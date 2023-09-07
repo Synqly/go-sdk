@@ -3,6 +3,8 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
+	"os"
 	"time"
 
 	"github.com/synqly/go-sdk/client/engine"
@@ -10,19 +12,34 @@ import (
 	"github.com/synqly/go-sdk/client/management"
 )
 
-const (
-	synqlyOrgId    = "synqly-org-id"
-	synqlyOrgToken = "synqly-org-token"
+var (
+	synqlyOrgId    = os.Getenv("SYNQLY_ORG_ID")
+	synqlyOrgToken = os.Getenv("SYNQLY_ORG_TOKEN")
+	splunkURL      = os.Getenv("SPLUNK_URL")
+	splunkToken    = os.Getenv("SPLUNK_TOKEN")
 )
 
+var consoleLogger = log.New(os.Stdout, "INFO: ", log.Ldate|log.Ltime)
+
+// App represents your application. We are not going to implement any app
+// functionality; instead, merely keep a list of tenants, where a tenant
+// represents one of your customers.
 type App struct {
 	Tenants []*Tenant
 }
 
+// NewApp instantiates a new App
 func NewApp() *App {
 	return &App{}
 }
 
+// Tenant represents one of your customers and the state you would maintain for
+// them in your application. In this example, we give each tenant a unique ID
+// that you would use internally to identify the tenant as well as the
+// corresponding Synqly Account ID and Synqly Client that you would use to
+// interact with the tenant in Synqly. Finally, we give each tenant an Event
+// Logger that we will use to log events for the tenant. This uses Synqly's
+// Event Connector to log events to a third-party event logging provider.
 type Tenant struct {
 	ID              string
 	SynqlyAccountId string
@@ -30,6 +47,9 @@ type Tenant struct {
 	EventLogger     engine.Client
 }
 
+// NewTenant adds a tenant to your application. It returns an error if a tenant
+// with the same ID already exists or if an account in Synqly cannot be created
+// for the tenant.
 func (a *App) NewTenant(ctx context.Context, id string) error {
 	// Do not allow duplicate tenant names
 	for _, tenant := range a.Tenants {
@@ -70,6 +90,10 @@ func (a *App) NewTenant(ctx context.Context, id string) error {
 	return nil
 }
 
+// configureEventLogging configures event logging for a tenant. It returns an
+// error if the tenant cannot be found or if the Integration cannot be created
+// for the tenant. This example uses Splunk as the event logging provider; you
+// can use any provider that Synqly supports (see https://docs.synqly.com).
 func (a *App) configureEventLogging(ctx context.Context, tenantID string) error {
 	// Find the tenant
 	var tenant *Tenant
@@ -82,12 +106,6 @@ func (a *App) configureEventLogging(ctx context.Context, tenantID string) error 
 	if tenant == nil {
 		return fmt.Errorf("tenant not found")
 	}
-
-	// Typically this info would be collected from the user in the UI and then
-	// the UI would call the Synqly API to create the Integration. We are doing
-	// it here to demonstrate how it works.
-	splunkURL := "https://my-org.splunkcloud.com:8088/services/collector/event"
-	splunkToken := "my-splunk-token"
 
 	// We need to save the tenant's Splunk credentials in Synqly before configuring the Integration
 	// We will use the Synqly Client we created for the tenant to do this
@@ -127,15 +145,23 @@ func (a *App) configureEventLogging(ctx context.Context, tenantID string) error 
 	return nil
 }
 
-func backgroundJob(app *App) {
+// backgroundJob simulates a background job that runs for each tenant. In this
+// example, we print out a message for each tenant every 10 seconds and then
+// log an event if the tenant has an event logger configured. The event logging
+// code does not depend on the provider configured for the tenant. Instead it
+// calls the Synqly API and Synqly sends the event to provider configured for
+// the tenant.
+func (app *App) backgroundJob() {
 	// Do some work for each tenant every 10 seconds
 	for {
 		for _, tenant := range app.Tenants {
-			fmt.Printf("Doing some important work for tenant %s\n", tenant.ID)
+			consoleLogger.Printf("Doing some important work for tenant %s\n", tenant.ID)
 
 			// Log the result of the work to Synqly
 			if tenant.EventLogger != nil {
 				err := tenant.EventLogger.Events().PostEvent(context.Background(),
+					// Synqly uses OCSF for events (https://ocsf.io/)
+					// This creates an OCSF ScheduledJobActivity Event
 					engine.NewEventFromScheduledJobActivity(&events.ScheduledJobActivity{
 						ActivityId: events.ScheduledJobActivityActivityIdUpdate,
 						Device: &events.Device{
@@ -150,7 +176,7 @@ func backgroundJob(app *App) {
 						},
 						Metadata: &events.Metadata{
 							Product: &events.Product{
-								VendorName: "Synqly",
+								VendorName: "Synqly SDK for Go",
 							},
 							Version: "1.0.0",
 						},
@@ -159,7 +185,7 @@ func backgroundJob(app *App) {
 						TypeUid:    events.ScheduledJobActivityTypeUidScheduledJobActivityUpdate,
 					}))
 				if err != nil {
-					fmt.Printf("Error logging event for tenant %s: %s\n", tenant.ID, err)
+					consoleLogger.Printf("Error logging event for tenant %s: %s\n", tenant.ID, err)
 				}
 			}
 		}
@@ -169,25 +195,48 @@ func backgroundJob(app *App) {
 
 }
 
+func (app *App) cleanup() {
+	// Clean up the Accounts created in Synqly. In your application, you would
+	// persist the Synqly account id and token to handle process restarts. We
+	// are not doing that in this example, so we need to clean up the accounts
+	// we created in Synqly.
+	consoleLogger.Println("Cleaning up Synqly Accounts")
+	ctx := context.Background()
+	for _, tenant := range app.Tenants {
+		// Deleting the account will delete all credentials and integrations associated with the account.
+		if err := tenant.SynqlyClient.Accounts().DeleteAccount(ctx, tenant.SynqlyAccountId); err != nil {
+			consoleLogger.Printf("Error deleting account %s: %s\n", tenant.SynqlyAccountId, err)
+		}
+	}
+}
+
 func main() {
 	ctx := context.Background()
 
+	if synqlyOrgId == "" || synqlyOrgToken == "" || splunkURL == "" || splunkToken == "" {
+		log.Fatal("SYNQLY_ORG_ID, SYNQLY_ORG_TOKEN, SPLUNK_URL, and SPLUNK_TOKEN environment variables must be set")
+	}
+
 	// Create a couple of tenants
 	app := NewApp()
+
+	// Be sure to clean up the Synqly Accounts we create before exiting
+	defer app.cleanup()
+
 	if err := app.NewTenant(ctx, "Tenant ABC"); err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 	if err := app.NewTenant(ctx, "Tenant XYZ"); err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
 	// Configure one tenant to use event logging
 	if err := app.configureEventLogging(ctx, "Tenant ABC"); err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
-	go backgroundJob(app)
+	go app.backgroundJob()
 
-	// wait for user to control c to exit
+	// Wait for user to control c to exit
 	select {}
 }
