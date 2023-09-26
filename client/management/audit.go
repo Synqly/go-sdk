@@ -2,18 +2,6 @@
 
 package management
 
-import (
-	time "time"
-)
-
-type Audit struct {
-	Environment string `json:"environment"`
-	// Time when the API request occurred.
-	CreatedAt     time.Time  `json:"created_at"`
-	Method        HttpMethod `json:"method,omitempty"`
-	Path          string     `json:"path"`
-	Code          string     `json:"code"`
-	Status        string     `json:"status"`
-	Body          *any       `json:"body,omitempty"`
-	IntegrationId *Id        `json:"integration_id,omitempty"`
+type ListAuditResponse struct {
+	Result []*Audit `json:"result,omitempty"`
 }
