@@ -3,7 +3,6 @@
 package core
 
 import (
-	fmt "fmt"
 	http "net/http"
 )
 
@@ -14,13 +13,10 @@ type ClientOption func(*ClientOptions)
 // This type is primarily used by the generated code and is
 // not meant to be used directly; use ClientOption instead.
 type ClientOptions struct {
-	BaseURL           string
-	HTTPClient        HTTPClient
-	HTTPHeader        http.Header
-	Bearer            string
-	SynqlyIntegrator  string
-	SynqlyAccount     string
-	SynqlyIntegration string
+	BaseURL    string
+	HTTPClient HTTPClient
+	HTTPHeader http.Header
+	Token      string
 }
 
 // NewClientOptions returns a new *ClientOptions value.
@@ -36,21 +32,13 @@ func NewClientOptions() *ClientOptions {
 // ToHeader maps the configured client options into a http.Header issued
 // on every request.
 func (c *ClientOptions) ToHeader() http.Header {
-	header := c.HTTPHeader.Clone()
-	if c.Bearer != "" {
-		header.Set("Authorization", "Bearer "+c.Bearer)
-	}
-	var headerSynqlyIntegratorValue string
-	if c.SynqlyIntegrator != headerSynqlyIntegratorValue {
-		header.Set("Synqly-Integrator", fmt.Sprintf("%v", c.SynqlyIntegrator))
-	}
-	var headerSynqlyAccountValue string
-	if c.SynqlyAccount != headerSynqlyAccountValue {
-		header.Set("Synqly-Account", fmt.Sprintf("%v", c.SynqlyAccount))
-	}
-	var headerSynqlyIntegrationValue string
-	if c.SynqlyIntegration != headerSynqlyIntegrationValue {
-		header.Set("Synqly-Integration", fmt.Sprintf("%v", c.SynqlyIntegration))
+	header := c.cloneHeader()
+	if c.Token != "" {
+		header.Set("Authorization", "Bearer "+c.Token)
 	}
 	return header
+}
+
+func (c *ClientOptions) cloneHeader() http.Header {
+	return c.HTTPHeader.Clone()
 }
