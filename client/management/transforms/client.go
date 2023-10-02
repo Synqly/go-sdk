@@ -35,7 +35,7 @@ func NewClient(opts ...core.ClientOption) *Client {
 // Returns a list of all `Transform` objects belonging to the Account matching
 // `{accountId}`.
 func (c *Client) ListTransform(ctx context.Context, accountId management.AccountId) (*management.ListTransformResponse, error) {
-	baseURL := ""
+	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
@@ -80,7 +80,7 @@ func (c *Client) ListTransform(ctx context.Context, accountId management.Account
 // Returns the `Transform` object matching `{transformId}` where the `Tranform`
 // belongs to the `Account` matching `{accountId}`.
 func (c *Client) GetTransform(ctx context.Context, accountId management.AccountId, transformId management.TransformId) (*management.GetTransformResponse, error) {
-	baseURL := ""
+	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
@@ -124,7 +124,7 @@ func (c *Client) GetTransform(ctx context.Context, accountId management.AccountI
 
 // Create a `Transform` object belonging to the `Account` matching `{accountId}`.
 func (c *Client) CreateTransform(ctx context.Context, accountId management.AccountId, request management.CreateTransformRequest) (*management.CreateTransformResponse, error) {
-	baseURL := ""
+	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
@@ -176,7 +176,7 @@ func (c *Client) CreateTransform(ctx context.Context, accountId management.Accou
 // Updates the `Transform` object matching `{transformId}`, where the
 // `Tranform` belongs to the `Account` matching `{accountId}`.
 func (c *Client) UpdateTransform(ctx context.Context, accountId management.AccountId, transformId management.TransformId, request management.UpdateTransformRequest) (*management.UpdateTransformResponse, error) {
-	baseURL := ""
+	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
@@ -235,7 +235,7 @@ func (c *Client) UpdateTransform(ctx context.Context, accountId management.Accou
 // Patches the `Transform` object matching `{transformId}`, where the `Transform`
 // belongs to the `Account` matching `{accountId}`.
 func (c *Client) PatchTransform(ctx context.Context, accountId management.AccountId, transformId management.TransformId, request []map[string]interface{}) (*management.PatchTransformResponse, error) {
-	baseURL := ""
+	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
@@ -287,7 +287,7 @@ func (c *Client) PatchTransform(ctx context.Context, accountId management.Accoun
 // Deletes the `Transform` object matching `{transformId}`, where the `Transform`
 // belongs to the `Account` matching `{accountId}`.
 func (c *Client) DeleteTransform(ctx context.Context, accountId management.AccountId, transformId management.TransformId) error {
-	baseURL := ""
+	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}

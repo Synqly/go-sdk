@@ -191,3 +191,6 @@ type Ticket struct {
 	// Associate tags with Ticket
 	Tags []string `json:"tags,omitempty"`
 }
+
+// Result of a vulnerability scan. Represented by OCSF Security Finding class (class_uid 2001).
+type SecurityFinding = *Event

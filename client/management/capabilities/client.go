@@ -35,7 +35,7 @@ func NewClient(opts ...core.ClientOption) *Client {
 
 // Returns a list of all `Capabilities`, optionally filtered by connector.
 func (c *Client) ListCategoryCapabilities(ctx context.Context, request *management.ListCategoryCapabilitiesRequest) (*management.ListCategoryCapabilitiesResponse, error) {
-	baseURL := ""
+	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
@@ -85,7 +85,7 @@ func (c *Client) ListCategoryCapabilities(ctx context.Context, request *manageme
 
 // Returns a list of all `Capabilities`, optionally filtered by provider.
 func (c *Client) ListProviderCapabilities(ctx context.Context, request *management.ListProviderCapabilitiesRequest) (*management.ListProviderCapabilitiesResponse, error) {
-	baseURL := ""
+	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}

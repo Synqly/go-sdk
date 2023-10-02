@@ -35,7 +35,7 @@ func NewClient(opts ...core.ClientOption) *Client {
 
 // Returns a list of `StatusEvent` objects from the token-linked `Integration`.
 func (c *Client) ListStatusEvents(ctx context.Context, request *engine.ListStatusEventsRequest) (*engine.ListStatusEventsResponse, error) {
-	baseURL := ""
+	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}

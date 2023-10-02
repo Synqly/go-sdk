@@ -31,7 +31,7 @@ func NewClient(opts ...core.ClientOption) *Client {
 // Returns a list of all Synqly `Audit` events for the `Account`
 // matching `{accountId}`.
 func (c *Client) ListAuditAccounts(ctx context.Context, accountId management.AccountId) (*management.ListAuditResponse, error) {
-	baseURL := ""
+	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
@@ -56,7 +56,7 @@ func (c *Client) ListAuditAccounts(ctx context.Context, accountId management.Acc
 
 // Returns a list of all Synqly `Audit` events for the `Organization`.
 func (c *Client) ListAuditOrganizations(ctx context.Context) (*management.ListAuditResponse, error) {
-	baseURL := ""
+	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}

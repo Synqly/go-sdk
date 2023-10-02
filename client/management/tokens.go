@@ -2,6 +2,9 @@
 
 package management
 
+// Unique identifier for this Token
+type TokenId = Id
+
 type GetTokenResponse struct {
 	Result *RefreshToken `json:"result,omitempty"`
 }

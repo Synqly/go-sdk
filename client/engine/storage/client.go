@@ -34,7 +34,7 @@ func NewClient(opts ...core.ClientOption) *Client {
 
 // Returns a list of contents from the token-linked `Integration`.
 func (c *Client) ListStorage(ctx context.Context, path string) (*engine.ListStorageResponse, error) {
-	baseURL := ""
+	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
@@ -85,7 +85,7 @@ func (c *Client) ListStorage(ctx context.Context, path string) (*engine.ListStor
 
 // Uploads a file from the provided `{path}` to the token-linked `Integration`.
 func (c *Client) UploadStorage(ctx context.Context, path string, request interface{}) error {
-	baseURL := ""
+	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
@@ -136,7 +136,7 @@ func (c *Client) UploadStorage(ctx context.Context, path string, request interfa
 // Downloads a file from the provided `{path}` in the token-linked
 // `Integration`.
 func (c *Client) DownloadStorage(ctx context.Context, path string) ([]byte, error) {
-	baseURL := ""
+	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
@@ -187,7 +187,7 @@ func (c *Client) DownloadStorage(ctx context.Context, path string) ([]byte, erro
 
 // Deletes a file from the provided `{path}` in the token-linked `Integration`.
 func (c *Client) DeleteStorage(ctx context.Context, path string) error {
-	baseURL := ""
+	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}

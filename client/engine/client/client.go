@@ -10,6 +10,7 @@ import (
 	statusevents "github.com/synqly/go-sdk/client/engine/statusevents"
 	storage "github.com/synqly/go-sdk/client/engine/storage"
 	ticketing "github.com/synqly/go-sdk/client/engine/ticketing"
+	vulnerabilities "github.com/synqly/go-sdk/client/engine/vulnerabilities"
 	http "net/http"
 )
 
@@ -18,12 +19,13 @@ type Client struct {
 	httpClient core.HTTPClient
 	header     http.Header
 
-	Events        *events.Client
-	Notifications *notifications.Client
-	StatusEvents  *statusevents.Client
-	Status        *status.Client
-	Storage       *storage.Client
-	Ticketing     *ticketing.Client
+	Events          *events.Client
+	Notifications   *notifications.Client
+	StatusEvents    *statusevents.Client
+	Status          *status.Client
+	Storage         *storage.Client
+	Ticketing       *ticketing.Client
+	Vulnerabilities *vulnerabilities.Client
 }
 
 func NewClient(opts ...core.ClientOption) *Client {
@@ -32,14 +34,15 @@ func NewClient(opts ...core.ClientOption) *Client {
 		opt(options)
 	}
 	return &Client{
-		baseURL:       options.BaseURL,
-		httpClient:    options.HTTPClient,
-		header:        options.ToHeader(),
-		Events:        events.NewClient(opts...),
-		Notifications: notifications.NewClient(opts...),
-		StatusEvents:  statusevents.NewClient(opts...),
-		Status:        status.NewClient(opts...),
-		Storage:       storage.NewClient(opts...),
-		Ticketing:     ticketing.NewClient(opts...),
+		baseURL:         options.BaseURL,
+		httpClient:      options.HTTPClient,
+		header:          options.ToHeader(),
+		Events:          events.NewClient(opts...),
+		Notifications:   notifications.NewClient(opts...),
+		StatusEvents:    statusevents.NewClient(opts...),
+		Status:          status.NewClient(opts...),
+		Storage:         storage.NewClient(opts...),
+		Ticketing:       ticketing.NewClient(opts...),
+		Vulnerabilities: vulnerabilities.NewClient(opts...),
 	}
 }

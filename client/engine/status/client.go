@@ -33,7 +33,7 @@ func NewClient(opts ...core.ClientOption) *Client {
 
 // Returns the `Status` object representing the token-linked `Integration`.
 func (c *Client) GetStatus(ctx context.Context) (*engine.GetStatusResponse, error) {
-	baseURL := ""
+	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
@@ -84,7 +84,7 @@ func (c *Client) GetStatus(ctx context.Context) (*engine.GetStatusResponse, erro
 
 // Deletes the `Status` object representing the token-linked `Integration`.
 func (c *Client) DeleteStatus(ctx context.Context) error {
-	baseURL := ""
+	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}

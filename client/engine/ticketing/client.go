@@ -35,7 +35,7 @@ func NewClient(opts ...core.ClientOption) *Client {
 
 // Returns a list of `Ticket` objects from the token-linked `Integration`.
 func (c *Client) ListTickets(ctx context.Context, request *engine.ListTicketsRequest) (*engine.ListTicketsResponse, error) {
-	baseURL := ""
+	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
@@ -96,7 +96,7 @@ func (c *Client) ListTickets(ctx context.Context, request *engine.ListTicketsReq
 // Returns a list of `Projects` from the token-linked `Integration`.
 // Tickets must be created and retrieved within the context of a specific Project.
 func (c *Client) ListProjects(ctx context.Context) (*engine.ListProjectsResponse, error) {
-	baseURL := ""
+	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
@@ -145,13 +145,13 @@ func (c *Client) ListProjects(ctx context.Context) (*engine.ListProjectsResponse
 	return response, nil
 }
 
-// Returns a `Ticket` object matching `{id}` from the token-linked `Integration`.
-func (c *Client) GetTicket(ctx context.Context, id engine.TicketId) (*engine.GetTicketResponse, error) {
-	baseURL := ""
+// Returns a `Ticket` object matching `{ticketId}` from the token-linked `Integration`.
+func (c *Client) GetTicket(ctx context.Context, ticketId engine.TicketId) (*engine.GetTicketResponse, error) {
+	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"v1/tickets/get/%v", id)
+	endpointURL := fmt.Sprintf(baseURL+"/"+"v1/tickets/get/%v", ticketId)
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -198,7 +198,7 @@ func (c *Client) GetTicket(ctx context.Context, id engine.TicketId) (*engine.Get
 
 // Creates a `Ticket` object in the token-linked Integration.
 func (c *Client) CreateTicket(ctx context.Context, request engine.CreateTicketRequest) (*engine.CreateTicketResponse, error) {
-	baseURL := ""
+	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
@@ -247,13 +247,13 @@ func (c *Client) CreateTicket(ctx context.Context, request engine.CreateTicketRe
 	return response, nil
 }
 
-// Updates the `Ticket` object matching `{id}` in the token-linked `Integration`.
-func (c *Client) PatchTicket(ctx context.Context, id engine.TicketId, request []map[string]interface{}) (*engine.PatchTicketResponse, error) {
-	baseURL := ""
+// Updates the `Ticket` object matching `{ticketId}` in the token-linked `Integration`.
+func (c *Client) PatchTicket(ctx context.Context, ticketId engine.TicketId, request []map[string]interface{}) (*engine.PatchTicketResponse, error) {
+	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"v1/tickets/patch/%v", id)
+	endpointURL := fmt.Sprintf(baseURL+"/"+"v1/tickets/patch/%v", ticketId)
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)

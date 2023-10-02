@@ -35,7 +35,7 @@ func NewClient(opts ...core.ClientOption) *Client {
 // Returns a list of all `Credential` objects belonging to the `Account` matching
 // `{accountId}`.
 func (c *Client) ListCredential(ctx context.Context, accountId management.AccountId) (*management.ListCredentialResponse, error) {
-	baseURL := ""
+	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
@@ -80,7 +80,7 @@ func (c *Client) ListCredential(ctx context.Context, accountId management.Accoun
 // Returns the `Credential` object matching `{credentialId}` where the
 // `Credential` belongs to the `Account` matching `{accountId}`.
 func (c *Client) GetCredential(ctx context.Context, accountId management.AccountId, credentialId management.CredentialId) (*management.GetCredentialResponse, error) {
-	baseURL := ""
+	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
@@ -127,7 +127,7 @@ func (c *Client) GetCredential(ctx context.Context, accountId management.Account
 // however, `Credential` objects can be shared by multiple `Integrations`
 // within an `Account`.
 func (c *Client) CreateCredential(ctx context.Context, accountId management.AccountId, request management.CreateCredentialRequest) (*management.CreateCredentialResponse, error) {
-	baseURL := ""
+	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
@@ -179,7 +179,7 @@ func (c *Client) CreateCredential(ctx context.Context, accountId management.Acco
 // Updates the `Credential` object matching `{credentialId}`, where the
 // `Credential` belongs to the `Account` matching `{accountId}`.
 func (c *Client) UpdateCredential(ctx context.Context, accountId management.AccountId, credentialId management.CredentialId, request management.UpdateCredentialRequest) (*management.UpdateCredentialResponse, error) {
-	baseURL := ""
+	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
@@ -238,7 +238,7 @@ func (c *Client) UpdateCredential(ctx context.Context, accountId management.Acco
 // Patches the `Credential` object matching `{credentialId}`, where the
 // `Credential` belongs to the `Account` matching `{accountId}`.
 func (c *Client) PatchCredential(ctx context.Context, accountId management.AccountId, credentialId management.CredentialId, request []map[string]interface{}) (*management.PatchCredentialResponse, error) {
-	baseURL := ""
+	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
@@ -290,7 +290,7 @@ func (c *Client) PatchCredential(ctx context.Context, accountId management.Accou
 // Deletes the `Credential` object matching `{credentialId}`, where the
 // `Credential` belongs to the `Account` matching `{accountId}`.
 func (c *Client) DeleteCredential(ctx context.Context, accountId management.AccountId, credentialId management.CredentialId) error {
-	baseURL := ""
+	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}

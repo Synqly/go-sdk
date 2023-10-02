@@ -216,6 +216,7 @@ type EventProviderTypeConfig struct {
 	Type             string
 	AzureMonitorLogs *AzureConfig
 	Aws              *AwsConfig
+	Splunk           *SplunkConfig
 }
 
 func NewEventProviderTypeConfigFromAzureMonitorLogs(value *AzureConfig) *EventProviderTypeConfig {
@@ -224,6 +225,10 @@ func NewEventProviderTypeConfigFromAzureMonitorLogs(value *AzureConfig) *EventPr
 
 func NewEventProviderTypeConfigFromAws(value *AwsConfig) *EventProviderTypeConfig {
 	return &EventProviderTypeConfig{Type: "aws", Aws: value}
+}
+
+func NewEventProviderTypeConfigFromSplunk(value *SplunkConfig) *EventProviderTypeConfig {
+	return &EventProviderTypeConfig{Type: "splunk", Splunk: value}
 }
 
 func (e *EventProviderTypeConfig) UnmarshalJSON(data []byte) error {
@@ -247,6 +252,12 @@ func (e *EventProviderTypeConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		e.Aws = value
+	case "splunk":
+		value := new(SplunkConfig)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.Splunk = value
 	}
 	return nil
 }
@@ -273,12 +284,22 @@ func (e EventProviderTypeConfig) MarshalJSON() ([]byte, error) {
 			AwsConfig: e.Aws,
 		}
 		return json.Marshal(marshaler)
+	case "splunk":
+		var marshaler = struct {
+			Type string `json:"type"`
+			*SplunkConfig
+		}{
+			Type:         e.Type,
+			SplunkConfig: e.Splunk,
+		}
+		return json.Marshal(marshaler)
 	}
 }
 
 type EventProviderTypeConfigVisitor interface {
 	VisitAzureMonitorLogs(*AzureConfig) error
 	VisitAws(*AwsConfig) error
+	VisitSplunk(*SplunkConfig) error
 }
 
 func (e *EventProviderTypeConfig) Accept(visitor EventProviderTypeConfigVisitor) error {
@@ -289,6 +310,8 @@ func (e *EventProviderTypeConfig) Accept(visitor EventProviderTypeConfigVisitor)
 		return visitor.VisitAzureMonitorLogs(e.AzureMonitorLogs)
 	case "aws":
 		return visitor.VisitAws(e.Aws)
+	case "splunk":
+		return visitor.VisitSplunk(e.Splunk)
 	}
 }
 
@@ -340,32 +363,37 @@ type NotificationConfig struct {
 }
 
 type ProviderConfig struct {
-	Type          string
-	Storage       *StorageConfig
-	Events        *EventConfig
-	Tickets       *TicketConfig
-	Notifications *NotificationConfig
-	Hooks         *HooksConfig
-}
-
-func NewProviderConfigFromStorage(value *StorageConfig) *ProviderConfig {
-	return &ProviderConfig{Type: "storage", Storage: value}
+	Type            string
+	Events          *EventConfig
+	Hooks           *HooksConfig
+	Notifications   *NotificationConfig
+	Storage         *StorageConfig
+	Tickets         *TicketConfig
+	Vulnerabilities *VulnerabilityConfig
 }
 
 func NewProviderConfigFromEvents(value *EventConfig) *ProviderConfig {
 	return &ProviderConfig{Type: "events", Events: value}
 }
 
-func NewProviderConfigFromTickets(value *TicketConfig) *ProviderConfig {
-	return &ProviderConfig{Type: "tickets", Tickets: value}
+func NewProviderConfigFromHooks(value *HooksConfig) *ProviderConfig {
+	return &ProviderConfig{Type: "hooks", Hooks: value}
 }
 
 func NewProviderConfigFromNotifications(value *NotificationConfig) *ProviderConfig {
 	return &ProviderConfig{Type: "notifications", Notifications: value}
 }
 
-func NewProviderConfigFromHooks(value *HooksConfig) *ProviderConfig {
-	return &ProviderConfig{Type: "hooks", Hooks: value}
+func NewProviderConfigFromStorage(value *StorageConfig) *ProviderConfig {
+	return &ProviderConfig{Type: "storage", Storage: value}
+}
+
+func NewProviderConfigFromTickets(value *TicketConfig) *ProviderConfig {
+	return &ProviderConfig{Type: "tickets", Tickets: value}
+}
+
+func NewProviderConfigFromVulnerabilities(value *VulnerabilityConfig) *ProviderConfig {
+	return &ProviderConfig{Type: "vulnerabilities", Vulnerabilities: value}
 }
 
 func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
@@ -377,36 +405,42 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 	}
 	p.Type = unmarshaler.Type
 	switch unmarshaler.Type {
-	case "storage":
-		value := new(StorageConfig)
-		if err := json.Unmarshal(data, &value); err != nil {
-			return err
-		}
-		p.Storage = value
 	case "events":
 		value := new(EventConfig)
 		if err := json.Unmarshal(data, &value); err != nil {
 			return err
 		}
 		p.Events = value
-	case "tickets":
-		value := new(TicketConfig)
-		if err := json.Unmarshal(data, &value); err != nil {
-			return err
-		}
-		p.Tickets = value
-	case "notifications":
-		value := new(NotificationConfig)
-		if err := json.Unmarshal(data, &value); err != nil {
-			return err
-		}
-		p.Notifications = value
 	case "hooks":
 		value := new(HooksConfig)
 		if err := json.Unmarshal(data, &value); err != nil {
 			return err
 		}
 		p.Hooks = value
+	case "notifications":
+		value := new(NotificationConfig)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.Notifications = value
+	case "storage":
+		value := new(StorageConfig)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.Storage = value
+	case "tickets":
+		value := new(TicketConfig)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.Tickets = value
+	case "vulnerabilities":
+		value := new(VulnerabilityConfig)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.Vulnerabilities = value
 	}
 	return nil
 }
@@ -415,15 +449,6 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	switch p.Type {
 	default:
 		return nil, fmt.Errorf("invalid type %s in %T", p.Type, p)
-	case "storage":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*StorageConfig
-		}{
-			Type:          p.Type,
-			StorageConfig: p.Storage,
-		}
-		return json.Marshal(marshaler)
 	case "events":
 		var marshaler = struct {
 			Type string `json:"type"`
@@ -431,24 +456,6 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 		}{
 			Type:        p.Type,
 			EventConfig: p.Events,
-		}
-		return json.Marshal(marshaler)
-	case "tickets":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*TicketConfig
-		}{
-			Type:         p.Type,
-			TicketConfig: p.Tickets,
-		}
-		return json.Marshal(marshaler)
-	case "notifications":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*NotificationConfig
-		}{
-			Type:               p.Type,
-			NotificationConfig: p.Notifications,
 		}
 		return json.Marshal(marshaler)
 	case "hooks":
@@ -460,32 +467,82 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 			HooksConfig: p.Hooks,
 		}
 		return json.Marshal(marshaler)
+	case "notifications":
+		var marshaler = struct {
+			Type string `json:"type"`
+			*NotificationConfig
+		}{
+			Type:               p.Type,
+			NotificationConfig: p.Notifications,
+		}
+		return json.Marshal(marshaler)
+	case "storage":
+		var marshaler = struct {
+			Type string `json:"type"`
+			*StorageConfig
+		}{
+			Type:          p.Type,
+			StorageConfig: p.Storage,
+		}
+		return json.Marshal(marshaler)
+	case "tickets":
+		var marshaler = struct {
+			Type string `json:"type"`
+			*TicketConfig
+		}{
+			Type:         p.Type,
+			TicketConfig: p.Tickets,
+		}
+		return json.Marshal(marshaler)
+	case "vulnerabilities":
+		var marshaler = struct {
+			Type string `json:"type"`
+			*VulnerabilityConfig
+		}{
+			Type:                p.Type,
+			VulnerabilityConfig: p.Vulnerabilities,
+		}
+		return json.Marshal(marshaler)
 	}
 }
 
 type ProviderConfigVisitor interface {
-	VisitStorage(*StorageConfig) error
 	VisitEvents(*EventConfig) error
-	VisitTickets(*TicketConfig) error
-	VisitNotifications(*NotificationConfig) error
 	VisitHooks(*HooksConfig) error
+	VisitNotifications(*NotificationConfig) error
+	VisitStorage(*StorageConfig) error
+	VisitTickets(*TicketConfig) error
+	VisitVulnerabilities(*VulnerabilityConfig) error
 }
 
 func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	switch p.Type {
 	default:
 		return fmt.Errorf("invalid type %s in %T", p.Type, p)
-	case "storage":
-		return visitor.VisitStorage(p.Storage)
 	case "events":
 		return visitor.VisitEvents(p.Events)
-	case "tickets":
-		return visitor.VisitTickets(p.Tickets)
-	case "notifications":
-		return visitor.VisitNotifications(p.Notifications)
 	case "hooks":
 		return visitor.VisitHooks(p.Hooks)
+	case "notifications":
+		return visitor.VisitNotifications(p.Notifications)
+	case "storage":
+		return visitor.VisitStorage(p.Storage)
+	case "tickets":
+		return visitor.VisitTickets(p.Tickets)
+	case "vulnerabilities":
+		return visitor.VisitVulnerabilities(p.Vulnerabilities)
 	}
+}
+
+type SplunkConfig struct {
+	// If true, skips verification of the Splunk server's TLS certificate. Defaults to false.
+	SkipTlsVerify bool `json:"skip_tls_verify"`
+	// Splunk index to send events to. If not provided, will use the default index for the Splunk collector.
+	Index *string `json:"index,omitempty"`
+	// Splunk source to send events to. If not provided, will use the default source for the Splunk collector.
+	Source *string `json:"source,omitempty"`
+	// Splunk source type to send events to. If not provided, will use the default source type for the Splunk collector.
+	SourceType *string `json:"source_type,omitempty"`
 }
 
 type StorageConfig struct {
@@ -506,51 +563,107 @@ type TicketConfig struct {
 	Transforms []TransformId `json:"transforms,omitempty"`
 }
 
-type AuthCode string
+type VulnerabilityConfig struct {
+	CredentialId CredentialId `json:"credential_id,omitempty"`
+	// Endpoint used for connecting to the external service. If not provided, will connect to the default endpoint for the Provider.
+	Endpoint *string `json:"endpoint,omitempty"`
+}
+
+type CreateMemberResponseResult struct {
+	Member *Member `json:"member,omitempty"`
+}
+
+type Member struct {
+	// Human-readable name for this resource
+	Name string `json:"name"`
+	// Time object was originally created
+	CreatedAt time.Time `json:"created_at"`
+	// Last time object was updated
+	UpdatedAt time.Time `json:"updated_at"`
+	Id        MemberId  `json:"id,omitempty"`
+	State     State     `json:"state,omitempty"`
+	// User's full name
+	Fullname string `json:"fullname"`
+	// User's nickname
+	Nickname string `json:"nickname"`
+	// Url of user's picture
+	Picture  string    `json:"picture"`
+	Ttl      string    `json:"ttl"`
+	TokenTtl string    `json:"token_ttl"`
+	Expires  time.Time `json:"expires"`
+	// Roles granted to this member. Tokens inherit this access.
+	Roles []*Role `json:"roles,omitempty"`
+}
+
+type MemberOptions struct {
+	// Optional member time-to-live duration. After a member expires, system requires a change password to re-enable member. Minimum 1 day, Maximum 1 year, Default 180 days.
+	Ttl string `json:"ttl"`
+	// Options: "expired" will force change password on first logon.
+	Options []Options `json:"options,omitempty"`
+	// Optional token time-to-live duration. Tokens are created for this member with this duration as their TTL. Minimum 10 miniutes, Maximum 1 week, Defaults 1 hour.
+	TokenTtl string `json:"token_ttl"`
+}
+
+type Options string
 
 const (
-	AuthCodeSuccess  AuthCode = "success"
-	AuthCodeFailure  AuthCode = "failure"
-	AuthCodeExpired  AuthCode = "expired"
-	AuthCodeDisabled AuthCode = "disabled"
-	AuthCodeLocked   AuthCode = "locked"
+	OptionsDisabled  Options = "disabled"
+	OptionsExpired   Options = "expired"
+	OptionsForgotten Options = "forgotten"
+	OptionsInvited   Options = "invited"
+	OptionsLocked    Options = "locked"
 )
 
-func NewAuthCodeFromString(s string) (AuthCode, error) {
+func NewOptionsFromString(s string) (Options, error) {
 	switch s {
-	case "success":
-		return AuthCodeSuccess, nil
-	case "failure":
-		return AuthCodeFailure, nil
-	case "expired":
-		return AuthCodeExpired, nil
 	case "disabled":
-		return AuthCodeDisabled, nil
+		return OptionsDisabled, nil
+	case "expired":
+		return OptionsExpired, nil
+	case "forgotten":
+		return OptionsForgotten, nil
+	case "invited":
+		return OptionsInvited, nil
 	case "locked":
-		return AuthCodeLocked, nil
+		return OptionsLocked, nil
 	}
-	var t AuthCode
+	var t Options
 	return "", fmt.Errorf("%s is not a valid %T", s, t)
 }
 
-func (a AuthCode) Ptr() *AuthCode {
-	return &a
+func (o Options) Ptr() *Options {
+	return &o
 }
 
-type LogonChangePasswordResponseResult struct {
-	// Authentication result
-	AuthCode AuthCode `json:"auth_code,omitempty"`
-	// Authentication failure message
-	AuthMsg *string `json:"auth_msg,omitempty"`
+type State string
+
+const (
+	StateDisabled  State = "disabled"
+	StateEnabled   State = "enabled"
+	StateForgotten State = "forgotten"
+	StateInvited   State = "invited"
+	StateLocked    State = "locked"
+)
+
+func NewStateFromString(s string) (State, error) {
+	switch s {
+	case "disabled":
+		return StateDisabled, nil
+	case "enabled":
+		return StateEnabled, nil
+	case "forgotten":
+		return StateForgotten, nil
+	case "invited":
+		return StateInvited, nil
+	case "locked":
+		return StateLocked, nil
+	}
+	var t State
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
 }
 
-type LogonUserResponseResult struct {
-	// Authentication result
-	AuthCode AuthCode `json:"auth_code,omitempty"`
-	// Authentication failure message
-	AuthMsg        *string    `json:"auth_msg,omitempty"`
-	RefreshTokenId TokenId    `json:"refresh_token_id,omitempty"`
-	Token          *TokenPair `json:"token,omitempty"`
+func (s State) Ptr() *State {
+	return &s
 }
 
 // Type of action granted access by an API operation: "create", "read", "update", "delete", or "*".
@@ -590,9 +703,6 @@ type Token struct {
 	// Permissions granted to this token.
 	Permissions *Permission `json:"permissions,omitempty"`
 }
-
-// Unique identifier for this Token
-type TokenId = Id
 
 type TokenPair struct {
 	// Access token contains the bearer secret
@@ -636,88 +746,4 @@ type Usage struct {
 	CpuTimeSeconds    float64 `json:"cpu_time_seconds"`
 	DbOperationsCount float64 `json:"db_operations_count"`
 	IntOpsCount       float64 `json:"int_ops_count"`
-}
-
-type CreateUserResponseResult struct {
-	User *User `json:"user,omitempty"`
-}
-
-type Options string
-
-const (
-	OptionsExpired  Options = "expired"
-	OptionsEnabled  Options = "enabled"
-	OptionsDisabled Options = "disabled"
-	OptionsLocked   Options = "locked"
-)
-
-func NewOptionsFromString(s string) (Options, error) {
-	switch s {
-	case "expired":
-		return OptionsExpired, nil
-	case "enabled":
-		return OptionsEnabled, nil
-	case "disabled":
-		return OptionsDisabled, nil
-	case "locked":
-		return OptionsLocked, nil
-	}
-	var t Options
-	return "", fmt.Errorf("%s is not a valid %T", s, t)
-}
-
-func (o Options) Ptr() *Options {
-	return &o
-}
-
-type State string
-
-const (
-	StateEnabled  State = "enabled"
-	StateDisabled State = "disabled"
-	StateLocked   State = "locked"
-)
-
-func NewStateFromString(s string) (State, error) {
-	switch s {
-	case "enabled":
-		return StateEnabled, nil
-	case "disabled":
-		return StateDisabled, nil
-	case "locked":
-		return StateLocked, nil
-	}
-	var t State
-	return "", fmt.Errorf("%s is not a valid %T", s, t)
-}
-
-func (s State) Ptr() *State {
-	return &s
-}
-
-type User struct {
-	// Human-readable name for this resource
-	Name string `json:"name"`
-	// Time object was originally created
-	CreatedAt time.Time `json:"created_at"`
-	// Last time object was updated
-	UpdatedAt time.Time `json:"updated_at"`
-	Id        UserId    `json:"id,omitempty"`
-	State     State     `json:"state,omitempty"`
-	Ttl       string    `json:"ttl"`
-	TokenTtl  string    `json:"token_ttl"`
-	Expires   time.Time `json:"expires"`
-	// Secret
-	Secret string `json:"secret"`
-	// Roles granted to this user. Tokens inherit this access.
-	Roles []*Role `json:"roles,omitempty"`
-}
-
-type UserOptions struct {
-	// Optional user time-to-live duration. After a user expires, system requires a change password to re-enable user. Minimum 1 day, Maximum 1 year, Default 180 days.
-	Ttl string `json:"ttl"`
-	// Options: "expired" will force change password on first logon.
-	Options []Options `json:"options,omitempty"`
-	// Optional token time-to-live duration. Tokens are created for this user with this duration as their TTL. Minimum 10 miniutes, Maximum 1 week, Defaults 1 hour.
-	TokenTtl string `json:"token_ttl"`
 }

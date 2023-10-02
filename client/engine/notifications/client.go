@@ -32,14 +32,14 @@ func NewClient(opts ...core.ClientOption) *Client {
 	}
 }
 
-// Returns the `Notification` object matching `{id}` from the token-linked
+// Returns the `Notification` object matching `{notificationId}` from the token-linked
 // `Integration`.
-func (c *Client) GetNotification(ctx context.Context, id engine.NotificationId) (*engine.GetNotificationResponse, error) {
-	baseURL := ""
+func (c *Client) GetNotification(ctx context.Context, notificationId engine.NotificationId) (*engine.GetNotificationResponse, error) {
+	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"v1/notifications/get/%v", id)
+	endpointURL := fmt.Sprintf(baseURL+"/"+"v1/notifications/get/%v", notificationId)
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -86,7 +86,7 @@ func (c *Client) GetNotification(ctx context.Context, id engine.NotificationId) 
 
 // Creates a `Notification` object in the token-linked `Integration`.
 func (c *Client) CreateNotification(ctx context.Context, request engine.CreateNotificationRequest) (*engine.CreateNotificationResponse, error) {
-	baseURL := ""
+	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
@@ -136,12 +136,12 @@ func (c *Client) CreateNotification(ctx context.Context, request engine.CreateNo
 }
 
 // Resolves a `Notification` object in the token-linked `Integration`.
-func (c *Client) ClearNotification(ctx context.Context, id engine.NotificationId) error {
-	baseURL := ""
+func (c *Client) ClearNotification(ctx context.Context, notificationId engine.NotificationId) error {
+	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"v1/notifications/clear/%v", id)
+	endpointURL := fmt.Sprintf(baseURL+"/"+"v1/notifications/clear/%v", notificationId)
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
