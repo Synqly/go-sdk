@@ -5,25 +5,38 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"os/signal"
 	"time"
 
-	"github.com/synqly/go-sdk/client/engine"
-	"github.com/synqly/go-sdk/client/engine/events"
-	"github.com/synqly/go-sdk/client/management"
+	engine "github.com/synqly/go-sdk/client/engine"
+	engineClient "github.com/synqly/go-sdk/client/engine/client"
+
+	// Each OSCF event type has its own package. This is intended to make imports
+	// more granular, allowing the end-user to import only the types they need.
+	scheduledJobActivity "github.com/synqly/go-sdk/client/engine/ocsf/scheduledjobactivity"
+
+	mgmt "github.com/synqly/go-sdk/client/management"
+	mgmtClient "github.com/synqly/go-sdk/client/management/client"
 )
 
 var (
-	synqlyOrgId    = os.Getenv("SYNQLY_ORG_ID")
+	// SYNQLY_ORG_ID: Your Synqly Organization ID
+	synqlyOrgId = os.Getenv("SYNQLY_ORG_ID")
+	// SYNQLY_ORG_TOKEN: A Synqly Organization Token, used to create Accounts and
+	// Integrations
 	synqlyOrgToken = os.Getenv("SYNQLY_ORG_TOKEN")
-	splunkURL      = os.Getenv("SPLUNK_URL")
-	splunkToken    = os.Getenv("SPLUNK_TOKEN")
+	// SPLUNK_URL: URL of a Splunk HTTP event collector endpoint
+	// Example: "https://prd-p-icwnd.splunkcloud.com:8088/services/collector/event"
+	splunkURL = os.Getenv("SPLUNK_URL")
+	// SPLUNK_HEC_TOKEN: A Splunk HTTP Event Collector token for logging events
+	splunkToken = os.Getenv("SPLUNK_HEC_TOKEN")
 )
 
 var consoleLogger = log.New(os.Stdout, "INFO: ", log.Ldate|log.Ltime)
 
 // App represents your application. We are not going to implement any app
 // functionality; instead, merely keep a list of tenants, where a tenant
-// represents one of your customers.
+// represents an end user of your product.
 type App struct {
 	Tenants []*Tenant
 }
@@ -33,23 +46,28 @@ func NewApp() *App {
 	return &App{}
 }
 
-// Tenant represents one of your customers and the state you would maintain for
-// them in your application. In this example, we give each tenant a unique ID
-// that you would use internally to identify the tenant as well as the
-// corresponding Synqly Account ID and Synqly Client that you would use to
-// interact with the tenant in Synqly. Finally, we give each tenant an Event
-// Logger that we will use to log events for the tenant. This uses Synqly's
-// Event Connector to log events to a third-party event logging provider.
+// A Tenant object represents one of your customers, as well as the state you
+// would maintain for them in your application.
 type Tenant struct {
-	ID              string
+	// ID: A unique identifier for one of your customers.
+	ID string
+	// SynqlyAccountId: The ID of the Synqly Account in which Integrations for
+	// this tenant will be created. This example creates a new Account for every
+	// Tenant, but it would also be possible to use the same Account for all Tenants.
 	SynqlyAccountId string
-	SynqlyClient    management.Client
-	EventLogger     engine.Client
+	// SynqlyClient: A cached managmenet client, used to manage Integrations.
+	SynqlyClient *mgmtClient.Client
+	// EventLogger: A cached engine client, used to log events to a third-party
+	// logging Provider by way of an Integration.
+	EventLogger *engineClient.Client
 }
 
-// NewTenant adds a tenant to your application. It returns an error if a tenant
-// with the same ID already exists or if an account in Synqly cannot be created
-// for the tenant.
+// NewTenant initializes a Synqly Account for a given Tenant. This example
+// creates a new Account for every Tenant, but it would also be possible to use
+// the same Account for all Tenants.
+//
+// Returns an error if a tenant with the same ID already exists or if a Synqly
+// Account cannot be created for the Tenant.
 func (a *App) NewTenant(ctx context.Context, id string) error {
 	// Do not allow duplicate tenant names
 	for _, tenant := range a.Tenants {
@@ -59,27 +77,24 @@ func (a *App) NewTenant(ctx context.Context, id string) error {
 	}
 
 	// Create a Synqly Account for this tenant
-	account, err := management.NewClient(
-		management.ClientWithBaseURL("https://api.synqly.com"),
-		management.ClientWithAuthBearer(synqlyOrgToken),
-		management.ClientWithHeaderSynqlyIntegrator(synqlyOrgId),
-	).Accounts().CreateAccount(ctx, &management.CreateAccountRequest{
+	account, err := mgmtClient.NewClient(
+		mgmtClient.WithAuthToken(synqlyOrgToken),
+	).Accounts.CreateAccount(ctx, &mgmt.CreateAccountRequest{
 		Name: id,
 	})
 	if err != nil {
-		return err
+		return fmt.Errorf("unable to create account: %w", err)
 	}
 
 	// Create a Synqly Client that can be used to interact with the tenant
 	// We will use this client to set up an Integration with an event logging provider
 	// once a user belonging to the tenant configures it. This configuration is typically
 	// done in the UI, but we will do in this example to demonstrate how it works.
-	client := management.NewClient(
-		management.ClientWithBaseURL("https://api.synqly.com"),
-		management.ClientWithHeaderSynqlyAccount(account.Result.Account.Id),
-		management.ClientWithAuthBearer(account.Result.Token.Access.Secret),
+	client := mgmtClient.NewClient(
+		mgmtClient.WithAuthToken(synqlyOrgToken),
 	)
 
+	// Store the Tenant and associated Synqly objects in an in-memory cache.
 	a.Tenants = append(a.Tenants, &Tenant{
 		ID:              id,
 		SynqlyAccountId: account.Result.Account.Id,
@@ -90,10 +105,14 @@ func (a *App) NewTenant(ctx context.Context, id string) error {
 	return nil
 }
 
-// configureEventLogging configures event logging for a tenant. It returns an
-// error if the tenant cannot be found or if the Integration cannot be created
-// for the tenant. This example uses Splunk as the event logging provider; you
-// can use any provider that Synqly supports (see https://docs.synqly.com).
+// configureEventLogging initializes event logging for a Tenant. Stores the
+// HEC_TOKEN as a secure Credential object, then creates a Splunk Integration
+// targeting SPLUNK_URL. This example uses Splunk as the event logging
+// provider, however, an Integration can be configured to target any supported
+// Provider type.
+//
+// Returns an error if the Tenant cannot be found, or if an Integration cannot
+// be created for the given Tenant.
 func (a *App) configureEventLogging(ctx context.Context, tenantID string) error {
 	// Find the tenant
 	var tenant *Tenant
@@ -109,10 +128,10 @@ func (a *App) configureEventLogging(ctx context.Context, tenantID string) error 
 
 	// We need to save the tenant's Splunk credentials in Synqly before configuring the Integration
 	// We will use the Synqly Client we created for the tenant to do this
-	credential, err := tenant.SynqlyClient.Credentials().CreateCredential(ctx, &management.Credential{
+	credential, err := tenant.SynqlyClient.Credentials.CreateCredential(ctx, tenant.SynqlyAccountId, &mgmt.Credential{
 		Name: "Splunk Login",
-		Type: management.CredentialTypeToken,
-		Token: &management.TokenCredential{
+		Type: mgmt.CredentialTypeToken,
+		Token: &mgmt.TokenCredential{
 			Secret: splunkToken,
 		},
 	})
@@ -121,78 +140,98 @@ func (a *App) configureEventLogging(ctx context.Context, tenantID string) error 
 	}
 
 	// Configure an Integration for the tenant that connects to Splunk
-	integration, err := tenant.SynqlyClient.Integrations().CreateIntegration(ctx, &management.CreateIntegrationRequest{
+	integration, err := tenant.SynqlyClient.Integrations.CreateIntegration(ctx, tenant.SynqlyAccountId, &mgmt.CreateIntegrationRequest{
 		Name:         "Background Event Logger",
 		Category:     "events",
 		ProviderType: "splunk",
-		ProviderConfig: management.NewProviderConfigFromEvents(&management.EventConfig{
+		// Set Splunk Config to ignore cert checking on the Splunk endpoint.
+		// This is not recommended for production use, we only set it here
+		// because Splunk HEC endpoints use self-signed "SplunkServerDefaultCert"
+		// certificates when first initialized.
+		ProviderConfig: mgmt.NewProviderConfigFromEvents(&mgmt.EventConfig{
 			Url:          &splunkURL,
 			CredentialId: credential.Result.Id,
+			Config: &mgmt.EventProviderTypeConfig{
+				Type: "splunk",
+				Splunk: &mgmt.SplunkConfig{
+					SkipTlsVerify: true,
+				},
+			},
 		}),
 	})
 	if err != nil {
-		return err
+		return fmt.Errorf("unable to create integration: %w", err)
 	}
 
 	// Create an Event Logger for the tenant
 	// We will use this client to log events for the tenant
-	tenant.EventLogger = engine.NewClient(
-		engine.ClientWithBaseURL("https://api.synqly.com"),
-		engine.ClientWithHeaderSynqlyAccount(tenant.SynqlyAccountId),
-		engine.ClientWithAuthBearer(integration.Result.Token.Access.Secret),
+	tenant.EventLogger = engineClient.NewClient(
+		engineClient.WithAuthToken(integration.Result.Token.Access.Secret),
 	)
 
 	return nil
 }
 
-// backgroundJob simulates a background job that runs for each tenant. In this
-// example, we print out a message for each tenant every 10 seconds and then
-// log an event if the tenant has an event logger configured. The event logging
-// code does not depend on the provider configured for the tenant. Instead it
-// calls the Synqly API and Synqly sends the event to provider configured for
-// the tenant.
+// backgroundJob simulates a background job that runs for every Tenant. In this
+// example, we print a message for every Tenant tenant at regular intervals,
+// logging the message as an event if the Tenant's event logger configured.
+//
+// Note that the PostEvent() call is not specific to Splunk. The code would be
+// the same for any supported Event Provider. This is where Synqly's abstraction
+// kicks in, Integrations within a given Connector category (in this case, Events)
+// share a unified API for data operations, no matter which Provider they target.
 func (app *App) backgroundJob() {
-	// Do some work for each tenant every 10 seconds
+	// Loop infinitely, generating data at 1 second intervals
 	for {
 		for _, tenant := range app.Tenants {
-			consoleLogger.Printf("Doing some important work for tenant %s\n", tenant.ID)
+			consoleLogger.Printf("Doing some work for tenant %s\n", tenant.ID)
 
-			// Log the result of the work to Synqly
+			// Call a helper function to generate a sample OCSF Event.
+			newEvent := createSampleEvent()
+
+			// If the EventLogger for the given Tenant has been intiliazed, use
+			// it to send data.
 			if tenant.EventLogger != nil {
-				err := tenant.EventLogger.Events().PostEvent(context.Background(),
-					// Synqly uses OCSF for events (https://ocsf.io/)
-					// This creates an OCSF ScheduledJobActivity Event
-					engine.NewEventFromScheduledJobActivity(&events.ScheduledJobActivity{
-						ActivityId: events.ScheduledJobActivityActivityIdUpdate,
-						Device: &events.Device{
-							TypeId: events.DeviceTypeIdServer,
-						},
-						Job: &events.Job{
-							File: &events.File{
-								Name:   "main.go",
-								TypeId: events.FileTypeIdRegularFile,
-							},
-							Name: "Background Job",
-						},
-						Metadata: &events.Metadata{
-							Product: &events.Product{
-								VendorName: "Synqly SDK for Go",
-							},
-							Version: "1.0.0",
-						},
-						Time:       int(time.Now().UTC().Unix()),
-						SeverityId: events.SeverityIdInformational,
-						TypeUid:    events.ScheduledJobActivityTypeUidScheduledJobActivityUpdate,
-					}))
+				// Log the result of the work to Synqly
+				err := tenant.EventLogger.Events.PostEvent(
+					context.Background(),
+					newEvent,
+				)
 				if err != nil {
-					consoleLogger.Printf("Error logging event for tenant %s: %s\n", tenant.ID, err)
+					consoleLogger.Printf("error logging event for tenant %s: %s\n",
+						tenant.ID, err)
 				}
 			}
 		}
 
-		time.Sleep(10 * time.Second)
+		time.Sleep(1 * time.Second)
 	}
+}
 
+// createSampleEvent generates a sample ScheduledJobActivity OCSF (https://ocsf.io/) Event
+func createSampleEvent() *engine.Event {
+	return engine.NewEventFromScheduledJobActivity(&scheduledJobActivity.ScheduledJobActivity{
+		ActivityId: scheduledJobActivity.Activity_Update,
+		Device: &scheduledJobActivity.Device{
+			TypeId: scheduledJobActivity.Device_Type_Server,
+		},
+		Job: &scheduledJobActivity.Job{
+			File: &scheduledJobActivity.File{
+				Name:   "main.go",
+				TypeId: 1,
+			},
+			Name: "Background Job",
+		},
+		Metadata: &scheduledJobActivity.Metadata{
+			Product: &scheduledJobActivity.Product{
+				VendorName: "Synqly SDK for Go",
+			},
+			Version: "1.0.0",
+		},
+		Time:       int(time.Now().UTC().Unix()),
+		SeverityId: scheduledJobActivity.Severity_Informational,
+		TypeUid:    scheduledJobActivity.Type_ScheduledJobActivity_Update,
+	})
 }
 
 func (app *App) cleanup() {
@@ -204,25 +243,36 @@ func (app *App) cleanup() {
 	ctx := context.Background()
 	for _, tenant := range app.Tenants {
 		// Deleting the account will delete all credentials and integrations associated with the account.
-		if err := tenant.SynqlyClient.Accounts().DeleteAccount(ctx, tenant.SynqlyAccountId); err != nil {
+		if err := tenant.SynqlyClient.Accounts.DeleteAccount(ctx, tenant.SynqlyAccountId); err != nil {
 			consoleLogger.Printf("Error deleting account %s: %s\n", tenant.SynqlyAccountId, err)
 		}
 	}
+	os.Exit(0)
 }
 
 func main() {
 	ctx := context.Background()
 
 	if synqlyOrgId == "" || synqlyOrgToken == "" || splunkURL == "" || splunkToken == "" {
-		log.Fatal("SYNQLY_ORG_ID, SYNQLY_ORG_TOKEN, SPLUNK_URL, and SPLUNK_TOKEN environment variables must be set")
+		log.Fatal("Must set following environment variables: SYNQLY_ORG_ID, SYNQLY_ORG_TOKEN, SPLUNK_URL, SPLUNK_HEC_TOKEN")
 	}
 
-	// Create a couple of tenants
+	// Instantiate App object
 	app := NewApp()
 
-	// Be sure to clean up the Synqly Accounts we create before exiting
+	// Create an interrupt handler to clean up tenants if the program is shut down
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt)
+	go func() {
+		// Intercept all ^C
+		for range c {
+			app.cleanup()
+		}
+	}()
+	// Also be sure to run clean up if the program exits gracefully
 	defer app.cleanup()
 
+	// Create a couple of tenants
 	if err := app.NewTenant(ctx, "Tenant ABC"); err != nil {
 		log.Fatal(err)
 	}
@@ -235,6 +285,7 @@ func main() {
 		log.Fatal(err)
 	}
 
+	// Generate synthetic load using a 10 second Event generator
 	go app.backgroundJob()
 
 	// Wait for user to control c to exit

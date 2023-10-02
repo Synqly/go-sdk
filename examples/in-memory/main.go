@@ -44,7 +44,7 @@ func NewApp() *App {
 type Tenant struct {
 	ID              string
 	SynqlyAccountId string
-	SynqlyClient    mgmtClient.Client
+	SynqlyClient    *mgmtClient.Client
 	EventLogger     *engineClient.Client
 }
 
@@ -82,7 +82,7 @@ func (a *App) NewTenant(ctx context.Context, id string) error {
 	a.Tenants = append(a.Tenants, &Tenant{
 		ID:              id,
 		SynqlyAccountId: account.Result.Account.Id,
-		SynqlyClient:    *client,
+		SynqlyClient:    client,
 		// TODO: Check if we can set this to nil
 		EventLogger: nil,
 	})
