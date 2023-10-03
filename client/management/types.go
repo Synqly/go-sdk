@@ -198,9 +198,8 @@ type AzureConfig struct {
 }
 
 type CreateIntegrationResponseResult struct {
-	Integration    *Integration `json:"integration,omitempty"`
-	RefreshTokenId TokenId      `json:"refresh_token_id,omitempty"`
-	Token          *TokenPair   `json:"token,omitempty"`
+	Integration *Integration `json:"integration,omitempty"`
+	Token       *TokenPair   `json:"token,omitempty"`
 }
 
 type EventConfig struct {
@@ -340,12 +339,12 @@ type Integration struct {
 	// Last time object was updated
 	UpdatedAt time.Time     `json:"updated_at"`
 	Id        IntegrationId `json:"id,omitempty"`
+	// Integration refresh token id
+	RefreshTokenId TokenId `json:"refresh_token_id,omitempty"`
 	// Account that manages this Integration.
 	AccountId AccountId `json:"account_id,omitempty"`
 	// Id of the categorical type for this Integration.
 	Category CategoryId `json:"category"`
-	// Token used to interact with this Integration.
-	TokenId TokenId `json:"token_id,omitempty"`
 	// Provider implementation to use for this Integration.
 	ProviderType ProviderId `json:"provider_type"`
 	// Custom configuration for the Provider.
@@ -719,6 +718,8 @@ type RefreshToken struct {
 	// Last time object was updated
 	UpdatedAt time.Time `json:"updated_at"`
 	Id        TokenId   `json:"id,omitempty"`
+	// Token time-to-live
+	TokenTtl string `json:"tokenTtl"`
 	// Primary running access and refresh tokens
 	Primary *TokenPair `json:"primary,omitempty"`
 	// Temporary secondary TokenPair created after a RefreshToken operation

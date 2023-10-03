@@ -125,8 +125,7 @@ func (c *Client) GetToken(ctx context.Context, refreshTokenId management.TokenId
 }
 
 // Resets the token value, secondary, and token expiration time for the
-// `RefreshToken` object matching `{refreshTokenId}`. The `RefreshToken` being
-// reset cannot be used to authenticate this request, only a `User` token
+// `RefreshToken` object matching `{refreshTokenId}`. An `Organization` token
 // with appropriate permissions can be used to perform this operation.
 func (c *Client) ResetToken(ctx context.Context, refreshTokenId management.TokenId) (*management.ResetTokenResponse, error) {
 	baseURL := "https://api.synqly.com"
