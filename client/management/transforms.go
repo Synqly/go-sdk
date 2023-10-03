@@ -2,7 +2,12 @@
 
 package management
 
-type CreateTransformRequest = *Transform
+type CreateTransformRequest struct {
+	// Human readable name for this Transform
+	Name string `json:"name"`
+	// JSON Patch transform to apply (rfc6902).
+	Patch []byte `json:"patch"`
+}
 
 type CreateTransformResponse struct {
 	Result *Transform `json:"result,omitempty"`

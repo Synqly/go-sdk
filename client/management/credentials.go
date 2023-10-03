@@ -2,7 +2,18 @@
 
 package management
 
-type CreateCredentialRequest = *Credential
+type CreateCredentialRequest struct {
+	// Human readable name for this Integration
+	Name string `json:"name"`
+	// Credential type
+	Type CredentialType `json:"type,omitempty"`
+	// AWS credential
+	Aws *AwsCredential `json:"aws,omitempty"`
+	// Token credential
+	Token *TokenCredential `json:"token,omitempty"`
+	// Basic authorization credential
+	Basic *BasicCredential `json:"basic,omitempty"`
+}
 
 type CreateCredentialResponse struct {
 	Result *Credential `json:"result,omitempty"`

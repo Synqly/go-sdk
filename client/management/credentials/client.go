@@ -126,7 +126,7 @@ func (c *Client) GetCredential(ctx context.Context, accountId management.Account
 // `{accountId}`. A `Credential` may only by used by a single `Account`;
 // however, `Credential` objects can be shared by multiple `Integrations`
 // within an `Account`.
-func (c *Client) CreateCredential(ctx context.Context, accountId management.AccountId, request management.CreateCredentialRequest) (*management.CreateCredentialResponse, error) {
+func (c *Client) CreateCredential(ctx context.Context, accountId management.AccountId, request *management.CreateCredentialRequest) (*management.CreateCredentialResponse, error) {
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL

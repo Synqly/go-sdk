@@ -123,7 +123,7 @@ func (c *Client) GetTransform(ctx context.Context, accountId management.AccountI
 }
 
 // Create a `Transform` object belonging to the `Account` matching `{accountId}`.
-func (c *Client) CreateTransform(ctx context.Context, accountId management.AccountId, request management.CreateTransformRequest) (*management.CreateTransformResponse, error) {
+func (c *Client) CreateTransform(ctx context.Context, accountId management.AccountId, request *management.CreateTransformRequest) (*management.CreateTransformResponse, error) {
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
