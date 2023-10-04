@@ -581,6 +581,8 @@ type Member struct {
 	UpdatedAt time.Time `json:"updated_at"`
 	Id        MemberId  `json:"id,omitempty"`
 	State     State     `json:"state,omitempty"`
+	// Last logon time
+	LastLogon time.Time `json:"last_logon"`
 	// User's full name
 	Fullname string `json:"fullname"`
 	// User's nickname
