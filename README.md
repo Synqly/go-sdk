@@ -18,7 +18,7 @@ export GOPRIVATE=github.com/synqly/go-sdk
 
 In order for `go mod` to successfully pull the repository, your local machine must have valid credentials to the Github account which has been granted access to `github.com/Synqly/go-sdk`.
 
-If your local machine is already configured to authenticate as the Github user which has been granted access to `github.com/Synqly/go-sdk`, you can skipto Step 3.
+If your local machine is already configured to authenticate as the Github user which has been granted access to `github.com/Synqly/go-sdk`, you can skip to Step 3.
 
 There are a number of ways to set github credentials locally. This section will use Git's built-in [gitcredentials](https://git-scm.com/docs/gitcredentials).
 
@@ -127,7 +127,7 @@ The `events-connector` example will:
 
 ## Prerequisites
 
-- A [Synqly](https://synqly.com) `Organization``
+- A [Synqly](https://synqly.com) `Organization`
 - Your Synqly Organization ID and API Token
 - Go 1.20 or later
 - A Splunk account -- [sign up for a free trial](https://www.splunk.com/en_us/download.html)

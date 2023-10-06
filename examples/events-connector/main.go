@@ -128,7 +128,7 @@ func (a *App) configureEventLogging(ctx context.Context, tenantID string) error 
 
 	// We need to save the tenant's Splunk credentials in Synqly before configuring the Integration
 	// We will use the Synqly Client we created for the tenant to do this
-	credential, err := tenant.SynqlyClient.Credentials.CreateCredential(ctx, tenant.SynqlyAccountId, &mgmt.Credential{
+	credential, err := tenant.SynqlyClient.Credentials.CreateCredential(ctx, tenant.SynqlyAccountId, &mgmt.CreateCredentialRequest{
 		Name: "Splunk Login",
 		Type: mgmt.CredentialTypeToken,
 		Token: &mgmt.TokenCredential{
