@@ -720,6 +720,8 @@ type RefreshToken struct {
 	// Last time object was updated
 	UpdatedAt time.Time `json:"updated_at"`
 	Id        TokenId   `json:"id,omitempty"`
+	// Time when this token expires and can no longer be used again.
+	Expires time.Time `json:"expires"`
 	// Token time-to-live
 	TokenTtl string `json:"tokenTtl"`
 	// Primary running access and refresh tokens
