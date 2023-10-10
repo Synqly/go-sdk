@@ -16,11 +16,14 @@ export GOPRIVATE=github.com/synqly/go-sdk
 
 ### Step 2: Configure Github Authentication to Synqly/go-sdk
 
-In order for `go mod` to successfully pull the repository, your local machine must have valid credentials to the Github account which has been granted access to `github.com/Synqly/go-sdk`.
+In order for `go mod` to successfully pull `github.com/Synqly/go-sdk`, your local machine must be able to authenticate with Github. The two most common ways to authenticate are through either a Github Personal Access Token or an SSH key linked to a Github account. The following sections describe the `go mod` configuration for both methods.
 
 If your local machine is already configured to authenticate as the Github user which has been granted access to `github.com/Synqly/go-sdk`, you can skip to Step 3.
 
-There are a number of ways to set github credentials locally. This section will use Git's built-in [gitcredentials](https://git-scm.com/docs/gitcredentials).
+
+#### Github Personal Access Token (PAT)
+
+This section describes how to use a Github Personal Access Token (PAT) to pull `github.com/Synqly/go-sdk`. The method below relies on Git's built-in [gitcredentials](https://git-scm.com/docs/gitcredentials) to cache a PAT for use with `go mod`.
 
 In order to configure access, first navigate to a temporary directory. This directory can be anywhere on the local system.
 
@@ -35,13 +38,13 @@ Next, attempt to clone Synqly/go-sdk:
 git clone https://github.com/Synqly/go-sdk.git
 ```
 
-If the system is not already authenticated to pull from Github, it should prompt for a Username, then a Password (the password field also accepts Tokens). 
+If the system is not already authenticated to pull from Github, it should prompt for a Username, then a Password. The Password field expects a Personal Access Token.
 
 ```bash
 # git clone output
 Cloning into 'go-sdk'...
 Username for 'https://github.com': <MY_USER_NAME>
-Password for 'https://<MY_USER_NAME>@github.com':
+Password for 'https://<MY_USER_NAME>@github.com': <PAT_VALUE>
 ```
 
 Enter a Username and Token value for the Github user that has been granted access to Synqly's go-sdk. This will cache the provided values using git's credential helper, making them available for `go mod` later on.
@@ -58,11 +61,22 @@ Receiving objects: 100% (465/465), 257.65 KiB | 3.53 MiB/s, done.
 Resolving deltas: 100% (180/180), done.
 ```
 
+#### SSH Key
+
+This section describes how to set `go mod` to use an SSH key when pulling `github.com/Synqly/go-sdk`. This section assumes you have already followed Github's [Add a New SSH Key](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/adding-a-new-ssh-key-to-your-github-account) guide. 
+
+Open your local `~/.gitconfig` file in your editor of choice. Add the following block if it does not already exist. This configuration will instruct tools that pull from github.com, such as `go mod`, to use SSH authentication. 
+
+```
+[url "ssh://git@github.com/"]
+	insteadOf = https://github.com/
+```
+
 ### Step 3: (Optional) Test Synqly/go-sdk Module Import
 
 Once the local system is authenticated to clone `github.com/Synyqly/go-sdk`, `go mod` should be able to use the same credentials to import the SDK as a Go module. You can now add packages from `github.com/Synqly/go-sdk` to a Go program to test whether they are importable. 
 
-The following example uses a minimal sample applicaiton to test package importability.
+The following example uses a minimal sample application to test package importability.
 
 First, create a sample application directory:
 
