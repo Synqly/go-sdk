@@ -63,8 +63,7 @@ type Tenant struct {
 }
 
 // NewTenant initializes a Synqly Account for a given Tenant. This example
-// creates a new Account for every Tenant, but it would also be possible to use
-// the same Account for all Tenants.
+// creates a new Account for every Tenant to keep their credentials isolated.
 //
 // Returns an error if a tenant with the same ID already exists or if a Synqly
 // Account cannot be created for the Tenant.
@@ -108,7 +107,7 @@ func (a *App) NewTenant(ctx context.Context, id string) error {
 // configureEventLogging initializes event logging for a Tenant. Stores the
 // HEC_TOKEN as a secure Credential object, then creates a Splunk Integration
 // targeting SPLUNK_URL. This example uses Splunk as the event logging
-// provider, however, an Integration can be configured to target any supported
+// provider; however, an Integration can be configured to target any supported
 // Provider type.
 //
 // Returns an error if the Tenant cannot be found, or if an Integration cannot
@@ -130,10 +129,9 @@ func (a *App) configureEventLogging(ctx context.Context, tenantID string) error 
 	// We will use the Synqly Client we created for the tenant to do this
 	credential, err := tenant.SynqlyClient.Credentials.CreateCredential(ctx, tenant.SynqlyAccountId, &mgmt.CreateCredentialRequest{
 		Name: "Splunk Login",
-		Type: mgmt.CredentialTypeToken,
-		Token: &mgmt.TokenCredential{
+		Config: mgmt.NewCredentialConfigFromToken(&mgmt.TokenCredential{
 			Secret: splunkToken,
-		},
+		}),
 	})
 	if err != nil {
 		return err
@@ -174,7 +172,7 @@ func (a *App) configureEventLogging(ctx context.Context, tenantID string) error 
 
 // backgroundJob simulates a background job that runs for every Tenant. In this
 // example, we print a message for every Tenant tenant at regular intervals,
-// logging the message as an event if the Tenant's event logger configured.
+// and log the message as an event if the Tenant's event logger is configured.
 //
 // Note that the PostEvent() call is not specific to Splunk. The code would be
 // the same for any supported Event Provider. This is where Synqly's abstraction
@@ -189,7 +187,7 @@ func (app *App) backgroundJob() {
 			// Call a helper function to generate a sample OCSF Event.
 			newEvent := createSampleEvent()
 
-			// If the EventLogger for the given Tenant has been intiliazed, use
+			// If the EventLogger for the given Tenant has been initialized, use
 			// it to send data.
 			if tenant.EventLogger != nil {
 				// Log the result of the work to Synqly
@@ -236,9 +234,9 @@ func createSampleEvent() *engine.Event {
 
 func (app *App) cleanup() {
 	// Clean up the Accounts created in Synqly. In your application, you would
-	// persist the Synqly account id and token to handle process restarts. We
-	// are not doing that in this example, so we need to clean up the accounts
-	// we created in Synqly.
+	// persist the Synqly Account id and Integration tokens to handle process
+	// restarts. We are not doing that in this example, so we need to clean up
+	// the accounts we created in Synqly.
 	consoleLogger.Println("Cleaning up Synqly Accounts")
 	ctx := context.Background()
 	for _, tenant := range app.Tenants {
@@ -285,7 +283,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// Generate synthetic load using a 10 second Event generator
+	// Generate synthetic load for the tenants
 	go app.backgroundJob()
 
 	// Wait for user to control c to exit

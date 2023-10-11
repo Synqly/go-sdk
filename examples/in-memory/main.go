@@ -114,10 +114,9 @@ func (a *App) configureEventLogging(ctx context.Context, tenantID string) error 
 	// We will use the Synqly Client we created for the tenant to do this
 	credential, err := tenant.SynqlyClient.Credentials.CreateCredential(ctx, tenant.SynqlyAccountId, &mgmt.CreateCredentialRequest{
 		Name: "Inmem Login",
-		Type: mgmt.CredentialTypeToken,
-		Token: &mgmt.TokenCredential{
+		Config: mgmt.NewCredentialConfigFromToken(&mgmt.TokenCredential{
 			Secret: "in-mem-sample-cred",
-		},
+		}),
 	})
 	if err != nil {
 		return err
