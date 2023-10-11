@@ -16,6 +16,8 @@ type Account struct {
 	// Last time object was updated
 	UpdatedAt time.Time `json:"updated_at"`
 	Id        AccountId `json:"id,omitempty"`
+	// Organization that manages this Account.
+	OrganizationId OrganizationId `json:"organization_id,omitempty"`
 }
 
 // Unique identifier for this Account
@@ -144,11 +146,112 @@ type Credential struct {
 	UpdatedAt time.Time    `json:"updated_at"`
 	Id        CredentialId `json:"id,omitempty"`
 	// Account that manages this credential.
-	AccountId AccountId        `json:"account_id,omitempty"`
-	Type      CredentialType   `json:"type,omitempty"`
-	Aws       *AwsCredential   `json:"aws,omitempty"`
-	Token     *TokenCredential `json:"token,omitempty"`
-	Basic     *BasicCredential `json:"basic,omitempty"`
+	AccountId AccountId `json:"account_id,omitempty"`
+	// Credential configuration
+	Config *CredentialConfig `json:"config,omitempty"`
+}
+
+type CredentialConfig struct {
+	Type  string
+	Aws   *AwsCredential
+	Token *TokenCredential
+	Basic *BasicCredential
+}
+
+func NewCredentialConfigFromAws(value *AwsCredential) *CredentialConfig {
+	return &CredentialConfig{Type: "aws", Aws: value}
+}
+
+func NewCredentialConfigFromToken(value *TokenCredential) *CredentialConfig {
+	return &CredentialConfig{Type: "token", Token: value}
+}
+
+func NewCredentialConfigFromBasic(value *BasicCredential) *CredentialConfig {
+	return &CredentialConfig{Type: "basic", Basic: value}
+}
+
+func (c *CredentialConfig) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	c.Type = unmarshaler.Type
+	switch unmarshaler.Type {
+	case "aws":
+		value := new(AwsCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		c.Aws = value
+	case "token":
+		value := new(TokenCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		c.Token = value
+	case "basic":
+		value := new(BasicCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		c.Basic = value
+	}
+	return nil
+}
+
+func (c CredentialConfig) MarshalJSON() ([]byte, error) {
+	switch c.Type {
+	default:
+		return nil, fmt.Errorf("invalid type %s in %T", c.Type, c)
+	case "aws":
+		var marshaler = struct {
+			Type string `json:"type"`
+			*AwsCredential
+		}{
+			Type:          c.Type,
+			AwsCredential: c.Aws,
+		}
+		return json.Marshal(marshaler)
+	case "token":
+		var marshaler = struct {
+			Type string `json:"type"`
+			*TokenCredential
+		}{
+			Type:            c.Type,
+			TokenCredential: c.Token,
+		}
+		return json.Marshal(marshaler)
+	case "basic":
+		var marshaler = struct {
+			Type string `json:"type"`
+			*BasicCredential
+		}{
+			Type:            c.Type,
+			BasicCredential: c.Basic,
+		}
+		return json.Marshal(marshaler)
+	}
+}
+
+type CredentialConfigVisitor interface {
+	VisitAws(*AwsCredential) error
+	VisitToken(*TokenCredential) error
+	VisitBasic(*BasicCredential) error
+}
+
+func (c *CredentialConfig) Accept(visitor CredentialConfigVisitor) error {
+	switch c.Type {
+	default:
+		return fmt.Errorf("invalid type %s in %T", c.Type, c)
+	case "aws":
+		return visitor.VisitAws(c.Aws)
+	case "token":
+		return visitor.VisitToken(c.Token)
+	case "basic":
+		return visitor.VisitBasic(c.Basic)
+	}
 }
 
 type CredentialType string
@@ -666,6 +769,9 @@ func NewStateFromString(s string) (State, error) {
 func (s State) Ptr() *State {
 	return &s
 }
+
+// Unique identifier for this Organization
+type OrganizationId = Id
 
 // Type of action granted access by an API operation: "create", "read", "update", "delete", or "*".
 type Action = string
