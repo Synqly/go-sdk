@@ -87,46 +87,6 @@ func (n NotificationStatus) Ptr() *NotificationStatus {
 	return &n
 }
 
-// Status object
-type Status struct {
-	// Human-readable name for this resource
-	Name string `json:"name"`
-	// Time object was originally created
-	CreatedAt time.Time `json:"created_at"`
-	// Last time object was updated
-	UpdatedAt time.Time `json:"updated_at"`
-	// Account owner
-	AccountId Id `json:"account_id"`
-	// Integration object
-	IntegrationId Id `json:"integration_id"`
-	// The current status of the notification.
-	Status string `json:"status"`
-	// Request count
-	Requests int64 `json:"requests"`
-	// Failed count
-	Failed int64 `json:"failed"`
-	// Cpu time in milliseconds
-	CpuTime int64 `json:"cpu_time"`
-	// Database operations count
-	DbOps int64 `json:"db_ops"`
-	// API operations count
-	ApiOps int64 `json:"api_ops"`
-}
-
-// Status event object
-type StatusEvent struct {
-	// Account owner
-	AccountId Id `json:"account_id"`
-	// Integration object
-	IntegrationId Id `json:"integration_id"`
-	// Time created
-	CreatedAt time.Time `json:"created_at"`
-	// Error message
-	Error *string `json:"error,omitempty"`
-	// Request number
-	Request int64 `json:"request"`
-}
-
 type Priority string
 
 const (

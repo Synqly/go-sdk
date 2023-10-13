@@ -454,6 +454,9 @@ type Integration struct {
 	ProviderConfig *ProviderConfig `json:"provider_config,omitempty"`
 }
 
+// Unique identifier for this Integration
+type IntegrationId = Id
+
 type NotificationConfig struct {
 	CredentialId CredentialId `json:"credential_id,omitempty"`
 	// Endpoint used for connecting to the external service. If not provided, will connect to the default endpoint for the Provider.
@@ -800,6 +803,46 @@ type Role struct {
 	Objects []Object `json:"objects,omitempty"`
 	// Optional list of APIs that this role blocks access to. Can be used to block access to select APIs like /v1/user, v1/tokens and /v1/credentials
 	BlockedApis []BlockedApi `json:"blocked_apis,omitempty"`
+}
+
+// Status object
+type Status struct {
+	// Human-readable name for this resource
+	Name string `json:"name"`
+	// Time object was originally created
+	CreatedAt time.Time `json:"created_at"`
+	// Last time object was updated
+	UpdatedAt time.Time `json:"updated_at"`
+	// Account owner
+	AccountId AccountId `json:"account_id,omitempty"`
+	// Integration object
+	IntegrationId IntegrationId `json:"integration_id,omitempty"`
+	// The current status of the notification.
+	Status string `json:"status"`
+	// Request count
+	Requests int64 `json:"requests"`
+	// Failed count
+	Failed int64 `json:"failed"`
+	// Cpu time in milliseconds
+	CpuTime int64 `json:"cpu_time"`
+	// Database operations count
+	DbOps int64 `json:"db_ops"`
+	// API operations count
+	ApiOps int64 `json:"api_ops"`
+}
+
+// Status event object
+type StatusEvent struct {
+	// Account owner
+	AccountId AccountId `json:"account_id,omitempty"`
+	// Integration object
+	IntegrationId IntegrationId `json:"integration_id,omitempty"`
+	// Time created
+	CreatedAt time.Time `json:"created_at"`
+	// Error message
+	Error *string `json:"error,omitempty"`
+	// Request number
+	Request int64 `json:"request"`
 }
 
 type Token struct {

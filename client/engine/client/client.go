@@ -5,9 +5,8 @@ package client
 import (
 	core "github.com/synqly/go-sdk/client/engine/core"
 	events "github.com/synqly/go-sdk/client/engine/events"
+	hooks "github.com/synqly/go-sdk/client/engine/hooks"
 	notifications "github.com/synqly/go-sdk/client/engine/notifications"
-	status "github.com/synqly/go-sdk/client/engine/status"
-	statusevents "github.com/synqly/go-sdk/client/engine/statusevents"
 	storage "github.com/synqly/go-sdk/client/engine/storage"
 	ticketing "github.com/synqly/go-sdk/client/engine/ticketing"
 	vulnerabilities "github.com/synqly/go-sdk/client/engine/vulnerabilities"
@@ -20,9 +19,8 @@ type Client struct {
 	header     http.Header
 
 	Events          *events.Client
+	Hooks           *hooks.Client
 	Notifications   *notifications.Client
-	StatusEvents    *statusevents.Client
-	Status          *status.Client
 	Storage         *storage.Client
 	Ticketing       *ticketing.Client
 	Vulnerabilities *vulnerabilities.Client
@@ -38,9 +36,8 @@ func NewClient(opts ...core.ClientOption) *Client {
 		httpClient:      options.HTTPClient,
 		header:          options.ToHeader(),
 		Events:          events.NewClient(opts...),
+		Hooks:           hooks.NewClient(opts...),
 		Notifications:   notifications.NewClient(opts...),
-		StatusEvents:    statusevents.NewClient(opts...),
-		Status:          status.NewClient(opts...),
 		Storage:         storage.NewClient(opts...),
 		Ticketing:       ticketing.NewClient(opts...),
 		Vulnerabilities: vulnerabilities.NewClient(opts...),

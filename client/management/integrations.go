@@ -20,9 +20,6 @@ type GetIntegrationResponse struct {
 	Result *Integration `json:"result,omitempty"`
 }
 
-// Unique identifier for this Integration
-type IntegrationId = Id
-
 type ListIntegrationResponse struct {
 	Result []*Integration `json:"result,omitempty"`
 }
