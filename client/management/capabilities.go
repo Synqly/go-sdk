@@ -13,9 +13,9 @@ type ListProviderCapabilitiesRequest struct {
 }
 
 type ListCategoryCapabilitiesResponse struct {
-	Result []*Category `json:"result,omitempty"`
+	Result map[CategoryId]*Category `json:"result,omitempty"`
 }
 
 type ListProviderCapabilitiesResponse struct {
-	Result []*Provider `json:"result,omitempty"`
+	Result map[ProviderId]*Provider `json:"result,omitempty"`
 }

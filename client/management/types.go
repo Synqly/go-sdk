@@ -70,6 +70,8 @@ func (h HttpMethod) Ptr() *HttpMethod {
 	return &h
 }
 
+type CapabilitiesProviderConfig = map[string]interface{}
+
 // Provides details on an available Integration.
 type Category struct {
 	Category CategoryId `json:"category"`
@@ -78,7 +80,7 @@ type Category struct {
 	// List of Providers that implement this Integration.
 	Providers []ProviderId `json:"providers,omitempty"`
 	// URL of the icon representing this type of Integration.
-	ImageRef *string `json:"image_ref,omitempty"`
+	Picture *string `json:"picture,omitempty"`
 }
 
 // Id of the Integrations category
@@ -93,10 +95,16 @@ type Provider struct {
 	// Categories that this Provider implements.
 	Categories []CategoryId `json:"categories,omitempty"`
 	// URL of the icon representing this type of Provider.
-	ImageRef *string `json:"image_ref,omitempty"`
+	Picture *string `json:"picture,omitempty"`
 	// Operations that this Provider implements.
 	SupportedOperations interface{} `json:"supported_operations,omitempty"`
+	// List of credential types that this Provider supports.
+	Credentials []ProviderCredentialConfig `json:"credentials,omitempty"`
+	// Details on the specific configuration options for this Provider.
+	ProviderConfig map[string]CapabilitiesProviderConfig `json:"provider_config,omitempty"`
 }
+
+type ProviderCredentialConfig = map[string]interface{}
 
 type ProviderId = string
 
@@ -123,12 +131,17 @@ type ErrorParam struct {
 
 type Id = string
 
+// AWS access key to authenticate with AWS. Access keys are long-term credentials for an IAM user and consist of an ID and secret. Follow [this guide to generate access and secret keys](https://docs.aws.amazon.com/general/latest/gr/aws-sec-cred-types.html#access-keys-and-secret-access-keys). You may optionally provide a session token if you are using temporary credentials.
 type AwsCredential struct {
-	AccessKeyId     string  `json:"access_key_id"`
-	SecretAccessKey string  `json:"secret_access_key"`
-	Session         *string `json:"session,omitempty"`
+	// ID portion of the AWS access key pair.
+	AccessKeyId string `json:"access_key_id"`
+	// Secret portion of the AWS access key pair.
+	SecretAccessKey string `json:"secret_access_key"`
+	// A temporary session token. Session tokens are optional and are only necessary if you are using temporary credentials.
+	Session *string `json:"session,omitempty"`
 }
 
+// Username and secret used to authenticate with an external service.
 type BasicCredential struct {
 	// Username value for authentication
 	Username string `json:"username"`
@@ -136,7 +149,7 @@ type BasicCredential struct {
 	Secret string `json:"secret"`
 }
 
-// Credential to access an integration. Each credential is managed by an Account.
+// Credential to access an integration. Each credential is owned by an Account.
 type Credential struct {
 	// Human-readable name for this resource
 	Name string `json:"name"`
@@ -279,16 +292,19 @@ func (c CredentialType) Ptr() *CredentialType {
 	return &c
 }
 
+// Token used to authenticate with an external service.
 type TokenCredential struct {
-	// Secret Token value used for authentication with an external service.
+	// Secret value of the token.
 	Secret string `json:"secret"`
 }
 
+// Configuration specific to AWS type Event Providers
 type AwsConfig struct {
 	// Override the default AWS region for this integration. If not present, the region will be infered from the URL.
 	Region *string `json:"region,omitempty"`
 }
 
+// Configuration specific to Azure Monitor Logs
 type AzureConfig struct {
 	// Azure Client (Application) ID.
 	ClientId string `json:"client_id"`
@@ -305,6 +321,7 @@ type CreateIntegrationResponseResult struct {
 	Token       *TokenPair   `json:"token,omitempty"`
 }
 
+// Configuration for an Event Provider
 type EventConfig struct {
 	CredentialId CredentialId `json:"credential_id,omitempty"`
 	// URL used for connecting to the external service. If not provided, will connect to the default endpoint for the Provider
@@ -417,6 +434,7 @@ func (e *EventProviderTypeConfig) Accept(visitor EventProviderTypeConfigVisitor)
 	}
 }
 
+// Configuration for a Webhook Provider
 type HooksConfig struct {
 	CredentialId CredentialId `json:"credential_id,omitempty"`
 	// Endpoint used for connecting to the external service.
@@ -457,6 +475,7 @@ type Integration struct {
 // Unique identifier for this Integration
 type IntegrationId = Id
 
+// Configuration for a Notification Provider
 type NotificationConfig struct {
 	CredentialId CredentialId `json:"credential_id,omitempty"`
 	// Endpoint used for connecting to the external service. If not provided, will connect to the default endpoint for the Provider.
@@ -639,6 +658,7 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 }
 
+// Configuration specific to the Splunk Event Provider
 type SplunkConfig struct {
 	// If true, skips verification of the Splunk server's TLS certificate. Defaults to false.
 	SkipTlsVerify bool `json:"skip_tls_verify"`
@@ -650,6 +670,7 @@ type SplunkConfig struct {
 	SourceType *string `json:"source_type,omitempty"`
 }
 
+// Configuration for a Storage Provider
 type StorageConfig struct {
 	CredentialId CredentialId `json:"credential_id,omitempty"`
 	Bucket       string       `json:"bucket"`
@@ -660,6 +681,7 @@ type StorageConfig struct {
 	Transforms []TransformId `json:"transforms,omitempty"`
 }
 
+// Configuration for a Ticket Provider
 type TicketConfig struct {
 	CredentialId CredentialId `json:"credential_id,omitempty"`
 	// Endpoint used for connecting to the external service. If not provided, will connect to the default endpoint for the Provider.
@@ -668,6 +690,7 @@ type TicketConfig struct {
 	Transforms []TransformId `json:"transforms,omitempty"`
 }
 
+// Configuration for a Vulnerability Provider
 type VulnerabilityConfig struct {
 	CredentialId CredentialId `json:"credential_id,omitempty"`
 	// Endpoint used for connecting to the external service. If not provided, will connect to the default endpoint for the Provider.
