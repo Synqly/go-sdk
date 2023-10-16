@@ -829,6 +829,8 @@ type Status struct {
 	DbOps int64 `json:"db_ops"`
 	// API operations count
 	ApiOps int64 `json:"api_ops"`
+	// API input byte count
+	InBytes int64 `json:"in_bytes"`
 }
 
 // Status event object

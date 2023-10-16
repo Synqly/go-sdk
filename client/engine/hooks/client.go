@@ -7,10 +7,12 @@ import (
 	context "context"
 	json "encoding/json"
 	errors "errors"
+	fmt "fmt"
 	engine "github.com/synqly/go-sdk/client/engine"
 	core "github.com/synqly/go-sdk/client/engine/core"
 	io "io"
 	http "net/http"
+	url "net/url"
 )
 
 type Client struct {
@@ -32,12 +34,18 @@ func NewClient(opts ...core.ClientOption) *Client {
 }
 
 // Proxy webhook messages from webhook providers to webhook recievers
-func (c *Client) ProxyHook(ctx context.Context, request interface{}) error {
+func (c *Client) ProxyHook(ctx context.Context, request *engine.PostProxyHook) error {
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
 	endpointURL := baseURL + "/" + "v1/hooks"
+
+	queryParams := make(url.Values)
+	queryParams.Add("token", fmt.Sprintf("%v", request.Token))
+	if len(queryParams) > 0 {
+		endpointURL += "?" + queryParams.Encode()
+	}
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
