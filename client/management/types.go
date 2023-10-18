@@ -812,11 +812,13 @@ type Permission struct {
 	// List of access roles. Authorization tries each role sequentially until one access role passes or they all fail
 	Roles []*Role `json:"roles,omitempty"`
 	// ID of the resource that this permission grants access to.
-	ResourceId string `json:"resource_id"`
+	ResourceId Id `json:"resource_id"`
 	// Type of the resource that this permission grants access to. Must be one of the following: "organization, "integration"
 	ResourceType string `json:"resource_type"`
 	// Token parentId
-	ParentId string `json:"parent_id"`
+	ParentId Id `json:"parent_id"`
+	// Token organizationId
+	OrganizationId Id `json:"organization_id"`
 }
 
 type Role struct {
