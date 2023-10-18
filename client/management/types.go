@@ -321,6 +321,11 @@ type CreateIntegrationResponseResult struct {
 	Token       *TokenPair   `json:"token,omitempty"`
 }
 
+type ElasticsearchConfig struct {
+	// Elasticsearch index to send events to.
+	Index string `json:"index"`
+}
+
 // Configuration for an Event Provider
 type EventConfig struct {
 	CredentialId CredentialId `json:"credential_id,omitempty"`
@@ -336,6 +341,7 @@ type EventProviderTypeConfig struct {
 	AzureMonitorLogs *AzureConfig
 	Aws              *AwsConfig
 	Splunk           *SplunkConfig
+	Elasticsearch    *ElasticsearchConfig
 }
 
 func NewEventProviderTypeConfigFromAzureMonitorLogs(value *AzureConfig) *EventProviderTypeConfig {
@@ -348,6 +354,10 @@ func NewEventProviderTypeConfigFromAws(value *AwsConfig) *EventProviderTypeConfi
 
 func NewEventProviderTypeConfigFromSplunk(value *SplunkConfig) *EventProviderTypeConfig {
 	return &EventProviderTypeConfig{Type: "splunk", Splunk: value}
+}
+
+func NewEventProviderTypeConfigFromElasticsearch(value *ElasticsearchConfig) *EventProviderTypeConfig {
+	return &EventProviderTypeConfig{Type: "elasticsearch", Elasticsearch: value}
 }
 
 func (e *EventProviderTypeConfig) UnmarshalJSON(data []byte) error {
@@ -377,6 +387,12 @@ func (e *EventProviderTypeConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		e.Splunk = value
+	case "elasticsearch":
+		value := new(ElasticsearchConfig)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.Elasticsearch = value
 	}
 	return nil
 }
@@ -412,6 +428,15 @@ func (e EventProviderTypeConfig) MarshalJSON() ([]byte, error) {
 			SplunkConfig: e.Splunk,
 		}
 		return json.Marshal(marshaler)
+	case "elasticsearch":
+		var marshaler = struct {
+			Type string `json:"type"`
+			*ElasticsearchConfig
+		}{
+			Type:                e.Type,
+			ElasticsearchConfig: e.Elasticsearch,
+		}
+		return json.Marshal(marshaler)
 	}
 }
 
@@ -419,6 +444,7 @@ type EventProviderTypeConfigVisitor interface {
 	VisitAzureMonitorLogs(*AzureConfig) error
 	VisitAws(*AwsConfig) error
 	VisitSplunk(*SplunkConfig) error
+	VisitElasticsearch(*ElasticsearchConfig) error
 }
 
 func (e *EventProviderTypeConfig) Accept(visitor EventProviderTypeConfigVisitor) error {
@@ -431,6 +457,8 @@ func (e *EventProviderTypeConfig) Accept(visitor EventProviderTypeConfigVisitor)
 		return visitor.VisitAws(e.Aws)
 	case "splunk":
 		return visitor.VisitSplunk(e.Splunk)
+	case "elasticsearch":
+		return visitor.VisitElasticsearch(e.Elasticsearch)
 	}
 }
 
