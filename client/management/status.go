@@ -16,3 +16,7 @@ type GetStatusResponse struct {
 type ListStatusEventsResponse struct {
 	Result []*StatusEvent `json:"result,omitempty"`
 }
+
+type ListStatusResponse struct {
+	Result []*Status `json:"result,omitempty"`
+}
