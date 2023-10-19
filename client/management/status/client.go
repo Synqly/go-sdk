@@ -90,7 +90,7 @@ func (c *Client) GetStatus(ctx context.Context, accountId management.AccountId, 
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"v1/status/%v/%v/integration", accountId, integrationId)
+	endpointURL := fmt.Sprintf(baseURL+"/"+"v1/status/%v/%v", accountId, integrationId)
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -141,7 +141,7 @@ func (c *Client) DeleteStatus(ctx context.Context, accountId management.AccountI
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"v1/status/%v/%v/delete", accountId, integrationId)
+	endpointURL := fmt.Sprintf(baseURL+"/"+"v1/status/%v/%v", accountId, integrationId)
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
