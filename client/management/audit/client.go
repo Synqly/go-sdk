@@ -4,7 +4,6 @@ package audit
 
 import (
 	context "context"
-	fmt "fmt"
 	management "github.com/synqly/go-sdk/client/management"
 	core "github.com/synqly/go-sdk/client/management/core"
 	http "net/http"
@@ -26,32 +25,6 @@ func NewClient(opts ...core.ClientOption) *Client {
 		httpClient: options.HTTPClient,
 		header:     options.ToHeader(),
 	}
-}
-
-// Returns a list of all Synqly `Audit` events for the `Account`
-// matching `{accountId}`.
-func (c *Client) ListAuditAccounts(ctx context.Context, accountId management.AccountId) (*management.ListAuditResponse, error) {
-	baseURL := "https://api.synqly.com"
-	if c.baseURL != "" {
-		baseURL = c.baseURL
-	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"v1/audit/accounts/%v", accountId)
-
-	var response *management.ListAuditResponse
-	if err := core.DoRequest(
-		ctx,
-		c.httpClient,
-		endpointURL,
-		http.MethodGet,
-		nil,
-		&response,
-		false,
-		c.header,
-		nil,
-	); err != nil {
-		return response, err
-	}
-	return response, nil
 }
 
 // Returns a list of all Synqly `Audit` events for the `Organization`.
