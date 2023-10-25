@@ -860,8 +860,6 @@ type Role struct {
 
 // Status object
 type Status struct {
-	// Human-readable name for this resource
-	Name string `json:"name"`
 	// Time object was originally created
 	CreatedAt time.Time `json:"created_at"`
 	// Last time object was updated
