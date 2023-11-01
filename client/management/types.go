@@ -479,6 +479,13 @@ type HooksConfig struct {
 	Transforms []TransformId `json:"transforms,omitempty"`
 }
 
+// Configuration for an Identity Provider
+type IdentityConfig struct {
+	CredentialId CredentialId `json:"credential_id,omitempty"`
+	// URL used for connecting to the identity provider.
+	Url *string `json:"url,omitempty"`
+}
+
 // Connects an Account to an external service
 type Integration struct {
 	// Human-readable name for this resource
@@ -518,6 +525,7 @@ type ProviderConfig struct {
 	Type            string
 	Events          *EventConfig
 	Hooks           *HooksConfig
+	Identity        *IdentityConfig
 	Notifications   *NotificationConfig
 	Storage         *StorageConfig
 	Tickets         *TicketConfig
@@ -530,6 +538,10 @@ func NewProviderConfigFromEvents(value *EventConfig) *ProviderConfig {
 
 func NewProviderConfigFromHooks(value *HooksConfig) *ProviderConfig {
 	return &ProviderConfig{Type: "hooks", Hooks: value}
+}
+
+func NewProviderConfigFromIdentity(value *IdentityConfig) *ProviderConfig {
+	return &ProviderConfig{Type: "identity", Identity: value}
 }
 
 func NewProviderConfigFromNotifications(value *NotificationConfig) *ProviderConfig {
@@ -569,6 +581,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.Hooks = value
+	case "identity":
+		value := new(IdentityConfig)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.Identity = value
 	case "notifications":
 		value := new(NotificationConfig)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -619,6 +637,15 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 			HooksConfig: p.Hooks,
 		}
 		return json.Marshal(marshaler)
+	case "identity":
+		var marshaler = struct {
+			Type string `json:"type"`
+			*IdentityConfig
+		}{
+			Type:           p.Type,
+			IdentityConfig: p.Identity,
+		}
+		return json.Marshal(marshaler)
 	case "notifications":
 		var marshaler = struct {
 			Type string `json:"type"`
@@ -661,6 +688,7 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 type ProviderConfigVisitor interface {
 	VisitEvents(*EventConfig) error
 	VisitHooks(*HooksConfig) error
+	VisitIdentity(*IdentityConfig) error
 	VisitNotifications(*NotificationConfig) error
 	VisitStorage(*StorageConfig) error
 	VisitTickets(*TicketConfig) error
@@ -675,6 +703,8 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 		return visitor.VisitEvents(p.Events)
 	case "hooks":
 		return visitor.VisitHooks(p.Hooks)
+	case "identity":
+		return visitor.VisitIdentity(p.Identity)
 	case "notifications":
 		return visitor.VisitNotifications(p.Notifications)
 	case "storage":

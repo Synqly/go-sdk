@@ -6,6 +6,7 @@ import (
 	core "github.com/synqly/go-sdk/client/engine/core"
 	events "github.com/synqly/go-sdk/client/engine/events"
 	hooks "github.com/synqly/go-sdk/client/engine/hooks"
+	identity "github.com/synqly/go-sdk/client/engine/identity"
 	notifications "github.com/synqly/go-sdk/client/engine/notifications"
 	storage "github.com/synqly/go-sdk/client/engine/storage"
 	ticketing "github.com/synqly/go-sdk/client/engine/ticketing"
@@ -20,6 +21,7 @@ type Client struct {
 
 	Events          *events.Client
 	Hooks           *hooks.Client
+	Identity        *identity.Client
 	Notifications   *notifications.Client
 	Storage         *storage.Client
 	Ticketing       *ticketing.Client
@@ -37,6 +39,7 @@ func NewClient(opts ...core.ClientOption) *Client {
 		header:          options.ToHeader(),
 		Events:          events.NewClient(opts...),
 		Hooks:           hooks.NewClient(opts...),
+		Identity:        identity.NewClient(opts...),
 		Notifications:   notifications.NewClient(opts...),
 		Storage:         storage.NewClient(opts...),
 		Ticketing:       ticketing.NewClient(opts...),
