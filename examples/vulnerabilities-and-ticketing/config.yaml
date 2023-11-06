@@ -1,0 +1,10 @@
+synqly:
+  org:
+    token:
+
+  jira:
+    user:
+    token:
+
+  tenable:
+    token:
