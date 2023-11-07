@@ -775,10 +775,11 @@ type Member struct {
 	// User's nickname
 	Nickname string `json:"nickname"`
 	// Url of user's picture
-	Picture  string    `json:"picture"`
-	Ttl      string    `json:"ttl"`
-	TokenTtl string    `json:"token_ttl"`
-	Expires  time.Time `json:"expires"`
+	Picture    string    `json:"picture"`
+	Ttl        string    `json:"ttl"`
+	TokenTtl   string    `json:"token_ttl"`
+	Expires    time.Time `json:"expires"`
+	PinExpires time.Time `json:"pin_expires"`
 	// Roles granted to this member. Tokens inherit this access.
 	Roles []*Role `json:"roles,omitempty"`
 }
