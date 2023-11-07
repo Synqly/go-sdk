@@ -90,3 +90,203 @@ func (c *Client) ListAuditLog(ctx context.Context, request *engine.ListIdentityA
 	}
 	return response, nil
 }
+
+// Reenables a disabled user in the identity system based on user ID.
+func (c *Client) EnableUser(ctx context.Context, userId engine.UserId) error {
+	baseURL := "https://api.synqly.com"
+	if c.baseURL != "" {
+		baseURL = c.baseURL
+	}
+	endpointURL := fmt.Sprintf(baseURL+"/"+"v1/identity/users/%v/actions/enable", userId)
+
+	errorDecoder := func(statusCode int, body io.Reader) error {
+		raw, err := io.ReadAll(body)
+		if err != nil {
+			return err
+		}
+		apiError := core.NewAPIError(statusCode, errors.New(string(raw)))
+		decoder := json.NewDecoder(bytes.NewReader(raw))
+		switch statusCode {
+		case 404:
+			value := new(engine.NotFoundError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 400:
+			value := new(engine.BadRequestError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		}
+		return apiError
+	}
+
+	if err := core.DoRequest(
+		ctx,
+		c.httpClient,
+		endpointURL,
+		http.MethodPost,
+		nil,
+		nil,
+		false,
+		c.header,
+		errorDecoder,
+	); err != nil {
+		return err
+	}
+	return nil
+}
+
+// Disables a user in the identity system based on user ID.
+func (c *Client) DisableUser(ctx context.Context, userId engine.UserId) error {
+	baseURL := "https://api.synqly.com"
+	if c.baseURL != "" {
+		baseURL = c.baseURL
+	}
+	endpointURL := fmt.Sprintf(baseURL+"/"+"v1/identity/users/%v/actions/disable", userId)
+
+	errorDecoder := func(statusCode int, body io.Reader) error {
+		raw, err := io.ReadAll(body)
+		if err != nil {
+			return err
+		}
+		apiError := core.NewAPIError(statusCode, errors.New(string(raw)))
+		decoder := json.NewDecoder(bytes.NewReader(raw))
+		switch statusCode {
+		case 404:
+			value := new(engine.NotFoundError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 400:
+			value := new(engine.BadRequestError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		}
+		return apiError
+	}
+
+	if err := core.DoRequest(
+		ctx,
+		c.httpClient,
+		endpointURL,
+		http.MethodPost,
+		nil,
+		nil,
+		false,
+		c.header,
+		errorDecoder,
+	); err != nil {
+		return err
+	}
+	return nil
+}
+
+// Forces a user to reset their password before they can log in again.
+func (c *Client) ForceResetPassword(ctx context.Context, userId engine.UserId) error {
+	baseURL := "https://api.synqly.com"
+	if c.baseURL != "" {
+		baseURL = c.baseURL
+	}
+	endpointURL := fmt.Sprintf(baseURL+"/"+"v1/identity/users/%v/actions/force_reset_password", userId)
+
+	errorDecoder := func(statusCode int, body io.Reader) error {
+		raw, err := io.ReadAll(body)
+		if err != nil {
+			return err
+		}
+		apiError := core.NewAPIError(statusCode, errors.New(string(raw)))
+		decoder := json.NewDecoder(bytes.NewReader(raw))
+		switch statusCode {
+		case 404:
+			value := new(engine.NotFoundError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 400:
+			value := new(engine.BadRequestError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		}
+		return apiError
+	}
+
+	if err := core.DoRequest(
+		ctx,
+		c.httpClient,
+		endpointURL,
+		http.MethodPost,
+		nil,
+		nil,
+		false,
+		c.header,
+		errorDecoder,
+	); err != nil {
+		return err
+	}
+	return nil
+}
+
+// Logs a user out of all current sessions so they must log in again.
+func (c *Client) ExpireAllSessions(ctx context.Context, userId engine.UserId) error {
+	baseURL := "https://api.synqly.com"
+	if c.baseURL != "" {
+		baseURL = c.baseURL
+	}
+	endpointURL := fmt.Sprintf(baseURL+"/"+"v1/identity/users/%v/actions/expire_all_sessions", userId)
+
+	errorDecoder := func(statusCode int, body io.Reader) error {
+		raw, err := io.ReadAll(body)
+		if err != nil {
+			return err
+		}
+		apiError := core.NewAPIError(statusCode, errors.New(string(raw)))
+		decoder := json.NewDecoder(bytes.NewReader(raw))
+		switch statusCode {
+		case 404:
+			value := new(engine.NotFoundError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 400:
+			value := new(engine.BadRequestError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		}
+		return apiError
+	}
+
+	if err := core.DoRequest(
+		ctx,
+		c.httpClient,
+		endpointURL,
+		http.MethodPost,
+		nil,
+		nil,
+		false,
+		c.header,
+		errorDecoder,
+	); err != nil {
+		return err
+	}
+	return nil
+}

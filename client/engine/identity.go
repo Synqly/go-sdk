@@ -15,3 +15,6 @@ type ListIdentityAuditLogResponse struct {
 	// Cursor to use to retrieve the next page of results
 	Cursor string `json:"cursor"`
 }
+
+// The unique identifier for a user in the identity provider's system
+type UserId = string
