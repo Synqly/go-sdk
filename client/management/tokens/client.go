@@ -57,6 +57,20 @@ func (c *Client) ListTokens(ctx context.Context) (*management.ListTokensResponse
 				return apiError
 			}
 			return value
+		case 403:
+			value := new(management.ForbiddenError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 401:
+			value := new(management.UnauthorizedError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
 		}
 		return apiError
 	}
@@ -98,6 +112,20 @@ func (c *Client) GetToken(ctx context.Context, refreshTokenId management.TokenId
 		switch statusCode {
 		case 404:
 			value := new(management.NotFoundError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 403:
+			value := new(management.ForbiddenError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 401:
+			value := new(management.UnauthorizedError)
 			value.APIError = apiError
 			if err := decoder.Decode(value); err != nil {
 				return apiError
@@ -156,6 +184,20 @@ func (c *Client) ResetToken(ctx context.Context, refreshTokenId management.Token
 				return apiError
 			}
 			return value
+		case 403:
+			value := new(management.ForbiddenError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 401:
+			value := new(management.UnauthorizedError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
 		}
 		return apiError
 	}
@@ -209,6 +251,20 @@ func (c *Client) RefreshToken(ctx context.Context, refreshTokenId management.Tok
 				return apiError
 			}
 			return value
+		case 403:
+			value := new(management.ForbiddenError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 401:
+			value := new(management.UnauthorizedError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
 		}
 		return apiError
 	}
@@ -256,6 +312,20 @@ func (c *Client) RemoveSecondaryToken(ctx context.Context, refreshTokenId manage
 			return value
 		case 404:
 			value := new(management.NotFoundError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 403:
+			value := new(management.ForbiddenError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 401:
+			value := new(management.UnauthorizedError)
 			value.APIError = apiError
 			if err := decoder.Decode(value); err != nil {
 				return apiError

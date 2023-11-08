@@ -72,6 +72,20 @@ func (c *Client) ListTickets(ctx context.Context, request *engine.ListTicketsReq
 				return apiError
 			}
 			return value
+		case 403:
+			value := new(engine.ForbiddenError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 401:
+			value := new(engine.UnauthorizedError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
 		}
 		return apiError
 	}
@@ -119,6 +133,20 @@ func (c *Client) ListProjects(ctx context.Context) (*engine.ListProjectsResponse
 			return value
 		case 400:
 			value := new(engine.BadRequestError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 403:
+			value := new(engine.ForbiddenError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 401:
+			value := new(engine.UnauthorizedError)
 			value.APIError = apiError
 			if err := decoder.Decode(value); err != nil {
 				return apiError
@@ -175,6 +203,20 @@ func (c *Client) GetTicket(ctx context.Context, ticketId engine.TicketId) (*engi
 				return apiError
 			}
 			return value
+		case 403:
+			value := new(engine.ForbiddenError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 401:
+			value := new(engine.UnauthorizedError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
 		}
 		return apiError
 	}
@@ -226,6 +268,20 @@ func (c *Client) CreateTicket(ctx context.Context, request engine.CreateTicketRe
 				return apiError
 			}
 			return value
+		case 403:
+			value := new(engine.ForbiddenError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 401:
+			value := new(engine.UnauthorizedError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
 		}
 		return apiError
 	}
@@ -272,6 +328,20 @@ func (c *Client) PatchTicket(ctx context.Context, ticketId engine.TicketId, requ
 			return value
 		case 400:
 			value := new(engine.BadRequestError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 403:
+			value := new(engine.ForbiddenError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 401:
+			value := new(engine.UnauthorizedError)
 			value.APIError = apiError
 			if err := decoder.Decode(value); err != nil {
 				return apiError

@@ -3,9 +3,13 @@
 package audit
 
 import (
+	bytes "bytes"
 	context "context"
+	json "encoding/json"
+	errors "errors"
 	management "github.com/synqly/go-sdk/client/management"
 	core "github.com/synqly/go-sdk/client/management/core"
+	io "io"
 	http "net/http"
 )
 
@@ -35,6 +39,39 @@ func (c *Client) ListAuditOrganizations(ctx context.Context) (*management.ListAu
 	}
 	endpointURL := baseURL + "/" + "v1/audit/organizations"
 
+	errorDecoder := func(statusCode int, body io.Reader) error {
+		raw, err := io.ReadAll(body)
+		if err != nil {
+			return err
+		}
+		apiError := core.NewAPIError(statusCode, errors.New(string(raw)))
+		decoder := json.NewDecoder(bytes.NewReader(raw))
+		switch statusCode {
+		case 404:
+			value := new(management.NotFoundError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 403:
+			value := new(management.ForbiddenError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 401:
+			value := new(management.UnauthorizedError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		}
+		return apiError
+	}
+
 	var response *management.ListAuditResponse
 	if err := core.DoRequest(
 		ctx,
@@ -45,7 +82,7 @@ func (c *Client) ListAuditOrganizations(ctx context.Context) (*management.ListAu
 		&response,
 		false,
 		c.header,
-		nil,
+		errorDecoder,
 	); err != nil {
 		return response, err
 	}
