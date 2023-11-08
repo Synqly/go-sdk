@@ -31,11 +31,14 @@ type Audit struct {
 	Environment string `json:"environment"`
 	// Time when the API request occurred.
 	CreatedAt     time.Time   `json:"created_at"`
+	RemoteAddr    string      `json:"remote_addr"`
 	Method        HttpMethod  `json:"method,omitempty"`
 	Path          string      `json:"path"`
 	Code          string      `json:"code"`
-	Status        string      `json:"status"`
 	Body          interface{} `json:"body,omitempty"`
+	Status        *string     `json:"status,omitempty"`
+	MemberId      *Id         `json:"member_id,omitempty"`
+	AccountId     *Id         `json:"account_id,omitempty"`
 	IntegrationId *Id         `json:"integration_id,omitempty"`
 }
 
@@ -953,6 +956,8 @@ type RefreshToken struct {
 	// Last time object was updated
 	UpdatedAt time.Time `json:"updated_at"`
 	Id        TokenId   `json:"id,omitempty"`
+	// Member Id
+	MemberId *Id `json:"memberId,omitempty"`
 	// Time when this token expires and can no longer be used again.
 	Expires time.Time `json:"expires"`
 	// Token time-to-live
