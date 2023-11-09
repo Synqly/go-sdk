@@ -3,7 +3,18 @@
 package engine
 
 import (
+	json "encoding/json"
 	fmt "fmt"
+	accountchange "github.com/synqly/go-sdk/client/engine/ocsf/accountchange"
+	apiactivity "github.com/synqly/go-sdk/client/engine/ocsf/apiactivity"
+	authentication "github.com/synqly/go-sdk/client/engine/ocsf/authentication"
+	fileactivity "github.com/synqly/go-sdk/client/engine/ocsf/fileactivity"
+	groupmanagement "github.com/synqly/go-sdk/client/engine/ocsf/groupmanagement"
+	networkactivity "github.com/synqly/go-sdk/client/engine/ocsf/networkactivity"
+	processactivity "github.com/synqly/go-sdk/client/engine/ocsf/processactivity"
+	scheduledjobactivity "github.com/synqly/go-sdk/client/engine/ocsf/scheduledjobactivity"
+	securityfinding "github.com/synqly/go-sdk/client/engine/ocsf/securityfinding"
+	webresourceaccessactivity "github.com/synqly/go-sdk/client/engine/ocsf/webresourceaccessactivity"
 	time "time"
 )
 
@@ -29,6 +40,270 @@ type ErrorParam struct {
 }
 
 type Id = string
+
+type Event struct {
+	ClassName                 string
+	AccountChange             *accountchange.AccountChange
+	ApiActivity               *apiactivity.ApiActivity
+	Authentication            *authentication.Authentication
+	FileActivity              *fileactivity.FileActivity
+	GroupManagement           *groupmanagement.GroupManagement
+	NetworkActivity           *networkactivity.NetworkActivity
+	ProcessActivity           *processactivity.ProcessActivity
+	ScheduledJobActivity      *scheduledjobactivity.ScheduledJobActivity
+	SecurityFinding           *securityfinding.SecurityFinding
+	WebResourceAccessActivity *webresourceaccessactivity.WebResourceAccessActivity
+}
+
+func NewEventFromAccountChange(value *accountchange.AccountChange) *Event {
+	return &Event{ClassName: "Account Change", AccountChange: value}
+}
+
+func NewEventFromApiActivity(value *apiactivity.ApiActivity) *Event {
+	return &Event{ClassName: "Api Activity", ApiActivity: value}
+}
+
+func NewEventFromAuthentication(value *authentication.Authentication) *Event {
+	return &Event{ClassName: "Authentication", Authentication: value}
+}
+
+func NewEventFromFileActivity(value *fileactivity.FileActivity) *Event {
+	return &Event{ClassName: "File Activity", FileActivity: value}
+}
+
+func NewEventFromGroupManagement(value *groupmanagement.GroupManagement) *Event {
+	return &Event{ClassName: "Group Management", GroupManagement: value}
+}
+
+func NewEventFromNetworkActivity(value *networkactivity.NetworkActivity) *Event {
+	return &Event{ClassName: "Network Activity", NetworkActivity: value}
+}
+
+func NewEventFromProcessActivity(value *processactivity.ProcessActivity) *Event {
+	return &Event{ClassName: "Process Activity", ProcessActivity: value}
+}
+
+func NewEventFromScheduledJobActivity(value *scheduledjobactivity.ScheduledJobActivity) *Event {
+	return &Event{ClassName: "Scheduled Job Activity", ScheduledJobActivity: value}
+}
+
+func NewEventFromSecurityFinding(value *securityfinding.SecurityFinding) *Event {
+	return &Event{ClassName: "Security Finding", SecurityFinding: value}
+}
+
+func NewEventFromWebResourceAccessActivity(value *webresourceaccessactivity.WebResourceAccessActivity) *Event {
+	return &Event{ClassName: "Web Resource Access Activity", WebResourceAccessActivity: value}
+}
+
+func (e *Event) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		ClassName string `json:"class_name"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	e.ClassName = unmarshaler.ClassName
+	switch unmarshaler.ClassName {
+	case "Account Change":
+		value := new(accountchange.AccountChange)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.AccountChange = value
+	case "Api Activity":
+		value := new(apiactivity.ApiActivity)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.ApiActivity = value
+	case "Authentication":
+		value := new(authentication.Authentication)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.Authentication = value
+	case "File Activity":
+		value := new(fileactivity.FileActivity)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.FileActivity = value
+	case "Group Management":
+		value := new(groupmanagement.GroupManagement)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.GroupManagement = value
+	case "Network Activity":
+		value := new(networkactivity.NetworkActivity)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.NetworkActivity = value
+	case "Process Activity":
+		value := new(processactivity.ProcessActivity)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.ProcessActivity = value
+	case "Scheduled Job Activity":
+		value := new(scheduledjobactivity.ScheduledJobActivity)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.ScheduledJobActivity = value
+	case "Security Finding":
+		value := new(securityfinding.SecurityFinding)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.SecurityFinding = value
+	case "Web Resource Access Activity":
+		value := new(webresourceaccessactivity.WebResourceAccessActivity)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.WebResourceAccessActivity = value
+	}
+	return nil
+}
+
+func (e Event) MarshalJSON() ([]byte, error) {
+	switch e.ClassName {
+	default:
+		return nil, fmt.Errorf("invalid type %s in %T", e.ClassName, e)
+	case "Account Change":
+		var marshaler = struct {
+			ClassName string `json:"class_name"`
+			*accountchange.AccountChange
+		}{
+			ClassName:     e.ClassName,
+			AccountChange: e.AccountChange,
+		}
+		return json.Marshal(marshaler)
+	case "Api Activity":
+		var marshaler = struct {
+			ClassName string `json:"class_name"`
+			*apiactivity.ApiActivity
+		}{
+			ClassName:   e.ClassName,
+			ApiActivity: e.ApiActivity,
+		}
+		return json.Marshal(marshaler)
+	case "Authentication":
+		var marshaler = struct {
+			ClassName string `json:"class_name"`
+			*authentication.Authentication
+		}{
+			ClassName:      e.ClassName,
+			Authentication: e.Authentication,
+		}
+		return json.Marshal(marshaler)
+	case "File Activity":
+		var marshaler = struct {
+			ClassName string `json:"class_name"`
+			*fileactivity.FileActivity
+		}{
+			ClassName:    e.ClassName,
+			FileActivity: e.FileActivity,
+		}
+		return json.Marshal(marshaler)
+	case "Group Management":
+		var marshaler = struct {
+			ClassName string `json:"class_name"`
+			*groupmanagement.GroupManagement
+		}{
+			ClassName:       e.ClassName,
+			GroupManagement: e.GroupManagement,
+		}
+		return json.Marshal(marshaler)
+	case "Network Activity":
+		var marshaler = struct {
+			ClassName string `json:"class_name"`
+			*networkactivity.NetworkActivity
+		}{
+			ClassName:       e.ClassName,
+			NetworkActivity: e.NetworkActivity,
+		}
+		return json.Marshal(marshaler)
+	case "Process Activity":
+		var marshaler = struct {
+			ClassName string `json:"class_name"`
+			*processactivity.ProcessActivity
+		}{
+			ClassName:       e.ClassName,
+			ProcessActivity: e.ProcessActivity,
+		}
+		return json.Marshal(marshaler)
+	case "Scheduled Job Activity":
+		var marshaler = struct {
+			ClassName string `json:"class_name"`
+			*scheduledjobactivity.ScheduledJobActivity
+		}{
+			ClassName:            e.ClassName,
+			ScheduledJobActivity: e.ScheduledJobActivity,
+		}
+		return json.Marshal(marshaler)
+	case "Security Finding":
+		var marshaler = struct {
+			ClassName string `json:"class_name"`
+			*securityfinding.SecurityFinding
+		}{
+			ClassName:       e.ClassName,
+			SecurityFinding: e.SecurityFinding,
+		}
+		return json.Marshal(marshaler)
+	case "Web Resource Access Activity":
+		var marshaler = struct {
+			ClassName string `json:"class_name"`
+			*webresourceaccessactivity.WebResourceAccessActivity
+		}{
+			ClassName:                 e.ClassName,
+			WebResourceAccessActivity: e.WebResourceAccessActivity,
+		}
+		return json.Marshal(marshaler)
+	}
+}
+
+type EventVisitor interface {
+	VisitAccountChange(*accountchange.AccountChange) error
+	VisitApiActivity(*apiactivity.ApiActivity) error
+	VisitAuthentication(*authentication.Authentication) error
+	VisitFileActivity(*fileactivity.FileActivity) error
+	VisitGroupManagement(*groupmanagement.GroupManagement) error
+	VisitNetworkActivity(*networkactivity.NetworkActivity) error
+	VisitProcessActivity(*processactivity.ProcessActivity) error
+	VisitScheduledJobActivity(*scheduledjobactivity.ScheduledJobActivity) error
+	VisitSecurityFinding(*securityfinding.SecurityFinding) error
+	VisitWebResourceAccessActivity(*webresourceaccessactivity.WebResourceAccessActivity) error
+}
+
+func (e *Event) Accept(visitor EventVisitor) error {
+	switch e.ClassName {
+	default:
+		return fmt.Errorf("invalid type %s in %T", e.ClassName, e)
+	case "Account Change":
+		return visitor.VisitAccountChange(e.AccountChange)
+	case "Api Activity":
+		return visitor.VisitApiActivity(e.ApiActivity)
+	case "Authentication":
+		return visitor.VisitAuthentication(e.Authentication)
+	case "File Activity":
+		return visitor.VisitFileActivity(e.FileActivity)
+	case "Group Management":
+		return visitor.VisitGroupManagement(e.GroupManagement)
+	case "Network Activity":
+		return visitor.VisitNetworkActivity(e.NetworkActivity)
+	case "Process Activity":
+		return visitor.VisitProcessActivity(e.ProcessActivity)
+	case "Scheduled Job Activity":
+		return visitor.VisitScheduledJobActivity(e.ScheduledJobActivity)
+	case "Security Finding":
+		return visitor.VisitSecurityFinding(e.SecurityFinding)
+	case "Web Resource Access Activity":
+		return visitor.VisitWebResourceAccessActivity(e.WebResourceAccessActivity)
+	}
+}
 
 // Notification object
 type Notification struct {

@@ -4,10 +4,11 @@ package client
 
 import (
 	core "github.com/synqly/go-sdk/client/engine/core"
-	events "github.com/synqly/go-sdk/client/engine/events"
 	hooks "github.com/synqly/go-sdk/client/engine/hooks"
 	identity "github.com/synqly/go-sdk/client/engine/identity"
 	notifications "github.com/synqly/go-sdk/client/engine/notifications"
+	siem "github.com/synqly/go-sdk/client/engine/siem"
+	sink "github.com/synqly/go-sdk/client/engine/sink"
 	storage "github.com/synqly/go-sdk/client/engine/storage"
 	ticketing "github.com/synqly/go-sdk/client/engine/ticketing"
 	vulnerabilities "github.com/synqly/go-sdk/client/engine/vulnerabilities"
@@ -19,10 +20,11 @@ type Client struct {
 	httpClient core.HTTPClient
 	header     http.Header
 
-	Events          *events.Client
 	Hooks           *hooks.Client
 	Identity        *identity.Client
 	Notifications   *notifications.Client
+	Siem            *siem.Client
+	Sink            *sink.Client
 	Storage         *storage.Client
 	Ticketing       *ticketing.Client
 	Vulnerabilities *vulnerabilities.Client
@@ -37,10 +39,11 @@ func NewClient(opts ...core.ClientOption) *Client {
 		baseURL:         options.BaseURL,
 		httpClient:      options.HTTPClient,
 		header:          options.ToHeader(),
-		Events:          events.NewClient(opts...),
 		Hooks:           hooks.NewClient(opts...),
 		Identity:        identity.NewClient(opts...),
 		Notifications:   notifications.NewClient(opts...),
+		Siem:            siem.NewClient(opts...),
+		Sink:            sink.NewClient(opts...),
 		Storage:         storage.NewClient(opts...),
 		Ticketing:       ticketing.NewClient(opts...),
 		Vulnerabilities: vulnerabilities.NewClient(opts...),

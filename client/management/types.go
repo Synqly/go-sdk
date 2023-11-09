@@ -308,7 +308,7 @@ type AwsConfig struct {
 }
 
 // Configuration specific to Azure Monitor Logs
-type AzureConfig struct {
+type AzureMonitorLogsConfig struct {
 	// Azure Client (Application) ID.
 	ClientId string `json:"client_id"`
 	// Azure Directory (tenant) ID.
@@ -327,142 +327,6 @@ type CreateIntegrationResponseResult struct {
 type ElasticsearchConfig struct {
 	// Elasticsearch index to send events to.
 	Index string `json:"index"`
-}
-
-// Configuration for an Event Provider
-type EventConfig struct {
-	CredentialId CredentialId `json:"credential_id,omitempty"`
-	// URL used for connecting to the external service. If not provided, will connect to the default endpoint for the Provider
-	Url *string `json:"url,omitempty"`
-	// Optional list of transformations used to modify requests before they are sent to the external service.
-	Transforms []TransformId            `json:"transforms,omitempty"`
-	Config     *EventProviderTypeConfig `json:"config,omitempty"`
-}
-
-type EventProviderTypeConfig struct {
-	Type             string
-	AzureMonitorLogs *AzureConfig
-	Aws              *AwsConfig
-	Splunk           *SplunkConfig
-	Elasticsearch    *ElasticsearchConfig
-}
-
-func NewEventProviderTypeConfigFromAzureMonitorLogs(value *AzureConfig) *EventProviderTypeConfig {
-	return &EventProviderTypeConfig{Type: "azure_monitor_logs", AzureMonitorLogs: value}
-}
-
-func NewEventProviderTypeConfigFromAws(value *AwsConfig) *EventProviderTypeConfig {
-	return &EventProviderTypeConfig{Type: "aws", Aws: value}
-}
-
-func NewEventProviderTypeConfigFromSplunk(value *SplunkConfig) *EventProviderTypeConfig {
-	return &EventProviderTypeConfig{Type: "splunk", Splunk: value}
-}
-
-func NewEventProviderTypeConfigFromElasticsearch(value *ElasticsearchConfig) *EventProviderTypeConfig {
-	return &EventProviderTypeConfig{Type: "elasticsearch", Elasticsearch: value}
-}
-
-func (e *EventProviderTypeConfig) UnmarshalJSON(data []byte) error {
-	var unmarshaler struct {
-		Type string `json:"type"`
-	}
-	if err := json.Unmarshal(data, &unmarshaler); err != nil {
-		return err
-	}
-	e.Type = unmarshaler.Type
-	switch unmarshaler.Type {
-	case "azure_monitor_logs":
-		value := new(AzureConfig)
-		if err := json.Unmarshal(data, &value); err != nil {
-			return err
-		}
-		e.AzureMonitorLogs = value
-	case "aws":
-		value := new(AwsConfig)
-		if err := json.Unmarshal(data, &value); err != nil {
-			return err
-		}
-		e.Aws = value
-	case "splunk":
-		value := new(SplunkConfig)
-		if err := json.Unmarshal(data, &value); err != nil {
-			return err
-		}
-		e.Splunk = value
-	case "elasticsearch":
-		value := new(ElasticsearchConfig)
-		if err := json.Unmarshal(data, &value); err != nil {
-			return err
-		}
-		e.Elasticsearch = value
-	}
-	return nil
-}
-
-func (e EventProviderTypeConfig) MarshalJSON() ([]byte, error) {
-	switch e.Type {
-	default:
-		return nil, fmt.Errorf("invalid type %s in %T", e.Type, e)
-	case "azure_monitor_logs":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*AzureConfig
-		}{
-			Type:        e.Type,
-			AzureConfig: e.AzureMonitorLogs,
-		}
-		return json.Marshal(marshaler)
-	case "aws":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*AwsConfig
-		}{
-			Type:      e.Type,
-			AwsConfig: e.Aws,
-		}
-		return json.Marshal(marshaler)
-	case "splunk":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*SplunkConfig
-		}{
-			Type:         e.Type,
-			SplunkConfig: e.Splunk,
-		}
-		return json.Marshal(marshaler)
-	case "elasticsearch":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*ElasticsearchConfig
-		}{
-			Type:                e.Type,
-			ElasticsearchConfig: e.Elasticsearch,
-		}
-		return json.Marshal(marshaler)
-	}
-}
-
-type EventProviderTypeConfigVisitor interface {
-	VisitAzureMonitorLogs(*AzureConfig) error
-	VisitAws(*AwsConfig) error
-	VisitSplunk(*SplunkConfig) error
-	VisitElasticsearch(*ElasticsearchConfig) error
-}
-
-func (e *EventProviderTypeConfig) Accept(visitor EventProviderTypeConfigVisitor) error {
-	switch e.Type {
-	default:
-		return fmt.Errorf("invalid type %s in %T", e.Type, e)
-	case "azure_monitor_logs":
-		return visitor.VisitAzureMonitorLogs(e.AzureMonitorLogs)
-	case "aws":
-		return visitor.VisitAws(e.Aws)
-	case "splunk":
-		return visitor.VisitSplunk(e.Splunk)
-	case "elasticsearch":
-		return visitor.VisitElasticsearch(e.Elasticsearch)
-	}
 }
 
 // Configuration for a Webhook Provider
@@ -526,17 +390,14 @@ type NotificationConfig struct {
 
 type ProviderConfig struct {
 	Type            string
-	Events          *EventConfig
 	Hooks           *HooksConfig
 	Identity        *IdentityConfig
 	Notifications   *NotificationConfig
+	Siem            *SiemConfig
+	Sink            *SinkConfig
 	Storage         *StorageConfig
 	Tickets         *TicketConfig
 	Vulnerabilities *VulnerabilityConfig
-}
-
-func NewProviderConfigFromEvents(value *EventConfig) *ProviderConfig {
-	return &ProviderConfig{Type: "events", Events: value}
 }
 
 func NewProviderConfigFromHooks(value *HooksConfig) *ProviderConfig {
@@ -549,6 +410,14 @@ func NewProviderConfigFromIdentity(value *IdentityConfig) *ProviderConfig {
 
 func NewProviderConfigFromNotifications(value *NotificationConfig) *ProviderConfig {
 	return &ProviderConfig{Type: "notifications", Notifications: value}
+}
+
+func NewProviderConfigFromSiem(value *SiemConfig) *ProviderConfig {
+	return &ProviderConfig{Type: "siem", Siem: value}
+}
+
+func NewProviderConfigFromSink(value *SinkConfig) *ProviderConfig {
+	return &ProviderConfig{Type: "sink", Sink: value}
 }
 
 func NewProviderConfigFromStorage(value *StorageConfig) *ProviderConfig {
@@ -572,12 +441,6 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 	}
 	p.Type = unmarshaler.Type
 	switch unmarshaler.Type {
-	case "events":
-		value := new(EventConfig)
-		if err := json.Unmarshal(data, &value); err != nil {
-			return err
-		}
-		p.Events = value
 	case "hooks":
 		value := new(HooksConfig)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -596,6 +459,18 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.Notifications = value
+	case "siem":
+		value := new(SiemConfig)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.Siem = value
+	case "sink":
+		value := new(SinkConfig)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.Sink = value
 	case "storage":
 		value := new(StorageConfig)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -622,15 +497,6 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	switch p.Type {
 	default:
 		return nil, fmt.Errorf("invalid type %s in %T", p.Type, p)
-	case "events":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*EventConfig
-		}{
-			Type:        p.Type,
-			EventConfig: p.Events,
-		}
-		return json.Marshal(marshaler)
 	case "hooks":
 		var marshaler = struct {
 			Type string `json:"type"`
@@ -656,6 +522,24 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 		}{
 			Type:               p.Type,
 			NotificationConfig: p.Notifications,
+		}
+		return json.Marshal(marshaler)
+	case "siem":
+		var marshaler = struct {
+			Type string `json:"type"`
+			*SiemConfig
+		}{
+			Type:       p.Type,
+			SiemConfig: p.Siem,
+		}
+		return json.Marshal(marshaler)
+	case "sink":
+		var marshaler = struct {
+			Type string `json:"type"`
+			*SinkConfig
+		}{
+			Type:       p.Type,
+			SinkConfig: p.Sink,
 		}
 		return json.Marshal(marshaler)
 	case "storage":
@@ -689,10 +573,11 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 }
 
 type ProviderConfigVisitor interface {
-	VisitEvents(*EventConfig) error
 	VisitHooks(*HooksConfig) error
 	VisitIdentity(*IdentityConfig) error
 	VisitNotifications(*NotificationConfig) error
+	VisitSiem(*SiemConfig) error
+	VisitSink(*SinkConfig) error
 	VisitStorage(*StorageConfig) error
 	VisitTickets(*TicketConfig) error
 	VisitVulnerabilities(*VulnerabilityConfig) error
@@ -702,20 +587,202 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	switch p.Type {
 	default:
 		return fmt.Errorf("invalid type %s in %T", p.Type, p)
-	case "events":
-		return visitor.VisitEvents(p.Events)
 	case "hooks":
 		return visitor.VisitHooks(p.Hooks)
 	case "identity":
 		return visitor.VisitIdentity(p.Identity)
 	case "notifications":
 		return visitor.VisitNotifications(p.Notifications)
+	case "siem":
+		return visitor.VisitSiem(p.Siem)
+	case "sink":
+		return visitor.VisitSink(p.Sink)
 	case "storage":
 		return visitor.VisitStorage(p.Storage)
 	case "tickets":
 		return visitor.VisitTickets(p.Tickets)
 	case "vulnerabilities":
 		return visitor.VisitVulnerabilities(p.Vulnerabilities)
+	}
+}
+
+// Configuration for a SIEM Provider
+type SiemConfig struct {
+	CredentialId CredentialId `json:"credential_id,omitempty"`
+	// URL used for connecting to the external service. If not provided, will connect to the default endpoint for the Provider
+	Url *string `json:"url,omitempty"`
+	// Optional list of transformations used to modify requests before they are sent to the external service.
+	Transforms []TransformId           `json:"transforms,omitempty"`
+	Config     *SiemProviderTypeConfig `json:"config,omitempty"`
+}
+
+type SiemProviderTypeConfig struct {
+	Type          string
+	Splunk        *SplunkConfig
+	Elasticsearch *ElasticsearchConfig
+}
+
+func NewSiemProviderTypeConfigFromSplunk(value *SplunkConfig) *SiemProviderTypeConfig {
+	return &SiemProviderTypeConfig{Type: "splunk", Splunk: value}
+}
+
+func NewSiemProviderTypeConfigFromElasticsearch(value *ElasticsearchConfig) *SiemProviderTypeConfig {
+	return &SiemProviderTypeConfig{Type: "elasticsearch", Elasticsearch: value}
+}
+
+func (s *SiemProviderTypeConfig) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	s.Type = unmarshaler.Type
+	switch unmarshaler.Type {
+	case "splunk":
+		value := new(SplunkConfig)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		s.Splunk = value
+	case "elasticsearch":
+		value := new(ElasticsearchConfig)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		s.Elasticsearch = value
+	}
+	return nil
+}
+
+func (s SiemProviderTypeConfig) MarshalJSON() ([]byte, error) {
+	switch s.Type {
+	default:
+		return nil, fmt.Errorf("invalid type %s in %T", s.Type, s)
+	case "splunk":
+		var marshaler = struct {
+			Type string `json:"type"`
+			*SplunkConfig
+		}{
+			Type:         s.Type,
+			SplunkConfig: s.Splunk,
+		}
+		return json.Marshal(marshaler)
+	case "elasticsearch":
+		var marshaler = struct {
+			Type string `json:"type"`
+			*ElasticsearchConfig
+		}{
+			Type:                s.Type,
+			ElasticsearchConfig: s.Elasticsearch,
+		}
+		return json.Marshal(marshaler)
+	}
+}
+
+type SiemProviderTypeConfigVisitor interface {
+	VisitSplunk(*SplunkConfig) error
+	VisitElasticsearch(*ElasticsearchConfig) error
+}
+
+func (s *SiemProviderTypeConfig) Accept(visitor SiemProviderTypeConfigVisitor) error {
+	switch s.Type {
+	default:
+		return fmt.Errorf("invalid type %s in %T", s.Type, s)
+	case "splunk":
+		return visitor.VisitSplunk(s.Splunk)
+	case "elasticsearch":
+		return visitor.VisitElasticsearch(s.Elasticsearch)
+	}
+}
+
+// Configuration for a Sink Provider
+type SinkConfig struct {
+	CredentialId CredentialId `json:"credential_id,omitempty"`
+	// URL used for connecting to the external service. If not provided, will connect to the default endpoint for the Provider
+	Url *string `json:"url,omitempty"`
+	// Optional list of transformations used to modify requests before they are sent to the external service.
+	Transforms []TransformId           `json:"transforms,omitempty"`
+	Config     *SinkProviderTypeConfig `json:"config,omitempty"`
+}
+
+type SinkProviderTypeConfig struct {
+	Type             string
+	AzureMonitorLogs *AzureMonitorLogsConfig
+	Aws              *AwsConfig
+}
+
+func NewSinkProviderTypeConfigFromAzureMonitorLogs(value *AzureMonitorLogsConfig) *SinkProviderTypeConfig {
+	return &SinkProviderTypeConfig{Type: "azure_monitor_logs", AzureMonitorLogs: value}
+}
+
+func NewSinkProviderTypeConfigFromAws(value *AwsConfig) *SinkProviderTypeConfig {
+	return &SinkProviderTypeConfig{Type: "aws", Aws: value}
+}
+
+func (s *SinkProviderTypeConfig) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	s.Type = unmarshaler.Type
+	switch unmarshaler.Type {
+	case "azure_monitor_logs":
+		value := new(AzureMonitorLogsConfig)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		s.AzureMonitorLogs = value
+	case "aws":
+		value := new(AwsConfig)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		s.Aws = value
+	}
+	return nil
+}
+
+func (s SinkProviderTypeConfig) MarshalJSON() ([]byte, error) {
+	switch s.Type {
+	default:
+		return nil, fmt.Errorf("invalid type %s in %T", s.Type, s)
+	case "azure_monitor_logs":
+		var marshaler = struct {
+			Type string `json:"type"`
+			*AzureMonitorLogsConfig
+		}{
+			Type:                   s.Type,
+			AzureMonitorLogsConfig: s.AzureMonitorLogs,
+		}
+		return json.Marshal(marshaler)
+	case "aws":
+		var marshaler = struct {
+			Type string `json:"type"`
+			*AwsConfig
+		}{
+			Type:      s.Type,
+			AwsConfig: s.Aws,
+		}
+		return json.Marshal(marshaler)
+	}
+}
+
+type SinkProviderTypeConfigVisitor interface {
+	VisitAzureMonitorLogs(*AzureMonitorLogsConfig) error
+	VisitAws(*AwsConfig) error
+}
+
+func (s *SinkProviderTypeConfig) Accept(visitor SinkProviderTypeConfigVisitor) error {
+	switch s.Type {
+	default:
+		return fmt.Errorf("invalid type %s in %T", s.Type, s)
+	case "azure_monitor_logs":
+		return visitor.VisitAzureMonitorLogs(s.AzureMonitorLogs)
+	case "aws":
+		return visitor.VisitAws(s.Aws)
 	}
 }
 
