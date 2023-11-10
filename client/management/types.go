@@ -30,16 +30,16 @@ type CreateAccountResponseResult struct {
 type Audit struct {
 	Environment string `json:"environment"`
 	// Time when the API request occurred.
-	CreatedAt     time.Time   `json:"created_at"`
-	RemoteAddr    string      `json:"remote_addr"`
-	Method        HttpMethod  `json:"method,omitempty"`
-	Path          string      `json:"path"`
-	Code          string      `json:"code"`
-	Body          interface{} `json:"body,omitempty"`
-	Status        *string     `json:"status,omitempty"`
-	MemberId      *Id         `json:"member_id,omitempty"`
-	AccountId     *Id         `json:"account_id,omitempty"`
-	IntegrationId *Id         `json:"integration_id,omitempty"`
+	CreatedAt     time.Time      `json:"created_at"`
+	RemoteAddr    string         `json:"remote_addr"`
+	Method        HttpMethod     `json:"method,omitempty"`
+	Path          string         `json:"path"`
+	Code          string         `json:"code"`
+	Body          interface{}    `json:"body,omitempty"`
+	Status        *string        `json:"status,omitempty"`
+	MemberId      *MemberId      `json:"member_id,omitempty"`
+	AccountId     *AccountId     `json:"account_id,omitempty"`
+	IntegrationId *IntegrationId `json:"integration_id,omitempty"`
 }
 
 type HttpMethod string

@@ -33,13 +33,27 @@ func NewClient(opts ...core.ClientOption) *Client {
 	}
 }
 
-// Returns all matching `Status` object.
-func (c *Client) ListStatus(ctx context.Context) (*management.ListStatusResponse, error) {
+// Returns all matching `Status` objects.
+func (c *Client) ListStatus(ctx context.Context, request *management.ListStatusRequest) (*management.ListStatusResponse, error) {
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
 	endpointURL := baseURL + "/" + "v1/status"
+
+	queryParams := make(url.Values)
+	queryParams.Add("limit", fmt.Sprintf("%v", request.Limit))
+	queryParams.Add("start_after", fmt.Sprintf("%v", request.StartAfter))
+	queryParams.Add("end_before", fmt.Sprintf("%v", request.EndBefore))
+	for _, value := range request.Order {
+		queryParams.Add("order", fmt.Sprintf("%v", value))
+	}
+	for _, value := range request.Filter {
+		queryParams.Add("filter", fmt.Sprintf("%v", value))
+	}
+	if len(queryParams) > 0 {
+		endpointURL += "?" + queryParams.Encode()
+	}
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -87,7 +101,7 @@ func (c *Client) ListStatus(ctx context.Context) (*management.ListStatusResponse
 		c.httpClient,
 		endpointURL,
 		http.MethodGet,
-		nil,
+		request,
 		&response,
 		false,
 		c.header,

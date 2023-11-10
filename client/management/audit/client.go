@@ -7,10 +7,12 @@ import (
 	context "context"
 	json "encoding/json"
 	errors "errors"
+	fmt "fmt"
 	management "github.com/synqly/go-sdk/client/management"
 	core "github.com/synqly/go-sdk/client/management/core"
 	io "io"
 	http "net/http"
+	url "net/url"
 )
 
 type Client struct {
@@ -32,12 +34,26 @@ func NewClient(opts ...core.ClientOption) *Client {
 }
 
 // Returns a list of all Synqly `Audit` events for the `Organization`.
-func (c *Client) ListAuditOrganizations(ctx context.Context) (*management.ListAuditResponse, error) {
+func (c *Client) ListAuditEvents(ctx context.Context, request *management.ListAuditEventsRequest) (*management.ListAuditEventsResponse, error) {
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
 	endpointURL := baseURL + "/" + "v1/audit/organizations"
+
+	queryParams := make(url.Values)
+	queryParams.Add("limit", fmt.Sprintf("%v", request.Limit))
+	queryParams.Add("start_after", fmt.Sprintf("%v", request.StartAfter))
+	queryParams.Add("end_before", fmt.Sprintf("%v", request.EndBefore))
+	for _, value := range request.Order {
+		queryParams.Add("order", fmt.Sprintf("%v", value))
+	}
+	for _, value := range request.Filter {
+		queryParams.Add("filter", fmt.Sprintf("%v", value))
+	}
+	if len(queryParams) > 0 {
+		endpointURL += "?" + queryParams.Encode()
+	}
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -72,13 +88,13 @@ func (c *Client) ListAuditOrganizations(ctx context.Context) (*management.ListAu
 		return apiError
 	}
 
-	var response *management.ListAuditResponse
+	var response *management.ListAuditEventsResponse
 	if err := core.DoRequest(
 		ctx,
 		c.httpClient,
 		endpointURL,
 		http.MethodGet,
-		nil,
+		request,
 		&response,
 		false,
 		c.header,

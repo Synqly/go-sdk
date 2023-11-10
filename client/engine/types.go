@@ -41,6 +41,28 @@ type ErrorParam struct {
 
 type Id = string
 
+type OrderOptions string
+
+const (
+	OrderOptionsAsc  OrderOptions = "asc"
+	OrderOptionsDesc OrderOptions = "desc"
+)
+
+func NewOrderOptionsFromString(s string) (OrderOptions, error) {
+	switch s {
+	case "asc":
+		return OrderOptionsAsc, nil
+	case "desc":
+		return OrderOptionsDesc, nil
+	}
+	var t OrderOptions
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (o OrderOptions) Ptr() *OrderOptions {
+	return &o
+}
+
 type Event struct {
 	ClassName                 string
 	AccountChange             *accountchange.AccountChange
