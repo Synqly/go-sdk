@@ -20,8 +20,6 @@ import (
 )
 
 var (
-	// SYNQLY_ORG_ID: Your Synqly Organization ID
-	synqlyOrgId = os.Getenv("SYNQLY_ORG_ID")
 	// SYNQLY_ORG_TOKEN: A Synqly Organization Token, used to create Accounts and
 	// Integrations
 	synqlyOrgToken = os.Getenv("SYNQLY_ORG_TOKEN")
@@ -112,7 +110,7 @@ func (a *App) NewTenant(ctx context.Context, id string) error {
 //
 // Returns an error if the Tenant cannot be found, or if an Integration cannot
 // be created for the given Tenant.
-func (a *App) configureEventLogging(ctx context.Context, tenantID string) error {
+func (a *App) configureEventLogging(ctx context.Context, tenantID, siemProviderType, siemProviderToken string) error {
 	// Find the tenant
 	var tenant *Tenant
 	for _, t := range a.Tenants {
@@ -128,7 +126,7 @@ func (a *App) configureEventLogging(ctx context.Context, tenantID string) error 
 	// We need to save the tenant's Splunk credentials in Synqly before configuring the Integration
 	// We will use the Synqly Client we created for the tenant to do this
 	credential, err := tenant.SynqlyClient.Credentials.CreateCredential(ctx, tenant.SynqlyAccountId, &mgmt.CreateCredentialRequest{
-		Name: "Splunk Login",
+		Name: fmt.Sprintf("%s authentication token", siemProviderType),
 		Config: mgmt.NewCredentialConfigFromToken(&mgmt.TokenCredential{
 			Secret: splunkToken,
 		}),
@@ -137,25 +135,22 @@ func (a *App) configureEventLogging(ctx context.Context, tenantID string) error 
 		return err
 	}
 
-	// Configure an Integration for the tenant that connects to Splunk
+	// Configure an Integration in Synqly depending on this tenant's config
+	var providerConfig *mgmt.ProviderConfig
+	switch siemProviderType {
+	case "splunk":
+		providerConfig = a.splunkConfig(splunkURL, credential.Result.Id)
+	case "inmem":
+		providerConfig = a.inmemConfig()
+	default:
+		return fmt.Errorf("invalid siem provider type: %s", siemProviderType)
+	}
+
 	integration, err := tenant.SynqlyClient.Integrations.CreateIntegration(ctx, tenant.SynqlyAccountId, &mgmt.CreateIntegrationRequest{
-		Name:         "Background Event Logger",
-		Category:     "events",
-		ProviderType: "splunk",
-		// Set Splunk Config to ignore cert checking on the Splunk endpoint.
-		// This is not recommended for production use, we only set it here
-		// because Splunk HEC endpoints use self-signed "SplunkServerDefaultCert"
-		// certificates when first initialized.
-		ProviderConfig: mgmt.NewProviderConfigFromEvents(&mgmt.EventConfig{
-			Url:          &splunkURL,
-			CredentialId: credential.Result.Id,
-			Config: &mgmt.EventProviderTypeConfig{
-				Type: "splunk",
-				Splunk: &mgmt.SplunkConfig{
-					SkipTlsVerify: true,
-				},
-			},
-		}),
+		Name:           "Background Event Logger",
+		Category:       "siem",
+		ProviderType:   siemProviderType,
+		ProviderConfig: providerConfig,
 	})
 	if err != nil {
 		return fmt.Errorf("unable to create integration: %w", err)
@@ -170,8 +165,32 @@ func (a *App) configureEventLogging(ctx context.Context, tenantID string) error 
 	return nil
 }
 
-// backgroundJob simulates a background job that runs for every Tenant. In this
+func (a *App) splunkConfig(splunkURL, credentialId string) *mgmt.ProviderConfig {
+	return mgmt.NewProviderConfigFromSiem(&mgmt.SiemConfig{
+		Url:          &splunkURL,
+		CredentialId: credentialId,
+		Config: &mgmt.SiemProviderTypeConfig{
+			Type: "splunk",
+			Splunk: &mgmt.SplunkConfig{
+				// Do not verify the Splunk server's TLS certificate. This
+				// is not recommended for production use; however, it is set
+				// here because Splunk HEC endpoints use self-signed
+				// "SplunkServerDefaultCert" certificates by default.
+				SkipTlsVerify: true,
+			},
+		},
+	})
+}
+
+func (a *App) inmemConfig() *mgmt.ProviderConfig {
+	return mgmt.NewProviderConfigFromSiem(&mgmt.SiemConfig{
+		Url:          nil,
+		CredentialId: "not-used",
+	})
+}
+
 // example, we print a message for every Tenant tenant at regular intervals,
+// backgroundJob simulates a background job that runs for every Tenant. In this
 // and log the message as an event if the Tenant's event logger is configured.
 //
 // Note that the PostEvent() call is not specific to Splunk. The code would be
@@ -179,6 +198,8 @@ func (a *App) configureEventLogging(ctx context.Context, tenantID string) error 
 // kicks in, Integrations within a given Connector category (in this case, Events)
 // share a unified API for data operations, no matter which Provider they target.
 func (app *App) backgroundJob() {
+	ctx := context.Background()
+
 	// Loop infinitely, generating data at 1 second intervals
 	for {
 		for _, tenant := range app.Tenants {
@@ -191,14 +212,15 @@ func (app *App) backgroundJob() {
 			// it to send data.
 			if tenant.EventLogger != nil {
 				// Log the result of the work to Synqly
-				err := tenant.EventLogger.Events.PostEvent(
-					context.Background(),
-					newEvent,
+				err := tenant.EventLogger.Siem.PostEvents(
+					ctx,
+					[]*engine.Event{newEvent},
 				)
 				if err != nil {
 					consoleLogger.Printf("error logging event for tenant %s: %s\n",
 						tenant.ID, err)
 				}
+				consoleLogger.Printf("Logged event for tenant %s\n", tenant.ID)
 			}
 		}
 
@@ -251,8 +273,8 @@ func (app *App) cleanup() {
 func main() {
 	ctx := context.Background()
 
-	if synqlyOrgId == "" || synqlyOrgToken == "" || splunkURL == "" || splunkToken == "" {
-		log.Fatal("Must set following environment variables: SYNQLY_ORG_ID, SYNQLY_ORG_TOKEN, SPLUNK_URL, SPLUNK_HEC_TOKEN")
+	if synqlyOrgToken == "" || splunkURL == "" || splunkToken == "" {
+		log.Fatal("Must set following environment variables: SYNQLY_ORG_TOKEN, SPLUNK_URL, SPLUNK_HEC_TOKEN")
 	}
 
 	// Instantiate App object
@@ -279,9 +301,14 @@ func main() {
 	}
 
 	// Configure one tenant to use event logging
-	if err := app.configureEventLogging(ctx, "Tenant ABC"); err != nil {
+	if err := app.configureEventLogging(ctx, "Tenant ABC", "splunk", splunkToken); err != nil {
 		log.Fatal(err)
 	}
+
+	// Uncomment the following to enable the in-memory mock SIEM provider for Tenant XYZ
+	// if err := app.configureEventLogging(ctx, "Tenant XYZ", "inmem", ""); err != nil {
+	// 	log.Fatal(err)
+	// }
 
 	// Generate synthetic load for the tenants
 	go app.backgroundJob()
