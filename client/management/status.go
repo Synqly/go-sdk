@@ -30,6 +30,11 @@ type GetStatusResponse struct {
 	Result *Status `json:"result,omitempty"`
 }
 
+// Get status last hour timeseries
+type GetStatusTimeseries struct {
+	Result *GetStatusTimeseriesResult `json:"result,omitempty"`
+}
+
 type ListStatusEventsResponse struct {
 	Result []*StatusEvent `json:"result,omitempty"`
 }

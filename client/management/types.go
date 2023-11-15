@@ -959,6 +959,17 @@ type Role struct {
 	BlockedApis []BlockedApi `json:"blocked_apis,omitempty"`
 }
 
+// Status timeseries object
+type GetStatusTimeseriesResult struct {
+	// start time
+	StartTime time.Time `json:"start_time"`
+	// end time
+	EndTime time.Time `json:"end_time"`
+	// interval duration
+	Interval string              `json:"interval"`
+	Series   []*TimeseriesResult `json:"series,omitempty"`
+}
+
 // Status object
 type Status struct {
 	// Time object was originally created
@@ -975,7 +986,7 @@ type Status struct {
 	Requests int64 `json:"requests"`
 	// Failed count
 	Failed int64 `json:"failed"`
-	// Cpu time in milliseconds
+	// Cpu time in microseconds
 	CpuTime int64 `json:"cpu_time"`
 	// Database operations count
 	DbOps int64 `json:"db_ops"`
@@ -997,6 +1008,24 @@ type StatusEvent struct {
 	Error *string `json:"error,omitempty"`
 	// Request number
 	Request int64 `json:"request"`
+}
+
+// Status timeseries object
+type TimeseriesResult struct {
+	// Interval time
+	CreatedAt time.Time `json:"created_at"`
+	// Request count
+	Requests int64 `json:"requests"`
+	// Failed count
+	Failed int64 `json:"failed"`
+	// Cpu time in microseconds
+	CpuTime int64 `json:"cpu_time"`
+	// Database operations count
+	DbOps int64 `json:"db_ops"`
+	// API operations count
+	ApiOps int64 `json:"api_ops"`
+	// API input byte count
+	InBytes int64 `json:"in_bytes"`
 }
 
 type Token struct {
