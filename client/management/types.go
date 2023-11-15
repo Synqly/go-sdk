@@ -796,6 +796,10 @@ type SplunkConfig struct {
 	Source *string `json:"source,omitempty"`
 	// Splunk source type to send events to. If not provided, will use the default source type for the Splunk collector.
 	SourceType *string `json:"source_type,omitempty"`
+	// Optional URL used for connecting to the Splunk search service. If not provided, the events query will be disabled.
+	SearchServiceUrl *string `json:"search_service_url,omitempty"`
+	// Optional token used for connecting to the Splunk search service. If not provided, the events query will be disabled.
+	SearchServiceTokenId *CredentialId `json:"search_service_token_id,omitempty"`
 }
 
 // Configuration for a Storage Provider

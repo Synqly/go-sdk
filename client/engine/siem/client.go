@@ -106,10 +106,18 @@ func (c *Client) QueryEvents(ctx context.Context, request *engine.QuerySiemEvent
 	endpointURL := baseURL + "/" + "v1/siem/events"
 
 	queryParams := make(url.Values)
-	queryParams.Add("limit", fmt.Sprintf("%v", request.Limit))
-	queryParams.Add("cursor", fmt.Sprintf("%v", request.Cursor))
-	queryParams.Add("order_by", fmt.Sprintf("%v", request.OrderBy))
-	queryParams.Add("order", fmt.Sprintf("%v", request.Order))
+	if request.Cursor != nil {
+		queryParams.Add("cursor", fmt.Sprintf("%v", *request.Cursor))
+	}
+	if request.Limit != nil {
+		queryParams.Add("limit", fmt.Sprintf("%v", *request.Limit))
+	}
+	for _, value := range request.Order {
+		queryParams.Add("order", fmt.Sprintf("%v", *value))
+	}
+	for _, value := range request.Filter {
+		queryParams.Add("filter", fmt.Sprintf("%v", *value))
+	}
 	if len(queryParams) > 0 {
 		endpointURL += "?" + queryParams.Encode()
 	}
