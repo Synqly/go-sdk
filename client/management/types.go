@@ -270,6 +270,24 @@ func (c *CredentialConfig) Accept(visitor CredentialConfigVisitor) error {
 	}
 }
 
+type CredentialConfigNoSecret struct {
+	Type string `json:"type"`
+}
+
+// Response object for a Credential
+type CredentialResponse struct {
+	// Human-readable name for this resource
+	Name string `json:"name"`
+	// Time object was originally created
+	CreatedAt time.Time `json:"created_at"`
+	// Last time object was updated
+	UpdatedAt time.Time    `json:"updated_at"`
+	Id        CredentialId `json:"id,omitempty"`
+	// Account that manages this credential.
+	AccountId AccountId                 `json:"account_id,omitempty"`
+	Config    *CredentialConfigNoSecret `json:"config,omitempty"`
+}
+
 type CredentialType string
 
 const (

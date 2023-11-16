@@ -27,26 +27,26 @@ type CreateCredentialRequest struct {
 }
 
 type CreateCredentialResponse struct {
-	Result *Credential `json:"result,omitempty"`
+	Result *CredentialResponse `json:"result,omitempty"`
 }
 
 // Unique identifier for this Credential
 type CredentialId = Id
 
 type GetCredentialResponse struct {
-	Result *Credential `json:"result,omitempty"`
+	Result *CredentialResponse `json:"result,omitempty"`
 }
 
 type ListCredentialsResponse struct {
-	Result []*Credential `json:"result,omitempty"`
+	Result []*CredentialResponse `json:"result,omitempty"`
 }
 
 type PatchCredentialResponse struct {
-	Result *Credential `json:"result,omitempty"`
+	Result *CredentialResponse `json:"result,omitempty"`
 }
 
 type UpdateCredentialRequest = *Credential
 
 type UpdateCredentialResponse struct {
-	Result *Credential `json:"result,omitempty"`
+	Result *CredentialResponse `json:"result,omitempty"`
 }

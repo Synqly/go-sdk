@@ -3,7 +3,6 @@
 package webresourceaccessactivity
 
 import (
-	uuid "github.com/google/uuid"
 	time "time"
 )
 
@@ -286,7 +285,7 @@ type Container struct {
 	// The orchestrator managing the container, such as ECS, EKS, K8s, or OpenShift.
 	Orchestrator *string `json:"orchestrator,omitempty"`
 	// The unique identifier of the pod (or equivalent) that the container is executing on.
-	PodUuid *uuid.UUID `json:"pod_uuid,omitempty"`
+	PodUuid *string `json:"pod_uuid,omitempty"`
 	// The backend running the container, such as containerd or cri-o.
 	Runtime *string `json:"runtime,omitempty"`
 	// The size of the container image.
@@ -1177,7 +1176,7 @@ type Session struct {
 	// The unique identifier of the session.
 	Uid *string `json:"uid,omitempty"`
 	// The universally unique identifier of the session.
-	Uuid *uuid.UUID `json:"uuid,omitempty"`
+	Uuid *string `json:"uuid,omitempty"`
 }
 
 // The Transport Layer Security (TLS) object describes the negotiated TLS protocol used for secure communications over an establish network connection.
