@@ -124,13 +124,13 @@ go run main.go
 Example Synqly OCSF Notification status: OPEN
 ```
 
-# Events Connector Example
+# SIEM Connector Example
 
-The `examples` directory of this repository contains example implementations that demonstrate how to incoporate Synqly SDKs into a Go application.
+The `examples` directory of this repository contains example implementations that demonstrate how to incorporate Synqly SDKs into a Go application.
 
-This section acts as supporting documentation for `examples/events-connector`. The `events-connector` example demonstrates how to use the Synqly's Events Connector to send events to a SIEM in a multi-tenant application.
+This section acts as supporting documentation for the sample program in `examples/siem-connector`. The `siem-connector` example demonstrates how to use the Synqly's SIEM Connector to send events to a SIEM Provider from within a multi-tenant application. 
 
-The `events-connector` example will:
+The `siem-connector` example will:
 
 - Define multiple tenants in a sample application
 - Define an `Integration` for each tenant (using Splunk as the target SIEM Provider)
@@ -149,16 +149,16 @@ The `events-connector` example will:
 
 ## Setup and run the example
 
-1. Clone this repository and navigate to the `examples/events-connector` directory.
+1. Clone this repository and navigate to the `examples/siem-connector` directory.
     ```bash
-    cd examples/events-connector
+    cd examples/siem-connector
     ```
 2. Initialize go modules (this will also verify access that `go` can pull from
    this repository). 
    ```bash
    go mod tidy
    ```
-3. The `events-connect` example depends on environment variables to connect to Synqly and Splunk. To allow the sample program to connect to Synqly, set the following environment variables to your Organization ID and API Token values.
+3. The example depends on environment variables to connect to Synqly and Splunk. To allow the sample program to connect to Synqly, set the following environment variables to your Organization ID and API Token values.
 
     ```bash
     export SYNQLY_ORG_ID=your-org-id
