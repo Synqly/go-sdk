@@ -20,10 +20,17 @@ type ListStatusRequest struct {
 }
 
 type ListStatusEventsRequest struct {
-	// Start search from cursor position
-	Cursor string `json:"-"`
-	// Number of tickets to return. Default 50. Max 100.
-	Limit int `json:"-"`
+	// Number of `StatusEvent` objects to return in this page. Defaults to 100.
+	Limit *int `json:"-"`
+	// Return `StatusEvent` objects starting after this `created_at`.
+	StartAfter *string `json:"-"`
+	// Return `StatusEvent` objects ending before this `created_at`.
+	EndBefore *string `json:"-"`
+	// The order defaults to created_at[asc] and can changed to descending order by specifying created_at[desc].
+	Order *string `json:"-"`
+	// Filter results by this query. For more information on filtering, refer to our Filtering Guide. Defaults to no filter.
+	// If used more than once, the queries are ANDed together.
+	Filter []*string `json:"-"`
 }
 
 type GetStatusResponse struct {

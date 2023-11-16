@@ -256,8 +256,21 @@ func (c *Client) ListStatusEvents(ctx context.Context, accountId management.Acco
 	endpointURL := fmt.Sprintf(baseURL+"/"+"v1/status/%v/%v/events", accountId, integrationId)
 
 	queryParams := make(url.Values)
-	queryParams.Add("cursor", fmt.Sprintf("%v", request.Cursor))
-	queryParams.Add("limit", fmt.Sprintf("%v", request.Limit))
+	if request.Limit != nil {
+		queryParams.Add("limit", fmt.Sprintf("%v", *request.Limit))
+	}
+	if request.StartAfter != nil {
+		queryParams.Add("start_after", fmt.Sprintf("%v", *request.StartAfter))
+	}
+	if request.EndBefore != nil {
+		queryParams.Add("end_before", fmt.Sprintf("%v", *request.EndBefore))
+	}
+	if request.Order != nil {
+		queryParams.Add("order", fmt.Sprintf("%v", *request.Order))
+	}
+	for _, value := range request.Filter {
+		queryParams.Add("filter", fmt.Sprintf("%v", *value))
+	}
 	if len(queryParams) > 0 {
 		endpointURL += "?" + queryParams.Encode()
 	}

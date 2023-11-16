@@ -9,9 +9,7 @@ type ListAuditEventsRequest struct {
 	StartAfter *string `json:"-"`
 	// Return `Audit` objects ending before this `created_at`.
 	EndBefore *string `json:"-"`
-	// Select a field to order the results by. Defaults to `created_at[desc]`. To control the direction of the sorting, append
-	// `[asc]` or `[desc]` to the field name. `Audit` order only supports the `created_at` field.
-	// The ordering defaults to `asc` if not specified.
+	// The order defaults to created_at[asc] and can changed to descending order by specifying created_at[desc].
 	Order *string `json:"-"`
 	// Filter results by this query. For more information on filtering, refer to our Filtering Guide. Defaults to no filter.
 	// If used more than once, the queries are ANDed together.
