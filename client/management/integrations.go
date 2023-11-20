@@ -2,6 +2,23 @@
 
 package management
 
+type ListAccountIntegrationsRequest struct {
+	// Number of `Integration` objects to return in this page. Defaults to 100.
+	Limit *int `json:"-"`
+	// Return `Integration` objects starting after this `name`.
+	StartAfter *string `json:"-"`
+	// Return `Integration` objects ending before this `name`.
+	EndBefore *string `json:"-"`
+	// Select a field to order the results by. Defaults to `name`. To control the direction of the sorting, append
+	// `[asc]` or `[desc]` to the field name. For example, `name[desc]` will sort the results by `name` in descending order.
+	// The ordering defaults to `asc` if not specified. May be used multiple times to order by multiple fields, and the
+	// ordering is applied in the order the fields are specified.
+	Order []*string `json:"-"`
+	// Filter results by this query. For more information on filtering, refer to our Filtering Guide. Defaults to no filter.
+	// If used more than once, the queries are ANDed together.
+	Filter []*string `json:"-"`
+}
+
 type ListIntegrationsRequest struct {
 	// Number of `Integration` objects to return in this page. Defaults to 100.
 	Limit *int `json:"-"`
@@ -35,6 +52,10 @@ type CreateIntegrationResponse struct {
 
 type GetIntegrationResponse struct {
 	Result *Integration `json:"result,omitempty"`
+}
+
+type ListAccountIntegrationsResponse struct {
+	Result []*Integration `json:"result,omitempty"`
 }
 
 type ListIntegrationsResponse struct {

@@ -33,9 +33,87 @@ func NewClient(opts ...core.ClientOption) *Client {
 	}
 }
 
+// Returns a list of all `Integration` objects match query params.
+func (c *Client) ListIntegrations(ctx context.Context, request *management.ListIntegrationsRequest) (*management.ListIntegrationsResponse, error) {
+	baseURL := "https://api.synqly.com"
+	if c.baseURL != "" {
+		baseURL = c.baseURL
+	}
+	endpointURL := baseURL + "/" + "v1/integrations"
+
+	queryParams := make(url.Values)
+	if request.Limit != nil {
+		queryParams.Add("limit", fmt.Sprintf("%v", *request.Limit))
+	}
+	if request.StartAfter != nil {
+		queryParams.Add("start_after", fmt.Sprintf("%v", *request.StartAfter))
+	}
+	if request.EndBefore != nil {
+		queryParams.Add("end_before", fmt.Sprintf("%v", *request.EndBefore))
+	}
+	for _, value := range request.Order {
+		queryParams.Add("order", fmt.Sprintf("%v", *value))
+	}
+	for _, value := range request.Filter {
+		queryParams.Add("filter", fmt.Sprintf("%v", *value))
+	}
+	if len(queryParams) > 0 {
+		endpointURL += "?" + queryParams.Encode()
+	}
+
+	errorDecoder := func(statusCode int, body io.Reader) error {
+		raw, err := io.ReadAll(body)
+		if err != nil {
+			return err
+		}
+		apiError := core.NewAPIError(statusCode, errors.New(string(raw)))
+		decoder := json.NewDecoder(bytes.NewReader(raw))
+		switch statusCode {
+		case 404:
+			value := new(management.NotFoundError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 403:
+			value := new(management.ForbiddenError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 401:
+			value := new(management.UnauthorizedError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		}
+		return apiError
+	}
+
+	var response *management.ListIntegrationsResponse
+	if err := core.DoRequest(
+		ctx,
+		c.httpClient,
+		endpointURL,
+		http.MethodGet,
+		request,
+		&response,
+		false,
+		c.header,
+		errorDecoder,
+	); err != nil {
+		return response, err
+	}
+	return response, nil
+}
+
 // Returns a list of all `Integration` objects belonging to the
 // `Account` matching `{accountId}`.
-func (c *Client) ListIntegrations(ctx context.Context, accountId management.AccountId, request *management.ListIntegrationsRequest) (*management.ListIntegrationsResponse, error) {
+func (c *Client) ListAccountIntegrations(ctx context.Context, accountId management.AccountId, request *management.ListAccountIntegrationsRequest) (*management.ListAccountIntegrationsResponse, error) {
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
@@ -95,7 +173,7 @@ func (c *Client) ListIntegrations(ctx context.Context, accountId management.Acco
 		return apiError
 	}
 
-	var response *management.ListIntegrationsResponse
+	var response *management.ListAccountIntegrationsResponse
 	if err := core.DoRequest(
 		ctx,
 		c.httpClient,
