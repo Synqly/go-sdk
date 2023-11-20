@@ -33,7 +33,7 @@ func NewClient(opts ...core.ClientOption) *Client {
 	}
 }
 
-// Returns a list of all `Integration` objects match query params.
+// Returns a list of all `Integration` objects that match the query params.
 func (c *Client) ListIntegrations(ctx context.Context, request *management.ListIntegrationsRequest) (*management.ListIntegrationsResponse, error) {
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
