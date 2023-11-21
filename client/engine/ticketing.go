@@ -24,7 +24,7 @@ type GetTicketResponse struct {
 }
 
 type ListProjectsResponse struct {
-	Result []string `json:"result,omitempty"`
+	Result []*Project `json:"result,omitempty"`
 }
 
 type ListTicketsResponse struct {

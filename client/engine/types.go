@@ -412,6 +412,14 @@ func (p Priority) Ptr() *Priority {
 	return &p
 }
 
+// Project in a ticketing system
+type Project struct {
+	// Unique identifier for this project. Use this id in the `project` field of a `Ticket`.
+	Id string `json:"id"`
+	// Name of the project
+	Name string `json:"name"`
+}
+
 // Ticketing ticket
 type Ticket struct {
 	// Human-readable name for this resource
