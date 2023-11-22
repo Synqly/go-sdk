@@ -3,5 +3,5 @@
 package engine
 
 type ListStorageResponse struct {
-	Result []string `json:"result,omitempty"`
+	Result []*StoragePath `json:"result,omitempty"`
 }

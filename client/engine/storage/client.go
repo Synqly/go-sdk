@@ -38,7 +38,7 @@ func (c *Client) ListStorage(ctx context.Context, path string) (*engine.ListStor
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"v1/storage/folder/list/%v", path)
+	endpointURL := fmt.Sprintf(baseURL+"/"+"v1/storage/folders/%v", path)
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -103,7 +103,7 @@ func (c *Client) UploadStorage(ctx context.Context, path string, request interfa
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"v1/storage/folder/upload/%v", path)
+	endpointURL := fmt.Sprintf(baseURL+"/"+"v1/storage/files/%v", path)
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -168,7 +168,7 @@ func (c *Client) DownloadStorage(ctx context.Context, path string) ([]byte, erro
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"v1/storage/folder/download/%v", path)
+	endpointURL := fmt.Sprintf(baseURL+"/"+"v1/storage/files/%v", path)
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -215,7 +215,7 @@ func (c *Client) DownloadStorage(ctx context.Context, path string) ([]byte, erro
 		ctx,
 		c.httpClient,
 		endpointURL,
-		http.MethodPost,
+		http.MethodGet,
 		nil,
 		&response,
 		false,
@@ -233,7 +233,7 @@ func (c *Client) DeleteStorage(ctx context.Context, path string) error {
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"v1/storage/folder/delete/%v", path)
+	endpointURL := fmt.Sprintf(baseURL+"/"+"v1/storage/files/%v", path)
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -279,7 +279,7 @@ func (c *Client) DeleteStorage(ctx context.Context, path string) error {
 		ctx,
 		c.httpClient,
 		endpointURL,
-		http.MethodPost,
+		http.MethodDelete,
 		nil,
 		nil,
 		false,

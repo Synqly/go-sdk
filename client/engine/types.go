@@ -384,6 +384,10 @@ func (n NotificationStatus) Ptr() *NotificationStatus {
 	return &n
 }
 
+type StoragePath struct {
+	Path string `json:"path"`
+}
+
 type Priority string
 
 const (
