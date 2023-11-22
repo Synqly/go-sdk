@@ -968,8 +968,12 @@ type Permission struct {
 	ResourceType string `json:"resource_type"`
 	// Token parentId
 	ParentId Id `json:"parent_id"`
+	// Token Id
+	Id Id `json:"id"`
 	// Token organizationId
 	OrganizationId Id `json:"organization_id"`
+	// Token memberId
+	MemberId Id `json:"member_id"`
 }
 
 type Role struct {
