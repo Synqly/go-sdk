@@ -1036,8 +1036,8 @@ type StatusEvent struct {
 type TimeseriesResult struct {
 	// Interval time
 	CreatedAt time.Time `json:"created_at"`
-	// Request count
-	Requests int64 `json:"requests"`
+	// Succeeded count
+	Succeeded int64 `json:"succeeded"`
 	// Failed count
 	Failed int64 `json:"failed"`
 	// Cpu time in microseconds
