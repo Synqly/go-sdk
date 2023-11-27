@@ -32,6 +32,7 @@ type Audit struct {
 	// Time when the API request occurred.
 	CreatedAt     time.Time      `json:"created_at"`
 	RemoteAddr    string         `json:"remote_addr"`
+	UserAgent     string         `json:"user_agent"`
 	Method        HttpMethod     `json:"method,omitempty"`
 	Path          string         `json:"path"`
 	Code          string         `json:"code"`
