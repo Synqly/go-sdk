@@ -2,15 +2,19 @@
 
 package engine
 
-type ListTicketsRequest struct {
-	// String to match against issue text fields
-	Search string `json:"-"`
-	// Only search in specified project. Default all projects.
-	Project string `json:"-"`
-	// Start search from cursor position
-	Cursor string `json:"-"`
-	// Number of tickets to return. Default 50. Max 100.
-	Limit int `json:"-"`
+type QueryTicketsRequest struct {
+	// Cursor to use to retrieve the next page of results.
+	Cursor *string `json:"-"`
+	// Number of `Account` objects to return in this page. Defaults to 100.
+	Limit *int `json:"-"`
+	// Select a field to order the results by. Defaults to `time`. To control the direction of the sorting, append
+	// `[asc]` or `[desc]` to the field name. For example, `name[desc]` will sort the results by `name` in descending order.
+	// The ordering defaults to `asc` if not specified. May be used multiple times to order by multiple fields, and the
+	// ordering is applied in the order the fields are specified.
+	Order []*string `json:"-"`
+	// Filter results by this query. For more information on filtering, refer to our Filtering Guide. Defaults to no filter.
+	// If used more than once, the queries are ANDed together.
+	Filter []*string `json:"-"`
 }
 
 type CreateTicketRequest = *Ticket
@@ -27,15 +31,15 @@ type ListProjectsResponse struct {
 	Result []*Project `json:"result,omitempty"`
 }
 
-type ListTicketsResponse struct {
+type PatchTicketResponse struct {
+	Result *Ticket `json:"result,omitempty"`
+}
+
+type QueryTicketsResponse struct {
 	// list of results
 	Result []*Ticket `json:"result,omitempty"`
 	// Cursor position for subsequent searches
 	Cursor string `json:"cursor"`
-}
-
-type PatchTicketResponse struct {
-	Result *Ticket `json:"result,omitempty"`
 }
 
 // Unique identifier for this ticket

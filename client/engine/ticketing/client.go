@@ -100,7 +100,7 @@ func (c *Client) ListProjects(ctx context.Context) (*engine.ListProjectsResponse
 }
 
 // Returns a list of `Ticket` objects from the token-linked `Integration`.
-func (c *Client) ListTickets(ctx context.Context, request *engine.ListTicketsRequest) (*engine.ListTicketsResponse, error) {
+func (c *Client) QueryTickets(ctx context.Context, request *engine.QueryTicketsRequest) (*engine.QueryTicketsResponse, error) {
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
@@ -108,10 +108,18 @@ func (c *Client) ListTickets(ctx context.Context, request *engine.ListTicketsReq
 	endpointURL := baseURL + "/" + "v1/ticketing/tickets"
 
 	queryParams := make(url.Values)
-	queryParams.Add("search", fmt.Sprintf("%v", request.Search))
-	queryParams.Add("project", fmt.Sprintf("%v", request.Project))
-	queryParams.Add("cursor", fmt.Sprintf("%v", request.Cursor))
-	queryParams.Add("limit", fmt.Sprintf("%v", request.Limit))
+	if request.Cursor != nil {
+		queryParams.Add("cursor", fmt.Sprintf("%v", *request.Cursor))
+	}
+	if request.Limit != nil {
+		queryParams.Add("limit", fmt.Sprintf("%v", *request.Limit))
+	}
+	for _, value := range request.Order {
+		queryParams.Add("order", fmt.Sprintf("%v", *value))
+	}
+	for _, value := range request.Filter {
+		queryParams.Add("filter", fmt.Sprintf("%v", *value))
+	}
 	if len(queryParams) > 0 {
 		endpointURL += "?" + queryParams.Encode()
 	}
@@ -156,7 +164,7 @@ func (c *Client) ListTickets(ctx context.Context, request *engine.ListTicketsReq
 		return apiError
 	}
 
-	var response *engine.ListTicketsResponse
+	var response *engine.QueryTicketsResponse
 	if err := core.DoRequest(
 		ctx,
 		c.httpClient,
