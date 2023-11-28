@@ -348,6 +348,16 @@ type ElasticsearchConfig struct {
 	Index string `json:"index"`
 }
 
+// Configuration for Microsoft Entra ID tenants
+type EntraIdConfig struct {
+	// Azure Client (Application) ID.
+	ClientId string `json:"client_id"`
+	// Azure Directory (tenant) ID.
+	TenantId string `json:"tenant_id"`
+	// Any custom scopes. Defaults to the primary microsoft graph API default scope.
+	Scopes []string `json:"scopes,omitempty"`
+}
+
 // Configuration for a Webhook Provider
 type HooksConfig struct {
 	CredentialId CredentialId `json:"credential_id,omitempty"`
@@ -369,7 +379,65 @@ type HooksConfig struct {
 type IdentityConfig struct {
 	CredentialId CredentialId `json:"credential_id,omitempty"`
 	// URL used for connecting to the identity provider.
-	Url *string `json:"url,omitempty"`
+	Url    *string                     `json:"url,omitempty"`
+	Config *IdentityProviderTypeConfig `json:"config,omitempty"`
+}
+
+type IdentityProviderTypeConfig struct {
+	Type    string
+	EntraId *EntraIdConfig
+}
+
+func NewIdentityProviderTypeConfigFromEntraId(value *EntraIdConfig) *IdentityProviderTypeConfig {
+	return &IdentityProviderTypeConfig{Type: "entra_id", EntraId: value}
+}
+
+func (i *IdentityProviderTypeConfig) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	i.Type = unmarshaler.Type
+	switch unmarshaler.Type {
+	case "entra_id":
+		value := new(EntraIdConfig)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		i.EntraId = value
+	}
+	return nil
+}
+
+func (i IdentityProviderTypeConfig) MarshalJSON() ([]byte, error) {
+	switch i.Type {
+	default:
+		return nil, fmt.Errorf("invalid type %s in %T", i.Type, i)
+	case "entra_id":
+		var marshaler = struct {
+			Type string `json:"type"`
+			*EntraIdConfig
+		}{
+			Type:          i.Type,
+			EntraIdConfig: i.EntraId,
+		}
+		return json.Marshal(marshaler)
+	}
+}
+
+type IdentityProviderTypeConfigVisitor interface {
+	VisitEntraId(*EntraIdConfig) error
+}
+
+func (i *IdentityProviderTypeConfig) Accept(visitor IdentityProviderTypeConfigVisitor) error {
+	switch i.Type {
+	default:
+		return fmt.Errorf("invalid type %s in %T", i.Type, i)
+	case "entra_id":
+		return visitor.VisitEntraId(i.EntraId)
+	}
 }
 
 // Connects an Account to an external service
