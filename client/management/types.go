@@ -483,7 +483,7 @@ type ProviderConfig struct {
 	Siem            *SiemConfig
 	Sink            *SinkConfig
 	Storage         *StorageConfig
-	Tickets         *TicketConfig
+	Ticketing       *TicketingConfig
 	Vulnerabilities *VulnerabilityConfig
 }
 
@@ -511,8 +511,8 @@ func NewProviderConfigFromStorage(value *StorageConfig) *ProviderConfig {
 	return &ProviderConfig{Type: "storage", Storage: value}
 }
 
-func NewProviderConfigFromTickets(value *TicketConfig) *ProviderConfig {
-	return &ProviderConfig{Type: "tickets", Tickets: value}
+func NewProviderConfigFromTicketing(value *TicketingConfig) *ProviderConfig {
+	return &ProviderConfig{Type: "ticketing", Ticketing: value}
 }
 
 func NewProviderConfigFromVulnerabilities(value *VulnerabilityConfig) *ProviderConfig {
@@ -564,12 +564,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.Storage = value
-	case "tickets":
-		value := new(TicketConfig)
+	case "ticketing":
+		value := new(TicketingConfig)
 		if err := json.Unmarshal(data, &value); err != nil {
 			return err
 		}
-		p.Tickets = value
+		p.Ticketing = value
 	case "vulnerabilities":
 		value := new(VulnerabilityConfig)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -638,13 +638,13 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 			StorageConfig: p.Storage,
 		}
 		return json.Marshal(marshaler)
-	case "tickets":
+	case "ticketing":
 		var marshaler = struct {
 			Type string `json:"type"`
-			*TicketConfig
+			*TicketingConfig
 		}{
-			Type:         p.Type,
-			TicketConfig: p.Tickets,
+			Type:            p.Type,
+			TicketingConfig: p.Ticketing,
 		}
 		return json.Marshal(marshaler)
 	case "vulnerabilities":
@@ -666,7 +666,7 @@ type ProviderConfigVisitor interface {
 	VisitSiem(*SiemConfig) error
 	VisitSink(*SinkConfig) error
 	VisitStorage(*StorageConfig) error
-	VisitTickets(*TicketConfig) error
+	VisitTicketing(*TicketingConfig) error
 	VisitVulnerabilities(*VulnerabilityConfig) error
 }
 
@@ -686,8 +686,8 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 		return visitor.VisitSink(p.Sink)
 	case "storage":
 		return visitor.VisitStorage(p.Storage)
-	case "tickets":
-		return visitor.VisitTickets(p.Tickets)
+	case "ticketing":
+		return visitor.VisitTicketing(p.Ticketing)
 	case "vulnerabilities":
 		return visitor.VisitVulnerabilities(p.Vulnerabilities)
 	}
@@ -900,8 +900,8 @@ type StorageConfig struct {
 	Transforms []TransformId `json:"transforms,omitempty"`
 }
 
-// Configuration for a Ticket Provider
-type TicketConfig struct {
+// Configuration for a Ticketing Provider
+type TicketingConfig struct {
 	CredentialId CredentialId `json:"credential_id,omitempty"`
 	// Endpoint used for connecting to the external service. If not provided, will connect to the default endpoint for the Provider.
 	Endpoint *string `json:"endpoint,omitempty"`
