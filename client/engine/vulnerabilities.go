@@ -2,20 +2,17 @@
 
 package engine
 
-type ListFindingsRequest struct {
+type QueryFindingsRequest struct {
 	// Number of finding reports to return. Defaults to 50.
-	Limit int `json:"-"`
+	Limit *int `json:"-"`
 	// Start search from cursor position.
-	Cursor string `json:"-"`
+	Cursor *string `json:"-"`
+	// Filter results by this query. For more information on filtering, refer to the Vulnerability Filtering Guide.
+	// Defaults to no filter. If used more than once, the queries are ANDed together.
+	Filter []*string `json:"-"`
 }
 
-type EventId = Id
-
-type GetFindingResponse struct {
-	Result SecurityFinding `json:"result,omitempty"`
-}
-
-type ListFindingsResponse struct {
+type QueryFindingsResponse struct {
 	Result []SecurityFinding `json:"result,omitempty"`
 	Cursor string            `json:"cursor"`
 }

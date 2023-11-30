@@ -461,5 +461,40 @@ type Ticket struct {
 	Tags []string `json:"tags,omitempty"`
 }
 
+type EventId = Id
+
 // Result of a vulnerability scan. Represented by OCSF Security Finding class (class_uid 2001).
 type SecurityFinding = *Event
+
+// Values supported by using severity as a filter. Supports `[eq]` and `[in]` operators.
+// For example, `severity[eq]critical` or `severity[in]critical, high`.
+type VulnerabilitySeverityFilterValue string
+
+const (
+	VulnerabilitySeverityFilterValueCritical VulnerabilitySeverityFilterValue = "critical"
+	VulnerabilitySeverityFilterValueHigh     VulnerabilitySeverityFilterValue = "high"
+	VulnerabilitySeverityFilterValueMedium   VulnerabilitySeverityFilterValue = "medium"
+	VulnerabilitySeverityFilterValueLow      VulnerabilitySeverityFilterValue = "low"
+	VulnerabilitySeverityFilterValueInfo     VulnerabilitySeverityFilterValue = "info"
+)
+
+func NewVulnerabilitySeverityFilterValueFromString(s string) (VulnerabilitySeverityFilterValue, error) {
+	switch s {
+	case "critical":
+		return VulnerabilitySeverityFilterValueCritical, nil
+	case "high":
+		return VulnerabilitySeverityFilterValueHigh, nil
+	case "medium":
+		return VulnerabilitySeverityFilterValueMedium, nil
+	case "low":
+		return VulnerabilitySeverityFilterValueLow, nil
+	case "info":
+		return VulnerabilitySeverityFilterValueInfo, nil
+	}
+	var t VulnerabilitySeverityFilterValue
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (v VulnerabilitySeverityFilterValue) Ptr() *VulnerabilitySeverityFilterValue {
+	return &v
+}
