@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"math/rand"
 	"os"
 	"os/signal"
 	"time"
@@ -223,8 +224,8 @@ func (app *App) backgroundJob() {
 				consoleLogger.Printf("Logged event for tenant %s\n", tenant.ID)
 			}
 		}
-
-		time.Sleep(1 * time.Second)
+		time.Sleep(1*time.Second + time.Duration(rand.Intn(1000))*time.Millisecond)
+		fmt.Println()
 	}
 }
 

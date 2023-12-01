@@ -100,7 +100,7 @@ func (t *Tenant) Init(ctx context.Context, tenantID string, config *TenantConfig
 	accountId := config.SynqlyConfig.AccountID
 	if accountId == "" {
 		account, err := t.synqly.management.Accounts.CreateAccount(ctx, &mgmt.CreateAccountRequest{
-			Name: "tix demo",
+			Name: "Synqly Vulnerabilities and Ticketing Demo",
 		})
 		if err != nil {
 			return fmt.Errorf("init failed, unable to create account: %w", err)
@@ -183,12 +183,12 @@ func (t *Tenant) configureVulnerabilityConnector(ctx context.Context) (*engineCl
 	), integration.Token.Access.Secret, nil
 }
 
-func (t *Tenant) createTicketingConnector(ctx context.Context, providerType string, providerConfig *mgmt.TicketConfig) (*mgmt.CreateIntegrationResponseResult, error) {
+func (t *Tenant) createTicketingConnector(ctx context.Context, providerType string, providerConfig *mgmt.TicketingConfig) (*mgmt.CreateIntegrationResponseResult, error) {
 	response, err := t.synqly.management.Integrations.CreateIntegration(ctx, t.synqly.accountId, &mgmt.CreateIntegrationRequest{
 		Name:           "Ticketing Connector",
-		Category:       "tickets",
+		Category:       "ticketing",
 		ProviderType:   providerType,
-		ProviderConfig: mgmt.NewProviderConfigFromTickets(providerConfig),
+		ProviderConfig: mgmt.NewProviderConfigFromTicketing(providerConfig),
 	})
 	if err != nil {
 		return nil, err
@@ -213,7 +213,7 @@ func (t *Tenant) configureTicketingConnector(ctx context.Context) (*engineClient
 		return nil, "", err
 	}
 
-	integration, err := t.createTicketingConnector(ctx, "jira", &mgmt.TicketConfig{
+	integration, err := t.createTicketingConnector(ctx, "jira", &mgmt.TicketingConfig{
 		Endpoint:     mgmt.String("https://synqly.atlassian.net"),
 		CredentialId: credential.Result.Id,
 	})
@@ -306,10 +306,13 @@ func main() {
 		log.Fatal(err)
 	}
 
-	findings, err := t.synqly.vulnerabilities.Vulnerabilities.ListVulnerabilityFindings(ctx, &engine.ListFindingsRequest{})
+	findings, err := t.synqly.vulnerabilities.Vulnerabilities.QueryVulnerabilityFindings(ctx, &engine.QueryFindingsRequest{
+		Filter: []*string{engine.String("severity[in]Critical,High,Medium")},
+	})
 	if err != nil {
 		log.Fatal(err)
 	}
+	consoleLogger.Printf("Found %d security findings from Tenable\n", len(findings.Result))
 
 	for _, finding := range findings.Result {
 		if err := t.notification(ctx, finding.SecurityFinding); err != nil {
