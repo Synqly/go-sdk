@@ -247,7 +247,7 @@ func (c *Client) GetTicket(ctx context.Context, ticketId engine.TicketId) (*engi
 }
 
 // Creates a `Ticket` object in the token-linked Integration.
-func (c *Client) CreateTicket(ctx context.Context, request engine.CreateTicketRequest) (*engine.CreateTicketResponse, error) {
+func (c *Client) CreateTicket(ctx context.Context, request *engine.CreateTicketRequest) (*engine.CreateTicketResponse, error) {
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL

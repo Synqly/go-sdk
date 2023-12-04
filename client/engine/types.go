@@ -27,6 +27,11 @@ type Base struct {
 	UpdatedAt time.Time `json:"updated_at"`
 }
 
+type BaseResourceRequest struct {
+	// Human-readable name for this resource
+	Name string `json:"name"`
+}
+
 type ErrorBody struct {
 	Status     int           `json:"status"`
 	Message    *string       `json:"message,omitempty"`
@@ -433,28 +438,28 @@ type Ticket struct {
 	// Last time object was updated
 	UpdatedAt time.Time `json:"updated_at"`
 	Id        TicketId  `json:"id,omitempty"`
-	// User who created this ticket.
-	Creator string `json:"creator"`
-	// Who ticket is assigned to.
-	Assignee string `json:"assignee"`
-	// Ticket contact information.
-	Contact string `json:"contact"`
-	// Ticket description.
-	Description string `json:"description"`
 	// Ticket summary.
 	Summary string `json:"summary"`
+	// User who created this ticket.
+	Creator *string `json:"creator,omitempty"`
+	// Who ticket is assigned to.
+	Assignee *string `json:"assignee,omitempty"`
+	// Ticket contact information.
+	Contact *string `json:"contact,omitempty"`
+	// Ticket description.
+	Description *string `json:"description,omitempty"`
 	// The priority of the Ticket
-	Priority Priority `json:"priority,omitempty"`
+	Priority *Priority `json:"priority,omitempty"`
 	// The ticket's due date.
-	DueDate time.Time `json:"due_date"`
+	DueDate *time.Time `json:"due_date,omitempty"`
 	// The ticket's complete date.
-	CompletionDate time.Time `json:"completion_date"`
+	CompletionDate *time.Time `json:"completion_date,omitempty"`
 	// The current status of the ticket.
-	Status string `json:"status"`
+	Status *string `json:"status,omitempty"`
 	// The ticket project.
-	Project string `json:"project"`
+	Project *string `json:"project,omitempty"`
 	// The ticket's type.
-	IssueType string `json:"issue_type"`
+	IssueType *string `json:"issue_type,omitempty"`
 	// Associate attachment URLs with ticket
 	Attachments []string `json:"attachments,omitempty"`
 	// Associate tags with Ticket

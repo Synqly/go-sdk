@@ -2,6 +2,10 @@
 
 package engine
 
+import (
+	time "time"
+)
+
 type QueryTicketsRequest struct {
 	// Cursor to use to retrieve the next page of results.
 	Cursor *string `json:"-"`
@@ -17,7 +21,36 @@ type QueryTicketsRequest struct {
 	Filter []*string `json:"-"`
 }
 
-type CreateTicketRequest = *Ticket
+type CreateTicketRequest struct {
+	// Human-readable name for this resource
+	Name string `json:"name"`
+	// Ticket summary.
+	Summary string `json:"summary"`
+	// User who created this ticket.
+	Creator *string `json:"creator,omitempty"`
+	// Who ticket is assigned to.
+	Assignee *string `json:"assignee,omitempty"`
+	// Ticket contact information.
+	Contact *string `json:"contact,omitempty"`
+	// Ticket description.
+	Description *string `json:"description,omitempty"`
+	// The priority of the Ticket
+	Priority *Priority `json:"priority,omitempty"`
+	// The ticket's due date.
+	DueDate *time.Time `json:"due_date,omitempty"`
+	// The ticket's complete date.
+	CompletionDate *time.Time `json:"completion_date,omitempty"`
+	// The current status of the ticket.
+	Status *string `json:"status,omitempty"`
+	// The ticket project.
+	Project *string `json:"project,omitempty"`
+	// The ticket's type.
+	IssueType *string `json:"issue_type,omitempty"`
+	// Associate attachment URLs with ticket
+	Attachments []string `json:"attachments,omitempty"`
+	// Associate tags with Ticket
+	Tags []string `json:"tags,omitempty"`
+}
 
 type CreateTicketResponse struct {
 	Result *Ticket `json:"result,omitempty"`
