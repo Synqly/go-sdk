@@ -37,6 +37,7 @@ type Audit struct {
 	Path          string         `json:"path"`
 	Code          string         `json:"code"`
 	Body          interface{}    `json:"body,omitempty"`
+	Response      *string        `json:"response,omitempty"`
 	Status        *string        `json:"status,omitempty"`
 	MemberId      *MemberId      `json:"member_id,omitempty"`
 	AccountId     *AccountId     `json:"account_id,omitempty"`
