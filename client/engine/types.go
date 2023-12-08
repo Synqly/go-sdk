@@ -10,6 +10,7 @@ import (
 	authentication "github.com/synqly/go-sdk/client/engine/ocsf/authentication"
 	fileactivity "github.com/synqly/go-sdk/client/engine/ocsf/fileactivity"
 	groupmanagement "github.com/synqly/go-sdk/client/engine/ocsf/groupmanagement"
+	inventoryinfo "github.com/synqly/go-sdk/client/engine/ocsf/inventoryinfo"
 	networkactivity "github.com/synqly/go-sdk/client/engine/ocsf/networkactivity"
 	processactivity "github.com/synqly/go-sdk/client/engine/ocsf/processactivity"
 	scheduledjobactivity "github.com/synqly/go-sdk/client/engine/ocsf/scheduledjobactivity"
@@ -75,6 +76,7 @@ type Event struct {
 	Authentication            *authentication.Authentication
 	FileActivity              *fileactivity.FileActivity
 	GroupManagement           *groupmanagement.GroupManagement
+	DeviceInventoryInfo       *inventoryinfo.InventoryInfo
 	NetworkActivity           *networkactivity.NetworkActivity
 	ProcessActivity           *processactivity.ProcessActivity
 	ScheduledJobActivity      *scheduledjobactivity.ScheduledJobActivity
@@ -100,6 +102,10 @@ func NewEventFromFileActivity(value *fileactivity.FileActivity) *Event {
 
 func NewEventFromGroupManagement(value *groupmanagement.GroupManagement) *Event {
 	return &Event{ClassName: "Group Management", GroupManagement: value}
+}
+
+func NewEventFromDeviceInventoryInfo(value *inventoryinfo.InventoryInfo) *Event {
+	return &Event{ClassName: "Device Inventory Info", DeviceInventoryInfo: value}
 }
 
 func NewEventFromNetworkActivity(value *networkactivity.NetworkActivity) *Event {
@@ -161,6 +167,12 @@ func (e *Event) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		e.GroupManagement = value
+	case "Device Inventory Info":
+		value := new(inventoryinfo.InventoryInfo)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.DeviceInventoryInfo = value
 	case "Network Activity":
 		value := new(networkactivity.NetworkActivity)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -244,6 +256,15 @@ func (e Event) MarshalJSON() ([]byte, error) {
 			GroupManagement: e.GroupManagement,
 		}
 		return json.Marshal(marshaler)
+	case "Device Inventory Info":
+		var marshaler = struct {
+			ClassName string `json:"class_name"`
+			*inventoryinfo.InventoryInfo
+		}{
+			ClassName:     e.ClassName,
+			InventoryInfo: e.DeviceInventoryInfo,
+		}
+		return json.Marshal(marshaler)
 	case "Network Activity":
 		var marshaler = struct {
 			ClassName string `json:"class_name"`
@@ -298,6 +319,7 @@ type EventVisitor interface {
 	VisitAuthentication(*authentication.Authentication) error
 	VisitFileActivity(*fileactivity.FileActivity) error
 	VisitGroupManagement(*groupmanagement.GroupManagement) error
+	VisitDeviceInventoryInfo(*inventoryinfo.InventoryInfo) error
 	VisitNetworkActivity(*networkactivity.NetworkActivity) error
 	VisitProcessActivity(*processactivity.ProcessActivity) error
 	VisitScheduledJobActivity(*scheduledjobactivity.ScheduledJobActivity) error
@@ -319,6 +341,8 @@ func (e *Event) Accept(visitor EventVisitor) error {
 		return visitor.VisitFileActivity(e.FileActivity)
 	case "Group Management":
 		return visitor.VisitGroupManagement(e.GroupManagement)
+	case "Device Inventory Info":
+		return visitor.VisitDeviceInventoryInfo(e.DeviceInventoryInfo)
 	case "Network Activity":
 		return visitor.VisitNetworkActivity(e.NetworkActivity)
 	case "Process Activity":
@@ -465,6 +489,9 @@ type Ticket struct {
 	// Associate tags with Ticket
 	Tags []string `json:"tags,omitempty"`
 }
+
+// Asset in a vulnerability scanning system. Represented by OCSF Device Inventory Info class (class_uid 5001).
+type Asset = *Event
 
 type EventId = Id
 
