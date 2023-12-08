@@ -387,10 +387,15 @@ type IdentityConfig struct {
 type IdentityProviderTypeConfig struct {
 	Type    string
 	EntraId *EntraIdConfig
+	Pingone *PingOneConfig
 }
 
 func NewIdentityProviderTypeConfigFromEntraId(value *EntraIdConfig) *IdentityProviderTypeConfig {
 	return &IdentityProviderTypeConfig{Type: "entra_id", EntraId: value}
+}
+
+func NewIdentityProviderTypeConfigFromPingone(value *PingOneConfig) *IdentityProviderTypeConfig {
+	return &IdentityProviderTypeConfig{Type: "pingone", Pingone: value}
 }
 
 func (i *IdentityProviderTypeConfig) UnmarshalJSON(data []byte) error {
@@ -408,6 +413,12 @@ func (i *IdentityProviderTypeConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		i.EntraId = value
+	case "pingone":
+		value := new(PingOneConfig)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		i.Pingone = value
 	}
 	return nil
 }
@@ -425,11 +436,21 @@ func (i IdentityProviderTypeConfig) MarshalJSON() ([]byte, error) {
 			EntraIdConfig: i.EntraId,
 		}
 		return json.Marshal(marshaler)
+	case "pingone":
+		var marshaler = struct {
+			Type string `json:"type"`
+			*PingOneConfig
+		}{
+			Type:          i.Type,
+			PingOneConfig: i.Pingone,
+		}
+		return json.Marshal(marshaler)
 	}
 }
 
 type IdentityProviderTypeConfigVisitor interface {
 	VisitEntraId(*EntraIdConfig) error
+	VisitPingone(*PingOneConfig) error
 }
 
 func (i *IdentityProviderTypeConfig) Accept(visitor IdentityProviderTypeConfigVisitor) error {
@@ -438,6 +459,8 @@ func (i *IdentityProviderTypeConfig) Accept(visitor IdentityProviderTypeConfigVi
 		return fmt.Errorf("invalid type %s in %T", i.Type, i)
 	case "entra_id":
 		return visitor.VisitEntraId(i.EntraId)
+	case "pingone":
+		return visitor.VisitPingone(i.Pingone)
 	}
 }
 
@@ -474,6 +497,16 @@ type NotificationConfig struct {
 	Channel *string `json:"channel,omitempty"`
 	// Optional list of transformations used to modify requests before they are sent to the external service.
 	Transforms []TransformId `json:"transforms,omitempty"`
+}
+
+// Configuration for the PingOne identity platform
+type PingOneConfig struct {
+	// The client ID for the application set up as a worker.
+	ClientId string `json:"client_id"`
+	// The organization ID that the client app is a part of.
+	OrganizationId string `json:"organization_id"`
+	// The URL base for making authentication requests to PingOne.
+	AuthUrl string `json:"auth_url"`
 }
 
 type ProviderConfig struct {
