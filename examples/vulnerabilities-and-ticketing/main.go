@@ -228,6 +228,22 @@ func (t *Tenant) configureTicketingConnector(ctx context.Context) (*engineClient
 
 // notification creates a ticket in the tenant's ticketing connector for the given vulnerability finding
 func (t *Tenant) notification(ctx context.Context, finding *securityfinding.SecurityFinding) error {
+	tags := []string{fmt.Sprintf("asset:%s", *finding.Resources[0].Uid), fmt.Sprintf("scan_uid:%s", *finding.Metadata.Uid)}
+
+	// search for existing ticket
+	tickets, err := t.synqly.ticketing.Ticketing.QueryTickets(ctx, &engine.QueryTicketsRequest{
+		Filter: []*string{
+			engine.String(fmt.Sprintf("tags[in]%s", strings.Join(tags, ","))),
+		},
+	})
+	if err != nil {
+		return err
+	}
+	for _, ticket := range tickets.Result {
+		consoleLogger.Printf("Found existing ticket with id %s\n", ticket.Id)
+		return nil
+	}
+
 	title := fmt.Sprintf("Vulnerability found for %s", *finding.Resources[0].Name)
 	summary := fmt.Sprintf("%s has a %s priority vulnerability", *finding.Resources[0].Name, strings.ToLower(*finding.Severity))
 	descrTemplate := `%s found a vulnerability: %s
@@ -274,14 +290,14 @@ See also:
 		priority = engine.PriorityMedium
 	}
 
-	tick, err := t.synqly.ticketing.Ticketing.CreateTicket(ctx, &engine.Ticket{
+	tick, err := t.synqly.ticketing.Ticketing.CreateTicket(ctx, &engine.CreateTicketRequest{
 		Name:        title,
 		Summary:     summary,
-		Description: description,
-		IssueType:   "Bug",
-		Priority:    priority,
-		Project:     "Test",
-		Tags:        []string{fmt.Sprintf("asset:%s", *finding.Resources[0].Uid), fmt.Sprintf("scan_uid:%s", *finding.Metadata.Uid)},
+		Description: engine.String(description),
+		IssueType:   engine.String("Bug"),
+		Priority:    priority.Ptr(),
+		Project:     engine.String("Test"),
+		Tags:        tags,
 	})
 	if err != nil {
 		return err
@@ -307,7 +323,10 @@ func main() {
 	}
 
 	findings, err := t.synqly.vulnerabilities.Vulnerabilities.QueryVulnerabilityFindings(ctx, &engine.QueryFindingsRequest{
-		Filter: []*string{engine.String("severity[in]Critical,High,Medium")},
+		Filter: []*string{
+			engine.String("severity[in]Critical,High,Medium"),
+			engine.String("finding.last_seen_time[gte]2023-12-10T00:00:00Z"),
+		},
 	})
 	if err != nil {
 		log.Fatal(err)
@@ -319,5 +338,4 @@ func main() {
 			log.Fatal(err)
 		}
 	}
-	consoleLogger.Printf("Created tickets for %d security findings\n", len(findings.Result))
 }
