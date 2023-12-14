@@ -37,8 +37,10 @@ type ListIntegrationsRequest struct {
 }
 
 type CreateIntegrationRequest struct {
-	// Human readable name for this Integration
-	Name     string     `json:"name"`
+	// Unique short name for this Integrations (lowercase [a-z0-9_-], can be used in URLs). Also used for case insenitive duplicate name detection and default sort order. Defaults to IntegrationId if both name and fullname are not specified.
+	Name *string `json:"name,omitempty"`
+	// Human friendly display name for this Integrations, will auto-generate 'name' field (if 'name' is not specified)
+	Fullname *string    `json:"fullname,omitempty"`
 	Category CategoryId `json:"category"`
 	// Provider implementation to use for this Integration.
 	ProviderType ProviderId `json:"provider_type"`

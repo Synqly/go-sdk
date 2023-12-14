@@ -20,14 +20,14 @@ type ListMembersRequest struct {
 }
 
 type CreateMemberRequest struct {
-	// Email name to use for this Member.
+	// Email name to use for this Member. Also used for duplicate detection and default sort order.
 	Name string `json:"name"`
-	// User's full name
-	Fullname string `json:"fullname"`
+	// User's full display name
+	Fullname *string `json:"fullname,omitempty"`
 	// User's nickname
-	Nickname string `json:"nickname"`
+	Nickname *string `json:"nickname,omitempty"`
 	// Url of user's picture
-	Picture string `json:"picture"`
+	Picture *string `json:"picture,omitempty"`
 	// Member secret
 	Secret string `json:"secret"`
 	// Roles granted to this member. Tokens inherit this access.

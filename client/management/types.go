@@ -16,6 +16,8 @@ type Account struct {
 	// Last time object was updated
 	UpdatedAt time.Time `json:"updated_at"`
 	Id        AccountId `json:"id,omitempty"`
+	// Human friendly display name for this account.
+	Fullname string `json:"fullname"`
 	// Organization that manages this Account.
 	OrganizationId OrganizationId `json:"organization_id,omitempty"`
 }
@@ -165,6 +167,8 @@ type Credential struct {
 	Id        CredentialId `json:"id,omitempty"`
 	// Account that manages this credential.
 	AccountId AccountId `json:"account_id,omitempty"`
+	// Human friendly display name for this Organization
+	Fullname string `json:"fullname"`
 	// Credential configuration
 	Config *CredentialConfig `json:"config,omitempty"`
 }
@@ -286,8 +290,10 @@ type CredentialResponse struct {
 	UpdatedAt time.Time    `json:"updated_at"`
 	Id        CredentialId `json:"id,omitempty"`
 	// Account that manages this credential.
-	AccountId AccountId                 `json:"account_id,omitempty"`
-	Config    *CredentialConfigNoSecret `json:"config,omitempty"`
+	AccountId AccountId `json:"account_id,omitempty"`
+	// Human friendly display name for this Organization.
+	Fullname string                    `json:"fullname"`
+	Config   *CredentialConfigNoSecret `json:"config,omitempty"`
 }
 
 type CredentialType string
@@ -473,6 +479,8 @@ type Integration struct {
 	// Last time object was updated
 	UpdatedAt time.Time     `json:"updated_at"`
 	Id        IntegrationId `json:"id,omitempty"`
+	// Human friendly display name for this integration.
+	Fullname string `json:"fullname"`
 	// Integration refresh token id
 	RefreshTokenId TokenId `json:"refresh_token_id,omitempty"`
 	// Account that manages this Integration.
@@ -965,7 +973,7 @@ type Member struct {
 	State     State     `json:"state,omitempty"`
 	// Last logon time
 	LastLogon time.Time `json:"last_logon"`
-	// User's full name
+	// User's full display name
 	Fullname string `json:"fullname"`
 	// User's nickname
 	Nickname string `json:"nickname"`
@@ -1204,6 +1212,8 @@ type Transform struct {
 	Id        TransformId `json:"id,omitempty"`
 	// Account that manages this Transform.
 	AccountId AccountId `json:"account_id,omitempty"`
+	// Human friendly display name for this Organization.
+	Fullname string `json:"fullname"`
 	// JSON Patch transform to apply (rfc6902).
 	Patch []byte `json:"patch"`
 }

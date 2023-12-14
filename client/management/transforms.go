@@ -20,8 +20,10 @@ type ListTransformsRequest struct {
 }
 
 type CreateTransformRequest struct {
-	// Human readable name for this Transform
-	Name string `json:"name"`
+	// Unique short name for this Organization (lowercase [a-z0-9_-], can be used in URLs). Also used for case insenitive duplicate name detection and default sort order. Defaults to TransformId if both name and fullname are not specified.
+	Name *string `json:"name,omitempty"`
+	// Human friendly display name for this Organization, will auto-generate 'name' field (if 'name' is not specified)
+	Fullname *string `json:"fullname,omitempty"`
 	// JSON Patch transform to apply (rfc6902).
 	Patch []byte `json:"patch"`
 }
