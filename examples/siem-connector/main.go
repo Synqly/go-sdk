@@ -77,7 +77,7 @@ func (a *App) NewTenant(ctx context.Context, id string) error {
 	account, err := mgmtClient.NewClient(
 		mgmtClient.WithAuthToken(synqlyOrgToken),
 	).Accounts.CreateAccount(ctx, &mgmt.CreateAccountRequest{
-		Name: id,
+		Fullname: &id,
 	})
 	if err != nil {
 		return fmt.Errorf("unable to create account: %w", err)
@@ -126,7 +126,7 @@ func (a *App) configureEventLogging(ctx context.Context, tenantID, siemProviderT
 	// We need to save the tenant's Splunk credentials in Synqly before configuring the Integration
 	// We will use the Synqly Client we created for the tenant to do this
 	credential, err := tenant.SynqlyClient.Credentials.CreateCredential(ctx, tenant.SynqlyAccountId, &mgmt.CreateCredentialRequest{
-		Name: fmt.Sprintf("%s authentication token", siemProviderType),
+		Fullname: engine.String(fmt.Sprintf("%s authentication token", siemProviderType)),
 		Config: mgmt.NewCredentialConfigFromToken(&mgmt.TokenCredential{
 			Secret: splunkToken,
 		}),
@@ -147,7 +147,7 @@ func (a *App) configureEventLogging(ctx context.Context, tenantID, siemProviderT
 	}
 
 	integration, err := tenant.SynqlyClient.Integrations.CreateIntegration(ctx, tenant.SynqlyAccountId, &mgmt.CreateIntegrationRequest{
-		Name:           "Background Event Logger",
+		Fullname:       engine.String("Background Event Logger"),
 		Category:       "siem",
 		ProviderType:   siemProviderType,
 		ProviderConfig: providerConfig,
