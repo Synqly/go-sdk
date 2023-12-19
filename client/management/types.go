@@ -1058,6 +1058,26 @@ func (s State) Ptr() *State {
 	return &s
 }
 
+type Organization struct {
+	// Human-readable name for this resource
+	Name string `json:"name"`
+	// Time object was originally created
+	CreatedAt time.Time `json:"created_at"`
+	// Last time object was updated
+	UpdatedAt time.Time      `json:"updated_at"`
+	Id        OrganizationId `json:"id,omitempty"`
+	// Organization refresh token id
+	RefreshTokenId TokenId `json:"refresh_token_id,omitempty"`
+	// Human friendly display name for this Organization
+	Fullname string `json:"fullname"`
+	// Organization email address
+	Contact string `json:"contact"`
+	// Reply-to email address, used for SMTP emails. Defaults to no-reply@synqly.com
+	ReplyTo string `json:"reply_to"`
+	// URL of the organization
+	Picture string `json:"picture"`
+}
+
 // Unique identifier for this Organization
 type OrganizationId = Id
 
