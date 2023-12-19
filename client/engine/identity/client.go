@@ -42,8 +42,18 @@ func (c *Client) ListAuditLog(ctx context.Context, request *engine.ListIdentityA
 	endpointURL := baseURL + "/" + "v1/identity/audit"
 
 	queryParams := make(url.Values)
-	queryParams.Add("limit", fmt.Sprintf("%v", request.Limit))
-	queryParams.Add("cursor", fmt.Sprintf("%v", request.Cursor))
+	if request.Limit != nil {
+		queryParams.Add("limit", fmt.Sprintf("%v", *request.Limit))
+	}
+	if request.Cursor != nil {
+		queryParams.Add("cursor", fmt.Sprintf("%v", *request.Cursor))
+	}
+	for _, value := range request.Order {
+		queryParams.Add("order", fmt.Sprintf("%v", *value))
+	}
+	for _, value := range request.Filter {
+		queryParams.Add("filter", fmt.Sprintf("%v", *value))
+	}
 	if len(queryParams) > 0 {
 		endpointURL += "?" + queryParams.Encode()
 	}
