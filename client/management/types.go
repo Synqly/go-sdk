@@ -1157,10 +1157,6 @@ type TimeseriesResult struct {
 	Failed int64 `json:"failed"`
 	// Cpu time in microseconds
 	CpuTime int64 `json:"cpu_time"`
-	// Database operations count
-	DbOps int64 `json:"db_ops"`
-	// API operations count
-	ApiOps int64 `json:"api_ops"`
 	// API input byte count
 	InBytes int64 `json:"in_bytes"`
 }
