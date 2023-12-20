@@ -31,7 +31,7 @@ func NewClient(opts ...core.ClientOption) *Client {
 	}
 }
 
-// Retrieve an Organization by ID
+// Retrieve Organization
 func (c *Client) GetOrganization(ctx context.Context) (*management.GetOrganizationResponse, error) {
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
@@ -89,7 +89,7 @@ func (c *Client) GetOrganization(ctx context.Context) (*management.GetOrganizati
 	return response, nil
 }
 
-// Update a Organization by ID
+// Update Organization
 func (c *Client) UpdateOrganization(ctx context.Context, request management.UpdateOrganizationRequest) (*management.UpdateOrganizationResponse, error) {
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
@@ -161,7 +161,7 @@ func (c *Client) UpdateOrganization(ctx context.Context, request management.Upda
 	return response, nil
 }
 
-// Update a Organization by ID
+// Patch Organization
 func (c *Client) PatchOrganization(ctx context.Context, request []map[string]interface{}) (*management.PatchOrganizationResponse, error) {
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
