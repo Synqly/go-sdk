@@ -204,6 +204,13 @@ func (c *Client) CreateCredential(ctx context.Context, accountId management.Acco
 				return apiError
 			}
 			return value
+		case 409:
+			value := new(management.ConflictError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
 		case 403:
 			value := new(management.ForbiddenError)
 			value.APIError = apiError

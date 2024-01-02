@@ -199,6 +199,13 @@ func (c *Client) CreateMember(ctx context.Context, request *management.CreateMem
 				return apiError
 			}
 			return value
+		case 409:
+			value := new(management.ConflictError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
 		case 403:
 			value := new(management.ForbiddenError)
 			value.APIError = apiError
