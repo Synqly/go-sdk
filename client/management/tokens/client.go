@@ -33,6 +33,71 @@ func NewClient(opts ...core.ClientOption) *Client {
 	}
 }
 
+// Create a token restricted to an account
+func (c *Client) CreateAccountToken(ctx context.Context, request *management.CreateAccountTokenRequest) (*management.CreateAccountTokenResponse, error) {
+	baseURL := "https://api.synqly.com"
+	if c.baseURL != "" {
+		baseURL = c.baseURL
+	}
+	endpointURL := baseURL + "/" + "v1/tokens/account"
+
+	errorDecoder := func(statusCode int, body io.Reader) error {
+		raw, err := io.ReadAll(body)
+		if err != nil {
+			return err
+		}
+		apiError := core.NewAPIError(statusCode, errors.New(string(raw)))
+		decoder := json.NewDecoder(bytes.NewReader(raw))
+		switch statusCode {
+		case 400:
+			value := new(management.BadRequestError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 404:
+			value := new(management.NotFoundError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 403:
+			value := new(management.ForbiddenError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 401:
+			value := new(management.UnauthorizedError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		}
+		return apiError
+	}
+
+	var response *management.CreateAccountTokenResponse
+	if err := core.DoRequest(
+		ctx,
+		c.httpClient,
+		endpointURL,
+		http.MethodPost,
+		request,
+		&response,
+		false,
+		c.header,
+		errorDecoder,
+	); err != nil {
+		return response, err
+	}
+	return response, nil
+}
+
 // Returns a list of all `RefreshToken` objects belonging to the Authorization Bearer
 // token. For more infromation on Tokens, refer to
 // [Authentication](https://docs.synqly.com/reference/authentication).

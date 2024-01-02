@@ -22,6 +22,21 @@ type ListTokensRequest struct {
 // Unique identifier for this Token
 type TokenId = Id
 
+type CreateAccountTokenRequest struct {
+	// Unique name token. Defaults to generated refresh token id.
+	Name *string `json:"name,omitempty"`
+	// Limit access to only this account.
+	AccountId AccountId `json:"accountId,omitempty"`
+	// Limit access to only this integration category.
+	Category *string `json:"category,omitempty"`
+	// Token time-to-live. Defaults to member TokenTtl.
+	TokenTtl *string `json:"tokenTtl,omitempty"`
+}
+
+type CreateAccountTokenResponse struct {
+	Result *RefreshToken `json:"result,omitempty"`
+}
+
 type GetTokenResponse struct {
 	Result *RefreshToken `json:"result,omitempty"`
 }

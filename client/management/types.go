@@ -1084,8 +1084,18 @@ type OrganizationId = Id
 // Type of action granted access by an API operation: "create", "read", "update", "delete", or "*".
 type Action = string
 
+// APIs allowed access to by prefix endpoint match. Can be used to allow access to select APIs like /v1/accounts, /v1/credentials, and /v1/transforms.
+type AllowedApi = string
+
 // APIs disallowed access to by prefix endpoint match. Can be used to block access to select APIs like /v1/users, /v1/tokens, and /v1/credentials.
 type BlockedApi = string
+
+type Constraint struct {
+	// Contained object constraint granted access or "*".
+	Object string `json:"object"`
+	// Object type (ie: "category", "tag")
+	Type string `json:"type"`
+}
 
 // Contained objects granted access to by Id or "*".
 type Object = Id
@@ -1110,8 +1120,12 @@ type Permission struct {
 type Role struct {
 	// List of actions that this permission grants access to: "create", "read", "update", "delete" and "*". Use "*" to give all action permissions.
 	Actions []Action `json:"actions,omitempty"`
-	// List of contained objects ids that this permission grants access to. Use "*" to grant access to all contained objects.
+	// List of contained account ids that this permission grants access to. Use "*" to grant access to all contained objects.
 	Objects []Object `json:"objects,omitempty"`
+	// List of constraints that this permission grants access to. Use "*" to grant access to all constrained objects.
+	Constraints []*Constraint `json:"constraints,omitempty"`
+	// Optional list of APIs that this role allows access to. Can be used to allow access to select APIs like /v1/accounts, v1/credentials and /v1/transforms
+	AllowedApis []AllowedApi `json:"allowed_apis,omitempty"`
 	// Optional list of APIs that this role blocks access to. Can be used to block access to select APIs like /v1/user, v1/tokens and /v1/credentials
 	BlockedApis []BlockedApi `json:"blocked_apis,omitempty"`
 }
