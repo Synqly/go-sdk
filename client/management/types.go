@@ -1122,7 +1122,7 @@ type Role struct {
 	Actions []Action `json:"actions,omitempty"`
 	// List of contained account ids that this permission grants access to. Use "*" to grant access to all contained objects.
 	Objects []Object `json:"objects,omitempty"`
-	// List of constraints that this permission grants access to. Use "*" to grant access to all constrained objects.
+	// Optional list of constraints that this permission grants access to. Use "*" to grant access to all constrained objects.
 	Constraints []*Constraint `json:"constraints,omitempty"`
 	// Optional list of APIs that this role allows access to. Can be used to allow access to select APIs like /v1/accounts, v1/credentials and /v1/transforms
 	AllowedApis []AllowedApi `json:"allowed_apis,omitempty"`
