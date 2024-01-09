@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"strconv"
 	"time"
 
 	engine "github.com/synqly/go-sdk/client/engine"
@@ -28,6 +29,8 @@ var (
 	splunkURL = os.Getenv("SPLUNK_URL")
 	// SPLUNK_HEC_TOKEN: A Splunk HTTP Event Collector token for logging events
 	splunkToken = os.Getenv("SPLUNK_HEC_TOKEN")
+	// DURATION_SECONDS: (Optional) limits event generation to the provided duration
+	durationSeconds = os.Getenv("DURATION_SECONDS")
 )
 
 var consoleLogger = log.New(os.Stdout, "INFO: ", log.Ldate|log.Ltime)
@@ -197,8 +200,11 @@ func (a *App) inmemConfig() *mgmt.ProviderConfig {
 // the same for any supported Event Provider. This is where Synqly's abstraction
 // kicks in, Integrations within a given Connector category (in this case, Events)
 // share a unified API for data operations, no matter which Provider they target.
-func (app *App) backgroundJob() {
+func (app *App) backgroundJob(durationSeconds int) {
 	ctx := context.Background()
+
+	startTime := time.Now()
+	endTime := startTime.Add(time.Duration(durationSeconds) * time.Second)
 
 	// Loop infinitely, generating data at 1 second intervals
 	for {
@@ -207,6 +213,11 @@ func (app *App) backgroundJob() {
 
 			// Call a helper function to generate a sample OCSF Event.
 			newEvent := createSampleEvent()
+
+			if time.Now().UTC().After(endTime) {
+				consoleLogger.Println("Done generating events")
+				return
+			}
 
 			// If the EventLogger for the given Tenant has been initialized, use
 			// it to send data.
@@ -311,8 +322,15 @@ func main() {
 	// }
 
 	// Generate synthetic load for the tenants
-	go app.backgroundJob()
-
-	// Wait for user to control c to exit
-	select {}
+	if durationSeconds == "" {
+		// If no duration provided, run for 10m
+		app.backgroundJob(600)
+	} else {
+		// Otherwise, run for the provided duration
+		dur, err := strconv.Atoi(durationSeconds)
+		if err != nil {
+			log.Fatal(err)
+		}
+		app.backgroundJob(dur)
+	}
 }
