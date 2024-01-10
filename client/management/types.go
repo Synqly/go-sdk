@@ -1076,10 +1076,23 @@ type Organization struct {
 	ReplyTo string `json:"reply_to"`
 	// URL of the organization
 	Picture string `json:"picture"`
+	// Organization options
+	Options *OrganizationOptions `json:"options,omitempty"`
 }
 
 // Unique identifier for this Organization
 type OrganizationId = Id
+
+type OrganizationOptions struct {
+	// Duration new member invitations will be valid. Default: 168h (7 days), minimum 24h, maximum 168h (7 days).
+	InviteDuration *string `json:"invite_duration,omitempty"`
+	// Duration forgotten password invitations will be valid. Default: 24h, minimum 24h, maximum 168h (7 days).
+	ForgotDuration *string `json:"forgot_duration,omitempty"`
+	// Duration before member password expires, part of required password rotation. Default: 4320h (180 days), minimum: 24h, maximum: 8760h (365 days).
+	PasswordDuration *string `json:"password_duration,omitempty"`
+	// Minimum password length. Default: 8, minimum 8, maximum 72.
+	MinimumPasswordLength *int `json:"minimum_password_length,omitempty"`
+}
 
 // Type of action granted access by an API operation: "create", "read", "update", "delete", or "*".
 type Action = string
@@ -1222,11 +1235,11 @@ type RefreshToken struct {
 	UpdatedAt time.Time `json:"updated_at"`
 	Id        TokenId   `json:"id,omitempty"`
 	// Member Id
-	MemberId *Id `json:"memberId,omitempty"`
+	MemberId *Id `json:"member_id,omitempty"`
 	// Time when this token expires and can no longer be used again.
 	Expires time.Time `json:"expires"`
 	// Token time-to-live
-	TokenTtl string `json:"tokenTtl"`
+	TokenTtl string `json:"token_ttl"`
 	// Primary running access and refresh tokens
 	Primary *TokenPair `json:"primary,omitempty"`
 	// Temporary secondary TokenPair created after a RefreshToken operation
