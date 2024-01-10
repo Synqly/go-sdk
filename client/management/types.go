@@ -1130,6 +1130,8 @@ type Role struct {
 	BlockedApis []BlockedApi `json:"blocked_apis,omitempty"`
 }
 
+type GetIntegrationTimeseriesResult = *GetStatusTimeseriesResult
+
 // Status timeseries object
 type GetStatusTimeseriesResult struct {
 	// start time

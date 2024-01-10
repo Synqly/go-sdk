@@ -2,6 +2,11 @@
 
 package management
 
+type GetIntegrationTimeseriesRequest struct {
+	// [minute|hour] provide most recent 60 minute or 24 hour timeseries. default: minute
+	Interval *string `json:"-"`
+}
+
 type ListStatusRequest struct {
 	// Number of `Status` objects to return in this page. Defaults to 100.
 	Limit *int `json:"-"`
@@ -31,6 +36,11 @@ type ListStatusEventsRequest struct {
 	// Filter results by this query. For more information on filtering, refer to our Filtering Guide. Defaults to no filter.
 	// If used more than once, the queries are ANDed together.
 	Filter []*string `json:"-"`
+}
+
+// Get integration timeseries
+type GetIntegrationTimeseries struct {
+	Result GetIntegrationTimeseriesResult `json:"result,omitempty"`
 }
 
 type GetStatusResponse struct {
