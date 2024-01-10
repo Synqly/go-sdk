@@ -161,15 +161,14 @@ The `siem-connector` example will:
 3. The example depends on environment variables to connect to Synqly and Splunk. To allow the sample program to connect to Synqly, set the following environment variables to your Organization ID and API Token values.
 
     ```bash
-    export SYNQLY_ORG_ID=your-org-id
-    export SYNQLY_API_TOKEN=your-api-token
+    export SYNQLY_ORG_TOKEN=your-api-token
     ```
 
 4. Access to Splunk is also configured via environment variable. Set the following variables in your terminal:
 
     ```bash
     export SPLUNK_URL=https://my-org.splunkcloud.com:8088/services/collector/event
-    export SPLUNK_TOKEN=my-splunk-token
+    export SPLUNK_HEC_TOKEN=my-splunk-token
     ```
 
 5. Run the example:
