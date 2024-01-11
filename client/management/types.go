@@ -327,6 +327,13 @@ type TokenCredential struct {
 	Secret string `json:"secret"`
 }
 
+// Configuration for an Assets Provider
+type AssetsConfig struct {
+	CredentialId CredentialId `json:"credential_id,omitempty"`
+	// URL used for connecting to the external service. If not provided, will connect to the default endpoint for the Provider
+	Url *string `json:"url,omitempty"`
+}
+
 // Configuration specific to AWS type Event Providers
 type AwsConfig struct {
 	// Override the default AWS region for this integration. If not present, the region will be infered from the URL.
@@ -519,6 +526,7 @@ type PingOneConfig struct {
 
 type ProviderConfig struct {
 	Type            string
+	Assets          *AssetsConfig
 	Hooks           *HooksConfig
 	Identity        *IdentityConfig
 	Notifications   *NotificationConfig
@@ -527,6 +535,10 @@ type ProviderConfig struct {
 	Storage         *StorageConfig
 	Ticketing       *TicketingConfig
 	Vulnerabilities *VulnerabilityConfig
+}
+
+func NewProviderConfigFromAssets(value *AssetsConfig) *ProviderConfig {
+	return &ProviderConfig{Type: "assets", Assets: value}
 }
 
 func NewProviderConfigFromHooks(value *HooksConfig) *ProviderConfig {
@@ -570,6 +582,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 	}
 	p.Type = unmarshaler.Type
 	switch unmarshaler.Type {
+	case "assets":
+		value := new(AssetsConfig)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.Assets = value
 	case "hooks":
 		value := new(HooksConfig)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -626,6 +644,15 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	switch p.Type {
 	default:
 		return nil, fmt.Errorf("invalid type %s in %T", p.Type, p)
+	case "assets":
+		var marshaler = struct {
+			Type string `json:"type"`
+			*AssetsConfig
+		}{
+			Type:         p.Type,
+			AssetsConfig: p.Assets,
+		}
+		return json.Marshal(marshaler)
 	case "hooks":
 		var marshaler = struct {
 			Type string `json:"type"`
@@ -702,6 +729,7 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 }
 
 type ProviderConfigVisitor interface {
+	VisitAssets(*AssetsConfig) error
 	VisitHooks(*HooksConfig) error
 	VisitIdentity(*IdentityConfig) error
 	VisitNotifications(*NotificationConfig) error
@@ -716,6 +744,8 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	switch p.Type {
 	default:
 		return fmt.Errorf("invalid type %s in %T", p.Type, p)
+	case "assets":
+		return visitor.VisitAssets(p.Assets)
 	case "hooks":
 		return visitor.VisitHooks(p.Hooks)
 	case "identity":

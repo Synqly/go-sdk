@@ -19,6 +19,9 @@ import (
 	time "time"
 )
 
+// Device inventory information. Represented by OCSF Device Inventory Info class (class_uid 5001).
+type Device = *Event
+
 type Base struct {
 	// Human-readable name for this resource
 	Name string `json:"name"`

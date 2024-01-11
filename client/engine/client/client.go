@@ -3,6 +3,7 @@
 package client
 
 import (
+	assets "github.com/synqly/go-sdk/client/engine/assets"
 	core "github.com/synqly/go-sdk/client/engine/core"
 	hooks "github.com/synqly/go-sdk/client/engine/hooks"
 	identity "github.com/synqly/go-sdk/client/engine/identity"
@@ -20,6 +21,7 @@ type Client struct {
 	httpClient core.HTTPClient
 	header     http.Header
 
+	Assets          *assets.Client
 	Hooks           *hooks.Client
 	Identity        *identity.Client
 	Notifications   *notifications.Client
@@ -39,6 +41,7 @@ func NewClient(opts ...core.ClientOption) *Client {
 		baseURL:         options.BaseURL,
 		httpClient:      options.HTTPClient,
 		header:          options.ToHeader(),
+		Assets:          assets.NewClient(opts...),
 		Hooks:           hooks.NewClient(opts...),
 		Identity:        identity.NewClient(opts...),
 		Notifications:   notifications.NewClient(opts...),
