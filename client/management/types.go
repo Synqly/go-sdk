@@ -81,7 +81,7 @@ type CapabilitiesProviderConfig = map[string]interface{}
 
 // Provides details on an available Integration.
 type Category struct {
-	Category CategoryId `json:"category"`
+	Category CategoryId `json:"category,omitempty"`
 	// Description of what this Integration does.
 	Description string `json:"description"`
 	// List of Providers that implement this Integration.
@@ -91,7 +91,48 @@ type Category struct {
 }
 
 // Id of the Integrations category
-type CategoryId = string
+type CategoryId string
+
+const (
+	CategoryIdAssets          CategoryId = "assets"
+	CategoryIdHooks           CategoryId = "hooks"
+	CategoryIdIdentity        CategoryId = "identity"
+	CategoryIdNotifications   CategoryId = "notifications"
+	CategoryIdSiem            CategoryId = "siem"
+	CategoryIdSink            CategoryId = "sink"
+	CategoryIdStorage         CategoryId = "storage"
+	CategoryIdTicketing       CategoryId = "ticketing"
+	CategoryIdVulnerabilities CategoryId = "vulnerabilities"
+)
+
+func NewCategoryIdFromString(s string) (CategoryId, error) {
+	switch s {
+	case "assets":
+		return CategoryIdAssets, nil
+	case "hooks":
+		return CategoryIdHooks, nil
+	case "identity":
+		return CategoryIdIdentity, nil
+	case "notifications":
+		return CategoryIdNotifications, nil
+	case "siem":
+		return CategoryIdSiem, nil
+	case "sink":
+		return CategoryIdSink, nil
+	case "storage":
+		return CategoryIdStorage, nil
+	case "ticketing":
+		return CategoryIdTicketing, nil
+	case "vulnerabilities":
+		return CategoryIdVulnerabilities, nil
+	}
+	var t CategoryId
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (c CategoryId) Ptr() *CategoryId {
+	return &c
+}
 
 type Provider struct {
 	Id ProviderId `json:"id"`
@@ -493,7 +534,7 @@ type Integration struct {
 	// Account that manages this Integration.
 	AccountId AccountId `json:"account_id,omitempty"`
 	// Id of the categorical type for this Integration.
-	Category CategoryId `json:"category"`
+	Category CategoryId `json:"category,omitempty"`
 	// Provider implementation to use for this Integration.
 	ProviderType ProviderId `json:"provider_type"`
 	// Custom configuration for the Provider.

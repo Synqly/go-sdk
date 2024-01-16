@@ -41,7 +41,7 @@ type CreateIntegrationRequest struct {
 	Name *string `json:"name,omitempty"`
 	// Human friendly display name for this Integrations, will auto-generate 'name' field (if 'name' is not specified)
 	Fullname *string    `json:"fullname,omitempty"`
-	Category CategoryId `json:"category"`
+	Category CategoryId `json:"category,omitempty"`
 	// Provider implementation to use for this Integration.
 	ProviderType ProviderId `json:"provider_type"`
 	// Custom configuration for the Provider.
