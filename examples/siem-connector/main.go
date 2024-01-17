@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"math/rand"
 	"os"
 	"os/signal"
 	"strconv"
@@ -130,7 +129,7 @@ func (a *App) configureEventLogging(ctx context.Context, tenantID, siemProviderT
 	// We need to save the tenant's Splunk credentials in Synqly before configuring the Integration
 	// We will use the Synqly Client we created for the tenant to do this
 	credential, err := tenant.SynqlyClient.Credentials.CreateCredential(ctx, tenant.SynqlyAccountId, &mgmt.CreateCredentialRequest{
-		Fullname: mgmt.String(fmt.Sprintf("%s authentication token", siemProviderType)),
+		Fullname: engine.String(fmt.Sprintf("%s authentication token", siemProviderType)),
 		Config: mgmt.NewCredentialConfigFromToken(&mgmt.TokenCredential{
 			Secret: splunkToken,
 		}),
@@ -151,7 +150,7 @@ func (a *App) configureEventLogging(ctx context.Context, tenantID, siemProviderT
 	}
 
 	integration, err := tenant.SynqlyClient.Integrations.CreateIntegration(ctx, tenant.SynqlyAccountId, &mgmt.CreateIntegrationRequest{
-		Fullname:       mgmt.String("Background Event Logger"),
+		Fullname:       engine.String("Background Event Logger"),
 		Category:       "siem",
 		ProviderType:   siemProviderType,
 		ProviderConfig: providerConfig,
@@ -235,8 +234,8 @@ func (app *App) backgroundJob(durationSeconds int) {
 				consoleLogger.Printf("Logged event for tenant %s\n", tenant.ID)
 			}
 		}
-		time.Sleep(1*time.Second + time.Duration(rand.Intn(1000))*time.Millisecond)
-		fmt.Println()
+
+		time.Sleep(1 * time.Second)
 	}
 }
 
@@ -318,9 +317,9 @@ func main() {
 	}
 
 	// Uncomment the following to enable the in-memory mock SIEM provider for Tenant XYZ
-	if err := app.configureEventLogging(ctx, "Tenant XYZ", "inmem", ""); err != nil {
-		log.Fatal(err)
-	}
+	// if err := app.configureEventLogging(ctx, "Tenant XYZ", "inmem", ""); err != nil {
+	// 	log.Fatal(err)
+	// }
 
 	// Generate synthetic load for the tenants
 	if durationSeconds == "" {
