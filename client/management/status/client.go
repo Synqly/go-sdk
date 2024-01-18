@@ -183,8 +183,8 @@ func (c *Client) GetStatus(ctx context.Context, accountId management.AccountId, 
 	return response, nil
 }
 
-// Deletes the integration `Status` object.
-func (c *Client) DeleteStatus(ctx context.Context, accountId management.AccountId, integrationId management.IntegrationId) error {
+// Resets the integration `Status` object.
+func (c *Client) ResetStatus(ctx context.Context, accountId management.AccountId, integrationId management.IntegrationId) error {
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
@@ -235,7 +235,7 @@ func (c *Client) DeleteStatus(ctx context.Context, accountId management.AccountI
 		ctx,
 		c.httpClient,
 		endpointURL,
-		http.MethodDelete,
+		http.MethodPut,
 		nil,
 		nil,
 		false,
