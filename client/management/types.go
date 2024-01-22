@@ -340,9 +340,10 @@ type CredentialResponse struct {
 type CredentialType string
 
 const (
-	CredentialTypeAws   CredentialType = "aws"
-	CredentialTypeToken CredentialType = "token"
-	CredentialTypeBasic CredentialType = "basic"
+	CredentialTypeAws    CredentialType = "aws"
+	CredentialTypeToken  CredentialType = "token"
+	CredentialTypeBasic  CredentialType = "basic"
+	CredentialTypeSecret CredentialType = "secret"
 )
 
 func NewCredentialTypeFromString(s string) (CredentialType, error) {
@@ -353,6 +354,8 @@ func NewCredentialTypeFromString(s string) (CredentialType, error) {
 		return CredentialTypeToken, nil
 	case "basic":
 		return CredentialTypeBasic, nil
+	case "secret":
+		return CredentialTypeSecret, nil
 	}
 	var t CredentialType
 	return "", fmt.Errorf("%s is not a valid %T", s, t)
@@ -360,6 +363,12 @@ func NewCredentialTypeFromString(s string) (CredentialType, error) {
 
 func (c CredentialType) Ptr() *CredentialType {
 	return &c
+}
+
+// Secret value such as password or webhook url
+type SecretCredential struct {
+	// Secret value
+	Secret string `json:"secret"`
 }
 
 // Token used to authenticate with an external service.
