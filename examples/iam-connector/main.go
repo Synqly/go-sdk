@@ -113,12 +113,12 @@ func demoActions(userEmail, orgToken string, okta *oktaConfig) error {
 		return err
 	}
 	if len(user.Result) == 0 {
-		return fmt.Errorf("User with email %s not found", userEmail)
+		return fmt.Errorf("user with email %s not found", userEmail)
 	}
 
 	userID := *user.Result[0].Uid
 
-	consoleLogger.Printf("Found user id %s", userID)
+	consoleLogger.Printf("Found user id %s with name %s\n", userID, *user.Result[0].FullName)
 
 	// Reset user's password
 
@@ -129,7 +129,7 @@ func demoActions(userEmail, orgToken string, okta *oktaConfig) error {
 
 	err = t.Synqly.EngineClients["identity"].Identity.ForceResetPassword(ctx, userID)
 	if err != nil {
-		return fmt.Errorf("Error forcing password reset: %w", err)
+		return fmt.Errorf("error forcing password reset: %w", err)
 	} else {
 		consoleLogger.Printf("Forced password reset")
 	}
