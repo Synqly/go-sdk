@@ -215,10 +215,11 @@ type Credential struct {
 }
 
 type CredentialConfig struct {
-	Type  string
-	Aws   *AwsCredential
-	Token *TokenCredential
-	Basic *BasicCredential
+	Type   string
+	Aws    *AwsCredential
+	Token  *TokenCredential
+	Basic  *BasicCredential
+	Secret *SecretCredential
 }
 
 func NewCredentialConfigFromAws(value *AwsCredential) *CredentialConfig {
@@ -231,6 +232,10 @@ func NewCredentialConfigFromToken(value *TokenCredential) *CredentialConfig {
 
 func NewCredentialConfigFromBasic(value *BasicCredential) *CredentialConfig {
 	return &CredentialConfig{Type: "basic", Basic: value}
+}
+
+func NewCredentialConfigFromSecret(value *SecretCredential) *CredentialConfig {
+	return &CredentialConfig{Type: "secret", Secret: value}
 }
 
 func (c *CredentialConfig) UnmarshalJSON(data []byte) error {
@@ -260,6 +265,12 @@ func (c *CredentialConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		c.Basic = value
+	case "secret":
+		value := new(SecretCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		c.Secret = value
 	}
 	return nil
 }
@@ -295,6 +306,15 @@ func (c CredentialConfig) MarshalJSON() ([]byte, error) {
 			BasicCredential: c.Basic,
 		}
 		return json.Marshal(marshaler)
+	case "secret":
+		var marshaler = struct {
+			Type string `json:"type"`
+			*SecretCredential
+		}{
+			Type:             c.Type,
+			SecretCredential: c.Secret,
+		}
+		return json.Marshal(marshaler)
 	}
 }
 
@@ -302,6 +322,7 @@ type CredentialConfigVisitor interface {
 	VisitAws(*AwsCredential) error
 	VisitToken(*TokenCredential) error
 	VisitBasic(*BasicCredential) error
+	VisitSecret(*SecretCredential) error
 }
 
 func (c *CredentialConfig) Accept(visitor CredentialConfigVisitor) error {
@@ -314,6 +335,8 @@ func (c *CredentialConfig) Accept(visitor CredentialConfigVisitor) error {
 		return visitor.VisitToken(c.Token)
 	case "basic":
 		return visitor.VisitBasic(c.Basic)
+	case "secret":
+		return visitor.VisitSecret(c.Secret)
 	}
 }
 
