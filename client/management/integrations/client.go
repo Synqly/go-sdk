@@ -323,6 +323,79 @@ func (c *Client) CreateIntegration(ctx context.Context, accountId management.Acc
 	return response, nil
 }
 
+// Verifies an ephemeral `Integration` and provider configuration and tests the authentication and provider connectivity.
+// The provider config credential IDs can utilize persistent IDs or use "#/n" reference IDs;
+// where (n) is the zero based offset in the optional credentials list.
+func (c *Client) VerifyIntegration(ctx context.Context, accountId management.AccountId, request *management.VerifyIntegrationRequest) error {
+	baseURL := "https://api.synqly.com"
+	if c.baseURL != "" {
+		baseURL = c.baseURL
+	}
+	endpointURL := fmt.Sprintf(baseURL+"/"+"v1/integrations/%v/verify", accountId)
+
+	errorDecoder := func(statusCode int, body io.Reader) error {
+		raw, err := io.ReadAll(body)
+		if err != nil {
+			return err
+		}
+		apiError := core.NewAPIError(statusCode, errors.New(string(raw)))
+		decoder := json.NewDecoder(bytes.NewReader(raw))
+		switch statusCode {
+		case 400:
+			value := new(management.BadRequestError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 404:
+			value := new(management.NotFoundError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 409:
+			value := new(management.ConflictError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 403:
+			value := new(management.ForbiddenError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 401:
+			value := new(management.UnauthorizedError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		}
+		return apiError
+	}
+
+	if err := core.DoRequest(
+		ctx,
+		c.httpClient,
+		endpointURL,
+		http.MethodPost,
+		request,
+		nil,
+		false,
+		c.header,
+		errorDecoder,
+	); err != nil {
+		return err
+	}
+	return nil
+}
+
 // Updates the `Integration` object matching `{integrationId}`, where the
 // `Integration` belongs to the `Account` matching `{accountId}`.
 func (c *Client) UpdateIntegration(ctx context.Context, accountId management.AccountId, integrationId management.IntegrationId, request management.UpdateIntegrationRequest) (*management.UpdateIntegrationResponse, error) {
