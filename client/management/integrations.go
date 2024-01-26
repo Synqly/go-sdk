@@ -75,6 +75,6 @@ type UpdateIntegrationResponse struct {
 }
 
 type VerifyIntegrationRequest struct {
-	Integration *CreateIntegrationRequest  `json:"Integration,omitempty"`
-	Credentials []*CreateCredentialRequest `json:"Credentials,omitempty"`
+	Integration *CreateIntegrationRequest  `json:"integration,omitempty"`
+	Credentials []*CreateCredentialRequest `json:"credentials,omitempty"`
 }
