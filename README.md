@@ -1,3 +1,5 @@
+\*\*\*\*\*\***CONFIDENTIAL**\*\*\*\*\*\*
+
 # Synqly Go SDK
 
 This repository contains Go packages for integrating with Synqly APIs.
