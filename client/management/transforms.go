@@ -20,7 +20,7 @@ type ListTransformsRequest struct {
 }
 
 type CreateTransformRequest struct {
-	// Unique short name for this Organization (lowercase [a-z0-9_-], can be used in URLs). Also used for case insenitive duplicate name detection and default sort order. Defaults to TransformId if both name and fullname are not specified.
+	// Unique short name for this Organization (lowercase [a-z0-9_-], can be used in URLs). Also used for case insensitive duplicate name detection and default sort order. Defaults to TransformId if both name and fullname are not specified.
 	Name *string `json:"name,omitempty"`
 	// Human friendly display name for this Organization, will auto-generate 'name' field (if 'name' is not specified)
 	Fullname *string `json:"fullname,omitempty"`

@@ -215,11 +215,12 @@ type Credential struct {
 }
 
 type CredentialConfig struct {
-	Type   string
-	Aws    *AwsCredential
-	Token  *TokenCredential
-	Basic  *BasicCredential
-	Secret *SecretCredential
+	Type        string
+	Aws         *AwsCredential
+	Token       *TokenCredential
+	Basic       *BasicCredential
+	Secret      *SecretCredential
+	OAuthClient *OAuthClientCredential
 }
 
 func NewCredentialConfigFromAws(value *AwsCredential) *CredentialConfig {
@@ -236,6 +237,10 @@ func NewCredentialConfigFromBasic(value *BasicCredential) *CredentialConfig {
 
 func NewCredentialConfigFromSecret(value *SecretCredential) *CredentialConfig {
 	return &CredentialConfig{Type: "secret", Secret: value}
+}
+
+func NewCredentialConfigFromOAuthClient(value *OAuthClientCredential) *CredentialConfig {
+	return &CredentialConfig{Type: "o_auth_client", OAuthClient: value}
 }
 
 func (c *CredentialConfig) UnmarshalJSON(data []byte) error {
@@ -271,6 +276,12 @@ func (c *CredentialConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		c.Secret = value
+	case "o_auth_client":
+		value := new(OAuthClientCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		c.OAuthClient = value
 	}
 	return nil
 }
@@ -315,6 +326,15 @@ func (c CredentialConfig) MarshalJSON() ([]byte, error) {
 			SecretCredential: c.Secret,
 		}
 		return json.Marshal(marshaler)
+	case "o_auth_client":
+		var marshaler = struct {
+			Type string `json:"type"`
+			*OAuthClientCredential
+		}{
+			Type:                  c.Type,
+			OAuthClientCredential: c.OAuthClient,
+		}
+		return json.Marshal(marshaler)
 	}
 }
 
@@ -323,6 +343,7 @@ type CredentialConfigVisitor interface {
 	VisitToken(*TokenCredential) error
 	VisitBasic(*BasicCredential) error
 	VisitSecret(*SecretCredential) error
+	VisitOAuthClient(*OAuthClientCredential) error
 }
 
 func (c *CredentialConfig) Accept(visitor CredentialConfigVisitor) error {
@@ -337,6 +358,8 @@ func (c *CredentialConfig) Accept(visitor CredentialConfigVisitor) error {
 		return visitor.VisitBasic(c.Basic)
 	case "secret":
 		return visitor.VisitSecret(c.Secret)
+	case "o_auth_client":
+		return visitor.VisitOAuthClient(c.OAuthClient)
 	}
 }
 
@@ -363,10 +386,11 @@ type CredentialResponse struct {
 type CredentialType string
 
 const (
-	CredentialTypeAws    CredentialType = "aws"
-	CredentialTypeToken  CredentialType = "token"
-	CredentialTypeBasic  CredentialType = "basic"
-	CredentialTypeSecret CredentialType = "secret"
+	CredentialTypeAws         CredentialType = "aws"
+	CredentialTypeToken       CredentialType = "token"
+	CredentialTypeBasic       CredentialType = "basic"
+	CredentialTypeSecret      CredentialType = "secret"
+	CredentialTypeOAuthClient CredentialType = "o_auth_client"
 )
 
 func NewCredentialTypeFromString(s string) (CredentialType, error) {
@@ -379,6 +403,8 @@ func NewCredentialTypeFromString(s string) (CredentialType, error) {
 		return CredentialTypeBasic, nil
 	case "secret":
 		return CredentialTypeSecret, nil
+	case "o_auth_client":
+		return CredentialTypeOAuthClient, nil
 	}
 	var t CredentialType
 	return "", fmt.Errorf("%s is not a valid %T", s, t)
@@ -386,6 +412,18 @@ func NewCredentialTypeFromString(s string) (CredentialType, error) {
 
 func (c CredentialType) Ptr() *CredentialType {
 	return &c
+}
+
+// A Client ID and secret used for authenticating with OAuth 2.0 compatible service using the client credentials grant.
+type OAuthClientCredential struct {
+	// The OAuth 2.0 token URL for the service provider
+	TokenUrl string `json:"token_url"`
+	// The ID of the client application defined at the service provider
+	ClientId string `json:"client_id"`
+	// Secret value for authentication
+	ClientSecret string `json:"client_secret"`
+	// Optional connection specific meta data such as a signing key ID or organization ID
+	Extra map[string]interface{} `json:"extra,omitempty"`
 }
 
 // Secret value such as password or webhook url
