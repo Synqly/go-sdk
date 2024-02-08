@@ -36,7 +36,7 @@ func NewClient(opts ...core.ClientOption) *Client {
 // Returns a list of all `Account` objects. For more information on
 // Organizations and Accounts, refer to our
 // [Synqly Overview](https://docs.synqly.com/docs/synqly-overview).
-func (c *Client) ListAccounts(ctx context.Context, request *management.ListAccountsRequest) (*management.ListAccountsResponse, error) {
+func (c *Client) List(ctx context.Context, request *management.ListAccountsRequest) (*management.ListAccountsResponse, error) {
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
@@ -116,7 +116,7 @@ func (c *Client) ListAccounts(ctx context.Context, request *management.ListAccou
 // Returns the `Account` object matching `{accountId}`. For more information on
 // Organizations and Accounts, refer to our
 // [Synqly Overview](https://docs.synqly.com/docs/synqly-overview).
-func (c *Client) GetAccount(ctx context.Context, accountId management.AccountId) (*management.GetAccountResponse, error) {
+func (c *Client) Get(ctx context.Context, accountId management.AccountId) (*management.GetAccountResponse, error) {
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
@@ -176,7 +176,7 @@ func (c *Client) GetAccount(ctx context.Context, accountId management.AccountId)
 // Creates an `Account` object. For more information on Organizations and
 // Accounts, refer to our
 // [Synqly Overview](https://docs.synqly.com/docs/synqly-overview).
-func (c *Client) CreateAccount(ctx context.Context, request *management.CreateAccountRequest) (*management.CreateAccountResponse, error) {
+func (c *Client) Create(ctx context.Context, request *management.CreateAccountRequest) (*management.CreateAccountResponse, error) {
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
@@ -250,7 +250,7 @@ func (c *Client) CreateAccount(ctx context.Context, request *management.CreateAc
 // Updates the `Account` object matching `{accountId}`. For more information on
 // Organizations and Accounts, refer to our
 // [Synqly Overview](https://docs.synqly.com/docs/synqly-overview).
-func (c *Client) UpdateAccount(ctx context.Context, accountId management.AccountId, request management.UpdateAccountRequest) (*management.UpdateAccountResponse, error) {
+func (c *Client) Update(ctx context.Context, accountId management.AccountId, request management.UpdateAccountRequest) (*management.UpdateAccountResponse, error) {
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
@@ -324,7 +324,7 @@ func (c *Client) UpdateAccount(ctx context.Context, accountId management.Account
 // Patches the `Account` object matching `{accountId}`. For more information on
 // Organizations and Accounts, refer to our
 // [Synqly Overview](https://docs.synqly.com/docs/synqly-overview).
-func (c *Client) PatchAccount(ctx context.Context, accountId management.AccountId, request []map[string]interface{}) (*management.PatchAccountResponse, error) {
+func (c *Client) Patch(ctx context.Context, accountId management.AccountId, request []map[string]interface{}) (*management.PatchAccountResponse, error) {
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
@@ -390,7 +390,7 @@ func (c *Client) PatchAccount(ctx context.Context, accountId management.AccountI
 
 // Deletes the `Account` matching `{accountId}`. Deleting an `Account` also deletea
 // all `Tokens` and `Credentials` belonging to the `Account`.
-func (c *Client) DeleteAccount(ctx context.Context, accountId management.AccountId) error {
+func (c *Client) Delete(ctx context.Context, accountId management.AccountId) error {
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
