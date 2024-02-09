@@ -34,7 +34,7 @@ func NewClient(opts ...core.ClientOption) *Client {
 }
 
 // Returns a list of all `Integration` objects that match the query params.
-func (c *Client) List(ctx context.Context, request *management.ListIntegrationsRequest) (*management.ListIntegrationsResponse, error) {
+func (c *Client) ListIntegrations(ctx context.Context, request *management.ListIntegrationsRequest) (*management.ListIntegrationsResponse, error) {
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
@@ -113,7 +113,7 @@ func (c *Client) List(ctx context.Context, request *management.ListIntegrationsR
 
 // Returns a list of all `Integration` objects belonging to the
 // `Account` matching `{accountId}`.
-func (c *Client) ListForAccount(ctx context.Context, accountId management.AccountId, request *management.ListAccountIntegrationsRequest) (*management.ListAccountIntegrationsResponse, error) {
+func (c *Client) ListAccountIntegrations(ctx context.Context, accountId management.AccountId, request *management.ListAccountIntegrationsRequest) (*management.ListAccountIntegrationsResponse, error) {
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
@@ -192,7 +192,7 @@ func (c *Client) ListForAccount(ctx context.Context, accountId management.Accoun
 
 // Returns the `Integration` object matching `{integrationId}` where
 // the `Integration` belongs to the `Account` matching `{accountId}`.
-func (c *Client) Get(ctx context.Context, accountId management.AccountId, integrationId management.IntegrationId) (*management.GetIntegrationResponse, error) {
+func (c *Client) GetIntegration(ctx context.Context, accountId management.AccountId, integrationId management.IntegrationId) (*management.GetIntegrationResponse, error) {
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
@@ -252,7 +252,7 @@ func (c *Client) Get(ctx context.Context, accountId management.AccountId, integr
 // Creates an `Integration` object belonging to the `Account` matching
 // `{accountId}`. Configures the `Integration` with the Provider specified
 // in the request. Returns an `Integration` token for use with `Integration` APIs.
-func (c *Client) Create(ctx context.Context, accountId management.AccountId, request *management.CreateIntegrationRequest) (*management.CreateIntegrationResponse, error) {
+func (c *Client) CreateIntegration(ctx context.Context, accountId management.AccountId, request *management.CreateIntegrationRequest) (*management.CreateIntegrationResponse, error) {
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
@@ -326,7 +326,7 @@ func (c *Client) Create(ctx context.Context, accountId management.AccountId, req
 // Verifies an ephemeral `Integration` and provider configuration and tests the authentication and provider connectivity.
 // The provider config credential IDs can utilize persistent IDs or use "#/n" reference IDs;
 // where (n) is the zero based offset in the optional credentials list.
-func (c *Client) Verify(ctx context.Context, accountId management.AccountId, request *management.VerifyIntegrationRequest) error {
+func (c *Client) VerifyIntegration(ctx context.Context, accountId management.AccountId, request *management.VerifyIntegrationRequest) error {
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
@@ -398,7 +398,7 @@ func (c *Client) Verify(ctx context.Context, accountId management.AccountId, req
 
 // Updates the `Integration` object matching `{integrationId}`, where the
 // `Integration` belongs to the `Account` matching `{accountId}`.
-func (c *Client) Update(ctx context.Context, accountId management.AccountId, integrationId management.IntegrationId, request management.UpdateIntegrationRequest) (*management.UpdateIntegrationResponse, error) {
+func (c *Client) UpdateIntegration(ctx context.Context, accountId management.AccountId, integrationId management.IntegrationId, request management.UpdateIntegrationRequest) (*management.UpdateIntegrationResponse, error) {
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
@@ -471,7 +471,7 @@ func (c *Client) Update(ctx context.Context, accountId management.AccountId, int
 
 // Patches the `Integration` object matching `{integrationId}`, where the
 // `Integration` belongs to the `Account` matching `{accountId}`.
-func (c *Client) Patch(ctx context.Context, accountId management.AccountId, integrationId management.IntegrationId, request []map[string]interface{}) (*management.PatchIntegrationResponse, error) {
+func (c *Client) PatchIntegration(ctx context.Context, accountId management.AccountId, integrationId management.IntegrationId, request []map[string]interface{}) (*management.PatchIntegrationResponse, error) {
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
@@ -538,7 +538,7 @@ func (c *Client) Patch(ctx context.Context, accountId management.AccountId, inte
 // Deletes the `Integration` object matching `{integrationId}, where the
 // `Integration` belongs to the `Account` matching `{accountId}`. Deleting
 // an `Integration` also deletes any tokens that belong to it.
-func (c *Client) Delete(ctx context.Context, accountId management.AccountId, integrationId management.IntegrationId) error {
+func (c *Client) DeleteIntegration(ctx context.Context, accountId management.AccountId, integrationId management.IntegrationId) error {
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
