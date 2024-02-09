@@ -2,7 +2,7 @@
 
 package management
 
-type ListIntegrationsRequest struct {
+type ListAccountIntegrationsRequest struct {
 	// Number of `Integration` objects to return in this page. Defaults to 100.
 	Limit *int `json:"-"`
 	// Return `Integration` objects starting after this `name`.
@@ -19,7 +19,7 @@ type ListIntegrationsRequest struct {
 	Filter []*string `json:"-"`
 }
 
-type ListAccountIntegrationsRequest struct {
+type ListIntegrationsRequest struct {
 	// Number of `Integration` objects to return in this page. Defaults to 100.
 	Limit *int `json:"-"`
 	// Return `Integration` objects starting after this `name`.
@@ -40,8 +40,11 @@ type CreateIntegrationRequest struct {
 	// Unique short name for this Integrations (lowercase [a-z0-9_-], can be used in URLs). Also used for case insensitive duplicate name detection and default sort order. Defaults to IntegrationId if both name and fullname are not specified.
 	Name *string `json:"name,omitempty"`
 	// Human friendly display name for this Integrations, will auto-generate 'name' field (if 'name' is not specified)
-	Fullname *string `json:"fullname,omitempty"`
-	// Provider configuration for this Integration.
+	Fullname *string    `json:"fullname,omitempty"`
+	Category CategoryId `json:"category,omitempty"`
+	// Provider implementation to use for this Integration.
+	ProviderType ProviderId `json:"provider_type"`
+	// Custom configuration for the Provider.
 	ProviderConfig *ProviderConfig `json:"provider_config,omitempty"`
 }
 
@@ -72,5 +75,6 @@ type UpdateIntegrationResponse struct {
 }
 
 type VerifyIntegrationRequest struct {
-	Integration *CreateIntegrationRequest `json:"integration,omitempty"`
+	Integration *CreateIntegrationRequest  `json:"integration,omitempty"`
+	Credentials []*CreateCredentialRequest `json:"credentials,omitempty"`
 }

@@ -10,7 +10,6 @@ import (
 	credentials "github.com/synqly/go-sdk/client/management/credentials"
 	integrations "github.com/synqly/go-sdk/client/management/integrations"
 	members "github.com/synqly/go-sdk/client/management/members"
-	meta "github.com/synqly/go-sdk/client/management/meta"
 	organization "github.com/synqly/go-sdk/client/management/organization"
 	status "github.com/synqly/go-sdk/client/management/status"
 	tokens "github.com/synqly/go-sdk/client/management/tokens"
@@ -29,7 +28,6 @@ type Client struct {
 	Credentials  *credentials.Client
 	Integrations *integrations.Client
 	Members      *members.Client
-	Meta         *meta.Client
 	Organization *organization.Client
 	Status       *status.Client
 	Tokens       *tokens.Client
@@ -51,7 +49,6 @@ func NewClient(opts ...core.ClientOption) *Client {
 		Credentials:  credentials.NewClient(opts...),
 		Integrations: integrations.NewClient(opts...),
 		Members:      members.NewClient(opts...),
-		Meta:         meta.NewClient(opts...),
 		Organization: organization.NewClient(opts...),
 		Status:       status.NewClient(opts...),
 		Tokens:       tokens.NewClient(opts...),
