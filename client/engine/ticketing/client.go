@@ -8,11 +8,12 @@ import (
 	json "encoding/json"
 	errors "errors"
 	fmt "fmt"
-	engine "github.com/synqly/go-sdk/client/engine"
-	core "github.com/synqly/go-sdk/client/engine/core"
 	io "io"
 	http "net/http"
 	url "net/url"
+
+	engine "github.com/synqly/go-sdk/client/engine"
+	core "github.com/synqly/go-sdk/client/engine/core"
 )
 
 type Client struct {
