@@ -79,25 +79,17 @@ func waitForAuditLogResult(ctx context.Context, client *engineClient.Client, req
 func demoActions(userEmail, orgToken string, okta *oktaConfig) error {
 	ctx := context.Background()
 
-	t, err := common.NewTenant(ctx, "Secure Identities Co", "tenant_store.yaml", orgToken, map[mgmt.CategoryId]common.AuthAndConfig{
-		"identity": {
-			Auth: &mgmt.CreateCredentialRequest{
-				Fullname: mgmt.String("okta"),
-				Config: mgmt.NewCredentialConfigFromToken(&mgmt.TokenCredential{
-					Secret: oktaConf.Token,
+	t, err := common.NewTenant(ctx, "Secure Identities Co", "tenant_store.yaml", orgToken, map[mgmt.CategoryId]*mgmt.CreateIntegrationRequest{
+		mgmt.CategoryIdIdentity: {
+			Fullname: mgmt.String("IAM Actions"),
+			ProviderConfig: mgmt.NewProviderConfigFromIdentityOkta(&mgmt.IdentityOkta{
+				Url: okta.URL,
+				Credential: mgmt.NewOktaCredentialFromToken(&mgmt.TokenCredential{
+					Secret: okta.Token,
 				}),
-			},
-			Config: &mgmt.CreateIntegrationRequest{
-				Fullname:     mgmt.String("IAM Actions"),
-				Category:     "identity",
-				ProviderType: "okta",
-				ProviderConfig: mgmt.NewProviderConfigFromIdentity(&mgmt.IdentityConfig{
-					Url: mgmt.String(oktaConf.URL),
-				}),
-			},
+			}),
 		},
-	},
-	)
+	})
 	if err != nil {
 		return fmt.Errorf("unable to create tenant: %w", err)
 	}

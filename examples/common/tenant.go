@@ -36,20 +36,15 @@ type TenantConfig struct {
 }
 
 type SynqlyConfig struct {
-	AccountID string            `yaml:"account_id"`
-	Tokens    map[string]string `yaml:"tokens"`
-}
-
-type AuthAndConfig struct {
-	Auth   *mgmt.CreateCredentialRequest
-	Config *mgmt.CreateIntegrationRequest
+	AccountID string                     `yaml:"account_id"`
+	Tokens    map[mgmt.CategoryId]string `yaml:"tokens"`
 }
 
 // NewTenant creates a tenant and configures it with Synqly. If this tenant does not
 // have a saved config file, then a new Synqly Account will be created with a identity
 // connector. If the tenant already has a config file, then the existing
 // Synqly Account and connectors will be used.
-func NewTenant(ctx context.Context, id, configFilePath, synqlyOrgToken string, providers map[mgmt.ProviderId]AuthAndConfig) (*Tenant, error) {
+func NewTenant(ctx context.Context, id, configFilePath, synqlyOrgToken string, integrations map[mgmt.CategoryId]*mgmt.CreateIntegrationRequest) (*Tenant, error) {
 	tenant := &Tenant{}
 	config := &TenantConfig{}
 
@@ -67,7 +62,7 @@ func NewTenant(ctx context.Context, id, configFilePath, synqlyOrgToken string, p
 	}
 
 	if config.SynqlyConfig.Tokens == nil {
-		config.SynqlyConfig.Tokens = make(map[string]string)
+		config.SynqlyConfig.Tokens = make(map[mgmt.CategoryId]string)
 	}
 
 	if tenant.Synqly.EngineClients == nil {
@@ -78,7 +73,7 @@ func NewTenant(ctx context.Context, id, configFilePath, synqlyOrgToken string, p
 		mgmtClient.WithAuthToken(synqlyOrgToken),
 	)
 
-	if err := tenant.Init(ctx, id, config, providers); err != nil {
+	if err := tenant.Init(ctx, id, config, integrations); err != nil {
 		return nil, err
 	}
 
@@ -97,10 +92,10 @@ func NewTenant(ctx context.Context, id, configFilePath, synqlyOrgToken string, p
 }
 
 // Init initializes the tenant's Synqly Account and Connectors clients
-func (t *Tenant) Init(ctx context.Context, tenantID string, config *TenantConfig, providers map[mgmt.CategoryId]AuthAndConfig) error {
+func (t *Tenant) Init(ctx context.Context, tenantID string, config *TenantConfig, integrations map[mgmt.CategoryId]*mgmt.CreateIntegrationRequest) error {
 	accountId := config.SynqlyConfig.AccountID
 	if accountId == "" {
-		account, err := t.Synqly.management.Accounts.CreateAccount(ctx, &mgmt.CreateAccountRequest{
+		account, err := t.Synqly.management.Accounts.Create(ctx, &mgmt.CreateAccountRequest{
 			Fullname: mgmt.String(tenantID),
 		})
 		if err != nil {
@@ -117,11 +112,11 @@ func (t *Tenant) Init(ctx context.Context, tenantID string, config *TenantConfig
 	var err error
 	var token string
 
-	for categoryID, provider := range providers {
-		consoleLogger.Printf("Configuring %s connector\n", categoryID)
+	for categoryID, integration := range integrations {
+		consoleLogger.Printf("Configuring %s connector\n", integration.ProviderConfig.Type)
 
 		if config.SynqlyConfig.Tokens[categoryID] == "" {
-			t.Synqly.EngineClients[categoryID], token, err = t.ConfigureConnector(ctx, &provider)
+			t.Synqly.EngineClients[categoryID], token, err = t.ConfigureConnector(ctx, integration)
 			if err != nil {
 				return fmt.Errorf("init failed, unable to configure %s connector: %w", categoryID, err)
 			}
@@ -136,39 +131,12 @@ func (t *Tenant) Init(ctx context.Context, tenantID string, config *TenantConfig
 	return nil
 }
 
-func (t *Tenant) ConfigureConnector(ctx context.Context, conf *AuthAndConfig) (*engineClient.Client, string, error) {
+func (t *Tenant) ConfigureConnector(ctx context.Context, integration *mgmt.CreateIntegrationRequest) (*engineClient.Client, string, error) {
 	if t.Synqly.management == nil {
 		return nil, "", errors.New("must set synqly.management")
 	}
 
-	credential, err := t.Synqly.management.Credentials.CreateCredential(ctx, t.Synqly.accountId, conf.Auth)
-	if err != nil {
-		return nil, "", fmt.Errorf("unable to create credential: %w", err)
-	}
-
-	// inject credential id into provider config
-	switch conf.Config.Category {
-	case "hooks":
-		conf.Config.ProviderConfig.Hooks.CredentialId = credential.Result.Id
-	case "identity":
-		conf.Config.ProviderConfig.Identity.CredentialId = credential.Result.Id
-	case "notifications":
-		conf.Config.ProviderConfig.Notifications.CredentialId = credential.Result.Id
-	case "siem":
-		conf.Config.ProviderConfig.Siem.CredentialId = credential.Result.Id
-	case "sink":
-		conf.Config.ProviderConfig.Sink.CredentialId = credential.Result.Id
-	case "storage":
-		conf.Config.ProviderConfig.Storage.CredentialId = credential.Result.Id
-	case "ticketing":
-		conf.Config.ProviderConfig.Ticketing.CredentialId = credential.Result.Id
-	case "vulnerabilities":
-		conf.Config.ProviderConfig.Vulnerabilities.CredentialId = credential.Result.Id
-	default:
-		return nil, "", fmt.Errorf("unknown provider type: %s", conf.Config.ProviderType)
-	}
-
-	resp, err := t.Synqly.management.Integrations.CreateIntegration(ctx, t.Synqly.accountId, conf.Config)
+	resp, err := t.Synqly.management.Integrations.Create(ctx, t.Synqly.accountId, integration)
 	if err != nil {
 		return nil, "", fmt.Errorf("unable to create integration: %w", err)
 	}

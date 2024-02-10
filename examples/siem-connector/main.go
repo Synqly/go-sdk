@@ -80,7 +80,7 @@ func (a *App) NewTenant(ctx context.Context, id string) error {
 	// Create a Synqly Account for this tenant
 	account, err := mgmtClient.NewClient(
 		mgmtClient.WithAuthToken(synqlyOrgToken),
-	).Accounts.CreateAccount(ctx, &mgmt.CreateAccountRequest{
+	).Accounts.Create(ctx, &mgmt.CreateAccountRequest{
 		Fullname: &id,
 	})
 	if err != nil {
@@ -129,7 +129,7 @@ func (a *App) configureEventLogging(ctx context.Context, tenantID, siemProviderT
 
 	// We need to save the tenant's Splunk credentials in Synqly before configuring the Integration
 	// We will use the Synqly Client we created for the tenant to do this
-	credential, err := tenant.SynqlyClient.Credentials.CreateCredential(ctx, tenant.SynqlyAccountId, &mgmt.CreateCredentialRequest{
+	credential, err := tenant.SynqlyClient.Credentials.Create(ctx, tenant.SynqlyAccountId, &mgmt.CreateCredentialRequest{
 		Fullname: mgmt.String(fmt.Sprintf("%s authentication token", siemProviderType)),
 		Config: mgmt.NewCredentialConfigFromToken(&mgmt.TokenCredential{
 			Secret: splunkToken,
@@ -150,10 +150,8 @@ func (a *App) configureEventLogging(ctx context.Context, tenantID, siemProviderT
 		return fmt.Errorf("invalid siem provider type: %s", siemProviderType)
 	}
 
-	integration, err := tenant.SynqlyClient.Integrations.CreateIntegration(ctx, tenant.SynqlyAccountId, &mgmt.CreateIntegrationRequest{
+	integration, err := tenant.SynqlyClient.Integrations.Create(ctx, tenant.SynqlyAccountId, &mgmt.CreateIntegrationRequest{
 		Fullname:       mgmt.String("Background Event Logger"),
-		Category:       "siem",
-		ProviderType:   siemProviderType,
 		ProviderConfig: providerConfig,
 	})
 	if err != nil {
@@ -170,27 +168,19 @@ func (a *App) configureEventLogging(ctx context.Context, tenantID, siemProviderT
 }
 
 func (a *App) splunkConfig(splunkURL, credentialId string) *mgmt.ProviderConfig {
-	return mgmt.NewProviderConfigFromSiem(&mgmt.SiemConfig{
-		Url:          &splunkURL,
-		CredentialId: credentialId,
-		Config: &mgmt.SiemProviderTypeConfig{
-			Type: "splunk",
-			Splunk: &mgmt.SplunkConfig{
-				// Do not verify the Splunk server's TLS certificate. This
-				// is not recommended for production use; however, it is set
-				// here because Splunk HEC endpoints use self-signed
-				// "SplunkServerDefaultCert" certificates by default.
-				SkipTlsVerify: true,
-			},
-		},
+	return mgmt.NewProviderConfigFromSiemSplunk(&mgmt.SiemSplunk{
+		HecUrl:        splunkURL,
+		HecCredential: mgmt.NewSplunkHecTokenFromTokenId(credentialId),
+		// Do not verify the Splunk server's TLS certificate. This
+		// is not recommended for production use; however, it is set
+		// here because Splunk Cloud HEC endpoints use self-signed
+		// "SplunkServerDefaultCert" certificates by default.
+		SkipTlsVerify: true,
 	})
 }
 
 func (a *App) inmemConfig() *mgmt.ProviderConfig {
-	return mgmt.NewProviderConfigFromSiem(&mgmt.SiemConfig{
-		Url:          nil,
-		CredentialId: "not-used",
-	})
+	return mgmt.NewProviderConfigFromSiemMockSiem(&mgmt.SiemMock{})
 }
 
 // example, we print a message for every Tenant tenant at regular intervals,
@@ -275,7 +265,7 @@ func (app *App) cleanup() {
 	ctx := context.Background()
 	for _, tenant := range app.Tenants {
 		// Deleting the account will delete all credentials and integrations associated with the account.
-		if err := tenant.SynqlyClient.Accounts.DeleteAccount(ctx, tenant.SynqlyAccountId); err != nil {
+		if err := tenant.SynqlyClient.Accounts.Delete(ctx, tenant.SynqlyAccountId); err != nil {
 			consoleLogger.Printf("Error deleting account %s: %s\n", tenant.SynqlyAccountId, err)
 		}
 	}
