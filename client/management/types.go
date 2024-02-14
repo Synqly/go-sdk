@@ -3418,9 +3418,6 @@ type Action = string
 // APIs allowed access to by prefix endpoint match. Can be used to allow access to select APIs like /v1/accounts, /v1/credentials, and /v1/transforms.
 type AllowedApi = string
 
-// APIs disallowed access to by prefix endpoint match. Can be used to block access to select APIs like /v1/users, /v1/tokens, and /v1/credentials.
-type BlockedApi = string
-
 type Constraint struct {
 	// Contained object constraint granted access or "*".
 	Object string `json:"object"`
@@ -3457,8 +3454,6 @@ type Role struct {
 	Constraints []*Constraint `json:"constraints,omitempty"`
 	// Optional list of APIs that this role allows access to. Can be used to allow access to select APIs like /v1/accounts, v1/credentials and /v1/transforms
 	AllowedApis []AllowedApi `json:"allowed_apis,omitempty"`
-	// Optional list of APIs that this role blocks access to. Can be used to block access to select APIs like /v1/user, v1/tokens and /v1/credentials
-	BlockedApis []BlockedApi `json:"blocked_apis,omitempty"`
 }
 
 type GetIntegrationTimeseriesResult = *GetStatusTimeseriesResult
