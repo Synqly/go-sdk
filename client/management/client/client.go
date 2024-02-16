@@ -5,6 +5,7 @@ package client
 import (
 	accounts "github.com/synqly/go-sdk/client/management/accounts"
 	audit "github.com/synqly/go-sdk/client/management/audit"
+	auth "github.com/synqly/go-sdk/client/management/auth"
 	capabilities "github.com/synqly/go-sdk/client/management/capabilities"
 	core "github.com/synqly/go-sdk/client/management/core"
 	credentials "github.com/synqly/go-sdk/client/management/credentials"
@@ -25,6 +26,7 @@ type Client struct {
 
 	Accounts     *accounts.Client
 	Audit        *audit.Client
+	Auth         *auth.Client
 	Capabilities *capabilities.Client
 	Credentials  *credentials.Client
 	Integrations *integrations.Client
@@ -47,6 +49,7 @@ func NewClient(opts ...core.ClientOption) *Client {
 		header:       options.ToHeader(),
 		Accounts:     accounts.NewClient(opts...),
 		Audit:        audit.NewClient(opts...),
+		Auth:         auth.NewClient(opts...),
 		Capabilities: capabilities.NewClient(opts...),
 		Credentials:  credentials.NewClient(opts...),
 		Integrations: integrations.NewClient(opts...),

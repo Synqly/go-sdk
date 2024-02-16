@@ -77,6 +77,51 @@ func (h HttpMethod) Ptr() *HttpMethod {
 	return &h
 }
 
+type AuthCode string
+
+const (
+	AuthCodeSuccess  AuthCode = "success"
+	AuthCodeFailure  AuthCode = "failure"
+	AuthCodeDisabled AuthCode = "disabled"
+	AuthCodeExpired  AuthCode = "expired"
+	AuthCodeInvited  AuthCode = "invited"
+	AuthCodeLocked   AuthCode = "locked"
+)
+
+func NewAuthCodeFromString(s string) (AuthCode, error) {
+	switch s {
+	case "success":
+		return AuthCodeSuccess, nil
+	case "failure":
+		return AuthCodeFailure, nil
+	case "disabled":
+		return AuthCodeDisabled, nil
+	case "expired":
+		return AuthCodeExpired, nil
+	case "invited":
+		return AuthCodeInvited, nil
+	case "locked":
+		return AuthCodeLocked, nil
+	}
+	var t AuthCode
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (a AuthCode) Ptr() *AuthCode {
+	return &a
+}
+
+type LogonResponseResult struct {
+	// Authentication result
+	AuthCode AuthCode `json:"auth_code,omitempty"`
+	// Authentication failure message
+	AuthMsg        *string       `json:"auth_msg,omitempty"`
+	RefreshTokenId TokenId       `json:"refresh_token_id,omitempty"`
+	Token          *TokenPair    `json:"token,omitempty"`
+	Organization   *Organization `json:"organization,omitempty"`
+	Member         *Member       `json:"member,omitempty"`
+}
+
 type CapabilitiesProviderConfig = map[string]interface{}
 
 // Provides details on an available Integration.
