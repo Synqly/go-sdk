@@ -1417,6 +1417,8 @@ type Integration struct {
 	Category CategoryId `json:"category,omitempty"`
 	// Provider configuration for this Integration.
 	ProviderConfig *ProviderConfig `json:"provider_config,omitempty"`
+	// Type of the provider for this Integration.
+	ProviderType string `json:"provider_type"`
 }
 
 // Unique identifier for this Integration
