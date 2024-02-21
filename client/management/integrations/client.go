@@ -113,7 +113,7 @@ func (c *Client) List(ctx context.Context, request *management.ListIntegrationsR
 
 // Returns a list of all `Integration` objects belonging to the
 // `Account` matching `{accountId}`.
-func (c *Client) ListForAccount(ctx context.Context, accountId management.AccountId, request *management.ListAccountIntegrationsRequest) (*management.ListAccountIntegrationsResponse, error) {
+func (c *Client) ListAccount(ctx context.Context, accountId management.AccountId, request *management.ListAccountIntegrationsRequest) (*management.ListAccountIntegrationsResponse, error) {
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
