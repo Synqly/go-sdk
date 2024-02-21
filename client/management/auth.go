@@ -2,6 +2,17 @@
 
 package management
 
+type ChangePasswordRequest struct {
+	// Old member secret
+	OldSecret string `json:"old_secret"`
+	// New member secret
+	NewSecret string `json:"new_secret"`
+}
+
+type ChangePasswordResponse struct {
+	Result *ChangePasswordResponseResult `json:"result,omitempty"`
+}
+
 type LogonRequest struct {
 	// Email address identifying the member to initiate a session for.
 	Name string `json:"name"`

@@ -111,6 +111,13 @@ func (a AuthCode) Ptr() *AuthCode {
 	return &a
 }
 
+type ChangePasswordResponseResult struct {
+	// Authentication result
+	AuthCode AuthCode `json:"auth_code,omitempty"`
+	// Authentication failure message
+	AuthMsg *string `json:"auth_msg,omitempty"`
+}
+
 type LogonResponseResult struct {
 	// Authentication result
 	AuthCode AuthCode `json:"auth_code,omitempty"`
