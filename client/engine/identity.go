@@ -6,7 +6,7 @@ import (
 	authentication "github.com/synqly/go-sdk/client/engine/ocsf/authentication"
 )
 
-type ListIdentityAuditLogRequest struct {
+type QueryIdentityAuditLogRequest struct {
 	// Number of events to return. Defaults to 100.
 	Limit *int `json:"-"`
 	// Start search from cursor position.
@@ -34,7 +34,7 @@ type QueryUserRequest struct {
 	Filter []*string `json:"-"`
 }
 
-type ListIdentityAuditLogResponse struct {
+type QueryIdentityAuditLogResponse struct {
 	// List of events from the audit log. Each event will be one of the OCSF Types Account Change, Authentication, or Group Management.
 	Result []*Event `json:"result,omitempty"`
 	// Cursor to use to retrieve the next page of results

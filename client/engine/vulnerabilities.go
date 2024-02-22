@@ -2,7 +2,7 @@
 
 package engine
 
-type QueryVulnerabilityAssetsRequest struct {
+type QueryAssetsRequest struct {
 	// Number of assets to return. Defaults to 50.
 	Limit *int `json:"-"`
 	// Start search from cursor position.
@@ -22,12 +22,12 @@ type QueryFindingsRequest struct {
 	Filter []*string `json:"-"`
 }
 
+type QueryAssetsResponse struct {
+	Result []Asset `json:"result,omitempty"`
+	Cursor string  `json:"cursor"`
+}
+
 type QueryFindingsResponse struct {
 	Result []SecurityFinding `json:"result,omitempty"`
 	Cursor string            `json:"cursor"`
-}
-
-type QueryVulnerabilityAssetsResponse struct {
-	Result []Asset `json:"result,omitempty"`
-	Cursor string  `json:"cursor"`
 }
