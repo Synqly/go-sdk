@@ -200,7 +200,7 @@ func main() {
 
 	consoleLogger.Printf("Using %s as vulnerability provider\n", vulnProvider.ProviderConfig.Type)
 
-	findings, err := t.Synqly.EngineClients["vulnerabilities"].Vulnerabilities.QueryVulnerabilityFindings(ctx, &engine.QueryFindingsRequest{
+	findings, err := t.Synqly.EngineClients["vulnerabilities"].Vulnerabilities.QueryFindings(ctx, &engine.QueryFindingsRequest{
 		Filter: []*string{
 			engine.String("severity[in]Critical,High,Medium"),
 			engine.String("finding.last_seen_time[gte]2024-01-05T00:00:00Z"),
