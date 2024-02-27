@@ -1544,10 +1544,22 @@ type NotificationsTeams struct {
 
 type OktaCredential struct {
 	Type string
+	// Token to authenticate with Okta. Follow [this guide to generate an API token](https://developer.okta.com_docs_guides_create-an-api-token_overview_). The token must have access to list records in the system audit log. (Not for production use. Use `o_auth_client` instead)
+	Token *TokenCredential
+	// ID of a credential that stores a token used to authenticate with Okta. (Not for production use. Use `o_auth_client` instead)
+	TokenId TokenCredentialId
 	// OAuth 2.0 Token URL, Client ID, and Client Secret for a Synqly Identity Connector API service application.
 	OAuthClient *OAuthClientCredential
 	// The ID of a credential that stores the OAuth 2.0 values for a Synqly Identity Connector API service application.
 	OAuthClientId OAuthClientCredentialId
+}
+
+func NewOktaCredentialFromToken(value *TokenCredential) *OktaCredential {
+	return &OktaCredential{Type: "token", Token: value}
+}
+
+func NewOktaCredentialFromTokenId(value TokenCredentialId) *OktaCredential {
+	return &OktaCredential{Type: "token_id", TokenId: value}
 }
 
 func NewOktaCredentialFromOAuthClient(value *OAuthClientCredential) *OktaCredential {
@@ -1567,6 +1579,20 @@ func (o *OktaCredential) UnmarshalJSON(data []byte) error {
 	}
 	o.Type = unmarshaler.Type
 	switch unmarshaler.Type {
+	case "token":
+		value := new(TokenCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		o.Token = value
+	case "token_id":
+		var valueUnmarshaler struct {
+			TokenId TokenCredentialId `json:"value,omitempty"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		o.TokenId = valueUnmarshaler.TokenId
 	case "o_auth_client":
 		value := new(OAuthClientCredential)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -1589,6 +1615,24 @@ func (o OktaCredential) MarshalJSON() ([]byte, error) {
 	switch o.Type {
 	default:
 		return nil, fmt.Errorf("invalid type %s in %T", o.Type, o)
+	case "token":
+		var marshaler = struct {
+			Type string `json:"type"`
+			*TokenCredential
+		}{
+			Type:            o.Type,
+			TokenCredential: o.Token,
+		}
+		return json.Marshal(marshaler)
+	case "token_id":
+		var marshaler = struct {
+			Type    string            `json:"type"`
+			TokenId TokenCredentialId `json:"value,omitempty"`
+		}{
+			Type:    o.Type,
+			TokenId: o.TokenId,
+		}
+		return json.Marshal(marshaler)
 	case "o_auth_client":
 		var marshaler = struct {
 			Type string `json:"type"`
@@ -1611,6 +1655,8 @@ func (o OktaCredential) MarshalJSON() ([]byte, error) {
 }
 
 type OktaCredentialVisitor interface {
+	VisitToken(*TokenCredential) error
+	VisitTokenId(TokenCredentialId) error
 	VisitOAuthClient(*OAuthClientCredential) error
 	VisitOAuthClientId(OAuthClientCredentialId) error
 }
@@ -1619,6 +1665,10 @@ func (o *OktaCredential) Accept(visitor OktaCredentialVisitor) error {
 	switch o.Type {
 	default:
 		return fmt.Errorf("invalid type %s in %T", o.Type, o)
+	case "token":
+		return visitor.VisitToken(o.Token)
+	case "token_id":
+		return visitor.VisitTokenId(o.TokenId)
 	case "o_auth_client":
 		return visitor.VisitOAuthClient(o.OAuthClient)
 	case "o_auth_client_id":
