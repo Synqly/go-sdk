@@ -3466,20 +3466,20 @@ type OrganizationOptions struct {
 	MinimumPasswordLength *int `json:"minimum_password_length,omitempty"`
 }
 
-// Type of action granted access by an API operation: "create", "read", "update", "delete", or "*".
+// Type of action granted access by an API operation: "create", "read", "update", "delete", or "\*".
 type Action = string
 
 // APIs allowed access to by prefix endpoint match. Can be used to allow access to select APIs like /v1/accounts, /v1/credentials, and /v1/transforms.
 type AllowedApi = string
 
 type Constraint struct {
-	// Contained object constraint granted access or "*".
+	// Contained object constraint granted access or "\*".
 	Object string `json:"object"`
 	// Object type (ie: "category", "tag")
 	Type string `json:"type"`
 }
 
-// Contained objects granted access to by Id or "*".
+// Contained objects granted access to by Id or "\*".
 type Object = Id
 
 type Permission struct {
@@ -3500,11 +3500,11 @@ type Permission struct {
 }
 
 type Role struct {
-	// List of actions that this permission grants access to: "create", "read", "update", "delete" and "*". Use "*" to give all action permissions.
+	// List of actions that this permission grants access to: "create", "read", "update", "delete" and "_". Use "_" to give all action permissions.
 	Actions []Action `json:"actions,omitempty"`
-	// List of contained account ids that this permission grants access to. Use "*" to grant access to all contained objects.
+	// List of contained account ids that this permission grants access to. Use "\*" to grant access to all contained objects.
 	Objects []Object `json:"objects,omitempty"`
-	// Optional list of constraints that this permission grants access to. Use "*" to grant access to all constrained objects.
+	// Optional list of constraints that this permission grants access to. Use "\*" to grant access to all constrained objects.
 	Constraints []*Constraint `json:"constraints,omitempty"`
 	// Optional list of APIs that this role allows access to. Can be used to allow access to select APIs like /v1/accounts, v1/credentials and /v1/transforms
 	AllowedApis []AllowedApi `json:"allowed_apis,omitempty"`

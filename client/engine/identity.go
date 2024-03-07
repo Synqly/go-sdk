@@ -3,7 +3,7 @@
 package engine
 
 import (
-	authentication "github.com/synqly/go-sdk/client/engine/ocsf/authentication"
+	authentication "github.com/synqly/go-sdk/client/engine/ocsf/v110/authentication"
 )
 
 type QueryIdentityAuditLogRequest struct {

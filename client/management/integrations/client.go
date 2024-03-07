@@ -535,9 +535,7 @@ func (c *Client) Patch(ctx context.Context, accountId management.AccountId, inte
 	return response, nil
 }
 
-// Deletes the `Integration` object matching `{integrationId}, where the
-// `Integration` belongs to the `Account` matching `{accountId}`. Deleting
-// an `Integration` also deletes any tokens that belong to it.
+// Deletes the `Integration` object matching `{integrationId}, where the `Integration`belongs to the`Account`matching`{accountId}`. Deleting an `Integration` also deletes any tokens that belong to it.
 func (c *Client) Delete(ctx context.Context, accountId management.AccountId, integrationId management.IntegrationId) error {
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
