@@ -22,7 +22,6 @@ type ListTokensRequest struct {
 // Unique identifier for this Token
 type TokenId = Id
 
-// Deprecated
 type CreateAccountTokenRequest struct {
 	// Unique name token. Defaults to generated refresh token id.
 	Name *string `json:"name,omitempty"`
@@ -34,23 +33,7 @@ type CreateAccountTokenRequest struct {
 	TokenTtl *string `json:"token_ttl,omitempty"`
 }
 
-// Deprecated
 type CreateAccountTokenResponse struct {
-	Result *RefreshToken `json:"result,omitempty"`
-}
-
-type CreateTokenRequest struct {
-	// Unique name token. Defaults to generated refresh token id.
-	Name *string `json:"name,omitempty"`
-	// Limit access to supplied resources
-	Resources *Resources `json:"resources,omitempty"`
-	// Limit access to supplied permissions
-	PermissionSet Permissions `json:"permission_set,omitempty"`
-	// Token time-to-live. Defaults to member TokenTtl.
-	TokenTtl *string `json:"token_ttl,omitempty"`
-}
-
-type CreateTokenResponse struct {
 	Result *RefreshToken `json:"result,omitempty"`
 }
 
