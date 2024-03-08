@@ -15,7 +15,7 @@ import (
 
 	"github.com/synqly/go-sdk/client/engine"
 	engineClient "github.com/synqly/go-sdk/client/engine/client"
-	"github.com/synqly/go-sdk/client/engine/ocsf/securityfinding"
+	"github.com/synqly/go-sdk/client/engine/ocsf/v110/securityfinding"
 	mgmt "github.com/synqly/go-sdk/client/management"
 	"github.com/synqly/go-sdk/examples/common"
 )
@@ -75,8 +75,8 @@ See also:
 		*finding.Finding.Desc,
 		*finding.Message,
 		asset,
-		*finding.Finding.Remediation.Desc,
-		finding.Vulnerabilities[0].Cve.Cvss.BaseScore,
+		finding.Finding.Remediation.Desc,
+		finding.Vulnerabilities[0].Cve.Cvss[0].BaseScore,
 		strings.Join(finding.Vulnerabilities[0].References, "\n"),
 	)
 
@@ -212,7 +212,7 @@ func main() {
 	consoleLogger.Printf("Found %d security findings from %s\n", len(findings.Result), vulnProvider.ProviderConfig.Type)
 
 	for _, finding := range findings.Result {
-		if err := notification(ctx, t.Synqly.EngineClients["ticketing"], finding.SecurityFinding); err != nil {
+		if err := notification(ctx, t.Synqly.EngineClients["ticketing"], finding); err != nil {
 			log.Fatal(err)
 		}
 	}
