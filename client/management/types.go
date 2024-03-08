@@ -142,6 +142,28 @@ type Category struct {
 	Picture *string `json:"picture,omitempty"`
 }
 
+type Provider struct {
+	Id ProviderId `json:"id"`
+	// Name of the Provider.
+	Name string `json:"name"`
+	// Description of what this Provider does.
+	Description string `json:"description"`
+	// Categories that this Provider implements.
+	Categories []CategoryId `json:"categories,omitempty"`
+	// URL of the icon representing this type of Provider.
+	Picture *string `json:"picture,omitempty"`
+	// Operations that this Provider implements.
+	SupportedOperations interface{} `json:"supported_operations,omitempty"`
+	// List of credential types that this Provider supports.
+	Credentials []ProviderCredentialConfig `json:"credentials,omitempty"`
+	// Details on the specific configuration options for this Provider.
+	ProviderConfig map[string]CapabilitiesProviderConfig `json:"provider_config,omitempty"`
+}
+
+type ProviderCredentialConfig = map[string]interface{}
+
+type ProviderId = string
+
 // Id of the Integrations category
 type CategoryId string
 
@@ -185,28 +207,6 @@ func NewCategoryIdFromString(s string) (CategoryId, error) {
 func (c CategoryId) Ptr() *CategoryId {
 	return &c
 }
-
-type Provider struct {
-	Id ProviderId `json:"id"`
-	// Name of the Provider.
-	Name string `json:"name"`
-	// Description of what this Provider does.
-	Description string `json:"description"`
-	// Categories that this Provider implements.
-	Categories []CategoryId `json:"categories,omitempty"`
-	// URL of the icon representing this type of Provider.
-	Picture *string `json:"picture,omitempty"`
-	// Operations that this Provider implements.
-	SupportedOperations interface{} `json:"supported_operations,omitempty"`
-	// List of credential types that this Provider supports.
-	Credentials []ProviderCredentialConfig `json:"credentials,omitempty"`
-	// Details on the specific configuration options for this Provider.
-	ProviderConfig map[string]CapabilitiesProviderConfig `json:"provider_config,omitempty"`
-}
-
-type ProviderCredentialConfig = map[string]interface{}
-
-type ProviderId = string
 
 type Base struct {
 	// Human-readable name for this resource
@@ -504,6 +504,9 @@ type TokenCredential struct {
 
 // Unique identifier for a token Credential
 type TokenCredentialId = CredentialId
+
+// Unique identifier for this Integration
+type IntegrationId = Id
 
 type ArmisCredential struct {
 	Type string
@@ -1427,9 +1430,6 @@ type Integration struct {
 	// Type of the provider for this Integration.
 	ProviderType string `json:"provider_type"`
 }
-
-// Unique identifier for this Integration
-type IntegrationId = Id
 
 type JiraCredential struct {
 	Type string
@@ -3355,8 +3355,10 @@ type Member struct {
 	TokenTtl   string    `json:"token_ttl"`
 	Expires    time.Time `json:"expires"`
 	PinExpires time.Time `json:"pin_expires"`
-	// Roles granted to this member. Tokens inherit this access.
+	// Deprecated: Roles granted to this member. Tokens inherit this access.
 	Roles []*Role `json:"roles,omitempty"`
+	// Roles granted to this member. Tokens inherit this access.
+	RoleBinding []RoleName `json:"role_binding,omitempty"`
 }
 
 type MemberOptions struct {
@@ -3483,8 +3485,12 @@ type Constraint struct {
 type Object = Id
 
 type Permission struct {
-	// List of access roles. Authorization tries each role sequentially until one access role passes or they all fail
+	// deprecated: List of access roles. Authorization tries each role sequentially until one access role passes or they all fail
 	Roles []*Role `json:"roles,omitempty"`
+	// Roles granted to this token.
+	RoleBinding []RoleName `json:"role_binding,omitempty"`
+	// Adhoc role granted to this token.
+	AdhocRole *AdhocRole `json:"adhoc_role,omitempty"`
 	// ID of the resource that this permission grants access to.
 	ResourceId Id `json:"resource_id"`
 	// Type of the resource that this permission grants access to. Must be one of the following: "organization, "integration"
@@ -3499,6 +3505,7 @@ type Permission struct {
 	MemberId Id `json:"member_id"`
 }
 
+// Deprecated
 type Role struct {
 	// List of actions that this permission grants access to: "create", "read", "update", "delete" and "_". Use "_" to give all action permissions.
 	Actions []Action `json:"actions,omitempty"`
@@ -3508,6 +3515,620 @@ type Role struct {
 	Constraints []*Constraint `json:"constraints,omitempty"`
 	// Optional list of APIs that this role allows access to. Can be used to allow access to select APIs like /v1/accounts, v1/credentials and /v1/transforms
 	AllowedApis []AllowedApi `json:"allowed_apis,omitempty"`
+}
+
+type AccountsActions string
+
+const (
+	AccountsActionsList   AccountsActions = "list"
+	AccountsActionsCreate AccountsActions = "create"
+	AccountsActionsGet    AccountsActions = "get"
+	AccountsActionsUpdate AccountsActions = "update"
+	AccountsActionsPatch  AccountsActions = "patch"
+	AccountsActionsDelete AccountsActions = "delete"
+	AccountsActionsAll    AccountsActions = "*"
+)
+
+func NewAccountsActionsFromString(s string) (AccountsActions, error) {
+	switch s {
+	case "list":
+		return AccountsActionsList, nil
+	case "create":
+		return AccountsActionsCreate, nil
+	case "get":
+		return AccountsActionsGet, nil
+	case "update":
+		return AccountsActionsUpdate, nil
+	case "patch":
+		return AccountsActionsPatch, nil
+	case "delete":
+		return AccountsActionsDelete, nil
+	case "*":
+		return AccountsActionsAll, nil
+	}
+	var t AccountsActions
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (a AccountsActions) Ptr() *AccountsActions {
+	return &a
+}
+
+// Permissions for the accounts API
+type AccountsPermissions struct {
+	Actions []AccountsActions `json:"actions,omitempty"`
+}
+
+type ApiPermissionMap struct {
+	All           *ReadWritePermissions     `json:"all,omitempty"`
+	Accounts      *AccountsPermissions      `json:"accounts,omitempty"`
+	Audit         *AuditPermissions         `json:"audit,omitempty"`
+	Auth          *AuthPermissions          `json:"auth,omitempty"`
+	Capabilities  *CapabilitiesPermissions  `json:"capabilities,omitempty"`
+	Credentials   *CredentialsPermissions   `json:"credentials,omitempty"`
+	Integrations  *IntegrationsPermissions  `json:"integrations,omitempty"`
+	Members       *MembersPermissions       `json:"members,omitempty"`
+	Organizations *OrganizationPermissions  `json:"organizations,omitempty"`
+	PermissionSet *PermissionSetPermissions `json:"permission_set,omitempty"`
+	Roles         *RolesPermissions         `json:"roles,omitempty"`
+	Status        *StatusPermissions        `json:"status,omitempty"`
+	Tokens        *TokensPermissions        `json:"tokens,omitempty"`
+	Transforms    *TransformsPermissions    `json:"transforms,omitempty"`
+}
+
+type AuditActions string
+
+const (
+	AuditActionsList AuditActions = "list"
+	AuditActionsAll  AuditActions = "*"
+)
+
+func NewAuditActionsFromString(s string) (AuditActions, error) {
+	switch s {
+	case "list":
+		return AuditActionsList, nil
+	case "*":
+		return AuditActionsAll, nil
+	}
+	var t AuditActions
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (a AuditActions) Ptr() *AuditActions {
+	return &a
+}
+
+// Permissions for the audit API
+type AuditPermissions struct {
+	Actions []AuditActions `json:"actions,omitempty"`
+}
+
+type AuthActions string
+
+const (
+	AuthActionsLogon          AuthActions = "logon"
+	AuthActionsChangePassword AuthActions = "change_password"
+	AuthActionsLogoff         AuthActions = "logoff"
+	AuthActionsAll            AuthActions = "*"
+)
+
+func NewAuthActionsFromString(s string) (AuthActions, error) {
+	switch s {
+	case "logon":
+		return AuthActionsLogon, nil
+	case "change_password":
+		return AuthActionsChangePassword, nil
+	case "logoff":
+		return AuthActionsLogoff, nil
+	case "*":
+		return AuthActionsAll, nil
+	}
+	var t AuthActions
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (a AuthActions) Ptr() *AuthActions {
+	return &a
+}
+
+// Permissions for the auth logon/logoff API
+type AuthPermissions struct {
+	Actions []AuthActions `json:"actions,omitempty"`
+}
+
+type CapabilitiesActions string
+
+const (
+	CapabilitiesActionsListCategory  CapabilitiesActions = "list_category"
+	CapabilitiesActionsListProviders CapabilitiesActions = "list_providers"
+	CapabilitiesActionsAll           CapabilitiesActions = "*"
+)
+
+func NewCapabilitiesActionsFromString(s string) (CapabilitiesActions, error) {
+	switch s {
+	case "list_category":
+		return CapabilitiesActionsListCategory, nil
+	case "list_providers":
+		return CapabilitiesActionsListProviders, nil
+	case "*":
+		return CapabilitiesActionsAll, nil
+	}
+	var t CapabilitiesActions
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (c CapabilitiesActions) Ptr() *CapabilitiesActions {
+	return &c
+}
+
+// Permissions for the capabilities API
+type CapabilitiesPermissions struct {
+	Actions []CapabilitiesActions `json:"actions,omitempty"`
+}
+
+type CredentialsActions string
+
+const (
+	CredentialsActionsList   CredentialsActions = "list"
+	CredentialsActionsCreate CredentialsActions = "create"
+	CredentialsActionsGet    CredentialsActions = "get"
+	CredentialsActionsUpdate CredentialsActions = "update"
+	CredentialsActionsPatch  CredentialsActions = "patch"
+	CredentialsActionsDelete CredentialsActions = "delete"
+	CredentialsActionsAll    CredentialsActions = "*"
+)
+
+func NewCredentialsActionsFromString(s string) (CredentialsActions, error) {
+	switch s {
+	case "list":
+		return CredentialsActionsList, nil
+	case "create":
+		return CredentialsActionsCreate, nil
+	case "get":
+		return CredentialsActionsGet, nil
+	case "update":
+		return CredentialsActionsUpdate, nil
+	case "patch":
+		return CredentialsActionsPatch, nil
+	case "delete":
+		return CredentialsActionsDelete, nil
+	case "*":
+		return CredentialsActionsAll, nil
+	}
+	var t CredentialsActions
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (c CredentialsActions) Ptr() *CredentialsActions {
+	return &c
+}
+
+// Permissions for the credentials API
+type CredentialsPermissions struct {
+	Actions []CredentialsActions `json:"actions,omitempty"`
+}
+
+type IntegrationsActions string
+
+const (
+	IntegrationsActionsList        IntegrationsActions = "list"
+	IntegrationsActionsCreate      IntegrationsActions = "create"
+	IntegrationsActionsGet         IntegrationsActions = "get"
+	IntegrationsActionsUpdate      IntegrationsActions = "update"
+	IntegrationsActionsPatch       IntegrationsActions = "patch"
+	IntegrationsActionsDelete      IntegrationsActions = "delete"
+	IntegrationsActionsListAccount IntegrationsActions = "list_account"
+	IntegrationsActionsVerify      IntegrationsActions = "verify"
+	IntegrationsActionsAll         IntegrationsActions = "*"
+)
+
+func NewIntegrationsActionsFromString(s string) (IntegrationsActions, error) {
+	switch s {
+	case "list":
+		return IntegrationsActionsList, nil
+	case "create":
+		return IntegrationsActionsCreate, nil
+	case "get":
+		return IntegrationsActionsGet, nil
+	case "update":
+		return IntegrationsActionsUpdate, nil
+	case "patch":
+		return IntegrationsActionsPatch, nil
+	case "delete":
+		return IntegrationsActionsDelete, nil
+	case "list_account":
+		return IntegrationsActionsListAccount, nil
+	case "verify":
+		return IntegrationsActionsVerify, nil
+	case "*":
+		return IntegrationsActionsAll, nil
+	}
+	var t IntegrationsActions
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (i IntegrationsActions) Ptr() *IntegrationsActions {
+	return &i
+}
+
+// Permissions for the integrations API
+type IntegrationsPermissions struct {
+	Actions []IntegrationsActions `json:"actions,omitempty"`
+}
+
+type MembersActions string
+
+const (
+	MembersActionsList   MembersActions = "list"
+	MembersActionsCreate MembersActions = "create"
+	MembersActionsGet    MembersActions = "get"
+	MembersActionsUpdate MembersActions = "update"
+	MembersActionsPatch  MembersActions = "patch"
+	MembersActionsDelete MembersActions = "delete"
+	MembersActionsAll    MembersActions = "*"
+)
+
+func NewMembersActionsFromString(s string) (MembersActions, error) {
+	switch s {
+	case "list":
+		return MembersActionsList, nil
+	case "create":
+		return MembersActionsCreate, nil
+	case "get":
+		return MembersActionsGet, nil
+	case "update":
+		return MembersActionsUpdate, nil
+	case "patch":
+		return MembersActionsPatch, nil
+	case "delete":
+		return MembersActionsDelete, nil
+	case "*":
+		return MembersActionsAll, nil
+	}
+	var t MembersActions
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (m MembersActions) Ptr() *MembersActions {
+	return &m
+}
+
+// Permissions for the members API
+type MembersPermissions struct {
+	Actions []MembersActions `json:"actions,omitempty"`
+}
+
+type OrganizationActions string
+
+const (
+	OrganizationActionsGet    OrganizationActions = "get"
+	OrganizationActionsUpdate OrganizationActions = "update"
+	OrganizationActionsPatch  OrganizationActions = "patch"
+	OrganizationActionsAll    OrganizationActions = "*"
+)
+
+func NewOrganizationActionsFromString(s string) (OrganizationActions, error) {
+	switch s {
+	case "get":
+		return OrganizationActionsGet, nil
+	case "update":
+		return OrganizationActionsUpdate, nil
+	case "patch":
+		return OrganizationActionsPatch, nil
+	case "*":
+		return OrganizationActionsAll, nil
+	}
+	var t OrganizationActions
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (o OrganizationActions) Ptr() *OrganizationActions {
+	return &o
+}
+
+// Permissions for the organization API
+type OrganizationPermissions struct {
+	Actions []OrganizationActions `json:"actions,omitempty"`
+}
+
+type PermissionSet struct {
+	Name Permissions `json:"name,omitempty"`
+	// Description of when the permission set should be used and what permissions are granted by the permission set.
+	Description *string `json:"description,omitempty"`
+	// Resources that can be used with this permission set
+	ResourceRestrictions []ResourceRestrictions `json:"resource_restrictions,omitempty"`
+	// API permissions granted by the permission set.
+	Permissions *ApiPermissionMap `json:"permissions,omitempty"`
+}
+
+type PermissionSetActions string
+
+const (
+	PermissionSetActionsList PermissionSetActions = "list"
+	PermissionSetActionsGet  PermissionSetActions = "get"
+	PermissionSetActionsAll  PermissionSetActions = "*"
+)
+
+func NewPermissionSetActionsFromString(s string) (PermissionSetActions, error) {
+	switch s {
+	case "list":
+		return PermissionSetActionsList, nil
+	case "get":
+		return PermissionSetActionsGet, nil
+	case "*":
+		return PermissionSetActionsAll, nil
+	}
+	var t PermissionSetActions
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (p PermissionSetActions) Ptr() *PermissionSetActions {
+	return &p
+}
+
+// Permissions for the permissionset API
+type PermissionSetPermissions struct {
+	Actions []PermissionSetActions `json:"actions,omitempty"`
+}
+
+type ReadWriteActions string
+
+const (
+	ReadWriteActionsRead      ReadWriteActions = "read"
+	ReadWriteActionsReadWrite ReadWriteActions = "*"
+)
+
+func NewReadWriteActionsFromString(s string) (ReadWriteActions, error) {
+	switch s {
+	case "read":
+		return ReadWriteActionsRead, nil
+	case "*":
+		return ReadWriteActionsReadWrite, nil
+	}
+	var t ReadWriteActions
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (r ReadWriteActions) Ptr() *ReadWriteActions {
+	return &r
+}
+
+// Permissions for all accounts
+type ReadWritePermissions struct {
+	Actions []ReadWriteActions `json:"actions,omitempty"`
+}
+
+type ResourceRestrictions string
+
+const (
+	ResourceRestrictionsAccounts     ResourceRestrictions = "accounts"
+	ResourceRestrictionsIntegrations ResourceRestrictions = "integrations"
+)
+
+func NewResourceRestrictionsFromString(s string) (ResourceRestrictions, error) {
+	switch s {
+	case "accounts":
+		return ResourceRestrictionsAccounts, nil
+	case "integrations":
+		return ResourceRestrictionsIntegrations, nil
+	}
+	var t ResourceRestrictions
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (r ResourceRestrictions) Ptr() *ResourceRestrictions {
+	return &r
+}
+
+type RolesActions string
+
+const (
+	RolesActionsList   RolesActions = "list"
+	RolesActionsCreate RolesActions = "create"
+	RolesActionsGet    RolesActions = "get"
+	RolesActionsUpdate RolesActions = "update"
+	RolesActionsPatch  RolesActions = "patch"
+	RolesActionsDelete RolesActions = "delete"
+	RolesActionsAll    RolesActions = "*"
+)
+
+func NewRolesActionsFromString(s string) (RolesActions, error) {
+	switch s {
+	case "list":
+		return RolesActionsList, nil
+	case "create":
+		return RolesActionsCreate, nil
+	case "get":
+		return RolesActionsGet, nil
+	case "update":
+		return RolesActionsUpdate, nil
+	case "patch":
+		return RolesActionsPatch, nil
+	case "delete":
+		return RolesActionsDelete, nil
+	case "*":
+		return RolesActionsAll, nil
+	}
+	var t RolesActions
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (r RolesActions) Ptr() *RolesActions {
+	return &r
+}
+
+// Permissions for the roles API
+type RolesPermissions struct {
+	Actions []RolesActions `json:"actions,omitempty"`
+}
+
+type StatusActions string
+
+const (
+	StatusActionsList                  StatusActions = "list"
+	StatusActionsGet                   StatusActions = "get"
+	StatusActionsReset                 StatusActions = "reset"
+	StatusActionsListEvents            StatusActions = "list_events"
+	StatusActionsTimeseries            StatusActions = "timeseries"
+	StatusActionsIntegrationTimeseries StatusActions = "integration_timeseries"
+	StatusActionsAll                   StatusActions = "*"
+)
+
+func NewStatusActionsFromString(s string) (StatusActions, error) {
+	switch s {
+	case "list":
+		return StatusActionsList, nil
+	case "get":
+		return StatusActionsGet, nil
+	case "reset":
+		return StatusActionsReset, nil
+	case "list_events":
+		return StatusActionsListEvents, nil
+	case "timeseries":
+		return StatusActionsTimeseries, nil
+	case "integration_timeseries":
+		return StatusActionsIntegrationTimeseries, nil
+	case "*":
+		return StatusActionsAll, nil
+	}
+	var t StatusActions
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (s StatusActions) Ptr() *StatusActions {
+	return &s
+}
+
+// Permissions for the status API
+type StatusPermissions struct {
+	Actions []StatusActions `json:"actions,omitempty"`
+}
+
+type TokensActions string
+
+const (
+	TokensActionsList            TokensActions = "list"
+	TokensActionsCreate          TokensActions = "create"
+	TokensActionsGet             TokensActions = "get"
+	TokensActionsReset           TokensActions = "reset"
+	TokensActionsRefresh         TokensActions = "refresh"
+	TokensActionsRemoveSecondary TokensActions = "remove_secondary"
+	TokensActionsAll             TokensActions = "*"
+)
+
+func NewTokensActionsFromString(s string) (TokensActions, error) {
+	switch s {
+	case "list":
+		return TokensActionsList, nil
+	case "create":
+		return TokensActionsCreate, nil
+	case "get":
+		return TokensActionsGet, nil
+	case "reset":
+		return TokensActionsReset, nil
+	case "refresh":
+		return TokensActionsRefresh, nil
+	case "remove_secondary":
+		return TokensActionsRemoveSecondary, nil
+	case "*":
+		return TokensActionsAll, nil
+	}
+	var t TokensActions
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (t TokensActions) Ptr() *TokensActions {
+	return &t
+}
+
+// Permissions for the tokens API
+type TokensPermissions struct {
+	Actions []TokensActions `json:"actions,omitempty"`
+}
+
+type TransformsActions string
+
+const (
+	TransformsActionsList   TransformsActions = "list"
+	TransformsActionsCreate TransformsActions = "create"
+	TransformsActionsGet    TransformsActions = "get"
+	TransformsActionsUpdate TransformsActions = "update"
+	TransformsActionsPatch  TransformsActions = "patch"
+	TransformsActionsDelete TransformsActions = "delete"
+	TransformsActionsAll    TransformsActions = "*"
+)
+
+func NewTransformsActionsFromString(s string) (TransformsActions, error) {
+	switch s {
+	case "list":
+		return TransformsActionsList, nil
+	case "create":
+		return TransformsActionsCreate, nil
+	case "get":
+		return TransformsActionsGet, nil
+	case "update":
+		return TransformsActionsUpdate, nil
+	case "patch":
+		return TransformsActionsPatch, nil
+	case "delete":
+		return TransformsActionsDelete, nil
+	case "*":
+		return TransformsActionsAll, nil
+	}
+	var t TransformsActions
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (t TransformsActions) Ptr() *TransformsActions {
+	return &t
+}
+
+// Permissions for the transforms API
+type TransformsPermissions struct {
+	Actions []TransformsActions `json:"actions,omitempty"`
+}
+
+type AdhocRole struct {
+	Resources     *Resources  `json:"resources,omitempty"`
+	PermissionSet Permissions `json:"permission_set,omitempty"`
+}
+
+type Resources struct {
+	Accounts     *RoleAccounts     `json:"accounts,omitempty"`
+	Integrations *RoleIntegrations `json:"integrations,omitempty"`
+}
+
+type RoleAccounts struct {
+	// List of account ids that this role definition grants access to. Use "\*" to grant access to all account ids.
+	Ids []IntegrationId `json:"ids,omitempty"`
+	// List of account labels this role definition grants access to.
+	Labels []string `json:"labels,omitempty"`
+}
+
+type RoleIntegrations struct {
+	// List of categories ids that this role definition grants access to. Use "\*" to grant access to all category ids.
+	Categories []CategoryId `json:"categories,omitempty"`
+}
+
+// Unique identifier for this Role
+type RoleName = string
+
+type RoleDefinition struct {
+	// Human-readable name for this resource
+	Name string `json:"name"`
+	// Time object was originally created
+	CreatedAt time.Time `json:"created_at"`
+	// Last time object was updated
+	UpdatedAt time.Time `json:"updated_at"`
+	Id        RoleId    `json:"id,omitempty"`
+	// Full name of role
+	Fullname string `json:"fullname"`
+	// Description of the resources included in the role and permissions granted on those resources. Includes details of when to use this role along with the intended personas.
+	Description *string `json:"description,omitempty"`
+	// Selects the resources the permission set applies to.
+	Resources *Resources `json:"resources,omitempty"`
+	// Permission set for this role.
+	PermissionSet Permissions `json:"permission_set,omitempty"`
 }
 
 type GetIntegrationTimeseriesResult = *GetStatusTimeseriesResult
@@ -3582,7 +4203,7 @@ type Token struct {
 	Secret string `json:"secret"`
 	// Time when this token expires and can no longer be used again.
 	Expires time.Time `json:"expires"`
-	// Permissions granted to this token.
+	// Deprecated: Permissions granted to this token.
 	Permissions *Permission `json:"permissions,omitempty"`
 }
 
