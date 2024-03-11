@@ -234,6 +234,7 @@ func (app *App) backgroundJob(durationSeconds int) {
 func createSampleEvent() *engine.Event {
 	return engine.NewEventFromScheduledJobActivity(&scheduledJobActivity.ScheduledJobActivity{
 		ActivityId: scheduledJobActivity.Activity_Update,
+		ActionId:   scheduledJobActivity.Action_Allowed,
 		Device: &scheduledJobActivity.Device{
 			TypeId: scheduledJobActivity.Device_Type_Server,
 		},
@@ -248,7 +249,7 @@ func createSampleEvent() *engine.Event {
 			Product: &scheduledJobActivity.Product{
 				VendorName: "Synqly SDK for Go",
 			},
-			Version: "1.0.0",
+			Version: "1.1.0",
 		},
 		Time:       int(time.Now().UTC().Unix()),
 		SeverityId: scheduledJobActivity.Severity_Informational,
