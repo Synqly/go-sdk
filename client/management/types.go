@@ -3355,8 +3355,6 @@ type Member struct {
 	TokenTtl   string    `json:"token_ttl"`
 	Expires    time.Time `json:"expires"`
 	PinExpires time.Time `json:"pin_expires"`
-	// Deprecated: Roles granted to this member. Tokens inherit this access.
-	Roles []*Role `json:"roles,omitempty"`
 	// Roles granted to this member. Tokens inherit this access.
 	RoleBinding []RoleName `json:"role_binding,omitempty"`
 }
@@ -3468,25 +3466,7 @@ type OrganizationOptions struct {
 	MinimumPasswordLength *int `json:"minimum_password_length,omitempty"`
 }
 
-// Type of action granted access by an API operation: "create", "read", "update", "delete", or "\*".
-type Action = string
-
-// APIs allowed access to by prefix endpoint match. Can be used to allow access to select APIs like /v1/accounts, /v1/credentials, and /v1/transforms.
-type AllowedApi = string
-
-type Constraint struct {
-	// Contained object constraint granted access or "\*".
-	Object string `json:"object"`
-	// Object type (ie: "category", "tag")
-	Type string `json:"type"`
-}
-
-// Contained objects granted access to by Id or "\*".
-type Object = Id
-
 type Permission struct {
-	// deprecated: List of access roles. Authorization tries each role sequentially until one access role passes or they all fail
-	Roles []*Role `json:"roles,omitempty"`
 	// Roles granted to this token.
 	RoleBinding []RoleName `json:"role_binding,omitempty"`
 	// Adhoc role granted to this token.
@@ -3503,18 +3483,6 @@ type Permission struct {
 	OrganizationId Id `json:"organization_id"`
 	// Token memberId
 	MemberId Id `json:"member_id"`
-}
-
-// Deprecated
-type Role struct {
-	// List of actions that this permission grants access to: "create", "read", "update", "delete" and "_". Use "_" to give all action permissions.
-	Actions []Action `json:"actions,omitempty"`
-	// List of contained account ids that this permission grants access to. Use "\*" to grant access to all contained objects.
-	Objects []Object `json:"objects,omitempty"`
-	// Optional list of constraints that this permission grants access to. Use "\*" to grant access to all constrained objects.
-	Constraints []*Constraint `json:"constraints,omitempty"`
-	// Optional list of APIs that this role allows access to. Can be used to allow access to select APIs like /v1/accounts, v1/credentials and /v1/transforms
-	AllowedApis []AllowedApi `json:"allowed_apis,omitempty"`
 }
 
 type AccountsActions string

@@ -30,9 +30,7 @@ type CreateMemberRequest struct {
 	Picture *string `json:"picture,omitempty"`
 	// Member secret
 	Secret string `json:"secret"`
-	// Deprecated: Roles granted to this member. Tokens inherit this access.
-	Roles []*Role `json:"roles,omitempty"`
-	// Roles granted to this member. Tokens inherit this access.
+	// Roles granted to this member. Tokens inherit this access. Defaults to `member`.
 	RoleBinding []RoleName     `json:"role_binding,omitempty"`
 	Options     *MemberOptions `json:"options,omitempty"`
 }
