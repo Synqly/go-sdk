@@ -238,15 +238,16 @@ func (c *Client) Get(ctx context.Context, refreshTokenId management.TokenId) (*m
 	return response, nil
 }
 
-// Resets the token value, secondary, and token expiration time for the
-// `RefreshToken` object matching `{refreshTokenId}`. An `Organization` token
-// with appropriate permissions can be used to perform this operation.
-func (c *Client) Reset(ctx context.Context, refreshTokenId management.TokenId) (*management.ResetTokenResponse, error) {
+// This API can be used to reset `Organization` or `Integration` `RefreshTokens`.
+// Resets the specified `RefreshToken` and expiration time, removes the secondary, and resets access and refresh tokens for the
+// `RefreshToken` object matching `{ownerId}/{refreshTokenId}` where `ownerId` is an `organizationId` or `integrationId`.
+// An `Organization` token with `administrator` permissions can be used to perform this operation.
+func (c *Client) Reset(ctx context.Context, ownerId management.Id, refreshTokenId management.TokenId) (*management.ResetTokenResponse, error) {
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"v1/tokens/%v/reset", refreshTokenId)
+	endpointURL := fmt.Sprintf(baseURL+"/"+"v1/tokens/%v/%v/reset", ownerId, refreshTokenId)
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)

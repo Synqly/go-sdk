@@ -19,6 +19,8 @@ type ListTokensRequest struct {
 	Filter []*string `json:"-"`
 }
 
+type Id = string
+
 // Unique identifier for this Token
 type TokenId = Id
 
