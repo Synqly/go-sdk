@@ -540,6 +540,33 @@ type StoragePath struct {
 	Path string `json:"path"`
 }
 
+type Attachment struct {
+	// The name of the file.
+	FileName string `json:"file_name"`
+	// The type of the file.
+	FileType string `json:"file_type"`
+	// File contents
+	Content []byte `json:"content"`
+}
+
+// Attachment in a ticketing system
+type AttachmentMetadata struct {
+	// Unique identifier for this attachment.
+	Id AttachmentId `json:"id,omitempty"`
+	// The ticket this attachment is associated with.
+	TicketId TicketId `json:"ticket_id,omitempty"`
+	// The name of the file.
+	FileName string `json:"file_name"`
+	// The type of the file.
+	FileType string `json:"file_type"`
+	// The size of the file in bytes.
+	FileSize int `json:"file_size"`
+	// The date the attachment was created.
+	CreatedDate time.Time `json:"created_date"`
+	// The user who created the attachment.
+	Creator string `json:"creator"`
+}
+
 type Priority string
 
 const (
@@ -607,8 +634,6 @@ type Ticket struct {
 	Project *string `json:"project,omitempty"`
 	// The ticket's type.
 	IssueType *string `json:"issue_type,omitempty"`
-	// Associate attachment URLs with ticket
-	Attachments []string `json:"attachments,omitempty"`
 	// Associate tags with Ticket
 	Tags []string `json:"tags,omitempty"`
 }

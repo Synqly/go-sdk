@@ -21,6 +21,20 @@ type QueryTicketsRequest struct {
 	Filter []*string `json:"-"`
 }
 
+// Unique identifier for an attachment
+type AttachmentId = Id
+
+type CreateAttachmentRequest struct {
+	// The name of the file.
+	FileName string `json:"file_name"`
+	// File contents
+	Content []byte `json:"content"`
+}
+
+type CreateAttachmentResponse struct {
+	Result *AttachmentMetadata `json:"result,omitempty"`
+}
+
 type CreateTicketRequest struct {
 	// Human-readable name for this resource
 	Name string `json:"name"`
@@ -46,8 +60,6 @@ type CreateTicketRequest struct {
 	Project *string `json:"project,omitempty"`
 	// The ticket's type.
 	IssueType *string `json:"issue_type,omitempty"`
-	// Associate attachment URLs with ticket
-	Attachments []string `json:"attachments,omitempty"`
 	// Associate tags with Ticket
 	Tags []string `json:"tags,omitempty"`
 }
@@ -56,8 +68,16 @@ type CreateTicketResponse struct {
 	Result *Ticket `json:"result,omitempty"`
 }
 
+type DownloadAttachmentResponse struct {
+	Result *Attachment `json:"result,omitempty"`
+}
+
 type GetTicketResponse struct {
 	Result *Ticket `json:"result,omitempty"`
+}
+
+type ListAttachmentsMetadataResponse struct {
+	Result []*AttachmentMetadata `json:"result,omitempty"`
 }
 
 type ListProjectsResponse struct {
