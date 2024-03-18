@@ -4079,6 +4079,31 @@ type RoleIntegrations struct {
 // Unique identifier for this Role
 type RoleName = string
 
+type BuiltinRoles string
+
+const (
+	BuiltinRolesAdministrator BuiltinRoles = "administrator"
+	BuiltinRolesViewer        BuiltinRoles = "viewer"
+	BuiltinRolesMember        BuiltinRoles = "member"
+)
+
+func NewBuiltinRolesFromString(s string) (BuiltinRoles, error) {
+	switch s {
+	case "administrator":
+		return BuiltinRolesAdministrator, nil
+	case "viewer":
+		return BuiltinRolesViewer, nil
+	case "member":
+		return BuiltinRolesMember, nil
+	}
+	var t BuiltinRoles
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (b BuiltinRoles) Ptr() *BuiltinRoles {
+	return &b
+}
+
 type RoleDefinition struct {
 	// Human-readable name for this resource
 	Name string `json:"name"`
