@@ -77,6 +77,31 @@ func (o OrderOptions) Ptr() *OrderOptions {
 	return &o
 }
 
+// Application information represented by OCSF Product object. The Product object describes characteristics of a software product.
+type Application = *fileactivity.Product
+
+type ConnectionState string
+
+const (
+	ConnectionStateConnect    ConnectionState = "Connect"
+	ConnectionStateDisconnect ConnectionState = "Disconnect"
+)
+
+func NewConnectionStateFromString(s string) (ConnectionState, error) {
+	switch s {
+	case "Connect":
+		return ConnectionStateConnect, nil
+	case "Disconnect":
+		return ConnectionStateDisconnect, nil
+	}
+	var t ConnectionState
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (c ConnectionState) Ptr() *ConnectionState {
+	return &c
+}
+
 type Event struct {
 	ClassName                 string
 	AccountChange             *accountchange.AccountChange

@@ -169,6 +169,7 @@ type CategoryId string
 
 const (
 	CategoryIdAssets          CategoryId = "assets"
+	CategoryIdEdr             CategoryId = "edr"
 	CategoryIdHooks           CategoryId = "hooks"
 	CategoryIdIdentity        CategoryId = "identity"
 	CategoryIdNotifications   CategoryId = "notifications"
@@ -183,6 +184,8 @@ func NewCategoryIdFromString(s string) (CategoryId, error) {
 	switch s {
 	case "assets":
 		return CategoryIdAssets, nil
+	case "edr":
+		return CategoryIdEdr, nil
 	case "hooks":
 		return CategoryIdHooks, nil
 	case "identity":
@@ -472,8 +475,8 @@ func (c CredentialType) Ptr() *CredentialType {
 
 // A Client ID and secret used for authenticating with OAuth 2.0 compatible service using the client credentials grant.
 type OAuthClientCredential struct {
-	// The OAuth 2.0 token URL for the service provider
-	TokenUrl string `json:"token_url"`
+	// Optional URL for the OAuth 2.0 token exchange if it can not be constructed based on provider configuration
+	TokenUrl *string `json:"token_url,omitempty"`
 	// The ID of the client application defined at the service provider
 	ClientId string `json:"client_id"`
 	// Secret value for authentication
@@ -1020,6 +1023,103 @@ type CreateIntegrationResponseResult struct {
 	CredentialsCreated []*CredentialResponse `json:"credentials_created,omitempty"`
 	Integration        *Integration          `json:"integration,omitempty"`
 	Token              *TokenPair            `json:"token,omitempty"`
+}
+
+type CrowdStrikeCredential struct {
+	Type string
+	// Docs for setting up oAuth
+	OAuthClient   *OAuthClientCredential
+	OAuthClientId OAuthClientCredentialId
+}
+
+func NewCrowdStrikeCredentialFromOAuthClient(value *OAuthClientCredential) *CrowdStrikeCredential {
+	return &CrowdStrikeCredential{Type: "o_auth_client", OAuthClient: value}
+}
+
+func NewCrowdStrikeCredentialFromOAuthClientId(value OAuthClientCredentialId) *CrowdStrikeCredential {
+	return &CrowdStrikeCredential{Type: "o_auth_client_id", OAuthClientId: value}
+}
+
+func (c *CrowdStrikeCredential) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	c.Type = unmarshaler.Type
+	switch unmarshaler.Type {
+	case "o_auth_client":
+		value := new(OAuthClientCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		c.OAuthClient = value
+	case "o_auth_client_id":
+		var valueUnmarshaler struct {
+			OAuthClientId OAuthClientCredentialId `json:"value,omitempty"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		c.OAuthClientId = valueUnmarshaler.OAuthClientId
+	}
+	return nil
+}
+
+func (c CrowdStrikeCredential) MarshalJSON() ([]byte, error) {
+	switch c.Type {
+	default:
+		return nil, fmt.Errorf("invalid type %s in %T", c.Type, c)
+	case "o_auth_client":
+		var marshaler = struct {
+			Type string `json:"type"`
+			*OAuthClientCredential
+		}{
+			Type:                  c.Type,
+			OAuthClientCredential: c.OAuthClient,
+		}
+		return json.Marshal(marshaler)
+	case "o_auth_client_id":
+		var marshaler = struct {
+			Type          string                  `json:"type"`
+			OAuthClientId OAuthClientCredentialId `json:"value,omitempty"`
+		}{
+			Type:          c.Type,
+			OAuthClientId: c.OAuthClientId,
+		}
+		return json.Marshal(marshaler)
+	}
+}
+
+type CrowdStrikeCredentialVisitor interface {
+	VisitOAuthClient(*OAuthClientCredential) error
+	VisitOAuthClientId(OAuthClientCredentialId) error
+}
+
+func (c *CrowdStrikeCredential) Accept(visitor CrowdStrikeCredentialVisitor) error {
+	switch c.Type {
+	default:
+		return fmt.Errorf("invalid type %s in %T", c.Type, c)
+	case "o_auth_client":
+		return visitor.VisitOAuthClient(c.OAuthClient)
+	case "o_auth_client_id":
+		return visitor.VisitOAuthClientId(c.OAuthClientId)
+	}
+}
+
+// Configuration for the CrowdStrike EDR Provider
+type EdrCrowdStrike struct {
+	Credential *CrowdStrikeCredential `json:"credential,omitempty"`
+	// The root domain where your CrowdStrike Falcon tenant is located. Default "https://api.crowdstrike.com".
+	Url *string `json:"url,omitempty"`
+}
+
+// Configuration for the SentinelOne EDR Provider
+type EdrSentinelOne struct {
+	Credential *SentinelOneCredential `json:"credential,omitempty"`
+	// URL for the SentinelOne Management API. This should be the base URL for the API, without any path components. For example, "https://your_management_url".
+	Url string `json:"url"`
 }
 
 type ElasticsearchCredential struct {
@@ -1845,6 +1945,8 @@ type ProviderConfig struct {
 	Type                              string
 	HooksHttp                         *HooksHttp
 	AssetsArmisCentrix                *AssetsArmisCentrix
+	EdrCrowdstrike                    *EdrCrowdStrike
+	EdrSentinelone                    *EdrSentinelOne
 	IdentityEntraId                   *IdentityEntraId
 	IdentityOkta                      *IdentityOkta
 	IdentityPingone                   *IdentityPingOne
@@ -1878,6 +1980,14 @@ func NewProviderConfigFromHooksHttp(value *HooksHttp) *ProviderConfig {
 
 func NewProviderConfigFromAssetsArmisCentrix(value *AssetsArmisCentrix) *ProviderConfig {
 	return &ProviderConfig{Type: "assets_armis_centrix", AssetsArmisCentrix: value}
+}
+
+func NewProviderConfigFromEdrCrowdstrike(value *EdrCrowdStrike) *ProviderConfig {
+	return &ProviderConfig{Type: "edr_crowdstrike", EdrCrowdstrike: value}
+}
+
+func NewProviderConfigFromEdrSentinelone(value *EdrSentinelOne) *ProviderConfig {
+	return &ProviderConfig{Type: "edr_sentinelone", EdrSentinelone: value}
 }
 
 func NewProviderConfigFromIdentityEntraId(value *IdentityEntraId) *ProviderConfig {
@@ -2001,6 +2111,18 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.AssetsArmisCentrix = value
+	case "edr_crowdstrike":
+		value := new(EdrCrowdStrike)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.EdrCrowdstrike = value
+	case "edr_sentinelone":
+		value := new(EdrSentinelOne)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.EdrSentinelone = value
 	case "identity_entra_id":
 		value := new(IdentityEntraId)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -2175,6 +2297,24 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 		}{
 			Type:               p.Type,
 			AssetsArmisCentrix: p.AssetsArmisCentrix,
+		}
+		return json.Marshal(marshaler)
+	case "edr_crowdstrike":
+		var marshaler = struct {
+			Type string `json:"type"`
+			*EdrCrowdStrike
+		}{
+			Type:           p.Type,
+			EdrCrowdStrike: p.EdrCrowdstrike,
+		}
+		return json.Marshal(marshaler)
+	case "edr_sentinelone":
+		var marshaler = struct {
+			Type string `json:"type"`
+			*EdrSentinelOne
+		}{
+			Type:           p.Type,
+			EdrSentinelOne: p.EdrSentinelone,
 		}
 		return json.Marshal(marshaler)
 	case "identity_entra_id":
@@ -2408,6 +2548,8 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 type ProviderConfigVisitor interface {
 	VisitHooksHttp(*HooksHttp) error
 	VisitAssetsArmisCentrix(*AssetsArmisCentrix) error
+	VisitEdrCrowdstrike(*EdrCrowdStrike) error
+	VisitEdrSentinelone(*EdrSentinelOne) error
 	VisitIdentityEntraId(*IdentityEntraId) error
 	VisitIdentityOkta(*IdentityOkta) error
 	VisitIdentityPingone(*IdentityPingOne) error
@@ -2443,6 +2585,10 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 		return visitor.VisitHooksHttp(p.HooksHttp)
 	case "assets_armis_centrix":
 		return visitor.VisitAssetsArmisCentrix(p.AssetsArmisCentrix)
+	case "edr_crowdstrike":
+		return visitor.VisitEdrCrowdstrike(p.EdrCrowdstrike)
+	case "edr_sentinelone":
+		return visitor.VisitEdrSentinelone(p.EdrSentinelone)
 	case "identity_entra_id":
 		return visitor.VisitIdentityEntraId(p.IdentityEntraId)
 	case "identity_okta":
@@ -2696,6 +2842,89 @@ type SiemSplunk struct {
 	SearchServiceUrl *string `json:"search_service_url,omitempty"`
 	// Optional id of a credential used for connecting to the Splunk search service. If not provided, querying is disabled.
 	SearchServiceCredential *SplunkSearchCredential `json:"search_service_credential,omitempty"`
+}
+
+type SentinelOneCredential struct {
+	Type string
+	// SentinelOne API token for authentication. Follow the API DOC overview once logged into your SentinelOne Mangement URL, "https://your_management_url/docs/en/generating-api-tokens.html".
+	Token   *TokenCredential
+	TokenId TokenCredentialId
+}
+
+func NewSentinelOneCredentialFromToken(value *TokenCredential) *SentinelOneCredential {
+	return &SentinelOneCredential{Type: "token", Token: value}
+}
+
+func NewSentinelOneCredentialFromTokenId(value TokenCredentialId) *SentinelOneCredential {
+	return &SentinelOneCredential{Type: "token_id", TokenId: value}
+}
+
+func (s *SentinelOneCredential) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	s.Type = unmarshaler.Type
+	switch unmarshaler.Type {
+	case "token":
+		value := new(TokenCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		s.Token = value
+	case "token_id":
+		var valueUnmarshaler struct {
+			TokenId TokenCredentialId `json:"value,omitempty"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		s.TokenId = valueUnmarshaler.TokenId
+	}
+	return nil
+}
+
+func (s SentinelOneCredential) MarshalJSON() ([]byte, error) {
+	switch s.Type {
+	default:
+		return nil, fmt.Errorf("invalid type %s in %T", s.Type, s)
+	case "token":
+		var marshaler = struct {
+			Type string `json:"type"`
+			*TokenCredential
+		}{
+			Type:            s.Type,
+			TokenCredential: s.Token,
+		}
+		return json.Marshal(marshaler)
+	case "token_id":
+		var marshaler = struct {
+			Type    string            `json:"type"`
+			TokenId TokenCredentialId `json:"value,omitempty"`
+		}{
+			Type:    s.Type,
+			TokenId: s.TokenId,
+		}
+		return json.Marshal(marshaler)
+	}
+}
+
+type SentinelOneCredentialVisitor interface {
+	VisitToken(*TokenCredential) error
+	VisitTokenId(TokenCredentialId) error
+}
+
+func (s *SentinelOneCredential) Accept(visitor SentinelOneCredentialVisitor) error {
+	switch s.Type {
+	default:
+		return fmt.Errorf("invalid type %s in %T", s.Type, s)
+	case "token":
+		return visitor.VisitToken(s.Token)
+	case "token_id":
+		return visitor.VisitTokenId(s.TokenId)
+	}
 }
 
 type ServiceNowCredential struct {
