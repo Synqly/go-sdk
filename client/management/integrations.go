@@ -43,6 +43,8 @@ type CreateIntegrationRequest struct {
 	Fullname *string `json:"fullname,omitempty"`
 	// Provider configuration for this Integration.
 	ProviderConfig *ProviderConfig `json:"provider_config,omitempty"`
+	// Integration Point associated with this integration.
+	IntegrationPointId *IntegrationPointId `json:"integration_point_id,omitempty"`
 }
 
 type CreateIntegrationResponse struct {

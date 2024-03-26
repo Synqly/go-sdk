@@ -20,6 +20,8 @@ type Account struct {
 	Fullname string `json:"fullname"`
 	// Organization that manages this Account.
 	OrganizationId OrganizationId `json:"organization_id,omitempty"`
+	// Environment this account runs in.
+	Environment Environment `json:"environment,omitempty"`
 }
 
 // Unique identifier for this Account
@@ -143,7 +145,6 @@ type Category struct {
 }
 
 type Provider struct {
-	Id ProviderId `json:"id"`
 	// Name of the Provider.
 	Name string `json:"name"`
 	// Description of what this Provider does.
@@ -161,8 +162,6 @@ type Provider struct {
 }
 
 type ProviderCredentialConfig = map[string]interface{}
-
-type ProviderId = string
 
 // Id of the Integrations category
 type CategoryId string
@@ -211,6 +210,8 @@ func (c CategoryId) Ptr() *CategoryId {
 	return &c
 }
 
+type ProviderId = string
+
 type Base struct {
 	// Human-readable name for this resource
 	Name string `json:"name"`
@@ -256,7 +257,7 @@ type BasicCredential struct {
 // Unique identifier for a basic auth Credential
 type BasicCredentialId = CredentialId
 
-// Credential to access an integration. Each credential is owned by an Account.
+// Credential to access an integration. Each credential is owned by an Account or an IntegrationPoint.
 type Credential struct {
 	// Human-readable name for this resource
 	Name string `json:"name"`
@@ -266,7 +267,11 @@ type Credential struct {
 	UpdatedAt time.Time    `json:"updated_at"`
 	Id        CredentialId `json:"id,omitempty"`
 	// Account that manages this credential.
-	AccountId AccountId `json:"account_id,omitempty"`
+	AccountId *AccountId `json:"account_id,omitempty"`
+	// Integration Point associated with this credential.
+	IntegrationPointId *IntegrationPointId `json:"integration_point_id,omitempty"`
+	// one of account or integration_point.
+	OwnerType OwnerType `json:"owner_type,omitempty"`
 	// Human friendly display name for this Organization
 	Fullname string `json:"fullname"`
 	// Credential configuration
@@ -436,7 +441,11 @@ type CredentialResponse struct {
 	UpdatedAt time.Time    `json:"updated_at"`
 	Id        CredentialId `json:"id,omitempty"`
 	// Account that manages this credential.
-	AccountId AccountId `json:"account_id,omitempty"`
+	AccountId *AccountId `json:"account_id,omitempty"`
+	// Integration Point associated with this credential.
+	IntegrationPointId *IntegrationPointId `json:"integration_point_id,omitempty"`
+	// one of account or integration_point.
+	OwnerType OwnerType `json:"owner_type,omitempty"`
 	// Human friendly display name for this Organization.
 	Fullname string                    `json:"fullname"`
 	Config   *CredentialConfigNoSecret `json:"config,omitempty"`
@@ -488,6 +497,28 @@ type OAuthClientCredential struct {
 // Unique identifier for an OAuth client Credential
 type OAuthClientCredentialId = CredentialId
 
+type OwnerType string
+
+const (
+	OwnerTypeAccount          OwnerType = "account"
+	OwnerTypeIntegrationPoint OwnerType = "integration_point"
+)
+
+func NewOwnerTypeFromString(s string) (OwnerType, error) {
+	switch s {
+	case "account":
+		return OwnerTypeAccount, nil
+	case "integration_point":
+		return OwnerTypeIntegrationPoint, nil
+	}
+	var t OwnerType
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (o OwnerType) Ptr() *OwnerType {
+	return &o
+}
+
 // Secret value such as password or webhook url
 type SecretCredential struct {
 	// Secret value
@@ -508,6 +539,32 @@ type TokenCredentialId = CredentialId
 
 // Unique identifier for this Integration
 type IntegrationId = Id
+
+type IntegrationEnvironments struct {
+	// List of allowed providers for test environment.
+	Test []ProviderId `json:"test,omitempty"`
+	// List of allowed providers for production environment.
+	Prod []ProviderId `json:"prod,omitempty"`
+}
+
+// Enables creation, editing and deletion of Integrations.
+type IntegrationPoint struct {
+	// Human-readable name for this resource
+	Name string `json:"name"`
+	// Time object was originally created
+	CreatedAt time.Time `json:"created_at"`
+	// Last time object was updated
+	UpdatedAt time.Time          `json:"updated_at"`
+	Id        IntegrationPointId `json:"id,omitempty"`
+	// Name of integration point, will be shown to end-users in the Connect UI.
+	Fullname *string `json:"fullname,omitempty"`
+	// Optional description of the Integration Point. Will not be displayed to end-users of Connect UI.
+	Description *string `json:"description,omitempty"`
+	// Connector to use for the Integration Point.
+	Connector CategoryId `json:"connector,omitempty"`
+	// Selects providers to use for account environments.
+	Environments *IntegrationEnvironments `json:"environments,omitempty"`
+}
 
 type ArmisCredential struct {
 	Type string
@@ -1527,6 +1584,8 @@ type Integration struct {
 	ProviderConfig *ProviderConfig `json:"provider_config,omitempty"`
 	// Type of the provider for this Integration.
 	ProviderType string `json:"provider_type"`
+	// Integration Point associated with this integration.
+	IntegrationPointId *IntegrationPointId `json:"integration_point_id,omitempty"`
 }
 
 type JiraCredential struct {
@@ -3657,6 +3716,28 @@ func (s State) Ptr() *State {
 	return &s
 }
 
+type Environment string
+
+const (
+	EnvironmentTest Environment = "test"
+	EnvironmentProd Environment = "prod"
+)
+
+func NewEnvironmentFromString(s string) (Environment, error) {
+	switch s {
+	case "test":
+		return EnvironmentTest, nil
+	case "prod":
+		return EnvironmentProd, nil
+	}
+	var t Environment
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (e Environment) Ptr() *Environment {
+	return &e
+}
+
 type Organization struct {
 	// Human-readable name for this resource
 	Name string `json:"name"`
@@ -3755,20 +3836,21 @@ type AccountsPermissions struct {
 }
 
 type ApiPermissionMap struct {
-	All           *ReadWritePermissions     `json:"all,omitempty"`
-	Accounts      *AccountsPermissions      `json:"accounts,omitempty"`
-	Audit         *AuditPermissions         `json:"audit,omitempty"`
-	Auth          *AuthPermissions          `json:"auth,omitempty"`
-	Capabilities  *CapabilitiesPermissions  `json:"capabilities,omitempty"`
-	Credentials   *CredentialsPermissions   `json:"credentials,omitempty"`
-	Integrations  *IntegrationsPermissions  `json:"integrations,omitempty"`
-	Members       *MembersPermissions       `json:"members,omitempty"`
-	Organizations *OrganizationPermissions  `json:"organizations,omitempty"`
-	PermissionSet *PermissionSetPermissions `json:"permission_set,omitempty"`
-	Roles         *RolesPermissions         `json:"roles,omitempty"`
-	Status        *StatusPermissions        `json:"status,omitempty"`
-	Tokens        *TokensPermissions        `json:"tokens,omitempty"`
-	Transforms    *TransformsPermissions    `json:"transforms,omitempty"`
+	All               *ReadWritePermissions         `json:"all,omitempty"`
+	Accounts          *AccountsPermissions          `json:"accounts,omitempty"`
+	Audit             *AuditPermissions             `json:"audit,omitempty"`
+	Auth              *AuthPermissions              `json:"auth,omitempty"`
+	Capabilities      *CapabilitiesPermissions      `json:"capabilities,omitempty"`
+	Credentials       *CredentialsPermissions       `json:"credentials,omitempty"`
+	Integrations      *IntegrationsPermissions      `json:"integrations,omitempty"`
+	IntegrationPoints *IntegrationPointsPermissions `json:"integration_points,omitempty"`
+	Members           *MembersPermissions           `json:"members,omitempty"`
+	Organizations     *OrganizationPermissions      `json:"organizations,omitempty"`
+	PermissionSet     *PermissionSetPermissions     `json:"permission_set,omitempty"`
+	Roles             *RolesPermissions             `json:"roles,omitempty"`
+	Status            *StatusPermissions            `json:"status,omitempty"`
+	Tokens            *TokensPermissions            `json:"tokens,omitempty"`
+	Transforms        *TransformsPermissions        `json:"transforms,omitempty"`
 }
 
 type AuditActions string
@@ -3901,6 +3983,48 @@ func (c CredentialsActions) Ptr() *CredentialsActions {
 // Permissions for the credentials API
 type CredentialsPermissions struct {
 	Actions []CredentialsActions `json:"actions,omitempty"`
+}
+
+type IntegrationPointsActions string
+
+const (
+	IntegrationPointsActionsList   IntegrationPointsActions = "list"
+	IntegrationPointsActionsCreate IntegrationPointsActions = "create"
+	IntegrationPointsActionsGet    IntegrationPointsActions = "get"
+	IntegrationPointsActionsUpdate IntegrationPointsActions = "update"
+	IntegrationPointsActionsPatch  IntegrationPointsActions = "patch"
+	IntegrationPointsActionsDelete IntegrationPointsActions = "delete"
+	IntegrationPointsActionsAll    IntegrationPointsActions = "*"
+)
+
+func NewIntegrationPointsActionsFromString(s string) (IntegrationPointsActions, error) {
+	switch s {
+	case "list":
+		return IntegrationPointsActionsList, nil
+	case "create":
+		return IntegrationPointsActionsCreate, nil
+	case "get":
+		return IntegrationPointsActionsGet, nil
+	case "update":
+		return IntegrationPointsActionsUpdate, nil
+	case "patch":
+		return IntegrationPointsActionsPatch, nil
+	case "delete":
+		return IntegrationPointsActionsDelete, nil
+	case "*":
+		return IntegrationPointsActionsAll, nil
+	}
+	var t IntegrationPointsActions
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (i IntegrationPointsActions) Ptr() *IntegrationPointsActions {
+	return &i
+}
+
+// Permissions for the integrations points API
+type IntegrationPointsPermissions struct {
+	Actions []IntegrationPointsActions `json:"actions,omitempty"`
 }
 
 type IntegrationsActions string
@@ -4423,7 +4547,7 @@ type Token struct {
 	Secret string `json:"secret"`
 	// Time when this token expires and can no longer be used again.
 	Expires time.Time `json:"expires"`
-	// Deprecated: Permissions granted to this token.
+	// Permissions granted to this token.
 	Permissions *Permission `json:"permissions,omitempty"`
 }
 
