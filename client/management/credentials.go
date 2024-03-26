@@ -26,8 +26,8 @@ type CreateCredentialRequest struct {
 	Fullname *string `json:"fullname,omitempty"`
 	// Credential configuration
 	Config *CredentialConfig `json:"config,omitempty"`
-	// one of account or integration_point.
-	OwnerType OwnerType `json:"owner_type,omitempty"`
+	// One of `account` or `integration_point`; defaults to `account` if not specified.
+	OwnerType *OwnerType `json:"owner_type,omitempty"`
 }
 
 type CreateCredentialResponse struct {

@@ -233,6 +233,8 @@ type ErrorParam struct {
 	Value string `json:"value"`
 }
 
+type Id = string
+
 // AWS access key to authenticate with AWS. Access keys are long-term credentials for an IAM user and consist of an ID and secret. Follow [this guide to generate access and secret keys](https://docs.aws.amazon.com/general/latest/gr/aws-sec-cred-types.html#access-keys-and-secret-access-keys). You may optionally provide a session token if you are using temporary credentials.
 type AwsCredential struct {
 	// ID portion of the AWS access key pair.
@@ -270,7 +272,7 @@ type Credential struct {
 	AccountId *AccountId `json:"account_id,omitempty"`
 	// Integration Point associated with this credential.
 	IntegrationPointId *IntegrationPointId `json:"integration_point_id,omitempty"`
-	// one of account or integration_point.
+	// One of `account` or `integration_point`.
 	OwnerType OwnerType `json:"owner_type,omitempty"`
 	// Human friendly display name for this Organization
 	Fullname string `json:"fullname"`
@@ -444,7 +446,7 @@ type CredentialResponse struct {
 	AccountId *AccountId `json:"account_id,omitempty"`
 	// Integration Point associated with this credential.
 	IntegrationPointId *IntegrationPointId `json:"integration_point_id,omitempty"`
-	// one of account or integration_point.
+	// One of `account` or `integration_point`.
 	OwnerType OwnerType `json:"owner_type,omitempty"`
 	// Human friendly display name for this Organization.
 	Fullname string                    `json:"fullname"`

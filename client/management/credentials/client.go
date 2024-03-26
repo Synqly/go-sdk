@@ -33,14 +33,14 @@ func NewClient(opts ...core.ClientOption) *Client {
 	}
 }
 
-// Returns a list of all `Credential` objects belonging to the `Account` matching
-// `{accountId}`.
-func (c *Client) List(ctx context.Context, accountId management.AccountId, request *management.ListCredentialsRequest) (*management.ListCredentialsResponse, error) {
+// Returns a list of all `Credential` objects belonging to the `Account` or `IntegrationPoint` matching
+// `{ownerId}`.
+func (c *Client) List(ctx context.Context, ownerId management.Id, request *management.ListCredentialsRequest) (*management.ListCredentialsResponse, error) {
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"v1/credentials/%v", accountId)
+	endpointURL := fmt.Sprintf(baseURL+"/"+"v1/credentials/%v", ownerId)
 
 	queryParams := make(url.Values)
 	if request.Limit != nil {
@@ -113,13 +113,13 @@ func (c *Client) List(ctx context.Context, accountId management.AccountId, reque
 }
 
 // Returns the `Credential` object matching `{credentialId}` where the
-// `Credential` belongs to the `Account` matching `{accountId}`.
-func (c *Client) Get(ctx context.Context, accountId management.AccountId, credentialId management.CredentialId) (*management.GetCredentialResponse, error) {
+// `Credential` belongs to the `Account` or `IntegrationPoint` matching `{ownerId}`.
+func (c *Client) Get(ctx context.Context, ownerId management.Id, credentialId management.CredentialId) (*management.GetCredentialResponse, error) {
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"v1/credentials/%v/%v", accountId, credentialId)
+	endpointURL := fmt.Sprintf(baseURL+"/"+"v1/credentials/%v/%v", ownerId, credentialId)
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -171,16 +171,15 @@ func (c *Client) Get(ctx context.Context, accountId management.AccountId, creden
 	return response, nil
 }
 
-// Creates a `Credential` object in the `Account` matching matching
-// `{accountId}`. A `Credential` may only by used by a single `Account`;
-// however, `Credential` objects can be shared by multiple `Integrations`
-// within an `Account`.
-func (c *Client) Create(ctx context.Context, accountId management.AccountId, request *management.CreateCredentialRequest) (*management.CreateCredentialResponse, error) {
+// Creates a `Credential` object in the `Account` or `IntegrationPoint` matching matching
+// `{ownerId}`. A `Credential` may only by used by a single `Account` or `IntegrationPoint`;
+// however, `Credential` objects can be shared by multiple `Integrations` within an `Account`.
+func (c *Client) Create(ctx context.Context, ownerId management.Id, request *management.CreateCredentialRequest) (*management.CreateCredentialResponse, error) {
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"v1/credentials/%v", accountId)
+	endpointURL := fmt.Sprintf(baseURL+"/"+"v1/credentials/%v", ownerId)
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -247,13 +246,13 @@ func (c *Client) Create(ctx context.Context, accountId management.AccountId, req
 }
 
 // Updates the `Credential` object matching `{credentialId}`, where the
-// `Credential` belongs to the `Account` matching `{accountId}`.
-func (c *Client) Update(ctx context.Context, accountId management.AccountId, credentialId management.CredentialId, request management.UpdateCredentialRequest) (*management.UpdateCredentialResponse, error) {
+// `Credential` belongs to the `Account` or `IntegrationPoint` matching `{ownerId}`.
+func (c *Client) Update(ctx context.Context, ownerId management.Id, credentialId management.CredentialId, request management.UpdateCredentialRequest) (*management.UpdateCredentialResponse, error) {
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"v1/credentials/%v/%v", accountId, credentialId)
+	endpointURL := fmt.Sprintf(baseURL+"/"+"v1/credentials/%v/%v", ownerId, credentialId)
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -320,13 +319,13 @@ func (c *Client) Update(ctx context.Context, accountId management.AccountId, cre
 }
 
 // Patches the `Credential` object matching `{credentialId}`, where the
-// `Credential` belongs to the `Account` matching `{accountId}`.
-func (c *Client) Patch(ctx context.Context, accountId management.AccountId, credentialId management.CredentialId, request []map[string]interface{}) (*management.PatchCredentialResponse, error) {
+// `Credential` belongs to the `Account` or `IntegrationPoint` matching `{ownerId}`.
+func (c *Client) Patch(ctx context.Context, ownerId management.Id, credentialId management.CredentialId, request []map[string]interface{}) (*management.PatchCredentialResponse, error) {
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"v1/credentials/%v/%v", accountId, credentialId)
+	endpointURL := fmt.Sprintf(baseURL+"/"+"v1/credentials/%v/%v", ownerId, credentialId)
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -386,13 +385,13 @@ func (c *Client) Patch(ctx context.Context, accountId management.AccountId, cred
 }
 
 // Deletes the `Credential` object matching `{credentialId}`, where the
-// `Credential` belongs to the `Account` matching `{accountId}`.
-func (c *Client) Delete(ctx context.Context, accountId management.AccountId, credentialId management.CredentialId) error {
+// `Credential` belongs to the `Account` or `IntegrationPoint` matching `{ownerId}`.
+func (c *Client) Delete(ctx context.Context, ownerId management.Id, credentialId management.CredentialId) error {
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"v1/credentials/%v/%v", accountId, credentialId)
+	endpointURL := fmt.Sprintf(baseURL+"/"+"v1/credentials/%v/%v", ownerId, credentialId)
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
