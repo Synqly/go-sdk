@@ -585,7 +585,7 @@ type AttachmentMetadata struct {
 	// The type of the file.
 	FileType string `json:"file_type"`
 	// The size of the file in bytes.
-	FileSize int `json:"file_size"`
+	FileSize *int `json:"file_size,omitempty"`
 	// The date the attachment was created.
 	CreatedDate time.Time `json:"created_date"`
 	// The user who created the attachment.
@@ -661,6 +661,8 @@ type Ticket struct {
 	IssueType *string `json:"issue_type,omitempty"`
 	// Associate tags with Ticket
 	Tags []string `json:"tags,omitempty"`
+	// Metadata of attachments associated with the ticket
+	Attachments []*AttachmentMetadata `json:"attachments,omitempty"`
 }
 
 // Asset in a vulnerability scanning system. Represented by OCSF Device Inventory Info class (class_uid 5001).
