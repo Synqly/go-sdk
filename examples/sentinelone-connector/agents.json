@@ -1,0 +1,130 @@
+
+{
+    "data": [
+    {
+        "accountId": "1782758751716709985",
+        "accountName": "Synqly, Inc.",
+        "activeDirectory": {
+            "computerDistinguishedName": null,
+            "computerMemberOf": [],
+            "lastUserDistinguishedName": null,
+            "lastUserMemberOf": []
+        },
+        "activeThreats": 0,
+        "agentVersion": "23.4.2.14",
+        "allowRemoteShell": true,
+        "appsVulnerabilityStatus": "not_applicable",
+        "cloudProviders": {
+            "Azure": {
+                "azureResourceGroup": "sentinelone_dev_provider",
+                "cloudAccount": "259abdf9-1be3-4275-8e78-6eab77ead01f",
+                "cloudImage": "20_04-lts-gen2",
+                "cloudInstanceId": "860d82c1-13ad-4b66-b30b-0b2f1f68b3f7",
+                "cloudInstanceSize": "Standard_B2als_v2",
+                "cloudLocation": "westus2",
+                "cloudTags": [
+                    ""
+                ]
+            }
+        },
+        "computerName": "sentinelonedev",
+        "consoleMigrationStatus": "N/A",
+        "containerizedWorkloadCounts": null,
+        "coreCount": 2,
+        "cpuCount": 1,
+        "cpuId": "AMD EPYC 7763 64-Core Processor",
+        "createdAt": "2024-02-23T21:38:40.467544Z",
+        "detectionState": null,
+        "domain": "44se5ooeutfevoeudnfvwnxykf.xx.internal.cloudapp.net",
+        "encryptedApplications": false,
+        "externalId": "",
+        "externalIp": "20.64.243.244",
+        "firewallEnabled": true,
+        "firstFullModeTime": null,
+        "fullDiskScanLastUpdatedAt": "2024-02-23T21:48:34.523974Z",
+        "groupId": "1782758752563959410",
+        "groupIp": "20.64.243.x",
+        "groupName": "Default Group",
+        "hasContainerizedWorkload": false,
+        "id": "1891593526968377742",
+        "inRemoteShellSession": false,
+        "infected": false,
+        "installerType": ".deb",
+        "isActive": true,
+        "isDecommissioned": false,
+        "isPendingUninstall": false,
+        "isUninstalled": false,
+        "isUpToDate": true,
+        "lastActiveDate": "2024-03-26T21:39:41.788833Z",
+        "lastIpToMgmt": "10.1.0.4",
+        "lastLoggedInUserName": "",
+        "lastSuccessfulScanDate": "2024-02-23T21:48:34.523974Z",
+        "licenseKey": "",
+        "locationEnabled": false,
+        "locationType": "not_supported",
+        "locations": null,
+        "machineType": "server",
+        "missingPermissions": [],
+        "mitigationMode": "protect",
+        "mitigationModeSuspicious": "detect",
+        "modelName": "Microsoft Corporation Virtual Machine",
+        "networkInterfaces": [
+            {
+                "gatewayIp": "10.1.0.1",
+                "gatewayMacAddress": "12:34:56:78:9a:bc",
+                "id": "1891593526976766351",
+                "inet": [
+                    "10.1.0.4"
+                ],
+                "inet6": [
+                    "fe80::222:48ff:febd:bc2a"
+                ],
+                "name": "eth0",
+                "physical": "00:22:48:BD:BC:2A"
+            }
+        ],
+        "networkQuarantineEnabled": false,
+        "networkStatus": "disconnected",
+        "operationalState": "na",
+        "operationalStateExpiration": null,
+        "osArch": "64 bit",
+        "osName": "Linux",
+        "osRevision": "Ubuntu 20.04.6 LTS 5.15.0-1059-azure",
+        "osStartTime": "2024-03-22T06:52:24Z",
+        "osType": "linux",
+        "osUsername": "root",
+        "proxyStates": {
+            "console": false,
+            "deepVisibility": false
+        },
+        "rangerStatus": "Enabled",
+        "rangerVersion": "23.4.1.1",
+        "registeredAt": "2024-02-23T21:38:40.463334Z",
+        "remoteProfilingState": "disabled",
+        "remoteProfilingStateExpiration": null,
+        "scanAbortedAt": "2024-02-23T21:39:26.132883Z",
+        "scanFinishedAt": "2024-02-23T21:48:34.523974Z",
+        "scanStartedAt": "2024-02-23T21:39:25.999793Z",
+        "scanStatus": "finished",
+        "serialNumber": null,
+        "showAlertIcon": false,
+        "siteId": "1782758752538793585",
+        "siteName": "Default site",
+        "storageName": null,
+        "storageType": null,
+        "tags": {
+            "sentinelone": []
+        },
+        "threatRebootRequired": false,
+        "totalMemory": 3863,
+        "updatedAt": "2024-03-26T21:38:36.294485Z",
+        "userActionsNeeded": [],
+        "uuid": "b626e5fa-bfce-254f-187a-f9e7dc1515ac"
+    }
+],
+"pagination": {
+    "nextCursor": null,
+    "totalItems": 1
+
+}
+}
