@@ -24,8 +24,8 @@ type CreateAccountRequest struct {
 	Name *string `json:"name,omitempty"`
 	// Human friendly display name for this Account, will auto-generate 'name' field (if 'name' is not specified)
 	Fullname *string `json:"fullname,omitempty"`
-	// Environment this account runs in.
-	Environment Environment `json:"environment,omitempty"`
+	// Environment this account runs in. Defaults to `prod` if not specified.
+	Environment *Environment `json:"environment,omitempty"`
 }
 
 type CreateAccountResponse struct {
