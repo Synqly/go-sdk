@@ -1375,7 +1375,7 @@ type NetworkProxy struct {
 	// The port used for communication within the network connection.
 	Port *Port `json:"port,omitempty"`
 	// The network proxy information pertaining to a specific endpoint. This can be used to describe information pertaining to network address translation (NAT).
-	ProxyEndpoint *NetworkProxy `json:"proxy_endpoint,omitempty"`
+	ProxyEndpoint *Object `json:"proxy_endpoint,omitempty"`
 	// The unique identifier of a virtual subnet.
 	SubnetUid *string `json:"subnet_uid,omitempty"`
 	// The service name in service-to-service connections. For example, AWS VPC logs the pkt-src-aws-service and pkt-dst-aws-service fields identify the connection is coming from or going to an AWS service.
@@ -1578,7 +1578,7 @@ type Process struct {
 	// If running under a process namespace (such as in a container), the process identifier within that process namespace.
 	NamespacePid *int `json:"namespace_pid,omitempty"`
 	// The parent process of this process object. It is recommended to only populate this field for the first process object, to prevent deep nesting.
-	ParentProcess *Process `json:"parent_process,omitempty"`
+	ParentProcess *Object `json:"parent_process,omitempty"`
 	// The process identifier, as reported by the operating system. Process ID (PID) is a number used by the operating system to uniquely identify an active process.
 	Pid *int `json:"pid,omitempty"`
 	// The name of the containment jail (i.e., sandbox). For example, hardened_ps, high_security_ps, oracle_ps, netsvcs_ps, or default_ps.

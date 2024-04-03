@@ -267,7 +267,7 @@ type Analytic struct {
 	// The name of the analytic that generated the finding.
 	Name *string `json:"name,omitempty"`
 	// Other analytics related to this analytic.
-	RelatedAnalytics []*Analytic `json:"related_analytics,omitempty"`
+	RelatedAnalytics []*Object `json:"related_analytics,omitempty"`
 	// The analytic type.
 	Type *string `json:"type,omitempty"`
 	// The analytic type ID.

@@ -309,7 +309,7 @@ type Analytic struct {
 	// The name of the analytic that generated the finding.
 	Name *string `json:"name,omitempty"`
 	// Other analytics related to this analytic.
-	RelatedAnalytics []*Analytic `json:"related_analytics,omitempty"`
+	RelatedAnalytics []*Object `json:"related_analytics,omitempty"`
 	// The analytic type.
 	Type *string `json:"type,omitempty"`
 	// The analytic type ID.
@@ -1390,7 +1390,7 @@ type Process struct {
 	// If running under a process namespace (such as in a container), the process identifier within that process namespace.
 	NamespacePid *int `json:"namespace_pid,omitempty"`
 	// The parent process of this process object. It is recommended to only populate this field for the first process object, to prevent deep nesting.
-	ParentProcess *Process `json:"parent_process,omitempty"`
+	ParentProcess *Object `json:"parent_process,omitempty"`
 	// The process identifier, as reported by the operating system. Process ID (PID) is a number used by the operating system to uniquely identify an active process.
 	Pid *int `json:"pid,omitempty"`
 	// The name of the containment jail (i.e., sandbox). For example, hardened_ps, high_security_ps, oracle_ps, netsvcs_ps, or default_ps.
