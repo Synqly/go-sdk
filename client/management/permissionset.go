@@ -21,6 +21,7 @@ const (
 	PermissionsViewer         Permissions = "viewer"
 	PermissionsMember         Permissions = "member"
 	PermissionsAccountManager Permissions = "account-manager"
+	PermissionsConnectUi      Permissions = "connect-ui"
 )
 
 func NewPermissionsFromString(s string) (Permissions, error) {
@@ -33,6 +34,8 @@ func NewPermissionsFromString(s string) (Permissions, error) {
 		return PermissionsMember, nil
 	case "account-manager":
 		return PermissionsAccountManager, nil
+	case "connect-ui":
+		return PermissionsConnectUi, nil
 	}
 	var t Permissions
 	return "", fmt.Errorf("%s is not a valid %T", s, t)
