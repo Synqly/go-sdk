@@ -1,6 +1,6 @@
 synqly:
-  org: AlbertoM
-  token: 1::3c6f70e2-0509-4d01-8019-33c736845d80::{SYNQLY_TOKEN}
+  org: {SYNQLY_ORG}
+  token: {SYNQLY_TOKEN}
 
 sentinelone:
   url: {SENTINELONE_URL}
