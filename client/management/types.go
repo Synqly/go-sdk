@@ -658,6 +658,13 @@ type AssetsArmisCentrix struct {
 	Url string `json:"url"`
 }
 
+// Configuration for ServiceNow as an Assets Provider
+type AssetsServiceNow struct {
+	Credential *ServiceNowCredential `json:"credential,omitempty"`
+	// URL for the ServiceNow API. This should be the base URL for the API, without any path components and must be HTTPS. For example, "https://tenant.service-now.com".
+	Url string `json:"url"`
+}
+
 type AwsS3Credential struct {
 	Type string
 	// AWS access key to authenticate with AWS. Access keys are long-term credentials for an IAM user and consist of an ID and secret. This token pair must have read and write access to the configured s3 bucket. You may optionally provide a session token if you are using temporary credentials.
@@ -2006,6 +2013,7 @@ type ProviderConfig struct {
 	Type                              string
 	HooksHttp                         *HooksHttp
 	AssetsArmisCentrix                *AssetsArmisCentrix
+	AssetsServicenow                  *AssetsServiceNow
 	EdrCrowdstrike                    *EdrCrowdStrike
 	EdrSentinelone                    *EdrSentinelOne
 	IdentityEntraId                   *IdentityEntraId
@@ -2041,6 +2049,10 @@ func NewProviderConfigFromHooksHttp(value *HooksHttp) *ProviderConfig {
 
 func NewProviderConfigFromAssetsArmisCentrix(value *AssetsArmisCentrix) *ProviderConfig {
 	return &ProviderConfig{Type: "assets_armis_centrix", AssetsArmisCentrix: value}
+}
+
+func NewProviderConfigFromAssetsServicenow(value *AssetsServiceNow) *ProviderConfig {
+	return &ProviderConfig{Type: "assets_servicenow", AssetsServicenow: value}
 }
 
 func NewProviderConfigFromEdrCrowdstrike(value *EdrCrowdStrike) *ProviderConfig {
@@ -2172,6 +2184,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.AssetsArmisCentrix = value
+	case "assets_servicenow":
+		value := new(AssetsServiceNow)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.AssetsServicenow = value
 	case "edr_crowdstrike":
 		value := new(EdrCrowdStrike)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -2358,6 +2376,15 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 		}{
 			Type:               p.Type,
 			AssetsArmisCentrix: p.AssetsArmisCentrix,
+		}
+		return json.Marshal(marshaler)
+	case "assets_servicenow":
+		var marshaler = struct {
+			Type string `json:"type"`
+			*AssetsServiceNow
+		}{
+			Type:             p.Type,
+			AssetsServiceNow: p.AssetsServicenow,
 		}
 		return json.Marshal(marshaler)
 	case "edr_crowdstrike":
@@ -2609,6 +2636,7 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 type ProviderConfigVisitor interface {
 	VisitHooksHttp(*HooksHttp) error
 	VisitAssetsArmisCentrix(*AssetsArmisCentrix) error
+	VisitAssetsServicenow(*AssetsServiceNow) error
 	VisitEdrCrowdstrike(*EdrCrowdStrike) error
 	VisitEdrSentinelone(*EdrSentinelOne) error
 	VisitIdentityEntraId(*IdentityEntraId) error
@@ -2646,6 +2674,8 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 		return visitor.VisitHooksHttp(p.HooksHttp)
 	case "assets_armis_centrix":
 		return visitor.VisitAssetsArmisCentrix(p.AssetsArmisCentrix)
+	case "assets_servicenow":
+		return visitor.VisitAssetsServicenow(p.AssetsServicenow)
 	case "edr_crowdstrike":
 		return visitor.VisitEdrCrowdstrike(p.EdrCrowdstrike)
 	case "edr_sentinelone":
