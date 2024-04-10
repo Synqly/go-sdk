@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bufio"
 	"context"
 	"encoding/json"
 	"errors"
@@ -98,27 +97,30 @@ func (s *sentinelOneProvider) demoActions(orgToken string, sentinelOneConf *sent
 	}
 
 	// Get some applications
-	resp, err := t.Synqly.EngineClients[mgmt.CategoryIdEdr].Edr.QueryApplications(ctx, &engine.QueryApplicationsRequest{Limit: engine.Int(2)})
+	var resp *engine.QueryApplicationsResponse
+	var appError error
+	for {
+		if resp != nil && resp.Cursor != "" {
+			resp, appError = t.Synqly.EngineClients[mgmt.CategoryIdEdr].Edr.QueryApplications(ctx, &engine.QueryApplicationsRequest{Cursor: &resp.Cursor})
+		} else {
+			resp, appError = t.Synqly.EngineClients[mgmt.CategoryIdEdr].Edr.QueryApplications(ctx, &engine.QueryApplicationsRequest{Limit: engine.Int(2)})
+		}
 
-	if err != nil {
-		return fmt.Errorf("error querying applications: %s", err)
-	}
-	for _, app := range resp.Result {
-		apps, _ := json.MarshalIndent(app, "", "  ")
-		fmt.Println()
-		consoleLogger.Printf("apps %s:\n", apps)
-	}
+		if appError != nil {
+			// handle error
+			break
+		}
 
-	// Get some more applications
-	resp, err = t.Synqly.EngineClients[mgmt.CategoryIdEdr].Edr.QueryApplications(ctx, &engine.QueryApplicationsRequest{Cursor: &resp.Cursor})
+		for _, app := range resp.Result {
+			apps, _ := json.MarshalIndent(app, "", "  ")
+			fmt.Println()
+			consoleLogger.Printf("apps %s:\n", apps)
+		}
 
-	if err != nil {
-		return fmt.Errorf("error querying applications: %s", err)
-	}
-	for _, app := range resp.Result {
-		apps, _ := json.MarshalIndent(app, "", "  ")
-		fmt.Println()
-		consoleLogger.Printf("apps %s:\n", apps)
+		if resp.Cursor == "" {
+			// no more data to fetch
+			break
+		}
 	}
 
 	// Get an endpoint
@@ -135,19 +137,18 @@ func (s *sentinelOneProvider) demoActions(orgToken string, sentinelOneConf *sent
 
 	consoleLogger.Printf("Quarantining endpoint %s", *endpointRes.Result[0].Device.Uid)
 
-	endpointId := *endpointRes.Result[0].Device.Uid
-	t.Synqly.EngineClients[mgmt.CategoryIdEdr].Edr.NetworkQuarantine(ctx, &engine.NetworkQuarantineRequest{
-		EndpointIds: []string{endpointId},
-		State:       engine.ConnectionStateDisconnect,
-	})
+	// Quarantine an endpoint, uncomment to execute
 
-	fmt.Println("press any key to add endpoint back to network (Unquarantine)...")
-	bufio.NewReader(os.Stdin).ReadBytes('\n')
+	// endpointId := *endpointRes.Result[0].Device.Uid
+	// t.Synqly.EngineClients[mgmt.CategoryIdEdr].Edr.NetworkQuarantine(ctx, &engine.NetworkQuarantineRequest{
+	// 	EndpointIds: []string{endpointId},
+	// 	State:       engine.ConnectionStateDisconnect,
+	// })
 
-	t.Synqly.EngineClients[mgmt.CategoryIdEdr].Edr.NetworkQuarantine(ctx, &engine.NetworkQuarantineRequest{
-		EndpointIds: []string{endpointId},
-		State:       engine.ConnectionStateConnect,
-	})
+	// t.Synqly.EngineClients[mgmt.CategoryIdEdr].Edr.NetworkQuarantine(ctx, &engine.NetworkQuarantineRequest{
+	// 	EndpointIds: []string{endpointId},
+	// 	State:       engine.ConnectionStateConnect,
+	// })
 
 	return nil
 }
