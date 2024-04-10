@@ -274,7 +274,7 @@ type Credential struct {
 	IntegrationPointId *IntegrationPointId `json:"integration_point_id,omitempty"`
 	// One of `account` or `integration_point`.
 	OwnerType OwnerType `json:"owner_type,omitempty"`
-	// Human friendly display name for this Organization
+	// Human friendly display name for this Credential
 	Fullname string `json:"fullname"`
 	// Credential configuration
 	Config *CredentialConfig `json:"config,omitempty"`
@@ -448,7 +448,7 @@ type CredentialResponse struct {
 	IntegrationPointId *IntegrationPointId `json:"integration_point_id,omitempty"`
 	// One of `account` or `integration_point`.
 	OwnerType OwnerType `json:"owner_type,omitempty"`
-	// Human friendly display name for this Organization.
+	// Human friendly display name for this Credential. Defaults to the same value as the 'name' field if not specified.
 	Fullname string                    `json:"fullname"`
 	Config   *CredentialConfigNoSecret `json:"config,omitempty"`
 }
@@ -3633,7 +3633,7 @@ type Member struct {
 	State     State     `json:"state,omitempty"`
 	// Last logon time
 	LastLogon time.Time `json:"last_logon"`
-	// User's full display name
+	// User's full display name.
 	Fullname string `json:"fullname"`
 	// User's nickname
 	Nickname string `json:"nickname"`
@@ -4591,7 +4591,7 @@ type Transform struct {
 	Id        TransformId `json:"id,omitempty"`
 	// Account that manages this Transform.
 	AccountId AccountId `json:"account_id,omitempty"`
-	// Human friendly display name for this Organization.
+	// Human friendly display name for this Transform.
 	Fullname string `json:"fullname"`
 	// JSON Patch transform to apply (rfc6902).
 	Patch []byte `json:"patch"`

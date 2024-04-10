@@ -22,7 +22,7 @@ type ListMembersRequest struct {
 type CreateMemberRequest struct {
 	// Email name to use for this Member. Also used for duplicate detection and default sort order.
 	Name string `json:"name"`
-	// User's full display name
+	// User's full display name. Defaults to the same value as the 'name' field if not specified.
 	Fullname *string `json:"fullname,omitempty"`
 	// User's nickname
 	Nickname *string `json:"nickname,omitempty"`

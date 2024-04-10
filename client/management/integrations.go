@@ -39,7 +39,7 @@ type ListAccountIntegrationsRequest struct {
 type CreateIntegrationRequest struct {
 	// Unique short name for this Integrations (lowercase [a-z0-9_-], can be used in URLs). Also used for case insensitive duplicate name detection and default sort order. Defaults to IntegrationId if both name and fullname are not specified.
 	Name *string `json:"name,omitempty"`
-	// Human friendly display name for this Integrations, will auto-generate 'name' field (if 'name' is not specified)
+	// Human friendly display name for this Integrations, will auto-generate 'name' field (if 'name' is not specified). Defaults to the same value as the 'name' field if not specified.
 	Fullname *string `json:"fullname,omitempty"`
 	// Provider configuration for this Integration.
 	ProviderConfig *ProviderConfig `json:"provider_config,omitempty"`

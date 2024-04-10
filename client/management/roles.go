@@ -25,7 +25,7 @@ type RoleId = Id
 type CreateRoleRequest struct {
 	// Unique short name for this Role (lowercase [a-z0-9_-], can be used in URLs). Also used for case insensitive duplicate name detection and default sort order. Defaults to RoleId if both name and fullname are not specified.
 	Name *string `json:"name,omitempty"`
-	// Human friendly display name for this Role, will auto-generate 'name' field (if 'name' is not specified)
+	// Human friendly display name for this Role, will auto-generate 'name' field (if 'name' is not specified). Defaults to the same value as the 'name' field if not specified.
 	Fullname *string `json:"fullname,omitempty"`
 	// Description of the resources included in the role and permissions granted on those resources. Includes details of when to use this role along with the intended personas.
 	Description *string `json:"description,omitempty"`

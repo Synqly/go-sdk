@@ -22,7 +22,7 @@ type ListIntegrationPointsRequest struct {
 type CreateIntegrationPointRequest struct {
 	// Unique short name for this Integration Point (lowercase [a-z0-9_-], can be used in URLs). Also used for case insensitive duplicate name detection and default sort order. Defaults to IntegrationPointId if both name and fullname are not specified.
 	Name *string `json:"name,omitempty"`
-	// Name of integration point, will be shown to end-users in the Connect UI.
+	// Name of integration point, will be shown to end-users in the Connect UI. Defaults to the same value as the 'name' field if not specified.
 	Fullname *string `json:"fullname,omitempty"`
 	// Optional description of the Integration Point. Will not be displayed to end-users of Connect UI.
 	Description *string `json:"description,omitempty"`
