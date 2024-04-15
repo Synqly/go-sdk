@@ -4655,6 +4655,12 @@ type StatusEvent struct {
 	Request int64 `json:"request"`
 }
 
+type StatusInfo struct {
+	Status      *Status      `json:"status,omitempty"`
+	Integration *Integration `json:"integration,omitempty"`
+	Account     *Account     `json:"account,omitempty"`
+}
+
 // Status timeseries object
 type TimeseriesResult struct {
 	// Interval time
