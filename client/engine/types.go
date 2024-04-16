@@ -561,6 +561,20 @@ func (n NotificationStatus) Ptr() *NotificationStatus {
 	return &n
 }
 
+type Evidence struct {
+	// Unique identifier for the investigation associated with the evidence
+	InvestigationId string `json:"investigation_id"`
+	// Original response from the SIEM
+	RawData string `json:"raw_data"`
+}
+
+type Investigation struct {
+	// Unique identifier for the investigation
+	Id string `json:"id"`
+	// Original response from the SIEM
+	RawData string `json:"raw_data"`
+}
+
 type StoragePath struct {
 	Path string `json:"path"`
 }

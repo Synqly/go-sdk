@@ -2789,6 +2789,7 @@ type ProviderConfig struct {
 	NotificationsTeams                *NotificationsTeams
 	SiemElasticsearch                 *SiemElasticsearch
 	SiemMockSiem                      *SiemMock
+	SiemRapid7Insightidr              *SiemRapid7InsightIdr
 	SiemSplunk                        *SiemSplunk
 	SinkAwsSecurityLake               *SinkAwsSecurityLake
 	SinkAwsSqs                        *SinkAwsSqs
@@ -2861,6 +2862,10 @@ func NewProviderConfigFromSiemElasticsearch(value *SiemElasticsearch) *ProviderC
 
 func NewProviderConfigFromSiemMockSiem(value *SiemMock) *ProviderConfig {
 	return &ProviderConfig{Type: "siem_mock_siem", SiemMockSiem: value}
+}
+
+func NewProviderConfigFromSiemRapid7Insightidr(value *SiemRapid7InsightIdr) *ProviderConfig {
+	return &ProviderConfig{Type: "siem_rapid7_insightidr", SiemRapid7Insightidr: value}
 }
 
 func NewProviderConfigFromSiemSplunk(value *SiemSplunk) *ProviderConfig {
@@ -3020,6 +3025,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.SiemMockSiem = value
+	case "siem_rapid7_insightidr":
+		value := new(SiemRapid7InsightIdr)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.SiemRapid7Insightidr = value
 	case "siem_splunk":
 		value := new(SiemSplunk)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -3250,6 +3261,15 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 			SiemMock: p.SiemMockSiem,
 		}
 		return json.Marshal(marshaler)
+	case "siem_rapid7_insightidr":
+		var marshaler = struct {
+			Type string `json:"type"`
+			*SiemRapid7InsightIdr
+		}{
+			Type:                 p.Type,
+			SiemRapid7InsightIdr: p.SiemRapid7Insightidr,
+		}
+		return json.Marshal(marshaler)
 	case "siem_splunk":
 		var marshaler = struct {
 			Type string `json:"type"`
@@ -3412,6 +3432,7 @@ type ProviderConfigVisitor interface {
 	VisitNotificationsTeams(*NotificationsTeams) error
 	VisitSiemElasticsearch(*SiemElasticsearch) error
 	VisitSiemMockSiem(*SiemMock) error
+	VisitSiemRapid7Insightidr(*SiemRapid7InsightIdr) error
 	VisitSiemSplunk(*SiemSplunk) error
 	VisitSinkAwsSecurityLake(*SinkAwsSecurityLake) error
 	VisitSinkAwsSqs(*SinkAwsSqs) error
@@ -3462,6 +3483,8 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 		return visitor.VisitSiemElasticsearch(p.SiemElasticsearch)
 	case "siem_mock_siem":
 		return visitor.VisitSiemMockSiem(p.SiemMockSiem)
+	case "siem_rapid7_insightidr":
+		return visitor.VisitSiemRapid7Insightidr(p.SiemRapid7Insightidr)
 	case "siem_splunk":
 		return visitor.VisitSiemSplunk(p.SiemSplunk)
 	case "sink_aws_security_lake":
@@ -3529,6 +3552,8 @@ const (
 	ProviderConfigIdSiemElasticsearch ProviderConfigId = "siem_elasticsearch"
 	// SIEM Mock
 	ProviderConfigIdSiemMock ProviderConfigId = "siem_mock_siem"
+	// Rapid7 InsightIDR
+	ProviderConfigIdSiemRapid7InsightIdr ProviderConfigId = "siem_rapid7_insightidr"
 	// Splunk Enterprise Security
 	ProviderConfigIdSiemSplunk ProviderConfigId = "siem_splunk"
 	// AWS Security Lake
@@ -3593,6 +3618,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdSiemElasticsearch, nil
 	case "siem_mock_siem":
 		return ProviderConfigIdSiemMock, nil
+	case "siem_rapid7_insightidr":
+		return ProviderConfigIdSiemRapid7InsightIdr, nil
 	case "siem_splunk":
 		return ProviderConfigIdSiemSplunk, nil
 	case "sink_aws_security_lake":
@@ -3811,6 +3838,13 @@ type SiemElasticsearch struct {
 type SiemMock struct {
 	// Name of the index where events are stored.
 	Index *string `json:"index,omitempty"`
+}
+
+// Configuration for Rapid7 InsightIDR as a SIEM Provider.
+type SiemRapid7InsightIdr struct {
+	Credential *Rapid7InsightCloudCredential `json:"credential,omitempty"`
+	// URL for the Rapid7 API. This should be the base URL for the API, without any path components and must be HTTPS. For example, "https://us2.api.insight.rapid7.com".
+	Url string `json:"url"`
 }
 
 // Configuration for Splunk as a SIEM Provider. This integration allows sending data to Splunk using an HTTP Event Collector (HEC). Additionally, it can be used to query Splunk using the Splunk Search Service.
