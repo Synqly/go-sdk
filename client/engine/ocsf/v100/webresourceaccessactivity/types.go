@@ -354,7 +354,7 @@ type Device struct {
 	ModifiedTimeDt *time.Time `json:"modified_time_dt,omitempty"`
 	// The alternate device name, ordinarily as assigned by an administrator. <p><b>Note:</b> The <b>Name</b> could be any other string that helps to identify the device, such as a phone number; for example <code>310-555-1234</code>.</p>
 	Name *string `json:"name,omitempty"`
-	// The network interfaces that are associated with the device, one for each MAC address/IP address combination.<p><b>Note:</b> The first element of the array is the network information that pertains to the event.</p>
+	// The network interfaces that are associated with the device, one for each unique MAC address/IP address/hostname/name combination.<p><b>Note:</b> The first element of the array is the network information that pertains to the event.</p>
 	NetworkInterfaces []*NetworkInterface `json:"network_interfaces,omitempty"`
 	// Organization and org unit related to the device.
 	Org *Organization `json:"org,omitempty"`
@@ -828,7 +828,7 @@ type NetworkEndpoint struct {
 	VpcUid *string `json:"vpc_uid,omitempty"`
 }
 
-// The Network Interface object describes the type and associated addresses of a network interface.
+// The Network Interface object describes the type and associated attributes of a network interface.
 type NetworkInterface struct {
 	// The hostname associated with the network interface.
 	Hostname *Hostname `json:"hostname,omitempty"`
@@ -840,6 +840,8 @@ type NetworkInterface struct {
 	Name *string `json:"name,omitempty"`
 	// The namespace is useful in merger or acquisition situations. For example, when similar entities exists that you need to keep separate.
 	Namespace *string `json:"namespace,omitempty"`
+	// The subnet prefix length determines the number of bits used to represent the network part of the IP address. The remaining bits are reserved for identifying individual hosts within that subnet.
+	SubnetPrefix *int `json:"subnet_prefix,omitempty"`
 	// The type of network interface.
 	Type *string `json:"type,omitempty"`
 	// The network interface type identifier.
@@ -853,6 +855,7 @@ type NetworkInterface struct {
 // 1 - Wired
 // 2 - Wireless
 // 3 - Mobile
+// 4 - Tunnel
 // 99 - Other: The type is not mapped. See the <code>type</code> attribute, which may contain a data source specific value.
 type NetworkInterfaceTypeId = int
 
@@ -930,8 +933,6 @@ type Observable struct {
 // 25 - Process: The Process object describes a running instance of a launched program. Defined by D3FEND <a target='_blank' href='https://d3fend.mitre.org/dao/artifact/d3f:Process/'>d3f:Process</a>.
 // 26 - GeoLocation: The Geo Location object describes a geographical location, usually associated with an IP address. Defined by D3FEND <a target='_blank' href='https://d3fend.mitre.org/dao/artifact/d3f:PhysicalLocation/'>d3f:PhysicalLocation</a>.
 // 27 - Container: The Container object describes an instance of a specific container. A container is a prepackaged, portable system image that runs isolated on an existing system using a container runtime like containerd.
-// 28 - RegistryKey: The registry key object describes a Windows registry key. Defined by D3FEND <a target='_blank' href='https://d3fend.mitre.org/dao/artifact/d3f:WindowsRegistryKey/'>d3f:WindowsRegistryKey</a>.
-// 29 - RegistryValue: The registry value object describes a Windows registry value.
 // 30 - Fingerprint: The Fingerprint object provides detailed information about a digital fingerprint, which is a compact representation of data used to identify a longer piece of information, such as a public key or file content. It contains the algorithm and value of the fingerprint, enabling efficient and reliable identification of the associated data.
 // 99 - Other: The observable data type is not mapped. See the <code>type</code> attribute, which may contain data source specific value.
 type ObservableTypeId = int
@@ -1254,9 +1255,9 @@ type Url struct {
 	// The Website categorization identifies.
 	CategoryIds []UrlCategoryIds `json:"category_ids,omitempty"`
 	// The URL host as extracted from the URL. For example: <code>www.example.com</code> from <code>www.example.com/download/trouble</code>.
-	Hostname Hostname `json:"hostname"`
+	Hostname *Hostname `json:"hostname,omitempty"`
 	// The URL path as extracted from the URL. For example: <code>/download/trouble</code> from <code>www.example.com/download/trouble</code>.
-	Path string `json:"path"`
+	Path *string `json:"path,omitempty"`
 	// The URL port. For example: <code>80</code>.
 	Port *Port `json:"port,omitempty"`
 	// The query portion of the URL. For example: the query portion of the URL <code>http://www.example.com/search?q=bad&sort=date</code> is <code>q=bad&sort=date</code>.
@@ -1267,8 +1268,8 @@ type Url struct {
 	Scheme *string `json:"scheme,omitempty"`
 	// The subdomain portion of the URL. For example: <code>sub</code> in <code>https://sub.example.com</code> or <code>sub2.sub1</code> in <code>https://sub2.sub1.example.com</code>.
 	Subdomain *string `json:"subdomain,omitempty"`
-	// The URL string. See RFC 1738. For example: <code>http://www.example.com/download/trouble.exe</code>.
-	UrlString UrlString `json:"url_string"`
+	// The URL string. See RFC 1738. For example: <code>http://www.example.com/download/trouble.exe</code>. Note: The URL path should not populate the URL string.
+	UrlString *UrlString `json:"url_string,omitempty"`
 }
 
 // UrlCategoryIds is an enum, and the following values are allowed.

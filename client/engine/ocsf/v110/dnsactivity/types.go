@@ -1559,8 +1559,6 @@ type Observable struct {
 // 25 - Process: The Process object describes a running instance of a launched program. Defined by D3FEND <a target='_blank' href='https://d3fend.mitre.org/dao/artifact/d3f:Process/'>d3f:Process</a>.
 // 26 - GeoLocation: The Geo Location object describes a geographical location, usually associated with an IP address. Defined by D3FEND <a target='_blank' href='https://d3fend.mitre.org/dao/artifact/d3f:PhysicalLocation/'>d3f:PhysicalLocation</a>.
 // 27 - Container: The Container object describes an instance of a specific container. A container is a prepackaged, portable system image that runs isolated on an existing system using a container runtime like containerd.
-// 28 - RegistryKey: The registry key object describes a Windows registry key. Defined by D3FEND <a target='_blank' href='https://d3fend.mitre.org/dao/artifact/d3f:WindowsRegistryKey/'>d3f:WindowsRegistryKey</a>.
-// 29 - RegistryValue: The registry value object describes a Windows registry value.
 // 30 - Fingerprint: The Fingerprint object provides detailed information about a digital fingerprint, which is a compact representation of data used to identify a longer piece of information, such as a public key or file content. It contains the algorithm and value of the fingerprint, enabling efficient and reliable identification of the associated data.
 // 99 - Other: The observable data type is not mapped. See the <code>type</code> attribute, which may contain data source specific value.
 type ObservableTypeId = int

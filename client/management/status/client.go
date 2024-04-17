@@ -57,6 +57,9 @@ func (c *Client) List(ctx context.Context, request *management.ListStatusRequest
 	for _, value := range request.Filter {
 		queryParams.Add("filter", fmt.Sprintf("%v", *value))
 	}
+	for _, value := range request.Expand {
+		queryParams.Add("expand", fmt.Sprintf("%v", *value))
+	}
 	if len(queryParams) > 0 {
 		endpointURL += "?" + queryParams.Encode()
 	}

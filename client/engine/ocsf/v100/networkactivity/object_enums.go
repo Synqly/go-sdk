@@ -269,6 +269,8 @@ const NetworkInterface_Type_Wired NetworkInterfaceTypeId = 1
 const NetworkInterface_Type_Wireless NetworkInterfaceTypeId = 2
 // Mobile
 const NetworkInterface_Type_Mobile NetworkInterfaceTypeId = 3
+// Tunnel
+const NetworkInterface_Type_Tunnel NetworkInterfaceTypeId = 4
 // Other. The type is not mapped. See the <code>type</code> attribute, which may contain a data source specific value.
 const NetworkInterface_Type_Other NetworkInterfaceTypeId = 99
 
@@ -313,10 +315,6 @@ const Observable_Type_Process ObservableTypeId = 25
 const Observable_Type_GeoLocation ObservableTypeId = 26
 // Container. The Container object describes an instance of a specific container. A container is a prepackaged, portable system image that runs isolated on an existing system using a container runtime like containerd.
 const Observable_Type_Container ObservableTypeId = 27
-// RegistryKey. The registry key object describes a Windows registry key. Defined by D3FEND <a target='_blank' href='https://d3fend.mitre.org/dao/artifact/d3f:WindowsRegistryKey/'>d3f:WindowsRegistryKey</a>.
-const Observable_Type_RegistryKey ObservableTypeId = 28
-// RegistryValue. The registry value object describes a Windows registry value.
-const Observable_Type_RegistryValue ObservableTypeId = 29
 // Fingerprint. The Fingerprint object provides detailed information about a digital fingerprint, which is a compact representation of data used to identify a longer piece of information, such as a public key or file content. It contains the algorithm and value of the fingerprint, enabling efficient and reliable identification of the associated data.
 const Observable_Type_Fingerprint ObservableTypeId = 30
 // Other. The observable data type is not mapped. See the <code>type</code> attribute, which may contain data source specific value.

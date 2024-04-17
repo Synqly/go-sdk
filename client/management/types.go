@@ -4657,8 +4657,12 @@ type Status struct {
 	UpdatedAt time.Time `json:"updated_at"`
 	// Account owner
 	AccountId AccountId `json:"account_id,omitempty"`
+	// Optional `ListStatusResponse` only; expand Account object
+	Account *Account `json:"account,omitempty"`
 	// Integration object
 	IntegrationId IntegrationId `json:"integration_id,omitempty"`
+	// Optional `ListStatusResponse` only; expand Integration object
+	Integration *Integration `json:"integration,omitempty"`
 	// The current status of the notification.
 	Status string `json:"status"`
 	// Request count

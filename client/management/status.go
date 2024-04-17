@@ -2,6 +2,10 @@
 
 package management
 
+import (
+	fmt "fmt"
+)
+
 type GetIntegrationTimeseriesRequest struct {
 	// [minute|hour] provide most recent 60 minute or 24 hour timeseries. default: minute
 	Interval *string `json:"-"`
@@ -22,6 +26,8 @@ type ListStatusRequest struct {
 	// Filter results by this query. For more information on filtering, refer to our Filtering Guide. Defaults to no filter.
 	// If used more than once, the queries are ANDed together.
 	Filter []*string `json:"-"`
+	// Expand the status result with the related integration and account information.
+	Expand []*ListStatusOptions `json:"-"`
 }
 
 type ListStatusEventsRequest struct {
@@ -54,6 +60,31 @@ type GetStatusTimeseries struct {
 
 type ListStatusEventsResponse struct {
 	Result []*StatusEvent `json:"result,omitempty"`
+}
+
+type ListStatusOptions string
+
+const (
+	ListStatusOptionsAccounts     ListStatusOptions = "accounts"
+	ListStatusOptionsIntegrations ListStatusOptions = "integrations"
+	ListStatusOptionsAll          ListStatusOptions = "all"
+)
+
+func NewListStatusOptionsFromString(s string) (ListStatusOptions, error) {
+	switch s {
+	case "accounts":
+		return ListStatusOptionsAccounts, nil
+	case "integrations":
+		return ListStatusOptionsIntegrations, nil
+	case "all":
+		return ListStatusOptionsAll, nil
+	}
+	var t ListStatusOptions
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (l ListStatusOptions) Ptr() *ListStatusOptions {
+	return &l
 }
 
 type ListStatusResponse struct {
