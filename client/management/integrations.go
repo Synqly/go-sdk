@@ -2,6 +2,10 @@
 
 package management
 
+import (
+	fmt "fmt"
+)
+
 type ListIntegrationsRequest struct {
 	// Number of `Integration` objects to return in this page. Defaults to 100.
 	Limit *int `json:"-"`
@@ -17,6 +21,8 @@ type ListIntegrationsRequest struct {
 	// Filter results by this query. For more information on filtering, refer to our Filtering Guide. Defaults to no filter.
 	// If used more than once, the queries are ANDed together.
 	Filter []*string `json:"-"`
+	// Expand the integration result with the related integration point and/or account information.
+	Expand []*ListIntegrationOptions `json:"-"`
 }
 
 type ListAccountIntegrationsRequest struct {
@@ -34,6 +40,8 @@ type ListAccountIntegrationsRequest struct {
 	// Filter results by this query. For more information on filtering, refer to our Filtering Guide. Defaults to no filter.
 	// If used more than once, the queries are ANDed together.
 	Filter []*string `json:"-"`
+	// Expand the integration result with the related integration point and/or account information.
+	Expand []*ListIntegrationOptions `json:"-"`
 }
 
 type CreateIntegrationRequest struct {
@@ -57,6 +65,31 @@ type GetIntegrationResponse struct {
 
 type ListAccountIntegrationsResponse struct {
 	Result []*Integration `json:"result,omitempty"`
+}
+
+type ListIntegrationOptions string
+
+const (
+	ListIntegrationOptionsAccount          ListIntegrationOptions = "account"
+	ListIntegrationOptionsIntegrationPoint ListIntegrationOptions = "integration_point"
+	ListIntegrationOptionsAll              ListIntegrationOptions = "all"
+)
+
+func NewListIntegrationOptionsFromString(s string) (ListIntegrationOptions, error) {
+	switch s {
+	case "account":
+		return ListIntegrationOptionsAccount, nil
+	case "integration_point":
+		return ListIntegrationOptionsIntegrationPoint, nil
+	case "all":
+		return ListIntegrationOptionsAll, nil
+	}
+	var t ListIntegrationOptions
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (l ListIntegrationOptions) Ptr() *ListIntegrationOptions {
+	return &l
 }
 
 type ListIntegrationsResponse struct {

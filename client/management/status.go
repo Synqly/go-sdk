@@ -26,7 +26,7 @@ type ListStatusRequest struct {
 	// Filter results by this query. For more information on filtering, refer to our Filtering Guide. Defaults to no filter.
 	// If used more than once, the queries are ANDed together.
 	Filter []*string `json:"-"`
-	// Expand the status result with the related integration and account information.
+	// Expand the status result with the related integration and/or account information.
 	Expand []*ListStatusOptions `json:"-"`
 }
 
@@ -65,17 +65,17 @@ type ListStatusEventsResponse struct {
 type ListStatusOptions string
 
 const (
-	ListStatusOptionsAccounts     ListStatusOptions = "accounts"
-	ListStatusOptionsIntegrations ListStatusOptions = "integrations"
-	ListStatusOptionsAll          ListStatusOptions = "all"
+	ListStatusOptionsAccount     ListStatusOptions = "account"
+	ListStatusOptionsIntegration ListStatusOptions = "integration"
+	ListStatusOptionsAll         ListStatusOptions = "all"
 )
 
 func NewListStatusOptionsFromString(s string) (ListStatusOptions, error) {
 	switch s {
-	case "accounts":
-		return ListStatusOptionsAccounts, nil
-	case "integrations":
-		return ListStatusOptionsIntegrations, nil
+	case "account":
+		return ListStatusOptionsAccount, nil
+	case "integration":
+		return ListStatusOptionsIntegration, nil
 	case "all":
 		return ListStatusOptionsAll, nil
 	}
