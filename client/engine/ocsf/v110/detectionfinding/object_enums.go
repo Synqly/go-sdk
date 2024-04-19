@@ -95,6 +95,24 @@ const Device_Type_Firewall DeviceTypeId = 9
 const Device_Type_Switch DeviceTypeId = 10
 // Hub. A <a target='_blank' href='https://en.wikipedia.org/wiki/Ethernet_hub'>networking hub</a>.
 const Device_Type_Hub DeviceTypeId = 11
+// PLC. A Programmable logic controller.
+const Device_Type_PLC DeviceTypeId = 90
+// SCADA. A supervisory control and data acquisition system.
+const Device_Type_SCADA DeviceTypeId = 91
+// DCS. A distributed control system.
+const Device_Type_DCS DeviceTypeId = 92
+// CNC. A computer numerical control system, including computerized machine tools.
+const Device_Type_CNC DeviceTypeId = 93
+// ScientificEquipment. A piece of scientific equipment such as an oscilloscope or spectrometer.
+const Device_Type_ScientificEquipment DeviceTypeId = 94
+// MedicalDevice. A medical device such as an MRI machine or infusion pump.
+const Device_Type_MedicalDevice DeviceTypeId = 95
+// LightingControls. A lighting control for internal or external applications.
+const Device_Type_LightingControls DeviceTypeId = 96
+// EnergyMonitoringSystem. An energy monitoring, security or safety system.
+const Device_Type_EnergyMonitoringSystem DeviceTypeId = 97
+// TransportationDevice. A transportation device or transportation supporting device.
+const Device_Type_TransportationDevice DeviceTypeId = 98
 // Other. The type is not mapped. See the <code>type</code> attribute, which contains a data source specific value.
 const Device_Type_Other DeviceTypeId = 99
 

@@ -1,4 +1,4 @@
-package fileactivity
+package softwareinfo
 
 // AccountTypeId Values
 // Type ID. The normalized account type identifier.
@@ -27,16 +27,6 @@ const Account_Type_LinuxAccount AccountTypeId = 9
 const Account_Type_AWSAccount AccountTypeId = 10
 // Other. The account type is not mapped.
 const Account_Type_Other AccountTypeId = 99
-
-// CvssDepth Values
-// CVSS Depth. The CVSS depth represents a depth of the equation used to calculate CVSS score.
-
-// Base
-const Cvss_Depth_Base CvssDepth = "Base"
-// Environmental
-const Cvss_Depth_Environmental CvssDepth = "Environmental"
-// Temporal
-const Cvss_Depth_Temporal CvssDepth = "Temporal"
 
 // DeviceRiskLevelId Values
 // Risk Level ID. The normalized risk level id.
@@ -100,60 +90,6 @@ const Device_Type_TransportationDevice DeviceTypeId = 98
 // Other. The type is not mapped. See the <code>type</code> attribute, which contains a data source specific value.
 const Device_Type_Other DeviceTypeId = 99
 
-// DigitalSignatureAlgorithmId Values
-// Algorithm ID. The identifier of the normalized digital signature algorithm.
-
-// Unknown. The algorithm is unknown.
-const DigitalSignature_Algorithm_Unknown DigitalSignatureAlgorithmId = 0
-// DSA. Digital Signature Algorithm (DSA).
-const DigitalSignature_Algorithm_DSA DigitalSignatureAlgorithmId = 1
-// RSA. Rivest-Shamir-Adleman (RSA) Algorithm.
-const DigitalSignature_Algorithm_RSA DigitalSignatureAlgorithmId = 2
-// ECDSA. Elliptic Curve Digital Signature Algorithm.
-const DigitalSignature_Algorithm_ECDSA DigitalSignatureAlgorithmId = 3
-// Authenticode. Microsoft Authenticode Digital Signature Algorithm.
-const DigitalSignature_Algorithm_Authenticode DigitalSignatureAlgorithmId = 4
-// Other. The algorithm is not mapped. See the <code>algorithm</code> attribute, which contains a data source specific value.
-const DigitalSignature_Algorithm_Other DigitalSignatureAlgorithmId = 99
-
-// FileConfidentialityId Values
-// Confidentiality ID. The normalized identifier of the file content confidentiality indicator.
-
-// Unknown. The confidentiality is unknown.
-const File_Confidentiality_Unknown FileConfidentialityId = 0
-// NotConfidential
-const File_Confidentiality_NotConfidential FileConfidentialityId = 1
-// Confidential
-const File_Confidentiality_Confidential FileConfidentialityId = 2
-// Secret
-const File_Confidentiality_Secret FileConfidentialityId = 3
-// TopSecret
-const File_Confidentiality_TopSecret FileConfidentialityId = 4
-// Other. The confidentiality is not mapped. See the <code>confidentiality</code> attribute, which contains a data source specific value.
-const File_Confidentiality_Other FileConfidentialityId = 99
-
-// FileTypeId Values
-// Type ID. The file type ID.
-
-// Unknown. The type is unknown.
-const File_Type_Unknown FileTypeId = 0
-// RegularFile
-const File_Type_RegularFile FileTypeId = 1
-// Folder
-const File_Type_Folder FileTypeId = 2
-// CharacterDevice
-const File_Type_CharacterDevice FileTypeId = 3
-// BlockDevice
-const File_Type_BlockDevice FileTypeId = 4
-// LocalSocket
-const File_Type_LocalSocket FileTypeId = 5
-// NamedPipe
-const File_Type_NamedPipe FileTypeId = 6
-// SymbolicLink
-const File_Type_SymbolicLink FileTypeId = 7
-// Other. The type is not mapped. See the <code>type</code> attribute, which contains a data source specific value.
-const File_Type_Other FileTypeId = 99
-
 // FingerprintAlgorithmId Values
 // Algorithm ID. The identifier of the normalized hash algorithm, which was used to create the digital fingerprint.
 
@@ -175,56 +111,6 @@ const Fingerprint_Algorithm_TLSH FingerprintAlgorithmId = 6
 const Fingerprint_Algorithm_quickXorHash FingerprintAlgorithmId = 7
 // Other. The algorithm is not mapped. See the <code>algorithm</code> attribute, which contains a data source specific value.
 const Fingerprint_Algorithm_Other FingerprintAlgorithmId = 99
-
-// MalwareClassificationIds Values
-// Classification IDs. The list of normalized identifiers of the malware classifications. Reference: <a target='_blank' href='https://docs.oasis-open.org/cti/stix/v2.1/os/stix-v2.1-os.html#_oxlc4df65spl'>STIX Malware Types</a> 
-
-// Unknown
-const Malware_ClassificationIds_Unknown MalwareClassificationIds = 0
-// Adware
-const Malware_ClassificationIds_Adware MalwareClassificationIds = 1
-// Backdoor
-const Malware_ClassificationIds_Backdoor MalwareClassificationIds = 2
-// Bot
-const Malware_ClassificationIds_Bot MalwareClassificationIds = 3
-// Bootkit
-const Malware_ClassificationIds_Bootkit MalwareClassificationIds = 4
-// DDOS
-const Malware_ClassificationIds_DDOS MalwareClassificationIds = 5
-// Downloader
-const Malware_ClassificationIds_Downloader MalwareClassificationIds = 6
-// Dropper
-const Malware_ClassificationIds_Dropper MalwareClassificationIds = 7
-// Exploit_Kit
-const Malware_ClassificationIds_Exploit_Kit MalwareClassificationIds = 8
-// Keylogger
-const Malware_ClassificationIds_Keylogger MalwareClassificationIds = 9
-// Ransomware
-const Malware_ClassificationIds_Ransomware MalwareClassificationIds = 10
-// Remote_Access_Trojan
-const Malware_ClassificationIds_Remote_Access_Trojan MalwareClassificationIds = 11
-// Resource_Exploitation
-const Malware_ClassificationIds_Resource_Exploitation MalwareClassificationIds = 13
-// Rogue_Security_Software
-const Malware_ClassificationIds_Rogue_Security_Software MalwareClassificationIds = 14
-// Rootkit
-const Malware_ClassificationIds_Rootkit MalwareClassificationIds = 15
-// Screen_Capture
-const Malware_ClassificationIds_Screen_Capture MalwareClassificationIds = 16
-// Spyware
-const Malware_ClassificationIds_Spyware MalwareClassificationIds = 17
-// Trojan
-const Malware_ClassificationIds_Trojan MalwareClassificationIds = 18
-// Virus
-const Malware_ClassificationIds_Virus MalwareClassificationIds = 19
-// Webshell
-const Malware_ClassificationIds_Webshell MalwareClassificationIds = 20
-// Wiper
-const Malware_ClassificationIds_Wiper MalwareClassificationIds = 21
-// Worm
-const Malware_ClassificationIds_Worm MalwareClassificationIds = 22
-// Other
-const Malware_ClassificationIds_Other MalwareClassificationIds = 99
 
 // NetworkInterfaceTypeId Values
 // Type ID. The network interface type identifier.
@@ -316,26 +202,6 @@ const Os_Type_AIX OsTypeId = 401
 // HP_UX
 const Os_Type_HP_UX OsTypeId = 402
 
-// ProcessIntegrityId Values
-// Integrity Level. The normalized identifier of the process integrity level (Windows only).
-
-// Unknown
-const Process_Integrity_Unknown ProcessIntegrityId = 0
-// Untrusted
-const Process_Integrity_Untrusted ProcessIntegrityId = 1
-// Low
-const Process_Integrity_Low ProcessIntegrityId = 2
-// Medium
-const Process_Integrity_Medium ProcessIntegrityId = 3
-// High
-const Process_Integrity_High ProcessIntegrityId = 4
-// System
-const Process_Integrity_System ProcessIntegrityId = 5
-// Protected
-const Process_Integrity_Protected ProcessIntegrityId = 6
-// Other
-const Process_Integrity_Other ProcessIntegrityId = 99
-
 // ReputationScoreId Values
 // Reputation Score ID. The normalized reputation score identifier.
 
@@ -363,18 +229,4 @@ const Reputation_Score_ProbablyMalicious ReputationScoreId = 9
 const Reputation_Score_Malicious ReputationScoreId = 10
 // Other. The reputation score is not mapped. See the <code>rep_score</code> attribute, which contains a data source specific value.
 const Reputation_Score_Other ReputationScoreId = 99
-
-// UserTypeId Values
-// Type ID. The account type identifier.
-
-// Unknown. The type is unknown.
-const User_Type_Unknown UserTypeId = 0
-// User. Regular user account.
-const User_Type_User UserTypeId = 1
-// Admin. Admin/root user account.
-const User_Type_Admin UserTypeId = 2
-// System. System account. For example, Windows computer accounts with a trailing dollar sign ($).
-const User_Type_System UserTypeId = 3
-// Other. The type is not mapped. See the <code>type</code> attribute, which contains a data source specific value.
-const User_Type_Other UserTypeId = 99
 

@@ -370,11 +370,15 @@ type Device struct {
 	RiskLevelId *DeviceRiskLevelId `json:"risk_level_id,omitempty"`
 	// The risk score as reported by the event source.
 	RiskScore *int `json:"risk_score,omitempty"`
+	// The specific device type within the larger technology category
+	SubType interface{} `json:"sub_type,omitempty"`
 	// The subnet mask.
 	Subnet *Subnet `json:"subnet,omitempty"`
 	// The unique identifier of a virtual subnet.
 	SubnetUid *string `json:"subnet_uid,omitempty"`
-	// The device type. For example: <code>unknown</code>, <code>server</code>, <code>desktop</code>, <code>laptop</code>, <code>tablet</code>, <code>mobile</code>, <code>virtual</code>, <code>browser</code>, or <code>other</code>.
+	// The list of software contained on a device
+	SwInfo []*Product `json:"sw_info,omitempty"`
+	// The device type. For example: <code>unknown</code>, <code>server</code>, <code>desktop</code>, <code>laptop</code>, <code>tablet</code>, <code>mobile</code>, <code>virtual</code>, <code>browser</code>, <code>plc</code>, <code>scada</code>, <code>dcs</code>, <code>cnc</code>, <code>scientific</code>, <code>medical</code>, <code>lighting</code>, <code>energy</code>, <code>transportation</code> <code>other</code>.
 	Type *string `json:"type,omitempty"`
 	// The device type ID.
 	TypeId DeviceTypeId `json:"type_id"`
@@ -441,6 +445,15 @@ type DeviceRiskLevelId = int
 // 9 - Firewall: A <a target='_blank' href='https://d3fend.mitre.org/dao/artifact/d3f:Firewall/'>networking firewall</a>.
 // 10 - Switch: A <a target='_blank' href='https://d3fend.mitre.org/dao/artifact/d3f:Switch/'>networking switch</a>.
 // 11 - Hub: A <a target='_blank' href='https://en.wikipedia.org/wiki/Ethernet_hub'>networking hub</a>.
+// 90 - PLC: A Programmable logic controller.
+// 91 - SCADA: A supervisory control and data acquisition system.
+// 92 - DCS: A distributed control system.
+// 93 - CNC: A computer numerical control system, including computerized machine tools.
+// 94 - ScientificEquipment: A piece of scientific equipment such as an oscilloscope or spectrometer.
+// 95 - MedicalDevice: A medical device such as an MRI machine or infusion pump.
+// 96 - LightingControls: A lighting control for internal or external applications.
+// 97 - EnergyMonitoringSystem: An energy monitoring, security or safety system.
+// 98 - TransportationDevice: A transportation device or transportation supporting device.
 // 99 - Other: The type is not mapped. See the <code>type</code> attribute, which contains a data source specific value.
 type DeviceTypeId = int
 
