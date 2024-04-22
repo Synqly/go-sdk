@@ -684,8 +684,109 @@ type Asset = *inventoryinfo.InventoryInfo
 
 type EventId = Id
 
+// Configuration options of a scan.
+type ScanConfiguration struct {
+	// ID of the scan.
+	Uid string `json:"uid"`
+	// Name of the scan.
+	Name string `json:"name"`
+	// Time when the scan was created.
+	CreationTime int `json:"creation_time"`
+	// User that owns the scan.
+	Owner *User `json:"owner,omitempty"`
+	// Schedule of the scan if it is a recurring scan.
+	Schedule *ScanSchedule `json:"schedule,omitempty"`
+}
+
+type ScanDayOption string
+
+const (
+	ScanDayOptionMonday    ScanDayOption = "Monday"
+	ScanDayOptionTuesday   ScanDayOption = "Tuesday"
+	ScanDayOptionWednesday ScanDayOption = "Wednesday"
+	ScanDayOptionThursday  ScanDayOption = "Thursday"
+	ScanDayOptionFriday    ScanDayOption = "Friday"
+	ScanDayOptionSaturday  ScanDayOption = "Saturday"
+	ScanDayOptionSunday    ScanDayOption = "Sunday"
+)
+
+func NewScanDayOptionFromString(s string) (ScanDayOption, error) {
+	switch s {
+	case "Monday":
+		return ScanDayOptionMonday, nil
+	case "Tuesday":
+		return ScanDayOptionTuesday, nil
+	case "Wednesday":
+		return ScanDayOptionWednesday, nil
+	case "Thursday":
+		return ScanDayOptionThursday, nil
+	case "Friday":
+		return ScanDayOptionFriday, nil
+	case "Saturday":
+		return ScanDayOptionSaturday, nil
+	case "Sunday":
+		return ScanDayOptionSunday, nil
+	}
+	var t ScanDayOption
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (s ScanDayOption) Ptr() *ScanDayOption {
+	return &s
+}
+
+type ScanFrequencyOption string
+
+const (
+	ScanFrequencyOptionOnce    ScanFrequencyOption = "once"
+	ScanFrequencyOptionDaily   ScanFrequencyOption = "daily"
+	ScanFrequencyOptionWeekly  ScanFrequencyOption = "weekly"
+	ScanFrequencyOptionMonthly ScanFrequencyOption = "monthly"
+	ScanFrequencyOptionYearly  ScanFrequencyOption = "yearly"
+	ScanFrequencyOptionUnknown ScanFrequencyOption = "unknown"
+)
+
+func NewScanFrequencyOptionFromString(s string) (ScanFrequencyOption, error) {
+	switch s {
+	case "once":
+		return ScanFrequencyOptionOnce, nil
+	case "daily":
+		return ScanFrequencyOptionDaily, nil
+	case "weekly":
+		return ScanFrequencyOptionWeekly, nil
+	case "monthly":
+		return ScanFrequencyOptionMonthly, nil
+	case "yearly":
+		return ScanFrequencyOptionYearly, nil
+	case "unknown":
+		return ScanFrequencyOptionUnknown, nil
+	}
+	var t ScanFrequencyOption
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (s ScanFrequencyOption) Ptr() *ScanFrequencyOption {
+	return &s
+}
+
+type ScanSchedule struct {
+	// Periodicity of the scan; for example, weekly, means that the scan will be repeated every `repeat_interval` weeks.
+	Frequency ScanFrequencyOption `json:"frequency,omitempty"`
+	// Number of days, weeks, months, or years between scans. For example, `1` means that the scan will be repeated once every `frequency` period.
+	RepeatInterval int `json:"repeat_interval"`
+	// Days of the week when the scan will be repeated. For example, `["monday", "friday"]`
+	// means that the scan will be repeated on Monday and Friday on the schedule defined by
+	// `frequency` and `repeat_interval`.
+	Days []string `json:"days,omitempty"`
+}
+
 // Result of a vulnerability scan. Represented by OCSF Security Finding class (class_uid 2001).
 type SecurityFinding = *securityfinding.SecurityFinding
+
+type User struct {
+	// ID of the user.
+	Uid string `json:"uid"`
+}
 
 // Values supported by using severity as a filter. Supports `[eq]` and `[in]` operators.
 // For example, `severity[eq]critical` or `severity[in]critical, high`.

@@ -22,6 +22,13 @@ type QueryFindingsRequest struct {
 	Filter []*string `json:"-"`
 }
 
+type QueryScansRequest struct {
+	// Number of scans to return. Defaults to 50.
+	Limit *int `json:"-"`
+	// Start search from cursor position.
+	Cursor *string `json:"-"`
+}
+
 type QueryAssetsResponse struct {
 	Result []Asset `json:"result,omitempty"`
 	Cursor string  `json:"cursor"`
@@ -30,4 +37,9 @@ type QueryAssetsResponse struct {
 type QueryFindingsResponse struct {
 	Result []SecurityFinding `json:"result,omitempty"`
 	Cursor string            `json:"cursor"`
+}
+
+type QueryScansResponse struct {
+	Result []*ScanConfiguration `json:"result,omitempty"`
+	Cursor string               `json:"cursor"`
 }
