@@ -19,6 +19,7 @@ import (
 	processactivity "github.com/synqly/go-sdk/client/engine/ocsf/v110/processactivity"
 	scheduledjobactivity "github.com/synqly/go-sdk/client/engine/ocsf/v110/scheduledjobactivity"
 	securityfinding "github.com/synqly/go-sdk/client/engine/ocsf/v110/securityfinding"
+	softwareinfo "github.com/synqly/go-sdk/client/engine/ocsf/v110/softwareinfo"
 	vulnerabilityfinding "github.com/synqly/go-sdk/client/engine/ocsf/v110/vulnerabilityfinding"
 	webresourceaccessactivity "github.com/synqly/go-sdk/client/engine/ocsf/v110/webresourceaccessactivity"
 	time "time"
@@ -77,8 +78,8 @@ func (o OrderOptions) Ptr() *OrderOptions {
 	return &o
 }
 
-// Application information represented by OCSF Product object. The Product object describes characteristics of a software product.
-type Application = *fileactivity.Product
+// Application information represented by the extended OCSF Software Info event. The Product object describes characteristics of a software product.
+type Application = *softwareinfo.SoftwareInfo
 
 type ConnectionState string
 
