@@ -5,22 +5,28 @@ package engine
 import (
 	json "encoding/json"
 	fmt "fmt"
-	accountchange "github.com/synqly/go-sdk/client/engine/ocsf/accountchange"
-	apiactivity "github.com/synqly/go-sdk/client/engine/ocsf/apiactivity"
-	authentication "github.com/synqly/go-sdk/client/engine/ocsf/authentication"
-	fileactivity "github.com/synqly/go-sdk/client/engine/ocsf/fileactivity"
-	groupmanagement "github.com/synqly/go-sdk/client/engine/ocsf/groupmanagement"
-	inventoryinfo "github.com/synqly/go-sdk/client/engine/ocsf/inventoryinfo"
-	networkactivity "github.com/synqly/go-sdk/client/engine/ocsf/networkactivity"
-	processactivity "github.com/synqly/go-sdk/client/engine/ocsf/processactivity"
-	scheduledjobactivity "github.com/synqly/go-sdk/client/engine/ocsf/scheduledjobactivity"
-	securityfinding "github.com/synqly/go-sdk/client/engine/ocsf/securityfinding"
-	webresourceaccessactivity "github.com/synqly/go-sdk/client/engine/ocsf/webresourceaccessactivity"
+	accountchange "github.com/synqly/go-sdk/client/engine/ocsf/v110/accountchange"
+	apiactivity "github.com/synqly/go-sdk/client/engine/ocsf/v110/apiactivity"
+	authentication "github.com/synqly/go-sdk/client/engine/ocsf/v110/authentication"
+	compliancefinding "github.com/synqly/go-sdk/client/engine/ocsf/v110/compliancefinding"
+	detectionfinding "github.com/synqly/go-sdk/client/engine/ocsf/v110/detectionfinding"
+	fileactivity "github.com/synqly/go-sdk/client/engine/ocsf/v110/fileactivity"
+	groupmanagement "github.com/synqly/go-sdk/client/engine/ocsf/v110/groupmanagement"
+	incidentfinding "github.com/synqly/go-sdk/client/engine/ocsf/v110/incidentfinding"
+	inventoryinfo "github.com/synqly/go-sdk/client/engine/ocsf/v110/inventoryinfo"
+	moduleactivity "github.com/synqly/go-sdk/client/engine/ocsf/v110/moduleactivity"
+	networkactivity "github.com/synqly/go-sdk/client/engine/ocsf/v110/networkactivity"
+	processactivity "github.com/synqly/go-sdk/client/engine/ocsf/v110/processactivity"
+	scheduledjobactivity "github.com/synqly/go-sdk/client/engine/ocsf/v110/scheduledjobactivity"
+	securityfinding "github.com/synqly/go-sdk/client/engine/ocsf/v110/securityfinding"
+	softwareinfo "github.com/synqly/go-sdk/client/engine/ocsf/v110/softwareinfo"
+	vulnerabilityfinding "github.com/synqly/go-sdk/client/engine/ocsf/v110/vulnerabilityfinding"
+	webresourceaccessactivity "github.com/synqly/go-sdk/client/engine/ocsf/v110/webresourceaccessactivity"
 	time "time"
 )
 
 // Device inventory information. Represented by OCSF Device Inventory Info class (class_uid 5001).
-type Device = *Event
+type Device = *inventoryinfo.InventoryInfo
 
 type Base struct {
 	// Human-readable name for this resource
@@ -72,18 +78,48 @@ func (o OrderOptions) Ptr() *OrderOptions {
 	return &o
 }
 
+// Application information represented by the extended OCSF Software Info event. The Product object describes characteristics of a software product.
+type Application = *softwareinfo.SoftwareInfo
+
+type ConnectionState string
+
+const (
+	ConnectionStateConnect    ConnectionState = "Connect"
+	ConnectionStateDisconnect ConnectionState = "Disconnect"
+)
+
+func NewConnectionStateFromString(s string) (ConnectionState, error) {
+	switch s {
+	case "Connect":
+		return ConnectionStateConnect, nil
+	case "Disconnect":
+		return ConnectionStateDisconnect, nil
+	}
+	var t ConnectionState
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (c ConnectionState) Ptr() *ConnectionState {
+	return &c
+}
+
 type Event struct {
 	ClassName                 string
 	AccountChange             *accountchange.AccountChange
 	ApiActivity               *apiactivity.ApiActivity
 	Authentication            *authentication.Authentication
+	ComplianceFinding         *compliancefinding.ComplianceFinding
+	DetectionFinding          *detectionfinding.DetectionFinding
 	FileActivity              *fileactivity.FileActivity
 	GroupManagement           *groupmanagement.GroupManagement
-	DeviceInventoryInfo       *inventoryinfo.InventoryInfo
+	IncidentFinding           *incidentfinding.IncidentFinding
+	InventoryInfo             *inventoryinfo.InventoryInfo
+	ModuleActivity            *moduleactivity.ModuleActivity
 	NetworkActivity           *networkactivity.NetworkActivity
 	ProcessActivity           *processactivity.ProcessActivity
 	ScheduledJobActivity      *scheduledjobactivity.ScheduledJobActivity
 	SecurityFinding           *securityfinding.SecurityFinding
+	VulnerabilityFinding      *vulnerabilityfinding.VulnerabilityFinding
 	WebResourceAccessActivity *webresourceaccessactivity.WebResourceAccessActivity
 }
 
@@ -92,11 +128,19 @@ func NewEventFromAccountChange(value *accountchange.AccountChange) *Event {
 }
 
 func NewEventFromApiActivity(value *apiactivity.ApiActivity) *Event {
-	return &Event{ClassName: "Api Activity", ApiActivity: value}
+	return &Event{ClassName: "API Activity", ApiActivity: value}
 }
 
 func NewEventFromAuthentication(value *authentication.Authentication) *Event {
 	return &Event{ClassName: "Authentication", Authentication: value}
+}
+
+func NewEventFromComplianceFinding(value *compliancefinding.ComplianceFinding) *Event {
+	return &Event{ClassName: "Compliance Finding", ComplianceFinding: value}
+}
+
+func NewEventFromDetectionFinding(value *detectionfinding.DetectionFinding) *Event {
+	return &Event{ClassName: "Detection Finding", DetectionFinding: value}
 }
 
 func NewEventFromFileActivity(value *fileactivity.FileActivity) *Event {
@@ -107,8 +151,16 @@ func NewEventFromGroupManagement(value *groupmanagement.GroupManagement) *Event 
 	return &Event{ClassName: "Group Management", GroupManagement: value}
 }
 
-func NewEventFromDeviceInventoryInfo(value *inventoryinfo.InventoryInfo) *Event {
-	return &Event{ClassName: "Device Inventory Info", DeviceInventoryInfo: value}
+func NewEventFromIncidentFinding(value *incidentfinding.IncidentFinding) *Event {
+	return &Event{ClassName: "Incident Finding", IncidentFinding: value}
+}
+
+func NewEventFromInventoryInfo(value *inventoryinfo.InventoryInfo) *Event {
+	return &Event{ClassName: "Inventory Info", InventoryInfo: value}
+}
+
+func NewEventFromModuleActivity(value *moduleactivity.ModuleActivity) *Event {
+	return &Event{ClassName: "Module Activity", ModuleActivity: value}
 }
 
 func NewEventFromNetworkActivity(value *networkactivity.NetworkActivity) *Event {
@@ -125,6 +177,10 @@ func NewEventFromScheduledJobActivity(value *scheduledjobactivity.ScheduledJobAc
 
 func NewEventFromSecurityFinding(value *securityfinding.SecurityFinding) *Event {
 	return &Event{ClassName: "Security Finding", SecurityFinding: value}
+}
+
+func NewEventFromVulnerabilityFinding(value *vulnerabilityfinding.VulnerabilityFinding) *Event {
+	return &Event{ClassName: "Vulnerability Finding", VulnerabilityFinding: value}
 }
 
 func NewEventFromWebResourceAccessActivity(value *webresourceaccessactivity.WebResourceAccessActivity) *Event {
@@ -146,7 +202,7 @@ func (e *Event) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		e.AccountChange = value
-	case "Api Activity":
+	case "API Activity":
 		value := new(apiactivity.ApiActivity)
 		if err := json.Unmarshal(data, &value); err != nil {
 			return err
@@ -158,6 +214,18 @@ func (e *Event) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		e.Authentication = value
+	case "Compliance Finding":
+		value := new(compliancefinding.ComplianceFinding)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.ComplianceFinding = value
+	case "Detection Finding":
+		value := new(detectionfinding.DetectionFinding)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.DetectionFinding = value
 	case "File Activity":
 		value := new(fileactivity.FileActivity)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -170,12 +238,24 @@ func (e *Event) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		e.GroupManagement = value
-	case "Device Inventory Info":
+	case "Incident Finding":
+		value := new(incidentfinding.IncidentFinding)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.IncidentFinding = value
+	case "Inventory Info":
 		value := new(inventoryinfo.InventoryInfo)
 		if err := json.Unmarshal(data, &value); err != nil {
 			return err
 		}
-		e.DeviceInventoryInfo = value
+		e.InventoryInfo = value
+	case "Module Activity":
+		value := new(moduleactivity.ModuleActivity)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.ModuleActivity = value
 	case "Network Activity":
 		value := new(networkactivity.NetworkActivity)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -200,6 +280,12 @@ func (e *Event) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		e.SecurityFinding = value
+	case "Vulnerability Finding":
+		value := new(vulnerabilityfinding.VulnerabilityFinding)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.VulnerabilityFinding = value
 	case "Web Resource Access Activity":
 		value := new(webresourceaccessactivity.WebResourceAccessActivity)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -223,7 +309,7 @@ func (e Event) MarshalJSON() ([]byte, error) {
 			AccountChange: e.AccountChange,
 		}
 		return json.Marshal(marshaler)
-	case "Api Activity":
+	case "API Activity":
 		var marshaler = struct {
 			ClassName string `json:"class_name"`
 			*apiactivity.ApiActivity
@@ -239,6 +325,24 @@ func (e Event) MarshalJSON() ([]byte, error) {
 		}{
 			ClassName:      e.ClassName,
 			Authentication: e.Authentication,
+		}
+		return json.Marshal(marshaler)
+	case "Compliance Finding":
+		var marshaler = struct {
+			ClassName string `json:"class_name"`
+			*compliancefinding.ComplianceFinding
+		}{
+			ClassName:         e.ClassName,
+			ComplianceFinding: e.ComplianceFinding,
+		}
+		return json.Marshal(marshaler)
+	case "Detection Finding":
+		var marshaler = struct {
+			ClassName string `json:"class_name"`
+			*detectionfinding.DetectionFinding
+		}{
+			ClassName:        e.ClassName,
+			DetectionFinding: e.DetectionFinding,
 		}
 		return json.Marshal(marshaler)
 	case "File Activity":
@@ -259,13 +363,31 @@ func (e Event) MarshalJSON() ([]byte, error) {
 			GroupManagement: e.GroupManagement,
 		}
 		return json.Marshal(marshaler)
-	case "Device Inventory Info":
+	case "Incident Finding":
+		var marshaler = struct {
+			ClassName string `json:"class_name"`
+			*incidentfinding.IncidentFinding
+		}{
+			ClassName:       e.ClassName,
+			IncidentFinding: e.IncidentFinding,
+		}
+		return json.Marshal(marshaler)
+	case "Inventory Info":
 		var marshaler = struct {
 			ClassName string `json:"class_name"`
 			*inventoryinfo.InventoryInfo
 		}{
 			ClassName:     e.ClassName,
-			InventoryInfo: e.DeviceInventoryInfo,
+			InventoryInfo: e.InventoryInfo,
+		}
+		return json.Marshal(marshaler)
+	case "Module Activity":
+		var marshaler = struct {
+			ClassName string `json:"class_name"`
+			*moduleactivity.ModuleActivity
+		}{
+			ClassName:      e.ClassName,
+			ModuleActivity: e.ModuleActivity,
 		}
 		return json.Marshal(marshaler)
 	case "Network Activity":
@@ -304,6 +426,15 @@ func (e Event) MarshalJSON() ([]byte, error) {
 			SecurityFinding: e.SecurityFinding,
 		}
 		return json.Marshal(marshaler)
+	case "Vulnerability Finding":
+		var marshaler = struct {
+			ClassName string `json:"class_name"`
+			*vulnerabilityfinding.VulnerabilityFinding
+		}{
+			ClassName:            e.ClassName,
+			VulnerabilityFinding: e.VulnerabilityFinding,
+		}
+		return json.Marshal(marshaler)
 	case "Web Resource Access Activity":
 		var marshaler = struct {
 			ClassName string `json:"class_name"`
@@ -320,13 +451,18 @@ type EventVisitor interface {
 	VisitAccountChange(*accountchange.AccountChange) error
 	VisitApiActivity(*apiactivity.ApiActivity) error
 	VisitAuthentication(*authentication.Authentication) error
+	VisitComplianceFinding(*compliancefinding.ComplianceFinding) error
+	VisitDetectionFinding(*detectionfinding.DetectionFinding) error
 	VisitFileActivity(*fileactivity.FileActivity) error
 	VisitGroupManagement(*groupmanagement.GroupManagement) error
-	VisitDeviceInventoryInfo(*inventoryinfo.InventoryInfo) error
+	VisitIncidentFinding(*incidentfinding.IncidentFinding) error
+	VisitInventoryInfo(*inventoryinfo.InventoryInfo) error
+	VisitModuleActivity(*moduleactivity.ModuleActivity) error
 	VisitNetworkActivity(*networkactivity.NetworkActivity) error
 	VisitProcessActivity(*processactivity.ProcessActivity) error
 	VisitScheduledJobActivity(*scheduledjobactivity.ScheduledJobActivity) error
 	VisitSecurityFinding(*securityfinding.SecurityFinding) error
+	VisitVulnerabilityFinding(*vulnerabilityfinding.VulnerabilityFinding) error
 	VisitWebResourceAccessActivity(*webresourceaccessactivity.WebResourceAccessActivity) error
 }
 
@@ -336,16 +472,24 @@ func (e *Event) Accept(visitor EventVisitor) error {
 		return fmt.Errorf("invalid type %s in %T", e.ClassName, e)
 	case "Account Change":
 		return visitor.VisitAccountChange(e.AccountChange)
-	case "Api Activity":
+	case "API Activity":
 		return visitor.VisitApiActivity(e.ApiActivity)
 	case "Authentication":
 		return visitor.VisitAuthentication(e.Authentication)
+	case "Compliance Finding":
+		return visitor.VisitComplianceFinding(e.ComplianceFinding)
+	case "Detection Finding":
+		return visitor.VisitDetectionFinding(e.DetectionFinding)
 	case "File Activity":
 		return visitor.VisitFileActivity(e.FileActivity)
 	case "Group Management":
 		return visitor.VisitGroupManagement(e.GroupManagement)
-	case "Device Inventory Info":
-		return visitor.VisitDeviceInventoryInfo(e.DeviceInventoryInfo)
+	case "Incident Finding":
+		return visitor.VisitIncidentFinding(e.IncidentFinding)
+	case "Inventory Info":
+		return visitor.VisitInventoryInfo(e.InventoryInfo)
+	case "Module Activity":
+		return visitor.VisitModuleActivity(e.ModuleActivity)
 	case "Network Activity":
 		return visitor.VisitNetworkActivity(e.NetworkActivity)
 	case "Process Activity":
@@ -354,6 +498,8 @@ func (e *Event) Accept(visitor EventVisitor) error {
 		return visitor.VisitScheduledJobActivity(e.ScheduledJobActivity)
 	case "Security Finding":
 		return visitor.VisitSecurityFinding(e.SecurityFinding)
+	case "Vulnerability Finding":
+		return visitor.VisitVulnerabilityFinding(e.VulnerabilityFinding)
 	case "Web Resource Access Activity":
 		return visitor.VisitWebResourceAccessActivity(e.WebResourceAccessActivity)
 	}
@@ -416,8 +562,49 @@ func (n NotificationStatus) Ptr() *NotificationStatus {
 	return &n
 }
 
+type Evidence struct {
+	// Unique identifier for the investigation associated with the evidence
+	InvestigationId string `json:"investigation_id"`
+	// Original response from the SIEM
+	RawData string `json:"raw_data"`
+}
+
+type Investigation struct {
+	// Unique identifier for the investigation
+	Id string `json:"id"`
+	// Original response from the SIEM
+	RawData string `json:"raw_data"`
+}
+
 type StoragePath struct {
 	Path string `json:"path"`
+}
+
+type Attachment struct {
+	// The name of the file.
+	FileName string `json:"file_name"`
+	// The type of the file.
+	FileType string `json:"file_type"`
+	// File contents
+	Content []byte `json:"content"`
+}
+
+// Attachment in a ticketing system
+type AttachmentMetadata struct {
+	// Unique identifier for this attachment.
+	Id AttachmentId `json:"id,omitempty"`
+	// The ticket this attachment is associated with.
+	TicketId TicketId `json:"ticket_id,omitempty"`
+	// The name of the file.
+	FileName string `json:"file_name"`
+	// The type of the file.
+	FileType string `json:"file_type"`
+	// The size of the file in bytes.
+	FileSize *int `json:"file_size,omitempty"`
+	// The date the attachment was created.
+	CreatedDate time.Time `json:"created_date"`
+	// The user who created the attachment.
+	Creator string `json:"creator"`
 }
 
 type Priority string
@@ -487,19 +674,120 @@ type Ticket struct {
 	Project *string `json:"project,omitempty"`
 	// The ticket's type.
 	IssueType *string `json:"issue_type,omitempty"`
-	// Associate attachment URLs with ticket
-	Attachments []string `json:"attachments,omitempty"`
 	// Associate tags with Ticket
 	Tags []string `json:"tags,omitempty"`
+	// Metadata of attachments associated with the ticket
+	Attachments []*AttachmentMetadata `json:"attachments,omitempty"`
 }
 
 // Asset in a vulnerability scanning system. Represented by OCSF Device Inventory Info class (class_uid 5001).
-type Asset = *Event
+type Asset = *inventoryinfo.InventoryInfo
 
 type EventId = Id
 
+// Configuration options of a scan.
+type ScanConfiguration struct {
+	// ID of the scan.
+	Uid string `json:"uid"`
+	// Name of the scan.
+	Name string `json:"name"`
+	// Time when the scan was created.
+	CreationTime int `json:"creation_time"`
+	// User that owns the scan.
+	Owner *User `json:"owner,omitempty"`
+	// Schedule of the scan if it is a recurring scan.
+	Schedule *ScanSchedule `json:"schedule,omitempty"`
+}
+
+type ScanDayOption string
+
+const (
+	ScanDayOptionMonday    ScanDayOption = "Monday"
+	ScanDayOptionTuesday   ScanDayOption = "Tuesday"
+	ScanDayOptionWednesday ScanDayOption = "Wednesday"
+	ScanDayOptionThursday  ScanDayOption = "Thursday"
+	ScanDayOptionFriday    ScanDayOption = "Friday"
+	ScanDayOptionSaturday  ScanDayOption = "Saturday"
+	ScanDayOptionSunday    ScanDayOption = "Sunday"
+)
+
+func NewScanDayOptionFromString(s string) (ScanDayOption, error) {
+	switch s {
+	case "Monday":
+		return ScanDayOptionMonday, nil
+	case "Tuesday":
+		return ScanDayOptionTuesday, nil
+	case "Wednesday":
+		return ScanDayOptionWednesday, nil
+	case "Thursday":
+		return ScanDayOptionThursday, nil
+	case "Friday":
+		return ScanDayOptionFriday, nil
+	case "Saturday":
+		return ScanDayOptionSaturday, nil
+	case "Sunday":
+		return ScanDayOptionSunday, nil
+	}
+	var t ScanDayOption
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (s ScanDayOption) Ptr() *ScanDayOption {
+	return &s
+}
+
+type ScanFrequencyOption string
+
+const (
+	ScanFrequencyOptionOnce    ScanFrequencyOption = "once"
+	ScanFrequencyOptionDaily   ScanFrequencyOption = "daily"
+	ScanFrequencyOptionWeekly  ScanFrequencyOption = "weekly"
+	ScanFrequencyOptionMonthly ScanFrequencyOption = "monthly"
+	ScanFrequencyOptionYearly  ScanFrequencyOption = "yearly"
+	ScanFrequencyOptionUnknown ScanFrequencyOption = "unknown"
+)
+
+func NewScanFrequencyOptionFromString(s string) (ScanFrequencyOption, error) {
+	switch s {
+	case "once":
+		return ScanFrequencyOptionOnce, nil
+	case "daily":
+		return ScanFrequencyOptionDaily, nil
+	case "weekly":
+		return ScanFrequencyOptionWeekly, nil
+	case "monthly":
+		return ScanFrequencyOptionMonthly, nil
+	case "yearly":
+		return ScanFrequencyOptionYearly, nil
+	case "unknown":
+		return ScanFrequencyOptionUnknown, nil
+	}
+	var t ScanFrequencyOption
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (s ScanFrequencyOption) Ptr() *ScanFrequencyOption {
+	return &s
+}
+
+type ScanSchedule struct {
+	// Periodicity of the scan; for example, weekly, means that the scan will be repeated every `repeat_interval` weeks.
+	Frequency ScanFrequencyOption `json:"frequency,omitempty"`
+	// Number of days, weeks, months, or years between scans. For example, `1` means that the scan will be repeated once every `frequency` period.
+	RepeatInterval int `json:"repeat_interval"`
+	// Days of the week when the scan will be repeated. For example, `["monday", "friday"]`
+	// means that the scan will be repeated on Monday and Friday on the schedule defined by
+	// `frequency` and `repeat_interval`.
+	Days []string `json:"days,omitempty"`
+}
+
 // Result of a vulnerability scan. Represented by OCSF Security Finding class (class_uid 2001).
-type SecurityFinding = *Event
+type SecurityFinding = *securityfinding.SecurityFinding
+
+type User struct {
+	// ID of the user.
+	Uid string `json:"uid"`
+}
 
 // Values supported by using severity as a filter. Supports `[eq]` and `[in]` operators.
 // For example, `severity[eq]critical` or `severity[in]critical, high`.

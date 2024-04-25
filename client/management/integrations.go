@@ -2,22 +2,9 @@
 
 package management
 
-type ListAccountIntegrationsRequest struct {
-	// Number of `Integration` objects to return in this page. Defaults to 100.
-	Limit *int `json:"-"`
-	// Return `Integration` objects starting after this `name`.
-	StartAfter *string `json:"-"`
-	// Return `Integration` objects ending before this `name`.
-	EndBefore *string `json:"-"`
-	// Select a field to order the results by. Defaults to `name`. To control the direction of the sorting, append
-	// `[asc]` or `[desc]` to the field name. For example, `name[desc]` will sort the results by `name` in descending order.
-	// The ordering defaults to `asc` if not specified. May be used multiple times to order by multiple fields, and the
-	// ordering is applied in the order the fields are specified.
-	Order []*string `json:"-"`
-	// Filter results by this query. For more information on filtering, refer to our Filtering Guide. Defaults to no filter.
-	// If used more than once, the queries are ANDed together.
-	Filter []*string `json:"-"`
-}
+import (
+	fmt "fmt"
+)
 
 type ListIntegrationsRequest struct {
 	// Number of `Integration` objects to return in this page. Defaults to 100.
@@ -34,18 +21,38 @@ type ListIntegrationsRequest struct {
 	// Filter results by this query. For more information on filtering, refer to our Filtering Guide. Defaults to no filter.
 	// If used more than once, the queries are ANDed together.
 	Filter []*string `json:"-"`
+	// Expand the integration result with the related integration point and/or account information.
+	Expand []*ListIntegrationOptions `json:"-"`
+}
+
+type ListAccountIntegrationsRequest struct {
+	// Number of `Integration` objects to return in this page. Defaults to 100.
+	Limit *int `json:"-"`
+	// Return `Integration` objects starting after this `name`.
+	StartAfter *string `json:"-"`
+	// Return `Integration` objects ending before this `name`.
+	EndBefore *string `json:"-"`
+	// Select a field to order the results by. Defaults to `name`. To control the direction of the sorting, append
+	// `[asc]` or `[desc]` to the field name. For example, `name[desc]` will sort the results by `name` in descending order.
+	// The ordering defaults to `asc` if not specified. May be used multiple times to order by multiple fields, and the
+	// ordering is applied in the order the fields are specified.
+	Order []*string `json:"-"`
+	// Filter results by this query. For more information on filtering, refer to our Filtering Guide. Defaults to no filter.
+	// If used more than once, the queries are ANDed together.
+	Filter []*string `json:"-"`
+	// Expand the integration result with the related integration point and/or account information.
+	Expand []*ListIntegrationOptions `json:"-"`
 }
 
 type CreateIntegrationRequest struct {
-	// Unique short name for this Integrations (lowercase [a-z0-9_-], can be used in URLs). Also used for case insenitive duplicate name detection and default sort order. Defaults to IntegrationId if both name and fullname are not specified.
+	// Unique short name for this Integrations (lowercase [a-z0-9_-], can be used in URLs). Also used for case insensitive duplicate name detection and default sort order. Defaults to IntegrationId if both name and fullname are not specified.
 	Name *string `json:"name,omitempty"`
-	// Human friendly display name for this Integrations, will auto-generate 'name' field (if 'name' is not specified)
-	Fullname *string    `json:"fullname,omitempty"`
-	Category CategoryId `json:"category,omitempty"`
-	// Provider implementation to use for this Integration.
-	ProviderType ProviderId `json:"provider_type"`
-	// Custom configuration for the Provider.
+	// Human friendly display name for this Integrations, will auto-generate 'name' field (if 'name' is not specified). Defaults to the same value as the 'name' field if not specified.
+	Fullname *string `json:"fullname,omitempty"`
+	// Provider configuration for this Integration.
 	ProviderConfig *ProviderConfig `json:"provider_config,omitempty"`
+	// Integration Point associated with this integration.
+	IntegrationPointId *IntegrationPointId `json:"integration_point_id,omitempty"`
 }
 
 type CreateIntegrationResponse struct {
@@ -58,6 +65,31 @@ type GetIntegrationResponse struct {
 
 type ListAccountIntegrationsResponse struct {
 	Result []*Integration `json:"result,omitempty"`
+}
+
+type ListIntegrationOptions string
+
+const (
+	ListIntegrationOptionsAccount          ListIntegrationOptions = "account"
+	ListIntegrationOptionsIntegrationPoint ListIntegrationOptions = "integration_point"
+	ListIntegrationOptionsAll              ListIntegrationOptions = "all"
+)
+
+func NewListIntegrationOptionsFromString(s string) (ListIntegrationOptions, error) {
+	switch s {
+	case "account":
+		return ListIntegrationOptionsAccount, nil
+	case "integration_point":
+		return ListIntegrationOptionsIntegrationPoint, nil
+	case "all":
+		return ListIntegrationOptionsAll, nil
+	}
+	var t ListIntegrationOptions
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (l ListIntegrationOptions) Ptr() *ListIntegrationOptions {
+	return &l
 }
 
 type ListIntegrationsResponse struct {
@@ -75,6 +107,5 @@ type UpdateIntegrationResponse struct {
 }
 
 type VerifyIntegrationRequest struct {
-	Integration *CreateIntegrationRequest  `json:"integration,omitempty"`
-	Credentials []*CreateCredentialRequest `json:"credentials,omitempty"`
+	Integration *CreateIntegrationRequest `json:"integration,omitempty"`
 }

@@ -34,7 +34,7 @@ func NewClient(opts ...core.ClientOption) *Client {
 }
 
 // Returns all matching `Status` objects.
-func (c *Client) ListStatus(ctx context.Context, request *management.ListStatusRequest) (*management.ListStatusResponse, error) {
+func (c *Client) List(ctx context.Context, request *management.ListStatusRequest) (*management.ListStatusResponse, error) {
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
@@ -56,6 +56,9 @@ func (c *Client) ListStatus(ctx context.Context, request *management.ListStatusR
 	}
 	for _, value := range request.Filter {
 		queryParams.Add("filter", fmt.Sprintf("%v", *value))
+	}
+	for _, value := range request.Expand {
+		queryParams.Add("expand", fmt.Sprintf("%v", *value))
 	}
 	if len(queryParams) > 0 {
 		endpointURL += "?" + queryParams.Encode()
@@ -119,7 +122,7 @@ func (c *Client) ListStatus(ctx context.Context, request *management.ListStatusR
 }
 
 // Returns the integration `Status` object.
-func (c *Client) GetStatus(ctx context.Context, accountId management.AccountId, integrationId management.IntegrationId) (*management.GetStatusResponse, error) {
+func (c *Client) Get(ctx context.Context, accountId management.AccountId, integrationId management.IntegrationId) (*management.GetStatusResponse, error) {
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
@@ -184,7 +187,7 @@ func (c *Client) GetStatus(ctx context.Context, accountId management.AccountId, 
 }
 
 // Resets the integration `Status` object.
-func (c *Client) ResetStatus(ctx context.Context, accountId management.AccountId, integrationId management.IntegrationId) error {
+func (c *Client) Reset(ctx context.Context, accountId management.AccountId, integrationId management.IntegrationId) error {
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
@@ -248,7 +251,7 @@ func (c *Client) ResetStatus(ctx context.Context, accountId management.AccountId
 }
 
 // Returns integration `Status` object list of `StatusEvent` objects.
-func (c *Client) ListStatusEvents(ctx context.Context, accountId management.AccountId, integrationId management.IntegrationId, request *management.ListStatusEventsRequest) (*management.ListStatusEventsResponse, error) {
+func (c *Client) ListEvents(ctx context.Context, accountId management.AccountId, integrationId management.IntegrationId, request *management.ListStatusEventsRequest) (*management.ListStatusEventsResponse, error) {
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
@@ -333,7 +336,7 @@ func (c *Client) ListStatusEvents(ctx context.Context, accountId management.Acco
 }
 
 // Returns organization last hour usage timeseries.
-func (c *Client) GetStatusTimeseries(ctx context.Context) (*management.GetStatusTimeseries, error) {
+func (c *Client) GetTimeseries(ctx context.Context) (*management.GetStatusTimeseries, error) {
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL

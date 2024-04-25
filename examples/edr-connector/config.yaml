@@ -1,0 +1,7 @@
+synqly:
+  org: {SYNQLY_ORG}
+  token: {SYNQLY_TOKEN}
+
+sentinelone:
+  url: {SENTINELONE_URL}
+  token: {SENTINELONE_TOKEN}

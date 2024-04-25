@@ -20,12 +20,14 @@ type ListCredentialsRequest struct {
 }
 
 type CreateCredentialRequest struct {
-	// Unique short name for this Credential (lowercase [a-z0-9_-], can be used in URLs). Also used for case insenitive duplicate name detection and default sort order. Defaults to CredentialId if both name and fullname are not specified.
+	// Unique short name for this Credential (lowercase [a-z0-9_-], can be used in URLs). Also used for case insensitive duplicate name detection and default sort order. Defaults to CredentialId if both name and fullname are not specified.
 	Name *string `json:"name,omitempty"`
-	// Human friendly display name for this Credential, will auto-generate 'name' field (if 'name' is not specified)
+	// Human friendly display name for this Credential, will auto-generate 'name' field (if 'name' is not specified). Defaults to the same value as the 'name' field if not specified.
 	Fullname *string `json:"fullname,omitempty"`
 	// Credential configuration
 	Config *CredentialConfig `json:"config,omitempty"`
+	// One of `account` or `integration_point`; defaults to `account` if not specified.
+	OwnerType *OwnerType `json:"owner_type,omitempty"`
 }
 
 type CreateCredentialResponse struct {

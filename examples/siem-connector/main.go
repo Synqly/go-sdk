@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"math/rand"
 	"os"
 	"os/signal"
 	"strconv"
@@ -14,7 +15,7 @@ import (
 
 	// Each OSCF event type has its own package. This is intended to make imports
 	// more granular, allowing the end-user to import only the types they need.
-	scheduledJobActivity "github.com/synqly/go-sdk/client/engine/ocsf/scheduledjobactivity"
+	scheduledJobActivity "github.com/synqly/go-sdk/client/engine/ocsf/v110/scheduledjobactivity"
 
 	mgmt "github.com/synqly/go-sdk/client/management"
 	mgmtClient "github.com/synqly/go-sdk/client/management/client"
@@ -72,27 +73,23 @@ func (a *App) NewTenant(ctx context.Context, id string) error {
 	// Do not allow duplicate tenant names
 	for _, tenant := range a.Tenants {
 		if tenant.ID == id {
-			return fmt.Errorf("duplicate tenant name")
+			return fmt.Errorf("duplicate tenant name %v", id)
 		}
 	}
 
-	// Create a Synqly Account for this tenant
-	account, err := mgmtClient.NewClient(
+	// Create a Synqly Client that can be used to interact with the tenant
+	// We will use this client to create an Account and set up an Integration with an event logging provider
+	client := mgmtClient.NewClient(
 		mgmtClient.WithAuthToken(synqlyOrgToken),
-	).Accounts.CreateAccount(ctx, &mgmt.CreateAccountRequest{
+	)
+
+	// Create a Synqly Account for this tenant
+	account, err := client.Accounts.Create(ctx, &mgmt.CreateAccountRequest{
 		Fullname: &id,
 	})
 	if err != nil {
 		return fmt.Errorf("unable to create account: %w", err)
 	}
-
-	// Create a Synqly Client that can be used to interact with the tenant
-	// We will use this client to set up an Integration with an event logging provider
-	// once a user belonging to the tenant configures it. This configuration is typically
-	// done in the UI, but we will do in this example to demonstrate how it works.
-	client := mgmtClient.NewClient(
-		mgmtClient.WithAuthToken(synqlyOrgToken),
-	)
 
 	// Store the Tenant and associated Synqly objects in an in-memory cache.
 	a.Tenants = append(a.Tenants, &Tenant{
@@ -101,15 +98,14 @@ func (a *App) NewTenant(ctx context.Context, id string) error {
 		SynqlyClient:    client,
 		EventLogger:     nil,
 	})
-
 	return nil
 }
 
-// configureEventLogging initializes event logging for a Tenant. Stores the
-// HEC_TOKEN as a secure Credential object, then creates a Splunk Integration
-// targeting SPLUNK_URL. This example uses Splunk as the event logging
-// provider; however, an Integration can be configured to target any supported
-// Provider type.
+// configureEventLogging initializes event logging for a Tenant.
+// This example uses Splunk SIEM providers and mock SIEM provider as the event logging
+// providers; however, an Integration can be configured to target any supported provider type.
+// Stores the HEC_TOKEN as a secure Credential object, then creates a Splunk Integration
+// targeting SPLUNK_URL.
 //
 // Returns an error if the Tenant cannot be found, or if an Integration cannot
 // be created for the given Tenant.
@@ -126,33 +122,33 @@ func (a *App) configureEventLogging(ctx context.Context, tenantID, siemProviderT
 		return fmt.Errorf("tenant not found")
 	}
 
-	// We need to save the tenant's Splunk credentials in Synqly before configuring the Integration
-	// We will use the Synqly Client we created for the tenant to do this
-	credential, err := tenant.SynqlyClient.Credentials.CreateCredential(ctx, tenant.SynqlyAccountId, &mgmt.CreateCredentialRequest{
-		Fullname: engine.String(fmt.Sprintf("%s authentication token", siemProviderType)),
-		Config: mgmt.NewCredentialConfigFromToken(&mgmt.TokenCredential{
-			Secret: splunkToken,
-		}),
-	})
-	if err != nil {
-		return err
-	}
-
 	// Configure an Integration in Synqly depending on this tenant's config
 	var providerConfig *mgmt.ProviderConfig
 	switch siemProviderType {
 	case "splunk":
+		// We need to save the tenant's Splunk credentials in Synqly before configuring the Integration
+		// We will use the Synqly Client we created for the tenant to do this
+		credential, err := tenant.SynqlyClient.Credentials.Create(ctx, tenant.SynqlyAccountId, &mgmt.CreateCredentialRequest{
+			Fullname: mgmt.String(fmt.Sprintf("%s authentication token", siemProviderType)),
+			Config: mgmt.NewCredentialConfigFromToken(&mgmt.TokenCredential{
+				Secret: splunkToken,
+			}),
+		})
+		if err != nil {
+			return err
+		}
+
 		providerConfig = a.splunkConfig(splunkURL, credential.Result.Id)
+
 	case "inmem":
 		providerConfig = a.inmemConfig()
+
 	default:
 		return fmt.Errorf("invalid siem provider type: %s", siemProviderType)
 	}
 
-	integration, err := tenant.SynqlyClient.Integrations.CreateIntegration(ctx, tenant.SynqlyAccountId, &mgmt.CreateIntegrationRequest{
-		Fullname:       engine.String("Background Event Logger"),
-		Category:       "siem",
-		ProviderType:   siemProviderType,
+	integration, err := tenant.SynqlyClient.Integrations.Create(ctx, tenant.SynqlyAccountId, &mgmt.CreateIntegrationRequest{
+		Fullname:       mgmt.String("Background Event Logger"),
 		ProviderConfig: providerConfig,
 	})
 	if err != nil {
@@ -160,7 +156,7 @@ func (a *App) configureEventLogging(ctx context.Context, tenantID, siemProviderT
 	}
 
 	// Create an Event Logger for the tenant
-	// We will use this client to log events for the tenant
+	// We will use this client to post events to the provider
 	tenant.EventLogger = engineClient.NewClient(
 		engineClient.WithAuthToken(integration.Result.Token.Access.Secret),
 	)
@@ -169,27 +165,19 @@ func (a *App) configureEventLogging(ctx context.Context, tenantID, siemProviderT
 }
 
 func (a *App) splunkConfig(splunkURL, credentialId string) *mgmt.ProviderConfig {
-	return mgmt.NewProviderConfigFromSiem(&mgmt.SiemConfig{
-		Url:          &splunkURL,
-		CredentialId: credentialId,
-		Config: &mgmt.SiemProviderTypeConfig{
-			Type: "splunk",
-			Splunk: &mgmt.SplunkConfig{
-				// Do not verify the Splunk server's TLS certificate. This
-				// is not recommended for production use; however, it is set
-				// here because Splunk HEC endpoints use self-signed
-				// "SplunkServerDefaultCert" certificates by default.
-				SkipTlsVerify: true,
-			},
-		},
+	return mgmt.NewProviderConfigFromSiemSplunk(&mgmt.SiemSplunk{
+		HecUrl:        splunkURL,
+		HecCredential: mgmt.NewSplunkHecTokenFromTokenId(credentialId),
+		// Do not verify the Splunk server's TLS certificate. This
+		// is not recommended for production use; however, it is set
+		// here because Splunk Cloud HEC endpoints use self-signed
+		// "SplunkServerDefaultCert" certificates by default.
+		SkipTlsVerify: true,
 	})
 }
 
 func (a *App) inmemConfig() *mgmt.ProviderConfig {
-	return mgmt.NewProviderConfigFromSiem(&mgmt.SiemConfig{
-		Url:          nil,
-		CredentialId: "not-used",
-	})
+	return mgmt.NewProviderConfigFromSiemMockSiem(&mgmt.SiemMock{})
 }
 
 // example, we print a message for every Tenant tenant at regular intervals,
@@ -220,7 +208,7 @@ func (app *App) backgroundJob(durationSeconds int) {
 			}
 
 			// If the EventLogger for the given Tenant has been initialized, use
-			// it to send data.
+			// it to post data.
 			if tenant.EventLogger != nil {
 				// Log the result of the work to Synqly
 				err := tenant.EventLogger.Siem.PostEvents(
@@ -228,14 +216,13 @@ func (app *App) backgroundJob(durationSeconds int) {
 					[]*engine.Event{newEvent},
 				)
 				if err != nil {
-					consoleLogger.Printf("error logging event for tenant %s: %s\n",
-						tenant.ID, err)
+					consoleLogger.Printf("error logging event for tenant %s: %s\n", tenant.ID, err)
 				}
 				consoleLogger.Printf("Logged event for tenant %s\n", tenant.ID)
 			}
 		}
-
-		time.Sleep(1 * time.Second)
+		time.Sleep(1*time.Second + time.Duration(rand.Intn(1000))*time.Millisecond)
+		fmt.Println()
 	}
 }
 
@@ -243,6 +230,7 @@ func (app *App) backgroundJob(durationSeconds int) {
 func createSampleEvent() *engine.Event {
 	return engine.NewEventFromScheduledJobActivity(&scheduledJobActivity.ScheduledJobActivity{
 		ActivityId: scheduledJobActivity.Activity_Update,
+		ActionId:   scheduledJobActivity.Action_Allowed,
 		Device: &scheduledJobActivity.Device{
 			TypeId: scheduledJobActivity.Device_Type_Server,
 		},
@@ -257,7 +245,7 @@ func createSampleEvent() *engine.Event {
 			Product: &scheduledJobActivity.Product{
 				VendorName: "Synqly SDK for Go",
 			},
-			Version: "1.0.0",
+			Version: "1.1.0",
 		},
 		Time:       int(time.Now().UTC().Unix()),
 		SeverityId: scheduledJobActivity.Severity_Informational,
@@ -274,7 +262,7 @@ func (app *App) cleanup() {
 	ctx := context.Background()
 	for _, tenant := range app.Tenants {
 		// Deleting the account will delete all credentials and integrations associated with the account.
-		if err := tenant.SynqlyClient.Accounts.DeleteAccount(ctx, tenant.SynqlyAccountId); err != nil {
+		if err := tenant.SynqlyClient.Accounts.Delete(ctx, tenant.SynqlyAccountId); err != nil {
 			consoleLogger.Printf("Error deleting account %s: %s\n", tenant.SynqlyAccountId, err)
 		}
 	}
@@ -284,8 +272,11 @@ func (app *App) cleanup() {
 func main() {
 	ctx := context.Background()
 
-	if synqlyOrgToken == "" || splunkURL == "" || splunkToken == "" {
-		log.Fatal("Must set following environment variables: SYNQLY_ORG_TOKEN, SPLUNK_URL, SPLUNK_HEC_TOKEN")
+	if synqlyOrgToken == "" {
+		log.Fatal("Must set following environment variable: SYNQLY_ORG_TOKEN")
+	}
+	if splunkURL == "" || splunkToken == "" {
+		consoleLogger.Print("WARNING: no Splunk credentials provided (SLUNK_URL, SPLUNK_HEC_TOKEN)\nUsing Mock as the SIEM  provider")
 	}
 
 	// Instantiate App object
@@ -304,22 +295,26 @@ func main() {
 	defer app.cleanup()
 
 	// Create a couple of tenants
-	if err := app.NewTenant(ctx, "Tenant ABC"); err != nil {
-		log.Fatal(err)
+
+	if splunkToken != "" && splunkURL != "" {
+		// Create and configure Tenant ABC to use splunk SIEM event logging provider
+		consoleLogger.Print("Creating Tenant ABC with splunk SIEM provider")
+		if err := app.NewTenant(ctx, "Tenant ABC"); err != nil {
+			log.Fatal(err)
+		}
+		if err := app.configureEventLogging(ctx, "Tenant ABC", "splunk", splunkToken); err != nil {
+			log.Fatal(err)
+		}
 	}
+
+	// Create and configure Tenant XYZ to use mock SIEM event logging provider
+	consoleLogger.Print("Creating Tenant XYZ with mock SIEM provider")
 	if err := app.NewTenant(ctx, "Tenant XYZ"); err != nil {
 		log.Fatal(err)
 	}
-
-	// Configure one tenant to use event logging
-	if err := app.configureEventLogging(ctx, "Tenant ABC", "splunk", splunkToken); err != nil {
+	if err := app.configureEventLogging(ctx, "Tenant XYZ", "inmem", ""); err != nil {
 		log.Fatal(err)
 	}
-
-	// Uncomment the following to enable the in-memory mock SIEM provider for Tenant XYZ
-	// if err := app.configureEventLogging(ctx, "Tenant XYZ", "inmem", ""); err != nil {
-	// 	log.Fatal(err)
-	// }
 
 	// Generate synthetic load for the tenants
 	if durationSeconds == "" {

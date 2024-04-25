@@ -17,6 +17,43 @@ type QuerySiemEventsRequest struct {
 	Filter []*string `json:"-"`
 }
 
+type QueryInvestigationsRequest struct {
+	// Cursor to use to retrieve the next page of results.
+	Cursor *string `json:"-"`
+	// Number of `Investigation` objects to return in this page. Defaults to 100.
+	Limit *int `json:"-"`
+	// Select a field to order the results by.
+	Order []*string `json:"-"`
+	// Filter results by this query.
+	Filter []*string `json:"-"`
+}
+
+type GetEvidenceResponse struct {
+	// List of evidence associated with an investigation
+	Result *Evidence `json:"result,omitempty"`
+}
+
+type GetInvestigationResponse struct {
+	// The investigation object
+	Result *Investigation `json:"result,omitempty"`
+}
+
+// JSON patch to apply to an investigation. A JSON patch is a list of operations, and each operation
+// is a map with the following keys:
+//
+// - `op`: The operation to perform. Supported values are `add`, `replace`, `remove`, `copy`, and `move`.
+// - `path`: The path to the field to update. The path is a JSON Pointer.
+// - `value`: The value to set the field to. This is required for `add` and `replace` operations.
+// - `from`: The path to the field to copy from. This is required for `copy` and `move` operations.
+type PatchInvestigationRequest = []map[string]interface{}
+
+type QueryInvestigationResponse struct {
+	// List of investigations
+	Result []*Investigation `json:"result,omitempty"`
+	// Cursor to use to retrieve the next page of results
+	Cursor string `json:"cursor"`
+}
+
 type QuerySiemEventsResponse struct {
 	// List of events
 	Result []map[string]interface{} `json:"result,omitempty"`

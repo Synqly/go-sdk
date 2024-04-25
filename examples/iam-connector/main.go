@@ -47,8 +47,8 @@ func (c *oktaConfig) Validate() error {
 	return nil
 }
 
-func waitForAuditLogResult(ctx context.Context, client *engineClient.Client, req *engine.ListIdentityAuditLogRequest) (*engine.ListIdentityAuditLogResponse, error) {
-	var resp *engine.ListIdentityAuditLogResponse = nil
+func waitForAuditLogResult(ctx context.Context, client *engineClient.Client, req *engine.QueryIdentityAuditLogRequest) (*engine.QueryIdentityAuditLogResponse, error) {
+	var resp *engine.QueryIdentityAuditLogResponse = nil
 	fmt.Print("Waiting for the audit log to update ")
 	for attempt := 1; attempt < 60 && resp == nil; attempt++ {
 		fmt.Print(".")
@@ -57,7 +57,7 @@ func waitForAuditLogResult(ctx context.Context, client *engineClient.Client, req
 			continue
 		}
 
-		resp, err := client.Identity.ListAuditLog(ctx, req)
+		resp, err := client.Identity.QueryAuditLog(ctx, req)
 		if err != nil {
 			return nil, err
 		}
@@ -79,25 +79,17 @@ func waitForAuditLogResult(ctx context.Context, client *engineClient.Client, req
 func demoActions(userEmail, orgToken string, okta *oktaConfig) error {
 	ctx := context.Background()
 
-	t, err := common.NewTenant(ctx, "Secure Identities Co", "tenant_store.yaml", orgToken, map[mgmt.CategoryId]common.AuthAndConfig{
-		"identity": {
-			Auth: &mgmt.CreateCredentialRequest{
-				Fullname: mgmt.String("okta"),
-				Config: mgmt.NewCredentialConfigFromToken(&mgmt.TokenCredential{
-					Secret: oktaConf.Token,
+	t, err := common.NewTenant(ctx, "Secure Identities Co", "tenant_store.yaml", orgToken, map[mgmt.CategoryId]*mgmt.CreateIntegrationRequest{
+		mgmt.CategoryIdIdentity: {
+			Fullname: mgmt.String("IAM Actions"),
+			ProviderConfig: mgmt.NewProviderConfigFromIdentityOkta(&mgmt.IdentityOkta{
+				Url: okta.URL,
+				Credential: mgmt.NewOktaCredentialFromToken(&mgmt.TokenCredential{
+					Secret: okta.Token,
 				}),
-			},
-			Config: &mgmt.CreateIntegrationRequest{
-				Fullname:     mgmt.String("IAM Actions"),
-				Category:     "identity",
-				ProviderType: "okta",
-				ProviderConfig: mgmt.NewProviderConfigFromIdentity(&mgmt.IdentityConfig{
-					Url: mgmt.String(oktaConf.URL),
-				}),
-			},
+			}),
 		},
-	},
-	)
+	})
 	if err != nil {
 		return fmt.Errorf("unable to create tenant: %w", err)
 	}
@@ -113,12 +105,12 @@ func demoActions(userEmail, orgToken string, okta *oktaConfig) error {
 		return err
 	}
 	if len(user.Result) == 0 {
-		return fmt.Errorf("User with email %s not found", userEmail)
+		return fmt.Errorf("user with email %s not found", userEmail)
 	}
 
 	userID := *user.Result[0].Uid
 
-	consoleLogger.Printf("Found user id %s", userID)
+	consoleLogger.Printf("Found user id %s with name %s\n", userID, *user.Result[0].FullName)
 
 	// Reset user's password
 
@@ -127,14 +119,14 @@ func demoActions(userEmail, orgToken string, okta *oktaConfig) error {
 	fmt.Printf("\n\n\n\n")
 	consoleLogger.Printf("Forcing password reset for user %s", userEmail)
 
-	err = t.Synqly.EngineClients["identity"].Identity.ForceResetPassword(ctx, userID)
+	err = t.Synqly.EngineClients["identity"].Identity.ForceUserPasswordReset(ctx, userID)
 	if err != nil {
-		return fmt.Errorf("Error forcing password reset: %w", err)
+		return fmt.Errorf("error forcing password reset: %w", err)
 	} else {
 		consoleLogger.Printf("Forced password reset")
 	}
 
-	resp, err := waitForAuditLogResult(ctx, t.Synqly.EngineClients["identity"], &engine.ListIdentityAuditLogRequest{
+	resp, err := waitForAuditLogResult(ctx, t.Synqly.EngineClients["identity"], &engine.QueryIdentityAuditLogRequest{
 		Filter: []*string{
 			engine.String("user.email_addr[eq]" + userEmail),
 			engine.String("time[gte]" + now),
@@ -165,7 +157,7 @@ func demoActions(userEmail, orgToken string, okta *oktaConfig) error {
 		consoleLogger.Printf("Disabled user")
 	}
 
-	resp, err = waitForAuditLogResult(ctx, t.Synqly.EngineClients["identity"], &engine.ListIdentityAuditLogRequest{
+	resp, err = waitForAuditLogResult(ctx, t.Synqly.EngineClients["identity"], &engine.QueryIdentityAuditLogRequest{
 		Filter: []*string{
 			engine.String("user.email_addr[eq]" + userEmail),
 			engine.String("time[gte]" + now),
@@ -199,7 +191,7 @@ func demoActions(userEmail, orgToken string, okta *oktaConfig) error {
 		consoleLogger.Printf("Enabled user")
 	}
 
-	resp, err = waitForAuditLogResult(ctx, t.Synqly.EngineClients["identity"], &engine.ListIdentityAuditLogRequest{
+	resp, err = waitForAuditLogResult(ctx, t.Synqly.EngineClients["identity"], &engine.QueryIdentityAuditLogRequest{
 		Filter: []*string{
 			engine.String("user.email_addr[eq]" + userEmail),
 			engine.String("time[gte]" + now),

@@ -34,7 +34,7 @@ func NewClient(opts ...core.ClientOption) *Client {
 }
 
 // Returns a list of `Event` objects from the token-linked audit log.
-func (c *Client) ListAuditLog(ctx context.Context, request *engine.ListIdentityAuditLogRequest) (*engine.ListIdentityAuditLogResponse, error) {
+func (c *Client) QueryAuditLog(ctx context.Context, request *engine.QueryIdentityAuditLogRequest) (*engine.QueryIdentityAuditLogResponse, error) {
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
@@ -98,7 +98,7 @@ func (c *Client) ListAuditLog(ctx context.Context, request *engine.ListIdentityA
 		return apiError
 	}
 
-	var response *engine.ListIdentityAuditLogResponse
+	var response *engine.QueryIdentityAuditLogResponse
 	if err := core.DoRequest(
 		ctx,
 		c.httpClient,
@@ -326,7 +326,7 @@ func (c *Client) DisableUser(ctx context.Context, userId engine.UserId) error {
 }
 
 // Forces a user to reset their password before they can log in again.
-func (c *Client) ForceResetPassword(ctx context.Context, userId engine.UserId) error {
+func (c *Client) ForceUserPasswordReset(ctx context.Context, userId engine.UserId) error {
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
@@ -390,7 +390,7 @@ func (c *Client) ForceResetPassword(ctx context.Context, userId engine.UserId) e
 }
 
 // Logs a user out of all current sessions so they must log in again.
-func (c *Client) ExpireAllSessions(ctx context.Context, userId engine.UserId) error {
+func (c *Client) ExpireAllUserSessions(ctx context.Context, userId engine.UserId) error {
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL

@@ -34,7 +34,7 @@ func NewClient(opts ...core.ClientOption) *Client {
 }
 
 // List all members
-func (c *Client) ListMembers(ctx context.Context, request *management.ListMembersRequest) (*management.ListMembersResponse, error) {
+func (c *Client) List(ctx context.Context, request *management.ListMembersRequest) (*management.ListMembersResponse, error) {
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
@@ -112,7 +112,7 @@ func (c *Client) ListMembers(ctx context.Context, request *management.ListMember
 }
 
 // Retrieve a Member by ID
-func (c *Client) GetMember(ctx context.Context, memberId management.MemberId) (*management.GetMemberResponse, error) {
+func (c *Client) Get(ctx context.Context, memberId management.MemberId) (*management.GetMemberResponse, error) {
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
@@ -170,7 +170,7 @@ func (c *Client) GetMember(ctx context.Context, memberId management.MemberId) (*
 }
 
 // Add a new member for this Organization.
-func (c *Client) CreateMember(ctx context.Context, request *management.CreateMemberRequest) (*management.CreateMemberResponse, error) {
+func (c *Client) Create(ctx context.Context, request *management.CreateMemberRequest) (*management.CreateMemberResponse, error) {
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
@@ -242,7 +242,7 @@ func (c *Client) CreateMember(ctx context.Context, request *management.CreateMem
 }
 
 // Update a Member by ID
-func (c *Client) UpdateMember(ctx context.Context, memberId management.MemberId, request management.UpdateMemberRequest) (*management.UpdateMemberResponse, error) {
+func (c *Client) Update(ctx context.Context, memberId management.MemberId, request management.UpdateMemberRequest) (*management.UpdateMemberResponse, error) {
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
@@ -314,7 +314,7 @@ func (c *Client) UpdateMember(ctx context.Context, memberId management.MemberId,
 }
 
 // Update a Member by ID
-func (c *Client) PatchMember(ctx context.Context, memberId management.MemberId, request []map[string]interface{}) (*management.PatchMemberResponse, error) {
+func (c *Client) Patch(ctx context.Context, memberId management.MemberId, request []map[string]interface{}) (*management.PatchMemberResponse, error) {
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
@@ -379,7 +379,7 @@ func (c *Client) PatchMember(ctx context.Context, memberId management.MemberId, 
 }
 
 // Delete a Member by ID. Also deletes all Tokens for the Member.
-func (c *Client) DeleteMember(ctx context.Context, memberId management.MemberId) error {
+func (c *Client) Delete(ctx context.Context, memberId management.MemberId) error {
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL

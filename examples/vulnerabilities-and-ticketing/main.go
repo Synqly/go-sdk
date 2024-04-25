@@ -15,7 +15,7 @@ import (
 
 	"github.com/synqly/go-sdk/client/engine"
 	engineClient "github.com/synqly/go-sdk/client/engine/client"
-	"github.com/synqly/go-sdk/client/engine/ocsf/securityfinding"
+	"github.com/synqly/go-sdk/client/engine/ocsf/v110/securityfinding"
 	mgmt "github.com/synqly/go-sdk/client/management"
 	"github.com/synqly/go-sdk/examples/common"
 )
@@ -75,8 +75,8 @@ See also:
 		*finding.Finding.Desc,
 		*finding.Message,
 		asset,
-		*finding.Finding.Remediation.Desc,
-		finding.Vulnerabilities[0].Cve.Cvss.BaseScore,
+		finding.Finding.Remediation.Desc,
+		finding.Vulnerabilities[0].Cve.Cvss[0].BaseScore,
 		strings.Join(finding.Vulnerabilities[0].References, "\n"),
 	)
 
@@ -108,6 +108,54 @@ See also:
 	return nil
 }
 
+func ticketingProviderConfig(jiraUser, jiraToken string) (*mgmt.CreateIntegrationRequest, error) {
+	if jiraUser == "" || jiraToken == "" {
+		return nil, fmt.Errorf("missing ticketing provider config")
+	}
+
+	integrationReq := &mgmt.CreateIntegrationRequest{
+		Fullname: engine.String("Ticketing Connector"),
+		ProviderConfig: mgmt.NewProviderConfigFromTicketingJira(&mgmt.TicketingJira{
+			Url: "https://synqly.atlassian.net",
+			Credential: mgmt.NewJiraCredentialFromBasic(&mgmt.BasicCredential{
+				Username: jiraUser,
+				Secret:   jiraToken,
+			}),
+		}),
+	}
+
+	return integrationReq, nil
+}
+
+func vulnerabilityProviderConfig(tenableToken, qualysEndpoint, qualysUser, qualysSecret string) (*mgmt.CreateIntegrationRequest, error) {
+	if tenableToken != "" {
+		return &mgmt.CreateIntegrationRequest{
+			Fullname: engine.String("Vulnerability Scanner"),
+			ProviderConfig: mgmt.NewProviderConfigFromVulnerabilitiesTenableCloud(&mgmt.VulnerabilitiesTenableCloud{
+				Url: mgmt.String("https://cloud.tenable.com"),
+				Credential: mgmt.NewTenableCloudCredentialFromToken(&mgmt.TokenCredential{
+					Secret: tenableToken,
+				}),
+			}),
+		}, nil
+	}
+
+	if qualysEndpoint != "" && qualysUser != "" && qualysSecret != "" {
+		return &mgmt.CreateIntegrationRequest{
+			Fullname: engine.String("Vulnerability Scanner"),
+			ProviderConfig: mgmt.NewProviderConfigFromVulnerabilitiesQualysCloud(&mgmt.VulnerabilitiesQualysCloud{
+				Url: qualysEndpoint,
+				Credential: mgmt.NewQualysCloudCredentialFromBasic(&mgmt.BasicCredential{
+					Username: qualysUser,
+					Secret:   qualysSecret,
+				}),
+			}),
+		}, nil
+	}
+
+	return nil, fmt.Errorf("missing vulnerability provider config")
+}
+
 func main() {
 	log.SetFlags(log.Llongfile | log.Ldate | log.Ltime)
 
@@ -119,56 +167,40 @@ func main() {
 	}
 
 	synqlyOrgToken := k.String("synqly.org.token")
-	tenableToken := k.String("synqly.tenable.token")
 	jiraUser := k.String("synqly.jira.user")
 	jiraToken := k.String("synqly.jira.token")
+	tenableToken := k.String("synqly.tenable.token")
+	qualysEndpoint := k.String("synqly.qualys.endpoint")
+	qualysUser := k.String("synqly.qualys.user")
+	qualysSecret := k.String("synqly.qualys.secret")
 
-	if synqlyOrgToken == "" || tenableToken == "" || jiraUser == "" || jiraToken == "" {
-		log.Fatal("Missing required config")
+	if synqlyOrgToken == "" {
+		log.Fatal("Missing Synqly Org token")
+	}
+
+	ticketingProvider, err := ticketingProviderConfig(jiraUser, jiraToken)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	vulnProvider, err := vulnerabilityProviderConfig(tenableToken, qualysEndpoint, qualysUser, qualysSecret)
+	if err != nil {
+		log.Fatal(err)
 	}
 
 	ctx := context.Background()
 
-	t, err := common.NewTenant(ctx, "Acme Corp", "tenant_store.yaml", synqlyOrgToken, map[mgmt.ProviderId]common.AuthAndConfig{
-		"ticketing": {
-			Auth: &mgmt.CreateCredentialRequest{
-				Name: engine.String("jira"),
-				Config: mgmt.NewCredentialConfigFromBasic(&mgmt.BasicCredential{
-					Username: jiraUser,
-					Secret:   jiraToken,
-				}),
-			},
-			Config: &mgmt.CreateIntegrationRequest{
-				Fullname:     engine.String("Ticketing Connector"),
-				Category:     "ticketing",
-				ProviderType: "jira",
-				ProviderConfig: mgmt.NewProviderConfigFromTicketing(&mgmt.TicketingConfig{
-					Endpoint: engine.String("https://synqly.atlassian.net"),
-				}),
-			},
-		},
-		"vulnerabilities": {
-			Auth: &mgmt.CreateCredentialRequest{
-				Name: engine.String("tenable"),
-				Config: mgmt.NewCredentialConfigFromToken(&mgmt.TokenCredential{
-					Secret: tenableToken,
-				}),
-			},
-			Config: &mgmt.CreateIntegrationRequest{
-				Fullname:     engine.String("Vulnerability Scanner"),
-				Category:     "vulnerabilities",
-				ProviderType: "tenable",
-				ProviderConfig: mgmt.NewProviderConfigFromVulnerabilities(&mgmt.VulnerabilityConfig{
-					Endpoint: engine.String("https://cloud.tenable.com"),
-				}),
-			},
-		},
+	t, err := common.NewTenant(ctx, "Acme Corp", "tenant_store.yaml", synqlyOrgToken, map[mgmt.CategoryId]*mgmt.CreateIntegrationRequest{
+		mgmt.CategoryIdTicketing:       ticketingProvider,
+		mgmt.CategoryIdVulnerabilities: vulnProvider,
 	})
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	findings, err := t.Synqly.EngineClients["vulnerabilities"].Vulnerabilities.QueryVulnerabilityFindings(ctx, &engine.QueryFindingsRequest{
+	consoleLogger.Printf("Using %s as vulnerability provider\n", vulnProvider.ProviderConfig.Type)
+
+	findings, err := t.Synqly.EngineClients["vulnerabilities"].Vulnerabilities.QueryFindings(ctx, &engine.QueryFindingsRequest{
 		Filter: []*string{
 			engine.String("severity[in]Critical,High,Medium"),
 			engine.String("finding.last_seen_time[gte]2024-01-05T00:00:00Z"),
@@ -177,10 +209,10 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	consoleLogger.Printf("Found %d security findings from Tenable\n", len(findings.Result))
+	consoleLogger.Printf("Found %d security findings from %s\n", len(findings.Result), vulnProvider.ProviderConfig.Type)
 
 	for _, finding := range findings.Result {
-		if err := notification(ctx, t.Synqly.EngineClients["ticketing"], finding.SecurityFinding); err != nil {
+		if err := notification(ctx, t.Synqly.EngineClients["ticketing"], finding); err != nil {
 			log.Fatal(err)
 		}
 	}

@@ -5,12 +5,17 @@ package client
 import (
 	accounts "github.com/synqly/go-sdk/client/management/accounts"
 	audit "github.com/synqly/go-sdk/client/management/audit"
+	auth "github.com/synqly/go-sdk/client/management/auth"
 	capabilities "github.com/synqly/go-sdk/client/management/capabilities"
 	core "github.com/synqly/go-sdk/client/management/core"
 	credentials "github.com/synqly/go-sdk/client/management/credentials"
+	integrationpoints "github.com/synqly/go-sdk/client/management/integrationpoints"
 	integrations "github.com/synqly/go-sdk/client/management/integrations"
 	members "github.com/synqly/go-sdk/client/management/members"
+	meta "github.com/synqly/go-sdk/client/management/meta"
 	organization "github.com/synqly/go-sdk/client/management/organization"
+	permissionset "github.com/synqly/go-sdk/client/management/permissionset"
+	roles "github.com/synqly/go-sdk/client/management/roles"
 	status "github.com/synqly/go-sdk/client/management/status"
 	tokens "github.com/synqly/go-sdk/client/management/tokens"
 	transforms "github.com/synqly/go-sdk/client/management/transforms"
@@ -22,16 +27,21 @@ type Client struct {
 	httpClient core.HTTPClient
 	header     http.Header
 
-	Accounts     *accounts.Client
-	Audit        *audit.Client
-	Capabilities *capabilities.Client
-	Credentials  *credentials.Client
-	Integrations *integrations.Client
-	Members      *members.Client
-	Organization *organization.Client
-	Status       *status.Client
-	Tokens       *tokens.Client
-	Transforms   *transforms.Client
+	Accounts          *accounts.Client
+	Audit             *audit.Client
+	Auth              *auth.Client
+	Capabilities      *capabilities.Client
+	Credentials       *credentials.Client
+	IntegrationPoints *integrationpoints.Client
+	Integrations      *integrations.Client
+	Members           *members.Client
+	Meta              *meta.Client
+	Organization      *organization.Client
+	Permissionset     *permissionset.Client
+	Roles             *roles.Client
+	Status            *status.Client
+	Tokens            *tokens.Client
+	Transforms        *transforms.Client
 }
 
 func NewClient(opts ...core.ClientOption) *Client {
@@ -40,18 +50,23 @@ func NewClient(opts ...core.ClientOption) *Client {
 		opt(options)
 	}
 	return &Client{
-		baseURL:      options.BaseURL,
-		httpClient:   options.HTTPClient,
-		header:       options.ToHeader(),
-		Accounts:     accounts.NewClient(opts...),
-		Audit:        audit.NewClient(opts...),
-		Capabilities: capabilities.NewClient(opts...),
-		Credentials:  credentials.NewClient(opts...),
-		Integrations: integrations.NewClient(opts...),
-		Members:      members.NewClient(opts...),
-		Organization: organization.NewClient(opts...),
-		Status:       status.NewClient(opts...),
-		Tokens:       tokens.NewClient(opts...),
-		Transforms:   transforms.NewClient(opts...),
+		baseURL:           options.BaseURL,
+		httpClient:        options.HTTPClient,
+		header:            options.ToHeader(),
+		Accounts:          accounts.NewClient(opts...),
+		Audit:             audit.NewClient(opts...),
+		Auth:              auth.NewClient(opts...),
+		Capabilities:      capabilities.NewClient(opts...),
+		Credentials:       credentials.NewClient(opts...),
+		IntegrationPoints: integrationpoints.NewClient(opts...),
+		Integrations:      integrations.NewClient(opts...),
+		Members:           members.NewClient(opts...),
+		Meta:              meta.NewClient(opts...),
+		Organization:      organization.NewClient(opts...),
+		Permissionset:     permissionset.NewClient(opts...),
+		Roles:             roles.NewClient(opts...),
+		Status:            status.NewClient(opts...),
+		Tokens:            tokens.NewClient(opts...),
+		Transforms:        transforms.NewClient(opts...),
 	}
 }
