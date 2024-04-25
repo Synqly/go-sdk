@@ -34,7 +34,7 @@ func NewClient(opts ...core.ClientOption) *Client {
 }
 
 // Proxy webhook messages from webhook providers to webhook recievers
-func (c *Client) ProxyHook(ctx context.Context, request *engine.PostProxyHook) error {
+func (c *Client) Proxy(ctx context.Context, request *engine.PostProxyHook) error {
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL

@@ -34,7 +34,7 @@ func NewClient(opts ...core.ClientOption) *Client {
 
 // Returns the `Notification` object matching `{notificationId}` from the token-linked
 // `Integration`.
-func (c *Client) GetNotification(ctx context.Context, notificationId engine.NotificationId) (*engine.GetNotificationResponse, error) {
+func (c *Client) GetMessage(ctx context.Context, notificationId engine.NotificationId) (*engine.GetNotificationResponse, error) {
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
@@ -106,7 +106,7 @@ func (c *Client) GetNotification(ctx context.Context, notificationId engine.Noti
 }
 
 // Creates a `Notification` object in the token-linked `Integration`.
-func (c *Client) CreateNotification(ctx context.Context, request engine.CreateNotificationRequest) (*engine.CreateNotificationResponse, error) {
+func (c *Client) CreateMessage(ctx context.Context, request engine.CreateNotificationRequest) (*engine.CreateNotificationResponse, error) {
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
@@ -171,7 +171,7 @@ func (c *Client) CreateNotification(ctx context.Context, request engine.CreateNo
 }
 
 // Resolves a `Notification` object in the token-linked `Integration`.
-func (c *Client) ClearNotification(ctx context.Context, notificationId engine.NotificationId) error {
+func (c *Client) ClearMessage(ctx context.Context, notificationId engine.NotificationId) error {
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL

@@ -22,7 +22,7 @@ type ListMembersRequest struct {
 type CreateMemberRequest struct {
 	// Email name to use for this Member. Also used for duplicate detection and default sort order.
 	Name string `json:"name"`
-	// User's full display name
+	// User's full display name. Defaults to the same value as the 'name' field if not specified.
 	Fullname *string `json:"fullname,omitempty"`
 	// User's nickname
 	Nickname *string `json:"nickname,omitempty"`
@@ -30,9 +30,9 @@ type CreateMemberRequest struct {
 	Picture *string `json:"picture,omitempty"`
 	// Member secret
 	Secret string `json:"secret"`
-	// Roles granted to this member. Tokens inherit this access.
-	Roles   []*Role        `json:"roles,omitempty"`
-	Options *MemberOptions `json:"options,omitempty"`
+	// Roles granted to this member. Tokens inherit this access. Defaults to `member`.
+	RoleBinding []RoleName     `json:"role_binding,omitempty"`
+	Options     *MemberOptions `json:"options,omitempty"`
 }
 
 type CreateMemberResponse struct {

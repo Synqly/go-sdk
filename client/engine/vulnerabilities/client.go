@@ -34,7 +34,7 @@ func NewClient(opts ...core.ClientOption) *Client {
 }
 
 // Query vulnerability findings
-func (c *Client) QueryVulnerabilityFindings(ctx context.Context, request *engine.QueryFindingsRequest) (*engine.QueryFindingsResponse, error) {
+func (c *Client) QueryFindings(ctx context.Context, request *engine.QueryFindingsRequest) (*engine.QueryFindingsResponse, error) {
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
@@ -113,7 +113,7 @@ func (c *Client) QueryVulnerabilityFindings(ctx context.Context, request *engine
 }
 
 // Query assets in a vulnerability scanning system
-func (c *Client) QueryVulnerabilityAssets(ctx context.Context, request *engine.QueryVulnerabilityAssetsRequest) (*engine.QueryVulnerabilityAssetsResponse, error) {
+func (c *Client) QueryAssets(ctx context.Context, request *engine.QueryAssetsRequest) (*engine.QueryAssetsResponse, error) {
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
@@ -174,7 +174,76 @@ func (c *Client) QueryVulnerabilityAssets(ctx context.Context, request *engine.Q
 		return apiError
 	}
 
-	var response *engine.QueryVulnerabilityAssetsResponse
+	var response *engine.QueryAssetsResponse
+	if err := core.DoRequest(
+		ctx,
+		c.httpClient,
+		endpointURL,
+		http.MethodGet,
+		request,
+		&response,
+		false,
+		c.header,
+		errorDecoder,
+	); err != nil {
+		return response, err
+	}
+	return response, nil
+}
+
+// [beta: currently only supported by Tenable] Query scans in a vulnerability scanning system
+func (c *Client) QueryScans(ctx context.Context, request *engine.QueryScansRequest) (*engine.QueryScansResponse, error) {
+	baseURL := "https://api.synqly.com"
+	if c.baseURL != "" {
+		baseURL = c.baseURL
+	}
+	endpointURL := baseURL + "/" + "v1/vulnerabilities/scans"
+
+	queryParams := make(url.Values)
+	if request.Limit != nil {
+		queryParams.Add("limit", fmt.Sprintf("%v", *request.Limit))
+	}
+	if request.Cursor != nil {
+		queryParams.Add("cursor", fmt.Sprintf("%v", *request.Cursor))
+	}
+	if len(queryParams) > 0 {
+		endpointURL += "?" + queryParams.Encode()
+	}
+
+	errorDecoder := func(statusCode int, body io.Reader) error {
+		raw, err := io.ReadAll(body)
+		if err != nil {
+			return err
+		}
+		apiError := core.NewAPIError(statusCode, errors.New(string(raw)))
+		decoder := json.NewDecoder(bytes.NewReader(raw))
+		switch statusCode {
+		case 400:
+			value := new(engine.BadRequestError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 403:
+			value := new(engine.ForbiddenError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 401:
+			value := new(engine.UnauthorizedError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		}
+		return apiError
+	}
+
+	var response *engine.QueryScansResponse
 	if err := core.DoRequest(
 		ctx,
 		c.httpClient,

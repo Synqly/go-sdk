@@ -34,7 +34,7 @@ func NewClient(opts ...core.ClientOption) *Client {
 }
 
 // Returns a list of all Synqly `Audit` events for the `Organization`.
-func (c *Client) ListAuditEvents(ctx context.Context, request *management.ListAuditEventsRequest) (*management.ListAuditEventsResponse, error) {
+func (c *Client) List(ctx context.Context, request *management.ListAuditEventsRequest) (*management.ListAuditEventsResponse, error) {
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL

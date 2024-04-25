@@ -34,7 +34,7 @@ func NewClient(opts ...core.ClientOption) *Client {
 }
 
 // Query devices from an asset inventory system
-func (c *Client) QueryDevicesInfo(ctx context.Context, request *engine.QueryDevicesRequest) (*engine.QueryDevicesResponse, error) {
+func (c *Client) QueryDevices(ctx context.Context, request *engine.QueryDevicesRequest) (*engine.QueryDevicesResponse, error) {
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL

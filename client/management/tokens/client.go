@@ -33,13 +33,13 @@ func NewClient(opts ...core.ClientOption) *Client {
 	}
 }
 
-// Create a token restricted to an account
-func (c *Client) CreateAccountToken(ctx context.Context, request *management.CreateAccountTokenRequest) (*management.CreateAccountTokenResponse, error) {
+// Create a token restricted to specified resources and permission set. Tokens can only be reduced in scope, never expanded. Permissions are inherited from the token used to call this API. Permissions assigned to the new token will not be persisted, this is not a way to create roles.
+func (c *Client) CreateToken(ctx context.Context, request *management.CreateTokenRequest) (*management.CreateTokenResponse, error) {
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
-	endpointURL := baseURL + "/" + "v1/tokens/account"
+	endpointURL := baseURL + "/" + "v1/tokens/token"
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -81,7 +81,7 @@ func (c *Client) CreateAccountToken(ctx context.Context, request *management.Cre
 		return apiError
 	}
 
-	var response *management.CreateAccountTokenResponse
+	var response *management.CreateTokenResponse
 	if err := core.DoRequest(
 		ctx,
 		c.httpClient,
@@ -101,7 +101,7 @@ func (c *Client) CreateAccountToken(ctx context.Context, request *management.Cre
 // Returns a list of all `RefreshToken` objects belonging to the Authorization Bearer
 // token. For more infromation on Tokens, refer to
 // [Authentication](https://docs.synqly.com/reference/authentication).
-func (c *Client) ListTokens(ctx context.Context, request *management.ListTokensRequest) (*management.ListTokensResponse, error) {
+func (c *Client) List(ctx context.Context, request *management.ListTokensRequest) (*management.ListTokensResponse, error) {
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
@@ -181,7 +181,7 @@ func (c *Client) ListTokens(ctx context.Context, request *management.ListTokensR
 // Returns the `RefreshToken` object matching `{tokenId}`. For more information on
 // Tokens, refer to
 // [Authentication](https://docs.synqly.com/reference/authentication).
-func (c *Client) GetToken(ctx context.Context, refreshTokenId management.TokenId) (*management.GetTokenResponse, error) {
+func (c *Client) Get(ctx context.Context, refreshTokenId management.TokenId) (*management.GetTokenResponse, error) {
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
@@ -238,15 +238,16 @@ func (c *Client) GetToken(ctx context.Context, refreshTokenId management.TokenId
 	return response, nil
 }
 
-// Resets the token value, secondary, and token expiration time for the
-// `RefreshToken` object matching `{refreshTokenId}`. An `Organization` token
-// with appropriate permissions can be used to perform this operation.
-func (c *Client) ResetToken(ctx context.Context, refreshTokenId management.TokenId) (*management.ResetTokenResponse, error) {
+// This API can be used to reset `Organization` or `Integration` `RefreshTokens`.
+// Resets the specified `RefreshToken` and expiration time, removes the secondary, and resets access and refresh tokens for the
+// `RefreshToken` object matching `{ownerId}/{refreshTokenId}` where `ownerId` is an `organizationId` or `integrationId`.
+// An `Organization` token with `administrator` permissions can be used to perform this operation.
+func (c *Client) Reset(ctx context.Context, ownerId management.Id, refreshTokenId management.TokenId) (*management.ResetTokenResponse, error) {
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"v1/tokens/%v/reset", refreshTokenId)
+	endpointURL := fmt.Sprintf(baseURL+"/"+"v1/tokens/%v/%v/reset", ownerId, refreshTokenId)
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -308,7 +309,7 @@ func (c *Client) ResetToken(ctx context.Context, refreshTokenId management.Token
 // Creates a new primary `TokenPair` object, setting the secondary `TokenPair`
 // to the previous primary value. Call `/v1/removeSecondaryToken` to remove
 // this secondary backup once the new primary `TokenPair` has been deployed.
-func (c *Client) RefreshToken(ctx context.Context, refreshTokenId management.TokenId) (*management.RefreshTokenResponse, error) {
+func (c *Client) Refresh(ctx context.Context, refreshTokenId management.TokenId) (*management.RefreshTokenResponse, error) {
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
@@ -374,7 +375,7 @@ func (c *Client) RefreshToken(ctx context.Context, refreshTokenId management.Tok
 
 // Deletes the secondary `TokenPair` for the `RefreshToken` object
 // matching `{refreshTokenId}`.
-func (c *Client) RemoveSecondaryToken(ctx context.Context, refreshTokenId management.TokenId) error {
+func (c *Client) RemoveSecondary(ctx context.Context, refreshTokenId management.TokenId) error {
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
