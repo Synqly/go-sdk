@@ -54,6 +54,9 @@ func (c *Client) QueryInvestigations(ctx context.Context, request *engine.QueryI
 	for _, value := range request.Filter {
 		queryParams.Add("filter", fmt.Sprintf("%v", *value))
 	}
+	if request.IncludeRawData != nil {
+		queryParams.Add("include_raw_data", fmt.Sprintf("%v", *request.IncludeRawData))
+	}
 	if len(queryParams) > 0 {
 		endpointURL += "?" + queryParams.Encode()
 	}
@@ -110,12 +113,20 @@ func (c *Client) QueryInvestigations(ctx context.Context, request *engine.QueryI
 // Retrieves an investigation by ID.
 //
 // ID of the investigation to retrieve.
-func (c *Client) GetInvestigation(ctx context.Context, id string) (*engine.GetInvestigationResponse, error) {
+func (c *Client) GetInvestigation(ctx context.Context, id string, request *engine.GetInvestigationRequest) (*engine.GetInvestigationResponse, error) {
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
 	endpointURL := fmt.Sprintf(baseURL+"/"+"v1/siem/investigations/%v", id)
+
+	queryParams := make(url.Values)
+	if request.IncludeRawData != nil {
+		queryParams.Add("include_raw_data", fmt.Sprintf("%v", *request.IncludeRawData))
+	}
+	if len(queryParams) > 0 {
+		endpointURL += "?" + queryParams.Encode()
+	}
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -163,7 +174,7 @@ func (c *Client) GetInvestigation(ctx context.Context, id string) (*engine.GetIn
 		c.httpClient,
 		endpointURL,
 		http.MethodGet,
-		nil,
+		request,
 		&response,
 		false,
 		c.header,
@@ -244,12 +255,20 @@ func (c *Client) PatchInvestigation(ctx context.Context, id string, request engi
 // Retrieves the evidence for an investigation.
 //
 // ID of the investigation to retrieve evidence for.
-func (c *Client) GetEvidence(ctx context.Context, id string) (*engine.GetEvidenceResponse, error) {
+func (c *Client) GetEvidence(ctx context.Context, id string, request *engine.GetInvestigationEvidenceRequest) (*engine.GetEvidenceResponse, error) {
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
 	endpointURL := fmt.Sprintf(baseURL+"/"+"v1/siem/investigations/%v/evidence", id)
+
+	queryParams := make(url.Values)
+	if request.IncludeRawData != nil {
+		queryParams.Add("include_raw_data", fmt.Sprintf("%v", *request.IncludeRawData))
+	}
+	if len(queryParams) > 0 {
+		endpointURL += "?" + queryParams.Encode()
+	}
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -297,7 +316,7 @@ func (c *Client) GetEvidence(ctx context.Context, id string) (*engine.GetEvidenc
 		c.httpClient,
 		endpointURL,
 		http.MethodGet,
-		nil,
+		request,
 		&response,
 		false,
 		c.header,
@@ -392,6 +411,12 @@ func (c *Client) QueryEvents(ctx context.Context, request *engine.QuerySiemEvent
 	}
 	for _, value := range request.Filter {
 		queryParams.Add("filter", fmt.Sprintf("%v", *value))
+	}
+	for _, value := range request.PassthroughParam {
+		queryParams.Add("passthrough-param", fmt.Sprintf("%v", *value))
+	}
+	if request.IncludeRawData != nil {
+		queryParams.Add("include_raw_data", fmt.Sprintf("%v", *request.IncludeRawData))
 	}
 	if len(queryParams) > 0 {
 		endpointURL += "?" + queryParams.Encode()

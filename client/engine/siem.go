@@ -2,6 +2,16 @@
 
 package engine
 
+type GetInvestigationEvidenceRequest struct {
+	// Include the raw data from the SIEM in the response. Defaults to `false`.
+	IncludeRawData *bool `json:"-"`
+}
+
+type GetInvestigationRequest struct {
+	// Include the raw data from the SIEM in the response. Defaults to `false`.
+	IncludeRawData *bool `json:"-"`
+}
+
 type QuerySiemEventsRequest struct {
 	// Cursor to use to retrieve the next page of results.
 	Cursor *string `json:"-"`
@@ -15,6 +25,13 @@ type QuerySiemEventsRequest struct {
 	// Filter results by this query. For more information on filtering, refer to our Filtering Guide. Defaults to no filter.
 	// If used more than once, the queries are ANDed together.
 	Filter []*string `json:"-"`
+	// Provider-specific query to pass through to the SIEM. This is useful for advanced queries that are not
+	// supported by the API. The keys and values are provider-specific. For example, to perform a specific query in
+	// Rapid7 IDR, you can use the `query: "{advanced query}"` key-value pair.
+	PassthroughParam []*string `json:"-"`
+	// Include the raw data from the SIEM in the response. This is useful for debugging and troubleshooting.
+	// Defaults to `false`.
+	IncludeRawData *bool `json:"-"`
 }
 
 type QueryInvestigationsRequest struct {
@@ -26,6 +43,8 @@ type QueryInvestigationsRequest struct {
 	Order []*string `json:"-"`
 	// Filter results by this query.
 	Filter []*string `json:"-"`
+	// Include the raw data from the SIEM in the response. Defaults to `false`.
+	IncludeRawData *bool `json:"-"`
 }
 
 type GetEvidenceResponse struct {
