@@ -2,6 +2,10 @@
 
 package engine
 
+import (
+	scanactivity "github.com/synqly/go-sdk/client/engine/ocsf/v110/scanactivity"
+)
+
 type QueryAssetsRequest struct {
 	// Number of assets to return. Defaults to 50.
 	Limit *int `json:"-"`
@@ -27,6 +31,10 @@ type QueryScansRequest struct {
 	Limit *int `json:"-"`
 	// Start search from cursor position.
 	Cursor *string `json:"-"`
+}
+
+type GetScanActivityResponse struct {
+	Result *scanactivity.ScanActivity `json:"result,omitempty"`
 }
 
 type QueryAssetsResponse struct {
