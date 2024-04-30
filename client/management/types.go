@@ -1483,6 +1483,13 @@ type AssetsArmisCentrix struct {
 	Url string `json:"url"`
 }
 
+// Configuration for the Nozomi Vantage provider
+type AssetsNozomiVantage struct {
+	Credential *NozomiVantageCredential `json:"credential,omitempty"`
+	// URL for the Nozomi Vantage API. This should be the base URL for the API, without any path components. For example, "https://tenant.us1.vantage.nozominetworks.io".
+	Url string `json:"url"`
+}
+
 // Configuration for ServiceNow as an Assets Provider
 type AssetsServiceNow struct {
 	Credential *ServiceNowCredential `json:"credential,omitempty"`
@@ -2483,6 +2490,88 @@ type NotificationsTeams struct {
 	Credential *TeamsCredential `json:"credential,omitempty"`
 }
 
+type NozomiVantageCredential struct {
+	Type    string
+	Basic   *BasicCredential
+	BasicId BasicCredentialId
+}
+
+func NewNozomiVantageCredentialFromBasic(value *BasicCredential) *NozomiVantageCredential {
+	return &NozomiVantageCredential{Type: "basic", Basic: value}
+}
+
+func NewNozomiVantageCredentialFromBasicId(value BasicCredentialId) *NozomiVantageCredential {
+	return &NozomiVantageCredential{Type: "basic_id", BasicId: value}
+}
+
+func (n *NozomiVantageCredential) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	n.Type = unmarshaler.Type
+	switch unmarshaler.Type {
+	case "basic":
+		value := new(BasicCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		n.Basic = value
+	case "basic_id":
+		var valueUnmarshaler struct {
+			BasicId BasicCredentialId `json:"value,omitempty"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		n.BasicId = valueUnmarshaler.BasicId
+	}
+	return nil
+}
+
+func (n NozomiVantageCredential) MarshalJSON() ([]byte, error) {
+	switch n.Type {
+	default:
+		return nil, fmt.Errorf("invalid type %s in %T", n.Type, n)
+	case "basic":
+		var marshaler = struct {
+			Type string `json:"type"`
+			*BasicCredential
+		}{
+			Type:            n.Type,
+			BasicCredential: n.Basic,
+		}
+		return json.Marshal(marshaler)
+	case "basic_id":
+		var marshaler = struct {
+			Type    string            `json:"type"`
+			BasicId BasicCredentialId `json:"value,omitempty"`
+		}{
+			Type:    n.Type,
+			BasicId: n.BasicId,
+		}
+		return json.Marshal(marshaler)
+	}
+}
+
+type NozomiVantageCredentialVisitor interface {
+	VisitBasic(*BasicCredential) error
+	VisitBasicId(BasicCredentialId) error
+}
+
+func (n *NozomiVantageCredential) Accept(visitor NozomiVantageCredentialVisitor) error {
+	switch n.Type {
+	default:
+		return fmt.Errorf("invalid type %s in %T", n.Type, n)
+	case "basic":
+		return visitor.VisitBasic(n.Basic)
+	case "basic_id":
+		return visitor.VisitBasicId(n.BasicId)
+	}
+}
+
 type OktaCredential struct {
 	Type          string
 	OAuthClient   *OAuthClientCredential
@@ -2780,6 +2869,7 @@ func (p *PingOneCredential) Accept(visitor PingOneCredentialVisitor) error {
 type ProviderConfig struct {
 	Type                              string
 	AssetsArmisCentrix                *AssetsArmisCentrix
+	AssetsNozomiVantage               *AssetsNozomiVantage
 	AssetsServicenow                  *AssetsServiceNow
 	EdrCrowdstrike                    *EdrCrowdStrike
 	EdrSentinelone                    *EdrSentinelOne
@@ -2814,6 +2904,10 @@ type ProviderConfig struct {
 
 func NewProviderConfigFromAssetsArmisCentrix(value *AssetsArmisCentrix) *ProviderConfig {
 	return &ProviderConfig{Type: "assets_armis_centrix", AssetsArmisCentrix: value}
+}
+
+func NewProviderConfigFromAssetsNozomiVantage(value *AssetsNozomiVantage) *ProviderConfig {
+	return &ProviderConfig{Type: "assets_nozomi_vantage", AssetsNozomiVantage: value}
 }
 
 func NewProviderConfigFromAssetsServicenow(value *AssetsServiceNow) *ProviderConfig {
@@ -2951,6 +3045,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.AssetsArmisCentrix = value
+	case "assets_nozomi_vantage":
+		value := new(AssetsNozomiVantage)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.AssetsNozomiVantage = value
 	case "assets_servicenow":
 		value := new(AssetsServiceNow)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -3146,6 +3246,15 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 		}{
 			Type:               p.Type,
 			AssetsArmisCentrix: p.AssetsArmisCentrix,
+		}
+		return json.Marshal(marshaler)
+	case "assets_nozomi_vantage":
+		var marshaler = struct {
+			Type string `json:"type"`
+			*AssetsNozomiVantage
+		}{
+			Type:                p.Type,
+			AssetsNozomiVantage: p.AssetsNozomiVantage,
 		}
 		return json.Marshal(marshaler)
 	case "assets_servicenow":
@@ -3423,6 +3532,7 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 
 type ProviderConfigVisitor interface {
 	VisitAssetsArmisCentrix(*AssetsArmisCentrix) error
+	VisitAssetsNozomiVantage(*AssetsNozomiVantage) error
 	VisitAssetsServicenow(*AssetsServiceNow) error
 	VisitEdrCrowdstrike(*EdrCrowdStrike) error
 	VisitEdrSentinelone(*EdrSentinelOne) error
@@ -3461,6 +3571,8 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 		return fmt.Errorf("invalid type %s in %T", p.Type, p)
 	case "assets_armis_centrix":
 		return visitor.VisitAssetsArmisCentrix(p.AssetsArmisCentrix)
+	case "assets_nozomi_vantage":
+		return visitor.VisitAssetsNozomiVantage(p.AssetsNozomiVantage)
 	case "assets_servicenow":
 		return visitor.VisitAssetsServicenow(p.AssetsServicenow)
 	case "edr_crowdstrike":
@@ -3530,6 +3642,8 @@ type ProviderConfigId string
 const (
 	// Armis Centrix™ for Asset Management and Security
 	ProviderConfigIdAssetsArmisCentrix ProviderConfigId = "assets_armis_centrix"
+	// Nozomi Vantage
+	ProviderConfigIdAssetsNozomiVantage ProviderConfigId = "assets_nozomi_vantage"
 	// ServiceNow Configuration Management Database (CMDB)
 	ProviderConfigIdAssetsServiceNow ProviderConfigId = "assets_servicenow"
 	// CrowdStrike Falcon® Insight EDR
@@ -3596,6 +3710,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 	switch s {
 	case "assets_armis_centrix":
 		return ProviderConfigIdAssetsArmisCentrix, nil
+	case "assets_nozomi_vantage":
+		return ProviderConfigIdAssetsNozomiVantage, nil
 	case "assets_servicenow":
 		return ProviderConfigIdAssetsServiceNow, nil
 	case "edr_crowdstrike":

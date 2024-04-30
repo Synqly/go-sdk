@@ -322,6 +322,8 @@ type Device struct {
 	InterfaceUid *string `json:"interface_uid,omitempty"`
 	// The device IP address, in either IPv4 or IPv6 format.
 	Ip *IpAddress `json:"ip,omitempty"`
+	// A list of IP addresses available on the device
+	IpAddresses []string `json:"ip_addresses,omitempty"`
 	// The event occurred on a compliant device.
 	IsCompliant *bool `json:"is_compliant,omitempty"`
 	// The event occurred on a managed device.
@@ -338,6 +340,8 @@ type Device struct {
 	Location *Location `json:"location,omitempty"`
 	// The Media Access Control (MAC) address of the endpoint.
 	Mac *MacAddress `json:"mac,omitempty"`
+	// A list of MAC addresses available on the device
+	MacAddresses []string `json:"mac_addresses,omitempty"`
 	// The time when the device was last known to have been modified.
 	ModifiedTime *Timestamp `json:"modified_time,omitempty"`
 	// The time when the device was last known to have been modified.
@@ -360,8 +364,6 @@ type Device struct {
 	RiskLevelId *DeviceRiskLevelId `json:"risk_level_id,omitempty"`
 	// The risk score as reported by the event source.
 	RiskScore *int `json:"risk_score,omitempty"`
-	// The specific device type within the larger technology category
-	SubType interface{} `json:"sub_type,omitempty"`
 	// The subnet mask.
 	Subnet *Subnet `json:"subnet,omitempty"`
 	// The unique identifier of a virtual subnet.
@@ -376,6 +378,8 @@ type Device struct {
 	Uid *string `json:"uid,omitempty"`
 	// An alternate unique identifier of the device if any. For example the ActiveDirectory DN.
 	UidAlt *string `json:"uid_alt,omitempty"`
+	// The product vendor that created the device.
+	Vendor *Organization `json:"vendor,omitempty"`
 	// The Virtual LAN identifier.
 	VlanUid *string `json:"vlan_uid,omitempty"`
 	// The unique identifier of the Virtual Private Cloud (VPC).
@@ -869,8 +873,7 @@ type NetworkInterface struct {
 type NetworkInterfaceTypeId = int
 
 // An unordered collection of attributes. It defines a set of attributes available in all objects. It can be also used as a generic object to log objects that are not otherwise defined by the schema.
-type Object struct {
-}
+type Object = map[string]interface{}
 
 // The observable object is a pivot element that contains related information found in many places in the event.
 type Observable struct {
