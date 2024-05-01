@@ -99,6 +99,8 @@ const Device_Type_Firewall DeviceTypeId = 9
 const Device_Type_Switch DeviceTypeId = 10
 // Hub. A <a target='_blank' href='https://en.wikipedia.org/wiki/Ethernet_hub'>networking hub</a>.
 const Device_Type_Hub DeviceTypeId = 11
+// ImagingEquipment. Equipment for processing optical data, such as a camera.
+const Device_Type_ImagingEquipment DeviceTypeId = 89
 // PLC. A Programmable logic controller.
 const Device_Type_PLC DeviceTypeId = 90
 // SCADA. A supervisory control and data acquisition system.

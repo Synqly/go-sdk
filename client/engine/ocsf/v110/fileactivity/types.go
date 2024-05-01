@@ -614,6 +614,7 @@ type DeviceRiskLevelId = int
 // 9 - Firewall: A <a target='_blank' href='https://d3fend.mitre.org/dao/artifact/d3f:Firewall/'>networking firewall</a>.
 // 10 - Switch: A <a target='_blank' href='https://d3fend.mitre.org/dao/artifact/d3f:Switch/'>networking switch</a>.
 // 11 - Hub: A <a target='_blank' href='https://en.wikipedia.org/wiki/Ethernet_hub'>networking hub</a>.
+// 89 - ImagingEquipment: Equipment for processing optical data, such as a camera.
 // 90 - PLC: A Programmable logic controller.
 // 91 - SCADA: A supervisory control and data acquisition system.
 // 92 - DCS: A distributed control system.
