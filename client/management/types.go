@@ -259,7 +259,7 @@ type BasicCredential struct {
 // Unique identifier for a basic auth Credential
 type BasicCredentialId = CredentialId
 
-// Credential to access an integration. Each credential is owned by an Account or an IntegrationPoint.
+// Credential to access an integration. Each credential is owned by an Account, Integration, IntegrationPoint or OrganizationWebhook.
 type Credential struct {
 	// Human-readable name for this resource
 	Name string `json:"name"`
@@ -270,6 +270,8 @@ type Credential struct {
 	Id        CredentialId `json:"id,omitempty"`
 	// Account that manages this credential.
 	AccountId *AccountId `json:"account_id,omitempty"`
+	// Integration associated with this credential.
+	IntegrationId *IntegrationId `json:"integration_id,omitempty"`
 	// Integration Point associated with this credential.
 	IntegrationPointId *IntegrationPointId `json:"integration_point_id,omitempty"`
 	// One of `account` or `integration_point`.
@@ -444,6 +446,8 @@ type CredentialResponse struct {
 	Id        CredentialId `json:"id,omitempty"`
 	// Account that manages this credential.
 	AccountId *AccountId `json:"account_id,omitempty"`
+	// Integration associated with this credential.
+	IntegrationId *IntegrationId `json:"integration_id,omitempty"`
 	// Integration Point associated with this credential.
 	IntegrationPointId *IntegrationPointId `json:"integration_point_id,omitempty"`
 	// One of `account` or `integration_point`.
@@ -502,16 +506,22 @@ type OAuthClientCredentialId = CredentialId
 type OwnerType string
 
 const (
-	OwnerTypeAccount          OwnerType = "account"
-	OwnerTypeIntegrationPoint OwnerType = "integration_point"
+	OwnerTypeAccount             OwnerType = "account"
+	OwnerTypeIntegration         OwnerType = "integration"
+	OwnerTypeIntegrationPoint    OwnerType = "integration_point"
+	OwnerTypeOrganizationWebhook OwnerType = "organization_webhook"
 )
 
 func NewOwnerTypeFromString(s string) (OwnerType, error) {
 	switch s {
 	case "account":
 		return OwnerTypeAccount, nil
+	case "integration":
+		return OwnerTypeIntegration, nil
 	case "integration_point":
 		return OwnerTypeIntegrationPoint, nil
+	case "organization_webhook":
+		return OwnerTypeOrganizationWebhook, nil
 	}
 	var t OwnerType
 	return "", fmt.Errorf("%s is not a valid %T", s, t)

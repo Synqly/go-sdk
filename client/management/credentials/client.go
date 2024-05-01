@@ -33,7 +33,7 @@ func NewClient(opts ...core.ClientOption) *Client {
 	}
 }
 
-// Returns a list of all `Credential` objects belonging to the `Account` or `IntegrationPoint` matching
+// Returns a list of all `Credential` objects belonging to the `Account`, `Integration`, or `IntegrationPoint`, or `OrganizationWebhook` matching
 // `{ownerId}`.
 func (c *Client) List(ctx context.Context, ownerId management.Id, request *management.ListCredentialsRequest) (*management.ListCredentialsResponse, error) {
 	baseURL := "https://api.synqly.com"
@@ -113,7 +113,7 @@ func (c *Client) List(ctx context.Context, ownerId management.Id, request *manag
 }
 
 // Returns the `Credential` object matching `{credentialId}` where the
-// `Credential` belongs to the `Account` or `IntegrationPoint` matching `{ownerId}`.
+// `Credential` belongs to the `Account`, `Integration`, `IntegrationPoint` or `OrganizationWebhook` matching `{ownerId}`.
 func (c *Client) Get(ctx context.Context, ownerId management.Id, credentialId management.CredentialId) (*management.GetCredentialResponse, error) {
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
@@ -171,8 +171,8 @@ func (c *Client) Get(ctx context.Context, ownerId management.Id, credentialId ma
 	return response, nil
 }
 
-// Creates a `Credential` object in the `Account` or `IntegrationPoint` matching matching
-// `{ownerId}`. A `Credential` may only by used by a single `Account` or `IntegrationPoint`;
+// Creates a `Credential` object in the `Account`, `IntegrationPoint`, or `OrganizationWebhook` matching matching
+// `{ownerId}`. A `Credential` may only by used by a single `Account`, `Integration`, `IntegrationPoint` or `OrganizationWebhook`;
 // however, `Credential` objects can be shared by multiple `Integrations` within an `Account`.
 func (c *Client) Create(ctx context.Context, ownerId management.Id, request *management.CreateCredentialRequest) (*management.CreateCredentialResponse, error) {
 	baseURL := "https://api.synqly.com"
@@ -246,7 +246,7 @@ func (c *Client) Create(ctx context.Context, ownerId management.Id, request *man
 }
 
 // Updates the `Credential` object matching `{credentialId}`, where the
-// `Credential` belongs to the `Account` or `IntegrationPoint` matching `{ownerId}`.
+// `Credential` belongs to the `Account`, `Integration`, `IntegrationPoint` or `OrganizationWebhook` matching `{ownerId}`.
 func (c *Client) Update(ctx context.Context, ownerId management.Id, credentialId management.CredentialId, request management.UpdateCredentialRequest) (*management.UpdateCredentialResponse, error) {
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
@@ -319,7 +319,7 @@ func (c *Client) Update(ctx context.Context, ownerId management.Id, credentialId
 }
 
 // Patches the `Credential` object matching `{credentialId}`, where the
-// `Credential` belongs to the `Account` or `IntegrationPoint` matching `{ownerId}`.
+// `Credential` belongs to the `Account`, `Integration`, `IntegrationPoint` or `OrganizationWebhook` matching `{ownerId}`.
 func (c *Client) Patch(ctx context.Context, ownerId management.Id, credentialId management.CredentialId, request []map[string]interface{}) (*management.PatchCredentialResponse, error) {
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
@@ -385,7 +385,7 @@ func (c *Client) Patch(ctx context.Context, ownerId management.Id, credentialId 
 }
 
 // Deletes the `Credential` object matching `{credentialId}`, where the
-// `Credential` belongs to the `Account` or `IntegrationPoint` matching `{ownerId}`.
+// `Credential` belongs to the `Account`, `Integration`, `IntegrationPoint` or `OrganizationWebhook` matching `{ownerId}`.
 func (c *Client) Delete(ctx context.Context, ownerId management.Id, credentialId management.CredentialId) error {
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
