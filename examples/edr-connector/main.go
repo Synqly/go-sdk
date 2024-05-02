@@ -51,9 +51,12 @@ func main() {
 	// load config -- try from a config file, and if that is not present, then try env vars
 	parser := koanfyaml.Parser()
 	if err := k.Load(file.Provider("config.yaml"), parser); err != nil {
-		k.Load(env.Provider("SYNQLY_", "_", func(s string) string {
+		err := k.Load(env.Provider("SYNQLY_", "_", func(s string) string {
 			return strings.ToLower(s)
 		}), nil)
+		if err != nil {
+			log.Fatalf("unable to load config.yaml or env vars: %v", err)
+		}
 	}
 
 	orgToken := k.String("synqly.token")
@@ -96,19 +99,21 @@ func (s *sentinelOneProvider) demoActions(orgToken string, sentinelOneConf *sent
 		return fmt.Errorf("unable to create tenant: %w", err)
 	}
 
+	consoleLogger.Print("Tenant loaded successfully")
+
 	// Get some applications
 	var resp *engine.QueryApplicationsResponse
-	var appError error
+	page := 0
 	for {
+		page++
 		if resp != nil && resp.Cursor != "" {
-			resp, appError = t.Synqly.EngineClients[mgmt.CategoryIdEdr].Edr.QueryApplications(ctx, &engine.QueryApplicationsRequest{Cursor: &resp.Cursor})
+			resp, err = t.Synqly.EngineClients[mgmt.CategoryIdEdr].Edr.QueryApplications(ctx, &engine.QueryApplicationsRequest{Cursor: &resp.Cursor})
 		} else {
-			resp, appError = t.Synqly.EngineClients[mgmt.CategoryIdEdr].Edr.QueryApplications(ctx, &engine.QueryApplicationsRequest{Limit: engine.Int(2)})
-		}
+			resp, err = t.Synqly.EngineClients[mgmt.CategoryIdEdr].Edr.QueryApplications(ctx, &engine.QueryApplicationsRequest{Limit: engine.Int(2)})
 
-		if appError != nil {
-			// handle error
-			break
+		}
+		if err != nil {
+			return fmt.Errorf("unable to query applications page %d: %w", page, err)
 		}
 
 		for _, app := range resp.Result {
@@ -117,7 +122,7 @@ func (s *sentinelOneProvider) demoActions(orgToken string, sentinelOneConf *sent
 			consoleLogger.Printf("apps %s:\n", apps)
 		}
 
-		if resp.Cursor == "" {
+		if resp.Cursor == "" || page == 5 {
 			// no more data to fetch
 			break
 		}
@@ -125,9 +130,8 @@ func (s *sentinelOneProvider) demoActions(orgToken string, sentinelOneConf *sent
 
 	// Get an endpoint
 	endpointRes, err := t.Synqly.EngineClients[mgmt.CategoryIdEdr].Edr.QueryEndpoints(ctx, &engine.QueryEndpointsRequest{})
-
 	if err != nil {
-		return err
+		return fmt.Errorf("unable to query endpoints: %w", err)
 	}
 	for _, app := range endpointRes.Result {
 		apps, _ := json.MarshalIndent(app, "", "  ")
@@ -135,10 +139,9 @@ func (s *sentinelOneProvider) demoActions(orgToken string, sentinelOneConf *sent
 		consoleLogger.Printf("agents %s:\n", apps)
 	}
 
-	consoleLogger.Printf("Quarantining endpoint %s", *endpointRes.Result[0].Device.Uid)
-
 	// Quarantine an endpoint, uncomment to execute
 
+	// consoleLogger.Printf("Quarantining endpoint %s", *endpointRes.Result[0].Device.Uid)
 	// endpointId := *endpointRes.Result[0].Device.Uid
 	// t.Synqly.EngineClients[mgmt.CategoryIdEdr].Edr.NetworkQuarantine(ctx, &engine.NetworkQuarantineRequest{
 	// 	EndpointIds: []string{endpointId},
