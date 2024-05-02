@@ -378,6 +378,8 @@ type Device struct {
 	Name *string `json:"name,omitempty"`
 	// If running under a process namespace (such as in a container), the process identifier within that process namespace.
 	NamespacePid *int `json:"namespace_pid,omitempty"`
+	// A list of NetBIOS names available on the device
+	NetbiosNames []string `json:"netbios_names,omitempty"`
 	// The network interfaces that are associated with the device, one for each unique MAC address/IP address/hostname/name combination.<p><b>Note:</b> The first element of the array is the network information that pertains to the event.</p>
 	NetworkInterfaces []*NetworkInterface `json:"network_interfaces,omitempty"`
 	// Organization and org unit related to the device.
@@ -422,6 +424,8 @@ type DeviceHwInfo struct {
 	BiosDate *string `json:"bios_date,omitempty"`
 	// The BIOS manufacturer. For example: <code>LENOVO</code>.
 	BiosManufacturer *string `json:"bios_manufacturer,omitempty"`
+	// The BIOS UUID.
+	BiosUid *string `json:"bios_uid,omitempty"`
 	// The BIOS version. For example: <code>LENOVO G5ETA2WW (2.62)</code>.
 	BiosVer *string `json:"bios_ver,omitempty"`
 	// The chassis type describes the system enclosure or physical form factor. Such as the following examples for Windows <a target='_blank' href='https://docs.microsoft.com/en-us/windows/win32/cimwin32prov/win32-systemenclosure'>Windows Chassis Types</a>
