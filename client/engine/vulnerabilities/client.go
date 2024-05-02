@@ -191,6 +191,63 @@ func (c *Client) QueryAssets(ctx context.Context, request *engine.QueryAssetsReq
 	return response, nil
 }
 
+// [beta: currently only supported by Tenable] Create assets in a vulnerability scanning system
+func (c *Client) CreateAsset(ctx context.Context, request *engine.CreateAssetRequest) error {
+	baseURL := "https://api.synqly.com"
+	if c.baseURL != "" {
+		baseURL = c.baseURL
+	}
+	endpointURL := baseURL + "/" + "v1/vulnerabilities/assets"
+
+	errorDecoder := func(statusCode int, body io.Reader) error {
+		raw, err := io.ReadAll(body)
+		if err != nil {
+			return err
+		}
+		apiError := core.NewAPIError(statusCode, errors.New(string(raw)))
+		decoder := json.NewDecoder(bytes.NewReader(raw))
+		switch statusCode {
+		case 400:
+			value := new(engine.BadRequestError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 403:
+			value := new(engine.ForbiddenError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 401:
+			value := new(engine.UnauthorizedError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		}
+		return apiError
+	}
+
+	if err := core.DoRequest(
+		ctx,
+		c.httpClient,
+		endpointURL,
+		http.MethodPost,
+		request,
+		nil,
+		false,
+		c.header,
+		errorDecoder,
+	); err != nil {
+		return err
+	}
+	return nil
+}
+
 // [beta: currently only supported by Tenable] Query scans in a vulnerability scanning system
 func (c *Client) QueryScans(ctx context.Context, request *engine.QueryScansRequest) (*engine.QueryScansResponse, error) {
 	baseURL := "https://api.synqly.com"

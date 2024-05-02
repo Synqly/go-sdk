@@ -33,6 +33,13 @@ type QueryScansRequest struct {
 	Cursor *string `json:"-"`
 }
 
+type CreateAssetRequest struct {
+	// Asset to create in the vulnerability scanning system.
+	Asset Asset `json:"asset,omitempty"`
+	// Name of the source that created the asset.
+	SourceName string `json:"source_name"`
+}
+
 type GetScanActivityResponse struct {
 	Result *scanactivity.ScanActivity `json:"result,omitempty"`
 }
