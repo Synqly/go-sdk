@@ -274,6 +274,8 @@ type Credential struct {
 	IntegrationId *IntegrationId `json:"integration_id,omitempty"`
 	// Integration Point associated with this credential.
 	IntegrationPointId *IntegrationPointId `json:"integration_point_id,omitempty"`
+	// Integration Point associated with this credential.
+	OrganizationWebhookId *WebhookId `json:"organization_webhook_id,omitempty"`
 	// One of `account` or `integration_point`.
 	OwnerType OwnerType `json:"owner_type,omitempty"`
 	// Human friendly display name for this Credential
@@ -450,6 +452,8 @@ type CredentialResponse struct {
 	IntegrationId *IntegrationId `json:"integration_id,omitempty"`
 	// Integration Point associated with this credential.
 	IntegrationPointId *IntegrationPointId `json:"integration_point_id,omitempty"`
+	// Integration Point associated with this credential.
+	OrganizationWebhookId *WebhookId `json:"organization_webhook_id,omitempty"`
 	// One of `account` or `integration_point`.
 	OwnerType OwnerType `json:"owner_type,omitempty"`
 	// Human friendly display name for this Credential. Defaults to the same value as the 'name' field if not specified.
@@ -771,6 +775,70 @@ type OrganizationOptions struct {
 	MinimumPasswordLength *int `json:"minimum_password_length,omitempty"`
 }
 
+type OrganizationWebhook struct {
+	// Human-readable name for this resource
+	Name string `json:"name"`
+	// Time object was originally created
+	CreatedAt time.Time `json:"created_at"`
+	// Last time object was updated
+	UpdatedAt time.Time `json:"updated_at"`
+	Id        WebhookId `json:"id,omitempty"`
+	// Human friendly slug for this webhook
+	Fullname string `json:"fullname"`
+	// Environment that the webhook is configured for. Only events associated with this environment will trigger the webhook.
+	Environment Environment `json:"environment,omitempty"`
+	// Specifies which Webhooks to send.
+	Filters []WebhookFilter `json:"filters,omitempty"`
+	// URL that webhooks will be sent to
+	Url string `json:"url"`
+	// Credential contain secret
+	CredentialId CredentialId `json:"credential_id,omitempty"`
+}
+
+type OrganizationWebhookSecret struct {
+	// Secret used for signing webhooks. This value is used to verify the authenticity of the webhook payload.
+	Value string `json:"value"`
+	// Time when this secret expires and can no longer be used again.
+	Expires time.Time `json:"expires"`
+}
+
+type WebhookFilter string
+
+const (
+	WebhookFilterAll               WebhookFilter = "all"
+	WebhookFilterAccountCreate     WebhookFilter = "account_create"
+	WebhookFilterAccountDelete     WebhookFilter = "account_delete"
+	WebhookFilterAccountUpdate     WebhookFilter = "account_update"
+	WebhookFilterIntegrationCreate WebhookFilter = "integration_create"
+	WebhookFilterIntegrationDelete WebhookFilter = "integration_delete"
+	WebhookFilterIntegrationUpdate WebhookFilter = "integration_update"
+)
+
+func NewWebhookFilterFromString(s string) (WebhookFilter, error) {
+	switch s {
+	case "all":
+		return WebhookFilterAll, nil
+	case "account_create":
+		return WebhookFilterAccountCreate, nil
+	case "account_delete":
+		return WebhookFilterAccountDelete, nil
+	case "account_update":
+		return WebhookFilterAccountUpdate, nil
+	case "integration_create":
+		return WebhookFilterIntegrationCreate, nil
+	case "integration_delete":
+		return WebhookFilterIntegrationDelete, nil
+	case "integration_update":
+		return WebhookFilterIntegrationUpdate, nil
+	}
+	var t WebhookFilter
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (w WebhookFilter) Ptr() *WebhookFilter {
+	return &w
+}
+
 type Permission struct {
 	// Roles granted to this token.
 	RoleBinding []RoleName `json:"role_binding,omitempty"`
@@ -848,6 +916,7 @@ type ApiPermissionMap struct {
 	Status            *StatusPermissions            `json:"status,omitempty"`
 	Tokens            *TokensPermissions            `json:"tokens,omitempty"`
 	Transforms        *TransformsPermissions        `json:"transforms,omitempty"`
+	Webhooks          *WebhooksPermissions          `json:"webhooks,omitempty"`
 }
 
 type AuditActions string
@@ -1402,6 +1471,48 @@ func (t TransformsActions) Ptr() *TransformsActions {
 // Permissions for the transforms API
 type TransformsPermissions struct {
 	Actions []TransformsActions `json:"actions,omitempty"`
+}
+
+type WebhooksActions string
+
+const (
+	WebhooksActionsList   WebhooksActions = "list"
+	WebhooksActionsCreate WebhooksActions = "create"
+	WebhooksActionsGet    WebhooksActions = "get"
+	WebhooksActionsUpdate WebhooksActions = "update"
+	WebhooksActionsPatch  WebhooksActions = "patch"
+	WebhooksActionsDelete WebhooksActions = "delete"
+	WebhooksActionsAll    WebhooksActions = "*"
+)
+
+func NewWebhooksActionsFromString(s string) (WebhooksActions, error) {
+	switch s {
+	case "list":
+		return WebhooksActionsList, nil
+	case "create":
+		return WebhooksActionsCreate, nil
+	case "get":
+		return WebhooksActionsGet, nil
+	case "update":
+		return WebhooksActionsUpdate, nil
+	case "patch":
+		return WebhooksActionsPatch, nil
+	case "delete":
+		return WebhooksActionsDelete, nil
+	case "*":
+		return WebhooksActionsAll, nil
+	}
+	var t WebhooksActions
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (w WebhooksActions) Ptr() *WebhooksActions {
+	return &w
+}
+
+// Permissions for the webhooks API
+type WebhooksPermissions struct {
+	Actions []WebhooksActions `json:"actions,omitempty"`
 }
 
 type ArmisCredential struct {
