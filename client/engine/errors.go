@@ -145,27 +145,27 @@ func (i *InternalServerError) Unwrap() error {
 	return i.APIError
 }
 
-type NotAllowedError struct {
+type MethodNotAllowedError struct {
 	*core.APIError
 	Body *ErrorBody
 }
 
-func (n *NotAllowedError) UnmarshalJSON(data []byte) error {
+func (m *MethodNotAllowedError) UnmarshalJSON(data []byte) error {
 	var body *ErrorBody
 	if err := json.Unmarshal(data, &body); err != nil {
 		return err
 	}
-	n.StatusCode = 405
-	n.Body = body
+	m.StatusCode = 405
+	m.Body = body
 	return nil
 }
 
-func (n *NotAllowedError) MarshalJSON() ([]byte, error) {
-	return json.Marshal(n.Body)
+func (m *MethodNotAllowedError) MarshalJSON() ([]byte, error) {
+	return json.Marshal(m.Body)
 }
 
-func (n *NotAllowedError) Unwrap() error {
-	return n.APIError
+func (m *MethodNotAllowedError) Unwrap() error {
+	return m.APIError
 }
 
 type NotFoundError struct {

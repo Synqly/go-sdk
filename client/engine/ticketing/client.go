@@ -50,15 +50,15 @@ func (c *Client) ListProjects(ctx context.Context) (*engine.ListProjectsResponse
 		apiError := core.NewAPIError(statusCode, errors.New(string(raw)))
 		decoder := json.NewDecoder(bytes.NewReader(raw))
 		switch statusCode {
-		case 404:
-			value := new(engine.NotFoundError)
+		case 400:
+			value := new(engine.BadRequestError)
 			value.APIError = apiError
 			if err := decoder.Decode(value); err != nil {
 				return apiError
 			}
 			return value
-		case 400:
-			value := new(engine.BadRequestError)
+		case 401:
+			value := new(engine.UnauthorizedError)
 			value.APIError = apiError
 			if err := decoder.Decode(value); err != nil {
 				return apiError
@@ -71,8 +71,71 @@ func (c *Client) ListProjects(ctx context.Context) (*engine.ListProjectsResponse
 				return apiError
 			}
 			return value
-		case 401:
-			value := new(engine.UnauthorizedError)
+		case 404:
+			value := new(engine.NotFoundError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 405:
+			value := new(engine.MethodNotAllowedError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 409:
+			value := new(engine.ConflictError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 415:
+			value := new(engine.UnsupportedMediaTypeError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 429:
+			value := new(engine.TooManyRequestsError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 500:
+			value := new(engine.InternalServerError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 501:
+			value := new(engine.NotImplementedError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 502:
+			value := new(engine.BadGatewayError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 503:
+			value := new(engine.ServiceUnavailableError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 504:
+			value := new(engine.GatewayTimeoutError)
 			value.APIError = apiError
 			if err := decoder.Decode(value); err != nil {
 				return apiError
@@ -132,15 +195,15 @@ func (c *Client) QueryTickets(ctx context.Context, request *engine.QueryTicketsR
 		apiError := core.NewAPIError(statusCode, errors.New(string(raw)))
 		decoder := json.NewDecoder(bytes.NewReader(raw))
 		switch statusCode {
-		case 404:
-			value := new(engine.NotFoundError)
+		case 400:
+			value := new(engine.BadRequestError)
 			value.APIError = apiError
 			if err := decoder.Decode(value); err != nil {
 				return apiError
 			}
 			return value
-		case 400:
-			value := new(engine.BadRequestError)
+		case 401:
+			value := new(engine.UnauthorizedError)
 			value.APIError = apiError
 			if err := decoder.Decode(value); err != nil {
 				return apiError
@@ -153,8 +216,71 @@ func (c *Client) QueryTickets(ctx context.Context, request *engine.QueryTicketsR
 				return apiError
 			}
 			return value
-		case 401:
-			value := new(engine.UnauthorizedError)
+		case 404:
+			value := new(engine.NotFoundError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 405:
+			value := new(engine.MethodNotAllowedError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 409:
+			value := new(engine.ConflictError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 415:
+			value := new(engine.UnsupportedMediaTypeError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 429:
+			value := new(engine.TooManyRequestsError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 500:
+			value := new(engine.InternalServerError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 501:
+			value := new(engine.NotImplementedError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 502:
+			value := new(engine.BadGatewayError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 503:
+			value := new(engine.ServiceUnavailableError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 504:
+			value := new(engine.GatewayTimeoutError)
 			value.APIError = apiError
 			if err := decoder.Decode(value); err != nil {
 				return apiError
@@ -197,15 +323,15 @@ func (c *Client) GetTicket(ctx context.Context, ticketId engine.TicketId) (*engi
 		apiError := core.NewAPIError(statusCode, errors.New(string(raw)))
 		decoder := json.NewDecoder(bytes.NewReader(raw))
 		switch statusCode {
-		case 404:
-			value := new(engine.NotFoundError)
+		case 400:
+			value := new(engine.BadRequestError)
 			value.APIError = apiError
 			if err := decoder.Decode(value); err != nil {
 				return apiError
 			}
 			return value
-		case 400:
-			value := new(engine.BadRequestError)
+		case 401:
+			value := new(engine.UnauthorizedError)
 			value.APIError = apiError
 			if err := decoder.Decode(value); err != nil {
 				return apiError
@@ -218,8 +344,71 @@ func (c *Client) GetTicket(ctx context.Context, ticketId engine.TicketId) (*engi
 				return apiError
 			}
 			return value
-		case 401:
-			value := new(engine.UnauthorizedError)
+		case 404:
+			value := new(engine.NotFoundError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 405:
+			value := new(engine.MethodNotAllowedError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 409:
+			value := new(engine.ConflictError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 415:
+			value := new(engine.UnsupportedMediaTypeError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 429:
+			value := new(engine.TooManyRequestsError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 500:
+			value := new(engine.InternalServerError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 501:
+			value := new(engine.NotImplementedError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 502:
+			value := new(engine.BadGatewayError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 503:
+			value := new(engine.ServiceUnavailableError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 504:
+			value := new(engine.GatewayTimeoutError)
 			value.APIError = apiError
 			if err := decoder.Decode(value); err != nil {
 				return apiError
@@ -262,15 +451,15 @@ func (c *Client) CreateTicket(ctx context.Context, request *engine.CreateTicketR
 		apiError := core.NewAPIError(statusCode, errors.New(string(raw)))
 		decoder := json.NewDecoder(bytes.NewReader(raw))
 		switch statusCode {
-		case 404:
-			value := new(engine.NotFoundError)
+		case 400:
+			value := new(engine.BadRequestError)
 			value.APIError = apiError
 			if err := decoder.Decode(value); err != nil {
 				return apiError
 			}
 			return value
-		case 400:
-			value := new(engine.BadRequestError)
+		case 401:
+			value := new(engine.UnauthorizedError)
 			value.APIError = apiError
 			if err := decoder.Decode(value); err != nil {
 				return apiError
@@ -283,8 +472,71 @@ func (c *Client) CreateTicket(ctx context.Context, request *engine.CreateTicketR
 				return apiError
 			}
 			return value
-		case 401:
-			value := new(engine.UnauthorizedError)
+		case 404:
+			value := new(engine.NotFoundError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 405:
+			value := new(engine.MethodNotAllowedError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 409:
+			value := new(engine.ConflictError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 415:
+			value := new(engine.UnsupportedMediaTypeError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 429:
+			value := new(engine.TooManyRequestsError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 500:
+			value := new(engine.InternalServerError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 501:
+			value := new(engine.NotImplementedError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 502:
+			value := new(engine.BadGatewayError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 503:
+			value := new(engine.ServiceUnavailableError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 504:
+			value := new(engine.GatewayTimeoutError)
 			value.APIError = apiError
 			if err := decoder.Decode(value); err != nil {
 				return apiError
@@ -327,15 +579,15 @@ func (c *Client) PatchTicket(ctx context.Context, ticketId engine.TicketId, requ
 		apiError := core.NewAPIError(statusCode, errors.New(string(raw)))
 		decoder := json.NewDecoder(bytes.NewReader(raw))
 		switch statusCode {
-		case 404:
-			value := new(engine.NotFoundError)
+		case 400:
+			value := new(engine.BadRequestError)
 			value.APIError = apiError
 			if err := decoder.Decode(value); err != nil {
 				return apiError
 			}
 			return value
-		case 400:
-			value := new(engine.BadRequestError)
+		case 401:
+			value := new(engine.UnauthorizedError)
 			value.APIError = apiError
 			if err := decoder.Decode(value); err != nil {
 				return apiError
@@ -348,8 +600,71 @@ func (c *Client) PatchTicket(ctx context.Context, ticketId engine.TicketId, requ
 				return apiError
 			}
 			return value
-		case 401:
-			value := new(engine.UnauthorizedError)
+		case 404:
+			value := new(engine.NotFoundError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 405:
+			value := new(engine.MethodNotAllowedError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 409:
+			value := new(engine.ConflictError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 415:
+			value := new(engine.UnsupportedMediaTypeError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 429:
+			value := new(engine.TooManyRequestsError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 500:
+			value := new(engine.InternalServerError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 501:
+			value := new(engine.NotImplementedError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 502:
+			value := new(engine.BadGatewayError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 503:
+			value := new(engine.ServiceUnavailableError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 504:
+			value := new(engine.GatewayTimeoutError)
 			value.APIError = apiError
 			if err := decoder.Decode(value); err != nil {
 				return apiError
@@ -392,15 +707,15 @@ func (c *Client) CreateAttachment(ctx context.Context, ticketId engine.TicketId,
 		apiError := core.NewAPIError(statusCode, errors.New(string(raw)))
 		decoder := json.NewDecoder(bytes.NewReader(raw))
 		switch statusCode {
-		case 404:
-			value := new(engine.NotFoundError)
+		case 400:
+			value := new(engine.BadRequestError)
 			value.APIError = apiError
 			if err := decoder.Decode(value); err != nil {
 				return apiError
 			}
 			return value
-		case 400:
-			value := new(engine.BadRequestError)
+		case 401:
+			value := new(engine.UnauthorizedError)
 			value.APIError = apiError
 			if err := decoder.Decode(value); err != nil {
 				return apiError
@@ -413,8 +728,71 @@ func (c *Client) CreateAttachment(ctx context.Context, ticketId engine.TicketId,
 				return apiError
 			}
 			return value
-		case 401:
-			value := new(engine.UnauthorizedError)
+		case 404:
+			value := new(engine.NotFoundError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 405:
+			value := new(engine.MethodNotAllowedError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 409:
+			value := new(engine.ConflictError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 415:
+			value := new(engine.UnsupportedMediaTypeError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 429:
+			value := new(engine.TooManyRequestsError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 500:
+			value := new(engine.InternalServerError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 501:
+			value := new(engine.NotImplementedError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 502:
+			value := new(engine.BadGatewayError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 503:
+			value := new(engine.ServiceUnavailableError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 504:
+			value := new(engine.GatewayTimeoutError)
 			value.APIError = apiError
 			if err := decoder.Decode(value); err != nil {
 				return apiError
@@ -457,15 +835,15 @@ func (c *Client) ListAttachmentsMetadata(ctx context.Context, ticketId engine.Ti
 		apiError := core.NewAPIError(statusCode, errors.New(string(raw)))
 		decoder := json.NewDecoder(bytes.NewReader(raw))
 		switch statusCode {
-		case 404:
-			value := new(engine.NotFoundError)
+		case 400:
+			value := new(engine.BadRequestError)
 			value.APIError = apiError
 			if err := decoder.Decode(value); err != nil {
 				return apiError
 			}
 			return value
-		case 400:
-			value := new(engine.BadRequestError)
+		case 401:
+			value := new(engine.UnauthorizedError)
 			value.APIError = apiError
 			if err := decoder.Decode(value); err != nil {
 				return apiError
@@ -478,8 +856,71 @@ func (c *Client) ListAttachmentsMetadata(ctx context.Context, ticketId engine.Ti
 				return apiError
 			}
 			return value
-		case 401:
-			value := new(engine.UnauthorizedError)
+		case 404:
+			value := new(engine.NotFoundError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 405:
+			value := new(engine.MethodNotAllowedError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 409:
+			value := new(engine.ConflictError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 415:
+			value := new(engine.UnsupportedMediaTypeError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 429:
+			value := new(engine.TooManyRequestsError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 500:
+			value := new(engine.InternalServerError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 501:
+			value := new(engine.NotImplementedError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 502:
+			value := new(engine.BadGatewayError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 503:
+			value := new(engine.ServiceUnavailableError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 504:
+			value := new(engine.GatewayTimeoutError)
 			value.APIError = apiError
 			if err := decoder.Decode(value); err != nil {
 				return apiError
@@ -522,15 +963,15 @@ func (c *Client) DownloadAttachment(ctx context.Context, ticketId engine.TicketI
 		apiError := core.NewAPIError(statusCode, errors.New(string(raw)))
 		decoder := json.NewDecoder(bytes.NewReader(raw))
 		switch statusCode {
-		case 404:
-			value := new(engine.NotFoundError)
+		case 400:
+			value := new(engine.BadRequestError)
 			value.APIError = apiError
 			if err := decoder.Decode(value); err != nil {
 				return apiError
 			}
 			return value
-		case 400:
-			value := new(engine.BadRequestError)
+		case 401:
+			value := new(engine.UnauthorizedError)
 			value.APIError = apiError
 			if err := decoder.Decode(value); err != nil {
 				return apiError
@@ -543,8 +984,71 @@ func (c *Client) DownloadAttachment(ctx context.Context, ticketId engine.TicketI
 				return apiError
 			}
 			return value
-		case 401:
-			value := new(engine.UnauthorizedError)
+		case 404:
+			value := new(engine.NotFoundError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 405:
+			value := new(engine.MethodNotAllowedError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 409:
+			value := new(engine.ConflictError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 415:
+			value := new(engine.UnsupportedMediaTypeError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 429:
+			value := new(engine.TooManyRequestsError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 500:
+			value := new(engine.InternalServerError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 501:
+			value := new(engine.NotImplementedError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 502:
+			value := new(engine.BadGatewayError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 503:
+			value := new(engine.ServiceUnavailableError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 504:
+			value := new(engine.GatewayTimeoutError)
 			value.APIError = apiError
 			if err := decoder.Decode(value); err != nil {
 				return apiError
@@ -587,15 +1091,15 @@ func (c *Client) DeleteAttachment(ctx context.Context, ticketId engine.TicketId,
 		apiError := core.NewAPIError(statusCode, errors.New(string(raw)))
 		decoder := json.NewDecoder(bytes.NewReader(raw))
 		switch statusCode {
-		case 404:
-			value := new(engine.NotFoundError)
+		case 400:
+			value := new(engine.BadRequestError)
 			value.APIError = apiError
 			if err := decoder.Decode(value); err != nil {
 				return apiError
 			}
 			return value
-		case 400:
-			value := new(engine.BadRequestError)
+		case 401:
+			value := new(engine.UnauthorizedError)
 			value.APIError = apiError
 			if err := decoder.Decode(value); err != nil {
 				return apiError
@@ -608,8 +1112,71 @@ func (c *Client) DeleteAttachment(ctx context.Context, ticketId engine.TicketId,
 				return apiError
 			}
 			return value
-		case 401:
-			value := new(engine.UnauthorizedError)
+		case 404:
+			value := new(engine.NotFoundError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 405:
+			value := new(engine.MethodNotAllowedError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 409:
+			value := new(engine.ConflictError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 415:
+			value := new(engine.UnsupportedMediaTypeError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 429:
+			value := new(engine.TooManyRequestsError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 500:
+			value := new(engine.InternalServerError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 501:
+			value := new(engine.NotImplementedError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 502:
+			value := new(engine.BadGatewayError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 503:
+			value := new(engine.ServiceUnavailableError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 504:
+			value := new(engine.GatewayTimeoutError)
 			value.APIError = apiError
 			if err := decoder.Decode(value); err != nil {
 				return apiError
