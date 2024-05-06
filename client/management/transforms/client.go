@@ -70,8 +70,15 @@ func (c *Client) List(ctx context.Context, accountId management.AccountId, reque
 		apiError := core.NewAPIError(statusCode, errors.New(string(raw)))
 		decoder := json.NewDecoder(bytes.NewReader(raw))
 		switch statusCode {
-		case 404:
-			value := new(management.NotFoundError)
+		case 400:
+			value := new(management.BadRequestError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 401:
+			value := new(management.UnauthorizedError)
 			value.APIError = apiError
 			if err := decoder.Decode(value); err != nil {
 				return apiError
@@ -84,8 +91,43 @@ func (c *Client) List(ctx context.Context, accountId management.AccountId, reque
 				return apiError
 			}
 			return value
-		case 401:
-			value := new(management.UnauthorizedError)
+		case 404:
+			value := new(management.NotFoundError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 405:
+			value := new(management.MethodNotAllowedError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 409:
+			value := new(management.ConflictError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 415:
+			value := new(management.UnsupportedMediaTypeError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 429:
+			value := new(management.TooManyRequestsError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 500:
+			value := new(management.InternalServerError)
 			value.APIError = apiError
 			if err := decoder.Decode(value); err != nil {
 				return apiError
@@ -129,8 +171,15 @@ func (c *Client) Get(ctx context.Context, accountId management.AccountId, transf
 		apiError := core.NewAPIError(statusCode, errors.New(string(raw)))
 		decoder := json.NewDecoder(bytes.NewReader(raw))
 		switch statusCode {
-		case 404:
-			value := new(management.NotFoundError)
+		case 400:
+			value := new(management.BadRequestError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 401:
+			value := new(management.UnauthorizedError)
 			value.APIError = apiError
 			if err := decoder.Decode(value); err != nil {
 				return apiError
@@ -143,8 +192,43 @@ func (c *Client) Get(ctx context.Context, accountId management.AccountId, transf
 				return apiError
 			}
 			return value
-		case 401:
-			value := new(management.UnauthorizedError)
+		case 404:
+			value := new(management.NotFoundError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 405:
+			value := new(management.MethodNotAllowedError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 409:
+			value := new(management.ConflictError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 415:
+			value := new(management.UnsupportedMediaTypeError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 429:
+			value := new(management.TooManyRequestsError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 500:
+			value := new(management.InternalServerError)
 			value.APIError = apiError
 			if err := decoder.Decode(value); err != nil {
 				return apiError
@@ -194,15 +278,8 @@ func (c *Client) Create(ctx context.Context, accountId management.AccountId, req
 				return apiError
 			}
 			return value
-		case 404:
-			value := new(management.NotFoundError)
-			value.APIError = apiError
-			if err := decoder.Decode(value); err != nil {
-				return apiError
-			}
-			return value
-		case 409:
-			value := new(management.ConflictError)
+		case 401:
+			value := new(management.UnauthorizedError)
 			value.APIError = apiError
 			if err := decoder.Decode(value); err != nil {
 				return apiError
@@ -215,8 +292,43 @@ func (c *Client) Create(ctx context.Context, accountId management.AccountId, req
 				return apiError
 			}
 			return value
-		case 401:
-			value := new(management.UnauthorizedError)
+		case 404:
+			value := new(management.NotFoundError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 405:
+			value := new(management.MethodNotAllowedError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 409:
+			value := new(management.ConflictError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 415:
+			value := new(management.UnsupportedMediaTypeError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 429:
+			value := new(management.TooManyRequestsError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 500:
+			value := new(management.InternalServerError)
 			value.APIError = apiError
 			if err := decoder.Decode(value); err != nil {
 				return apiError
@@ -267,15 +379,8 @@ func (c *Client) Update(ctx context.Context, accountId management.AccountId, tra
 				return apiError
 			}
 			return value
-		case 404:
-			value := new(management.NotFoundError)
-			value.APIError = apiError
-			if err := decoder.Decode(value); err != nil {
-				return apiError
-			}
-			return value
-		case 409:
-			value := new(management.ConflictError)
+		case 401:
+			value := new(management.UnauthorizedError)
 			value.APIError = apiError
 			if err := decoder.Decode(value); err != nil {
 				return apiError
@@ -288,8 +393,43 @@ func (c *Client) Update(ctx context.Context, accountId management.AccountId, tra
 				return apiError
 			}
 			return value
-		case 401:
-			value := new(management.UnauthorizedError)
+		case 404:
+			value := new(management.NotFoundError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 405:
+			value := new(management.MethodNotAllowedError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 409:
+			value := new(management.ConflictError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 415:
+			value := new(management.UnsupportedMediaTypeError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 429:
+			value := new(management.TooManyRequestsError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 500:
+			value := new(management.InternalServerError)
 			value.APIError = apiError
 			if err := decoder.Decode(value); err != nil {
 				return apiError
@@ -340,8 +480,8 @@ func (c *Client) Patch(ctx context.Context, accountId management.AccountId, tran
 				return apiError
 			}
 			return value
-		case 404:
-			value := new(management.NotFoundError)
+		case 401:
+			value := new(management.UnauthorizedError)
 			value.APIError = apiError
 			if err := decoder.Decode(value); err != nil {
 				return apiError
@@ -354,8 +494,43 @@ func (c *Client) Patch(ctx context.Context, accountId management.AccountId, tran
 				return apiError
 			}
 			return value
-		case 401:
-			value := new(management.UnauthorizedError)
+		case 404:
+			value := new(management.NotFoundError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 405:
+			value := new(management.MethodNotAllowedError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 409:
+			value := new(management.ConflictError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 415:
+			value := new(management.UnsupportedMediaTypeError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 429:
+			value := new(management.TooManyRequestsError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 500:
+			value := new(management.InternalServerError)
 			value.APIError = apiError
 			if err := decoder.Decode(value); err != nil {
 				return apiError
@@ -399,8 +574,15 @@ func (c *Client) Delete(ctx context.Context, accountId management.AccountId, tra
 		apiError := core.NewAPIError(statusCode, errors.New(string(raw)))
 		decoder := json.NewDecoder(bytes.NewReader(raw))
 		switch statusCode {
-		case 404:
-			value := new(management.NotFoundError)
+		case 400:
+			value := new(management.BadRequestError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 401:
+			value := new(management.UnauthorizedError)
 			value.APIError = apiError
 			if err := decoder.Decode(value); err != nil {
 				return apiError
@@ -413,8 +595,43 @@ func (c *Client) Delete(ctx context.Context, accountId management.AccountId, tra
 				return apiError
 			}
 			return value
-		case 401:
-			value := new(management.UnauthorizedError)
+		case 404:
+			value := new(management.NotFoundError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 405:
+			value := new(management.MethodNotAllowedError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 409:
+			value := new(management.ConflictError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 415:
+			value := new(management.UnsupportedMediaTypeError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 429:
+			value := new(management.TooManyRequestsError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 500:
+			value := new(management.InternalServerError)
 			value.APIError = apiError
 			if err := decoder.Decode(value); err != nil {
 				return apiError

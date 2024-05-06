@@ -371,6 +371,13 @@ func (c *Client) PostEvents(ctx context.Context, request []*engine.Event) error 
 				return apiError
 			}
 			return value
+		case 500:
+			value := new(engine.InternalServerError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
 		}
 		return apiError
 	}

@@ -7,6 +7,29 @@ import (
 	core "github.com/synqly/go-sdk/client/management/core"
 )
 
+type BadGatewayError struct {
+	*core.APIError
+	Body *ErrorBody
+}
+
+func (b *BadGatewayError) UnmarshalJSON(data []byte) error {
+	var body *ErrorBody
+	if err := json.Unmarshal(data, &body); err != nil {
+		return err
+	}
+	b.StatusCode = 502
+	b.Body = body
+	return nil
+}
+
+func (b *BadGatewayError) MarshalJSON() ([]byte, error) {
+	return json.Marshal(b.Body)
+}
+
+func (b *BadGatewayError) Unwrap() error {
+	return b.APIError
+}
+
 type BadRequestError struct {
 	*core.APIError
 	Body *ErrorBody
@@ -76,6 +99,75 @@ func (f *ForbiddenError) Unwrap() error {
 	return f.APIError
 }
 
+type GatewayTimeoutError struct {
+	*core.APIError
+	Body *ErrorBody
+}
+
+func (g *GatewayTimeoutError) UnmarshalJSON(data []byte) error {
+	var body *ErrorBody
+	if err := json.Unmarshal(data, &body); err != nil {
+		return err
+	}
+	g.StatusCode = 504
+	g.Body = body
+	return nil
+}
+
+func (g *GatewayTimeoutError) MarshalJSON() ([]byte, error) {
+	return json.Marshal(g.Body)
+}
+
+func (g *GatewayTimeoutError) Unwrap() error {
+	return g.APIError
+}
+
+type InternalServerError struct {
+	*core.APIError
+	Body *ErrorBody
+}
+
+func (i *InternalServerError) UnmarshalJSON(data []byte) error {
+	var body *ErrorBody
+	if err := json.Unmarshal(data, &body); err != nil {
+		return err
+	}
+	i.StatusCode = 500
+	i.Body = body
+	return nil
+}
+
+func (i *InternalServerError) MarshalJSON() ([]byte, error) {
+	return json.Marshal(i.Body)
+}
+
+func (i *InternalServerError) Unwrap() error {
+	return i.APIError
+}
+
+type MethodNotAllowedError struct {
+	*core.APIError
+	Body *ErrorBody
+}
+
+func (m *MethodNotAllowedError) UnmarshalJSON(data []byte) error {
+	var body *ErrorBody
+	if err := json.Unmarshal(data, &body); err != nil {
+		return err
+	}
+	m.StatusCode = 405
+	m.Body = body
+	return nil
+}
+
+func (m *MethodNotAllowedError) MarshalJSON() ([]byte, error) {
+	return json.Marshal(m.Body)
+}
+
+func (m *MethodNotAllowedError) Unwrap() error {
+	return m.APIError
+}
+
 type NotFoundError struct {
 	*core.APIError
 	Body *ErrorBody
@@ -99,6 +191,75 @@ func (n *NotFoundError) Unwrap() error {
 	return n.APIError
 }
 
+type NotImplementedError struct {
+	*core.APIError
+	Body *ErrorBody
+}
+
+func (n *NotImplementedError) UnmarshalJSON(data []byte) error {
+	var body *ErrorBody
+	if err := json.Unmarshal(data, &body); err != nil {
+		return err
+	}
+	n.StatusCode = 501
+	n.Body = body
+	return nil
+}
+
+func (n *NotImplementedError) MarshalJSON() ([]byte, error) {
+	return json.Marshal(n.Body)
+}
+
+func (n *NotImplementedError) Unwrap() error {
+	return n.APIError
+}
+
+type ServiceUnavailableError struct {
+	*core.APIError
+	Body *ErrorBody
+}
+
+func (s *ServiceUnavailableError) UnmarshalJSON(data []byte) error {
+	var body *ErrorBody
+	if err := json.Unmarshal(data, &body); err != nil {
+		return err
+	}
+	s.StatusCode = 503
+	s.Body = body
+	return nil
+}
+
+func (s *ServiceUnavailableError) MarshalJSON() ([]byte, error) {
+	return json.Marshal(s.Body)
+}
+
+func (s *ServiceUnavailableError) Unwrap() error {
+	return s.APIError
+}
+
+type TooManyRequestsError struct {
+	*core.APIError
+	Body *ErrorBody
+}
+
+func (t *TooManyRequestsError) UnmarshalJSON(data []byte) error {
+	var body *ErrorBody
+	if err := json.Unmarshal(data, &body); err != nil {
+		return err
+	}
+	t.StatusCode = 429
+	t.Body = body
+	return nil
+}
+
+func (t *TooManyRequestsError) MarshalJSON() ([]byte, error) {
+	return json.Marshal(t.Body)
+}
+
+func (t *TooManyRequestsError) Unwrap() error {
+	return t.APIError
+}
+
 type UnauthorizedError struct {
 	*core.APIError
 	Body *ErrorBody
@@ -119,5 +280,28 @@ func (u *UnauthorizedError) MarshalJSON() ([]byte, error) {
 }
 
 func (u *UnauthorizedError) Unwrap() error {
+	return u.APIError
+}
+
+type UnsupportedMediaTypeError struct {
+	*core.APIError
+	Body *ErrorBody
+}
+
+func (u *UnsupportedMediaTypeError) UnmarshalJSON(data []byte) error {
+	var body *ErrorBody
+	if err := json.Unmarshal(data, &body); err != nil {
+		return err
+	}
+	u.StatusCode = 415
+	u.Body = body
+	return nil
+}
+
+func (u *UnsupportedMediaTypeError) MarshalJSON() ([]byte, error) {
+	return json.Marshal(u.Body)
+}
+
+func (u *UnsupportedMediaTypeError) Unwrap() error {
 	return u.APIError
 }

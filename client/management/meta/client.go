@@ -47,8 +47,64 @@ func (c *Client) ManagementOpenapiSpec(ctx context.Context) (management.GetOpenA
 		apiError := core.NewAPIError(statusCode, errors.New(string(raw)))
 		decoder := json.NewDecoder(bytes.NewReader(raw))
 		switch statusCode {
+		case 400:
+			value := new(management.BadRequestError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 401:
+			value := new(management.UnauthorizedError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 403:
+			value := new(management.ForbiddenError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
 		case 404:
 			value := new(management.NotFoundError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 405:
+			value := new(management.MethodNotAllowedError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 409:
+			value := new(management.ConflictError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 415:
+			value := new(management.UnsupportedMediaTypeError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 429:
+			value := new(management.TooManyRequestsError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 500:
+			value := new(management.InternalServerError)
 			value.APIError = apiError
 			if err := decoder.Decode(value); err != nil {
 				return apiError
