@@ -632,8 +632,12 @@ type NetworkInterface struct {
 	Hostname *Hostname `json:"hostname,omitempty"`
 	// The IP address associated with the network interface.
 	Ip *IpAddress `json:"ip,omitempty"`
+	// A list of IP addresses available on the network interface.
+	IpAddresses []string `json:"ip_addresses,omitempty"`
 	// The MAC address of the network interface.
 	Mac *MacAddress `json:"mac,omitempty"`
+	// A list of MAC addresses available on the network interface.
+	MacAddresses []string `json:"mac_addresses,omitempty"`
 	// The name of the network interface.
 	Name *string `json:"name,omitempty"`
 	// The namespace is useful in merger or acquisition situations. For example, when similar entities exist that you need to keep separate.
