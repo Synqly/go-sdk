@@ -52,11 +52,6 @@ type PatchOrganizationWebhookResponse struct {
 	Result *OrganizationWebhook `json:"result,omitempty"`
 }
 
-type RefreshOrganizationWebhookRequest struct {
-	// Secret used for signing webhooks. This value is used to verify the authenticity of the webhook payload.
-	Secret *OrganizationWebhookSecret `json:"secret,omitempty"`
-}
-
 type UpdateOrganizationWebhookRequest = *OrganizationWebhook
 
 type UpdateOrganizationWebhookResponse struct {

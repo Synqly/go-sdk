@@ -156,12 +156,12 @@ func (c *Client) List(ctx context.Context, ownerId management.Id, request *manag
 
 // Returns the `Credential` object matching `{credentialId}` where the
 // `Credential` belongs to the `Account`, `Integration`, `IntegrationPoint` or `OrganizationWebhook` matching `{ownerId}`.
-func (c *Client) Get(ctx context.Context, ownerId management.Id, credentialId management.CredentialId) (*management.GetCredentialResponse, error) {
+func (c *Client) Get(ctx context.Context, credentialId management.CredentialId, ownerId management.Id) (*management.GetCredentialResponse, error) {
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"v1/credentials/%v/%v", ownerId, credentialId)
+	endpointURL := fmt.Sprintf(baseURL+"/"+"v1/credentials/%v/%v", credentialId, ownerId)
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -239,6 +239,106 @@ func (c *Client) Get(ctx context.Context, ownerId management.Id, credentialId ma
 	}
 
 	var response *management.GetCredentialResponse
+	if err := core.DoRequest(
+		ctx,
+		c.httpClient,
+		endpointURL,
+		http.MethodGet,
+		nil,
+		&response,
+		false,
+		c.header,
+		errorDecoder,
+	); err != nil {
+		return response, err
+	}
+	return response, nil
+}
+
+// Returns the `Credential` object matching `{credentialId}`.
+func (c *Client) Lookup(ctx context.Context, credentialId management.CredentialId) (*management.LookupCredentialResponse, error) {
+	baseURL := "https://api.synqly.com"
+	if c.baseURL != "" {
+		baseURL = c.baseURL
+	}
+	endpointURL := fmt.Sprintf(baseURL+"/"+"v1/credentials/lookup/%v", credentialId)
+
+	errorDecoder := func(statusCode int, body io.Reader) error {
+		raw, err := io.ReadAll(body)
+		if err != nil {
+			return err
+		}
+		apiError := core.NewAPIError(statusCode, errors.New(string(raw)))
+		decoder := json.NewDecoder(bytes.NewReader(raw))
+		switch statusCode {
+		case 400:
+			value := new(management.BadRequestError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 401:
+			value := new(management.UnauthorizedError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 403:
+			value := new(management.ForbiddenError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 404:
+			value := new(management.NotFoundError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 405:
+			value := new(management.MethodNotAllowedError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 409:
+			value := new(management.ConflictError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 415:
+			value := new(management.UnsupportedMediaTypeError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 429:
+			value := new(management.TooManyRequestsError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 500:
+			value := new(management.InternalServerError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		}
+		return apiError
+	}
+
+	var response *management.LookupCredentialResponse
 	if err := core.DoRequest(
 		ctx,
 		c.httpClient,

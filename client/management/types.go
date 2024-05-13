@@ -282,6 +282,10 @@ type Credential struct {
 	Fullname string `json:"fullname"`
 	// Credential configuration
 	Config *CredentialConfig `json:"config,omitempty"`
+	// Time when this credential expires and can no longer be used again.
+	Expires *time.Time `json:"expires,omitempty"`
+	// Field is set by the management process. Determines lifecycle and ownership of the credential.
+	Managed ManagedType `json:"managed,omitempty"`
 }
 
 type CredentialConfig struct {
@@ -459,6 +463,10 @@ type CredentialResponse struct {
 	// Human friendly display name for this Credential. Defaults to the same value as the 'name' field if not specified.
 	Fullname string                    `json:"fullname"`
 	Config   *CredentialConfigNoSecret `json:"config,omitempty"`
+	// Time when this credential expires and can no longer be used again.
+	Expires *time.Time `json:"expires,omitempty"`
+	// Field is set by the management process. Determines lifecycle and ownership of the credential.
+	Managed ManagedType `json:"managed,omitempty"`
 }
 
 type CredentialType string
@@ -490,6 +498,28 @@ func NewCredentialTypeFromString(s string) (CredentialType, error) {
 
 func (c CredentialType) Ptr() *CredentialType {
 	return &c
+}
+
+type ManagedType string
+
+const (
+	ManagedTypeManaged   ManagedType = "Managed"
+	ManagedTypeUnmanaged ManagedType = "Unmanaged"
+)
+
+func NewManagedTypeFromString(s string) (ManagedType, error) {
+	switch s {
+	case "Managed":
+		return ManagedTypeManaged, nil
+	case "Unmanaged":
+		return ManagedTypeUnmanaged, nil
+	}
+	var t ManagedType
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (m ManagedType) Ptr() *ManagedType {
+	return &m
 }
 
 // A Client ID and secret used for authenticating with OAuth 2.0 compatible service using the client credentials grant.
@@ -799,7 +829,7 @@ type OrganizationWebhookSecret struct {
 	// Secret used for signing webhooks. This value is used to verify the authenticity of the webhook payload.
 	Value string `json:"value"`
 	// Time when this secret expires and can no longer be used again.
-	Expires time.Time `json:"expires"`
+	Expires *time.Time `json:"expires,omitempty"`
 }
 
 type WebhookFilter string
@@ -1018,6 +1048,7 @@ const (
 	CredentialsActionsUpdate CredentialsActions = "update"
 	CredentialsActionsPatch  CredentialsActions = "patch"
 	CredentialsActionsDelete CredentialsActions = "delete"
+	CredentialsActionsLookup CredentialsActions = "lookup"
 	CredentialsActionsAll    CredentialsActions = "*"
 )
 
@@ -1035,6 +1066,8 @@ func NewCredentialsActionsFromString(s string) (CredentialsActions, error) {
 		return CredentialsActionsPatch, nil
 	case "delete":
 		return CredentialsActionsDelete, nil
+	case "lookup":
+		return CredentialsActionsLookup, nil
 	case "*":
 		return CredentialsActionsAll, nil
 	}

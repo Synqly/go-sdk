@@ -2,6 +2,10 @@
 
 package management
 
+import (
+	time "time"
+)
+
 type ListCredentialsRequest struct {
 	// Number of `Credential` objects to return in this page. Defaults to 100.
 	Limit *int `json:"-"`
@@ -28,6 +32,8 @@ type CreateCredentialRequest struct {
 	Config *CredentialConfig `json:"config,omitempty"`
 	// One of `account` or `integration_point`; defaults to `account` if not specified.
 	OwnerType *OwnerType `json:"owner_type,omitempty"`
+	// Time when this credential expires and can no longer be used again.
+	Expires *time.Time `json:"expires,omitempty"`
 }
 
 type CreateCredentialResponse struct {
@@ -43,6 +49,10 @@ type GetCredentialResponse struct {
 
 type ListCredentialsResponse struct {
 	Result []*CredentialResponse `json:"result,omitempty"`
+}
+
+type LookupCredentialResponse struct {
+	Result *CredentialResponse `json:"result,omitempty"`
 }
 
 type PatchCredentialResponse struct {
