@@ -28,6 +28,32 @@ const Account_Type_AWSAccount AccountTypeId = 10
 // Other. The account type is not mapped.
 const Account_Type_Other AccountTypeId = 99
 
+// AgentTypeId Values
+// Type ID. The normalized representation of an agent or sensor. E.g., EDR, vulnerability management, APM, backup & recovery, etc.
+
+// Unknown. The type is unknown.
+const Agent_Type_Unknown AgentTypeId = 0
+// EndpointDetectionandResponse. Any EDR sensor or agent. Or any tool that provides similar threat detection, anti-malware, anti-ransomware, or similar capabilities. E.g., Crowdstrike Falcon, Microsoft Defender for Endpoint, Wazuh.
+const Agent_Type_EndpointDetectionandResponse AgentTypeId = 1
+// DataLossPrevention. Any DLP sensor or agent. Or any tool that provides similar data classification, data loss detection, and/or data loss prevention capabilities. E.g., Forcepoint DLP, Microsoft Purview, Symantec DLP.
+const Agent_Type_DataLossPrevention AgentTypeId = 2
+// Backup_Recovery. Any agent or sensor that provides backups, archival, or recovery capabilities. E.g., Azure Backup, AWS Backint Agent.
+const Agent_Type_Backup_Recovery AgentTypeId = 3
+// PerformanceMonitoring_Observability. Any agent or sensor that provides Application Performance Monitoring (APM), active tracing, profiling, or other observability use cases and optionally forwards the logs. E.g., New Relic Agent, Datadog Agent, Azure Monitor Agent.
+const Agent_Type_PerformanceMonitoring_Observability AgentTypeId = 4
+// VulnerabilityManagement. Any agent or sensor that provides vulnerability management or scanning capabilities. E.g., Qualys VMDR, Microsoft Defender for Endpoint, Crowdstrike Spotlight, Amazon Inspector Agent.
+const Agent_Type_VulnerabilityManagement AgentTypeId = 5
+// LogForwarding. Any agent or sensor that forwards logs to a 3rd party storage system such as a data lake or SIEM. E.g., Splunk Universal Forwarder, Tenzir, FluentBit, Amazon CloudWatch Agent, Amazon Kinesis Agent.
+const Agent_Type_LogForwarding AgentTypeId = 6
+// MobileDeviceManagement. Any agent or sensor responsible for providing Mobile Device Management (MDM) or Mobile Enterprise Management (MEM) capabilities. E.g., JumpCloud Agent, Esper Agent, Jamf Pro binary.
+const Agent_Type_MobileDeviceManagement AgentTypeId = 7
+// ConfigurationManagement. Any agent or sensor that provides configuration management of a device, such as scanning for software, license management, or applying configurations. E.g., AWS Systems Manager Agent, Flexera, ServiceNow MID Server.
+const Agent_Type_ConfigurationManagement AgentTypeId = 8
+// RemoteAccess. Any agent or sensor that provides remote access capabilities to a device. E.g., BeyondTrust, Amazon Systems Manager Agent, Verkada Agent.
+const Agent_Type_RemoteAccess AgentTypeId = 9
+// Other. The type is not mapped. See the <code>type</code> attribute, which contains a data source specific value.
+const Agent_Type_Other AgentTypeId = 99
+
 // DeviceRiskLevelId Values
 // Risk Level ID. The normalized risk level id.
 

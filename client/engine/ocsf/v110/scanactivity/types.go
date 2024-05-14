@@ -76,6 +76,8 @@ type ScanActivity struct {
 	ActivityName *string `json:"activity_name,omitempty"`
 	// The actor object describes details about the user/role/process that was the source of the activity.
 	Actor *Actor `json:"actor,omitempty"`
+	// The agents that were used to scan the devices.
+	AgentList []*Agent `json:"agent_list,omitempty"`
 	// Describes details about a typical API (Application Programming Interface) call.
 	Api *Api `json:"api,omitempty"`
 	// The event category name, as defined by category_uid value: <code>Application Activity</code>.
@@ -110,6 +112,8 @@ type ScanActivity struct {
 	NumFiles *int `json:"num_files,omitempty"`
 	// The number of folders scanned.
 	NumFolders *int `json:"num_folders,omitempty"`
+	// The number of hosts that were scanned.
+	NumHosts *int `json:"num_hosts,omitempty"`
 	// The number of network items scanned.
 	NumNetworkItems *int `json:"num_network_items,omitempty"`
 	// The number of processes scanned.
@@ -239,6 +243,38 @@ type Actor struct {
 	// The user that initiated the activity or the user context from which the activity was initiated.
 	User *User `json:"user,omitempty"`
 }
+
+// An Agent (also known as a Sensor) is typically installed on an Operating System (OS) and serves as a specialized software component that can be designed to monitor, detect, collect, archive, or take action. These activities and possible actions are defined by the upstream system controlling the Agent and its intended purpose. For instance, an Agent can include Endpoint Detection & Response (EDR) agents, backup/disaster recovery sensors, Application Performance Monitoring or profiling sensors, and similar software.
+type Agent struct {
+	// The name of the agent or sensor. For example: <code>AWS SSM Agent</code>.
+	Name *string `json:"name,omitempty"`
+	// The normalized caption of the type_id value for the agent or sensor. In the case of 'Other' or 'Unknown', it is defined by the event source.
+	Type *string `json:"type,omitempty"`
+	// The normalized representation of an agent or sensor. E.g., EDR, vulnerability management, APM, backup & recovery, etc.
+	TypeId *AgentTypeId `json:"type_id,omitempty"`
+	// The UID of the agent or sensor, sometimes known as a Sensor ID or <code>aid</code>.
+	Uid *string `json:"uid,omitempty"`
+	// An alternative or contextual identifier for the agent or sensor, such as a configuration, organization, or license UID.
+	UidAlt *string `json:"uid_alt,omitempty"`
+	// The company or author who created the agent or sensor. For example: <code>Crowdstrike</code>.
+	VendorName *string `json:"vendor_name,omitempty"`
+	// The semantic version of the agent or sensor, e.g., <code>7.101.50.0</code>.
+	Version *string `json:"version,omitempty"`
+}
+
+// AgentTypeId is an enum, and the following values are allowed.
+// 0 - Unknown: The type is unknown.
+// 1 - EndpointDetectionandResponse: Any EDR sensor or agent. Or any tool that provides similar threat detection, anti-malware, anti-ransomware, or similar capabilities. E.g., Crowdstrike Falcon, Microsoft Defender for Endpoint, Wazuh.
+// 2 - DataLossPrevention: Any DLP sensor or agent. Or any tool that provides similar data classification, data loss detection, and/or data loss prevention capabilities. E.g., Forcepoint DLP, Microsoft Purview, Symantec DLP.
+// 3 - Recovery: Any agent or sensor that provides backups, archival, or recovery capabilities. E.g., Azure Backup, AWS Backint Agent.
+// 4 - Observability: Any agent or sensor that provides Application Performance Monitoring (APM), active tracing, profiling, or other observability use cases and optionally forwards the logs. E.g., New Relic Agent, Datadog Agent, Azure Monitor Agent.
+// 5 - VulnerabilityManagement: Any agent or sensor that provides vulnerability management or scanning capabilities. E.g., Qualys VMDR, Microsoft Defender for Endpoint, Crowdstrike Spotlight, Amazon Inspector Agent.
+// 6 - LogForwarding: Any agent or sensor that forwards logs to a 3rd party storage system such as a data lake or SIEM. E.g., Splunk Universal Forwarder, Tenzir, FluentBit, Amazon CloudWatch Agent, Amazon Kinesis Agent.
+// 7 - MobileDeviceManagement: Any agent or sensor responsible for providing Mobile Device Management (MDM) or Mobile Enterprise Management (MEM) capabilities. E.g., JumpCloud Agent, Esper Agent, Jamf Pro binary.
+// 8 - ConfigurationManagement: Any agent or sensor that provides configuration management of a device, such as scanning for software, license management, or applying configurations. E.g., AWS Systems Manager Agent, Flexera, ServiceNow MID Server.
+// 9 - RemoteAccess: Any agent or sensor that provides remote access capabilities to a device. E.g., BeyondTrust, Amazon Systems Manager Agent, Verkada Agent.
+// 99 - Other: The type is not mapped. See the <code>type</code> attribute, which contains a data source specific value.
+type AgentTypeId = int
 
 // The API, or Application Programming Interface, object represents information pertaining to an API request and response.
 type Api struct {
@@ -1183,6 +1219,8 @@ type Response struct {
 type Scan struct {
 	// The administrator-supplied or application-generated name of the scan. For example: "Home office weekly user database scan", "Scan folders for viruses", "Full system virus scan"
 	Name *string `json:"name,omitempty"`
+	// Hosts or IP addresses targeted by the scan.
+	Targets []string `json:"targets,omitempty"`
 	// The type of scan.
 	Type *string `json:"type,omitempty"`
 	// The type id of the scan.

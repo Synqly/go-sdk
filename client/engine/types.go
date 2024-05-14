@@ -693,6 +693,8 @@ type ScanConfiguration struct {
 	Name string `json:"name"`
 	// Time when the scan was created.
 	CreationTime int `json:"creation_time"`
+	// Time when the scan was last modified.
+	LastModifiedTime int `json:"last_modified_time"`
 	// User that owns the scan.
 	Owner *User `json:"owner,omitempty"`
 	// Schedule of the scan if it is a recurring scan.
@@ -771,6 +773,8 @@ func (s ScanFrequencyOption) Ptr() *ScanFrequencyOption {
 }
 
 type ScanSchedule struct {
+	// Time of the day when the scan are repeated. For scans that are executed once, this is the time when the scan was started. This is formatted as `HH:MM:SS`.
+	Time string `json:"time"`
 	// Periodicity of the scan; for example, weekly, means that the scan will be repeated every `repeat_interval` weeks.
 	Frequency ScanFrequencyOption `json:"frequency,omitempty"`
 	// Number of days, weeks, months, or years between scans. For example, `1` means that the scan will be repeated once every `frequency` period.
