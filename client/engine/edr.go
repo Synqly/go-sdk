@@ -30,6 +30,22 @@ type QueryEndpointsRequest struct {
 	Filter []*string `json:"-"`
 }
 
+type QueryThreatsRequest struct {
+	// Number of threats to return. Defaults to 50.
+	Limit *int `json:"-"`
+	// Start search from cursor position.
+	Cursor *string `json:"-"`
+	// Select a field to order the results by. Defaults to `name`. To control the direction of the sorting, append
+	// `[asc]` or `[desc]` to the field name. For example, `name[asc]` will sort the results by `name` in ascending order.
+	// The ordering defaults to `asc` if not specified.
+	Order []*string `json:"-"`
+	// Filter results by this query. For more information on filtering, refer to our Filtering Guide. Defaults to no filter.
+	// If used more than once, the queries are ANDed together.
+	Filter []*string `json:"-"`
+	// Include the raw data from the EDR in the response. Defaults to `false`.
+	IncludeRawData *bool `json:"-"`
+}
+
 type NetworkQuarantineRequest struct {
 	// The connection state (Connect or Disconnect) to enforce for the provided endpoint IDs.
 	State ConnectionState `json:"state,omitempty"`
@@ -47,6 +63,13 @@ type QueryApplicationsResponse struct {
 type QueryEndpointsResponse struct {
 	// List of endpoint assets that match the query.
 	Result []Device `json:"result,omitempty"`
+	// Cursor to use to retrieve the next page of results.
+	Cursor string `json:"cursor"`
+}
+
+type QueryThreatsResponse struct {
+	// List of threats that match the query.
+	Result []ThreatEvent `json:"result,omitempty"`
 	// Cursor to use to retrieve the next page of results.
 	Cursor string `json:"cursor"`
 }

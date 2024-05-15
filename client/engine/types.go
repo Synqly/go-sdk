@@ -103,6 +103,9 @@ func (c ConnectionState) Ptr() *ConnectionState {
 	return &c
 }
 
+// Threat event information represented by OCSF Threat object. The Threat object describes characteristics of a threat event.
+type ThreatEvent = *detectionfinding.DetectionFinding
+
 type Event struct {
 	ClassName                 string
 	AccountChange             *accountchange.AccountChange
