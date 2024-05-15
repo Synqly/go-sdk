@@ -30,7 +30,7 @@ type CreateIntegrationTokenRequest struct {
 }
 
 type CreateIntegrationTokenResponse struct {
-	Result *RefreshToken `json:"result,omitempty"`
+	Result *Token `json:"result,omitempty"`
 }
 
 type CreateTokenRequest struct {
