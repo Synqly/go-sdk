@@ -156,12 +156,12 @@ func (c *Client) List(ctx context.Context, ownerId management.Id, request *manag
 
 // Returns the `Credential` object matching `{credentialId}` where the
 // `Credential` belongs to the `Account`, `Integration`, `IntegrationPoint` or `OrganizationWebhook` matching `{ownerId}`.
-func (c *Client) Get(ctx context.Context, credentialId management.CredentialId, ownerId management.Id) (*management.GetCredentialResponse, error) {
+func (c *Client) Get(ctx context.Context, ownerId management.Id, credentialId management.CredentialId) (*management.GetCredentialResponse, error) {
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"v1/credentials/%v/%v", credentialId, ownerId)
+	endpointURL := fmt.Sprintf(baseURL+"/"+"v1/credentials/%v/%v", ownerId, credentialId)
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
