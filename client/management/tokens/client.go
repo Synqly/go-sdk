@@ -33,13 +33,16 @@ func NewClient(opts ...core.ClientOption) *Client {
 	}
 }
 
-// Create a token restricted to specified resources and permission set. Tokens can only be reduced in scope, never expanded. Permissions are inherited from the token used to call this API. Permissions assigned to the new token will not be persisted, this is not a way to create roles.
+// Create a token restricted to specified resources and permission set.
+// Tokens can only be reduced in scope, never expanded.
+// Permissions are inherited from the token used to call this API.
+// Permissions assigned to the new token will not be persisted, this is not a way to create roles.
 func (c *Client) CreateToken(ctx context.Context, request *management.CreateTokenRequest) (*management.CreateTokenResponse, error) {
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
-	endpointURL := baseURL + "/" + "v1/tokens/token"
+	endpointURL := baseURL + "/" + "v1/tokens"
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -117,6 +120,109 @@ func (c *Client) CreateToken(ctx context.Context, request *management.CreateToke
 	}
 
 	var response *management.CreateTokenResponse
+	if err := core.DoRequest(
+		ctx,
+		c.httpClient,
+		endpointURL,
+		http.MethodPost,
+		request,
+		&response,
+		false,
+		c.header,
+		errorDecoder,
+	); err != nil {
+		return response, err
+	}
+	return response, nil
+}
+
+// Create an integration token restricted to a single integration. The token used to call
+// this API must have the necessary permissions to create tokens and have access to the account
+// and integration IDs. Permissions may not be escalated, so any operation that the invocation
+// token does not have access to cannot be granted.
+func (c *Client) CreateIntegrationToken(ctx context.Context, accountId management.AccountId, integrationId management.IntegrationId, request *management.CreateIntegrationTokenRequest) (*management.CreateIntegrationTokenResponse, error) {
+	baseURL := "https://api.synqly.com"
+	if c.baseURL != "" {
+		baseURL = c.baseURL
+	}
+	endpointURL := fmt.Sprintf(baseURL+"/"+"v1/tokens/%v/%v", accountId, integrationId)
+
+	errorDecoder := func(statusCode int, body io.Reader) error {
+		raw, err := io.ReadAll(body)
+		if err != nil {
+			return err
+		}
+		apiError := core.NewAPIError(statusCode, errors.New(string(raw)))
+		decoder := json.NewDecoder(bytes.NewReader(raw))
+		switch statusCode {
+		case 400:
+			value := new(management.BadRequestError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 401:
+			value := new(management.UnauthorizedError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 403:
+			value := new(management.ForbiddenError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 404:
+			value := new(management.NotFoundError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 405:
+			value := new(management.MethodNotAllowedError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 409:
+			value := new(management.ConflictError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 415:
+			value := new(management.UnsupportedMediaTypeError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 429:
+			value := new(management.TooManyRequestsError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 500:
+			value := new(management.InternalServerError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		}
+		return apiError
+	}
+
+	var response *management.CreateIntegrationTokenResponse
 	if err := core.DoRequest(
 		ctx,
 		c.httpClient,

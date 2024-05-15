@@ -22,14 +22,25 @@ type ListTokensRequest struct {
 // Unique identifier for this Token
 type TokenId = Id
 
+type CreateIntegrationTokenRequest struct {
+	// Unique name token. If not provided, defaults to generated newly created refresh token id.
+	Name *string `json:"name,omitempty"`
+	// Token time-to-live. If not provided, defaults to the TTL of the token used to call this API. Use the format "1h", "1m", "1s" for hours, minutes, and seconds respectively.
+	TokenTtl *string `json:"token_ttl,omitempty"`
+}
+
+type CreateIntegrationTokenResponse struct {
+	Result *RefreshToken `json:"result,omitempty"`
+}
+
 type CreateTokenRequest struct {
-	// Unique name token. Defaults to generated refresh token id.
+	// Unique name token. If not provided, defaults to generated newly created refresh token id.
 	Name *string `json:"name,omitempty"`
 	// Limit access to supplied resources
 	Resources *Resources `json:"resources,omitempty"`
 	// Limit access to supplied permissions
 	PermissionSet Permissions `json:"permission_set,omitempty"`
-	// Token time-to-live. Defaults to member TokenTtl.
+	// Token time-to-live. If not provided, defaults to the TTL of the token used to call this API. Use the format "1h", "1m", "1s" for hours, minutes, and seconds respectively.
 	TokenTtl *string `json:"token_ttl,omitempty"`
 }
 

@@ -1425,13 +1425,14 @@ type StatusPermissions struct {
 type TokensActions string
 
 const (
-	TokensActionsList            TokensActions = "list"
-	TokensActionsCreate          TokensActions = "create"
-	TokensActionsGet             TokensActions = "get"
-	TokensActionsReset           TokensActions = "reset"
-	TokensActionsRefresh         TokensActions = "refresh"
-	TokensActionsRemoveSecondary TokensActions = "remove_secondary"
-	TokensActionsAll             TokensActions = "*"
+	TokensActionsList              TokensActions = "list"
+	TokensActionsCreate            TokensActions = "create"
+	TokensActionsCreateIntegration TokensActions = "create_integration"
+	TokensActionsGet               TokensActions = "get"
+	TokensActionsReset             TokensActions = "reset"
+	TokensActionsRefresh           TokensActions = "refresh"
+	TokensActionsRemoveSecondary   TokensActions = "remove_secondary"
+	TokensActionsAll               TokensActions = "*"
 )
 
 func NewTokensActionsFromString(s string) (TokensActions, error) {
@@ -1440,6 +1441,8 @@ func NewTokensActionsFromString(s string) (TokensActions, error) {
 		return TokensActionsList, nil
 	case "create":
 		return TokensActionsCreate, nil
+	case "create_integration":
+		return TokensActionsCreateIntegration, nil
 	case "get":
 		return TokensActionsGet, nil
 	case "reset":
