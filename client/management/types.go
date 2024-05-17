@@ -805,6 +805,18 @@ type OrganizationOptions struct {
 	MinimumPasswordLength *int `json:"minimum_password_length,omitempty"`
 }
 
+// Response payload for webhook events. This payload is sent to the webhook URL when an event occurs.
+type OrganizationWebhookPayload struct {
+	// The event that triggered the webhook
+	Event string `json:"event"`
+	// The account that the event occurred in
+	Account *Account `json:"account,omitempty"`
+	// The integration that the event occurred in
+	Integration *Integration `json:"integration,omitempty"`
+	// A unique identifier for this webhook event
+	Nonce string `json:"nonce"`
+}
+
 type OrganizationWebhook struct {
 	// Human-readable name for this resource
 	Name string `json:"name"`
@@ -823,18 +835,6 @@ type OrganizationWebhook struct {
 	Url string `json:"url"`
 	// Credential contain secret
 	CredentialId CredentialId `json:"credential_id,omitempty"`
-}
-
-// Response payload for webhook events. This payload is sent to the webhook URL when an event occurs.
-type OrganizationWebhookPayload struct {
-	// The event that triggered the webhook
-	Event WebhookFilter `json:"event,omitempty"`
-	// The account that the event occurred in
-	Account *Account `json:"account,omitempty"`
-	// The integration that the event occurred in
-	Integration *Integration `json:"integration,omitempty"`
-	// A unique identifier for this webhook event
-	Nonce string `json:"nonce"`
 }
 
 type OrganizationWebhookSecret struct {
