@@ -805,45 +805,6 @@ type OrganizationOptions struct {
 	MinimumPasswordLength *int `json:"minimum_password_length,omitempty"`
 }
 
-// Response payload for webhook events. This payload is sent to the webhook URL when an event occurs.
-type OrganizationWebhookPayload struct {
-	// The event that triggered the webhook
-	Event string `json:"event"`
-	// The account that the event occurred in
-	Account *Account `json:"account,omitempty"`
-	// The integration that the event occurred in
-	Integration *Integration `json:"integration,omitempty"`
-	// A unique identifier for this webhook event
-	Nonce string `json:"nonce"`
-}
-
-type OrganizationWebhook struct {
-	// Human-readable name for this resource
-	Name string `json:"name"`
-	// Time object was originally created
-	CreatedAt time.Time `json:"created_at"`
-	// Last time object was updated
-	UpdatedAt time.Time `json:"updated_at"`
-	Id        WebhookId `json:"id,omitempty"`
-	// Human friendly slug for this webhook
-	Fullname string `json:"fullname"`
-	// Environment that the webhook is configured for. Only events associated with this environment will trigger the webhook.
-	Environment Environment `json:"environment,omitempty"`
-	// Specifies which Webhooks to send.
-	Filters []WebhookFilter `json:"filters,omitempty"`
-	// URL that webhooks will be sent to
-	Url string `json:"url"`
-	// Credential contain secret
-	CredentialId CredentialId `json:"credential_id,omitempty"`
-}
-
-type OrganizationWebhookSecret struct {
-	// Secret used for signing webhooks. This value is used to verify the authenticity of the webhook payload.
-	Value string `json:"value"`
-	// Time when this secret expires and can no longer be used again.
-	Expires *time.Time `json:"expires,omitempty"`
-}
-
 type WebhookFilter string
 
 const (
@@ -879,6 +840,45 @@ func NewWebhookFilterFromString(s string) (WebhookFilter, error) {
 
 func (w WebhookFilter) Ptr() *WebhookFilter {
 	return &w
+}
+
+// Response payload for webhook events. This payload is sent to the webhook URL when an event occurs.
+type OrganizationWebhookPayload struct {
+	// The event that triggered the webhook
+	Event WebhookFilter `json:"event,omitempty"`
+	// The account that the event occurred in
+	Account *Account `json:"account,omitempty"`
+	// The integration that the event occurred in
+	Integration *Integration `json:"integration,omitempty"`
+	// A unique identifier for this webhook event
+	Nonce string `json:"nonce"`
+}
+
+type OrganizationWebhook struct {
+	// Human-readable name for this resource
+	Name string `json:"name"`
+	// Time object was originally created
+	CreatedAt time.Time `json:"created_at"`
+	// Last time object was updated
+	UpdatedAt time.Time `json:"updated_at"`
+	Id        WebhookId `json:"id,omitempty"`
+	// Human friendly slug for this webhook
+	Fullname string `json:"fullname"`
+	// Environment that the webhook is configured for. Only events associated with this environment will trigger the webhook.
+	Environment Environment `json:"environment,omitempty"`
+	// Specifies which Webhooks to send.
+	Filters []WebhookFilter `json:"filters,omitempty"`
+	// URL that webhooks will be sent to
+	Url string `json:"url"`
+	// Credential contain secret
+	CredentialId CredentialId `json:"credential_id,omitempty"`
+}
+
+type OrganizationWebhookSecret struct {
+	// Secret used for signing webhooks. This value is used to verify the authenticity of the webhook payload.
+	Value string `json:"value"`
+	// Time when this secret expires and can no longer be used again.
+	Expires *time.Time `json:"expires,omitempty"`
 }
 
 type Permission struct {

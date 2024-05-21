@@ -19,6 +19,9 @@ type ListOrganizationWebhooksRequest struct {
 	Filter []*string `json:"-"`
 }
 
+// Unique identifier for a Webhook
+type WebhookId = Id
+
 type CreateOrganizationWebhookRequest struct {
 	// Human friendly slug for this webhook
 	Name *string `json:"name,omitempty"`
@@ -57,6 +60,3 @@ type UpdateOrganizationWebhookRequest = *OrganizationWebhook
 type UpdateOrganizationWebhookResponse struct {
 	Result *OrganizationWebhook `json:"result,omitempty"`
 }
-
-// Unique identifier for a Webhook
-type WebhookId = Id
