@@ -23,6 +23,8 @@ type ListIntegrationsRequest struct {
 	Filter []*string `json:"-"`
 	// Expand the integration result with the related integration point and/or account information.
 	Expand []*ListIntegrationOptions `json:"-"`
+	// Return total number of all integrations in the system, respecting all applied filters. This is expensive, use sparingly.
+	Total *bool `json:"-"`
 }
 
 type ListAccountIntegrationsRequest struct {
@@ -42,6 +44,8 @@ type ListAccountIntegrationsRequest struct {
 	Filter []*string `json:"-"`
 	// Expand the integration result with the related integration point and/or account information.
 	Expand []*ListIntegrationOptions `json:"-"`
+	// Return total number of integrations for a particular account. This is expensive, use sparingly.
+	Total *bool `json:"-"`
 }
 
 type CreateIntegrationRequest struct {
@@ -65,6 +69,7 @@ type GetIntegrationResponse struct {
 
 type ListAccountIntegrationsResponse struct {
 	Result []*Integration `json:"result,omitempty"`
+	Total  *int           `json:"total,omitempty"`
 }
 
 type ListIntegrationOptions string
@@ -94,6 +99,7 @@ func (l ListIntegrationOptions) Ptr() *ListIntegrationOptions {
 
 type ListIntegrationsResponse struct {
 	Result []*Integration `json:"result,omitempty"`
+	Total  *int           `json:"total,omitempty"`
 }
 
 type PatchIntegrationResponse struct {

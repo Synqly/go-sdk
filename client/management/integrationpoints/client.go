@@ -57,6 +57,9 @@ func (c *Client) List(ctx context.Context, request *management.ListIntegrationPo
 	for _, value := range request.Filter {
 		queryParams.Add("filter", fmt.Sprintf("%v", *value))
 	}
+	if request.Total != nil {
+		queryParams.Add("total", fmt.Sprintf("%v", *request.Total))
+	}
 	if len(queryParams) > 0 {
 		endpointURL += "?" + queryParams.Encode()
 	}

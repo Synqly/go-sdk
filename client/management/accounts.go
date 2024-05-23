@@ -17,6 +17,8 @@ type ListAccountsRequest struct {
 	// Filter results by this query. For more information on filtering, refer to our Filtering Guide. Defaults to no filter.
 	// If used more than once, the queries are ANDed together.
 	Filter []*string `json:"-"`
+	// Return total number of accounts in the system, respecting all applied filters. This is expensive, use sparingly.
+	Total *bool `json:"-"`
 }
 
 type CreateAccountRequest struct {
@@ -38,6 +40,7 @@ type GetAccountResponse struct {
 
 type ListAccountsResponse struct {
 	Result []*Account `json:"result,omitempty"`
+	Total  *int       `json:"total,omitempty"`
 }
 
 type PatchAccountResponse struct {

@@ -60,6 +60,9 @@ func (c *Client) List(ctx context.Context, request *management.ListIntegrationsR
 	for _, value := range request.Expand {
 		queryParams.Add("expand", fmt.Sprintf("%v", *value))
 	}
+	if request.Total != nil {
+		queryParams.Add("total", fmt.Sprintf("%v", *request.Total))
+	}
 	if len(queryParams) > 0 {
 		endpointURL += "?" + queryParams.Encode()
 	}
@@ -183,6 +186,9 @@ func (c *Client) ListAccount(ctx context.Context, accountId management.AccountId
 	}
 	for _, value := range request.Expand {
 		queryParams.Add("expand", fmt.Sprintf("%v", *value))
+	}
+	if request.Total != nil {
+		queryParams.Add("total", fmt.Sprintf("%v", *request.Total))
 	}
 	if len(queryParams) > 0 {
 		endpointURL += "?" + queryParams.Encode()
