@@ -588,9 +588,9 @@ type IntegrationId = Id
 
 type IntegrationEnvironments struct {
 	// List of allowed providers for test environment.
-	Test []ProviderId `json:"test,omitempty"`
+	Test []ProviderConfigId `json:"test,omitempty"`
 	// List of allowed providers for production environment.
-	Prod []ProviderId `json:"prod,omitempty"`
+	Prod []ProviderConfigId `json:"prod,omitempty"`
 }
 
 // Enables creation, editing and deletion of Integrations.
@@ -639,6 +639,8 @@ type Integration struct {
 	Category CategoryId `json:"category,omitempty"`
 	// Provider configuration for this Integration.
 	ProviderConfig *ProviderConfig `json:"provider_config,omitempty"`
+	// Human friendly display name for the provider.
+	ProviderFullname string `json:"provider_fullname"`
 	// Type of the provider for this Integration.
 	ProviderType string `json:"provider_type"`
 	// Integration Point associated with this integration. Use the expand=integration_point parameter with the List and ListAccount APIs to expand the Integration Point to the full object
@@ -3873,6 +3875,8 @@ const (
 	ProviderConfigIdVulnerabilitiesRapid7InsightCloud ProviderConfigId = "vulnerabilities_rapid7_insight_cloud"
 	// Tenable Vulnerability Management
 	ProviderConfigIdVulnerabilitiesTenableCloud ProviderConfigId = "vulnerabilities_tenable_cloud"
+	// Any provider config type.
+	ProviderConfigIdAll ProviderConfigId = "*"
 )
 
 func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
@@ -3941,6 +3945,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdVulnerabilitiesRapid7InsightCloud, nil
 	case "vulnerabilities_tenable_cloud":
 		return ProviderConfigIdVulnerabilitiesTenableCloud, nil
+	case "*":
+		return ProviderConfigIdAll, nil
 	}
 	var t ProviderConfigId
 	return "", fmt.Errorf("%s is not a valid %T", s, t)
