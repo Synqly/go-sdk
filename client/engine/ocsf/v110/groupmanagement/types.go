@@ -747,7 +747,7 @@ type LdapPerson struct {
 	// The geographical location associated with a user. This is typically the user's usual work location.
 	Location *Location `json:"location,omitempty"`
 	// The user's manager. This helps in understanding an org hierarchy. This should only ever be populated once in an event. I.e. there should not be a manager's manager in an event.
-	Manager *User `json:"manager,omitempty"`
+	Manager *Object `json:"manager,omitempty"`
 	// The timestamp when the user entry was last modified.
 	ModifiedTime *Timestamp `json:"modified_time,omitempty"`
 	// The timestamp when the user entry was last modified.
