@@ -56,6 +56,23 @@ type ErrorParam struct {
 
 type Id = string
 
+type MetaApi struct {
+	// Raw responses from backing APIs, indexed by request name (e.g. "query")
+	Response map[string]string `json:"response,omitempty"`
+}
+
+type MetaResponse struct {
+	// Statistics about items contained in the response.
+	Stats *MetaStats `json:"stats,omitempty"`
+	// Information about backing API requests made to fulfill the response.
+	Api *MetaApi `json:"api,omitempty"`
+}
+
+type MetaStats struct {
+	// A count of total response times. If present "\*" will be all items, or they can be faceted into specific categories.
+	Count map[string]int64 `json:"count,omitempty"`
+}
+
 type OrderOptions string
 
 const (

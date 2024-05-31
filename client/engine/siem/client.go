@@ -734,6 +734,9 @@ func (c *Client) QueryEvents(ctx context.Context, request *engine.QuerySiemEvent
 	for _, value := range request.Filter {
 		queryParams.Add("filter", fmt.Sprintf("%v", *value))
 	}
+	for _, value := range request.Meta {
+		queryParams.Add("meta", fmt.Sprintf("%v", *value))
+	}
 	for _, value := range request.PassthroughParam {
 		queryParams.Add("passthrough-param", fmt.Sprintf("%v", *value))
 	}

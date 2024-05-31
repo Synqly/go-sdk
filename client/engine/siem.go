@@ -25,6 +25,8 @@ type QuerySiemEventsRequest struct {
 	// Filter results by this query. For more information on filtering, refer to our Filtering Guide. Defaults to no filter.
 	// If used more than once, the queries are ANDed together.
 	Filter []*string `json:"-"`
+	// Add metadata to the response by invoking meta functions.
+	Meta []*string `json:"-"`
 	// Provider-specific query to pass through to the SIEM. This is useful for advanced queries that are not
 	// supported by the API. The keys and values are provider-specific. For example, to perform a specific query in
 	// Rapid7 IDR, you can use the `query: "{advanced query}"` key-value pair.
@@ -76,6 +78,8 @@ type QueryInvestigationResponse struct {
 type QuerySiemEventsResponse struct {
 	// List of events
 	Result []map[string]interface{} `json:"result,omitempty"`
+	// Metadata about the query results organized by group, then type, then field.
+	Meta *MetaResponse `json:"meta,omitempty"`
 	// Cursor to use to retrieve the next page of results
 	Cursor string `json:"cursor"`
 }
