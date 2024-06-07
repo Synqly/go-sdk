@@ -57,8 +57,20 @@ type ErrorParam struct {
 type Id = string
 
 type MetaApi struct {
-	// Raw responses from backing APIs, indexed by request name (e.g. "query")
-	Response map[string]string `json:"response,omitempty"`
+	Response *MetaApiResponse `json:"response,omitempty"`
+}
+
+type MetaApiPrimaryResponse struct {
+	// The endpoint URL of the primary API request made to fulfill the response.
+	Endpoint string `json:"endpoint"`
+	// The response from the primary API request.
+	Response string `json:"response"`
+}
+
+type MetaApiResponse struct {
+	Primary *MetaApiPrimaryResponse `json:"primary,omitempty"`
+	// All responses from backing API calls, indexed by endpoint URL.
+	List map[string][]string `json:"list,omitempty"`
 }
 
 type MetaResponse struct {

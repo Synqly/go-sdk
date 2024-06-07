@@ -2,6 +2,22 @@
 
 package engine
 
+type QueryAlertsRequest struct {
+	// Number of threats to return. Defaults to 50.
+	Limit *int `json:"-"`
+	// Start search from cursor position.
+	Cursor *string `json:"-"`
+	// Select a field to order the results by. Defaults to `name`. To control the direction of the sorting, append
+	// `[asc]` or `[desc]` to the field name. For example, `name[asc]` will sort the results by `name` in ascending order.
+	// The ordering defaults to `asc` if not specified.
+	Order []*string `json:"-"`
+	// Filter results by this query. For more information on filtering, refer to our Filtering Guide. Defaults to no filter.
+	// If used more than once, the queries are ANDed together.
+	Filter []*string `json:"-"`
+	// Include the raw data from the EDR in the response. Defaults to `false`.
+	IncludeRawData *bool `json:"-"`
+}
+
 type QueryApplicationsRequest struct {
 	// Number of applications to return. Defaults to 50.
 	Limit *int `json:"-"`
@@ -51,6 +67,13 @@ type NetworkQuarantineRequest struct {
 	State ConnectionState `json:"state,omitempty"`
 	// The list of endpoint IDs to enforce the connection state on.
 	EndpointIds []string `json:"endpoint_ids,omitempty"`
+}
+
+type QueryAlertsResponse struct {
+	// List of alerts that match the query.
+	Result []*Event `json:"result,omitempty"`
+	// Cursor to use to retrieve the next page of results.
+	Cursor string `json:"cursor"`
 }
 
 type QueryApplicationsResponse struct {
