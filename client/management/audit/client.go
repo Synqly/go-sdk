@@ -48,9 +48,6 @@ func (c *Client) List(ctx context.Context, request *management.ListAuditEventsRe
 	if request.StartAfter != nil {
 		queryParams.Add("start_after", fmt.Sprintf("%v", *request.StartAfter))
 	}
-	if request.EndBefore != nil {
-		queryParams.Add("end_before", fmt.Sprintf("%v", *request.EndBefore))
-	}
 	if request.Order != nil {
 		queryParams.Add("order", fmt.Sprintf("%v", *request.Order))
 	}

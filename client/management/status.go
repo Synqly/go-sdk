@@ -16,8 +16,6 @@ type ListStatusRequest struct {
 	Limit *int `json:"-"`
 	// Return `Status` objects starting after this `account_id,integration_id`.
 	StartAfter *string `json:"-"`
-	// Return `Status` objects ending before this `account_id,integration_id`.
-	EndBefore *string `json:"-"`
 	// Select a field to order the results by. Defaults to `account_id,integration_id`. To control the direction of the sorting, append
 	// `[asc]` or `[desc]` to the field name. For example, `name[desc]` will sort the results by `name` in descending order.
 	// The ordering defaults to `asc` if not specified. May be used multiple times to order by multiple fields, and the
@@ -35,8 +33,6 @@ type ListStatusEventsRequest struct {
 	Limit *int `json:"-"`
 	// Return `StatusEvent` objects starting after this `created_at`.
 	StartAfter *string `json:"-"`
-	// Return `StatusEvent` objects ending before this `created_at`.
-	EndBefore *string `json:"-"`
 	// The order defaults to created_at[asc] and can changed to descending order by specifying created_at[desc].
 	Order *string `json:"-"`
 	// Filter results by this query. For more information on filtering, refer to our Filtering Guide. Defaults to no filter.
