@@ -18,6 +18,7 @@ import (
 	permissionset "github.com/synqly/go-sdk/client/management/permissionset"
 	roles "github.com/synqly/go-sdk/client/management/roles"
 	status "github.com/synqly/go-sdk/client/management/status"
+	suborgs "github.com/synqly/go-sdk/client/management/suborgs"
 	tokens "github.com/synqly/go-sdk/client/management/tokens"
 	transforms "github.com/synqly/go-sdk/client/management/transforms"
 	http "net/http"
@@ -42,6 +43,7 @@ type Client struct {
 	Permissionset        *permissionset.Client
 	Roles                *roles.Client
 	Status               *status.Client
+	SubOrgs              *suborgs.Client
 	Tokens               *tokens.Client
 	Transforms           *transforms.Client
 }
@@ -69,6 +71,7 @@ func NewClient(opts ...core.ClientOption) *Client {
 		Permissionset:        permissionset.NewClient(opts...),
 		Roles:                roles.NewClient(opts...),
 		Status:               status.NewClient(opts...),
+		SubOrgs:              suborgs.NewClient(opts...),
 		Tokens:               tokens.NewClient(opts...),
 		Transforms:           transforms.NewClient(opts...),
 	}

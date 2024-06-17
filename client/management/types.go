@@ -749,6 +749,12 @@ func (s State) Ptr() *State {
 	return &s
 }
 
+type CreateOrganizationResponseResult struct {
+	Member       *Member       `json:"member,omitempty"`
+	Organization *Organization `json:"organization,omitempty"`
+	Token        *TokenPair    `json:"token,omitempty"`
+}
+
 type Environment string
 
 const (
@@ -771,6 +777,10 @@ func (e Environment) Ptr() *Environment {
 	return &e
 }
 
+type GetOrganizationResponse struct {
+	Result *Organization `json:"result,omitempty"`
+}
+
 type Organization struct {
 	// Human-readable name for this resource
 	Name string `json:"name"`
@@ -781,20 +791,19 @@ type Organization struct {
 	Id        OrganizationId `json:"id,omitempty"`
 	// Organization refresh token id
 	RefreshTokenId TokenId `json:"refresh_token_id,omitempty"`
+	// Organization type: root or standard
+	OrganizationType OrganizationType `json:"organization_type,omitempty"`
 	// Human friendly display name for this Organization
 	Fullname string `json:"fullname"`
 	// Organization email address
 	Contact string `json:"contact"`
 	// Reply-to email address, used for SMTP emails. Defaults to no-reply@synqly.com
 	ReplyTo string `json:"reply_to"`
-	// URL of the organization
+	// Picture URL of the organization
 	Picture string `json:"picture"`
 	// Organization options
 	Options *OrganizationOptions `json:"options,omitempty"`
 }
-
-// Unique identifier for this Organization
-type OrganizationId = Id
 
 type OrganizationOptions struct {
 	// Duration new member invitations will be valid. Default: 168h (7 days), minimum 24h, maximum 168h (7 days).
@@ -805,6 +814,28 @@ type OrganizationOptions struct {
 	PasswordDuration *string `json:"password_duration,omitempty"`
 	// Minimum password length. Default: 8, minimum 8, maximum 72.
 	MinimumPasswordLength *int `json:"minimum_password_length,omitempty"`
+}
+
+type OrganizationType string
+
+const (
+	OrganizationTypeRoot     OrganizationType = "root"
+	OrganizationTypeStandard OrganizationType = "standard"
+)
+
+func NewOrganizationTypeFromString(s string) (OrganizationType, error) {
+	switch s {
+	case "root":
+		return OrganizationTypeRoot, nil
+	case "standard":
+		return OrganizationTypeStandard, nil
+	}
+	var t OrganizationType
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (o OrganizationType) Ptr() *OrganizationType {
+	return &o
 }
 
 type WebhookFilter string
@@ -898,6 +929,8 @@ type Permission struct {
 	Id Id `json:"id"`
 	// Token organizationId
 	OrganizationId Id `json:"organization_id"`
+	// Token root organizationId
+	RootOrganizationId *Id `json:"root_organization_id,omitempty"`
 	// Token memberId
 	MemberId Id `json:"member_id"`
 }
@@ -958,6 +991,7 @@ type ApiPermissionMap struct {
 	PermissionSet     *PermissionSetPermissions     `json:"permission_set,omitempty"`
 	Roles             *RolesPermissions             `json:"roles,omitempty"`
 	Status            *StatusPermissions            `json:"status,omitempty"`
+	Suborgs           *SubOrgsPermissions           `json:"suborgs,omitempty"`
 	Tokens            *TokensPermissions            `json:"tokens,omitempty"`
 	Transforms        *TransformsPermissions        `json:"transforms,omitempty"`
 	Webhooks          *WebhooksPermissions          `json:"webhooks,omitempty"`
@@ -1434,6 +1468,42 @@ func (s StatusActions) Ptr() *StatusActions {
 // Permissions for the status API
 type StatusPermissions struct {
 	Actions []StatusActions `json:"actions,omitempty"`
+}
+
+type SubOrgsActions string
+
+const (
+	SubOrgsActionsList   SubOrgsActions = "list"
+	SubOrgsActionsCreate SubOrgsActions = "create"
+	SubOrgsActionsGet    SubOrgsActions = "get"
+	SubOrgsActionsDelete SubOrgsActions = "delete"
+	SubOrgsActionsAll    SubOrgsActions = "*"
+)
+
+func NewSubOrgsActionsFromString(s string) (SubOrgsActions, error) {
+	switch s {
+	case "list":
+		return SubOrgsActionsList, nil
+	case "create":
+		return SubOrgsActionsCreate, nil
+	case "get":
+		return SubOrgsActionsGet, nil
+	case "delete":
+		return SubOrgsActionsDelete, nil
+	case "*":
+		return SubOrgsActionsAll, nil
+	}
+	var t SubOrgsActions
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (s SubOrgsActions) Ptr() *SubOrgsActions {
+	return &s
+}
+
+// Permissions for the roles API
+type SubOrgsPermissions struct {
+	Actions []SubOrgsActions `json:"actions,omitempty"`
 }
 
 type TokensActions string
@@ -4869,8 +4939,9 @@ type AdhocRole struct {
 }
 
 type Resources struct {
-	Accounts     *RoleAccounts     `json:"accounts,omitempty"`
-	Integrations *RoleIntegrations `json:"integrations,omitempty"`
+	Organizations *RoleOrganizations `json:"organizations,omitempty"`
+	Accounts      *RoleAccounts      `json:"accounts,omitempty"`
+	Integrations  *RoleIntegrations  `json:"integrations,omitempty"`
 }
 
 type RoleAccounts struct {
@@ -4888,16 +4959,26 @@ type RoleIntegrations struct {
 // Unique identifier for this Role
 type RoleName = string
 
+type RoleOrganizations struct {
+	// List of organization ids that this role definition grants access to. Use "\*" to grant access to all organization ids.
+	Ids []OrganizationId `json:"ids,omitempty"`
+	// List of organization labels this role definition grants access to.
+	Labels []string `json:"labels,omitempty"`
+}
+
 type BuiltinRoles string
 
 const (
-	BuiltinRolesAdministrator BuiltinRoles = "administrator"
-	BuiltinRolesViewer        BuiltinRoles = "viewer"
-	BuiltinRolesMember        BuiltinRoles = "member"
+	BuiltinRolesRootAdministrator BuiltinRoles = "root_administrator"
+	BuiltinRolesAdministrator     BuiltinRoles = "administrator"
+	BuiltinRolesViewer            BuiltinRoles = "viewer"
+	BuiltinRolesMember            BuiltinRoles = "member"
 )
 
 func NewBuiltinRolesFromString(s string) (BuiltinRoles, error) {
 	switch s {
+	case "root_administrator":
+		return BuiltinRolesRootAdministrator, nil
 	case "administrator":
 		return BuiltinRolesAdministrator, nil
 	case "viewer":

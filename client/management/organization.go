@@ -11,7 +11,3 @@ type UpdateOrganizationRequest = *Organization
 type UpdateOrganizationResponse struct {
 	Result *Organization `json:"result,omitempty"`
 }
-
-type GetOrganizationResponse struct {
-	Result *Organization `json:"result,omitempty"`
-}
