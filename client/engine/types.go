@@ -724,9 +724,9 @@ type ScanConfiguration struct {
 	// Name of the scan.
 	Name string `json:"name"`
 	// Time when the scan was created.
-	CreationTime int `json:"creation_time"`
+	CreationTime *int `json:"creation_time,omitempty"`
 	// Time when the scan was last modified.
-	LastModifiedTime int `json:"last_modified_time"`
+	LastModifiedTime *int `json:"last_modified_time,omitempty"`
 	// User that owns the scan.
 	Owner *User `json:"owner,omitempty"`
 	// Schedule of the scan if it is a recurring scan.
