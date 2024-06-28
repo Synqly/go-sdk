@@ -3124,6 +3124,7 @@ type ProviderConfig struct {
 	NotificationsTeams                *NotificationsTeams
 	SiemElasticsearch                 *SiemElasticsearch
 	SiemMockSiem                      *SiemMock
+	SiemQRadar                        *SiemQRadar
 	SiemRapid7Insightidr              *SiemRapid7InsightIdr
 	SiemSplunk                        *SiemSplunk
 	SinkAwsSecurityLake               *SinkAwsSecurityLake
@@ -3201,6 +3202,10 @@ func NewProviderConfigFromSiemElasticsearch(value *SiemElasticsearch) *ProviderC
 
 func NewProviderConfigFromSiemMockSiem(value *SiemMock) *ProviderConfig {
 	return &ProviderConfig{Type: "siem_mock_siem", SiemMockSiem: value}
+}
+
+func NewProviderConfigFromSiemQRadar(value *SiemQRadar) *ProviderConfig {
+	return &ProviderConfig{Type: "siem_q_radar", SiemQRadar: value}
 }
 
 func NewProviderConfigFromSiemRapid7Insightidr(value *SiemRapid7InsightIdr) *ProviderConfig {
@@ -3370,6 +3375,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.SiemMockSiem = value
+	case "siem_q_radar":
+		value := new(SiemQRadar)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.SiemQRadar = value
 	case "siem_rapid7_insightidr":
 		value := new(SiemRapid7InsightIdr)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -3615,6 +3626,15 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 			SiemMock: p.SiemMockSiem,
 		}
 		return json.Marshal(marshaler)
+	case "siem_q_radar":
+		var marshaler = struct {
+			Type string `json:"type"`
+			*SiemQRadar
+		}{
+			Type:       p.Type,
+			SiemQRadar: p.SiemQRadar,
+		}
+		return json.Marshal(marshaler)
 	case "siem_rapid7_insightidr":
 		var marshaler = struct {
 			Type string `json:"type"`
@@ -3787,6 +3807,7 @@ type ProviderConfigVisitor interface {
 	VisitNotificationsTeams(*NotificationsTeams) error
 	VisitSiemElasticsearch(*SiemElasticsearch) error
 	VisitSiemMockSiem(*SiemMock) error
+	VisitSiemQRadar(*SiemQRadar) error
 	VisitSiemRapid7Insightidr(*SiemRapid7InsightIdr) error
 	VisitSiemSplunk(*SiemSplunk) error
 	VisitSinkAwsSecurityLake(*SinkAwsSecurityLake) error
@@ -3840,6 +3861,8 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 		return visitor.VisitSiemElasticsearch(p.SiemElasticsearch)
 	case "siem_mock_siem":
 		return visitor.VisitSiemMockSiem(p.SiemMockSiem)
+	case "siem_q_radar":
+		return visitor.VisitSiemQRadar(p.SiemQRadar)
 	case "siem_rapid7_insightidr":
 		return visitor.VisitSiemRapid7Insightidr(p.SiemRapid7Insightidr)
 	case "siem_splunk":
@@ -3911,6 +3934,8 @@ const (
 	ProviderConfigIdSiemElasticsearch ProviderConfigId = "siem_elasticsearch"
 	// SIEM Mock
 	ProviderConfigIdSiemMock ProviderConfigId = "siem_mock_siem"
+	// QRadar
+	ProviderConfigIdSiemQRadar ProviderConfigId = "siem_q_radar"
 	// Rapid7 InsightIDR
 	ProviderConfigIdSiemRapid7InsightIdr ProviderConfigId = "siem_rapid7_insightidr"
 	// Splunk Enterprise Security
@@ -3981,6 +4006,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdSiemElasticsearch, nil
 	case "siem_mock_siem":
 		return ProviderConfigIdSiemMock, nil
+	case "siem_q_radar":
+		return ProviderConfigIdSiemQRadar, nil
 	case "siem_rapid7_insightidr":
 		return ProviderConfigIdSiemRapid7InsightIdr, nil
 	case "siem_splunk":
@@ -4024,6 +4051,88 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 
 func (p ProviderConfigId) Ptr() *ProviderConfigId {
 	return &p
+}
+
+type QRadarCredential struct {
+	Type    string
+	Token   *TokenCredential
+	TokenId TokenCredentialId
+}
+
+func NewQRadarCredentialFromToken(value *TokenCredential) *QRadarCredential {
+	return &QRadarCredential{Type: "token", Token: value}
+}
+
+func NewQRadarCredentialFromTokenId(value TokenCredentialId) *QRadarCredential {
+	return &QRadarCredential{Type: "token_id", TokenId: value}
+}
+
+func (q *QRadarCredential) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	q.Type = unmarshaler.Type
+	switch unmarshaler.Type {
+	case "token":
+		value := new(TokenCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		q.Token = value
+	case "token_id":
+		var valueUnmarshaler struct {
+			TokenId TokenCredentialId `json:"value,omitempty"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		q.TokenId = valueUnmarshaler.TokenId
+	}
+	return nil
+}
+
+func (q QRadarCredential) MarshalJSON() ([]byte, error) {
+	switch q.Type {
+	default:
+		return nil, fmt.Errorf("invalid type %s in %T", q.Type, q)
+	case "token":
+		var marshaler = struct {
+			Type string `json:"type"`
+			*TokenCredential
+		}{
+			Type:            q.Type,
+			TokenCredential: q.Token,
+		}
+		return json.Marshal(marshaler)
+	case "token_id":
+		var marshaler = struct {
+			Type    string            `json:"type"`
+			TokenId TokenCredentialId `json:"value,omitempty"`
+		}{
+			Type:    q.Type,
+			TokenId: q.TokenId,
+		}
+		return json.Marshal(marshaler)
+	}
+}
+
+type QRadarCredentialVisitor interface {
+	VisitToken(*TokenCredential) error
+	VisitTokenId(TokenCredentialId) error
+}
+
+func (q *QRadarCredential) Accept(visitor QRadarCredentialVisitor) error {
+	switch q.Type {
+	default:
+		return fmt.Errorf("invalid type %s in %T", q.Type, q)
+	case "token":
+		return visitor.VisitToken(q.Token)
+	case "token_id":
+		return visitor.VisitTokenId(q.TokenId)
+	}
 }
 
 type QualysCloudCredential struct {
@@ -4203,6 +4312,13 @@ type SiemElasticsearch struct {
 type SiemMock struct {
 	// Name of the index where events are stored.
 	Index *string `json:"index,omitempty"`
+}
+
+// Configuration for IBM QRadar as a SIEM Provider.
+type SiemQRadar struct {
+	Credential *QRadarCredential `json:"credential,omitempty"`
+	// URL for the QRadar instance. This should be the base URL instance, without any path components and must be HTTPS. For example, "https://qradar.westus2.cloudapp.azure.com".
+	Url string `json:"url"`
 }
 
 // Configuration for Rapid7 InsightIDR as a SIEM Provider.

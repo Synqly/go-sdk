@@ -34,7 +34,7 @@ func NewClient(opts ...core.ClientOption) *Client {
 }
 
 // Queries investigations
-func (c *Client) QueryInvestigations(ctx context.Context, request *engine.QueryInvestigationsRequest) error {
+func (c *Client) QueryInvestigations(ctx context.Context, request *engine.QueryInvestigationsRequest) (*engine.QueryInvestigationResponse, error) {
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
@@ -164,20 +164,21 @@ func (c *Client) QueryInvestigations(ctx context.Context, request *engine.QueryI
 		return apiError
 	}
 
+	var response *engine.QueryInvestigationResponse
 	if err := core.DoRequest(
 		ctx,
 		c.httpClient,
 		endpointURL,
 		http.MethodGet,
 		request,
-		nil,
+		&response,
 		false,
 		c.header,
 		errorDecoder,
 	); err != nil {
-		return err
+		return response, err
 	}
-	return nil
+	return response, nil
 }
 
 // Retrieves an investigation by ID.
