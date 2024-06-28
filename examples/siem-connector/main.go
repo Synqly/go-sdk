@@ -13,7 +13,7 @@ import (
 	engine "github.com/synqly/go-sdk/client/engine"
 	engineClient "github.com/synqly/go-sdk/client/engine/client"
 
-	// Each OSCF event type has its own package. This is intended to make imports
+	// Each OCSF event type has its own package. This is intended to make imports
 	// more granular, allowing the end-user to import only the types they need.
 	scheduledJobActivity "github.com/synqly/go-sdk/client/engine/ocsf/v110/scheduledjobactivity"
 
@@ -57,7 +57,7 @@ type Tenant struct {
 	// this tenant will be created. This example creates a new Account for every
 	// Tenant, but it would also be possible to use the same Account for all Tenants.
 	SynqlyAccountId string
-	// SynqlyClient: A cached managmenet client, used to manage Integrations.
+	// SynqlyClient: A cached management client, used to manage Integrations.
 	SynqlyClient *mgmtClient.Client
 	// EventLogger: A cached engine client, used to log events to a third-party
 	// logging Provider by way of an Integration.
@@ -221,7 +221,7 @@ func (app *App) backgroundJob(durationSeconds int) {
 				consoleLogger.Printf("Logged event for tenant %s\n", tenant.ID)
 			}
 		}
-		time.Sleep(1*time.Second + time.Duration(rand.Intn(1000))*time.Millisecond)
+		time.Sleep(1*time.Second + time.Duration(rand.Intn(1000))*time.Millisecond) //nolint: gosec
 		fmt.Println()
 	}
 }
