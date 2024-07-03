@@ -2230,6 +2230,15 @@ func (c *CrowdStrikeCredential) Accept(visitor CrowdStrikeCredentialVisitor) err
 	}
 }
 
+type CustomFieldMapping struct {
+	// Name for the custom field that you will use in the `custom_fields` field in ticket objects within Synqly.
+	Name string `json:"name"`
+	// ID of the project this field mapping is associated with. ID of "\*" is used to apply to all projects.
+	ProjectId string `json:"project_id"`
+	// Path to or name of the custom field in the provider.
+	ProviderFieldPath string `json:"provider_field_path"`
+}
+
 // Configuration for the CrowdStrike EDR Provider
 type EdrCrowdStrike struct {
 	Credential *CrowdStrikeCredential `json:"credential,omitempty"`
@@ -3105,6 +3114,17 @@ func (p *PingOneCredential) Accept(visitor PingOneCredentialVisitor) error {
 	case "token_id":
 		return visitor.VisitTokenId(p.TokenId)
 	}
+}
+
+type PriorityMapping struct {
+	// Custom value for the "High" priority.
+	High *string `json:"high,omitempty"`
+	// Custom value for the "Low" priority.
+	Low *string `json:"low,omitempty"`
+	// Custom value for the "Medium" priority.
+	Medium *string `json:"medium,omitempty"`
+	// Custom value for the "Urgent" priority.
+	Urgent *string `json:"urgent,omitempty"`
 }
 
 type ProviderConfig struct {
@@ -4797,6 +4817,21 @@ func (s *SplunkSearchCredential) Accept(visitor SplunkSearchCredentialVisitor) e
 	}
 }
 
+type StatusMapping struct {
+	// Custom value for the "Closed" status.
+	Closed *string `json:"closed,omitempty"`
+	// Custom value for the "Done" status.
+	Done *string `json:"done,omitempty"`
+	// Custom value for the "In Progress" status.
+	InProgress *string `json:"in_progress,omitempty"`
+	// Custom value for the "On Hold" status.
+	OnHold *string `json:"on_hold,omitempty"`
+	// Custom value for the "Open" status.
+	Open *string `json:"open,omitempty"`
+	// Custom value for the "To Do" status.
+	Todo *string `json:"todo,omitempty"`
+}
+
 // Configuration for AWS S3 as a Storage Provider
 type StorageAwsS3 struct {
 	// Name of the AWS S3 bucket where files are stored.
@@ -5004,12 +5039,18 @@ func (t *TenableCloudCredential) Accept(visitor TenableCloudCredentialVisitor) e
 // Configuration for Jira as a Ticketing Provider
 type TicketingJira struct {
 	Credential *JiraCredential `json:"credential,omitempty"`
+	// Custom field mappings for this provider.
+	CustomFieldMappings []*CustomFieldMapping `json:"custom_field_mappings,omitempty"`
 	// URL for the Jira API. This should be the base URL for the API, without any path components and must be HTTPS. For example, "https://tenant.atlassian.net".
 	Url string `json:"url"`
+	// Value mappings for this provider.
+	ValueMappings []*ValueMapping `json:"value_mappings,omitempty"`
 }
 
 // Configuration for the Synqly mock in-memory ticketing handler. This provider is for testing purposes only. It retains tickets for a limited time and does not persist them for long-term usage.
 type TicketingMock struct {
+	// Custom field mappings for this provider.
+	CustomFieldMappings []*CustomFieldMapping `json:"custom_field_mappings,omitempty"`
 	// Optional name of the mock provider. This value is unused.
 	Name *string `json:"name,omitempty"`
 }
@@ -5026,6 +5067,17 @@ type TicketingServiceNow struct {
 	Credential *ServiceNowCredential `json:"credential,omitempty"`
 	// URL for the ServiceNow API. This should be the base URL for the API, without any path components and must be HTTPS. For example, "https://tenant.service-now.com".
 	Url string `json:"url"`
+}
+
+type ValueMapping struct {
+	// Optionally restrict this value mapping to a specific issue type. If not provided, the mapping will apply to all issue types.
+	IssueType *string `json:"issue_type,omitempty"`
+	// Remap the standard Synqly priorities to custom values.
+	Priority *PriorityMapping `json:"priority,omitempty"`
+	// ID of the project this value mapping is associated with. ID of "\*" is used to apply to all projects.
+	ProjectId string `json:"project_id"`
+	// Remap the standard Synqly statuses to custom values.
+	Status *StatusMapping `json:"status,omitempty"`
 }
 
 // Configuration for Qualys Cloud Platform as a Vulnerabilities Provider

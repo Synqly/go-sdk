@@ -639,6 +639,46 @@ type AttachmentMetadata struct {
 	Creator string `json:"creator"`
 }
 
+// Unique identifier for a field mapping
+type FieldMappingId = Id
+
+type FieldType string
+
+const (
+	FieldTypeString     FieldType = "STRING"
+	FieldTypeNumber     FieldType = "NUMBER"
+	FieldTypeBoolean    FieldType = "BOOLEAN"
+	FieldTypeDatetime   FieldType = "DATETIME"
+	FieldTypeDate       FieldType = "DATE"
+	FieldTypeJsonString FieldType = "JSON_STRING"
+)
+
+func NewFieldTypeFromString(s string) (FieldType, error) {
+	switch s {
+	case "STRING":
+		return FieldTypeString, nil
+	case "NUMBER":
+		return FieldTypeNumber, nil
+	case "BOOLEAN":
+		return FieldTypeBoolean, nil
+	case "DATETIME":
+		return FieldTypeDatetime, nil
+	case "DATE":
+		return FieldTypeDate, nil
+	case "JSON_STRING":
+		return FieldTypeJsonString, nil
+	}
+	var t FieldType
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (f FieldType) Ptr() *FieldType {
+	return &f
+}
+
+// Unique identifier for an issue type
+type IssueTypeId = string
+
 type Priority string
 
 const (
@@ -675,6 +715,20 @@ type Project struct {
 	Name string `json:"name"`
 }
 
+// Unique identifier for a project
+type ProjectId = Id
+
+type RemoteField struct {
+	// Type of the field.
+	Type FieldType `json:"type,omitempty"`
+	// Type of field in the remote ticketing provider.
+	ProviderFieldName string `json:"provider_field_name"`
+	// Path to the field in the remote ticketing provider. Uses dot notation for nested fields.
+	ProviderFieldPath string `json:"provider_field_path"`
+}
+
+type Status = string
+
 // Ticketing ticket
 type Ticket struct {
 	// Human-readable name for this resource
@@ -701,16 +755,21 @@ type Ticket struct {
 	// The ticket's complete date.
 	CompletionDate *time.Time `json:"completion_date,omitempty"`
 	// The current status of the ticket.
-	Status *string `json:"status,omitempty"`
+	Status *Status `json:"status,omitempty"`
 	// The ticket project.
-	Project *string `json:"project,omitempty"`
+	Project *ProjectId `json:"project,omitempty"`
 	// The ticket's type.
-	IssueType *string `json:"issue_type,omitempty"`
+	IssueType *IssueTypeId `json:"issue_type,omitempty"`
 	// Associate tags with Ticket
 	Tags []string `json:"tags,omitempty"`
 	// Metadata of attachments associated with the ticket
 	Attachments []*AttachmentMetadata `json:"attachments,omitempty"`
+	// Custom fields for this ticket, keys are the custom field names.
+	CustomFields map[string]interface{} `json:"custom_fields,omitempty"`
 }
+
+// Unique identifier for a value mapping
+type ValueMappingId = Id
 
 // Asset in a vulnerability scanning system. Represented by OCSF Device Inventory Info class (class_uid 5001).
 type Asset = *inventoryinfo.InventoryInfo

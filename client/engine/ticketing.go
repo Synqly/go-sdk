@@ -55,13 +55,15 @@ type CreateTicketRequest struct {
 	// The ticket's complete date.
 	CompletionDate *time.Time `json:"completion_date,omitempty"`
 	// The current status of the ticket.
-	Status *string `json:"status,omitempty"`
+	Status *Status `json:"status,omitempty"`
 	// The ticket project.
 	Project *string `json:"project,omitempty"`
 	// The ticket's type.
 	IssueType *string `json:"issue_type,omitempty"`
 	// Associate tags with Ticket
 	Tags []string `json:"tags,omitempty"`
+	// Set custom fields for this ticket, keys are the custom field names.
+	CustomFields map[string]interface{} `json:"custom_fields,omitempty"`
 }
 
 type CreateTicketResponse struct {
@@ -82,6 +84,10 @@ type ListAttachmentsMetadataResponse struct {
 
 type ListProjectsResponse struct {
 	Result []*Project `json:"result,omitempty"`
+}
+
+type ListRemoteFieldsResponse struct {
+	Result []*RemoteField `json:"result,omitempty"`
 }
 
 type PatchTicketResponse struct {
