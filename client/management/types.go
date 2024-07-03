@@ -5043,8 +5043,6 @@ type TicketingJira struct {
 	CustomFieldMappings []*CustomFieldMapping `json:"custom_field_mappings,omitempty"`
 	// URL for the Jira API. This should be the base URL for the API, without any path components and must be HTTPS. For example, "https://tenant.atlassian.net".
 	Url string `json:"url"`
-	// Value mappings for this provider.
-	ValueMappings []*ValueMapping `json:"value_mappings,omitempty"`
 }
 
 // Configuration for the Synqly mock in-memory ticketing handler. This provider is for testing purposes only. It retains tickets for a limited time and does not persist them for long-term usage.
