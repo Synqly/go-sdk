@@ -201,6 +201,67 @@ type MarkingDefinition struct {
 	Name *string `json:"name,omitempty"`
 }
 
+type Relationships struct {
+	// The id property uniquely identifies this object.
+	Id Id `json:"id"`
+	// The created_by_ref property specifies the id property of the identity object that describes the entity that created this object.
+	CreatedByRef *Identity `json:"created_by_ref,omitempty"`
+	// The created property represents the time at which the object was originally created.
+	Created time.Time `json:"created"`
+	// The modified property is only used by STIX Objects that support versioning and represents the time that this particular version of the object was last modified.
+	Modified time.Time `json:"modified"`
+	// The revoked property indicates whether this object has been revoked. If the revoked property is present and set to true, then the object has been revoked.
+	Revoked *bool `json:"revoked,omitempty"`
+	// The labels property is an array of strings that are used to categorize this object.
+	Labels []string `json:"labels,omitempty"`
+	// The confidence property is an integer from 0 to 100 that represents the confidence that this object is accurate and valid.
+	Confidence *int `json:"confidence,omitempty"`
+	// The lang property specifies the language used in the properties of the object.
+	Lang *string `json:"lang,omitempty"`
+	// The external_references property is an array of external references that are relevant to this object.
+	ExternalReferences []*ExternalReference `json:"external_references,omitempty"`
+	// The object_marking_refs property is an array of ids of marking_definition objects that apply to this object.
+	ObjectMarkingRefs []*MarkingDefinition `json:"object_marking_refs,omitempty"`
+	// The granular_markings property is an array of granular markings that are applied to this object.
+	GranularMarkings []*GranularMarking `json:"granular_markings,omitempty"`
+	// The extensions property is an object that contains custom properties or objects that extend the object.
+	Extensions       map[string]interface{} `json:"extensions,omitempty"`
+	RelationshipType string                 `json:"relationship_type"`
+	Description      *string                `json:"description,omitempty"`
+	SourceRef        Id                     `json:"source_ref"`
+	TargetRef        Id                     `json:"target_ref"`
+	StartTime        *time.Time             `json:"start_time,omitempty"`
+	StopTime         *time.Time             `json:"stop_time,omitempty"`
+	specVersion      string
+}
+
+func (r *Relationships) SpecVersion() string {
+	return r.specVersion
+}
+
+func (r *Relationships) UnmarshalJSON(data []byte) error {
+	type unmarshaler Relationships
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*r = Relationships(value)
+	r.specVersion = "2.1"
+	return nil
+}
+
+func (r *Relationships) MarshalJSON() ([]byte, error) {
+	type embed Relationships
+	var marshaler = struct {
+		embed
+		SpecVersion string `json:"spec_version"`
+	}{
+		embed:       embed(*r),
+		SpecVersion: "2.1",
+	}
+	return json.Marshal(marshaler)
+}
+
 type Software struct {
 	// The id property uniquely identifies this object.
 	Id Id `json:"id"`
@@ -865,65 +926,4 @@ type Statement struct {
 type Tlp struct {
 	// The TLP level [TLP] of the content marked by this marking definition, as defined in this section.
 	Tlp string `json:"tlp"`
-}
-
-type Relationships struct {
-	// The id property uniquely identifies this object.
-	Id Id `json:"id"`
-	// The created_by_ref property specifies the id property of the identity object that describes the entity that created this object.
-	CreatedByRef *Identity `json:"created_by_ref,omitempty"`
-	// The created property represents the time at which the object was originally created.
-	Created time.Time `json:"created"`
-	// The modified property is only used by STIX Objects that support versioning and represents the time that this particular version of the object was last modified.
-	Modified time.Time `json:"modified"`
-	// The revoked property indicates whether this object has been revoked. If the revoked property is present and set to true, then the object has been revoked.
-	Revoked *bool `json:"revoked,omitempty"`
-	// The labels property is an array of strings that are used to categorize this object.
-	Labels []string `json:"labels,omitempty"`
-	// The confidence property is an integer from 0 to 100 that represents the confidence that this object is accurate and valid.
-	Confidence *int `json:"confidence,omitempty"`
-	// The lang property specifies the language used in the properties of the object.
-	Lang *string `json:"lang,omitempty"`
-	// The external_references property is an array of external references that are relevant to this object.
-	ExternalReferences []*ExternalReference `json:"external_references,omitempty"`
-	// The object_marking_refs property is an array of ids of marking_definition objects that apply to this object.
-	ObjectMarkingRefs []*MarkingDefinition `json:"object_marking_refs,omitempty"`
-	// The granular_markings property is an array of granular markings that are applied to this object.
-	GranularMarkings []*GranularMarking `json:"granular_markings,omitempty"`
-	// The extensions property is an object that contains custom properties or objects that extend the object.
-	Extensions       map[string]interface{} `json:"extensions,omitempty"`
-	RelationshipType string                 `json:"relationship_type"`
-	Description      *string                `json:"description,omitempty"`
-	SourceRef        Id                     `json:"source_ref"`
-	TargetRef        Id                     `json:"target_ref"`
-	StartTime        *time.Time             `json:"start_time,omitempty"`
-	StopTime         *time.Time             `json:"stop_time,omitempty"`
-	specVersion      string
-}
-
-func (r *Relationships) SpecVersion() string {
-	return r.specVersion
-}
-
-func (r *Relationships) UnmarshalJSON(data []byte) error {
-	type unmarshaler Relationships
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*r = Relationships(value)
-	r.specVersion = "2.1"
-	return nil
-}
-
-func (r *Relationships) MarshalJSON() ([]byte, error) {
-	type embed Relationships
-	var marshaler = struct {
-		embed
-		SpecVersion string `json:"spec_version"`
-	}{
-		embed:       embed(*r),
-		SpecVersion: "2.1",
-	}
-	return json.Marshal(marshaler)
 }
