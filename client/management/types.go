@@ -3944,7 +3944,7 @@ const (
 	ProviderConfigIdIdentityPingOne ProviderConfigId = "identity_pingone"
 	// Atlassian Jira
 	ProviderConfigIdNotificationsJira ProviderConfigId = "notifications_jira"
-	// Notifications Mock
+	// Notifications Test
 	ProviderConfigIdNotificationsMock ProviderConfigId = "notifications_mock_notifications"
 	// Slack
 	ProviderConfigIdNotificationsSlack ProviderConfigId = "notifications_slack"
@@ -3952,7 +3952,7 @@ const (
 	ProviderConfigIdNotificationsTeams ProviderConfigId = "notifications_teams"
 	// Elastic SIEM
 	ProviderConfigIdSiemElasticsearch ProviderConfigId = "siem_elasticsearch"
-	// SIEM Mock
+	// SIEM Test
 	ProviderConfigIdSiemMock ProviderConfigId = "siem_mock_siem"
 	// QRadar
 	ProviderConfigIdSiemQRadar ProviderConfigId = "siem_q_radar"
@@ -3966,7 +3966,7 @@ const (
 	ProviderConfigIdSinkAwsSqs ProviderConfigId = "sink_aws_sqs"
 	// Microsoft Azure Monitor Logs
 	ProviderConfigIdSinkAzureMonitorLogs ProviderConfigId = "sink_azure_monitor_logs"
-	// Sink Mock
+	// Sink Test
 	ProviderConfigIdSinkMock ProviderConfigId = "sink_mock_sink"
 	// AWS S3
 	ProviderConfigIdStorageAwsS3 ProviderConfigId = "storage_aws_s3"
@@ -3974,11 +3974,11 @@ const (
 	ProviderConfigIdStorageAzureBlob ProviderConfigId = "storage_azure_blob"
 	// Google Cloud Storage
 	ProviderConfigIdStorageGcs ProviderConfigId = "storage_gcs"
-	// Storage Mock
+	// Storage Test
 	ProviderConfigIdStorageMock ProviderConfigId = "storage_mock_storage"
 	// Atlassian Jira
 	ProviderConfigIdTicketingJira ProviderConfigId = "ticketing_jira"
-	// Ticketing Mock
+	// Ticketing Test
 	ProviderConfigIdTicketingMock ProviderConfigId = "ticketing_mock_ticketing"
 	// PagerDuty Operations Cloud
 	ProviderConfigIdTicketingPagerDuty ProviderConfigId = "ticketing_pagerduty"
