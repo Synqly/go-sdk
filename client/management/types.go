@@ -5258,6 +5258,28 @@ type Token struct {
 	Permissions *Permission `json:"permissions,omitempty"`
 }
 
+type TokenOwnerType string
+
+const (
+	TokenOwnerTypeOrganization TokenOwnerType = "organization"
+	TokenOwnerTypeIntegration  TokenOwnerType = "integration"
+)
+
+func NewTokenOwnerTypeFromString(s string) (TokenOwnerType, error) {
+	switch s {
+	case "organization":
+		return TokenOwnerTypeOrganization, nil
+	case "integration":
+		return TokenOwnerTypeIntegration, nil
+	}
+	var t TokenOwnerType
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (t TokenOwnerType) Ptr() *TokenOwnerType {
+	return &t
+}
+
 type TokenPair struct {
 	// Access token contains the bearer secret
 	Access *Token `json:"access,omitempty"`
@@ -5275,6 +5297,10 @@ type RefreshToken struct {
 	Id        TokenId   `json:"id,omitempty"`
 	// Member Id
 	MemberId *Id `json:"member_id,omitempty"`
+	// ID of the entity that owns this token
+	OwnerId Id `json:"owner_id"`
+	// Type of the entity that owns this token
+	OwnerType TokenOwnerType `json:"owner_type,omitempty"`
 	// Time when this token expires and can no longer be used again.
 	Expires time.Time `json:"expires"`
 	// Token time-to-live
