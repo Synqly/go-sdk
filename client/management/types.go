@@ -3147,6 +3147,7 @@ type ProviderConfig struct {
 	SiemQRadar                        *SiemQRadar
 	SiemRapid7Insightidr              *SiemRapid7InsightIdr
 	SiemSplunk                        *SiemSplunk
+	SiemSumoLogic                     *SiemSumoLogic
 	SinkAwsSecurityLake               *SinkAwsSecurityLake
 	SinkAwsSqs                        *SinkAwsSqs
 	SinkAzureMonitorLogs              *SinkAzureMonitorLogs
@@ -3234,6 +3235,10 @@ func NewProviderConfigFromSiemRapid7Insightidr(value *SiemRapid7InsightIdr) *Pro
 
 func NewProviderConfigFromSiemSplunk(value *SiemSplunk) *ProviderConfig {
 	return &ProviderConfig{Type: "siem_splunk", SiemSplunk: value}
+}
+
+func NewProviderConfigFromSiemSumoLogic(value *SiemSumoLogic) *ProviderConfig {
+	return &ProviderConfig{Type: "siem_sumo_logic", SiemSumoLogic: value}
 }
 
 func NewProviderConfigFromSinkAwsSecurityLake(value *SinkAwsSecurityLake) *ProviderConfig {
@@ -3413,6 +3418,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.SiemSplunk = value
+	case "siem_sumo_logic":
+		value := new(SiemSumoLogic)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.SiemSumoLogic = value
 	case "sink_aws_security_lake":
 		value := new(SinkAwsSecurityLake)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -3673,6 +3684,15 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 			SiemSplunk: p.SiemSplunk,
 		}
 		return json.Marshal(marshaler)
+	case "siem_sumo_logic":
+		var marshaler = struct {
+			Type string `json:"type"`
+			*SiemSumoLogic
+		}{
+			Type:          p.Type,
+			SiemSumoLogic: p.SiemSumoLogic,
+		}
+		return json.Marshal(marshaler)
 	case "sink_aws_security_lake":
 		var marshaler = struct {
 			Type string `json:"type"`
@@ -3830,6 +3850,7 @@ type ProviderConfigVisitor interface {
 	VisitSiemQRadar(*SiemQRadar) error
 	VisitSiemRapid7Insightidr(*SiemRapid7InsightIdr) error
 	VisitSiemSplunk(*SiemSplunk) error
+	VisitSiemSumoLogic(*SiemSumoLogic) error
 	VisitSinkAwsSecurityLake(*SinkAwsSecurityLake) error
 	VisitSinkAwsSqs(*SinkAwsSqs) error
 	VisitSinkAzureMonitorLogs(*SinkAzureMonitorLogs) error
@@ -3887,6 +3908,8 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 		return visitor.VisitSiemRapid7Insightidr(p.SiemRapid7Insightidr)
 	case "siem_splunk":
 		return visitor.VisitSiemSplunk(p.SiemSplunk)
+	case "siem_sumo_logic":
+		return visitor.VisitSiemSumoLogic(p.SiemSumoLogic)
 	case "sink_aws_security_lake":
 		return visitor.VisitSinkAwsSecurityLake(p.SinkAwsSecurityLake)
 	case "sink_aws_sqs":
@@ -3960,6 +3983,8 @@ const (
 	ProviderConfigIdSiemRapid7InsightIdr ProviderConfigId = "siem_rapid7_insightidr"
 	// Splunk Enterprise Security
 	ProviderConfigIdSiemSplunk ProviderConfigId = "siem_splunk"
+	// Sumo Logic Cloud SIEM
+	ProviderConfigIdSiemSumoLogic ProviderConfigId = "siem_sumo_logic"
 	// AWS Security Lake
 	ProviderConfigIdSinkAwsSecurityLake ProviderConfigId = "sink_aws_security_lake"
 	// AWS Simple Queue Service
@@ -4032,6 +4057,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdSiemRapid7InsightIdr, nil
 	case "siem_splunk":
 		return ProviderConfigIdSiemSplunk, nil
+	case "siem_sumo_logic":
+		return ProviderConfigIdSiemSumoLogic, nil
 	case "sink_aws_security_lake":
 		return ProviderConfigIdSinkAwsSecurityLake, nil
 	case "sink_aws_sqs":
@@ -4365,6 +4392,18 @@ type SiemSplunk struct {
 	Source *string `json:"source,omitempty"`
 	// Splunk source type to send events to. If not provided, will use the default source type for the Splunk collector.
 	SourceType *string `json:"source_type,omitempty"`
+}
+
+// Configuration for Sumo Logic Cloud SIEM.
+type SiemSumoLogic struct {
+	// Automatically parse logs as JSON when running log queries against Sumo Logic.
+	AutoParseLogs bool                    `json:"auto_parse_logs"`
+	CollectionUrl *SumoLogicCollectionUrl `json:"collection_url,omitempty"`
+	Credential    *SumoLogicCredential    `json:"credential,omitempty"`
+	// Only query for logs that have been processed into the Sumo Logic Cloud SIEM app.
+	SiemLogsOnly bool `json:"siem_logs_only"`
+	// Your Sumo Logic API endpoint. See https://help.sumologic.com/docs/api/getting-started/#sumo-logic-endpoints-by-deployment-and-firewall-security for help determining which base URL to use.
+	Url string `json:"url"`
 }
 
 type SentinelOneCredential struct {
@@ -4869,6 +4908,170 @@ type StorageGcs struct {
 type StorageMock struct {
 	// Name of the bucket where files are stored.
 	Bucket string `json:"bucket"`
+}
+
+type SumoLogicCollectionUrl struct {
+	Type     string
+	Secret   *SecretCredential
+	SecretId SecretCredentialId
+}
+
+func NewSumoLogicCollectionUrlFromSecret(value *SecretCredential) *SumoLogicCollectionUrl {
+	return &SumoLogicCollectionUrl{Type: "secret", Secret: value}
+}
+
+func NewSumoLogicCollectionUrlFromSecretId(value SecretCredentialId) *SumoLogicCollectionUrl {
+	return &SumoLogicCollectionUrl{Type: "secret_id", SecretId: value}
+}
+
+func (s *SumoLogicCollectionUrl) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	s.Type = unmarshaler.Type
+	switch unmarshaler.Type {
+	case "secret":
+		value := new(SecretCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		s.Secret = value
+	case "secret_id":
+		var valueUnmarshaler struct {
+			SecretId SecretCredentialId `json:"value,omitempty"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		s.SecretId = valueUnmarshaler.SecretId
+	}
+	return nil
+}
+
+func (s SumoLogicCollectionUrl) MarshalJSON() ([]byte, error) {
+	switch s.Type {
+	default:
+		return nil, fmt.Errorf("invalid type %s in %T", s.Type, s)
+	case "secret":
+		var marshaler = struct {
+			Type string `json:"type"`
+			*SecretCredential
+		}{
+			Type:             s.Type,
+			SecretCredential: s.Secret,
+		}
+		return json.Marshal(marshaler)
+	case "secret_id":
+		var marshaler = struct {
+			Type     string             `json:"type"`
+			SecretId SecretCredentialId `json:"value,omitempty"`
+		}{
+			Type:     s.Type,
+			SecretId: s.SecretId,
+		}
+		return json.Marshal(marshaler)
+	}
+}
+
+type SumoLogicCollectionUrlVisitor interface {
+	VisitSecret(*SecretCredential) error
+	VisitSecretId(SecretCredentialId) error
+}
+
+func (s *SumoLogicCollectionUrl) Accept(visitor SumoLogicCollectionUrlVisitor) error {
+	switch s.Type {
+	default:
+		return fmt.Errorf("invalid type %s in %T", s.Type, s)
+	case "secret":
+		return visitor.VisitSecret(s.Secret)
+	case "secret_id":
+		return visitor.VisitSecretId(s.SecretId)
+	}
+}
+
+type SumoLogicCredential struct {
+	Type    string
+	Basic   *BasicCredential
+	BasicId BasicCredentialId
+}
+
+func NewSumoLogicCredentialFromBasic(value *BasicCredential) *SumoLogicCredential {
+	return &SumoLogicCredential{Type: "basic", Basic: value}
+}
+
+func NewSumoLogicCredentialFromBasicId(value BasicCredentialId) *SumoLogicCredential {
+	return &SumoLogicCredential{Type: "basic_id", BasicId: value}
+}
+
+func (s *SumoLogicCredential) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	s.Type = unmarshaler.Type
+	switch unmarshaler.Type {
+	case "basic":
+		value := new(BasicCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		s.Basic = value
+	case "basic_id":
+		var valueUnmarshaler struct {
+			BasicId BasicCredentialId `json:"value,omitempty"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		s.BasicId = valueUnmarshaler.BasicId
+	}
+	return nil
+}
+
+func (s SumoLogicCredential) MarshalJSON() ([]byte, error) {
+	switch s.Type {
+	default:
+		return nil, fmt.Errorf("invalid type %s in %T", s.Type, s)
+	case "basic":
+		var marshaler = struct {
+			Type string `json:"type"`
+			*BasicCredential
+		}{
+			Type:            s.Type,
+			BasicCredential: s.Basic,
+		}
+		return json.Marshal(marshaler)
+	case "basic_id":
+		var marshaler = struct {
+			Type    string            `json:"type"`
+			BasicId BasicCredentialId `json:"value,omitempty"`
+		}{
+			Type:    s.Type,
+			BasicId: s.BasicId,
+		}
+		return json.Marshal(marshaler)
+	}
+}
+
+type SumoLogicCredentialVisitor interface {
+	VisitBasic(*BasicCredential) error
+	VisitBasicId(BasicCredentialId) error
+}
+
+func (s *SumoLogicCredential) Accept(visitor SumoLogicCredentialVisitor) error {
+	switch s.Type {
+	default:
+		return fmt.Errorf("invalid type %s in %T", s.Type, s)
+	case "basic":
+		return visitor.VisitBasic(s.Basic)
+	case "basic_id":
+		return visitor.VisitBasicId(s.BasicId)
+	}
 }
 
 type TeamsCredential struct {
