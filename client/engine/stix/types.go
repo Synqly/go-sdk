@@ -367,8 +367,10 @@ type Indicator struct {
 	ValidUntil *time.Time `json:"valid_until,omitempty"`
 	// The kill chain phase to which this Indicator corresponds.
 	KillChainPhases []*KillChainPhase `json:"kill_chain_phases,omitempty"`
-	specVersion     string
-	type_           string
+	// The data as received from the source.
+	RawData     *string `json:"raw_data,omitempty"`
+	specVersion string
+	type_       string
 }
 
 func (i *Indicator) SpecVersion() string {
