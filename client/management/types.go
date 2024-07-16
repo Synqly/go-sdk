@@ -3162,6 +3162,7 @@ type ProviderConfig struct {
 	TicketingServicenow               *TicketingServiceNow
 	VulnerabilitiesQualysCloud        *VulnerabilitiesQualysCloud
 	VulnerabilitiesRapid7InsightCloud *VulnerabilitiesRapid7InsightCloud
+	VulnerabilitiesTaniumCloud        *VulnerabilitiesTaniumCloud
 	VulnerabilitiesTenableCloud       *VulnerabilitiesTenableCloud
 }
 
@@ -3295,6 +3296,10 @@ func NewProviderConfigFromVulnerabilitiesQualysCloud(value *VulnerabilitiesQualy
 
 func NewProviderConfigFromVulnerabilitiesRapid7InsightCloud(value *VulnerabilitiesRapid7InsightCloud) *ProviderConfig {
 	return &ProviderConfig{Type: "vulnerabilities_rapid7_insight_cloud", VulnerabilitiesRapid7InsightCloud: value}
+}
+
+func NewProviderConfigFromVulnerabilitiesTaniumCloud(value *VulnerabilitiesTaniumCloud) *ProviderConfig {
+	return &ProviderConfig{Type: "vulnerabilities_tanium_cloud", VulnerabilitiesTaniumCloud: value}
 }
 
 func NewProviderConfigFromVulnerabilitiesTenableCloud(value *VulnerabilitiesTenableCloud) *ProviderConfig {
@@ -3508,6 +3513,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.VulnerabilitiesRapid7InsightCloud = value
+	case "vulnerabilities_tanium_cloud":
+		value := new(VulnerabilitiesTaniumCloud)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.VulnerabilitiesTaniumCloud = value
 	case "vulnerabilities_tenable_cloud":
 		value := new(VulnerabilitiesTenableCloud)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -3819,6 +3830,15 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 			VulnerabilitiesRapid7InsightCloud: p.VulnerabilitiesRapid7InsightCloud,
 		}
 		return json.Marshal(marshaler)
+	case "vulnerabilities_tanium_cloud":
+		var marshaler = struct {
+			Type string `json:"type"`
+			*VulnerabilitiesTaniumCloud
+		}{
+			Type:                       p.Type,
+			VulnerabilitiesTaniumCloud: p.VulnerabilitiesTaniumCloud,
+		}
+		return json.Marshal(marshaler)
 	case "vulnerabilities_tenable_cloud":
 		var marshaler = struct {
 			Type string `json:"type"`
@@ -3865,6 +3885,7 @@ type ProviderConfigVisitor interface {
 	VisitTicketingServicenow(*TicketingServiceNow) error
 	VisitVulnerabilitiesQualysCloud(*VulnerabilitiesQualysCloud) error
 	VisitVulnerabilitiesRapid7InsightCloud(*VulnerabilitiesRapid7InsightCloud) error
+	VisitVulnerabilitiesTaniumCloud(*VulnerabilitiesTaniumCloud) error
 	VisitVulnerabilitiesTenableCloud(*VulnerabilitiesTenableCloud) error
 }
 
@@ -3938,6 +3959,8 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 		return visitor.VisitVulnerabilitiesQualysCloud(p.VulnerabilitiesQualysCloud)
 	case "vulnerabilities_rapid7_insight_cloud":
 		return visitor.VisitVulnerabilitiesRapid7InsightCloud(p.VulnerabilitiesRapid7InsightCloud)
+	case "vulnerabilities_tanium_cloud":
+		return visitor.VisitVulnerabilitiesTaniumCloud(p.VulnerabilitiesTaniumCloud)
 	case "vulnerabilities_tenable_cloud":
 		return visitor.VisitVulnerabilitiesTenableCloud(p.VulnerabilitiesTenableCloud)
 	}
@@ -4013,6 +4036,8 @@ const (
 	ProviderConfigIdVulnerabilitiesQualysCloud ProviderConfigId = "vulnerabilities_qualys_cloud"
 	// Rapid7 Insight Vulnerability Management Cloud
 	ProviderConfigIdVulnerabilitiesRapid7InsightCloud ProviderConfigId = "vulnerabilities_rapid7_insight_cloud"
+	// Tanium Vulnerability Management
+	ProviderConfigIdVulnerabilitiesTaniumCloud ProviderConfigId = "vulnerabilities_tanium_cloud"
 	// Tenable Vulnerability Management
 	ProviderConfigIdVulnerabilitiesTenableCloud ProviderConfigId = "vulnerabilities_tenable_cloud"
 	// Any provider config type.
@@ -4087,6 +4112,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdVulnerabilitiesQualysCloud, nil
 	case "vulnerabilities_rapid7_insight_cloud":
 		return ProviderConfigIdVulnerabilitiesRapid7InsightCloud, nil
+	case "vulnerabilities_tanium_cloud":
+		return ProviderConfigIdVulnerabilitiesTaniumCloud, nil
 	case "vulnerabilities_tenable_cloud":
 		return ProviderConfigIdVulnerabilitiesTenableCloud, nil
 	case "*":
@@ -5074,6 +5101,89 @@ func (s *SumoLogicCredential) Accept(visitor SumoLogicCredentialVisitor) error {
 	}
 }
 
+// Supported credential types for Tanium Cloud
+type TaniumCloudCredential struct {
+	Type    string
+	Token   *TokenCredential
+	TokenId TokenCredentialId
+}
+
+func NewTaniumCloudCredentialFromToken(value *TokenCredential) *TaniumCloudCredential {
+	return &TaniumCloudCredential{Type: "token", Token: value}
+}
+
+func NewTaniumCloudCredentialFromTokenId(value TokenCredentialId) *TaniumCloudCredential {
+	return &TaniumCloudCredential{Type: "token_id", TokenId: value}
+}
+
+func (t *TaniumCloudCredential) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	t.Type = unmarshaler.Type
+	switch unmarshaler.Type {
+	case "token":
+		value := new(TokenCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		t.Token = value
+	case "token_id":
+		var valueUnmarshaler struct {
+			TokenId TokenCredentialId `json:"value,omitempty"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		t.TokenId = valueUnmarshaler.TokenId
+	}
+	return nil
+}
+
+func (t TaniumCloudCredential) MarshalJSON() ([]byte, error) {
+	switch t.Type {
+	default:
+		return nil, fmt.Errorf("invalid type %s in %T", t.Type, t)
+	case "token":
+		var marshaler = struct {
+			Type string `json:"type"`
+			*TokenCredential
+		}{
+			Type:            t.Type,
+			TokenCredential: t.Token,
+		}
+		return json.Marshal(marshaler)
+	case "token_id":
+		var marshaler = struct {
+			Type    string            `json:"type"`
+			TokenId TokenCredentialId `json:"value,omitempty"`
+		}{
+			Type:    t.Type,
+			TokenId: t.TokenId,
+		}
+		return json.Marshal(marshaler)
+	}
+}
+
+type TaniumCloudCredentialVisitor interface {
+	VisitToken(*TokenCredential) error
+	VisitTokenId(TokenCredentialId) error
+}
+
+func (t *TaniumCloudCredential) Accept(visitor TaniumCloudCredentialVisitor) error {
+	switch t.Type {
+	default:
+		return fmt.Errorf("invalid type %s in %T", t.Type, t)
+	case "token":
+		return visitor.VisitToken(t.Token)
+	case "token_id":
+		return visitor.VisitTokenId(t.TokenId)
+	}
+}
+
 type TeamsCredential struct {
 	Type     string
 	Secret   *SecretCredential
@@ -5293,6 +5403,13 @@ type VulnerabilitiesRapid7InsightCloud struct {
 	Credential *Rapid7InsightCloudCredential `json:"credential,omitempty"`
 	// URL for the Rapid7 API. This should be the base URL for the API, without any path components and must be HTTPS. For example, "https://us2.api.insight.rapid7.com".
 	Url string `json:"url"`
+}
+
+// Configuration for Tanium Cloud as a Vulnerabilities Provider
+type VulnerabilitiesTaniumCloud struct {
+	Credential *TaniumCloudCredential `json:"credential,omitempty"`
+	// URL for the Tanium Cloud API. This should be the base URL for the API, without any path components and must be HTTPS, e.g. "https://<customername>-api.cloud.tanium.com" or "https://<customername>-api.titankube.com".
+	Url *string `json:"url,omitempty"`
 }
 
 // Configuration for Tenable Cloud as a Vulnerabilities Provider
