@@ -3160,6 +3160,7 @@ type ProviderConfig struct {
 	TicketingMockTicketing            *TicketingMock
 	TicketingPagerduty                *TicketingPagerDuty
 	TicketingServicenow               *TicketingServiceNow
+	TicketingTorq                     *TicketingTorq
 	VulnerabilitiesQualysCloud        *VulnerabilitiesQualysCloud
 	VulnerabilitiesRapid7InsightCloud *VulnerabilitiesRapid7InsightCloud
 	VulnerabilitiesTaniumCloud        *VulnerabilitiesTaniumCloud
@@ -3288,6 +3289,10 @@ func NewProviderConfigFromTicketingPagerduty(value *TicketingPagerDuty) *Provide
 
 func NewProviderConfigFromTicketingServicenow(value *TicketingServiceNow) *ProviderConfig {
 	return &ProviderConfig{Type: "ticketing_servicenow", TicketingServicenow: value}
+}
+
+func NewProviderConfigFromTicketingTorq(value *TicketingTorq) *ProviderConfig {
+	return &ProviderConfig{Type: "ticketing_torq", TicketingTorq: value}
 }
 
 func NewProviderConfigFromVulnerabilitiesQualysCloud(value *VulnerabilitiesQualysCloud) *ProviderConfig {
@@ -3501,6 +3506,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.TicketingServicenow = value
+	case "ticketing_torq":
+		value := new(TicketingTorq)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.TicketingTorq = value
 	case "vulnerabilities_qualys_cloud":
 		value := new(VulnerabilitiesQualysCloud)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -3812,6 +3823,15 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 			TicketingServiceNow: p.TicketingServicenow,
 		}
 		return json.Marshal(marshaler)
+	case "ticketing_torq":
+		var marshaler = struct {
+			Type string `json:"type"`
+			*TicketingTorq
+		}{
+			Type:          p.Type,
+			TicketingTorq: p.TicketingTorq,
+		}
+		return json.Marshal(marshaler)
 	case "vulnerabilities_qualys_cloud":
 		var marshaler = struct {
 			Type string `json:"type"`
@@ -3883,6 +3903,7 @@ type ProviderConfigVisitor interface {
 	VisitTicketingMockTicketing(*TicketingMock) error
 	VisitTicketingPagerduty(*TicketingPagerDuty) error
 	VisitTicketingServicenow(*TicketingServiceNow) error
+	VisitTicketingTorq(*TicketingTorq) error
 	VisitVulnerabilitiesQualysCloud(*VulnerabilitiesQualysCloud) error
 	VisitVulnerabilitiesRapid7InsightCloud(*VulnerabilitiesRapid7InsightCloud) error
 	VisitVulnerabilitiesTaniumCloud(*VulnerabilitiesTaniumCloud) error
@@ -3955,6 +3976,8 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 		return visitor.VisitTicketingPagerduty(p.TicketingPagerduty)
 	case "ticketing_servicenow":
 		return visitor.VisitTicketingServicenow(p.TicketingServicenow)
+	case "ticketing_torq":
+		return visitor.VisitTicketingTorq(p.TicketingTorq)
 	case "vulnerabilities_qualys_cloud":
 		return visitor.VisitVulnerabilitiesQualysCloud(p.VulnerabilitiesQualysCloud)
 	case "vulnerabilities_rapid7_insight_cloud":
@@ -4032,6 +4055,8 @@ const (
 	ProviderConfigIdTicketingPagerDuty ProviderConfigId = "ticketing_pagerduty"
 	// ServiceNow IT Service Management (ITSM)
 	ProviderConfigIdTicketingServiceNow ProviderConfigId = "ticketing_servicenow"
+	// Torq
+	ProviderConfigIdTicketingTorq ProviderConfigId = "ticketing_torq"
 	// Qualys Vulnerability Management, Detection & Response (VMDR)
 	ProviderConfigIdVulnerabilitiesQualysCloud ProviderConfigId = "vulnerabilities_qualys_cloud"
 	// Rapid7 Insight Vulnerability Management Cloud
@@ -4108,6 +4133,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdTicketingPagerDuty, nil
 	case "ticketing_servicenow":
 		return ProviderConfigIdTicketingServiceNow, nil
+	case "ticketing_torq":
+		return ProviderConfigIdTicketingTorq, nil
 	case "vulnerabilities_qualys_cloud":
 		return ProviderConfigIdVulnerabilitiesQualysCloud, nil
 	case "vulnerabilities_rapid7_insight_cloud":
@@ -5378,6 +5405,93 @@ type TicketingServiceNow struct {
 	Credential *ServiceNowCredential `json:"credential,omitempty"`
 	// URL for the ServiceNow API. This should be the base URL for the API, without any path components and must be HTTPS. For example, "https://tenant.service-now.com".
 	Url string `json:"url"`
+}
+
+// Configuration for Torq as a Ticketing Provider
+type TicketingTorq struct {
+	Credential *TorqCredential `json:"credential,omitempty"`
+}
+
+type TorqCredential struct {
+	Type          string
+	OAuthClient   *OAuthClientCredential
+	OAuthClientId OAuthClientCredentialId
+}
+
+func NewTorqCredentialFromOAuthClient(value *OAuthClientCredential) *TorqCredential {
+	return &TorqCredential{Type: "o_auth_client", OAuthClient: value}
+}
+
+func NewTorqCredentialFromOAuthClientId(value OAuthClientCredentialId) *TorqCredential {
+	return &TorqCredential{Type: "o_auth_client_id", OAuthClientId: value}
+}
+
+func (t *TorqCredential) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	t.Type = unmarshaler.Type
+	switch unmarshaler.Type {
+	case "o_auth_client":
+		value := new(OAuthClientCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		t.OAuthClient = value
+	case "o_auth_client_id":
+		var valueUnmarshaler struct {
+			OAuthClientId OAuthClientCredentialId `json:"value,omitempty"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		t.OAuthClientId = valueUnmarshaler.OAuthClientId
+	}
+	return nil
+}
+
+func (t TorqCredential) MarshalJSON() ([]byte, error) {
+	switch t.Type {
+	default:
+		return nil, fmt.Errorf("invalid type %s in %T", t.Type, t)
+	case "o_auth_client":
+		var marshaler = struct {
+			Type string `json:"type"`
+			*OAuthClientCredential
+		}{
+			Type:                  t.Type,
+			OAuthClientCredential: t.OAuthClient,
+		}
+		return json.Marshal(marshaler)
+	case "o_auth_client_id":
+		var marshaler = struct {
+			Type          string                  `json:"type"`
+			OAuthClientId OAuthClientCredentialId `json:"value,omitempty"`
+		}{
+			Type:          t.Type,
+			OAuthClientId: t.OAuthClientId,
+		}
+		return json.Marshal(marshaler)
+	}
+}
+
+type TorqCredentialVisitor interface {
+	VisitOAuthClient(*OAuthClientCredential) error
+	VisitOAuthClientId(OAuthClientCredentialId) error
+}
+
+func (t *TorqCredential) Accept(visitor TorqCredentialVisitor) error {
+	switch t.Type {
+	default:
+		return fmt.Errorf("invalid type %s in %T", t.Type, t)
+	case "o_auth_client":
+		return visitor.VisitOAuthClient(t.OAuthClient)
+	case "o_auth_client_id":
+		return visitor.VisitOAuthClientId(t.OAuthClientId)
+	}
 }
 
 type ValueMapping struct {
