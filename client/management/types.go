@@ -131,6 +131,29 @@ type LogonResponseResult struct {
 	Member         *Member       `json:"member,omitempty"`
 }
 
+// A Bridge Group represents a connection between the Synqly Saas or Embedded service and a Bridge Agent. See 'Synqly Bridge Agent' guide in Synqly docs for additional information.
+type BridgeGroup struct {
+	// Human-readable name for this resource
+	Name string `json:"name"`
+	// Time object was originally created
+	CreatedAt time.Time `json:"created_at"`
+	// Last time object was updated
+	UpdatedAt time.Time     `json:"updated_at"`
+	Id        BridgeGroupId `json:"id,omitempty"`
+	// Full name of bridge
+	Fullname string `json:"fullname"`
+	// Description of the resources included in the bridge and permissions granted on those resources. Includes details of when to use this bridge along with the intended personas.
+	Description *string `json:"description,omitempty"`
+	// Labels applied to Bridges within the group. These labels can be used by integrations to select the groups of bridges capable of handling requests to the integration.
+	Labels []string `json:"labels,omitempty"`
+}
+
+type CreateBridgeResponseResult struct {
+	Bridge *BridgeGroup `json:"bridge,omitempty"`
+	// JWT for the Bridge Group to connect to Synqly. This must be saved in a file {bridgeId}.creds in the same directory as the bridge executable.
+	Credential string `json:"credential"`
+}
+
 type CapabilitiesProviderConfig = map[string]interface{}
 
 // Provides details on an available Integration.
@@ -612,6 +635,92 @@ type IntegrationPoint struct {
 	Environments *IntegrationEnvironments `json:"environments,omitempty"`
 }
 
+type BridgeSelector struct {
+	Type string
+	// ID of a specific bridge group to use
+	Id string
+	// Labels the bridge group must have. If multiple labels are provided, the first bridge group that has any one of the labels will be selected.
+	Labels []string
+}
+
+func NewBridgeSelectorFromId(value string) *BridgeSelector {
+	return &BridgeSelector{Type: "id", Id: value}
+}
+
+func NewBridgeSelectorFromLabels(value []string) *BridgeSelector {
+	return &BridgeSelector{Type: "labels", Labels: value}
+}
+
+func (b *BridgeSelector) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	b.Type = unmarshaler.Type
+	switch unmarshaler.Type {
+	case "id":
+		var valueUnmarshaler struct {
+			Id string `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		b.Id = valueUnmarshaler.Id
+	case "labels":
+		var valueUnmarshaler struct {
+			Labels []string `json:"value,omitempty"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		b.Labels = valueUnmarshaler.Labels
+	}
+	return nil
+}
+
+func (b BridgeSelector) MarshalJSON() ([]byte, error) {
+	switch b.Type {
+	default:
+		return nil, fmt.Errorf("invalid type %s in %T", b.Type, b)
+	case "id":
+		var marshaler = struct {
+			Type string `json:"type"`
+			Id   string `json:"value"`
+		}{
+			Type: b.Type,
+			Id:   b.Id,
+		}
+		return json.Marshal(marshaler)
+	case "labels":
+		var marshaler = struct {
+			Type   string   `json:"type"`
+			Labels []string `json:"value,omitempty"`
+		}{
+			Type:   b.Type,
+			Labels: b.Labels,
+		}
+		return json.Marshal(marshaler)
+	}
+}
+
+type BridgeSelectorVisitor interface {
+	VisitId(string) error
+	VisitLabels([]string) error
+}
+
+func (b *BridgeSelector) Accept(visitor BridgeSelectorVisitor) error {
+	switch b.Type {
+	default:
+		return fmt.Errorf("invalid type %s in %T", b.Type, b)
+	case "id":
+		return visitor.VisitId(b.Id)
+	case "labels":
+		return visitor.VisitLabels(b.Labels)
+	}
+}
+
 type CreateIntegrationResponseResult struct {
 	CredentialsCreated []*CredentialResponse `json:"credentials_created,omitempty"`
 	Integration        *Integration          `json:"integration,omitempty"`
@@ -647,6 +756,8 @@ type Integration struct {
 	IntegrationPointId *IntegrationPointId `json:"integration_point_id,omitempty"`
 	// When using the expand option on the List or ListAccount APIs, the full integration_point object is included in the response
 	IntegrationPoint *IntegrationPoint `json:"integration_point,omitempty"`
+	// Use a Bridge to connect to the provider.
+	BridgeSelector *BridgeSelector `json:"bridge_selector,omitempty"`
 }
 
 type CreateMemberResponseResult struct {
@@ -982,6 +1093,7 @@ type ApiPermissionMap struct {
 	Accounts          *AccountsPermissions          `json:"accounts,omitempty"`
 	Audit             *AuditPermissions             `json:"audit,omitempty"`
 	Auth              *AuthPermissions              `json:"auth,omitempty"`
+	Bridges           *BridgesPermissions           `json:"bridges,omitempty"`
 	Capabilities      *CapabilitiesPermissions      `json:"capabilities,omitempty"`
 	Credentials       *CredentialsPermissions       `json:"credentials,omitempty"`
 	Integrations      *IntegrationsPermissions      `json:"integrations,omitempty"`
@@ -1055,6 +1167,48 @@ func (a AuthActions) Ptr() *AuthActions {
 // Permissions for the auth logon/logoff API
 type AuthPermissions struct {
 	Actions []AuthActions `json:"actions,omitempty"`
+}
+
+type BridgesActions string
+
+const (
+	BridgesActionsList   BridgesActions = "list"
+	BridgesActionsCreate BridgesActions = "create"
+	BridgesActionsGet    BridgesActions = "get"
+	BridgesActionsUpdate BridgesActions = "update"
+	BridgesActionsPatch  BridgesActions = "patch"
+	BridgesActionsDelete BridgesActions = "delete"
+	BridgesActionsAll    BridgesActions = "*"
+)
+
+func NewBridgesActionsFromString(s string) (BridgesActions, error) {
+	switch s {
+	case "list":
+		return BridgesActionsList, nil
+	case "create":
+		return BridgesActionsCreate, nil
+	case "get":
+		return BridgesActionsGet, nil
+	case "update":
+		return BridgesActionsUpdate, nil
+	case "patch":
+		return BridgesActionsPatch, nil
+	case "delete":
+		return BridgesActionsDelete, nil
+	case "*":
+		return BridgesActionsAll, nil
+	}
+	var t BridgesActions
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (b BridgesActions) Ptr() *BridgesActions {
+	return &b
+}
+
+// Permissions for the bridge API
+type BridgesPermissions struct {
+	Actions []BridgesActions `json:"actions,omitempty"`
 }
 
 type CapabilitiesActions string

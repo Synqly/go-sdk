@@ -53,6 +53,8 @@ type CreateIntegrationRequest struct {
 	ProviderConfig *ProviderConfig `json:"provider_config,omitempty"`
 	// Integration Point associated with this integration.
 	IntegrationPointId *IntegrationPointId `json:"integration_point_id,omitempty"`
+	// Use a Bridge to connect to the provider.
+	BridgeSelector *BridgeSelector `json:"bridge_selector,omitempty"`
 }
 
 type CreateIntegrationResponse struct {
