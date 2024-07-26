@@ -4571,7 +4571,11 @@ type SiemMock struct {
 
 // Configuration for IBM QRadar as a SIEM Provider.
 type SiemQRadar struct {
-	Credential *QRadarCredential `json:"credential,omitempty"`
+	// The QRadar HTTP Receiver URL, stored as a secret. This URL has a special port in QRadar and is stored in a credential to protect that information. See https://www.youtube.com/watch?v=UEBLVVNpyfg for a demonstration of setting up and mapping and HTTP Receiver in QRadar.
+	CollectionPort int               `json:"collection_port"`
+	Credential     *QRadarCredential `json:"credential,omitempty"`
+	// If true, skips verification of the QRadar server's TLS certificate. Defaults to false.
+	SkipTlsVerify bool `json:"skip_tls_verify"`
 	// URL for the QRadar instance. This should be the base URL instance, without any path components and must be HTTPS. For example, "https://qradar.westus2.cloudapp.azure.com".
 	Url string `json:"url"`
 }
