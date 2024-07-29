@@ -5568,6 +5568,8 @@ type TicketingServiceNow struct {
 // Configuration for Torq as a Ticketing Provider
 type TicketingTorq struct {
 	Credential *TorqCredential `json:"credential,omitempty"`
+	// Custom field mappings for this provider.
+	CustomFieldMappings []*CustomFieldMapping `json:"custom_field_mappings,omitempty"`
 }
 
 type TorqCredential struct {
