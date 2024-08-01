@@ -642,40 +642,6 @@ type AttachmentMetadata struct {
 // Unique identifier for a field mapping
 type FieldMappingId = Id
 
-type FieldType string
-
-const (
-	FieldTypeString     FieldType = "STRING"
-	FieldTypeNumber     FieldType = "NUMBER"
-	FieldTypeBoolean    FieldType = "BOOLEAN"
-	FieldTypeDatetime   FieldType = "DATETIME"
-	FieldTypeDate       FieldType = "DATE"
-	FieldTypeJsonString FieldType = "JSON_STRING"
-)
-
-func NewFieldTypeFromString(s string) (FieldType, error) {
-	switch s {
-	case "STRING":
-		return FieldTypeString, nil
-	case "NUMBER":
-		return FieldTypeNumber, nil
-	case "BOOLEAN":
-		return FieldTypeBoolean, nil
-	case "DATETIME":
-		return FieldTypeDatetime, nil
-	case "DATE":
-		return FieldTypeDate, nil
-	case "JSON_STRING":
-		return FieldTypeJsonString, nil
-	}
-	var t FieldType
-	return "", fmt.Errorf("%s is not a valid %T", s, t)
-}
-
-func (f FieldType) Ptr() *FieldType {
-	return &f
-}
-
 // Unique identifier for an issue type
 type IssueTypeId = string
 
@@ -719,12 +685,51 @@ type Project struct {
 type ProjectId = Id
 
 type RemoteField struct {
-	// Type of the field.
-	Type FieldType `json:"type,omitempty"`
-	// Type of field in the remote ticketing provider.
+	// Remote ID of the field.
+	FieldId string `json:"field_id"`
+	// Schema of the field.
+	Schema *RemoteFieldSchema `json:"schema,omitempty"`
+	// Scope of remote field - standard or some kind of customization?
+	FieldScope RemoteFieldScope `json:"field_scope,omitempty"`
+	// Name of field in the remote ticketing provider.
 	ProviderFieldName string `json:"provider_field_name"`
 	// Path to the field in the remote ticketing provider. Uses dot notation for nested fields.
-	ProviderFieldPath string `json:"provider_field_path"`
+	ProviderFieldPath *string `json:"provider_field_path,omitempty"`
+	// Project id to which this field is scoped to
+	ProjectId *string `json:"project_id,omitempty"`
+}
+
+type RemoteFieldSchema struct {
+	FieldType string   `json:"fieldType"`
+	Values    []string `json:"values,omitempty"`
+}
+
+type RemoteFieldScope string
+
+const (
+	RemoteFieldScopeStandard          RemoteFieldScope = "standard"
+	RemoteFieldScopeIntegrationCustom RemoteFieldScope = "integration_custom"
+	RemoteFieldScopeProjectCustom     RemoteFieldScope = "project_custom"
+	RemoteFieldScopeTicketCustom      RemoteFieldScope = "ticket_custom"
+)
+
+func NewRemoteFieldScopeFromString(s string) (RemoteFieldScope, error) {
+	switch s {
+	case "standard":
+		return RemoteFieldScopeStandard, nil
+	case "integration_custom":
+		return RemoteFieldScopeIntegrationCustom, nil
+	case "project_custom":
+		return RemoteFieldScopeProjectCustom, nil
+	case "ticket_custom":
+		return RemoteFieldScopeTicketCustom, nil
+	}
+	var t RemoteFieldScope
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (r RemoteFieldScope) Ptr() *RemoteFieldScope {
+	return &r
 }
 
 type Status = string
