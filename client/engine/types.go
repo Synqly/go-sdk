@@ -85,6 +85,10 @@ type MetaStats struct {
 	Count map[string]int64 `json:"count,omitempty"`
 }
 
+// The Object type is used to represent an object with arbitrary fields. The keys are strings and the values are any type.
+type Object struct {
+}
+
 type OrderOptions string
 
 const (
@@ -619,6 +623,8 @@ type Attachment struct {
 	FileType string `json:"file_type"`
 	// File contents
 	Content []byte `json:"content"`
+	// The attributes that are not mapped to the attachment schema. The names and values of those attributes are specific to the provider.
+	Unmapped *Object `json:"unmapped,omitempty"`
 }
 
 // Attachment in a ticketing system
@@ -637,6 +643,24 @@ type AttachmentMetadata struct {
 	CreatedDate time.Time `json:"created_date"`
 	// The user who created the attachment.
 	Creator string `json:"creator"`
+	// The attributes that are not mapped to the attachment metadata schema. The names and values of those attributes are specific to the provider.
+	Unmapped *Object `json:"unmapped,omitempty"`
+}
+
+// Comment on a ticket.
+type Comment struct {
+	Id       CommentId `json:"id,omitempty"`
+	TicketId TicketId  `json:"ticket_id,omitempty"`
+	// The user who created the comment.
+	Creator string `json:"creator"`
+	// The content of the comment.
+	Content string `json:"content"`
+	// The date the comment was created.
+	CreatedAt time.Time `json:"created_at"`
+	// The date the comment was last updated.
+	UpdatedAt *time.Time `json:"updated_at,omitempty"`
+	// The attributes that are not mapped to the comment schema. The names and values of those attributes are specific to the provider.
+	Unmapped *Object `json:"unmapped,omitempty"`
 }
 
 // Unique identifier for a field mapping
@@ -679,6 +703,8 @@ type Project struct {
 	Id string `json:"id"`
 	// Name of the project
 	Name string `json:"name"`
+	// The attributes that are not mapped to the project schema. The names and values of those attributes are specific to the provider.
+	Unmapped *Object `json:"unmapped,omitempty"`
 }
 
 // Unique identifier for a project
@@ -771,6 +797,8 @@ type Ticket struct {
 	Attachments []*AttachmentMetadata `json:"attachments,omitempty"`
 	// Custom fields for this ticket, keys are the custom field names.
 	CustomFields map[string]interface{} `json:"custom_fields,omitempty"`
+	// The attributes that are not mapped to the ticket schema. The names and values of those attributes are specific to the provider.
+	Unmapped *Object `json:"unmapped,omitempty"`
 }
 
 // Unique identifier for a value mapping

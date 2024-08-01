@@ -24,6 +24,9 @@ type QueryTicketsRequest struct {
 // Unique identifier for an attachment
 type AttachmentId = Id
 
+// Unique identifier for a comment
+type CommentId = Id
+
 type CreateAttachmentRequest struct {
 	// The name of the file.
 	FileName string `json:"file_name"`
@@ -33,6 +36,15 @@ type CreateAttachmentRequest struct {
 
 type CreateAttachmentResponse struct {
 	Result *AttachmentMetadata `json:"result,omitempty"`
+}
+
+type CreateCommentRequest struct {
+	// The content of the comment.
+	Content string `json:"content"`
+}
+
+type CreateCommentResponse struct {
+	Result *Comment `json:"result,omitempty"`
 }
 
 type CreateTicketRequest struct {
@@ -80,6 +92,10 @@ type GetTicketResponse struct {
 
 type ListAttachmentsMetadataResponse struct {
 	Result []*AttachmentMetadata `json:"result,omitempty"`
+}
+
+type ListCommentsResponse struct {
+	Result []*Comment `json:"result,omitempty"`
 }
 
 type ListProjectsResponse struct {
