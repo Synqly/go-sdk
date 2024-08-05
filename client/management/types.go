@@ -3315,6 +3315,7 @@ type ProviderConfig struct {
 	TicketingPagerduty                *TicketingPagerDuty
 	TicketingServicenow               *TicketingServiceNow
 	TicketingTorq                     *TicketingTorq
+	VulnerabilitiesCrowdstrike        *VulnerabilitiesCrowdStrike
 	VulnerabilitiesQualysCloud        *VulnerabilitiesQualysCloud
 	VulnerabilitiesRapid7InsightCloud *VulnerabilitiesRapid7InsightCloud
 	VulnerabilitiesTaniumCloud        *VulnerabilitiesTaniumCloud
@@ -3447,6 +3448,10 @@ func NewProviderConfigFromTicketingServicenow(value *TicketingServiceNow) *Provi
 
 func NewProviderConfigFromTicketingTorq(value *TicketingTorq) *ProviderConfig {
 	return &ProviderConfig{Type: "ticketing_torq", TicketingTorq: value}
+}
+
+func NewProviderConfigFromVulnerabilitiesCrowdstrike(value *VulnerabilitiesCrowdStrike) *ProviderConfig {
+	return &ProviderConfig{Type: "vulnerabilities_crowdstrike", VulnerabilitiesCrowdstrike: value}
 }
 
 func NewProviderConfigFromVulnerabilitiesQualysCloud(value *VulnerabilitiesQualysCloud) *ProviderConfig {
@@ -3666,6 +3671,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.TicketingTorq = value
+	case "vulnerabilities_crowdstrike":
+		value := new(VulnerabilitiesCrowdStrike)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.VulnerabilitiesCrowdstrike = value
 	case "vulnerabilities_qualys_cloud":
 		value := new(VulnerabilitiesQualysCloud)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -3986,6 +3997,15 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 			TicketingTorq: p.TicketingTorq,
 		}
 		return json.Marshal(marshaler)
+	case "vulnerabilities_crowdstrike":
+		var marshaler = struct {
+			Type string `json:"type"`
+			*VulnerabilitiesCrowdStrike
+		}{
+			Type:                       p.Type,
+			VulnerabilitiesCrowdStrike: p.VulnerabilitiesCrowdstrike,
+		}
+		return json.Marshal(marshaler)
 	case "vulnerabilities_qualys_cloud":
 		var marshaler = struct {
 			Type string `json:"type"`
@@ -4058,6 +4078,7 @@ type ProviderConfigVisitor interface {
 	VisitTicketingPagerduty(*TicketingPagerDuty) error
 	VisitTicketingServicenow(*TicketingServiceNow) error
 	VisitTicketingTorq(*TicketingTorq) error
+	VisitVulnerabilitiesCrowdstrike(*VulnerabilitiesCrowdStrike) error
 	VisitVulnerabilitiesQualysCloud(*VulnerabilitiesQualysCloud) error
 	VisitVulnerabilitiesRapid7InsightCloud(*VulnerabilitiesRapid7InsightCloud) error
 	VisitVulnerabilitiesTaniumCloud(*VulnerabilitiesTaniumCloud) error
@@ -4132,6 +4153,8 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 		return visitor.VisitTicketingServicenow(p.TicketingServicenow)
 	case "ticketing_torq":
 		return visitor.VisitTicketingTorq(p.TicketingTorq)
+	case "vulnerabilities_crowdstrike":
+		return visitor.VisitVulnerabilitiesCrowdstrike(p.VulnerabilitiesCrowdstrike)
 	case "vulnerabilities_qualys_cloud":
 		return visitor.VisitVulnerabilitiesQualysCloud(p.VulnerabilitiesQualysCloud)
 	case "vulnerabilities_rapid7_insight_cloud":
@@ -4211,6 +4234,8 @@ const (
 	ProviderConfigIdTicketingServiceNow ProviderConfigId = "ticketing_servicenow"
 	// Torq
 	ProviderConfigIdTicketingTorq ProviderConfigId = "ticketing_torq"
+	// CrowdStrike Falcon Spotlight
+	ProviderConfigIdVulnerabilitiesCrowdStrike ProviderConfigId = "vulnerabilities_crowdstrike"
 	// Qualys Vulnerability Management, Detection & Response (VMDR)
 	ProviderConfigIdVulnerabilitiesQualysCloud ProviderConfigId = "vulnerabilities_qualys_cloud"
 	// Rapid7 Insight Vulnerability Management Cloud
@@ -4289,6 +4314,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdTicketingServiceNow, nil
 	case "ticketing_torq":
 		return ProviderConfigIdTicketingTorq, nil
+	case "vulnerabilities_crowdstrike":
+		return ProviderConfigIdVulnerabilitiesCrowdStrike, nil
 	case "vulnerabilities_qualys_cloud":
 		return ProviderConfigIdVulnerabilitiesQualysCloud, nil
 	case "vulnerabilities_rapid7_insight_cloud":
@@ -5663,6 +5690,13 @@ type ValueMapping struct {
 	ProjectId string `json:"project_id"`
 	// Remap the standard Synqly statuses to custom values.
 	Status *StatusMapping `json:"status,omitempty"`
+}
+
+// Configuration for CrowdStrike Falcon as a Vulnerabilities Provider
+type VulnerabilitiesCrowdStrike struct {
+	Credential *CrowdStrikeCredential `json:"credential,omitempty"`
+	// The root domain where your CrowdStrike Falcon tenant is located. Default "https://api.crowdstrike.com".
+	Url *string `json:"url,omitempty"`
 }
 
 // Configuration for Qualys Cloud Platform as a Vulnerabilities Provider
