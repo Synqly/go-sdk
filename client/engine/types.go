@@ -86,8 +86,7 @@ type MetaStats struct {
 }
 
 // The Object type is used to represent an object with arbitrary fields. The keys are strings and the values are any type.
-type Object struct {
-}
+type Object = map[string]interface{}
 
 type OrderOptions string
 
@@ -653,7 +652,7 @@ type Comment struct {
 	TicketId TicketId  `json:"ticket_id,omitempty"`
 	// The user who created the comment.
 	Creator string `json:"creator"`
-	// The content of the comment.
+	// The content of the comment formatted as markdown.
 	Content string `json:"content"`
 	// The date the comment was created.
 	CreatedAt time.Time `json:"created_at"`
