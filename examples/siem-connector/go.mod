@@ -2,4 +2,4 @@ module siem-connector
 
 go 1.21.1
 
-require github.com/synqly/go-sdk v0.2.78
+require github.com/synqly/go-sdk v0.2.79
