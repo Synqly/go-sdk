@@ -611,6 +611,28 @@ type Investigation struct {
 	RawData string `json:"raw_data"`
 }
 
+type QueryEventStatus string
+
+const (
+	QueryEventStatusPending  QueryEventStatus = "PENDING"
+	QueryEventStatusComplete QueryEventStatus = "COMPLETE"
+)
+
+func NewQueryEventStatusFromString(s string) (QueryEventStatus, error) {
+	switch s {
+	case "PENDING":
+		return QueryEventStatusPending, nil
+	case "COMPLETE":
+		return QueryEventStatusComplete, nil
+	}
+	var t QueryEventStatus
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (q QueryEventStatus) Ptr() *QueryEventStatus {
+	return &q
+}
+
 type StoragePath struct {
 	Path string `json:"path"`
 }

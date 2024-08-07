@@ -82,4 +82,6 @@ type QuerySiemEventsResponse struct {
 	Meta *MetaResponse `json:"meta,omitempty"`
 	// Cursor to use to retrieve the next page of results
 	Cursor string `json:"cursor"`
+	// If the provider supports asynchronous queries and the query is still running, this will be PENDING. There will be a value in the `cursor` field allowing you to continue polling for results.
+	Status QueryEventStatus `json:"status,omitempty"`
 }
