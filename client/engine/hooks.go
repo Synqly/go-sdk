@@ -7,7 +7,7 @@ import (
 )
 
 type PostProxyHook struct {
-	// Optional: if you can't use the HTTP Authorization bearer, specify integration access token here.
+	// Optional: if you can't use the HTTP Authorization Bearer, specify integration access token here.
 	Token string      `json:"-"`
 	Body  interface{} `json:"-"`
 }
