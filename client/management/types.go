@@ -5588,6 +5588,8 @@ type TicketingPagerDuty struct {
 // Configuration for ServiceNow as a Ticketing Provider
 type TicketingServiceNow struct {
 	Credential *ServiceNowCredential `json:"credential,omitempty"`
+	// Custom field mappings for this provider.
+	CustomFieldMappings []*CustomFieldMapping `json:"custom_field_mappings,omitempty"`
 	// URL for the ServiceNow API. This should be the base URL for the API, without any path components and must be HTTPS. For example, "https://tenant.service-now.com".
 	Url string `json:"url"`
 }
