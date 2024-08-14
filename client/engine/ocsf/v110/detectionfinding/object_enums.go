@@ -538,6 +538,18 @@ const Reputation_Score_Malicious ReputationScoreId = 10
 // Other. The reputation score is not mapped. See the <code>rep_score</code> attribute, which contains a data source specific value.
 const Reputation_Score_Other ReputationScoreId = 99
 
+// UserMfaStatusId Values
+// MFA Status ID. The normalized identifier of the user's multi-factor authentication status.
+
+// Unknown. The status is unknown.
+const User_MfaStatus_Unknown UserMfaStatusId = 0
+// Enabled. Multi-factor authentication is on for this user.
+const User_MfaStatus_Enabled UserMfaStatusId = 1
+// NotEnabled. TMulti-factor authentication is off for this user.
+const User_MfaStatus_NotEnabled UserMfaStatusId = 2
+// Other. The event status is not mapped. See the <code>user_status</code> attribute, which contains a data source specific value.
+const User_MfaStatus_Other UserMfaStatusId = 99
+
 // UserTypeId Values
 // Type ID. The account type identifier.
 
@@ -551,4 +563,22 @@ const User_Type_Admin UserTypeId = 2
 const User_Type_System UserTypeId = 3
 // Other. The type is not mapped. See the <code>type</code> attribute, which contains a data source specific value.
 const User_Type_Other UserTypeId = 99
+
+// UserUserStatusId Values
+// User Status ID. The normalized identifier of the user's status.
+
+// Unknown. The status is unknown.
+const User_UserStatus_Unknown UserUserStatusId = 0
+// Active. The user is active.
+const User_UserStatus_Active UserUserStatusId = 1
+// Pending. The user is not active, pending either user or admin action.
+const User_UserStatus_Pending UserUserStatusId = 2
+// Locked. The user account is locked requiring either time or intervention to unlock.
+const User_UserStatus_Locked UserUserStatusId = 3
+// Suspended. The user account is suspended.
+const User_UserStatus_Suspended UserUserStatusId = 4
+// Deprovisioned. The user account has been deprovisioned and is pending removal.
+const User_UserStatus_Deprovisioned UserUserStatusId = 5
+// Other. The event status is not mapped. See the <code>user_status</code> attribute, which contains a data source specific value.
+const User_UserStatus_Other UserUserStatusId = 99
 
