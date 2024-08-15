@@ -3,7 +3,7 @@
 package engine
 
 import (
-	authentication "github.com/synqly/go-sdk/client/engine/ocsf/v110/authentication"
+	latest "github.com/synqly/go-sdk/client/engine/ocsf/latest"
 )
 
 type QueryIdentityAuditLogRequest struct {
@@ -14,6 +14,20 @@ type QueryIdentityAuditLogRequest struct {
 	// Select a field to order the results by. Defaults to `time`. To control the direction of the sorting, append
 	// `[asc]` or `[desc]` to the field name. For example, `time[asc]` will sort the results by `time` in ascending order.
 	// The ordering defaults to `asc` if not specified.
+	Order []*string `json:"-"`
+	// Filter results by this query. For more information on filtering, refer to our Filtering Guide. Defaults to no filter.
+	// If used more than once, the queries are ANDed together.
+	Filter []*string `json:"-"`
+}
+
+type QueryGroupRequest struct {
+	// Number of users to return. Defaults to 100.
+	Limit *int `json:"-"`
+	// Start search from cursor position.
+	Cursor *string `json:"-"`
+	// Select a field to order the results by. Defaults to `uid`. To control the direction of the sorting, append
+	// `[asc]` or `[desc]` to the field name. For example, `email_addr[asc]` will sort the results by `email_addr` in
+	// ascending order. The ordering defaults to `asc` if not specified.
 	Order []*string `json:"-"`
 	// Filter results by this query. For more information on filtering, refer to our Filtering Guide. Defaults to no filter.
 	// If used more than once, the queries are ANDed together.
@@ -34,6 +48,29 @@ type QueryUserRequest struct {
 	Filter []*string `json:"-"`
 }
 
+type GetGroupMembersResponse struct {
+	// List of users wrapped in the OCSF Entity Management event of type Read that are members in the group referenced by ID.
+	Result []latest.EntityManagement `json:"result,omitempty"`
+}
+
+type GetGroupResponse struct {
+	Result latest.EntityManagement `json:"result,omitempty"`
+}
+
+type GetUserResponse struct {
+	Result latest.EntityManagement `json:"result,omitempty"`
+}
+
+// The unique identifier for a group in the identity provider's system
+type GroupId = string
+
+type QueryGroupsResponse struct {
+	// List groups wrapped in the OCSF Entity Management event of type Read.
+	Result []latest.EntityManagement `json:"result,omitempty"`
+	// Cursor to use to retrieve the next page of results
+	Cursor string `json:"cursor"`
+}
+
 type QueryIdentityAuditLogResponse struct {
 	// List of events from the audit log. Each event will be one of the OCSF Types Account Change, Authentication, or Group Management.
 	Result []*Event `json:"result,omitempty"`
@@ -42,8 +79,8 @@ type QueryIdentityAuditLogResponse struct {
 }
 
 type QueryUsersResponse struct {
-	// List of users in the identity provider, mapped to the OSCF User object.
-	Result []*authentication.User `json:"result,omitempty"`
+	// List users wrapped in the OCSF Entity Management event of type Read.
+	Result []latest.EntityManagement `json:"result,omitempty"`
 	// Cursor to use to retrieve the next page of results
 	Cursor string `json:"cursor"`
 }
