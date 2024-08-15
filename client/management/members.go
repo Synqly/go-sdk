@@ -26,7 +26,7 @@ type CreateMemberRequest struct {
 	Nickname *string `json:"nickname,omitempty"`
 	// Url of user's picture
 	Picture *string `json:"picture,omitempty"`
-	// Member secret
+	// Member secret used to logon. Must be at least 8 characters long and fewer than 72 characters. There are no restrictions on the characters used; however, the secret must be sufficiently complex. It cannot be a common word, previously leaked password, or easily guessed sequences like `qwerty` or `12345`.
 	Secret string `json:"secret"`
 	// Roles granted to this member. Tokens inherit this access. Defaults to `member`.
 	RoleBinding []RoleName     `json:"role_binding,omitempty"`
