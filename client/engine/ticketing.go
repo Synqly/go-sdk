@@ -39,6 +39,8 @@ type CreateAttachmentResponse struct {
 }
 
 type CreateCommentRequest struct {
+	// Email address of user who created this ticket. Required by PagerDuty. Not supported by Jira, ServiceNow, or Torq.
+	Creator *string `json:"creator,omitempty"`
 	// The content of the comment.
 	Content string `json:"content"`
 }
