@@ -324,7 +324,7 @@ func (c *Client) QueryApplications(ctx context.Context, request *engine.QueryApp
 }
 
 // Connect or disconnect one or more endpoints assets to the network, allowing or disallowing connections.
-func (c *Client) NetworkQuarantine(ctx context.Context, request *engine.NetworkQuarantineRequest) error {
+func (c *Client) NetworkQuarantine(ctx context.Context, request *engine.NetworkQuarantineRequest) (*engine.NetworkQuarantineResponse, error) {
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
@@ -434,20 +434,21 @@ func (c *Client) NetworkQuarantine(ctx context.Context, request *engine.NetworkQ
 		return apiError
 	}
 
+	var response *engine.NetworkQuarantineResponse
 	if err := core.DoRequest(
 		ctx,
 		c.httpClient,
 		endpointURL,
 		http.MethodPost,
 		request,
-		nil,
+		&response,
 		false,
 		c.header,
 		errorDecoder,
 	); err != nil {
-		return err
+		return response, err
 	}
-	return nil
+	return response, nil
 }
 
 // Returns a list of threats that match the query from the token-linked EDR source.

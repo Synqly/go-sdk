@@ -2393,11 +2393,152 @@ type CustomFieldMapping struct {
 	ProviderFieldPath string `json:"provider_field_path"`
 }
 
+type DefenderCredential struct {
+	Type          string
+	OAuthClient   *OAuthClientCredential
+	OAuthClientId OAuthClientCredentialId
+	TenantId      string
+	UrlString     string
+}
+
+func NewDefenderCredentialFromOAuthClient(value *OAuthClientCredential) *DefenderCredential {
+	return &DefenderCredential{Type: "o_auth_client", OAuthClient: value}
+}
+
+func NewDefenderCredentialFromOAuthClientId(value OAuthClientCredentialId) *DefenderCredential {
+	return &DefenderCredential{Type: "o_auth_client_id", OAuthClientId: value}
+}
+
+func NewDefenderCredentialFromTenantId(value string) *DefenderCredential {
+	return &DefenderCredential{Type: "tenantId", TenantId: value}
+}
+
+func NewDefenderCredentialFromUrlString(value string) *DefenderCredential {
+	return &DefenderCredential{Type: "urlString", UrlString: value}
+}
+
+func (d *DefenderCredential) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	d.Type = unmarshaler.Type
+	switch unmarshaler.Type {
+	case "o_auth_client":
+		value := new(OAuthClientCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		d.OAuthClient = value
+	case "o_auth_client_id":
+		var valueUnmarshaler struct {
+			OAuthClientId OAuthClientCredentialId `json:"value,omitempty"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		d.OAuthClientId = valueUnmarshaler.OAuthClientId
+	case "tenantId":
+		var valueUnmarshaler struct {
+			TenantId string `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		d.TenantId = valueUnmarshaler.TenantId
+	case "urlString":
+		var valueUnmarshaler struct {
+			UrlString string `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		d.UrlString = valueUnmarshaler.UrlString
+	}
+	return nil
+}
+
+func (d DefenderCredential) MarshalJSON() ([]byte, error) {
+	switch d.Type {
+	default:
+		return nil, fmt.Errorf("invalid type %s in %T", d.Type, d)
+	case "o_auth_client":
+		var marshaler = struct {
+			Type string `json:"type"`
+			*OAuthClientCredential
+		}{
+			Type:                  d.Type,
+			OAuthClientCredential: d.OAuthClient,
+		}
+		return json.Marshal(marshaler)
+	case "o_auth_client_id":
+		var marshaler = struct {
+			Type          string                  `json:"type"`
+			OAuthClientId OAuthClientCredentialId `json:"value,omitempty"`
+		}{
+			Type:          d.Type,
+			OAuthClientId: d.OAuthClientId,
+		}
+		return json.Marshal(marshaler)
+	case "tenantId":
+		var marshaler = struct {
+			Type     string `json:"type"`
+			TenantId string `json:"value"`
+		}{
+			Type:     d.Type,
+			TenantId: d.TenantId,
+		}
+		return json.Marshal(marshaler)
+	case "urlString":
+		var marshaler = struct {
+			Type      string `json:"type"`
+			UrlString string `json:"value"`
+		}{
+			Type:      d.Type,
+			UrlString: d.UrlString,
+		}
+		return json.Marshal(marshaler)
+	}
+}
+
+type DefenderCredentialVisitor interface {
+	VisitOAuthClient(*OAuthClientCredential) error
+	VisitOAuthClientId(OAuthClientCredentialId) error
+	VisitTenantId(string) error
+	VisitUrlString(string) error
+}
+
+func (d *DefenderCredential) Accept(visitor DefenderCredentialVisitor) error {
+	switch d.Type {
+	default:
+		return fmt.Errorf("invalid type %s in %T", d.Type, d)
+	case "o_auth_client":
+		return visitor.VisitOAuthClient(d.OAuthClient)
+	case "o_auth_client_id":
+		return visitor.VisitOAuthClientId(d.OAuthClientId)
+	case "tenantId":
+		return visitor.VisitTenantId(d.TenantId)
+	case "urlString":
+		return visitor.VisitUrlString(d.UrlString)
+	}
+}
+
 // Configuration for the CrowdStrike EDR Provider
 type EdrCrowdStrike struct {
 	Credential *CrowdStrikeCredential `json:"credential,omitempty"`
 	// The root domain where your CrowdStrike Falcon tenant is located. Default "https://api.crowdstrike.com".
 	Url *string `json:"url,omitempty"`
+}
+
+// Configuration for the Microsoft Defender EDR Provider
+type EdrDefender struct {
+	Credential *DefenderCredential `json:"credential,omitempty"`
+	// TenantId for the Microsoft Defender Management Console.
+	TenantId string `json:"tenantId"`
+	// URL for the Microsoft Defender Management Console.
+	UrlString string `json:"urlString"`
 }
 
 // Configuration for the SentinelOne EDR Provider
@@ -3287,6 +3428,7 @@ type ProviderConfig struct {
 	AssetsNozomiVantage               *AssetsNozomiVantage
 	AssetsServicenow                  *AssetsServiceNow
 	EdrCrowdstrike                    *EdrCrowdStrike
+	EdrDefender                       *EdrDefender
 	EdrSentinelone                    *EdrSentinelOne
 	HooksHttp                         *HooksHttp
 	IdentityEntraId                   *IdentityEntraId
@@ -3336,6 +3478,10 @@ func NewProviderConfigFromAssetsServicenow(value *AssetsServiceNow) *ProviderCon
 
 func NewProviderConfigFromEdrCrowdstrike(value *EdrCrowdStrike) *ProviderConfig {
 	return &ProviderConfig{Type: "edr_crowdstrike", EdrCrowdstrike: value}
+}
+
+func NewProviderConfigFromEdrDefender(value *EdrDefender) *ProviderConfig {
+	return &ProviderConfig{Type: "edr_defender", EdrDefender: value}
 }
 
 func NewProviderConfigFromEdrSentinelone(value *EdrSentinelOne) *ProviderConfig {
@@ -3503,6 +3649,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.EdrCrowdstrike = value
+	case "edr_defender":
+		value := new(EdrDefender)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.EdrDefender = value
 	case "edr_sentinelone":
 		value := new(EdrSentinelOne)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -3743,6 +3895,15 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 		}{
 			Type:           p.Type,
 			EdrCrowdStrike: p.EdrCrowdstrike,
+		}
+		return json.Marshal(marshaler)
+	case "edr_defender":
+		var marshaler = struct {
+			Type string `json:"type"`
+			*EdrDefender
+		}{
+			Type:        p.Type,
+			EdrDefender: p.EdrDefender,
 		}
 		return json.Marshal(marshaler)
 	case "edr_sentinelone":
@@ -4050,6 +4211,7 @@ type ProviderConfigVisitor interface {
 	VisitAssetsNozomiVantage(*AssetsNozomiVantage) error
 	VisitAssetsServicenow(*AssetsServiceNow) error
 	VisitEdrCrowdstrike(*EdrCrowdStrike) error
+	VisitEdrDefender(*EdrDefender) error
 	VisitEdrSentinelone(*EdrSentinelOne) error
 	VisitHooksHttp(*HooksHttp) error
 	VisitIdentityEntraId(*IdentityEntraId) error
@@ -4097,6 +4259,8 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 		return visitor.VisitAssetsServicenow(p.AssetsServicenow)
 	case "edr_crowdstrike":
 		return visitor.VisitEdrCrowdstrike(p.EdrCrowdstrike)
+	case "edr_defender":
+		return visitor.VisitEdrDefender(p.EdrDefender)
 	case "edr_sentinelone":
 		return visitor.VisitEdrSentinelone(p.EdrSentinelone)
 	case "hooks_http":
@@ -4178,6 +4342,8 @@ const (
 	ProviderConfigIdAssetsServiceNow ProviderConfigId = "assets_servicenow"
 	// CrowdStrike Falcon® Insight EDR
 	ProviderConfigIdEdrCrowdStrike ProviderConfigId = "edr_crowdstrike"
+	// Microsoft Defender for Endpoint
+	ProviderConfigIdEdrDefender ProviderConfigId = "edr_defender"
 	// SentinelOne Singularity™ Endpoint
 	ProviderConfigIdEdrSentinelOne ProviderConfigId = "edr_sentinelone"
 	// HTTP Webhook
@@ -4258,6 +4424,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdAssetsServiceNow, nil
 	case "edr_crowdstrike":
 		return ProviderConfigIdEdrCrowdStrike, nil
+	case "edr_defender":
+		return ProviderConfigIdEdrDefender, nil
 	case "edr_sentinelone":
 		return ProviderConfigIdEdrSentinelOne, nil
 	case "hooks_http":

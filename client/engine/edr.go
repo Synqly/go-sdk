@@ -109,6 +109,11 @@ type NetworkQuarantineRequest struct {
 	EndpointIds []string `json:"endpoint_ids,omitempty"`
 }
 
+type NetworkQuarantineResponse struct {
+	// The list of endpoint IDs or action IDs that were successfully quarantined or unquarantined.
+	Result []string `json:"result,omitempty"`
+}
+
 type QueryAlertsResponse struct {
 	// List of alerts that match the query.
 	Result []*Event `json:"result,omitempty"`
