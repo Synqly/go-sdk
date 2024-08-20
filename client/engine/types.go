@@ -747,8 +747,9 @@ type RemoteField struct {
 }
 
 type RemoteFieldSchema struct {
-	FieldType string   `json:"fieldType"`
-	Values    []string `json:"values,omitempty"`
+	FieldTypeId RemoteFieldTypeId `json:"field_type_id,omitempty"`
+	FieldType   *string           `json:"field_Type,omitempty"`
+	EnumValues  []string          `json:"enum_values,omitempty"`
 }
 
 type RemoteFieldScope string
@@ -758,6 +759,7 @@ const (
 	RemoteFieldScopeIntegrationCustom RemoteFieldScope = "integration_custom"
 	RemoteFieldScopeProjectCustom     RemoteFieldScope = "project_custom"
 	RemoteFieldScopeTicketCustom      RemoteFieldScope = "ticket_custom"
+	RemoteFieldScopeUnknown           RemoteFieldScope = "unknown"
 )
 
 func NewRemoteFieldScopeFromString(s string) (RemoteFieldScope, error) {
@@ -770,12 +772,42 @@ func NewRemoteFieldScopeFromString(s string) (RemoteFieldScope, error) {
 		return RemoteFieldScopeProjectCustom, nil
 	case "ticket_custom":
 		return RemoteFieldScopeTicketCustom, nil
+	case "unknown":
+		return RemoteFieldScopeUnknown, nil
 	}
 	var t RemoteFieldScope
 	return "", fmt.Errorf("%s is not a valid %T", s, t)
 }
 
 func (r RemoteFieldScope) Ptr() *RemoteFieldScope {
+	return &r
+}
+
+type RemoteFieldTypeId string
+
+const (
+	RemoteFieldTypeIdString RemoteFieldTypeId = "string"
+	RemoteFieldTypeIdNumber RemoteFieldTypeId = "number"
+	RemoteFieldTypeIdEnum   RemoteFieldTypeId = "enum"
+	RemoteFieldTypeIdOther  RemoteFieldTypeId = "other"
+)
+
+func NewRemoteFieldTypeIdFromString(s string) (RemoteFieldTypeId, error) {
+	switch s {
+	case "string":
+		return RemoteFieldTypeIdString, nil
+	case "number":
+		return RemoteFieldTypeIdNumber, nil
+	case "enum":
+		return RemoteFieldTypeIdEnum, nil
+	case "other":
+		return RemoteFieldTypeIdOther, nil
+	}
+	var t RemoteFieldTypeId
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (r RemoteFieldTypeId) Ptr() *RemoteFieldTypeId {
 	return &r
 }
 
