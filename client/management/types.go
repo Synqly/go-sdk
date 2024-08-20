@@ -2631,17 +2631,17 @@ func (e *ElasticsearchCredential) Accept(visitor ElasticsearchCredentialVisitor)
 }
 
 type EntraIdCredential struct {
-	Type    string
-	Token   *TokenCredential
-	TokenId TokenCredentialId
+	Type          string
+	OAuthClient   *OAuthClientCredential
+	OAuthClientId OAuthClientCredentialId
 }
 
-func NewEntraIdCredentialFromToken(value *TokenCredential) *EntraIdCredential {
-	return &EntraIdCredential{Type: "token", Token: value}
+func NewEntraIdCredentialFromOAuthClient(value *OAuthClientCredential) *EntraIdCredential {
+	return &EntraIdCredential{Type: "o_auth_client", OAuthClient: value}
 }
 
-func NewEntraIdCredentialFromTokenId(value TokenCredentialId) *EntraIdCredential {
-	return &EntraIdCredential{Type: "token_id", TokenId: value}
+func NewEntraIdCredentialFromOAuthClientId(value OAuthClientCredentialId) *EntraIdCredential {
+	return &EntraIdCredential{Type: "o_auth_client_id", OAuthClientId: value}
 }
 
 func (e *EntraIdCredential) UnmarshalJSON(data []byte) error {
@@ -2653,20 +2653,20 @@ func (e *EntraIdCredential) UnmarshalJSON(data []byte) error {
 	}
 	e.Type = unmarshaler.Type
 	switch unmarshaler.Type {
-	case "token":
-		value := new(TokenCredential)
+	case "o_auth_client":
+		value := new(OAuthClientCredential)
 		if err := json.Unmarshal(data, &value); err != nil {
 			return err
 		}
-		e.Token = value
-	case "token_id":
+		e.OAuthClient = value
+	case "o_auth_client_id":
 		var valueUnmarshaler struct {
-			TokenId TokenCredentialId `json:"value,omitempty"`
+			OAuthClientId OAuthClientCredentialId `json:"value,omitempty"`
 		}
 		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
 			return err
 		}
-		e.TokenId = valueUnmarshaler.TokenId
+		e.OAuthClientId = valueUnmarshaler.OAuthClientId
 	}
 	return nil
 }
@@ -2675,40 +2675,40 @@ func (e EntraIdCredential) MarshalJSON() ([]byte, error) {
 	switch e.Type {
 	default:
 		return nil, fmt.Errorf("invalid type %s in %T", e.Type, e)
-	case "token":
+	case "o_auth_client":
 		var marshaler = struct {
 			Type string `json:"type"`
-			*TokenCredential
+			*OAuthClientCredential
 		}{
-			Type:            e.Type,
-			TokenCredential: e.Token,
+			Type:                  e.Type,
+			OAuthClientCredential: e.OAuthClient,
 		}
 		return json.Marshal(marshaler)
-	case "token_id":
+	case "o_auth_client_id":
 		var marshaler = struct {
-			Type    string            `json:"type"`
-			TokenId TokenCredentialId `json:"value,omitempty"`
+			Type          string                  `json:"type"`
+			OAuthClientId OAuthClientCredentialId `json:"value,omitempty"`
 		}{
-			Type:    e.Type,
-			TokenId: e.TokenId,
+			Type:          e.Type,
+			OAuthClientId: e.OAuthClientId,
 		}
 		return json.Marshal(marshaler)
 	}
 }
 
 type EntraIdCredentialVisitor interface {
-	VisitToken(*TokenCredential) error
-	VisitTokenId(TokenCredentialId) error
+	VisitOAuthClient(*OAuthClientCredential) error
+	VisitOAuthClientId(OAuthClientCredentialId) error
 }
 
 func (e *EntraIdCredential) Accept(visitor EntraIdCredentialVisitor) error {
 	switch e.Type {
 	default:
 		return fmt.Errorf("invalid type %s in %T", e.Type, e)
-	case "token":
-		return visitor.VisitToken(e.Token)
-	case "token_id":
-		return visitor.VisitTokenId(e.TokenId)
+	case "o_auth_client":
+		return visitor.VisitOAuthClient(e.OAuthClient)
+	case "o_auth_client_id":
+		return visitor.VisitOAuthClientId(e.OAuthClientId)
 	}
 }
 
@@ -2895,11 +2895,7 @@ type HooksHttp struct {
 
 // Configuration for the Microsoft Entra ID Identity Provider
 type IdentityEntraId struct {
-	// Azure Client (Application) ID.
-	ClientId   string             `json:"client_id"`
 	Credential *EntraIdCredential `json:"credential,omitempty"`
-	// Any custom scopes. Defaults to the primary Microsoft graph API default scope.
-	Scopes []string `json:"scopes,omitempty"`
 	// Azure Directory (tenant) ID.
 	TenantId string `json:"tenant_id"`
 	// Optional URL override for the Microsoft Graph API. This should be the base URL for the API without any path components.
