@@ -162,7 +162,7 @@ func (c *Client) GetMessage(ctx context.Context, notificationId engine.Notificat
 }
 
 // Creates a `Notification` object in the token-linked `Integration`.
-func (c *Client) CreateMessage(ctx context.Context, request engine.CreateNotificationRequest) (*engine.CreateNotificationResponse, error) {
+func (c *Client) CreateMessage(ctx context.Context, request *engine.CreateNotificationRequest) (*engine.CreateNotificationResponse, error) {
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL

@@ -2,7 +2,31 @@
 
 package engine
 
-type CreateNotificationRequest = *Notification
+// Notification object
+type CreateNotificationRequest struct {
+	// Human-readable name for this resource
+	Name string `json:"name"`
+	// Notification summary.
+	Summary string `json:"summary"`
+	// Notification priority
+	Priority *Priority `json:"priority,omitempty"`
+	// Notification project
+	Project *string `json:"project,omitempty"`
+	// The current status of the notification.
+	Status *string `json:"status,omitempty"`
+	// Notification description.
+	Description *string `json:"description,omitempty"`
+	// The notification's type.
+	IssueType *string `json:"issue_type,omitempty"`
+	// The user who created this notification.
+	Creator *string `json:"creator,omitempty"`
+	// Who notification is assigned to.
+	Assignee *string `json:"assignee,omitempty"`
+	// The notification contact information.
+	Contact *string `json:"contact,omitempty"`
+	// Associate tags with Notification
+	Tags []string `json:"tags,omitempty"`
+}
 
 type CreateNotificationResponse struct {
 	Result *Notification `json:"result,omitempty"`

@@ -549,30 +549,28 @@ type Notification struct {
 	// Last time object was updated
 	UpdatedAt time.Time      `json:"updated_at"`
 	Id        NotificationId `json:"id,omitempty"`
-	// Notification priority
-	Priority Priority `json:"priority,omitempty"`
-	// Notification status
-	NotificationStatus NotificationStatus `json:"notification_status,omitempty"`
-	// Notification project
-	Project string `json:"project"`
-	// The current status of the notification.
-	Status string `json:"status"`
-	// Notification description.
-	Description string `json:"description"`
 	// Notification summary.
 	Summary string `json:"summary"`
+	// Notification priority
+	Priority *Priority `json:"priority,omitempty"`
+	// Notification status
+	NotificationStatus *NotificationStatus `json:"notification_status,omitempty"`
+	// Notification project
+	Project *string `json:"project,omitempty"`
+	// The current status of the notification.
+	Status *string `json:"status,omitempty"`
+	// Notification description.
+	Description *string `json:"description,omitempty"`
 	// The notification's type.
-	IssueType string `json:"issue_type"`
+	IssueType *string `json:"issue_type,omitempty"`
 	// The user who created this notification.
-	Creator string `json:"creator"`
+	Creator *string `json:"creator,omitempty"`
 	// Who notification is assigned to.
-	Assignee string `json:"assignee"`
+	Assignee *string `json:"assignee,omitempty"`
 	// The notification contact information.
-	Contact string `json:"contact"`
+	Contact *string `json:"contact,omitempty"`
 	// Associate tags with Notification
 	Tags []string `json:"tags,omitempty"`
-	// External URL reference
-	Reference string `json:"reference"`
 }
 
 type NotificationStatus string
