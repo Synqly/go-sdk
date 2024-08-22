@@ -26,6 +26,8 @@ type CreateAccountRequest struct {
 	Fullname *string `json:"fullname,omitempty"`
 	// Environment this account runs in. Defaults to `prod` if not specified.
 	Environment *Environment `json:"environment,omitempty"`
+	// User defined labels that apply to this account. These values can be used in role bindings to limit the scope of permissions.
+	Labels []string `json:"labels,omitempty"`
 }
 
 type CreateAccountResponse struct {

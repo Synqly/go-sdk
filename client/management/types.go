@@ -22,6 +22,8 @@ type Account struct {
 	OrganizationId OrganizationId `json:"organization_id,omitempty"`
 	// Environment this account runs in.
 	Environment Environment `json:"environment,omitempty"`
+	// User defined labels that apply to this account. These values can be used in role bindings to limit the scope of permissions.
+	Labels []string `json:"labels,omitempty"`
 }
 
 // Unique identifier for this Account
@@ -5907,8 +5909,10 @@ type Resources struct {
 type RoleAccounts struct {
 	// List of account ids that this role definition grants access to. Use "\*" to grant access to all account ids.
 	Ids []IntegrationId `json:"ids,omitempty"`
-	// List of account labels this role definition grants access to.
+	// List of account labels this role definition grants access to. If both labels and environments are specified both must pass
 	Labels []string `json:"labels,omitempty"`
+	// Account environments this role definition grants access to. If both labels and environments are specified both must pass
+	Environments []Environment `json:"environments,omitempty"`
 }
 
 type RoleIntegrations struct {
