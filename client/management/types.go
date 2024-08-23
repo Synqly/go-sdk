@@ -742,7 +742,7 @@ type Integration struct {
 	Fullname string `json:"fullname"`
 	// Integration refresh token id
 	RefreshTokenId TokenId `json:"refresh_token_id,omitempty"`
-	// Account associated with this integration. Use the expand=account parameter with the List and ListAccount APIs to expand the Account to the full object
+	// Account associated with this integration. Use the expand=accounts parameter with the List and ListAccount APIs to expand the Account to the full object
 	AccountId AccountId `json:"account_id,omitempty"`
 	// When using the expand option on the List or ListAccount APIs, the full account object is included in the response
 	Account *Account `json:"account,omitempty"`
@@ -754,7 +754,7 @@ type Integration struct {
 	ProviderFullname string `json:"provider_fullname"`
 	// Type of the provider for this Integration.
 	ProviderType string `json:"provider_type"`
-	// Integration Point associated with this integration. Use the expand=integration_point parameter with the List and ListAccount APIs to expand the Integration Point to the full object
+	// Integration Point associated with this integration. Use the expand=integration_points parameter with the List and ListAccount APIs to expand the Integration Point to the full object
 	IntegrationPointId *IntegrationPointId `json:"integration_point_id,omitempty"`
 	// When using the expand option on the List or ListAccount APIs, the full integration_point object is included in the response
 	IntegrationPoint *IntegrationPoint `json:"integration_point,omitempty"`
@@ -5995,11 +5995,11 @@ type Status struct {
 	CreatedAt time.Time `json:"created_at"`
 	// Last time object was updated
 	UpdatedAt time.Time `json:"updated_at"`
-	// Account associated with this status. Use the expand=account parameter with the List API to expand the Account to the full object
+	// Account associated with this status. Use the expand=accounts parameter with the List API to expand the Account to the full object
 	AccountId AccountId `json:"account_id,omitempty"`
 	// When using the expand option on the List API, the full account object is included in the response
 	Account *Account `json:"account,omitempty"`
-	// Integration associated with this status. Use the expand=integration parameter with the List API to expand the Account to the full object
+	// Integration associated with this status. Use the expand=integrations parameter with the List API to expand the Account to the full object
 	IntegrationId IntegrationId `json:"integration_id,omitempty"`
 	// When using the expand option on the List API, the full integration object is included in the response
 	Integration *Integration `json:"integration,omitempty"`

@@ -61,17 +61,23 @@ type ListStatusEventsResponse struct {
 type ListStatusOptions string
 
 const (
-	ListStatusOptionsAccount     ListStatusOptions = "account"
-	ListStatusOptionsIntegration ListStatusOptions = "integration"
-	ListStatusOptionsAll         ListStatusOptions = "all"
+	ListStatusOptionsAccount      ListStatusOptions = "account"
+	ListStatusOptionsAccounts     ListStatusOptions = "accounts"
+	ListStatusOptionsIntegration  ListStatusOptions = "integration"
+	ListStatusOptionsIntegrations ListStatusOptions = "integrations"
+	ListStatusOptionsAll          ListStatusOptions = "all"
 )
 
 func NewListStatusOptionsFromString(s string) (ListStatusOptions, error) {
 	switch s {
 	case "account":
 		return ListStatusOptionsAccount, nil
+	case "accounts":
+		return ListStatusOptionsAccounts, nil
 	case "integration":
 		return ListStatusOptionsIntegration, nil
+	case "integrations":
+		return ListStatusOptionsIntegrations, nil
 	case "all":
 		return ListStatusOptionsAll, nil
 	}

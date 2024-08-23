@@ -73,17 +73,23 @@ type ListAccountIntegrationsResponse struct {
 type ListIntegrationOptions string
 
 const (
-	ListIntegrationOptionsAccount          ListIntegrationOptions = "account"
-	ListIntegrationOptionsIntegrationPoint ListIntegrationOptions = "integration_point"
-	ListIntegrationOptionsAll              ListIntegrationOptions = "all"
+	ListIntegrationOptionsAccount           ListIntegrationOptions = "account"
+	ListIntegrationOptionsAccounts          ListIntegrationOptions = "accounts"
+	ListIntegrationOptionsIntegrationPoint  ListIntegrationOptions = "integration_point"
+	ListIntegrationOptionsIntegrationPoints ListIntegrationOptions = "integration_points"
+	ListIntegrationOptionsAll               ListIntegrationOptions = "all"
 )
 
 func NewListIntegrationOptionsFromString(s string) (ListIntegrationOptions, error) {
 	switch s {
 	case "account":
 		return ListIntegrationOptionsAccount, nil
+	case "accounts":
+		return ListIntegrationOptionsAccounts, nil
 	case "integration_point":
 		return ListIntegrationOptionsIntegrationPoint, nil
+	case "integration_points":
+		return ListIntegrationOptionsIntegrationPoints, nil
 	case "all":
 		return ListIntegrationOptionsAll, nil
 	}
