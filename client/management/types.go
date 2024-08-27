@@ -2550,10 +2550,31 @@ type EdrSentinelOne struct {
 	Url string `json:"url"`
 }
 
+// Options used to control how requests are made to elasticsearch when different authentication types are used.
+type ElasticsearchAuthOptions struct {
+	// When you have the correct permissions, this allows API requests to get made as a specific user, with all of their roles
+	// and permissions. When populated, this option will send the 'es-security-runas-user' header with every request made to
+	// the Elasticsearch API.
+	RunAs *string `json:"run_as,omitempty"`
+	// Some auth cases, notably JWT auth can be configured to require sending a shared secret in the `ES-Client-Authentication`
+	// header. When this secret is populated, it will get added as the shared secret for every request made to Elasticsearch.
+	SharedSecret *ElasticsearchSharedSecret `json:"shared_secret,omitempty"`
+}
+
 type ElasticsearchCredential struct {
-	Type    string
-	Token   *TokenCredential
-	TokenId TokenCredentialId
+	Type          string
+	OAuthClient   *OAuthClientCredential
+	OAuthClientId OAuthClientCredentialId
+	Token         *TokenCredential
+	TokenId       TokenCredentialId
+}
+
+func NewElasticsearchCredentialFromOAuthClient(value *OAuthClientCredential) *ElasticsearchCredential {
+	return &ElasticsearchCredential{Type: "o_auth_client", OAuthClient: value}
+}
+
+func NewElasticsearchCredentialFromOAuthClientId(value OAuthClientCredentialId) *ElasticsearchCredential {
+	return &ElasticsearchCredential{Type: "o_auth_client_id", OAuthClientId: value}
 }
 
 func NewElasticsearchCredentialFromToken(value *TokenCredential) *ElasticsearchCredential {
@@ -2573,6 +2594,20 @@ func (e *ElasticsearchCredential) UnmarshalJSON(data []byte) error {
 	}
 	e.Type = unmarshaler.Type
 	switch unmarshaler.Type {
+	case "o_auth_client":
+		value := new(OAuthClientCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.OAuthClient = value
+	case "o_auth_client_id":
+		var valueUnmarshaler struct {
+			OAuthClientId OAuthClientCredentialId `json:"value,omitempty"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		e.OAuthClientId = valueUnmarshaler.OAuthClientId
 	case "token":
 		value := new(TokenCredential)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -2595,6 +2630,24 @@ func (e ElasticsearchCredential) MarshalJSON() ([]byte, error) {
 	switch e.Type {
 	default:
 		return nil, fmt.Errorf("invalid type %s in %T", e.Type, e)
+	case "o_auth_client":
+		var marshaler = struct {
+			Type string `json:"type"`
+			*OAuthClientCredential
+		}{
+			Type:                  e.Type,
+			OAuthClientCredential: e.OAuthClient,
+		}
+		return json.Marshal(marshaler)
+	case "o_auth_client_id":
+		var marshaler = struct {
+			Type          string                  `json:"type"`
+			OAuthClientId OAuthClientCredentialId `json:"value,omitempty"`
+		}{
+			Type:          e.Type,
+			OAuthClientId: e.OAuthClientId,
+		}
+		return json.Marshal(marshaler)
 	case "token":
 		var marshaler = struct {
 			Type string `json:"type"`
@@ -2617,6 +2670,8 @@ func (e ElasticsearchCredential) MarshalJSON() ([]byte, error) {
 }
 
 type ElasticsearchCredentialVisitor interface {
+	VisitOAuthClient(*OAuthClientCredential) error
+	VisitOAuthClientId(OAuthClientCredentialId) error
 	VisitToken(*TokenCredential) error
 	VisitTokenId(TokenCredentialId) error
 }
@@ -2625,10 +2680,96 @@ func (e *ElasticsearchCredential) Accept(visitor ElasticsearchCredentialVisitor)
 	switch e.Type {
 	default:
 		return fmt.Errorf("invalid type %s in %T", e.Type, e)
+	case "o_auth_client":
+		return visitor.VisitOAuthClient(e.OAuthClient)
+	case "o_auth_client_id":
+		return visitor.VisitOAuthClientId(e.OAuthClientId)
 	case "token":
 		return visitor.VisitToken(e.Token)
 	case "token_id":
 		return visitor.VisitTokenId(e.TokenId)
+	}
+}
+
+type ElasticsearchSharedSecret struct {
+	Type     string
+	Secret   *SecretCredential
+	SecretId SecretCredentialId
+}
+
+func NewElasticsearchSharedSecretFromSecret(value *SecretCredential) *ElasticsearchSharedSecret {
+	return &ElasticsearchSharedSecret{Type: "secret", Secret: value}
+}
+
+func NewElasticsearchSharedSecretFromSecretId(value SecretCredentialId) *ElasticsearchSharedSecret {
+	return &ElasticsearchSharedSecret{Type: "secret_id", SecretId: value}
+}
+
+func (e *ElasticsearchSharedSecret) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	e.Type = unmarshaler.Type
+	switch unmarshaler.Type {
+	case "secret":
+		value := new(SecretCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.Secret = value
+	case "secret_id":
+		var valueUnmarshaler struct {
+			SecretId SecretCredentialId `json:"value,omitempty"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		e.SecretId = valueUnmarshaler.SecretId
+	}
+	return nil
+}
+
+func (e ElasticsearchSharedSecret) MarshalJSON() ([]byte, error) {
+	switch e.Type {
+	default:
+		return nil, fmt.Errorf("invalid type %s in %T", e.Type, e)
+	case "secret":
+		var marshaler = struct {
+			Type string `json:"type"`
+			*SecretCredential
+		}{
+			Type:             e.Type,
+			SecretCredential: e.Secret,
+		}
+		return json.Marshal(marshaler)
+	case "secret_id":
+		var marshaler = struct {
+			Type     string             `json:"type"`
+			SecretId SecretCredentialId `json:"value,omitempty"`
+		}{
+			Type:     e.Type,
+			SecretId: e.SecretId,
+		}
+		return json.Marshal(marshaler)
+	}
+}
+
+type ElasticsearchSharedSecretVisitor interface {
+	VisitSecret(*SecretCredential) error
+	VisitSecretId(SecretCredentialId) error
+}
+
+func (e *ElasticsearchSharedSecret) Accept(visitor ElasticsearchSharedSecretVisitor) error {
+	switch e.Type {
+	default:
+		return fmt.Errorf("invalid type %s in %T", e.Type, e)
+	case "secret":
+		return visitor.VisitSecret(e.Secret)
+	case "secret_id":
+		return visitor.VisitSecretId(e.SecretId)
 	}
 }
 
@@ -4749,7 +4890,8 @@ func (r *Rapid7InsightCloudCredential) Accept(visitor Rapid7InsightCloudCredenti
 
 // Configuration for Elasticsearch search and analytics engine. Supports both managed and self-hosted Elasticsearch deployments
 type SiemElasticsearch struct {
-	Credential *ElasticsearchCredential `json:"credential,omitempty"`
+	AuthOptions *ElasticsearchAuthOptions `json:"auth_options,omitempty"`
+	Credential  *ElasticsearchCredential  `json:"credential,omitempty"`
 	// Elasticsearch index to send events to.
 	Index string `json:"index"`
 	// URL for the Elasticsearch API. This should be the base URL for the API, without any path components and must be HTTPS. For example, "https://tenant.elastic.com".
