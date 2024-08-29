@@ -2399,8 +2399,6 @@ type DefenderCredential struct {
 	Type          string
 	OAuthClient   *OAuthClientCredential
 	OAuthClientId OAuthClientCredentialId
-	TenantId      string
-	UrlString     string
 }
 
 func NewDefenderCredentialFromOAuthClient(value *OAuthClientCredential) *DefenderCredential {
@@ -2409,14 +2407,6 @@ func NewDefenderCredentialFromOAuthClient(value *OAuthClientCredential) *Defende
 
 func NewDefenderCredentialFromOAuthClientId(value OAuthClientCredentialId) *DefenderCredential {
 	return &DefenderCredential{Type: "o_auth_client_id", OAuthClientId: value}
-}
-
-func NewDefenderCredentialFromTenantId(value string) *DefenderCredential {
-	return &DefenderCredential{Type: "tenantId", TenantId: value}
-}
-
-func NewDefenderCredentialFromUrlString(value string) *DefenderCredential {
-	return &DefenderCredential{Type: "urlString", UrlString: value}
 }
 
 func (d *DefenderCredential) UnmarshalJSON(data []byte) error {
@@ -2442,22 +2432,6 @@ func (d *DefenderCredential) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		d.OAuthClientId = valueUnmarshaler.OAuthClientId
-	case "tenantId":
-		var valueUnmarshaler struct {
-			TenantId string `json:"value"`
-		}
-		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
-			return err
-		}
-		d.TenantId = valueUnmarshaler.TenantId
-	case "urlString":
-		var valueUnmarshaler struct {
-			UrlString string `json:"value"`
-		}
-		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
-			return err
-		}
-		d.UrlString = valueUnmarshaler.UrlString
 	}
 	return nil
 }
@@ -2484,32 +2458,12 @@ func (d DefenderCredential) MarshalJSON() ([]byte, error) {
 			OAuthClientId: d.OAuthClientId,
 		}
 		return json.Marshal(marshaler)
-	case "tenantId":
-		var marshaler = struct {
-			Type     string `json:"type"`
-			TenantId string `json:"value"`
-		}{
-			Type:     d.Type,
-			TenantId: d.TenantId,
-		}
-		return json.Marshal(marshaler)
-	case "urlString":
-		var marshaler = struct {
-			Type      string `json:"type"`
-			UrlString string `json:"value"`
-		}{
-			Type:      d.Type,
-			UrlString: d.UrlString,
-		}
-		return json.Marshal(marshaler)
 	}
 }
 
 type DefenderCredentialVisitor interface {
 	VisitOAuthClient(*OAuthClientCredential) error
 	VisitOAuthClientId(OAuthClientCredentialId) error
-	VisitTenantId(string) error
-	VisitUrlString(string) error
 }
 
 func (d *DefenderCredential) Accept(visitor DefenderCredentialVisitor) error {
@@ -2520,10 +2474,6 @@ func (d *DefenderCredential) Accept(visitor DefenderCredentialVisitor) error {
 		return visitor.VisitOAuthClient(d.OAuthClient)
 	case "o_auth_client_id":
 		return visitor.VisitOAuthClientId(d.OAuthClientId)
-	case "tenantId":
-		return visitor.VisitTenantId(d.TenantId)
-	case "urlString":
-		return visitor.VisitUrlString(d.UrlString)
 	}
 }
 
@@ -2538,9 +2488,9 @@ type EdrCrowdStrike struct {
 type EdrDefender struct {
 	Credential *DefenderCredential `json:"credential,omitempty"`
 	// TenantId for the Microsoft Defender Management Console.
-	TenantId string `json:"tenantId"`
+	TenantId string `json:"tenant_id"`
 	// URL for the Microsoft Defender Management Console.
-	UrlString string `json:"urlString"`
+	Url string `json:"url"`
 }
 
 // Configuration for the SentinelOne EDR Provider
