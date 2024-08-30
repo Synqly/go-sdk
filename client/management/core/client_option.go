@@ -25,7 +25,7 @@ type ClientOptions struct {
 func NewClientOptions() *ClientOptions {
 	return &ClientOptions{
 		HTTPClient: http.DefaultClient,
-		HTTPHeader: http.Header{"User-Agent": []string{"Synqly-Go-SDK/0.2.95"}},
+		HTTPHeader: http.Header{"User-Agent": []string{"Synqly-Go-SDK/0.2.96"}},
 	}
 }
 

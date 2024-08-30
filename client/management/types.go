@@ -5824,6 +5824,8 @@ type TicketingJira struct {
 	Credential *JiraCredential `json:"credential,omitempty"`
 	// Custom field mappings for this provider.
 	CustomFieldMappings []*CustomFieldMapping `json:"custom_field_mappings,omitempty"`
+	// Default Project for the integration.
+	DefaultProject *string `json:"default_project,omitempty"`
 	// URL for the Jira API. This should be the base URL for the API, without any path components and must be HTTPS. For example, "https://tenant.atlassian.net".
 	Url string `json:"url"`
 }
@@ -5848,6 +5850,8 @@ type TicketingServiceNow struct {
 	Credential *ServiceNowCredential `json:"credential,omitempty"`
 	// Custom field mappings for this provider.
 	CustomFieldMappings []*CustomFieldMapping `json:"custom_field_mappings,omitempty"`
+	// Default Project for the integration. This maps to the custom table for tickets. This table should be derived from Incident table. If not provided, defaults to the incident table.
+	DefaultProject *string `json:"default_project,omitempty"`
 	// URL for the ServiceNow API. This should be the base URL for the API, without any path components and must be HTTPS. For example, "https://tenant.service-now.com".
 	Url string `json:"url"`
 }
