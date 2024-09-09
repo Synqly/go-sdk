@@ -4893,12 +4893,13 @@ type SiemSplunk struct {
 
 // Configuration for Sumo Logic Cloud SIEM.
 type SiemSumoLogic struct {
-	// Automatically parse logs as JSON when running log queries against Sumo Logic.
-	AutoParseLogs bool                    `json:"auto_parse_logs"`
+	// Automatically parse logs as JSON when running log queries against Sumo Logic. Default is true.
+	AutoParseLogs *bool `json:"auto_parse_logs,omitempty"`
+	// Required if you need to send Sumo Logic events from the Synqly API.
 	CollectionUrl *SumoLogicCollectionUrl `json:"collection_url,omitempty"`
 	Credential    *SumoLogicCredential    `json:"credential,omitempty"`
-	// Only query for logs that have been processed into the Sumo Logic Cloud SIEM app.
-	SiemLogsOnly bool `json:"siem_logs_only"`
+	// Only query for logs that have been processed into the Sumo Logic Cloud SIEM app. Default is false.
+	SiemLogsOnly *bool `json:"siem_logs_only,omitempty"`
 	// Your Sumo Logic API endpoint. See https://help.sumologic.com/docs/api/getting-started/#sumo-logic-endpoints-by-deployment-and-firewall-security for help determining which base URL to use.
 	Url string `json:"url"`
 }
