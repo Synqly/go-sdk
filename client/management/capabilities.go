@@ -4,12 +4,12 @@ package management
 
 type ListCategoryCapabilitiesRequest struct {
 	// Optional comma separated list of categories to return; "storage,tickets"
-	Category string `json:"-"`
+	Category *string `json:"-"`
 }
 
 type ListProviderCapabilitiesRequest struct {
 	// Optional comma separated list of providers to return; "aws_s3,aws_sqs"
-	Provider string `json:"-"`
+	Provider *string `json:"-"`
 }
 
 type ListCategoryCapabilitiesResponse struct {

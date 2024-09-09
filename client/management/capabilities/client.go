@@ -42,7 +42,9 @@ func (c *Client) ListCategory(ctx context.Context, request *management.ListCateg
 	endpointURL := baseURL + "/" + "v1/capabilities/category"
 
 	queryParams := make(url.Values)
-	queryParams.Add("category", fmt.Sprintf("%v", request.Category))
+	if request.Category != nil {
+		queryParams.Add("category", fmt.Sprintf("%v", *request.Category))
+	}
 	if len(queryParams) > 0 {
 		endpointURL += "?" + queryParams.Encode()
 	}
@@ -148,7 +150,9 @@ func (c *Client) ListProviders(ctx context.Context, request *management.ListProv
 	endpointURL := baseURL + "/" + "v1/capabilities/provider"
 
 	queryParams := make(url.Values)
-	queryParams.Add("provider", fmt.Sprintf("%v", request.Provider))
+	if request.Provider != nil {
+		queryParams.Add("provider", fmt.Sprintf("%v", *request.Provider))
+	}
 	if len(queryParams) > 0 {
 		endpointURL += "?" + queryParams.Encode()
 	}
