@@ -1158,3 +1158,74 @@ func (c *Client) DeleteIocs(ctx context.Context, request *engine.DeleteIocsReque
 	}
 	return response, nil
 }
+
+// Returns the posture score of the endpoint assets that match the query from the token-linked EDR source.
+func (c *Client) QueryPostureScore(ctx context.Context, request *engine.QueryPostureScoreRequest) (*engine.QueryPostureScoreResponse, error) {
+	baseURL := "https://api.synqly.com"
+	if c.baseURL != "" {
+		baseURL = c.baseURL
+	}
+	endpointURL := baseURL + "/" + "v1/edr/posture_score"
+
+	queryParams := make(url.Values)
+	if request.Limit != nil {
+		queryParams.Add("limit", fmt.Sprintf("%v", *request.Limit))
+	}
+	if request.Cursor != nil {
+		queryParams.Add("cursor", fmt.Sprintf("%v", *request.Cursor))
+	}
+	for _, value := range request.Order {
+		queryParams.Add("order", fmt.Sprintf("%v", *value))
+	}
+	for _, value := range request.Filter {
+		queryParams.Add("filter", fmt.Sprintf("%v", *value))
+	}
+	if request.IncludeRawData != nil {
+		queryParams.Add("include_raw_data", fmt.Sprintf("%v", *request.IncludeRawData))
+	}
+	if len(queryParams) > 0 {
+		endpointURL += "?" + queryParams.Encode()
+	}
+
+	errorDecoder := func(statusCode int, body io.Reader) error {
+		raw, err := io.ReadAll(body)
+		if err != nil {
+			return err
+		}
+		apiError := core.NewAPIError(statusCode, errors.New(string(raw)))
+		decoder := json.NewDecoder(bytes.NewReader(raw))
+		switch statusCode {
+		case 400:
+			value := new(engine.BadRequestError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 500:
+			value := new(engine.InternalServerError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		}
+		return apiError
+	}
+
+	var response *engine.QueryPostureScoreResponse
+	if err := core.DoRequest(
+		ctx,
+		c.httpClient,
+		endpointURL,
+		http.MethodGet,
+		request,
+		&response,
+		false,
+		c.header,
+		errorDecoder,
+	); err != nil {
+		return response, err
+	}
+	return response, nil
+}

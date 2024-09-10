@@ -71,6 +71,22 @@ type QueryIocsRequest struct {
 	IncludeRawData *bool `json:"-"`
 }
 
+type QueryPostureScoreRequest struct {
+	// Number of scores for endpoints to return. Defaults to 50.
+	Limit *int `json:"-"`
+	// Start search from cursor position.
+	Cursor *string `json:"-"`
+	// Select a field to order the results by. Defaults to `name`. To control the direction of the sorting, append
+	// `[asc]` or `[desc]` to the field name. For example, `name[asc]` will sort the results by `name` in ascending order.
+	// The ordering defaults to `asc` if not specified.
+	Order []*string `json:"-"`
+	// Filter results by this query. For more information on filtering, refer to our Filtering Guide. Defaults to no filter.
+	// If used more than once, the queries are ANDed together.
+	Filter []*string `json:"-"`
+	// Include the raw data from the EDR in the response. Defaults to `false`.
+	IncludeRawData *bool `json:"-"`
+}
+
 type QueryThreatsRequest struct {
 	// Number of threats to return. Defaults to 50.
 	Limit *int `json:"-"`
@@ -138,6 +154,13 @@ type QueryEndpointsResponse struct {
 type QueryIocsResponse struct {
 	// List of iocs that match the query.
 	Result []*stix.Indicator `json:"result,omitempty"`
+	// Cursor to use to retrieve the next page of results.
+	Cursor string `json:"cursor"`
+}
+
+type QueryPostureScoreResponse struct {
+	// List of posture scores that match the query.
+	Result []PostureScore `json:"result,omitempty"`
 	// Cursor to use to retrieve the next page of results.
 	Cursor string `json:"cursor"`
 }

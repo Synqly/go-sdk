@@ -28,6 +28,18 @@ const Account_Type_AWSAccount AccountTypeId = 10
 // Other. The account type is not mapped.
 const Account_Type_Other AccountTypeId = 99
 
+// AffectedPackageTypeId Values
+// Type ID. The type of software package.
+
+// Unknown. The type is unknown.
+const AffectedPackage_Type_Unknown AffectedPackageTypeId = 0
+// Application. An application software package.
+const AffectedPackage_Type_Application AffectedPackageTypeId = 1
+// OperatingSystem. An operating system software package.
+const AffectedPackage_Type_OperatingSystem AffectedPackageTypeId = 2
+// Other. The type is not mapped. See the <code>type</code> attribute, which contains a data source specific value.
+const AffectedPackage_Type_Other AffectedPackageTypeId = 99
+
 // AgentTypeId Values
 // Type ID. The normalized representation of an agent or sensor. E.g., EDR, vulnerability management, APM, backup & recovery, etc.
 
@@ -53,6 +65,16 @@ const Agent_Type_ConfigurationManagement AgentTypeId = 8
 const Agent_Type_RemoteAccess AgentTypeId = 9
 // Other. The type is not mapped. See the <code>type</code> attribute, which contains a data source specific value.
 const Agent_Type_Other AgentTypeId = 99
+
+// CvssDepth Values
+// CVSS Depth. The CVSS depth represents a depth of the equation used to calculate CVSS score.
+
+// Base
+const Cvss_Depth_Base CvssDepth = "Base"
+// Environmental
+const Cvss_Depth_Environmental CvssDepth = "Environmental"
+// Temporal
+const Cvss_Depth_Temporal CvssDepth = "Temporal"
 
 // DeviceRiskLevelId Values
 // Risk Level ID. The normalized risk level id.
@@ -162,6 +184,44 @@ const DigitalSignature_State_Pending DigitalSignatureStateId = 5
 // Other. The state is not mapped. See the <code>state</code> attribute, which contains a data source specific value.
 const DigitalSignature_State_Other DigitalSignatureStateId = 99
 
+// DnsAnswerFlagIds Values
+// DNS Header Flags. The list of DNS answer header flag IDs.
+
+// Unknown. The flag is unknown.
+const DnsAnswer_FlagIds_Unknown DnsAnswerFlagIds = 0
+// AuthoritativeAnswer
+const DnsAnswer_FlagIds_AuthoritativeAnswer DnsAnswerFlagIds = 1
+// TruncatedResponse
+const DnsAnswer_FlagIds_TruncatedResponse DnsAnswerFlagIds = 2
+// RecursionDesired
+const DnsAnswer_FlagIds_RecursionDesired DnsAnswerFlagIds = 3
+// RecursionAvailable
+const DnsAnswer_FlagIds_RecursionAvailable DnsAnswerFlagIds = 4
+// AuthenticData
+const DnsAnswer_FlagIds_AuthenticData DnsAnswerFlagIds = 5
+// CheckingDisabled
+const DnsAnswer_FlagIds_CheckingDisabled DnsAnswerFlagIds = 6
+// Other. The flag is not mapped. See the <code>flags</code> attribute, which contains a data source specific value.
+const DnsAnswer_FlagIds_Other DnsAnswerFlagIds = 99
+
+// DomainContactTypeId Values
+// Domain Contact Type ID. The normalized domain contact type ID.
+
+// Unknown. The type is unknown.
+const DomainContact_Type_Unknown DomainContactTypeId = 0
+// Registrant. The contact information provided is for the domain registrant.
+const DomainContact_Type_Registrant DomainContactTypeId = 1
+// Administrative. The contact information provided is for the domain administrator.
+const DomainContact_Type_Administrative DomainContactTypeId = 2
+// Technical. The contact information provided is for the domain technical lead.
+const DomainContact_Type_Technical DomainContactTypeId = 3
+// Billing. The contact information provided is for the domain billing lead.
+const DomainContact_Type_Billing DomainContactTypeId = 4
+// Abuse. The contact information provided is for the domain abuse contact.
+const DomainContact_Type_Abuse DomainContactTypeId = 5
+// Other. The type is not mapped. See the <code>type</code> attribute, which contains a data source specific value.
+const DomainContact_Type_Other DomainContactTypeId = 99
+
 // FileConfidentialityId Values
 // Confidentiality ID. The normalized identifier of the file content confidentiality indicator.
 
@@ -245,6 +305,42 @@ const HttpRequest_HttpMethod_Post HttpRequestHttpMethod = "POST"
 const HttpRequest_HttpMethod_Put HttpRequestHttpMethod = "PUT"
 // Trace. The TRACE method performs a message loop-back test along the path to the target resource.
 const HttpRequest_HttpMethod_Trace HttpRequestHttpMethod = "TRACE"
+
+// KbArticleInstallStateId Values
+// Install State ID. The normalized install state ID of the kb article.
+
+// Unknown. The normalized install state is unknown.
+const KbArticle_InstallState_Unknown KbArticleInstallStateId = 0
+// Installed. The item is installed.
+const KbArticle_InstallState_Installed KbArticleInstallStateId = 1
+// NotInstalled. The item is not installed.
+const KbArticle_InstallState_NotInstalled KbArticleInstallStateId = 2
+// InstalledPendingReboot. The item is installed pending reboot operation.
+const KbArticle_InstallState_InstalledPendingReboot KbArticleInstallStateId = 3
+// Other. The install state is not mapped. See the <code>install_state</code> attribute, which contains a data source specific value.
+const KbArticle_InstallState_Other KbArticleInstallStateId = 99
+
+// KillChainPhasePhaseId Values
+// Kill Chain Phase ID. The cyber kill chain phase identifier.
+
+// Unknown. The kill chain phase is unknown.
+const KillChainPhase_Phase_Unknown KillChainPhasePhaseId = 0
+// Reconnaissance. The attackers pick a target and perform a detailed analysis, start collecting information (email addresses, conferences information, etc.) and evaluate the victim’s vulnerabilities to determine how to exploit them.
+const KillChainPhase_Phase_Reconnaissance KillChainPhasePhaseId = 1
+// Weaponization. The attackers develop a malware weapon and aim to exploit the discovered vulnerabilities.
+const KillChainPhase_Phase_Weaponization KillChainPhasePhaseId = 2
+// Delivery. The intruders will use various tactics, such as phishing, infected USB drives, etc.
+const KillChainPhase_Phase_Delivery KillChainPhasePhaseId = 3
+// Exploitation. The intruders start leveraging vulnerabilities to executed code on the victim’s system.
+const KillChainPhase_Phase_Exploitation KillChainPhasePhaseId = 4
+// Installation. The intruders install malware on the victim’s system.
+const KillChainPhase_Phase_Installation KillChainPhasePhaseId = 5
+// Command_Control. Malware opens a command channel to enable the intruders to remotely manipulate the victim's system.
+const KillChainPhase_Phase_Command_Control KillChainPhasePhaseId = 6
+// ActionsonObjectives. With hands-on keyboard access, intruders accomplish the mission’s goal.
+const KillChainPhase_Phase_ActionsonObjectives KillChainPhasePhaseId = 7
+// Other. The kill chain phase is not mapped. See the <code>phase</code> attribute, which contains a data source specific value.
+const KillChainPhase_Phase_Other KillChainPhasePhaseId = 99
 
 // NetworkConnectionInfoBoundaryId Values
 // Boundary ID. <p>The normalized identifier of the boundary of the connection. </p><p> For cloud connections, this translates to the traffic-boundary (same VPC, through IGW, etc.). For traditional networks, this is described as Local, Internal, or External.</p>
@@ -472,6 +568,74 @@ const Os_Type_AIX OsTypeId = 401
 // HP_UX
 const Os_Type_HP_UX OsTypeId = 402
 
+// OsintConfidenceId Values
+// Confidence Id. The normalized confidence refers to the accuracy of collected information related to the OSINT or how pertinent an indicator or analysis is to a specific event or finding. A low confidence means that the information collected or analysis conducted lacked detail or is not accurate enough to qualify an indicator as fully malicious.
+
+// Unknown. The normalized confidence is unknown.
+const Osint_Confidence_Unknown OsintConfidenceId = 0
+// Low
+const Osint_Confidence_Low OsintConfidenceId = 1
+// Medium
+const Osint_Confidence_Medium OsintConfidenceId = 2
+// High
+const Osint_Confidence_High OsintConfidenceId = 3
+// Other. The confidence is not mapped to the defined enum values. See the <code>confidence</code> attribute, which contains a data source specific value.
+const Osint_Confidence_Other OsintConfidenceId = 99
+
+// OsintTlp Values
+// Traffic Light Protocol. The <a target='_blank' href='https://www.first.org/tlp/'>Traffic Light Protocol</a> was created to facilitate greater sharing of potentially sensitive information and more effective collaboration. TLP provides a simple and intuitive schema for indicating with whom potentially sensitive information can be shared.
+
+// TLP_AMBER. TLP:AMBER is for limited disclosure, recipients can only spread this on a need-to-know basis within their organization and its clients. Note that TLP:AMBER+STRICT restricts sharing to the organization only. Sources may use TLP:AMBER when information requires support to be effectively acted upon, yet carries risk to privacy, reputation, or operations if shared outside of the organizations involved. Recipients may share TLP:AMBER information with members of their own organization and its clients, but only on a need-to-know basis to protect their organization and its clients and prevent further harm. Note: if the source wants to restrict sharing to the organization only, they must specify TLP:AMBER+STRICT.
+const Osint_Tlp_TLP_AMBER OsintTlp = "AMBER"
+// TLP_AMBER_STRICT. TLP:AMBER is for limited disclosure, recipients can only spread this on a need-to-know basis within their organization and its clients. Note that TLP:AMBER+STRICT restricts sharing to the organization only. Sources may use TLP:AMBER when information requires support to be effectively acted upon, yet carries risk to privacy, reputation, or operations if shared outside of the organizations involved. Recipients may share TLP:AMBER information with members of their own organization and its clients, but only on a need-to-know basis to protect their organization and its clients and prevent further harm. Note: if the source wants to restrict sharing to the organization only, they must specify TLP:AMBER+STRICT.
+const Osint_Tlp_TLP_AMBER_STRICT OsintTlp = "AMBER STRICT"
+// TLP_CLEAR. TLP:CLEAR denotes that recipients can spread this to the world, there is no limit on disclosure. Sources may use TLP:CLEAR when information carries minimal or no foreseeable risk of misuse, in accordance with applicable rules and procedures for public release. Subject to standard copyright rules, TLP:CLEAR information may be shared without restriction.
+const Osint_Tlp_TLP_CLEAR OsintTlp = "CLEAR"
+// TLP_GREEN. TLP:GREEN is for limited disclosure, recipients can spread this within their community. Sources may use TLP:GREEN when information is useful to increase awareness within their wider community. Recipients may share TLP:GREEN information with peers and partner organizations within their community, but not via publicly accessible channels. TLP:GREEN information may not be shared outside of the community. Note: when “community” is not defined, assume the cybersecurity/defense community.
+const Osint_Tlp_TLP_GREEN OsintTlp = "GREEN"
+// TLP_RED. TLP:RED is for the eyes and ears of individual recipients only, no further disclosure. Sources may use TLP:RED when information cannot be effectively acted upon without significant risk for the privacy, reputation, or operations of the organizations involved. Recipients may therefore not share TLP:RED information with anyone else. In the context of a meeting, for example, TLP:RED information is limited to those present at the meeting.
+const Osint_Tlp_TLP_RED OsintTlp = "RED"
+
+// OsintTypeId Values
+// Indicator Type ID. The OSINT indicator type ID.
+
+// Unknown. The indicator type is ambiguous or there is not a related indicator for the OSINT object.
+const Osint_Type_Unknown OsintTypeId = 0
+// IPAddress. An IPv4 or IPv6 address.
+const Osint_Type_IPAddress OsintTypeId = 1
+// Domain. A full-qualified domain name (FQDN), subdomain, or partial domain.
+const Osint_Type_Domain OsintTypeId = 2
+// Hostname. A hostname or computer name.
+const Osint_Type_Hostname OsintTypeId = 3
+// Hash. Any type of hash e.g., MD5, SHA1, SHA2, BLAKE, BLAKE2, etc. generated from a file, malware sample, request header, or otherwise.
+const Osint_Type_Hash OsintTypeId = 4
+// URL. A Uniform Resource Locator (URL) or Uniform Resource Indicator (URI).
+const Osint_Type_URL OsintTypeId = 5
+// UserAgent. A User Agent typically seen in HTTP request headers.
+const Osint_Type_UserAgent OsintTypeId = 6
+// DigitalCertificate. The serial number, fingerprint, or full content of an X.509 digital certificate.
+const Osint_Type_DigitalCertificate OsintTypeId = 7
+// Email. The contents of an email or any related information to an email object.
+const Osint_Type_Email OsintTypeId = 8
+// EmailAddress. An email address.
+const Osint_Type_EmailAddress OsintTypeId = 9
+// Vulnerability. A CVE ID, CWE ID, or other identifier for a weakness, exploit, bug, or misconfiguration.
+const Osint_Type_Vulnerability OsintTypeId = 10
+// Other. The indicator type is not directly listed.
+const Osint_Type_Other OsintTypeId = 99
+
+// PackageTypeId Values
+// Type ID. The type of software package.
+
+// Unknown. The type is unknown.
+const Package_Type_Unknown PackageTypeId = 0
+// Application. An application software package.
+const Package_Type_Application PackageTypeId = 1
+// OperatingSystem. An operating system software package.
+const Package_Type_OperatingSystem PackageTypeId = 2
+// Other. The type is not mapped. See the <code>type</code> attribute, which contains a data source specific value.
+const Package_Type_Other PackageTypeId = 99
+
 // ProcessIntegrityId Values
 // Integrity Level. The normalized identifier of the process integrity level (Windows only).
 
@@ -519,6 +683,30 @@ const Reputation_Score_ProbablyMalicious ReputationScoreId = 9
 const Reputation_Score_Malicious ReputationScoreId = 10
 // Other. The reputation score is not mapped. See the <code>rep_score</code> attribute, which contains a data source specific value.
 const Reputation_Score_Other ReputationScoreId = 99
+
+// TimespanTypeId Values
+// Time Span Type ID. The normalized identifier for the time span duration type.
+
+// Unknown. The type is unknown.
+const Timespan_Type_Unknown TimespanTypeId = 0
+// Milliseconds
+const Timespan_Type_Milliseconds TimespanTypeId = 1
+// Seconds
+const Timespan_Type_Seconds TimespanTypeId = 2
+// Minutes
+const Timespan_Type_Minutes TimespanTypeId = 3
+// Hours
+const Timespan_Type_Hours TimespanTypeId = 4
+// Days
+const Timespan_Type_Days TimespanTypeId = 5
+// Weeks
+const Timespan_Type_Weeks TimespanTypeId = 6
+// Months
+const Timespan_Type_Months TimespanTypeId = 7
+// Years
+const Timespan_Type_Years TimespanTypeId = 8
+// Other. The type is not mapped. See the <code>type</code> attribute, which contains a data source specific value.
+const Timespan_Type_Other TimespanTypeId = 99
 
 // TlsExtensionTypeId Values
 // Type ID. The TLS extension type identifier. See <a target='_blank' href='https://datatracker.ietf.org/doc/html/rfc8446#page-35'>The Transport Layer Security (TLS) extension page</a>.
@@ -807,4 +995,16 @@ const User_UserStatus_Suspended UserUserStatusId = 4
 const User_UserStatus_Deprovisioned UserUserStatusId = 5
 // Other. The event status is not mapped. See the <code>user_status</code> attribute, which contains a data source specific value.
 const User_UserStatus_Other UserUserStatusId = 99
+
+// WhoisDnssecStatusId Values
+// DNSSEC Status ID. Describes the normalized status of DNS Security Extensions (DNSSEC) for a domain.
+
+// Unknown. The disposition is unknown.
+const Whois_DnssecStatus_Unknown WhoisDnssecStatusId = 0
+// Signed. The related domain enables the signing of DNS records using DNSSEC.
+const Whois_DnssecStatus_Signed WhoisDnssecStatusId = 1
+// Unsigned. The related domain does not enable the signing of DNS records using DNSSEC.
+const Whois_DnssecStatus_Unsigned WhoisDnssecStatusId = 2
+// Other. The DNSSEC status is not mapped. See the <code>dnssec_status</code> attribute, which contains a data source specific value.
+const Whois_DnssecStatus_Other WhoisDnssecStatusId = 99
 

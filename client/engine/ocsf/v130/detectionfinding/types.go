@@ -146,6 +146,8 @@ type DetectionFinding struct {
 	Metadata *Metadata `json:"metadata,omitempty"`
 	// The observables associated with the event or a finding.
 	Observables []*Observable `json:"observables,omitempty"`
+	// The OSINT (Open Source Intelligence) object contains details related to an indicator such as the indicator itself, related indicators, geolocation, registrar information, subdomains, analyst commentary, and other contextual information. This information can be used to further enrich a detection or finding by providing decisioning support to other analysts and engineers.
+	Osint []*Osint `json:"osint,omitempty"`
 	// The raw event/finding data as received from the source.
 	RawData *string `json:"raw_data,omitempty"`
 	// Describes the recommended remediation steps to address identified issue(s).
@@ -937,6 +939,35 @@ type Display struct {
 	ScaleFactor *int `json:"scale_factor,omitempty"`
 }
 
+// The DNS Answer object represents a specific response provided by the Domain Name System (DNS) when querying for information about a domain or performing a DNS operation. It encapsulates the relevant details and data returned by the DNS server in response to a query.
+type DnsAnswer struct {
+	// The class of DNS data contained in this resource record. See <a target='_blank' href='https://www.rfc-editor.org/rfc/rfc1035.txt'>RFC1035</a>. For example: <code>IN</code>.
+	Class *string `json:"class,omitempty"`
+	// The list of DNS answer header flag IDs.
+	FlagIds []DnsAnswerFlagIds `json:"flag_ids,omitempty"`
+	// The list of DNS answer header flags.
+	Flags []string `json:"flags,omitempty"`
+	// The DNS packet identifier assigned by the program that generated the query. The identifier is copied to the response.
+	PacketUid *int `json:"packet_uid,omitempty"`
+	// The data describing the DNS resource. The meaning of this data depends on the type and class of the resource record.
+	Rdata string `json:"rdata"`
+	// The time interval that the resource record may be cached. Zero value means that the resource record can only be used for the transaction in progress, and should not be cached.
+	Ttl *int `json:"ttl,omitempty"`
+	// The type of data contained in this resource record. See <a target='_blank' href='https://www.rfc-editor.org/rfc/rfc1035.txt'>RFC1035</a>. For example: <code>CNAME</code>.
+	Type *string `json:"type,omitempty"`
+}
+
+// DnsAnswerFlagIds is an enum, and the following values are allowed.
+// 0 - Unknown: The flag is unknown.
+// 1 - AuthoritativeAnswer
+// 2 - TruncatedResponse
+// 3 - RecursionDesired
+// 4 - RecursionAvailable
+// 5 - AuthenticData
+// 6 - CheckingDisabled
+// 99 - Other: The flag is not mapped. See the <code>flags</code> attribute, which contains a data source specific value.
+type DnsAnswerFlagIds = int
+
 // The DNS query object represents a specific request made to the Domain Name System (DNS) to retrieve information about a domain or perform a DNS operation. This object encapsulates the necessary attributes and methods to construct and send DNS queries, specify the query type (e.g., A, AAAA, MX). Defined by D3FEND <a target='_blank' href='https://d3fend.mitre.org/dao/artifact/d3f:DNSLookup/'>d3f:DNSLookup</a>.
 type DnsQuery struct {
 	// The class of resource records being queried. See <a target='_blank' href='https://www.rfc-editor.org/rfc/rfc1035.txt'>RFC1035</a>. For example: <code>IN</code>.
@@ -963,6 +994,34 @@ type DnsQuery struct {
 // 6 - DSOMessage: DNS Stateful Operations (DSO)
 // 99 - Other: The DNS Opcode is not defined by the RFC. See the <code>opcode</code> attribute, which contains a data source specific value.
 type DnsQueryOpcodeId = int
+
+// The contact information related to a domain registration, e.g., registrant, administrator, abuse, billing, or technical contact.
+type DomainContact struct {
+	// The user's primary email address.
+	EmailAddr *EmailAddress `json:"email_addr,omitempty"`
+	// Location details for the contract such as the city, state/province, country, etc.
+	Location *Location `json:"location,omitempty"`
+	// The individual or organization name for the contact.
+	Name *string `json:"name,omitempty"`
+	// The number associated with the phone.
+	PhoneNumber *string `json:"phone_number,omitempty"`
+	// The Domain Contact type, normalized to the caption of the <code>type_id</code> value. In the case of 'Other', it is defined by the source
+	Type *string `json:"type,omitempty"`
+	// The normalized domain contact type ID.
+	TypeId DomainContactTypeId `json:"type_id"`
+	// The unique identifier of the contact information, typically provided in WHOIS information.
+	Uid *string `json:"uid,omitempty"`
+}
+
+// DomainContactTypeId is an enum, and the following values are allowed.
+// 0 - Unknown: The type is unknown.
+// 1 - Registrant: The contact information provided is for the domain registrant.
+// 2 - Administrative: The contact information provided is for the domain administrator.
+// 3 - Technical: The contact information provided is for the domain technical lead.
+// 4 - Billing: The contact information provided is for the domain billing lead.
+// 5 - Abuse: The contact information provided is for the domain abuse contact.
+// 99 - Other: The type is not mapped. See the <code>type</code> attribute, which contains a data source specific value.
+type DomainContactTypeId = int
 
 // The Email object describes the email metadata such as sender, recipients, and direction. Defined by D3FEND <a target='_blank' href='https://d3fend.mitre.org/dao/artifact/d3f:Email/'>d3f:Email</a>.
 type Email struct {
@@ -992,6 +1051,24 @@ type Email struct {
 	Uid *string `json:"uid,omitempty"`
 	// The X-Originating-IP header identifying the emails originating IP address(es).
 	XOriginatingIp []IpAddress `json:"x_originating_ip,omitempty"`
+}
+
+// The Email Authentication object describes the Sender Policy Framework (SPF), DomainKeys Identified Mail (DKIM) and Domain-based Message Authentication, Reporting and Conformance (DMARC) attributes of an email.
+type EmailAuth struct {
+	// The DomainKeys Identified Mail (DKIM) status of the email.
+	Dkim *string `json:"dkim,omitempty"`
+	// The DomainKeys Identified Mail (DKIM) signing domain of the email.
+	DkimDomain *string `json:"dkim_domain,omitempty"`
+	// The DomainKeys Identified Mail (DKIM) signature used by the sending/receiving system.
+	DkimSignature *string `json:"dkim_signature,omitempty"`
+	// The Domain-based Message Authentication, Reporting and Conformance (DMARC) status of the email.
+	Dmarc *string `json:"dmarc,omitempty"`
+	// The Domain-based Message Authentication, Reporting and Conformance (DMARC) override action.
+	DmarcOverride *string `json:"dmarc_override,omitempty"`
+	// The Domain-based Message Authentication, Reporting and Conformance (DMARC) policy status.
+	DmarcPolicy *string `json:"dmarc_policy,omitempty"`
+	// The Sender Policy Framework (SPF) status of the email.
+	Spf *string `json:"spf,omitempty"`
 }
 
 // The Enrichment object provides inline enrichment data for specific attributes of interest within an event. It serves as a mechanism to enhance or supplement the information associated with the event by adding additional relevant details or context.
@@ -1988,6 +2065,85 @@ type Os struct {
 // 402 - UX
 type OsTypeId = int
 
+// The OSINT (Open Source Intelligence) object contains details related to an indicator such as the indicator itself, related indicators, geolocation, registrar information, subdomains, analyst commentary, and other contextual information. This information can be used to further enrich a detection or finding by providing decisioning support to other analysts and engineers.
+type Osint struct {
+	// Any pertinent DNS answers information related to an indicator or OSINT analysis.
+	Answers []*DnsAnswer `json:"answers,omitempty"`
+	// MITRE ATT&CK Tactics, Techniques, and/or Procedures (TTPs) pertinent to an indicator or OSINT analysis.
+	Attacks []*Attack `json:"attacks,omitempty"`
+	// Any pertinent autonomous system information related to an indicator or OSINT analysis.
+	AutonomousSystem *AutonomousSystem `json:"autonomous_system,omitempty"`
+	// Analyst commentary or source commentary about an indicator or OSINT analysis.
+	Comment *string `json:"comment,omitempty"`
+	// The confidence of an indicator being malicious and/or pertinent, normalized to the caption of the confidence_id value. In the case of 'Other', it is defined by the event source or analyst.
+	Confidence *string `json:"confidence,omitempty"`
+	// The normalized confidence refers to the accuracy of collected information related to the OSINT or how pertinent an indicator or analysis is to a specific event or finding. A low confidence means that the information collected or analysis conducted lacked detail or is not accurate enough to qualify an indicator as fully malicious.
+	ConfidenceId *OsintConfidenceId `json:"confidence_id,omitempty"`
+	// Any email information pertinent to an indicator or OSINT analysis.
+	Email *Email `json:"email,omitempty"`
+	// Any email authentication information pertinent to an indicator or OSINT analysis.
+	EmailAuth *EmailAuth `json:"email_auth,omitempty"`
+	// Lockheed Martin Kill Chain Phases pertinent to an indicator or OSINT analysis.
+	KillChain []*KillChainPhase `json:"kill_chain,omitempty"`
+	// Any pertinent geolocation information related to an indicator or OSINT analysis.
+	Location *Location `json:"location,omitempty"`
+	// The name of the entity.
+	Name *string `json:"name,omitempty"`
+	// Any digital signatures or hashes related to an indicator or OSINT analysis.
+	Signatures []*DigitalSignature `json:"signatures,omitempty"`
+	// The source URL of an indicator or OSINT analysis, e.g., a URL back to a TIP, report, or otherwise.
+	SrcUrl *UrlString `json:"src_url,omitempty"`
+	// Any pertinent subdomain information - such as those generated by a Domain Generation Algorithm - related to an indicator or OSINT analysis.
+	Subdomains []string `json:"subdomains,omitempty"`
+	// The <a target='_blank' href='https://www.first.org/tlp/'>Traffic Light Protocol</a> was created to facilitate greater sharing of potentially sensitive information and more effective collaboration. TLP provides a simple and intuitive schema for indicating with whom potentially sensitive information can be shared.
+	Tlp *OsintTlp `json:"tlp,omitempty"`
+	// The OSINT indicator type.
+	Type *string `json:"type,omitempty"`
+	// The OSINT indicator type ID.
+	TypeId OsintTypeId `json:"type_id"`
+	// The unique identifier of the entity.
+	Uid *string `json:"uid,omitempty"`
+	// The actual indicator value in scope, e.g., a SHA-256 hash hexdigest or a domain name.
+	Value string `json:"value"`
+	// The vendor name of a tool which generates intelligence or provides indicators.
+	VendorName *string `json:"vendor_name,omitempty"`
+	// Any vulnerabilities related to an indicator or OSINT analysis.
+	Vulnerabilities []*Vulnerability `json:"vulnerabilities,omitempty"`
+	// Any pertinent WHOIS information related to an indicator or OSINT analysis.
+	Whois *Whois `json:"whois,omitempty"`
+}
+
+// OsintConfidenceId is an enum, and the following values are allowed.
+// 0 - Unknown: The normalized confidence is unknown.
+// 1 - Low
+// 2 - Medium
+// 3 - High
+// 99 - Other: The confidence is not mapped to the defined enum values. See the <code>confidence</code> attribute, which contains a data source specific value.
+type OsintConfidenceId = int
+
+// OsintTlp is an enum, and the following values are allowed.
+// AMBER - AMBER: TLP:AMBER is for limited disclosure, recipients can only spread this on a need-to-know basis within their organization and its clients. Note that TLP:AMBER+STRICT restricts sharing to the organization only. Sources may use TLP:AMBER when information requires support to be effectively acted upon, yet carries risk to privacy, reputation, or operations if shared outside of the organizations involved. Recipients may share TLP:AMBER information with members of their own organization and its clients, but only on a need-to-know basis to protect their organization and its clients and prevent further harm. Note: if the source wants to restrict sharing to the organization only, they must specify TLP:AMBER+STRICT.
+// AMBER STRICT - AMBER_STRICT: TLP:AMBER is for limited disclosure, recipients can only spread this on a need-to-know basis within their organization and its clients. Note that TLP:AMBER+STRICT restricts sharing to the organization only. Sources may use TLP:AMBER when information requires support to be effectively acted upon, yet carries risk to privacy, reputation, or operations if shared outside of the organizations involved. Recipients may share TLP:AMBER information with members of their own organization and its clients, but only on a need-to-know basis to protect their organization and its clients and prevent further harm. Note: if the source wants to restrict sharing to the organization only, they must specify TLP:AMBER+STRICT.
+// CLEAR - CLEAR: TLP:CLEAR denotes that recipients can spread this to the world, there is no limit on disclosure. Sources may use TLP:CLEAR when information carries minimal or no foreseeable risk of misuse, in accordance with applicable rules and procedures for public release. Subject to standard copyright rules, TLP:CLEAR information may be shared without restriction.
+// GREEN - GREEN: TLP:GREEN is for limited disclosure, recipients can spread this within their community. Sources may use TLP:GREEN when information is useful to increase awareness within their wider community. Recipients may share TLP:GREEN information with peers and partner organizations within their community, but not via publicly accessible channels. TLP:GREEN information may not be shared outside of the community. Note: when “community” is not defined, assume the cybersecurity/defense community.
+// RED - RED: TLP:RED is for the eyes and ears of individual recipients only, no further disclosure. Sources may use TLP:RED when information cannot be effectively acted upon without significant risk for the privacy, reputation, or operations of the organizations involved. Recipients may therefore not share TLP:RED information with anyone else. In the context of a meeting, for example, TLP:RED information is limited to those present at the meeting.
+type OsintTlp = string
+
+// OsintTypeId is an enum, and the following values are allowed.
+// 0 - Unknown: The indicator type is ambiguous or there is not a related indicator for the OSINT object.
+// 1 - IPAddress: An IPv4 or IPv6 address.
+// 2 - Domain: A full-qualified domain name (FQDN), subdomain, or partial domain.
+// 3 - Hostname: A hostname or computer name.
+// 4 - Hash: Any type of hash e.g., MD5, SHA1, SHA2, BLAKE, BLAKE2, etc. generated from a file, malware sample, request header, or otherwise.
+// 5 - URL: A Uniform Resource Locator (URL) or Uniform Resource Indicator (URI).
+// 6 - UserAgent: A User Agent typically seen in HTTP request headers.
+// 7 - DigitalCertificate: The serial number, fingerprint, or full content of an X.509 digital certificate.
+// 8 - Email: The contents of an email or any related information to an email object.
+// 9 - EmailAddress: An email address.
+// 10 - Vulnerability: A CVE ID, CWE ID, or other identifier for a weakness, exploit, bug, or misconfiguration.
+// 99 - Other: The indicator type is not directly listed.
+type OsintTypeId = int
+
 // The Software Package object describes details about a software package. Defined by D3FEND <a target='_blank' href='https://d3fend.mitre.org/dao/artifact/d3f:SoftwarePackage/'>d3f:SoftwarePackage</a>.
 type Package struct {
 	// Architecture is a shorthand name describing the type of computer hardware the packaged software is meant to run on.
@@ -2599,3 +2755,46 @@ type Vulnerability struct {
 	// The name of the vendor that identified the vulnerability.
 	VendorName *string `json:"vendor_name,omitempty"`
 }
+
+// The resources of a WHOIS record for a given domain. This can include domain names, IP address blocks, autonomous system information, and/or contact and registration information for a domain.
+type Whois struct {
+	// The autonomous system information associated with a domain.
+	AutonomousSystem *AutonomousSystem `json:"autonomous_system,omitempty"`
+	// When the domain was registered or WHOIS entry was created.
+	CreatedTime *Timestamp `json:"created_time,omitempty"`
+	// When the domain was registered or WHOIS entry was created.
+	CreatedTimeDt *time.Time `json:"created_time_dt,omitempty"`
+	// The normalized value of dnssec_status_id.
+	DnssecStatus *string `json:"dnssec_status,omitempty"`
+	// Describes the normalized status of DNS Security Extensions (DNSSEC) for a domain.
+	DnssecStatusId *WhoisDnssecStatusId `json:"dnssec_status_id,omitempty"`
+	// The name of the domain.
+	Domain *string `json:"domain,omitempty"`
+	// An array of <code>Domain Contact</code> objects.
+	DomainContacts []*DomainContact `json:"domain_contacts,omitempty"`
+	// The email address for the registrar's abuse contact
+	EmailAddr *EmailAddress `json:"email_addr,omitempty"`
+	// When the WHOIS record was last updated or seen at.
+	LastSeenTime *Timestamp `json:"last_seen_time,omitempty"`
+	// When the WHOIS record was last updated or seen at.
+	LastSeenTimeDt *time.Time `json:"last_seen_time_dt,omitempty"`
+	// A collection of name servers related to a domain registration or other record.
+	NameServers []string `json:"name_servers,omitempty"`
+	// The phone number for the registrar's abuse contact
+	PhoneNumber *string `json:"phone_number,omitempty"`
+	// The domain registrar.
+	Registrar *string `json:"registrar,omitempty"`
+	// The status of a domain and its ability to be transferred, e.g., <code>clientTransferProhibited</code>.
+	Status *string `json:"status,omitempty"`
+	// An array of subdomain strings. Can be used to collect several subdomains such as those from Domain Generation Algorithms (DGAs).
+	Subdomains []string `json:"subdomains,omitempty"`
+	// The IP address block (CIDR) associated with a domain.
+	Subnet *Subnet `json:"subnet,omitempty"`
+}
+
+// WhoisDnssecStatusId is an enum, and the following values are allowed.
+// 0 - Unknown: The disposition is unknown.
+// 1 - Signed: The related domain enables the signing of DNS records using DNSSEC.
+// 2 - Unsigned: The related domain does not enable the signing of DNS records using DNSSEC.
+// 99 - Other: The DNSSEC status is not mapped. See the <code>dnssec_status</code> attribute, which contains a data source specific value.
+type WhoisDnssecStatusId = int

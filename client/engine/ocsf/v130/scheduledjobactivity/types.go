@@ -157,6 +157,8 @@ type ScheduledJobActivity struct {
 	Metadata *Metadata `json:"metadata,omitempty"`
 	// The observables associated with the event or a finding.
 	Observables []*Observable `json:"observables,omitempty"`
+	// The OSINT (Open Source Intelligence) object contains details related to an indicator such as the indicator itself, related indicators, geolocation, registrar information, subdomains, analyst commentary, and other contextual information. This information can be used to further enrich a detection or finding by providing decisioning support to other analysts and engineers.
+	Osint []*Osint `json:"osint,omitempty"`
 	// The raw event/finding data as received from the source.
 	RawData *string `json:"raw_data,omitempty"`
 	// The event/finding severity, normalized to the caption of the severity_id value. In the case of 'Other', it is defined by the source.
@@ -267,6 +269,63 @@ type Actor struct {
 	User *User `json:"user,omitempty"`
 }
 
+// The Affected Code object describes details about a code block identified as vulnerable.
+type AffectedCode struct {
+	// The line number of the last line of code block identified as vulnerable.
+	EndLine *int `json:"end_line,omitempty"`
+	// Details about the file that contains the affected code block.
+	File *File `json:"file,omitempty"`
+	// Details about the user that owns the affected file.
+	Owner *User `json:"owner,omitempty"`
+	// Describes the recommended remediation steps to address identified issue(s).
+	Remediation *Remediation `json:"remediation,omitempty"`
+	// The line number of the first line of code block identified as vulnerable.
+	StartLine *int `json:"start_line,omitempty"`
+}
+
+// The Affected Package object describes details about a software package identified as affected by a vulnerability/vulnerabilities.
+type AffectedPackage struct {
+	// Architecture is a shorthand name describing the type of computer hardware the packaged software is meant to run on.
+	Architecture *string `json:"architecture,omitempty"`
+	// The Common Platform Enumeration (CPE) name for the software package.
+	CpeName *string `json:"cpe_name,omitempty"`
+	// The software package epoch. Epoch is a way to define weighted dependencies based on version numbers.
+	Epoch *int `json:"epoch,omitempty"`
+	// The software package version in which a reported vulnerability was patched/fixed.
+	FixedInVersion *string `json:"fixed_in_version,omitempty"`
+	// Cryptographic hash to identify the binary instance of a software component. This can include any component such file, package, or library.
+	Hash *Fingerprint `json:"hash,omitempty"`
+	// The software license applied to this package.
+	License *string `json:"license,omitempty"`
+	// The software package name.
+	Name string `json:"name"`
+	// The software packager manager utilized to manage a package on a system, e.g. npm, yum, dpkg etc.
+	PackageManager *string `json:"package_manager,omitempty"`
+	// The installation path of the affected package.
+	Path *string `json:"path,omitempty"`
+	// A purl is a URL string used to identify and locate a software package in a mostly universal and uniform way across programming languages, package managers, packaging conventions, tools, APIs and databases.
+	Purl *string `json:"purl,omitempty"`
+	// Release is the number of times a version of the software has been packaged.
+	Release *string `json:"release,omitempty"`
+	// Describes the recommended remediation steps to address identified issue(s).
+	Remediation *Remediation `json:"remediation,omitempty"`
+	// The type of software package, normalized to the caption of the type_id value. In the case of 'Other', it is defined by the source.
+	Type *string `json:"type,omitempty"`
+	// The type of software package.
+	TypeId *AffectedPackageTypeId `json:"type_id,omitempty"`
+	// The name of the vendor who published the software package.
+	VendorName *string `json:"vendor_name,omitempty"`
+	// The software package version.
+	Version string `json:"version"`
+}
+
+// AffectedPackageTypeId is an enum, and the following values are allowed.
+// 0 - Unknown: The type is unknown.
+// 1 - Application: An application software package.
+// 2 - OperatingSystem: An operating system software package.
+// 99 - Other: The type is not mapped. See the <code>type</code> attribute, which contains a data source specific value.
+type AffectedPackageTypeId = int
+
 // An Agent (also known as a Sensor) is typically installed on an Operating System (OS) and serves as a specialized software component that can be designed to monitor, detect, collect, archive, or take action. These activities and possible actions are defined by the upstream system controlling the Agent and its intended purpose. For instance, an Agent can include Endpoint Detection & Response (EDR) agents, backup/disaster recovery sensors, Application Performance Monitoring or profiling sensors, and similar software.
 type Agent struct {
 	// The name of the agent or sensor. For example: <code>AWS SSM Agent</code>.
@@ -335,6 +394,14 @@ type Authorization struct {
 	Decision *string `json:"decision,omitempty"`
 	// Details about the Identity/Access management policies that are applicable.
 	Policy *Policy `json:"policy,omitempty"`
+}
+
+// An autonomous system (AS) is a collection of connected Internet Protocol (IP) routing prefixes under the control of one or more network operators on behalf of a single administrative entity or domain that presents a common, clearly defined routing policy to the internet.
+type AutonomousSystem struct {
+	// Organization name for the Autonomous System.
+	Name *string `json:"name,omitempty"`
+	// Unique number that the AS is identified by.
+	Number *int `json:"number,omitempty"`
 }
 
 // The Digital Certificate, also known as a Public Key Certificate, object contains information about the ownership and usage of a public key. It serves as a means to establish trust in the authenticity and integrity of the public key and the associated entity. Defined by D3FEND <a target='_blank' href='https://d3fend.mitre.org/dao/artifact/d3f:Certificate/'>d3f:Certificate</a>.
@@ -711,6 +778,111 @@ type Display struct {
 	ScaleFactor *int `json:"scale_factor,omitempty"`
 }
 
+// The DNS Answer object represents a specific response provided by the Domain Name System (DNS) when querying for information about a domain or performing a DNS operation. It encapsulates the relevant details and data returned by the DNS server in response to a query.
+type DnsAnswer struct {
+	// The class of DNS data contained in this resource record. See <a target='_blank' href='https://www.rfc-editor.org/rfc/rfc1035.txt'>RFC1035</a>. For example: <code>IN</code>.
+	Class *string `json:"class,omitempty"`
+	// The list of DNS answer header flag IDs.
+	FlagIds []DnsAnswerFlagIds `json:"flag_ids,omitempty"`
+	// The list of DNS answer header flags.
+	Flags []string `json:"flags,omitempty"`
+	// The DNS packet identifier assigned by the program that generated the query. The identifier is copied to the response.
+	PacketUid *int `json:"packet_uid,omitempty"`
+	// The data describing the DNS resource. The meaning of this data depends on the type and class of the resource record.
+	Rdata string `json:"rdata"`
+	// The time interval that the resource record may be cached. Zero value means that the resource record can only be used for the transaction in progress, and should not be cached.
+	Ttl *int `json:"ttl,omitempty"`
+	// The type of data contained in this resource record. See <a target='_blank' href='https://www.rfc-editor.org/rfc/rfc1035.txt'>RFC1035</a>. For example: <code>CNAME</code>.
+	Type *string `json:"type,omitempty"`
+}
+
+// DnsAnswerFlagIds is an enum, and the following values are allowed.
+// 0 - Unknown: The flag is unknown.
+// 1 - AuthoritativeAnswer
+// 2 - TruncatedResponse
+// 3 - RecursionDesired
+// 4 - RecursionAvailable
+// 5 - AuthenticData
+// 6 - CheckingDisabled
+// 99 - Other: The flag is not mapped. See the <code>flags</code> attribute, which contains a data source specific value.
+type DnsAnswerFlagIds = int
+
+// The contact information related to a domain registration, e.g., registrant, administrator, abuse, billing, or technical contact.
+type DomainContact struct {
+	// The user's primary email address.
+	EmailAddr *EmailAddress `json:"email_addr,omitempty"`
+	// Location details for the contract such as the city, state/province, country, etc.
+	Location *Location `json:"location,omitempty"`
+	// The individual or organization name for the contact.
+	Name *string `json:"name,omitempty"`
+	// The number associated with the phone.
+	PhoneNumber *string `json:"phone_number,omitempty"`
+	// The Domain Contact type, normalized to the caption of the <code>type_id</code> value. In the case of 'Other', it is defined by the source
+	Type *string `json:"type,omitempty"`
+	// The normalized domain contact type ID.
+	TypeId DomainContactTypeId `json:"type_id"`
+	// The unique identifier of the contact information, typically provided in WHOIS information.
+	Uid *string `json:"uid,omitempty"`
+}
+
+// DomainContactTypeId is an enum, and the following values are allowed.
+// 0 - Unknown: The type is unknown.
+// 1 - Registrant: The contact information provided is for the domain registrant.
+// 2 - Administrative: The contact information provided is for the domain administrator.
+// 3 - Technical: The contact information provided is for the domain technical lead.
+// 4 - Billing: The contact information provided is for the domain billing lead.
+// 5 - Abuse: The contact information provided is for the domain abuse contact.
+// 99 - Other: The type is not mapped. See the <code>type</code> attribute, which contains a data source specific value.
+type DomainContactTypeId = int
+
+// The Email object describes the email metadata such as sender, recipients, and direction. Defined by D3FEND <a target='_blank' href='https://d3fend.mitre.org/dao/artifact/d3f:Email/'>d3f:Email</a>.
+type Email struct {
+	// The email header Cc values, as defined by RFC 5322.
+	Cc []EmailAddress `json:"cc,omitempty"`
+	// The <strong>Delivered-To</strong> email header field.
+	DeliveredTo *EmailAddress `json:"delivered_to,omitempty"`
+	// The email header From values, as defined by RFC 5322.
+	From EmailAddress `json:"from"`
+	// The email header Message-Id value, as defined by RFC 5322.
+	MessageUid *string `json:"message_uid,omitempty"`
+	// The email authentication header.
+	RawHeader *string `json:"raw_header,omitempty"`
+	// The email header Reply-To values, as defined by RFC 5322.
+	ReplyTo *EmailAddress `json:"reply_to,omitempty"`
+	// The size in bytes of the email, including attachments.
+	Size *int `json:"size,omitempty"`
+	// The value of the SMTP MAIL FROM command.
+	SmtpFrom *EmailAddress `json:"smtp_from,omitempty"`
+	// The value of the SMTP envelope RCPT TO command.
+	SmtpTo []EmailAddress `json:"smtp_to,omitempty"`
+	// The email header Subject value, as defined by RFC 5322.
+	Subject *string `json:"subject,omitempty"`
+	// The email header To values, as defined by RFC 5322.
+	To []EmailAddress `json:"to,omitempty"`
+	// The email unique identifier.
+	Uid *string `json:"uid,omitempty"`
+	// The X-Originating-IP header identifying the emails originating IP address(es).
+	XOriginatingIp []IpAddress `json:"x_originating_ip,omitempty"`
+}
+
+// The Email Authentication object describes the Sender Policy Framework (SPF), DomainKeys Identified Mail (DKIM) and Domain-based Message Authentication, Reporting and Conformance (DMARC) attributes of an email.
+type EmailAuth struct {
+	// The DomainKeys Identified Mail (DKIM) status of the email.
+	Dkim *string `json:"dkim,omitempty"`
+	// The DomainKeys Identified Mail (DKIM) signing domain of the email.
+	DkimDomain *string `json:"dkim_domain,omitempty"`
+	// The DomainKeys Identified Mail (DKIM) signature used by the sending/receiving system.
+	DkimSignature *string `json:"dkim_signature,omitempty"`
+	// The Domain-based Message Authentication, Reporting and Conformance (DMARC) status of the email.
+	Dmarc *string `json:"dmarc,omitempty"`
+	// The Domain-based Message Authentication, Reporting and Conformance (DMARC) override action.
+	DmarcOverride *string `json:"dmarc_override,omitempty"`
+	// The Domain-based Message Authentication, Reporting and Conformance (DMARC) policy status.
+	DmarcPolicy *string `json:"dmarc_policy,omitempty"`
+	// The Sender Policy Framework (SPF) status of the email.
+	Spf *string `json:"spf,omitempty"`
+}
+
 // The Enrichment object provides inline enrichment data for specific attributes of interest within an event. It serves as a mechanism to enhance or supplement the information associated with the event by adding additional relevant details or context.
 type Enrichment struct {
 	// The time when the enrichment data was generated.
@@ -987,6 +1159,48 @@ type Job struct {
 // 99 - Other: The run state is not mapped. See the <code>run_state</code> attribute, which contains a data source specific value.
 type JobRunStateId = int
 
+// The KB Article object contains metadata that describes the patch or update.
+type KbArticle struct {
+	// The average time to patch.
+	AvgTimespan *Timespan `json:"avg_timespan,omitempty"`
+	// The kb article bulletin identifier.
+	Bulletin *string `json:"bulletin,omitempty"`
+	// The vendors classification of the kb article.
+	Classification *string `json:"classification,omitempty"`
+	// The date the kb article was released by the vendor.
+	CreatedTime *Timestamp `json:"created_time,omitempty"`
+	// The date the kb article was released by the vendor.
+	CreatedTimeDt *time.Time `json:"created_time_dt,omitempty"`
+	// The install state of the kb article.
+	InstallState *string `json:"install_state,omitempty"`
+	// The normalized install state ID of the kb article.
+	InstallStateId *KbArticleInstallStateId `json:"install_state_id,omitempty"`
+	// The kb article has been replaced by another.
+	IsSuperseded *bool `json:"is_superseded,omitempty"`
+	// The operating system the kb article applies.
+	Os *Os `json:"os,omitempty"`
+	// The product details the kb article applies.
+	Product *Product `json:"product,omitempty"`
+	// The severity of the kb article.
+	Severity *string `json:"severity,omitempty"`
+	// The size in bytes for the kb article.
+	Size *int `json:"size,omitempty"`
+	// The kb article link from the source vendor.
+	SrcUrl *UrlString `json:"src_url,omitempty"`
+	// The title of the kb article.
+	Title *string `json:"title,omitempty"`
+	// The unique identifier for the kb article.
+	Uid string `json:"uid"`
+}
+
+// KbArticleInstallStateId is an enum, and the following values are allowed.
+// 0 - Unknown: The normalized install state is unknown.
+// 1 - Installed: The item is installed.
+// 2 - NotInstalled: The item is not installed.
+// 3 - InstalledPendingReboot: The item is installed pending reboot operation.
+// 99 - Other: The install state is not mapped. See the <code>install_state</code> attribute, which contains a data source specific value.
+type KbArticleInstallStateId = int
+
 // The Keyboard Information object contains details and attributes related to a computer or device keyboard. It encompasses information that describes the characteristics, capabilities, and configuration of the keyboard.
 type KeyboardInfo struct {
 	// The number of function keys on client keyboard.
@@ -1000,6 +1214,26 @@ type KeyboardInfo struct {
 	// The keyboard type (e.g., xt, ico).
 	KeyboardType *string `json:"keyboard_type,omitempty"`
 }
+
+// The Kill Chain Phase object represents a single phase of a cyber attack, including the initial reconnaissance and planning stages up to the final objective of the attacker. It provides a detailed description of each phase and its associated activities within the broader context of a cyber attack. See <a target='_blank' href='https://www.lockheedmartin.com/en-us/capabilities/cyber/cyber-kill-chain.html'>Cyber Kill Chain®</a>.
+type KillChainPhase struct {
+	// The cyber kill chain phase.
+	Phase *string `json:"phase,omitempty"`
+	// The cyber kill chain phase identifier.
+	PhaseId KillChainPhasePhaseId `json:"phase_id"`
+}
+
+// KillChainPhasePhaseId is an enum, and the following values are allowed.
+// 0 - Unknown: The kill chain phase is unknown.
+// 1 - Reconnaissance: The attackers pick a target and perform a detailed analysis, start collecting information (email addresses, conferences information, etc.) and evaluate the victim’s vulnerabilities to determine how to exploit them.
+// 2 - Weaponization: The attackers develop a malware weapon and aim to exploit the discovered vulnerabilities.
+// 3 - Delivery: The intruders will use various tactics, such as phishing, infected USB drives, etc.
+// 4 - Exploitation: The intruders start leveraging vulnerabilities to executed code on the victim’s system.
+// 5 - Installation: The intruders install malware on the victim’s system.
+// 6 - Control: Malware opens a command channel to enable the intruders to remotely manipulate the victim's system.
+// 7 - ActionsonObjectives: With hands-on keyboard access, intruders accomplish the mission’s goal.
+// 99 - Other: The kill chain phase is not mapped. See the <code>phase</code> attribute, which contains a data source specific value.
+type KillChainPhasePhaseId = int
 
 // The additional LDAP attributes that describe a person.
 type LdapPerson struct {
@@ -1348,6 +1582,120 @@ type Os struct {
 // 402 - UX
 type OsTypeId = int
 
+// The OSINT (Open Source Intelligence) object contains details related to an indicator such as the indicator itself, related indicators, geolocation, registrar information, subdomains, analyst commentary, and other contextual information. This information can be used to further enrich a detection or finding by providing decisioning support to other analysts and engineers.
+type Osint struct {
+	// Any pertinent DNS answers information related to an indicator or OSINT analysis.
+	Answers []*DnsAnswer `json:"answers,omitempty"`
+	// MITRE ATT&CK Tactics, Techniques, and/or Procedures (TTPs) pertinent to an indicator or OSINT analysis.
+	Attacks []*Attack `json:"attacks,omitempty"`
+	// Any pertinent autonomous system information related to an indicator or OSINT analysis.
+	AutonomousSystem *AutonomousSystem `json:"autonomous_system,omitempty"`
+	// Analyst commentary or source commentary about an indicator or OSINT analysis.
+	Comment *string `json:"comment,omitempty"`
+	// The confidence of an indicator being malicious and/or pertinent, normalized to the caption of the confidence_id value. In the case of 'Other', it is defined by the event source or analyst.
+	Confidence *string `json:"confidence,omitempty"`
+	// The normalized confidence refers to the accuracy of collected information related to the OSINT or how pertinent an indicator or analysis is to a specific event or finding. A low confidence means that the information collected or analysis conducted lacked detail or is not accurate enough to qualify an indicator as fully malicious.
+	ConfidenceId *OsintConfidenceId `json:"confidence_id,omitempty"`
+	// Any email information pertinent to an indicator or OSINT analysis.
+	Email *Email `json:"email,omitempty"`
+	// Any email authentication information pertinent to an indicator or OSINT analysis.
+	EmailAuth *EmailAuth `json:"email_auth,omitempty"`
+	// Lockheed Martin Kill Chain Phases pertinent to an indicator or OSINT analysis.
+	KillChain []*KillChainPhase `json:"kill_chain,omitempty"`
+	// Any pertinent geolocation information related to an indicator or OSINT analysis.
+	Location *Location `json:"location,omitempty"`
+	// The name of the entity.
+	Name *string `json:"name,omitempty"`
+	// Any digital signatures or hashes related to an indicator or OSINT analysis.
+	Signatures []*DigitalSignature `json:"signatures,omitempty"`
+	// The source URL of an indicator or OSINT analysis, e.g., a URL back to a TIP, report, or otherwise.
+	SrcUrl *UrlString `json:"src_url,omitempty"`
+	// Any pertinent subdomain information - such as those generated by a Domain Generation Algorithm - related to an indicator or OSINT analysis.
+	Subdomains []string `json:"subdomains,omitempty"`
+	// The <a target='_blank' href='https://www.first.org/tlp/'>Traffic Light Protocol</a> was created to facilitate greater sharing of potentially sensitive information and more effective collaboration. TLP provides a simple and intuitive schema for indicating with whom potentially sensitive information can be shared.
+	Tlp *OsintTlp `json:"tlp,omitempty"`
+	// The OSINT indicator type.
+	Type *string `json:"type,omitempty"`
+	// The OSINT indicator type ID.
+	TypeId OsintTypeId `json:"type_id"`
+	// The unique identifier of the entity.
+	Uid *string `json:"uid,omitempty"`
+	// The actual indicator value in scope, e.g., a SHA-256 hash hexdigest or a domain name.
+	Value string `json:"value"`
+	// The vendor name of a tool which generates intelligence or provides indicators.
+	VendorName *string `json:"vendor_name,omitempty"`
+	// Any vulnerabilities related to an indicator or OSINT analysis.
+	Vulnerabilities []*Vulnerability `json:"vulnerabilities,omitempty"`
+	// Any pertinent WHOIS information related to an indicator or OSINT analysis.
+	Whois *Whois `json:"whois,omitempty"`
+}
+
+// OsintConfidenceId is an enum, and the following values are allowed.
+// 0 - Unknown: The normalized confidence is unknown.
+// 1 - Low
+// 2 - Medium
+// 3 - High
+// 99 - Other: The confidence is not mapped to the defined enum values. See the <code>confidence</code> attribute, which contains a data source specific value.
+type OsintConfidenceId = int
+
+// OsintTlp is an enum, and the following values are allowed.
+// AMBER - AMBER: TLP:AMBER is for limited disclosure, recipients can only spread this on a need-to-know basis within their organization and its clients. Note that TLP:AMBER+STRICT restricts sharing to the organization only. Sources may use TLP:AMBER when information requires support to be effectively acted upon, yet carries risk to privacy, reputation, or operations if shared outside of the organizations involved. Recipients may share TLP:AMBER information with members of their own organization and its clients, but only on a need-to-know basis to protect their organization and its clients and prevent further harm. Note: if the source wants to restrict sharing to the organization only, they must specify TLP:AMBER+STRICT.
+// AMBER STRICT - AMBER_STRICT: TLP:AMBER is for limited disclosure, recipients can only spread this on a need-to-know basis within their organization and its clients. Note that TLP:AMBER+STRICT restricts sharing to the organization only. Sources may use TLP:AMBER when information requires support to be effectively acted upon, yet carries risk to privacy, reputation, or operations if shared outside of the organizations involved. Recipients may share TLP:AMBER information with members of their own organization and its clients, but only on a need-to-know basis to protect their organization and its clients and prevent further harm. Note: if the source wants to restrict sharing to the organization only, they must specify TLP:AMBER+STRICT.
+// CLEAR - CLEAR: TLP:CLEAR denotes that recipients can spread this to the world, there is no limit on disclosure. Sources may use TLP:CLEAR when information carries minimal or no foreseeable risk of misuse, in accordance with applicable rules and procedures for public release. Subject to standard copyright rules, TLP:CLEAR information may be shared without restriction.
+// GREEN - GREEN: TLP:GREEN is for limited disclosure, recipients can spread this within their community. Sources may use TLP:GREEN when information is useful to increase awareness within their wider community. Recipients may share TLP:GREEN information with peers and partner organizations within their community, but not via publicly accessible channels. TLP:GREEN information may not be shared outside of the community. Note: when “community” is not defined, assume the cybersecurity/defense community.
+// RED - RED: TLP:RED is for the eyes and ears of individual recipients only, no further disclosure. Sources may use TLP:RED when information cannot be effectively acted upon without significant risk for the privacy, reputation, or operations of the organizations involved. Recipients may therefore not share TLP:RED information with anyone else. In the context of a meeting, for example, TLP:RED information is limited to those present at the meeting.
+type OsintTlp = string
+
+// OsintTypeId is an enum, and the following values are allowed.
+// 0 - Unknown: The indicator type is ambiguous or there is not a related indicator for the OSINT object.
+// 1 - IPAddress: An IPv4 or IPv6 address.
+// 2 - Domain: A full-qualified domain name (FQDN), subdomain, or partial domain.
+// 3 - Hostname: A hostname or computer name.
+// 4 - Hash: Any type of hash e.g., MD5, SHA1, SHA2, BLAKE, BLAKE2, etc. generated from a file, malware sample, request header, or otherwise.
+// 5 - URL: A Uniform Resource Locator (URL) or Uniform Resource Indicator (URI).
+// 6 - UserAgent: A User Agent typically seen in HTTP request headers.
+// 7 - DigitalCertificate: The serial number, fingerprint, or full content of an X.509 digital certificate.
+// 8 - Email: The contents of an email or any related information to an email object.
+// 9 - EmailAddress: An email address.
+// 10 - Vulnerability: A CVE ID, CWE ID, or other identifier for a weakness, exploit, bug, or misconfiguration.
+// 99 - Other: The indicator type is not directly listed.
+type OsintTypeId = int
+
+// The Software Package object describes details about a software package. Defined by D3FEND <a target='_blank' href='https://d3fend.mitre.org/dao/artifact/d3f:SoftwarePackage/'>d3f:SoftwarePackage</a>.
+type Package struct {
+	// Architecture is a shorthand name describing the type of computer hardware the packaged software is meant to run on.
+	Architecture *string `json:"architecture,omitempty"`
+	// The Common Platform Enumeration (CPE) name for the software package.
+	CpeName *string `json:"cpe_name,omitempty"`
+	// The software package epoch. Epoch is a way to define weighted dependencies based on version numbers.
+	Epoch *int `json:"epoch,omitempty"`
+	// Cryptographic hash to identify the binary instance of a software component. This can include any component such file, package, or library.
+	Hash *Fingerprint `json:"hash,omitempty"`
+	// The software license applied to this package.
+	License *string `json:"license,omitempty"`
+	// The software package name.
+	Name string `json:"name"`
+	// A purl is a URL string used to identify and locate a software package in a mostly universal and uniform way across programming languages, package managers, packaging conventions, tools, APIs and databases.
+	Purl *string `json:"purl,omitempty"`
+	// Release is the number of times a version of the software has been packaged.
+	Release *string `json:"release,omitempty"`
+	// The type of software package, normalized to the caption of the type_id value. In the case of 'Other', it is defined by the source.
+	Type *string `json:"type,omitempty"`
+	// The type of software package.
+	TypeId *PackageTypeId `json:"type_id,omitempty"`
+	// The name of the vendor who published the software package.
+	VendorName *string `json:"vendor_name,omitempty"`
+	// The software package version.
+	Version string `json:"version"`
+}
+
+// PackageTypeId is an enum, and the following values are allowed.
+// 0 - Unknown: The type is unknown.
+// 1 - Application: An application software package.
+// 2 - OperatingSystem: An operating system software package.
+// 99 - Other: The type is not mapped. See the <code>type</code> attribute, which contains a data source specific value.
+type PackageTypeId = int
+
 // The Policy object describes the policies that are applicable. <p>Policy attributes provide traceability to the operational state of the security product at the time that the event was captured, facilitating forensics, troubleshooting, and policy tuning/adjustments.</p>
 type Policy struct {
 	// The description of the policy.
@@ -1449,6 +1797,18 @@ type Product struct {
 	VendorName string `json:"vendor_name"`
 	// The version of the product, as defined by the event source. For example: <code>2013.1.3-beta</code>.
 	Version *string `json:"version,omitempty"`
+}
+
+// The Remediation object describes the recommended remediation steps to address identified issue(s).
+type Remediation struct {
+	// The description of the remediation strategy.
+	Desc string `json:"desc"`
+	// A list of KB articles or patches related to an endpoint. A KB Article contains metadata that describes the patch or an update.
+	KbArticleList []*KbArticle `json:"kb_article_list,omitempty"`
+	// The KB article/s related to the entity. A KB Article contains metadata that describes the patch or an update.
+	KbArticles []string `json:"kb_articles,omitempty"`
+	// A list of supporting URL/s, references that help describe the remediation strategy.
+	References []string `json:"references,omitempty"`
 }
 
 // The Reputation object describes the reputation/risk score of an entity (e.g. device, user, domain).
@@ -1584,6 +1944,43 @@ type Technique struct {
 	Uid *string `json:"uid,omitempty"`
 }
 
+// The Time Span object represents different time period durations. If a timespan is fractional, i.e. crosses one period, e.g. a week and 3 days, more than one may may be populated since each member is of integral type. In that case <code>type_id</code> if present should be set to <code>Other</code>.
+type Timespan struct {
+	// The duration of the time span in milliseconds.
+	Duration *int `json:"duration,omitempty"`
+	// The duration of the time span in days.
+	DurationDays *int `json:"duration_days,omitempty"`
+	// The duration of the time span in hours.
+	DurationHours *int `json:"duration_hours,omitempty"`
+	// The duration of the time span in minutes.
+	DurationMins *int `json:"duration_mins,omitempty"`
+	// The duration of the time span in months.
+	DurationMonths *int `json:"duration_months,omitempty"`
+	// The duration of the time span in seconds.
+	DurationSecs *int `json:"duration_secs,omitempty"`
+	// The duration of the time span in weeks.
+	DurationWeeks *int `json:"duration_weeks,omitempty"`
+	// The duration of the time span in years.
+	DurationYears *int `json:"duration_years,omitempty"`
+	// The type of time span duration the object represents.
+	Type *string `json:"type,omitempty"`
+	// The normalized identifier for the time span duration type.
+	TypeId *TimespanTypeId `json:"type_id,omitempty"`
+}
+
+// TimespanTypeId is an enum, and the following values are allowed.
+// 0 - Unknown: The type is unknown.
+// 1 - Milliseconds
+// 2 - Seconds
+// 3 - Minutes
+// 4 - Hours
+// 5 - Days
+// 6 - Weeks
+// 7 - Months
+// 8 - Years
+// 99 - Other: The type is not mapped. See the <code>type</code> attribute, which contains a data source specific value.
+type TimespanTypeId = int
+
 // The User object describes the characteristics of a user/person or a security principal. Defined by D3FEND <a target='_blank' href='https://d3fend.mitre.org/dao/artifact/d3f:UserAccount/'>d3f:UserAccount</a>.
 type User struct {
 	// The user's account or the account associated with the user.
@@ -1663,3 +2060,92 @@ type UserTypeId = int
 // 5 - Deprovisioned: The user account has been deprovisioned and is pending removal.
 // 99 - Other: The event status is not mapped. See the <code>user_status</code> attribute, which contains a data source specific value.
 type UserUserStatusId = int
+
+// The vulnerability is an unintended characteristic of a computing component or system configuration that multiplies the risk of an adverse event or a loss occurring either due to accidental exposure, deliberate attack, or conflict with new system components.
+type Vulnerability struct {
+	// List of Affected Code objects that describe details about code blocks identified as vulnerable.
+	AffectedCode []*AffectedCode `json:"affected_code,omitempty"`
+	// List of software packages identified as affected by a vulnerability/vulnerabilities.
+	AffectedPackages []*AffectedPackage `json:"affected_packages,omitempty"`
+	// The Common Vulnerabilities and Exposures (<a target='_blank' href='https://cve.mitre.org/'>CVE</a>).
+	Cve *Cve `json:"cve,omitempty"`
+	// The CWE object represents a weakness in a software system that can be exploited by a threat actor to perform an attack. The CWE object is based on the <a target='_blank' href='https://cwe.mitre.org/'>Common Weakness Enumeration (CWE)</a> catalog.
+	Cwe *Cwe `json:"cwe,omitempty"`
+	// The description of the vulnerability.
+	Desc *string `json:"desc,omitempty"`
+	// The time when the vulnerability was first observed.
+	FirstSeenTime *Timestamp `json:"first_seen_time,omitempty"`
+	// The time when the vulnerability was first observed.
+	FirstSeenTimeDt *time.Time `json:"first_seen_time_dt,omitempty"`
+	// Indicates if a fix is available for the reported vulnerability.
+	FixAvailable *bool `json:"fix_available,omitempty"`
+	// Indicates if an exploit or a PoC (proof-of-concept) is available for the reported vulnerability.
+	IsExploitAvailable *bool `json:"is_exploit_available,omitempty"`
+	// Indicates if a fix is available for the reported vulnerability.
+	IsFixAvailable *bool `json:"is_fix_available,omitempty"`
+	// A list of KB articles or patches related to an endpoint. A KB Article contains metadata that describes the patch or an update.
+	KbArticleList []*KbArticle `json:"kb_article_list,omitempty"`
+	// The KB article/s related to the entity. A KB Article contains metadata that describes the patch or an update.
+	KbArticles []string `json:"kb_articles,omitempty"`
+	// The time when the vulnerability was most recently observed.
+	LastSeenTime *Timestamp `json:"last_seen_time,omitempty"`
+	// The time when the vulnerability was most recently observed.
+	LastSeenTimeDt *time.Time `json:"last_seen_time_dt,omitempty"`
+	// List of vulnerable packages as identified by the security product
+	Packages []*Package `json:"packages,omitempty"`
+	// A list of reference URLs with additional information about the vulnerability.
+	References []string `json:"references,omitempty"`
+	// List of vulnerabilities that are related to this vulnerability.
+	RelatedVulnerabilities []string `json:"related_vulnerabilities,omitempty"`
+	// The remediation recommendations on how to mitigate the identified vulnerability.
+	Remediation *Remediation `json:"remediation,omitempty"`
+	// The vendor assigned severity of the vulnerability.
+	Severity *string `json:"severity,omitempty"`
+	// A title or a brief phrase summarizing the discovered vulnerability.
+	Title *string `json:"title,omitempty"`
+	// The name of the vendor that identified the vulnerability.
+	VendorName *string `json:"vendor_name,omitempty"`
+}
+
+// The resources of a WHOIS record for a given domain. This can include domain names, IP address blocks, autonomous system information, and/or contact and registration information for a domain.
+type Whois struct {
+	// The autonomous system information associated with a domain.
+	AutonomousSystem *AutonomousSystem `json:"autonomous_system,omitempty"`
+	// When the domain was registered or WHOIS entry was created.
+	CreatedTime *Timestamp `json:"created_time,omitempty"`
+	// When the domain was registered or WHOIS entry was created.
+	CreatedTimeDt *time.Time `json:"created_time_dt,omitempty"`
+	// The normalized value of dnssec_status_id.
+	DnssecStatus *string `json:"dnssec_status,omitempty"`
+	// Describes the normalized status of DNS Security Extensions (DNSSEC) for a domain.
+	DnssecStatusId *WhoisDnssecStatusId `json:"dnssec_status_id,omitempty"`
+	// The name of the domain.
+	Domain *string `json:"domain,omitempty"`
+	// An array of <code>Domain Contact</code> objects.
+	DomainContacts []*DomainContact `json:"domain_contacts,omitempty"`
+	// The email address for the registrar's abuse contact
+	EmailAddr *EmailAddress `json:"email_addr,omitempty"`
+	// When the WHOIS record was last updated or seen at.
+	LastSeenTime *Timestamp `json:"last_seen_time,omitempty"`
+	// When the WHOIS record was last updated or seen at.
+	LastSeenTimeDt *time.Time `json:"last_seen_time_dt,omitempty"`
+	// A collection of name servers related to a domain registration or other record.
+	NameServers []string `json:"name_servers,omitempty"`
+	// The phone number for the registrar's abuse contact
+	PhoneNumber *string `json:"phone_number,omitempty"`
+	// The domain registrar.
+	Registrar *string `json:"registrar,omitempty"`
+	// The status of a domain and its ability to be transferred, e.g., <code>clientTransferProhibited</code>.
+	Status *string `json:"status,omitempty"`
+	// An array of subdomain strings. Can be used to collect several subdomains such as those from Domain Generation Algorithms (DGAs).
+	Subdomains []string `json:"subdomains,omitempty"`
+	// The IP address block (CIDR) associated with a domain.
+	Subnet *Subnet `json:"subnet,omitempty"`
+}
+
+// WhoisDnssecStatusId is an enum, and the following values are allowed.
+// 0 - Unknown: The disposition is unknown.
+// 1 - Signed: The related domain enables the signing of DNS records using DNSSEC.
+// 2 - Unsigned: The related domain does not enable the signing of DNS records using DNSSEC.
+// 99 - Other: The DNSSEC status is not mapped. See the <code>dnssec_status</code> attribute, which contains a data source specific value.
+type WhoisDnssecStatusId = int

@@ -22,6 +22,7 @@ import (
 	softwareinfo "github.com/synqly/go-sdk/client/engine/ocsf/v110/softwareinfo"
 	vulnerabilityfinding "github.com/synqly/go-sdk/client/engine/ocsf/v110/vulnerabilityfinding"
 	webresourceaccessactivity "github.com/synqly/go-sdk/client/engine/ocsf/v110/webresourceaccessactivity"
+	configstate "github.com/synqly/go-sdk/client/engine/ocsf/v130/configstate"
 	time "time"
 )
 
@@ -134,6 +135,9 @@ func NewConnectionStateFromString(s string) (ConnectionState, error) {
 func (c ConnectionState) Ptr() *ConnectionState {
 	return &c
 }
+
+// The posture score of an endpoint asset.
+type PostureScore = *configstate.ConfigState
 
 // Threat event information represented by OCSF Threat object. The Threat object describes characteristics of a threat event.
 type ThreatEvent = *detectionfinding.DetectionFinding
