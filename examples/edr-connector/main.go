@@ -87,12 +87,14 @@ func (s *sentinelOneProvider) demoActions(orgToken string, sentinelOneConf *sent
 	t, err := common.NewTenant(ctx, id, "tenant_store.yaml", orgToken, map[mgmt.CategoryId]*mgmt.CreateIntegrationRequest{
 		mgmt.CategoryIdEdr: {
 			Fullname: mgmt.String("SentinelOne Identity Provider"),
-			ProviderConfig: mgmt.NewProviderConfigFromEdrSentinelone(&mgmt.EdrSentinelOne{
-				Url: sentinelOneConf.URL,
-				Credential: mgmt.NewSentinelOneCredentialFromToken(&mgmt.TokenCredential{
-					Secret: sentinelOneConf.Token,
-				}),
-			}),
+			ProviderConfig: &mgmt.ProviderConfig{
+				EdrSentinelone: &mgmt.EdrSentinelOne{
+					Url: sentinelOneConf.URL,
+					Credential: &mgmt.SentinelOneCredential{
+						Token: &mgmt.TokenCredential{Secret: sentinelOneConf.Token},
+					},
+				},
+			},
 		},
 	})
 	if err != nil {

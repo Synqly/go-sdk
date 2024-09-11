@@ -28,10 +28,28 @@ var (
 
 var consoleLogger = log.New(os.Stdout, "INFO: ", log.Ldate|log.Ltime)
 
+type provider interface {
+	ProviderConfig() *mgmt.ProviderConfig
+}
+
 type oktaConfig struct {
 	URL      string `koanf:"url"`
 	Token    string `koanf:"token"`
 	ClientId string `koanf:"clientid"`
+}
+
+func (c *oktaConfig) ProviderConfig() *mgmt.ProviderConfig {
+	return &mgmt.ProviderConfig{
+		IdentityOkta: &mgmt.IdentityOkta{
+			Url: c.URL,
+			Credential: &mgmt.OktaCredential{
+				OAuthClient: &mgmt.OAuthClientCredential{
+					ClientId:     c.ClientId,
+					ClientSecret: c.Token,
+				},
+			},
+		},
+	}
 }
 
 func (c *oktaConfig) Validate() error {
@@ -45,6 +63,26 @@ func (c *oktaConfig) Validate() error {
 		return errors.New("okta.client.id is required")
 	}
 	return nil
+}
+
+type entraConfig struct {
+	TenantId     string `koanf:"tenant_id"`
+	ClientId     string `koanf:"client_id"`
+	ClientSecret string `koanf:"client_secret"`
+}
+
+func (c *entraConfig) ProviderConfig() *mgmt.ProviderConfig {
+	return &mgmt.ProviderConfig{
+		IdentityEntraId: &mgmt.IdentityEntraId{
+			TenantId: c.TenantId,
+			Credential: &mgmt.EntraIdCredential{
+				OAuthClient: &mgmt.OAuthClientCredential{
+					ClientId:     c.ClientId,
+					ClientSecret: c.ClientSecret,
+				},
+			},
+		},
+	}
 }
 
 func waitForAuditLogResult(ctx context.Context, client *engineClient.Client, req *engine.QueryIdentityAuditLogRequest) (*engine.QueryIdentityAuditLogResponse, error) {
@@ -76,18 +114,13 @@ func waitForAuditLogResult(ctx context.Context, client *engineClient.Client, req
 // Next, it forces a password reset for the user, and waits for the audit log to update with the
 // result of this action. Then, it disables the user, and again waits for the audit log to update.
 // Finally, it re-enables the user, and waits for the audit log to update.
-func demoActions(userEmail, orgToken string, okta *oktaConfig) error {
+func demoActions(userEmail, orgToken string, p provider) error {
 	ctx := context.Background()
 
-	t, err := common.NewTenant(ctx, "Secure Identities Co", "tenant_store.yaml", orgToken, map[mgmt.CategoryId]*mgmt.CreateIntegrationRequest{
+	t, err := common.NewTenant(ctx, "Secure Identities Corp", "tenant_store-okta.yaml", orgToken, map[mgmt.CategoryId]*mgmt.CreateIntegrationRequest{
 		mgmt.CategoryIdIdentity: {
-			Fullname: mgmt.String("IAM Actions"),
-			ProviderConfig: mgmt.NewProviderConfigFromIdentityOkta(&mgmt.IdentityOkta{
-				Url: okta.URL,
-				Credential: mgmt.NewOktaCredentialFromToken(&mgmt.TokenCredential{
-					Secret: okta.Token,
-				}),
-			}),
+			Name:           engine.String("iam"),
+			ProviderConfig: p.ProviderConfig(),
 		},
 	})
 	if err != nil {
@@ -98,7 +131,7 @@ func demoActions(userEmail, orgToken string, okta *oktaConfig) error {
 
 	user, err := t.Synqly.EngineClients["identity"].Identity.QueryUsers(ctx, &engine.QueryUserRequest{
 		Filter: []*string{
-			engine.String("email_addr[eq]" + userEmail),
+			engine.String("entity.user.name[eq]" + userEmail),
 		},
 	})
 	if err != nil {
@@ -108,9 +141,21 @@ func demoActions(userEmail, orgToken string, okta *oktaConfig) error {
 		return fmt.Errorf("user with email %s not found", userEmail)
 	}
 
-	userID := *user.Result[0].Uid
+	b, _ := json.MarshalIndent(user.Result, "", "  ")
+	consoleLogger.Printf("User details:\n%s\n\n\n\n\n\n", b)
 
-	consoleLogger.Printf("Found user id %s with name %s\n", userID, *user.Result[0].FullName)
+	groupName := "Example Group"
+	consoleLogger.Printf("Looking up group %s", groupName)
+
+	groups, err := t.Synqly.EngineClients["identity"].Identity.QueryGroups(ctx, &engine.QueryGroupRequest{})
+	if err != nil {
+		return err
+	}
+
+	b, _ = json.MarshalIndent(groups.Result, "", "  ")
+	consoleLogger.Printf("Groups:\n%s\n\n\n\n\n\n", b)
+
+	userID := *user.Result[0].Entity.Uid
 
 	// Reset user's password
 
@@ -217,7 +262,7 @@ func main() {
 
 	// load config -- try from a config file, and if that is not present, then try env vars
 	parser := koanfyaml.Parser()
-	if err := k.Load(file.Provider("config.yaml"), parser); err != nil {
+	if err := k.Load(file.Provider("config-okta.yaml"), parser); err != nil {
 		k.Load(env.Provider("SYNQLY_", "_", func(s string) string {
 			return strings.ToLower(s)
 		}), nil)
@@ -228,6 +273,8 @@ func main() {
 		log.Fatal("synqly.org.token is required. Set SYNQLY_ORG_TOKEN or add it to config.yaml.")
 	}
 
+	oktaConf := oktaConfig{}
+
 	err := k.Unmarshal("synqly.okta", &oktaConf)
 	if err != nil {
 		log.Fatal(err)
@@ -236,7 +283,13 @@ func main() {
 		log.Fatalf("invalid okta config: %s. Set Okta configuration through env vars or add it to config.yaml", err)
 	}
 
-	userEmail := k.String("synqly.okta.user.email")
+	// entraConf := entraConfig{}
+	// err := k.Unmarshal("synqly.entra_id", &entraConf)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+
+	userEmail := k.String("synqly.user.email")
 	if userEmail == "" {
 		log.Fatal("synqly.okta.user.email is required. Set SYNQLY_OKTA_USER_EMAIL or add it to config.yaml.")
 	}

@@ -3,6 +3,7 @@ synqly:
     token:
 
   jira:
+    url:
     user:
     token:
 

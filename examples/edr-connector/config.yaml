@@ -1,7 +1,6 @@
 synqly:
-  org: {SYNQLY_ORG}
-  token: {SYNQLY_TOKEN}
+  token:
 
 sentinelone:
-  url: {SENTINELONE_URL}
-  token: {SENTINELONE_TOKEN}
+  url:
+  token:

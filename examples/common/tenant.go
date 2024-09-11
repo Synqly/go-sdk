@@ -70,7 +70,7 @@ func NewTenant(ctx context.Context, id, configFilePath, synqlyOrgToken string, i
 	}
 
 	tenant.Synqly.management = mgmtClient.NewClient(
-		mgmtClient.WithAuthToken(synqlyOrgToken),
+		mgmtClient.WithToken(synqlyOrgToken),
 	)
 
 	if err := tenant.Init(ctx, id, config, integrations); err != nil {
@@ -123,7 +123,7 @@ func (t *Tenant) Init(ctx context.Context, tenantID string, config *TenantConfig
 			config.SynqlyConfig.Tokens[categoryID] = token
 		} else {
 			t.Synqly.EngineClients[categoryID] = engineClient.NewClient(
-				engineClient.WithAuthToken(config.SynqlyConfig.Tokens[categoryID]),
+				engineClient.WithToken(config.SynqlyConfig.Tokens[categoryID]),
 			)
 		}
 	}
@@ -142,6 +142,6 @@ func (t *Tenant) ConfigureConnector(ctx context.Context, integration *mgmt.Creat
 	}
 
 	return engineClient.NewClient(
-		engineClient.WithAuthToken(resp.Result.Token.Access.Secret),
+		engineClient.WithToken(resp.Result.Token.Access.Secret),
 	), resp.Result.Token.Access.Secret, nil
 }

@@ -80,7 +80,7 @@ func (a *App) NewTenant(ctx context.Context, id string) error {
 	// Create a Synqly Client that can be used to interact with the tenant
 	// We will use this client to create an Account and set up an Integration with an event logging provider
 	client := mgmtClient.NewClient(
-		mgmtClient.WithAuthToken(synqlyOrgToken),
+		mgmtClient.WithToken(synqlyOrgToken),
 	)
 
 	// Create a Synqly Account for this tenant
@@ -109,7 +109,7 @@ func (a *App) NewTenant(ctx context.Context, id string) error {
 //
 // Returns an error if the Tenant cannot be found, or if an Integration cannot
 // be created for the given Tenant.
-func (a *App) configureEventLogging(ctx context.Context, tenantID, siemProviderType, siemProviderToken string) error {
+func (a *App) configureEventLogging(ctx context.Context, tenantID, siemProviderType string) error {
 	// Find the tenant
 	var tenant *Tenant
 	for _, t := range a.Tenants {
@@ -130,9 +130,11 @@ func (a *App) configureEventLogging(ctx context.Context, tenantID, siemProviderT
 		// We will use the Synqly Client we created for the tenant to do this
 		credential, err := tenant.SynqlyClient.Credentials.Create(ctx, tenant.SynqlyAccountId, &mgmt.CreateCredentialRequest{
 			Fullname: mgmt.String(fmt.Sprintf("%s authentication token", siemProviderType)),
-			Config: mgmt.NewCredentialConfigFromToken(&mgmt.TokenCredential{
-				Secret: splunkToken,
-			}),
+			Config: &mgmt.CredentialConfig{
+				Token: &mgmt.TokenCredential{
+					Secret: splunkToken,
+				},
+			},
 		})
 		if err != nil {
 			return err
@@ -158,26 +160,29 @@ func (a *App) configureEventLogging(ctx context.Context, tenantID, siemProviderT
 	// Create an Event Logger for the tenant
 	// We will use this client to post events to the provider
 	tenant.EventLogger = engineClient.NewClient(
-		engineClient.WithAuthToken(integration.Result.Token.Access.Secret),
+		engineClient.WithToken(integration.Result.Token.Access.Secret),
 	)
 
 	return nil
 }
 
 func (a *App) splunkConfig(splunkURL, credentialId string) *mgmt.ProviderConfig {
-	return mgmt.NewProviderConfigFromSiemSplunk(&mgmt.SiemSplunk{
-		HecUrl:        splunkURL,
-		HecCredential: mgmt.NewSplunkHecTokenFromTokenId(credentialId),
-		// Do not verify the Splunk server's TLS certificate. This
-		// is not recommended for production use; however, it is set
-		// here because Splunk Cloud HEC endpoints use self-signed
-		// "SplunkServerDefaultCert" certificates by default.
-		SkipTlsVerify: true,
-	})
+	return &mgmt.ProviderConfig{
+		SiemSplunk: &mgmt.SiemSplunk{
+			HecUrl: splunkURL,
+			HecCredential: &mgmt.SplunkHecToken{
+				TokenId: credentialId,
+			},
+			// Do not verify the Splunk server's TLS certificate. This
+			// is not recommended for production use; however, it is set
+			// here because Splunk Cloud HEC endpoints use self-signed
+			// "SplunkServerDefaultCert" certificates by default.
+			SkipTlsVerify: true,
+		}}
 }
 
 func (a *App) inmemConfig() *mgmt.ProviderConfig {
-	return mgmt.NewProviderConfigFromSiemMockSiem(&mgmt.SiemMock{})
+	return &mgmt.ProviderConfig{SiemMockSiem: &mgmt.SiemMock{}}
 }
 
 // example, we print a message for every Tenant tenant at regular intervals,
@@ -228,29 +233,31 @@ func (app *App) backgroundJob(durationSeconds int) {
 
 // createSampleEvent generates a sample ScheduledJobActivity OCSF (https://ocsf.io/) Event
 func createSampleEvent() *engine.Event {
-	return engine.NewEventFromScheduledJobActivity(&scheduledJobActivity.ScheduledJobActivity{
-		ActivityId: scheduledJobActivity.Activity_Update,
-		ActionId:   scheduledJobActivity.Action_Allowed,
-		Device: &scheduledJobActivity.Device{
-			TypeId: scheduledJobActivity.Device_Type_Server,
-		},
-		Job: &scheduledJobActivity.Job{
-			File: &scheduledJobActivity.File{
-				Name:   "main.go",
-				TypeId: 1,
+	return &engine.Event{
+		ScheduledJobActivity: &scheduledJobActivity.ScheduledJobActivity{
+			ActivityId: scheduledJobActivity.Activity_Update,
+			ActionId:   scheduledJobActivity.Action_Allowed,
+			Device: &scheduledJobActivity.Device{
+				TypeId: scheduledJobActivity.Device_Type_Server,
 			},
-			Name: "Background Job",
-		},
-		Metadata: &scheduledJobActivity.Metadata{
-			Product: &scheduledJobActivity.Product{
-				VendorName: "Synqly SDK for Go",
+			Job: &scheduledJobActivity.Job{
+				File: &scheduledJobActivity.File{
+					Name:   "main.go",
+					TypeId: 1,
+				},
+				Name: "Background Job",
 			},
-			Version: "1.1.0",
+			Metadata: &scheduledJobActivity.Metadata{
+				Product: &scheduledJobActivity.Product{
+					VendorName: "Synqly SDK for Go",
+				},
+				Version: "1.1.0",
+			},
+			Time:       int(time.Now().UTC().Unix()),
+			SeverityId: scheduledJobActivity.Severity_Informational,
+			TypeUid:    scheduledJobActivity.Type_ScheduledJobActivity_Update,
 		},
-		Time:       int(time.Now().UTC().Unix()),
-		SeverityId: scheduledJobActivity.Severity_Informational,
-		TypeUid:    scheduledJobActivity.Type_ScheduledJobActivity_Update,
-	})
+	}
 }
 
 func (app *App) cleanup() {
@@ -302,7 +309,7 @@ func main() {
 		if err := app.NewTenant(ctx, "Tenant ABC"); err != nil {
 			log.Fatal(err)
 		}
-		if err := app.configureEventLogging(ctx, "Tenant ABC", "splunk", splunkToken); err != nil {
+		if err := app.configureEventLogging(ctx, "Tenant ABC", "splunk"); err != nil {
 			log.Fatal(err)
 		}
 	}
@@ -312,7 +319,7 @@ func main() {
 	if err := app.NewTenant(ctx, "Tenant XYZ"); err != nil {
 		log.Fatal(err)
 	}
-	if err := app.configureEventLogging(ctx, "Tenant XYZ", "inmem", ""); err != nil {
+	if err := app.configureEventLogging(ctx, "Tenant XYZ", "inmem"); err != nil {
 		log.Fatal(err)
 	}
 

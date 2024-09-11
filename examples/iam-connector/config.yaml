@@ -2,8 +2,10 @@ synqly:
   org:
     token:
 
+  user:
+    email:
+
   okta:
-    user.email:
     url:
     token:
     clientid:
