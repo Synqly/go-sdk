@@ -3,6 +3,9 @@
 package incidentfinding
 
 import (
+	json "encoding/json"
+	fmt "fmt"
+	core "github.com/synqly/go-sdk/client/engine/core"
 	time "time"
 )
 
@@ -81,101 +84,164 @@ type ImpactId = int
 // An Incident Finding reports the creation, update, or closure of security incidents as a result of detections and/or analytics.
 type IncidentFinding struct {
 	// The normalized identifier of the Incident activity.
-	ActivityId ActivityId `json:"activity_id"`
+	ActivityId ActivityId `json:"activity_id" url:"activity_id"`
 	// The Incident activity name, as defined by the <code>activity_id</code>.
-	ActivityName *string `json:"activity_name,omitempty"`
+	ActivityName *string `json:"activity_name,omitempty" url:"activity_name,omitempty"`
 	// Describes details about a typical API (Application Programming Interface) call.
-	Api *Api `json:"api,omitempty"`
+	Api *Api `json:"api,omitempty" url:"api,omitempty"`
 	// The details of the user assigned to an Incident.
-	Assignee *User `json:"assignee,omitempty"`
+	Assignee *User `json:"assignee,omitempty" url:"assignee,omitempty"`
 	// The details of the group assigned to an Incident.
-	AssigneeGroup *Group `json:"assignee_group,omitempty"`
+	AssigneeGroup *Group `json:"assignee_group,omitempty" url:"assignee_group,omitempty"`
 	// An array of <a target='_blank' href='https://attack.mitre.org'>MITRE ATT&CK®</a> objects describing the tactics, techniques & sub-techniques associated to the Incident.
-	Attacks []*Attack `json:"attacks,omitempty"`
+	Attacks []*Attack `json:"attacks,omitempty" url:"attacks,omitempty"`
 	// The event category name, as defined by category_uid value: <code>Findings</code>.
-	CategoryName *string `json:"category_name,omitempty"`
+	CategoryName *string `json:"category_name,omitempty" url:"category_name,omitempty"`
 	// The category unique identifier of the event.
-	CategoryUid CategoryUid `json:"category_uid"`
+	CategoryUid CategoryUid `json:"category_uid" url:"category_uid"`
 	// The unique identifier of a class. A Class describes the attributes available in an event.
-	ClassUid ClassUid `json:"class_uid"`
+	ClassUid ClassUid `json:"class_uid" url:"class_uid"`
 	// Describes details about the Cloud environment where the event was originally created or logged.
-	Cloud *Cloud `json:"cloud,omitempty"`
+	Cloud *Cloud `json:"cloud,omitempty" url:"cloud,omitempty"`
 	// Additional user supplied details for updating or closing the incident.
-	Comment *string `json:"comment,omitempty"`
+	Comment *string `json:"comment,omitempty" url:"comment,omitempty"`
 	// The confidence, normalized to the caption of the confidence_id value. In the case of 'Other', it is defined by the event source.
-	Confidence *string `json:"confidence,omitempty"`
+	Confidence *string `json:"confidence,omitempty" url:"confidence,omitempty"`
 	// The normalized confidence refers to the accuracy of the rule that created the finding. A rule with a low confidence means that the finding scope is wide and may create finding reports that may not be malicious in nature.
-	ConfidenceId *ConfidenceId `json:"confidence_id,omitempty"`
+	ConfidenceId *ConfidenceId `json:"confidence_id,omitempty" url:"confidence_id,omitempty"`
 	// The confidence score as reported by the event source.
-	ConfidenceScore *int `json:"confidence_score,omitempty"`
+	ConfidenceScore *int `json:"confidence_score,omitempty" url:"confidence_score,omitempty"`
 	// The number of times that events in the same logical group occurred during the event <strong>Start Time</strong> to <strong>End Time</strong> period.
-	Count *int `json:"count,omitempty"`
+	Count *int `json:"count,omitempty" url:"count,omitempty"`
 	// The short description of the Incident.
-	Desc *string `json:"desc,omitempty"`
+	Desc *string `json:"desc,omitempty" url:"desc,omitempty"`
 	// The event duration or aggregate time, the amount of time the event covers from <code>start_time</code> to <code>end_time</code> in milliseconds.
-	Duration *int `json:"duration,omitempty"`
+	Duration *int `json:"duration,omitempty" url:"duration,omitempty"`
 	// The time of the most recent event included in the incident.
-	EndTime *Timestamp `json:"end_time,omitempty"`
+	EndTime *Timestamp `json:"end_time,omitempty" url:"end_time,omitempty"`
 	// The time of the most recent event included in the incident.
-	EndTimeDt *time.Time `json:"end_time_dt,omitempty"`
+	EndTimeDt *time.Time `json:"end_time_dt,omitempty" url:"end_time_dt,omitempty"`
 	// The additional information from an external data source, which is associated with the event or a finding. For example add location information for the IP address in the DNS answers:</p><code>[{"name": "answers.ip", "value": "92.24.47.250", "type": "location", "data": {"city": "Socotra", "continent": "Asia", "coordinates": [-25.4153, 17.0743], "country": "YE", "desc": "Yemen"}}]</code>
-	Enrichments []*Enrichment `json:"enrichments,omitempty"`
+	Enrichments []*Enrichment `json:"enrichments,omitempty" url:"enrichments,omitempty"`
 	// A list of <code>finding_info</code> objects associated to an incident.
-	FindingInfoList []*FindingInfo `json:"finding_info_list,omitempty"`
+	FindingInfoList []*FindingInfo `json:"finding_info_list" url:"finding_info_list"`
 	// The impact , normalized to the caption of the impact_id value. In the case of 'Other', it is defined by the event source.
-	Impact *string `json:"impact,omitempty"`
+	Impact *string `json:"impact,omitempty" url:"impact,omitempty"`
 	// The normalized impact of the finding.
-	ImpactId *ImpactId `json:"impact_id,omitempty"`
+	ImpactId *ImpactId `json:"impact_id,omitempty" url:"impact_id,omitempty"`
 	// The impact of the finding, valid range 0-100.
-	ImpactScore *int `json:"impact_score,omitempty"`
+	ImpactScore *int `json:"impact_score,omitempty" url:"impact_score,omitempty"`
 	// A determination based on analytics as to whether a potential breach was found.
-	IsSuspectedBreach *bool `json:"is_suspected_breach,omitempty"`
+	IsSuspectedBreach *bool `json:"is_suspected_breach,omitempty" url:"is_suspected_breach,omitempty"`
 	// The description of the event/finding, as defined by the source.
-	Message *string `json:"message,omitempty"`
+	Message *string `json:"message,omitempty" url:"message,omitempty"`
 	// The metadata associated with the event or a finding.
-	Metadata *Metadata `json:"metadata,omitempty"`
+	Metadata *Metadata `json:"metadata" url:"metadata"`
 	// The observables associated with the event or a finding.
-	Observables []*Observable `json:"observables,omitempty"`
+	Observables []*Observable `json:"observables,omitempty" url:"observables,omitempty"`
 	// The priority, normalized to the caption of the priority_id value. In the case of 'Other', it is defined by the event source.
-	Priority *int `json:"priority,omitempty"`
+	Priority *int `json:"priority,omitempty" url:"priority,omitempty"`
 	// The normalized priority. Priority identifies the relative importance of the finding. It is a measurement of urgency.
-	PriorityId *PriorityId `json:"priority_id,omitempty"`
+	PriorityId *PriorityId `json:"priority_id,omitempty" url:"priority_id,omitempty"`
 	// The raw event/finding data as received from the source.
-	RawData *string `json:"raw_data,omitempty"`
+	RawData *string `json:"raw_data,omitempty" url:"raw_data,omitempty"`
 	// The event/finding severity, normalized to the caption of the severity_id value. In the case of 'Other', it is defined by the source.
-	Severity *string `json:"severity,omitempty"`
+	Severity *string `json:"severity,omitempty" url:"severity,omitempty"`
 	// <p>The normalized identifier of the event/finding severity.</p>The normalized severity is a measurement the effort and expense required to manage and resolve an event or incident. Smaller numerical values represent lower impact events, and larger numerical values represent higher impact events.
-	SeverityId SeverityId `json:"severity_id"`
+	SeverityId SeverityId `json:"severity_id" url:"severity_id"`
 	// A Url link used to access the original incident.
-	SrcUrl *UrlString `json:"src_url,omitempty"`
+	SrcUrl *UrlString `json:"src_url,omitempty" url:"src_url,omitempty"`
 	// The time of the least recent event included in the incident.
-	StartTime *Timestamp `json:"start_time,omitempty"`
+	StartTime *Timestamp `json:"start_time,omitempty" url:"start_time,omitempty"`
 	// The time of the least recent event included in the incident.
-	StartTimeDt *time.Time `json:"start_time_dt,omitempty"`
+	StartTimeDt *time.Time `json:"start_time_dt,omitempty" url:"start_time_dt,omitempty"`
 	// The normalized status of the Incident normalized to the caption of the status_id value. In the case of 'Other', it is defined by the source.
-	Status *string `json:"status,omitempty"`
+	Status *string `json:"status,omitempty" url:"status,omitempty"`
 	// The event status code, as reported by the event source.<br /><br />For example, in a Windows Failed Authentication event, this would be the value of 'Failure Code', e.g. 0x18.
-	StatusCode *string `json:"status_code,omitempty"`
+	StatusCode *string `json:"status_code,omitempty" url:"status_code,omitempty"`
 	// The status details contains additional information about the event/finding outcome.
-	StatusDetail *string `json:"status_detail,omitempty"`
+	StatusDetail *string `json:"status_detail,omitempty" url:"status_detail,omitempty"`
 	// The normalized status identifier of the Incident.
-	StatusId StatusId `json:"status_id"`
+	StatusId StatusId `json:"status_id" url:"status_id"`
 	// The normalized event occurrence time or the finding creation time.
-	Time Timestamp `json:"time"`
+	Time Timestamp `json:"time" url:"time"`
 	// The normalized event occurrence time or the finding creation time.
-	TimeDt *time.Time `json:"time_dt,omitempty"`
+	TimeDt *time.Time `json:"time_dt,omitempty" url:"time_dt,omitempty"`
 	// The number of minutes that the reported event <code>time</code> is ahead or behind UTC, in the range -1,080 to +1,080.
-	TimezoneOffset *int `json:"timezone_offset,omitempty"`
+	TimezoneOffset *int `json:"timezone_offset,omitempty" url:"timezone_offset,omitempty"`
 	// The event/finding type name, as defined by the type_uid.
-	TypeName *string `json:"type_name,omitempty"`
+	TypeName *string `json:"type_name,omitempty" url:"type_name,omitempty"`
 	// The event/finding type ID. It identifies the event's semantics and structure. The value is calculated by the logging system as: <code>class_uid \* 100 + activity_id</code>.
-	TypeUid TypeUid `json:"type_uid"`
+	TypeUid TypeUid `json:"type_uid" url:"type_uid"`
 	// The attributes that are not mapped to the event schema. The names and values of those attributes are specific to the event source.
-	Unmapped *Object `json:"unmapped,omitempty"`
+	Unmapped *Object `json:"unmapped,omitempty" url:"unmapped,omitempty"`
 	// The verdict assigned to an Incident finding.
-	Verdict *string `json:"verdict,omitempty"`
+	Verdict *string `json:"verdict,omitempty" url:"verdict,omitempty"`
 	// The normalized verdict of an Incident.
-	VerdictId *VerdictId `json:"verdict_id,omitempty"`
+	VerdictId *VerdictId `json:"verdict_id,omitempty" url:"verdict_id,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (i *IncidentFinding) GetExtraProperties() map[string]interface{} {
+	return i.extraProperties
+}
+
+func (i *IncidentFinding) UnmarshalJSON(data []byte) error {
+	type embed IncidentFinding
+	var unmarshaler = struct {
+		embed
+		EndTimeDt   *core.DateTime `json:"end_time_dt,omitempty"`
+		StartTimeDt *core.DateTime `json:"start_time_dt,omitempty"`
+		TimeDt      *core.DateTime `json:"time_dt,omitempty"`
+	}{
+		embed: embed(*i),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*i = IncidentFinding(unmarshaler.embed)
+	i.EndTimeDt = unmarshaler.EndTimeDt.TimePtr()
+	i.StartTimeDt = unmarshaler.StartTimeDt.TimePtr()
+	i.TimeDt = unmarshaler.TimeDt.TimePtr()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *i)
+	if err != nil {
+		return err
+	}
+	i.extraProperties = extraProperties
+
+	i._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (i *IncidentFinding) MarshalJSON() ([]byte, error) {
+	type embed IncidentFinding
+	var marshaler = struct {
+		embed
+		EndTimeDt   *core.DateTime `json:"end_time_dt,omitempty"`
+		StartTimeDt *core.DateTime `json:"start_time_dt,omitempty"`
+		TimeDt      *core.DateTime `json:"time_dt,omitempty"`
+	}{
+		embed:       embed(*i),
+		EndTimeDt:   core.NewOptionalDateTime(i.EndTimeDt),
+		StartTimeDt: core.NewOptionalDateTime(i.StartTimeDt),
+		TimeDt:      core.NewOptionalDateTime(i.TimeDt),
+	}
+	return json.Marshal(marshaler)
+}
+
+func (i *IncidentFinding) String() string {
+	if len(i._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(i._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(i); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", i)
 }
 
 // PriorityId is an enum, and the following values are allowed.
@@ -234,13 +300,50 @@ type VerdictId = int
 // The Account object contains details about the account that initiated or performed a specific activity within a system or application.
 type Account struct {
 	// The name of the account (e.g. GCP Account Name).
-	Name *string `json:"name,omitempty"`
+	Name *string `json:"name,omitempty" url:"name,omitempty"`
 	// The account type, normalized to the caption of 'account_type_id'. In the case of 'Other', it is defined by the event source.
-	Type *string `json:"type,omitempty"`
+	Type *string `json:"type,omitempty" url:"type,omitempty"`
 	// The normalized account type identifier.
-	TypeId *AccountTypeId `json:"type_id,omitempty"`
+	TypeId *AccountTypeId `json:"type_id,omitempty" url:"type_id,omitempty"`
 	// The unique identifier of the account (e.g. AWS Account ID).
-	Uid *string `json:"uid,omitempty"`
+	Uid *string `json:"uid,omitempty" url:"uid,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (a *Account) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
+}
+
+func (a *Account) UnmarshalJSON(data []byte) error {
+	type unmarshaler Account
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*a = Account(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+
+	a._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (a *Account) String() string {
+	if len(a._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(a); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", a)
 }
 
 // AccountTypeId is an enum, and the following values are allowed.
@@ -261,21 +364,58 @@ type AccountTypeId = int
 // The Analytic object contains details about the analytic technique used to analyze and derive insights from the data or information that led to the creation of a finding or conclusion.
 type Analytic struct {
 	// The analytic category.
-	Category *string `json:"category,omitempty"`
+	Category *string `json:"category,omitempty" url:"category,omitempty"`
 	// The description of the analytic that generated the finding.
-	Desc *string `json:"desc,omitempty"`
+	Desc *string `json:"desc,omitempty" url:"desc,omitempty"`
 	// The name of the analytic that generated the finding.
-	Name *string `json:"name,omitempty"`
+	Name *string `json:"name,omitempty" url:"name,omitempty"`
 	// Other analytics related to this analytic.
-	RelatedAnalytics []Object `json:"related_analytics,omitempty"`
+	RelatedAnalytics []Object `json:"related_analytics,omitempty" url:"related_analytics,omitempty"`
 	// The analytic type.
-	Type *string `json:"type,omitempty"`
+	Type *string `json:"type,omitempty" url:"type,omitempty"`
 	// The analytic type ID.
-	TypeId AnalyticTypeId `json:"type_id"`
+	TypeId AnalyticTypeId `json:"type_id" url:"type_id"`
 	// The unique identifier of the analytic that generated the finding.
-	Uid *string `json:"uid,omitempty"`
+	Uid *string `json:"uid,omitempty" url:"uid,omitempty"`
 	// The analytic version. For example: <code>1.1</code>.
-	Version *string `json:"version,omitempty"`
+	Version *string `json:"version,omitempty" url:"version,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (a *Analytic) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
+}
+
+func (a *Analytic) UnmarshalJSON(data []byte) error {
+	type unmarshaler Analytic
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*a = Analytic(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+
+	a._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (a *Analytic) String() string {
+	if len(a._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(a); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", a)
 }
 
 // AnalyticTypeId is an enum, and the following values are allowed.
@@ -290,209 +430,461 @@ type AnalyticTypeId = int
 // The API, or Application Programming Interface, object represents information pertaining to an API request and response.
 type Api struct {
 	// The information pertaining to the API group.
-	Group *Group `json:"group,omitempty"`
+	Group *Group `json:"group,omitempty" url:"group,omitempty"`
 	// Verb/Operation associated with the request
-	Operation string `json:"operation"`
+	Operation string `json:"operation" url:"operation"`
 	// Details pertaining to the API request.
-	Request *Request `json:"request,omitempty"`
+	Request *Request `json:"request,omitempty" url:"request,omitempty"`
 	// Details pertaining to the API response.
-	Response *Response `json:"response,omitempty"`
+	Response *Response `json:"response,omitempty" url:"response,omitempty"`
 	// The information pertaining to the API service.
-	Service *Service `json:"service,omitempty"`
+	Service *Service `json:"service,omitempty" url:"service,omitempty"`
 	// The version of the API service.
-	Version *string `json:"version,omitempty"`
+	Version *string `json:"version,omitempty" url:"version,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (a *Api) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
+}
+
+func (a *Api) UnmarshalJSON(data []byte) error {
+	type unmarshaler Api
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*a = Api(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+
+	a._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (a *Api) String() string {
+	if len(a._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(a); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", a)
 }
 
 // The <a target='_blank' href='https://attack.mitre.org'>MITRE ATT&CK®</a> object describes the tactic, technique & sub-technique associated to an attack as defined in <a target='_blank' href='https://attack.mitre.org/wiki/ATT&CK_Matrix'>ATT&CK Matrix<sup>TM</sup></a>.
 type Attack struct {
 	// The Sub Technique object describes the sub technique ID and/or name associated to an attack, as defined by <a target='_blank' href='https://attack.mitre.org/wiki/ATT&CK_Matrix'>ATT&CK Matrix<sup>TM</sup></a>.
-	SubTechnique *SubTechnique `json:"sub_technique,omitempty"`
+	SubTechnique *SubTechnique `json:"sub_technique,omitempty" url:"sub_technique,omitempty"`
 	// The Tactic object describes the tactic ID and/or name that is associated to an attack, as defined by <a target='_blank' href='https://attack.mitre.org/wiki/ATT&CK_Matrix'>ATT&CK Matrix<sup>TM</sup></a>.
-	Tactic *Tactic `json:"tactic,omitempty"`
+	Tactic *Tactic `json:"tactic,omitempty" url:"tactic,omitempty"`
 	// The Tactic object describes the tactic ID and/or tactic name that are associated with the attack technique, as defined by <a target='_blank' href='https://attack.mitre.org/wiki/ATT&CK_Matrix'>ATT&CK Matrix<sup>TM</sup></a>.
-	Tactics []*Tactic `json:"tactics,omitempty"`
+	Tactics []*Tactic `json:"tactics,omitempty" url:"tactics,omitempty"`
 	// The Technique object describes the technique ID and/or name associated to an attack, as defined by <a target='_blank' href='https://attack.mitre.org/wiki/ATT&CK_Matrix'>ATT&CK Matrix<sup>TM</sup></a>.
-	Technique *Technique `json:"technique,omitempty"`
+	Technique *Technique `json:"technique,omitempty" url:"technique,omitempty"`
 	// The <a target='_blank' href='https://attack.mitre.org/wiki/ATT&CK_Matrix'>ATT&CK Matrix<sup>TM</sup></a> version.
-	Version *string `json:"version,omitempty"`
+	Version *string `json:"version,omitempty" url:"version,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (a *Attack) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
+}
+
+func (a *Attack) UnmarshalJSON(data []byte) error {
+	type unmarshaler Attack
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*a = Attack(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+
+	a._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (a *Attack) String() string {
+	if len(a._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(a); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", a)
 }
 
 // The Cloud object contains information about a cloud account such as AWS Account ID, regions, etc.
 type Cloud struct {
 	// The account object describes details about the account that was the source or target of the activity.
-	Account *Account `json:"account,omitempty"`
+	Account *Account `json:"account,omitempty" url:"account,omitempty"`
 	// Organization and org unit relevant to the event or object.
-	Org *Organization `json:"org,omitempty"`
+	Org *Organization `json:"org,omitempty" url:"org,omitempty"`
 	// The unique identifier of a Cloud project.
-	ProjectUid *string `json:"project_uid,omitempty"`
+	ProjectUid *string `json:"project_uid,omitempty" url:"project_uid,omitempty"`
 	// The unique name of the Cloud services provider, such as AWS, MS Azure, GCP, etc.
-	Provider string `json:"provider"`
+	Provider string `json:"provider" url:"provider"`
 	// The name of the cloud region, as defined by the cloud provider.
-	Region *string `json:"region,omitempty"`
+	Region *string `json:"region,omitempty" url:"region,omitempty"`
 	// The availability zone in the cloud region, as defined by the cloud provider.
-	Zone *string `json:"zone,omitempty"`
+	Zone *string `json:"zone,omitempty" url:"zone,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *Cloud) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
+}
+
+func (c *Cloud) UnmarshalJSON(data []byte) error {
+	type unmarshaler Cloud
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = Cloud(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
+	c._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (c *Cloud) String() string {
+	if len(c._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
 }
 
 // The Container object describes an instance of a specific container. A container is a prepackaged, portable system image that runs isolated on an existing system using a container runtime like containerd.
 type Container struct {
 	// Commit hash of image created for docker or the SHA256 hash of the container. For example: <code>13550340a8681c84c861aac2e5b440161c2b33a3e4f302ac680ca5b686de48de</code>.
-	Hash *Fingerprint `json:"hash,omitempty"`
+	Hash *Fingerprint `json:"hash,omitempty" url:"hash,omitempty"`
 	// The container image used as a template to run the container.
-	Image *Image `json:"image,omitempty"`
+	Image *Image `json:"image,omitempty" url:"image,omitempty"`
 	// The container name.
-	Name *string `json:"name,omitempty"`
+	Name *string `json:"name,omitempty" url:"name,omitempty"`
 	// The network driver used by the container. For example, bridge, overlay, host, none, etc.
-	NetworkDriver *string `json:"network_driver,omitempty"`
+	NetworkDriver *string `json:"network_driver,omitempty" url:"network_driver,omitempty"`
 	// The orchestrator managing the container, such as ECS, EKS, K8s, or OpenShift.
-	Orchestrator *string `json:"orchestrator,omitempty"`
+	Orchestrator *string `json:"orchestrator,omitempty" url:"orchestrator,omitempty"`
 	// The unique identifier of the pod (or equivalent) that the container is executing on.
-	PodUuid *string `json:"pod_uuid,omitempty"`
+	PodUuid *string `json:"pod_uuid,omitempty" url:"pod_uuid,omitempty"`
 	// The backend running the container, such as containerd or cri-o.
-	Runtime *string `json:"runtime,omitempty"`
+	Runtime *string `json:"runtime,omitempty" url:"runtime,omitempty"`
 	// The size of the container image.
-	Size *int `json:"size,omitempty"`
+	Size *int `json:"size,omitempty" url:"size,omitempty"`
 	// The tag used by the container. It can indicate version, format, OS.
-	Tag *string `json:"tag,omitempty"`
+	Tag *string `json:"tag,omitempty" url:"tag,omitempty"`
 	// The full container unique identifier for this instantiation of the container. For example: <code>ac2ea168264a08f9aaca0dfc82ff3551418dfd22d02b713142a6843caa2f61bf</code>.
-	Uid *string `json:"uid,omitempty"`
+	Uid *string `json:"uid,omitempty" url:"uid,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *Container) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
+}
+
+func (c *Container) UnmarshalJSON(data []byte) error {
+	type unmarshaler Container
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = Container(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
+	c._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (c *Container) String() string {
+	if len(c._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
 }
 
 // The Device object represents an addressable computer system or host, which is typically connected to a computer network and participates in the transmission or processing of data within the computer network. Defined by D3FEND <a target='_blank' href='https://d3fend.mitre.org/dao/artifact/d3f:Host/'>d3f:Host</a>.
 type Device struct {
 	// The unique identifier of the cloud autoscale configuration.
-	AutoscaleUid *string `json:"autoscale_uid,omitempty"`
+	AutoscaleUid *string `json:"autoscale_uid,omitempty" url:"autoscale_uid,omitempty"`
 	// The information describing an instance of a container. A container is a prepackaged, portable system image that runs isolated on an existing system using a container runtime like containerd.
-	Container *Container `json:"container,omitempty"`
+	Container *Container `json:"container,omitempty" url:"container,omitempty"`
 	// The time when the device was known to have been created.
-	CreatedTime *Timestamp `json:"created_time,omitempty"`
+	CreatedTime *Timestamp `json:"created_time,omitempty" url:"created_time,omitempty"`
 	// The time when the device was known to have been created.
-	CreatedTimeDt *time.Time `json:"created_time_dt,omitempty"`
+	CreatedTimeDt *time.Time `json:"created_time_dt,omitempty" url:"created_time_dt,omitempty"`
 	// The description of the device, ordinarily as reported by the operating system.
-	Desc *string `json:"desc,omitempty"`
+	Desc *string `json:"desc,omitempty" url:"desc,omitempty"`
 	// The network domain where the device resides. For example: <code>work.example.com</code>.
-	Domain *string `json:"domain,omitempty"`
+	Domain *string `json:"domain,omitempty" url:"domain,omitempty"`
 	// The initial discovery time of the device.
-	FirstSeenTime *Timestamp `json:"first_seen_time,omitempty"`
+	FirstSeenTime *Timestamp `json:"first_seen_time,omitempty" url:"first_seen_time,omitempty"`
 	// The initial discovery time of the device.
-	FirstSeenTimeDt *time.Time `json:"first_seen_time_dt,omitempty"`
+	FirstSeenTimeDt *time.Time `json:"first_seen_time_dt,omitempty" url:"first_seen_time_dt,omitempty"`
 	// The group names to which the device belongs. For example: <code>["Windows Laptops", "Engineering"]<code/>.
-	Groups []*Group `json:"groups,omitempty"`
+	Groups []*Group `json:"groups,omitempty" url:"groups,omitempty"`
 	// The device hostname.
-	Hostname *Hostname `json:"hostname,omitempty"`
+	Hostname *Hostname `json:"hostname,omitempty" url:"hostname,omitempty"`
 	// The endpoint hardware information.
-	HwInfo *DeviceHwInfo `json:"hw_info,omitempty"`
+	HwInfo *DeviceHwInfo `json:"hw_info,omitempty" url:"hw_info,omitempty"`
 	// The name of the hypervisor running on the device. For example, <code>Xen</code>, <code>VMware</code>, <code>Hyper-V</code>, <code>VirtualBox</code>, etc.
-	Hypervisor *string `json:"hypervisor,omitempty"`
+	Hypervisor *string `json:"hypervisor,omitempty" url:"hypervisor,omitempty"`
 	// The image used as a template to run the virtual machine.
-	Image *Image `json:"image,omitempty"`
+	Image *Image `json:"image,omitempty" url:"image,omitempty"`
 	// The International Mobile Station Equipment Identifier that is associated with the device.
-	Imei *string `json:"imei,omitempty"`
+	Imei *string `json:"imei,omitempty" url:"imei,omitempty"`
 	// The unique identifier of a VM instance.
-	InstanceUid *string `json:"instance_uid,omitempty"`
+	InstanceUid *string `json:"instance_uid,omitempty" url:"instance_uid,omitempty"`
 	// The name of the network interface (e.g. eth2).
-	InterfaceName *string `json:"interface_name,omitempty"`
+	InterfaceName *string `json:"interface_name,omitempty" url:"interface_name,omitempty"`
 	// The unique identifier of the network interface.
-	InterfaceUid *string `json:"interface_uid,omitempty"`
+	InterfaceUid *string `json:"interface_uid,omitempty" url:"interface_uid,omitempty"`
 	// The device IP address, in either IPv4 or IPv6 format.
-	Ip *IpAddress `json:"ip,omitempty"`
+	Ip *IpAddress `json:"ip,omitempty" url:"ip,omitempty"`
 	// A list of IP addresses available on the device
-	IpAddresses []string `json:"ip_addresses,omitempty"`
+	IpAddresses []string `json:"ip_addresses,omitempty" url:"ip_addresses,omitempty"`
 	// The event occurred on a compliant device.
-	IsCompliant *bool `json:"is_compliant,omitempty"`
+	IsCompliant *bool `json:"is_compliant,omitempty" url:"is_compliant,omitempty"`
 	// The event occurred on a managed device.
-	IsManaged *bool `json:"is_managed,omitempty"`
+	IsManaged *bool `json:"is_managed,omitempty" url:"is_managed,omitempty"`
 	// The event occurred on a personal device.
-	IsPersonal *bool `json:"is_personal,omitempty"`
+	IsPersonal *bool `json:"is_personal,omitempty" url:"is_personal,omitempty"`
 	// The event occurred on a trusted device.
-	IsTrusted *bool `json:"is_trusted,omitempty"`
+	IsTrusted *bool `json:"is_trusted,omitempty" url:"is_trusted,omitempty"`
 	// The most recent discovery time of the device.
-	LastSeenTime *Timestamp `json:"last_seen_time,omitempty"`
+	LastSeenTime *Timestamp `json:"last_seen_time,omitempty" url:"last_seen_time,omitempty"`
 	// The most recent discovery time of the device.
-	LastSeenTimeDt *time.Time `json:"last_seen_time_dt,omitempty"`
+	LastSeenTimeDt *time.Time `json:"last_seen_time_dt,omitempty" url:"last_seen_time_dt,omitempty"`
 	// The geographical location of the device.
-	Location *Location `json:"location,omitempty"`
+	Location *Location `json:"location,omitempty" url:"location,omitempty"`
 	// The Media Access Control (MAC) address of the endpoint.
-	Mac *MacAddress `json:"mac,omitempty"`
+	Mac *MacAddress `json:"mac,omitempty" url:"mac,omitempty"`
 	// A list of MAC addresses available on the device
-	MacAddresses []string `json:"mac_addresses,omitempty"`
+	MacAddresses []string `json:"mac_addresses,omitempty" url:"mac_addresses,omitempty"`
 	// The time when the device was last known to have been modified.
-	ModifiedTime *Timestamp `json:"modified_time,omitempty"`
+	ModifiedTime *Timestamp `json:"modified_time,omitempty" url:"modified_time,omitempty"`
 	// The time when the device was last known to have been modified.
-	ModifiedTimeDt *time.Time `json:"modified_time_dt,omitempty"`
+	ModifiedTimeDt *time.Time `json:"modified_time_dt,omitempty" url:"modified_time_dt,omitempty"`
 	// The alternate device name, ordinarily as assigned by an administrator. <p><b>Note:</b> The <b>Name</b> could be any other string that helps to identify the device, such as a phone number; for example <code>310-555-1234</code>.</p>
-	Name *string `json:"name,omitempty"`
+	Name *string `json:"name,omitempty" url:"name,omitempty"`
 	// If running under a process namespace (such as in a container), the process identifier within that process namespace.
-	NamespacePid *int `json:"namespace_pid,omitempty"`
+	NamespacePid *int `json:"namespace_pid,omitempty" url:"namespace_pid,omitempty"`
 	// A list of NetBIOS names available on the device
-	NetbiosNames []string `json:"netbios_names,omitempty"`
+	NetbiosNames []string `json:"netbios_names,omitempty" url:"netbios_names,omitempty"`
 	// The network interfaces that are associated with the device, one for each unique MAC address/IP address/hostname/name combination.<p><b>Note:</b> The first element of the array is the network information that pertains to the event.</p>
-	NetworkInterfaces []*NetworkInterface `json:"network_interfaces,omitempty"`
+	NetworkInterfaces []*NetworkInterface `json:"network_interfaces,omitempty" url:"network_interfaces,omitempty"`
 	// Organization and org unit related to the device.
-	Org *Organization `json:"org,omitempty"`
+	Org *Organization `json:"org,omitempty" url:"org,omitempty"`
 	// The endpoint operating system.
-	Os *Os `json:"os,omitempty"`
+	Os *Os `json:"os,omitempty" url:"os,omitempty"`
 	// The region where the virtual machine is located. For example, an AWS Region.
-	Region *string `json:"region,omitempty"`
+	Region *string `json:"region,omitempty" url:"region,omitempty"`
 	// The risk level, normalized to the caption of the risk_level_id value. In the case of 'Other', it is defined by the event source.
-	RiskLevel *string `json:"risk_level,omitempty"`
+	RiskLevel *string `json:"risk_level,omitempty" url:"risk_level,omitempty"`
 	// The normalized risk level id.
-	RiskLevelId *DeviceRiskLevelId `json:"risk_level_id,omitempty"`
+	RiskLevelId *DeviceRiskLevelId `json:"risk_level_id,omitempty" url:"risk_level_id,omitempty"`
 	// The risk score as reported by the event source.
-	RiskScore *int `json:"risk_score,omitempty"`
+	RiskScore *int `json:"risk_score,omitempty" url:"risk_score,omitempty"`
 	// The subnet mask.
-	Subnet *Subnet `json:"subnet,omitempty"`
+	Subnet *Subnet `json:"subnet,omitempty" url:"subnet,omitempty"`
 	// The unique identifier of a virtual subnet.
-	SubnetUid *string `json:"subnet_uid,omitempty"`
+	SubnetUid *string `json:"subnet_uid,omitempty" url:"subnet_uid,omitempty"`
 	// The list of software contained on a device
-	SwInfo []*Product `json:"sw_info,omitempty"`
+	SwInfo []*Product `json:"sw_info,omitempty" url:"sw_info,omitempty"`
 	// The device type. For example: <code>unknown</code>, <code>server</code>, <code>desktop</code>, <code>laptop</code>, <code>tablet</code>, <code>mobile</code>, <code>virtual</code>, <code>browser</code>, <code>plc</code>, <code>scada</code>, <code>dcs</code>, <code>cnc</code>, <code>scientific</code>, <code>medical</code>, <code>lighting</code>, <code>energy</code>, <code>transportation</code> <code>other</code>.
-	Type *string `json:"type,omitempty"`
+	Type *string `json:"type,omitempty" url:"type,omitempty"`
 	// The device type ID.
-	TypeId DeviceTypeId `json:"type_id"`
+	TypeId DeviceTypeId `json:"type_id" url:"type_id"`
 	// The unique identifier of the device. For example the Windows TargetSID or AWS EC2 ARN.
-	Uid *string `json:"uid,omitempty"`
+	Uid *string `json:"uid,omitempty" url:"uid,omitempty"`
 	// An alternate unique identifier of the device if any. For example the ActiveDirectory DN.
-	UidAlt *string `json:"uid_alt,omitempty"`
+	UidAlt *string `json:"uid_alt,omitempty" url:"uid_alt,omitempty"`
 	// The product vendor that created the device.
-	Vendor *Organization `json:"vendor,omitempty"`
+	Vendor *Organization `json:"vendor,omitempty" url:"vendor,omitempty"`
 	// The Virtual LAN identifier.
-	VlanUid *string `json:"vlan_uid,omitempty"`
+	VlanUid *string `json:"vlan_uid,omitempty" url:"vlan_uid,omitempty"`
 	// The unique identifier of the Virtual Private Cloud (VPC).
-	VpcUid *string `json:"vpc_uid,omitempty"`
+	VpcUid *string `json:"vpc_uid,omitempty" url:"vpc_uid,omitempty"`
 	// The network zone or LAN segment.
-	Zone *string `json:"zone,omitempty"`
+	Zone *string `json:"zone,omitempty" url:"zone,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (d *Device) GetExtraProperties() map[string]interface{} {
+	return d.extraProperties
+}
+
+func (d *Device) UnmarshalJSON(data []byte) error {
+	type embed Device
+	var unmarshaler = struct {
+		embed
+		CreatedTimeDt   *core.DateTime `json:"created_time_dt,omitempty"`
+		FirstSeenTimeDt *core.DateTime `json:"first_seen_time_dt,omitempty"`
+		LastSeenTimeDt  *core.DateTime `json:"last_seen_time_dt,omitempty"`
+		ModifiedTimeDt  *core.DateTime `json:"modified_time_dt,omitempty"`
+	}{
+		embed: embed(*d),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*d = Device(unmarshaler.embed)
+	d.CreatedTimeDt = unmarshaler.CreatedTimeDt.TimePtr()
+	d.FirstSeenTimeDt = unmarshaler.FirstSeenTimeDt.TimePtr()
+	d.LastSeenTimeDt = unmarshaler.LastSeenTimeDt.TimePtr()
+	d.ModifiedTimeDt = unmarshaler.ModifiedTimeDt.TimePtr()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *d)
+	if err != nil {
+		return err
+	}
+	d.extraProperties = extraProperties
+
+	d._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (d *Device) MarshalJSON() ([]byte, error) {
+	type embed Device
+	var marshaler = struct {
+		embed
+		CreatedTimeDt   *core.DateTime `json:"created_time_dt,omitempty"`
+		FirstSeenTimeDt *core.DateTime `json:"first_seen_time_dt,omitempty"`
+		LastSeenTimeDt  *core.DateTime `json:"last_seen_time_dt,omitempty"`
+		ModifiedTimeDt  *core.DateTime `json:"modified_time_dt,omitempty"`
+	}{
+		embed:           embed(*d),
+		CreatedTimeDt:   core.NewOptionalDateTime(d.CreatedTimeDt),
+		FirstSeenTimeDt: core.NewOptionalDateTime(d.FirstSeenTimeDt),
+		LastSeenTimeDt:  core.NewOptionalDateTime(d.LastSeenTimeDt),
+		ModifiedTimeDt:  core.NewOptionalDateTime(d.ModifiedTimeDt),
+	}
+	return json.Marshal(marshaler)
+}
+
+func (d *Device) String() string {
+	if len(d._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(d._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(d); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", d)
 }
 
 // The Device Hardware Information object contains details and specifications of the physical components that make up a device. This information provides an overview of the hardware capabilities, configuration, and characteristics of the device.
 type DeviceHwInfo struct {
 	// The BIOS date. For example: <code>03/31/16</code>.
-	BiosDate *string `json:"bios_date,omitempty"`
+	BiosDate *string `json:"bios_date,omitempty" url:"bios_date,omitempty"`
 	// The BIOS manufacturer. For example: <code>LENOVO</code>.
-	BiosManufacturer *string `json:"bios_manufacturer,omitempty"`
+	BiosManufacturer *string `json:"bios_manufacturer,omitempty" url:"bios_manufacturer,omitempty"`
 	// The BIOS UUID.
-	BiosUid *string `json:"bios_uid,omitempty"`
+	BiosUid *string `json:"bios_uid,omitempty" url:"bios_uid,omitempty"`
 	// The BIOS version. For example: <code>LENOVO G5ETA2WW (2.62)</code>.
-	BiosVer *string `json:"bios_ver,omitempty"`
+	BiosVer *string `json:"bios_ver,omitempty" url:"bios_ver,omitempty"`
 	// The chassis type describes the system enclosure or physical form factor. Such as the following examples for Windows <a target='_blank' href='https://docs.microsoft.com/en-us/windows/win32/cimwin32prov/win32-systemenclosure'>Windows Chassis Types</a>
-	Chassis *string `json:"chassis,omitempty"`
+	Chassis *string `json:"chassis,omitempty" url:"chassis,omitempty"`
 	// The cpu architecture, the number of bits used for addressing in memory. For example: <code>32</code> or <code>64</code>.
-	CpuBits *int `json:"cpu_bits,omitempty"`
+	CpuBits *int `json:"cpu_bits,omitempty" url:"cpu_bits,omitempty"`
 	// The number of processor cores in all installed processors. For Example: <code>42</code>.
-	CpuCores *int `json:"cpu_cores,omitempty"`
+	CpuCores *int `json:"cpu_cores,omitempty" url:"cpu_cores,omitempty"`
 	// The number of physical processors on a system. For example: <code>1</code>.
-	CpuCount *int `json:"cpu_count,omitempty"`
+	CpuCount *int `json:"cpu_count,omitempty" url:"cpu_count,omitempty"`
 	// The speed of the processor in Mhz. For Example: <code>4200</code>.
-	CpuSpeed *int `json:"cpu_speed,omitempty"`
+	CpuSpeed *int `json:"cpu_speed,omitempty" url:"cpu_speed,omitempty"`
 	// The processor type. For example: <code>x86 Family 6 Model 37 Stepping 5</code>.
-	CpuType *string `json:"cpu_type,omitempty"`
+	CpuType *string `json:"cpu_type,omitempty" url:"cpu_type,omitempty"`
 	// The desktop display affiliated with the event
-	DesktopDisplay *Display `json:"desktop_display,omitempty"`
+	DesktopDisplay *Display `json:"desktop_display,omitempty" url:"desktop_display,omitempty"`
 	// The keyboard detailed information.
-	KeyboardInfo *KeyboardInfo `json:"keyboard_info,omitempty"`
+	KeyboardInfo *KeyboardInfo `json:"keyboard_info,omitempty" url:"keyboard_info,omitempty"`
 	// The total amount of installed RAM, in Megabytes. For example: <code>2048</code>.
-	RamSize *int `json:"ram_size,omitempty"`
+	RamSize *int `json:"ram_size,omitempty" url:"ram_size,omitempty"`
 	// The device manufacturer serial number.
-	SerialNumber *string `json:"serial_number,omitempty"`
+	SerialNumber *string `json:"serial_number,omitempty" url:"serial_number,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (d *DeviceHwInfo) GetExtraProperties() map[string]interface{} {
+	return d.extraProperties
+}
+
+func (d *DeviceHwInfo) UnmarshalJSON(data []byte) error {
+	type unmarshaler DeviceHwInfo
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*d = DeviceHwInfo(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *d)
+	if err != nil {
+		return err
+	}
+	d.extraProperties = extraProperties
+
+	d._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (d *DeviceHwInfo) String() string {
+	if len(d._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(d._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(d); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", d)
 }
 
 // DeviceRiskLevelId is an enum, and the following values are allowed.
@@ -532,103 +924,355 @@ type DeviceTypeId = int
 // The Display object contains information about the physical or virtual display connected to a computer system.
 type Display struct {
 	// The numeric color depth.
-	ColorDepth *int `json:"color_depth,omitempty"`
+	ColorDepth *int `json:"color_depth,omitempty" url:"color_depth,omitempty"`
 	// The numeric physical height of display.
-	PhysicalHeight *int `json:"physical_height,omitempty"`
+	PhysicalHeight *int `json:"physical_height,omitempty" url:"physical_height,omitempty"`
 	// The numeric physical orientation of display.
-	PhysicalOrientation *int `json:"physical_orientation,omitempty"`
+	PhysicalOrientation *int `json:"physical_orientation,omitempty" url:"physical_orientation,omitempty"`
 	// The numeric physical width of display.
-	PhysicalWidth *int `json:"physical_width,omitempty"`
+	PhysicalWidth *int `json:"physical_width,omitempty" url:"physical_width,omitempty"`
 	// The numeric scale factor of display.
-	ScaleFactor *int `json:"scale_factor,omitempty"`
+	ScaleFactor *int `json:"scale_factor,omitempty" url:"scale_factor,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (d *Display) GetExtraProperties() map[string]interface{} {
+	return d.extraProperties
+}
+
+func (d *Display) UnmarshalJSON(data []byte) error {
+	type unmarshaler Display
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*d = Display(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *d)
+	if err != nil {
+		return err
+	}
+	d.extraProperties = extraProperties
+
+	d._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (d *Display) String() string {
+	if len(d._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(d._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(d); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", d)
 }
 
 // The Enrichment object provides inline enrichment data for specific attributes of interest within an event. It serves as a mechanism to enhance or supplement the information associated with the event by adding additional relevant details or context.
 type Enrichment struct {
 	// The enrichment data associated with the attribute and value. The meaning of this data depends on the type the enrichment record.
-	Data interface{} `json:"data,omitempty"`
+	Data interface{} `json:"data" url:"data"`
 	// The name of the attribute to which the enriched data pertains.
-	Name string `json:"name"`
+	Name string `json:"name" url:"name"`
 	// The enrichment data provider name.
-	Provider *string `json:"provider,omitempty"`
+	Provider *string `json:"provider,omitempty" url:"provider,omitempty"`
 	// The enrichment type. For example: <code>location</code>.
-	Type *string `json:"type,omitempty"`
+	Type *string `json:"type,omitempty" url:"type,omitempty"`
 	// The value of the attribute to which the enriched data pertains.
-	Value string `json:"value"`
+	Value string `json:"value" url:"value"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (e *Enrichment) GetExtraProperties() map[string]interface{} {
+	return e.extraProperties
+}
+
+func (e *Enrichment) UnmarshalJSON(data []byte) error {
+	type unmarshaler Enrichment
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*e = Enrichment(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *e)
+	if err != nil {
+		return err
+	}
+	e.extraProperties = extraProperties
+
+	e._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (e *Enrichment) String() string {
+	if len(e._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(e._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(e); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", e)
 }
 
 // The OCSF Schema Extension object provides detailed information about the schema extension used to construct the event. The schema extensions are registered in the <a target='_blank' href='https://github.com/ocsf/ocsf-schema/blob/main/extensions.md'>extensions.md</a> file.
 type Extension struct {
 	// The schema extension name. For example: <code>dev</code>.
-	Name string `json:"name"`
+	Name string `json:"name" url:"name"`
 	// The schema extension unique identifier. For example: <code>999</code>.
-	Uid string `json:"uid"`
+	Uid string `json:"uid" url:"uid"`
 	// The schema extension version. For example: <code>1.0.0-alpha.2</code>.
-	Version string `json:"version"`
+	Version string `json:"version" url:"version"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (e *Extension) GetExtraProperties() map[string]interface{} {
+	return e.extraProperties
+}
+
+func (e *Extension) UnmarshalJSON(data []byte) error {
+	type unmarshaler Extension
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*e = Extension(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *e)
+	if err != nil {
+		return err
+	}
+	e.extraProperties = extraProperties
+
+	e._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (e *Extension) String() string {
+	if len(e._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(e._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(e); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", e)
 }
 
 // The Feature object provides information about the software product feature that generated a specific event. It encompasses details related to the capabilities, components, user interface (UI) design, and performance upgrades associated with the feature.
 type Feature struct {
 	// The name of the feature.
-	Name *string `json:"name,omitempty"`
+	Name *string `json:"name,omitempty" url:"name,omitempty"`
 	// The unique identifier of the feature.
-	Uid *string `json:"uid,omitempty"`
+	Uid *string `json:"uid,omitempty" url:"uid,omitempty"`
 	// The version of the feature.
-	Version *string `json:"version,omitempty"`
+	Version *string `json:"version,omitempty" url:"version,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (f *Feature) GetExtraProperties() map[string]interface{} {
+	return f.extraProperties
+}
+
+func (f *Feature) UnmarshalJSON(data []byte) error {
+	type unmarshaler Feature
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*f = Feature(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *f)
+	if err != nil {
+		return err
+	}
+	f.extraProperties = extraProperties
+
+	f._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (f *Feature) String() string {
+	if len(f._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(f._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(f); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", f)
 }
 
 // The Finding Information object describes metadata related to a security finding generated by a security tool or system.
 type FindingInfo struct {
 	// The analytic technique used to analyze and derive insights from the data or information that led to the finding or conclusion.
-	Analytic *Analytic `json:"analytic,omitempty"`
+	Analytic *Analytic `json:"analytic,omitempty" url:"analytic,omitempty"`
 	// The <a target='_blank' href='https://attack.mitre.org'>MITRE ATT&CK®</a> technique and associated tactics related to the finding.
-	Attacks []*Attack `json:"attacks,omitempty"`
+	Attacks []*Attack `json:"attacks,omitempty" url:"attacks,omitempty"`
 	// The time when the finding was created.
-	CreatedTime *Timestamp `json:"created_time,omitempty"`
+	CreatedTime *Timestamp `json:"created_time,omitempty" url:"created_time,omitempty"`
 	// The time when the finding was created.
-	CreatedTimeDt *time.Time `json:"created_time_dt,omitempty"`
+	CreatedTimeDt *time.Time `json:"created_time_dt,omitempty" url:"created_time_dt,omitempty"`
 	// A list of data sources utilized in generation of the finding.
-	DataSources []string `json:"data_sources,omitempty"`
+	DataSources []string `json:"data_sources,omitempty" url:"data_sources,omitempty"`
 	// The description of the reported finding.
-	Desc *string `json:"desc,omitempty"`
+	Desc *string `json:"desc,omitempty" url:"desc,omitempty"`
 	// The time when the finding was first observed. e.g. The time when a vulnerability was first observed. <p>It can differ from the <code>created_time</code> timestamp, which reflects the time this finding was created.</p>
-	FirstSeenTime *Timestamp `json:"first_seen_time,omitempty"`
+	FirstSeenTime *Timestamp `json:"first_seen_time,omitempty" url:"first_seen_time,omitempty"`
 	// The time when the finding was first observed. e.g. The time when a vulnerability was first observed. <p>It can differ from the <code>created_time</code> timestamp, which reflects the time this finding was created.</p>
-	FirstSeenTimeDt *time.Time `json:"first_seen_time_dt,omitempty"`
+	FirstSeenTimeDt *time.Time `json:"first_seen_time_dt,omitempty" url:"first_seen_time_dt,omitempty"`
 	// The <a target='_blank' href='https://www.lockheedmartin.com/en-us/capabilities/cyber/cyber-kill-chain.html'>Cyber Kill Chain®</a> provides a detailed description of each phase and its associated activities within the broader context of a cyber attack.
-	KillChain []*KillChainPhase `json:"kill_chain,omitempty"`
+	KillChain []*KillChainPhase `json:"kill_chain,omitempty" url:"kill_chain,omitempty"`
 	// The time when the finding was most recently observed. e.g. The time when a vulnerability was most recently observed. <p>It can differ from the <code>modified_time</code> timestamp, which reflects the time this finding was last modified.</p>
-	LastSeenTime *Timestamp `json:"last_seen_time,omitempty"`
+	LastSeenTime *Timestamp `json:"last_seen_time,omitempty" url:"last_seen_time,omitempty"`
 	// The time when the finding was most recently observed. e.g. The time when a vulnerability was most recently observed. <p>It can differ from the <code>modified_time</code> timestamp, which reflects the time this finding was last modified.</p>
-	LastSeenTimeDt *time.Time `json:"last_seen_time_dt,omitempty"`
+	LastSeenTimeDt *time.Time `json:"last_seen_time_dt,omitempty" url:"last_seen_time_dt,omitempty"`
 	// The time when the finding was last modified.
-	ModifiedTime *Timestamp `json:"modified_time,omitempty"`
+	ModifiedTime *Timestamp `json:"modified_time,omitempty" url:"modified_time,omitempty"`
 	// The time when the finding was last modified.
-	ModifiedTimeDt *time.Time `json:"modified_time_dt,omitempty"`
+	ModifiedTimeDt *time.Time `json:"modified_time_dt,omitempty" url:"modified_time_dt,omitempty"`
 	// The unique identifier of the product that reported the finding.
-	ProductUid *string `json:"product_uid,omitempty"`
+	ProductUid *string `json:"product_uid,omitempty" url:"product_uid,omitempty"`
 	// Other analytics related to this finding.
-	RelatedAnalytics []*Analytic `json:"related_analytics,omitempty"`
+	RelatedAnalytics []*Analytic `json:"related_analytics,omitempty" url:"related_analytics,omitempty"`
 	// Describes events and/or other findings related to the finding as identified by the security product.
-	RelatedEvents []*RelatedEvent `json:"related_events,omitempty"`
+	RelatedEvents []*RelatedEvent `json:"related_events,omitempty" url:"related_events,omitempty"`
 	// The URL pointing to the source of the finding.
-	SrcUrl *UrlString `json:"src_url,omitempty"`
+	SrcUrl *UrlString `json:"src_url,omitempty" url:"src_url,omitempty"`
 	// A title or a brief phrase summarizing the reported finding.
-	Title string `json:"title"`
+	Title string `json:"title" url:"title"`
 	// One or more types of the reported finding.
-	Types []string `json:"types,omitempty"`
+	Types []string `json:"types,omitempty" url:"types,omitempty"`
 	// The unique identifier of the reported finding.
-	Uid string `json:"uid"`
+	Uid string `json:"uid" url:"uid"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (f *FindingInfo) GetExtraProperties() map[string]interface{} {
+	return f.extraProperties
+}
+
+func (f *FindingInfo) UnmarshalJSON(data []byte) error {
+	type embed FindingInfo
+	var unmarshaler = struct {
+		embed
+		CreatedTimeDt   *core.DateTime `json:"created_time_dt,omitempty"`
+		FirstSeenTimeDt *core.DateTime `json:"first_seen_time_dt,omitempty"`
+		LastSeenTimeDt  *core.DateTime `json:"last_seen_time_dt,omitempty"`
+		ModifiedTimeDt  *core.DateTime `json:"modified_time_dt,omitempty"`
+	}{
+		embed: embed(*f),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*f = FindingInfo(unmarshaler.embed)
+	f.CreatedTimeDt = unmarshaler.CreatedTimeDt.TimePtr()
+	f.FirstSeenTimeDt = unmarshaler.FirstSeenTimeDt.TimePtr()
+	f.LastSeenTimeDt = unmarshaler.LastSeenTimeDt.TimePtr()
+	f.ModifiedTimeDt = unmarshaler.ModifiedTimeDt.TimePtr()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *f)
+	if err != nil {
+		return err
+	}
+	f.extraProperties = extraProperties
+
+	f._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (f *FindingInfo) MarshalJSON() ([]byte, error) {
+	type embed FindingInfo
+	var marshaler = struct {
+		embed
+		CreatedTimeDt   *core.DateTime `json:"created_time_dt,omitempty"`
+		FirstSeenTimeDt *core.DateTime `json:"first_seen_time_dt,omitempty"`
+		LastSeenTimeDt  *core.DateTime `json:"last_seen_time_dt,omitempty"`
+		ModifiedTimeDt  *core.DateTime `json:"modified_time_dt,omitempty"`
+	}{
+		embed:           embed(*f),
+		CreatedTimeDt:   core.NewOptionalDateTime(f.CreatedTimeDt),
+		FirstSeenTimeDt: core.NewOptionalDateTime(f.FirstSeenTimeDt),
+		LastSeenTimeDt:  core.NewOptionalDateTime(f.LastSeenTimeDt),
+		ModifiedTimeDt:  core.NewOptionalDateTime(f.ModifiedTimeDt),
+	}
+	return json.Marshal(marshaler)
+}
+
+func (f *FindingInfo) String() string {
+	if len(f._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(f._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(f); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", f)
 }
 
 // The Fingerprint object provides detailed information about a digital fingerprint, which is a compact representation of data used to identify a longer piece of information, such as a public key or file content. It contains the algorithm and value of the fingerprint, enabling efficient and reliable identification of the associated data.
 type Fingerprint struct {
 	// The hash algorithm used to create the digital fingerprint, normalized to the caption of 'algorithm_id'. In the case of 'Other', it is defined by the event source.
-	Algorithm *string `json:"algorithm,omitempty"`
+	Algorithm *string `json:"algorithm,omitempty" url:"algorithm,omitempty"`
 	// The identifier of the normalized hash algorithm, which was used to create the digital fingerprint.
-	AlgorithmId FingerprintAlgorithmId `json:"algorithm_id"`
+	AlgorithmId FingerprintAlgorithmId `json:"algorithm_id" url:"algorithm_id"`
 	// The digital fingerprint value.
-	Value Hash `json:"value"`
+	Value Hash `json:"value" url:"value"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (f *Fingerprint) GetExtraProperties() map[string]interface{} {
+	return f.extraProperties
+}
+
+func (f *Fingerprint) UnmarshalJSON(data []byte) error {
+	type unmarshaler Fingerprint
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*f = Fingerprint(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *f)
+	if err != nil {
+		return err
+	}
+	f.extraProperties = extraProperties
+
+	f._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (f *Fingerprint) String() string {
+	if len(f._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(f._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(f); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", f)
 }
 
 // FingerprintAlgorithmId is an enum, and the following values are allowed.
@@ -646,53 +1290,201 @@ type FingerprintAlgorithmId = int
 // The Group object represents a collection or association of entities, such as users, policies, or devices. It serves as a logical grouping mechanism to organize and manage entities with similar characteristics or permissions within a system or organization.
 type Group struct {
 	// The group description.
-	Desc *string `json:"desc,omitempty"`
+	Desc *string `json:"desc,omitempty" url:"desc,omitempty"`
 	// The domain where the group is defined. For example: the LDAP or Active Directory domain.
-	Domain *string `json:"domain,omitempty"`
+	Domain *string `json:"domain,omitempty" url:"domain,omitempty"`
 	// The group name.
-	Name *string `json:"name,omitempty"`
+	Name *string `json:"name,omitempty" url:"name,omitempty"`
 	// The group privileges.
-	Privileges []string `json:"privileges,omitempty"`
+	Privileges []string `json:"privileges,omitempty" url:"privileges,omitempty"`
 	// The type of the group or account.
-	Type *string `json:"type,omitempty"`
+	Type *string `json:"type,omitempty" url:"type,omitempty"`
 	// The unique identifier of the group. For example, for Windows events this is the security identifier (SID) of the group.
-	Uid *string `json:"uid,omitempty"`
+	Uid *string `json:"uid,omitempty" url:"uid,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (g *Group) GetExtraProperties() map[string]interface{} {
+	return g.extraProperties
+}
+
+func (g *Group) UnmarshalJSON(data []byte) error {
+	type unmarshaler Group
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*g = Group(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	if err != nil {
+		return err
+	}
+	g.extraProperties = extraProperties
+
+	g._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (g *Group) String() string {
+	if len(g._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(g._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(g); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", g)
 }
 
 // The Image object provides a description of a specific Virtual Machine (VM) or Container image. Defined by D3FEND <a target='_blank' href='https://d3fend.mitre.org/dao/artifact/d3f:ContainerImage/'>d3f:ContainerImage</a>.
 type Image struct {
 	// The image labels.
-	Labels []string `json:"labels,omitempty"`
+	Labels []string `json:"labels,omitempty" url:"labels,omitempty"`
 	// The image name. For example: <code>elixir</code>.
-	Name *string `json:"name,omitempty"`
+	Name *string `json:"name,omitempty" url:"name,omitempty"`
 	// The full path to the image file.
-	Path *string `json:"path,omitempty"`
+	Path *string `json:"path,omitempty" url:"path,omitempty"`
 	// The image tag. For example: <code>1.11-alpine</code>.
-	Tag *string `json:"tag,omitempty"`
+	Tag *string `json:"tag,omitempty" url:"tag,omitempty"`
 	// The unique image ID. For example: <code>77af4d6b9913</code>.
-	Uid string `json:"uid"`
+	Uid string `json:"uid" url:"uid"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (i *Image) GetExtraProperties() map[string]interface{} {
+	return i.extraProperties
+}
+
+func (i *Image) UnmarshalJSON(data []byte) error {
+	type unmarshaler Image
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*i = Image(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *i)
+	if err != nil {
+		return err
+	}
+	i.extraProperties = extraProperties
+
+	i._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (i *Image) String() string {
+	if len(i._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(i._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(i); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", i)
 }
 
 // The Keyboard Information object contains details and attributes related to a computer or device keyboard. It encompasses information that describes the characteristics, capabilities, and configuration of the keyboard.
 type KeyboardInfo struct {
 	// The number of function keys on client keyboard.
-	FunctionKeys *int `json:"function_keys,omitempty"`
+	FunctionKeys *int `json:"function_keys,omitempty" url:"function_keys,omitempty"`
 	// The Input Method Editor (IME) file name.
-	Ime *string `json:"ime,omitempty"`
+	Ime *string `json:"ime,omitempty" url:"ime,omitempty"`
 	// The keyboard locale identifier name (e.g., en-US).
-	KeyboardLayout *string `json:"keyboard_layout,omitempty"`
+	KeyboardLayout *string `json:"keyboard_layout,omitempty" url:"keyboard_layout,omitempty"`
 	// The keyboard numeric code.
-	KeyboardSubtype *int `json:"keyboard_subtype,omitempty"`
+	KeyboardSubtype *int `json:"keyboard_subtype,omitempty" url:"keyboard_subtype,omitempty"`
 	// The keyboard type (e.g., xt, ico).
-	KeyboardType *string `json:"keyboard_type,omitempty"`
+	KeyboardType *string `json:"keyboard_type,omitempty" url:"keyboard_type,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (k *KeyboardInfo) GetExtraProperties() map[string]interface{} {
+	return k.extraProperties
+}
+
+func (k *KeyboardInfo) UnmarshalJSON(data []byte) error {
+	type unmarshaler KeyboardInfo
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*k = KeyboardInfo(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *k)
+	if err != nil {
+		return err
+	}
+	k.extraProperties = extraProperties
+
+	k._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (k *KeyboardInfo) String() string {
+	if len(k._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(k._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(k); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", k)
 }
 
 // The Kill Chain Phase object represents a single phase of a cyber attack, including the initial reconnaissance and planning stages up to the final objective of the attacker. It provides a detailed description of each phase and its associated activities within the broader context of a cyber attack. See <a target='_blank' href='https://www.lockheedmartin.com/en-us/capabilities/cyber/cyber-kill-chain.html'>Cyber Kill Chain®</a>.
 type KillChainPhase struct {
 	// The cyber kill chain phase.
-	Phase *string `json:"phase,omitempty"`
+	Phase *string `json:"phase,omitempty" url:"phase,omitempty"`
 	// The cyber kill chain phase identifier.
-	PhaseId KillChainPhasePhaseId `json:"phase_id"`
+	PhaseId KillChainPhasePhaseId `json:"phase_id" url:"phase_id"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (k *KillChainPhase) GetExtraProperties() map[string]interface{} {
+	return k.extraProperties
+}
+
+func (k *KillChainPhase) UnmarshalJSON(data []byte) error {
+	type unmarshaler KillChainPhase
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*k = KillChainPhase(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *k)
+	if err != nil {
+		return err
+	}
+	k.extraProperties = extraProperties
+
+	k._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (k *KillChainPhase) String() string {
+	if len(k._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(k._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(k); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", k)
 }
 
 // KillChainPhasePhaseId is an enum, and the following values are allowed.
@@ -710,183 +1502,454 @@ type KillChainPhasePhaseId = int
 // The additional LDAP attributes that describe a person.
 type LdapPerson struct {
 	// The cost center associated with the user.
-	CostCenter *string `json:"cost_center,omitempty"`
+	CostCenter *string `json:"cost_center,omitempty" url:"cost_center,omitempty"`
 	// The timestamp when the user was created.
-	CreatedTime *Timestamp `json:"created_time,omitempty"`
+	CreatedTime *Timestamp `json:"created_time,omitempty" url:"created_time,omitempty"`
 	// The timestamp when the user was created.
-	CreatedTimeDt *time.Time `json:"created_time_dt,omitempty"`
+	CreatedTimeDt *time.Time `json:"created_time_dt,omitempty" url:"created_time_dt,omitempty"`
 	// The timestamp when the user was deleted. In Active Directory (AD), when a user is deleted they are moved to a temporary container and then removed after 30 days. So, this field can be populated even after a user is deleted for the next 30 days.
-	DeletedTime *Timestamp `json:"deleted_time,omitempty"`
+	DeletedTime *Timestamp `json:"deleted_time,omitempty" url:"deleted_time,omitempty"`
 	// The timestamp when the user was deleted. In Active Directory (AD), when a user is deleted they are moved to a temporary container and then removed after 30 days. So, this field can be populated even after a user is deleted for the next 30 days.
-	DeletedTimeDt *time.Time `json:"deleted_time_dt,omitempty"`
+	DeletedTimeDt *time.Time `json:"deleted_time_dt,omitempty" url:"deleted_time_dt,omitempty"`
 	// A list of additional email addresses for the user.
-	EmailAddrs []EmailAddress `json:"email_addrs,omitempty"`
+	EmailAddrs []EmailAddress `json:"email_addrs,omitempty" url:"email_addrs,omitempty"`
 	// The employee identifier assigned to the user by the organization.
-	EmployeeUid *string `json:"employee_uid,omitempty"`
+	EmployeeUid *string `json:"employee_uid,omitempty" url:"employee_uid,omitempty"`
 	// The given or first name of the user.
-	GivenName *string `json:"given_name,omitempty"`
+	GivenName *string `json:"given_name,omitempty" url:"given_name,omitempty"`
 	// The timestamp when the user was or will be hired by the organization.
-	HireTime *Timestamp `json:"hire_time,omitempty"`
+	HireTime *Timestamp `json:"hire_time,omitempty" url:"hire_time,omitempty"`
 	// The timestamp when the user was or will be hired by the organization.
-	HireTimeDt *time.Time `json:"hire_time_dt,omitempty"`
+	HireTimeDt *time.Time `json:"hire_time_dt,omitempty" url:"hire_time_dt,omitempty"`
 	// The user's job title.
-	JobTitle *string `json:"job_title,omitempty"`
+	JobTitle *string `json:"job_title,omitempty" url:"job_title,omitempty"`
 	// The labels associated with the user. For example in AD this could be the <code>userType</code>, <code>employeeType</code>. For example: <code>Member, Employee</code>.
-	Labels []string `json:"labels,omitempty"`
+	Labels []string `json:"labels,omitempty" url:"labels,omitempty"`
 	// The last time when the user logged in.
-	LastLoginTime *Timestamp `json:"last_login_time,omitempty"`
+	LastLoginTime *Timestamp `json:"last_login_time,omitempty" url:"last_login_time,omitempty"`
 	// The last time when the user logged in.
-	LastLoginTimeDt *time.Time `json:"last_login_time_dt,omitempty"`
+	LastLoginTimeDt *time.Time `json:"last_login_time_dt,omitempty" url:"last_login_time_dt,omitempty"`
 	// The LDAP and X.500 <code>commonName</code> attribute, typically the full name of the person. For example, <code>John Doe</code>.
-	LdapCn *string `json:"ldap_cn,omitempty"`
+	LdapCn *string `json:"ldap_cn,omitempty" url:"ldap_cn,omitempty"`
 	// The X.500 Distinguished Name (DN) is a structured string that uniquely identifies an entry, such as a user, in an X.500 directory service For example, <code>cn=John Doe,ou=People,dc=example,dc=com</code>.
-	LdapDn *string `json:"ldap_dn,omitempty"`
+	LdapDn *string `json:"ldap_dn,omitempty" url:"ldap_dn,omitempty"`
 	// The timestamp when the user left or will be leaving the organization.
-	LeaveTime *Timestamp `json:"leave_time,omitempty"`
+	LeaveTime *Timestamp `json:"leave_time,omitempty" url:"leave_time,omitempty"`
 	// The timestamp when the user left or will be leaving the organization.
-	LeaveTimeDt *time.Time `json:"leave_time_dt,omitempty"`
+	LeaveTimeDt *time.Time `json:"leave_time_dt,omitempty" url:"leave_time_dt,omitempty"`
 	// The geographical location associated with a user. This is typically the user's usual work location.
-	Location *Location `json:"location,omitempty"`
+	Location *Location `json:"location,omitempty" url:"location,omitempty"`
 	// The user's manager. This helps in understanding an org hierarchy. This should only ever be populated once in an event. I.e. there should not be a manager's manager in an event.
-	Manager *Object `json:"manager,omitempty"`
+	Manager *Object `json:"manager,omitempty" url:"manager,omitempty"`
 	// The timestamp when the user entry was last modified.
-	ModifiedTime *Timestamp `json:"modified_time,omitempty"`
+	ModifiedTime *Timestamp `json:"modified_time,omitempty" url:"modified_time,omitempty"`
 	// The timestamp when the user entry was last modified.
-	ModifiedTimeDt *time.Time `json:"modified_time_dt,omitempty"`
+	ModifiedTimeDt *time.Time `json:"modified_time_dt,omitempty" url:"modified_time_dt,omitempty"`
 	// The primary office location associated with the user. This could be any string and isn't a specific address. For example, <code>South East Virtual</code>.
-	OfficeLocation *string `json:"office_location,omitempty"`
+	OfficeLocation *string `json:"office_location,omitempty" url:"office_location,omitempty"`
 	// The last or family name for the user.
-	Surname *string `json:"surname,omitempty"`
+	Surname *string `json:"surname,omitempty" url:"surname,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (l *LdapPerson) GetExtraProperties() map[string]interface{} {
+	return l.extraProperties
+}
+
+func (l *LdapPerson) UnmarshalJSON(data []byte) error {
+	type embed LdapPerson
+	var unmarshaler = struct {
+		embed
+		CreatedTimeDt   *core.DateTime `json:"created_time_dt,omitempty"`
+		DeletedTimeDt   *core.DateTime `json:"deleted_time_dt,omitempty"`
+		HireTimeDt      *core.DateTime `json:"hire_time_dt,omitempty"`
+		LastLoginTimeDt *core.DateTime `json:"last_login_time_dt,omitempty"`
+		LeaveTimeDt     *core.DateTime `json:"leave_time_dt,omitempty"`
+		ModifiedTimeDt  *core.DateTime `json:"modified_time_dt,omitempty"`
+	}{
+		embed: embed(*l),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*l = LdapPerson(unmarshaler.embed)
+	l.CreatedTimeDt = unmarshaler.CreatedTimeDt.TimePtr()
+	l.DeletedTimeDt = unmarshaler.DeletedTimeDt.TimePtr()
+	l.HireTimeDt = unmarshaler.HireTimeDt.TimePtr()
+	l.LastLoginTimeDt = unmarshaler.LastLoginTimeDt.TimePtr()
+	l.LeaveTimeDt = unmarshaler.LeaveTimeDt.TimePtr()
+	l.ModifiedTimeDt = unmarshaler.ModifiedTimeDt.TimePtr()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *l)
+	if err != nil {
+		return err
+	}
+	l.extraProperties = extraProperties
+
+	l._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (l *LdapPerson) MarshalJSON() ([]byte, error) {
+	type embed LdapPerson
+	var marshaler = struct {
+		embed
+		CreatedTimeDt   *core.DateTime `json:"created_time_dt,omitempty"`
+		DeletedTimeDt   *core.DateTime `json:"deleted_time_dt,omitempty"`
+		HireTimeDt      *core.DateTime `json:"hire_time_dt,omitempty"`
+		LastLoginTimeDt *core.DateTime `json:"last_login_time_dt,omitempty"`
+		LeaveTimeDt     *core.DateTime `json:"leave_time_dt,omitempty"`
+		ModifiedTimeDt  *core.DateTime `json:"modified_time_dt,omitempty"`
+	}{
+		embed:           embed(*l),
+		CreatedTimeDt:   core.NewOptionalDateTime(l.CreatedTimeDt),
+		DeletedTimeDt:   core.NewOptionalDateTime(l.DeletedTimeDt),
+		HireTimeDt:      core.NewOptionalDateTime(l.HireTimeDt),
+		LastLoginTimeDt: core.NewOptionalDateTime(l.LastLoginTimeDt),
+		LeaveTimeDt:     core.NewOptionalDateTime(l.LeaveTimeDt),
+		ModifiedTimeDt:  core.NewOptionalDateTime(l.ModifiedTimeDt),
+	}
+	return json.Marshal(marshaler)
+}
+
+func (l *LdapPerson) String() string {
+	if len(l._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(l._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(l); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", l)
 }
 
 // The Geo Location object describes a geographical location, usually associated with an IP address. Defined by D3FEND <a target='_blank' href='https://d3fend.mitre.org/dao/artifact/d3f:PhysicalLocation/'>d3f:PhysicalLocation</a>.
 type Location struct {
 	// The name of the city.
-	City *string `json:"city,omitempty"`
+	City *string `json:"city,omitempty" url:"city,omitempty"`
 	// The name of the continent.
-	Continent *string `json:"continent,omitempty"`
+	Continent *string `json:"continent,omitempty" url:"continent,omitempty"`
 	// A two-element array, containing a longitude/latitude pair. The format conforms with <a target='_blank' href='https://geojson.org'>GeoJSON</a>. For example: <code>[-73.983, 40.719]</code>.
-	Coordinates []float64 `json:"coordinates,omitempty"`
+	Coordinates []float64 `json:"coordinates,omitempty" url:"coordinates,omitempty"`
 	// The ISO 3166-1 Alpha-2 country code. For the complete list of country codes see <a target='_blank' href='https://www.iso.org/obp/ui/#iso:pub:PUB500001:en' >ISO 3166-1 alpha-2 codes</a>.<p><b>Note:</b> The two letter country code should be capitalized. For example: <code>US</code> or <code>CA</code>.</p>
-	Country *string `json:"country,omitempty"`
+	Country *string `json:"country,omitempty" url:"country,omitempty"`
 	// The description of the geographical location.
-	Desc *string `json:"desc,omitempty"`
+	Desc *string `json:"desc,omitempty" url:"desc,omitempty"`
 	// The indication of whether the location is on premises.
-	IsOnPremises *bool `json:"is_on_premises,omitempty"`
+	IsOnPremises *bool `json:"is_on_premises,omitempty" url:"is_on_premises,omitempty"`
 	// The name of the Internet Service Provider (ISP).
-	Isp *string `json:"isp,omitempty"`
+	Isp *string `json:"isp,omitempty" url:"isp,omitempty"`
 	// The postal code of the location.
-	PostalCode *string `json:"postal_code,omitempty"`
+	PostalCode *string `json:"postal_code,omitempty" url:"postal_code,omitempty"`
 	// The provider of the geographical location data.
-	Provider *string `json:"provider,omitempty"`
+	Provider *string `json:"provider,omitempty" url:"provider,omitempty"`
 	// The alphanumeric code that identifies the principal subdivision (e.g. province or state) of the country. Region codes are defined at <a target='_blank' href='https://www.iso.org/iso-3166-country-codes.html'>ISO 3166-2</a> and have a limit of three characters. For example, see <a target='_blank' href='https://www.iso.org/obp/ui/#iso:code:3166:US'>the region codes for the US</a>.
-	Region *string `json:"region,omitempty"`
+	Region *string `json:"region,omitempty" url:"region,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (l *Location) GetExtraProperties() map[string]interface{} {
+	return l.extraProperties
+}
+
+func (l *Location) UnmarshalJSON(data []byte) error {
+	type unmarshaler Location
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*l = Location(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *l)
+	if err != nil {
+		return err
+	}
+	l.extraProperties = extraProperties
+
+	l._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (l *Location) String() string {
+	if len(l._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(l._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(l); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", l)
 }
 
 // The Logger object represents the device and product where events are stored with times for receipt and transmission. This may be at the source device where the event occurred, a remote scanning device, intermediate hops, or the ultimate destination.
 type Logger struct {
 	// The device where the events are logged.
-	Device *Device `json:"device,omitempty"`
+	Device *Device `json:"device,omitempty" url:"device,omitempty"`
 	// The audit level at which an event was generated.
-	LogLevel *string `json:"log_level,omitempty"`
+	LogLevel *string `json:"log_level,omitempty" url:"log_level,omitempty"`
 	// The event log name. For example, syslog file name or Windows logging subsystem: Security.
-	LogName *string `json:"log_name,omitempty"`
+	LogName *string `json:"log_name,omitempty" url:"log_name,omitempty"`
 	// The logging provider or logging service that logged the event. For example, Microsoft-Windows-Security-Auditing.
-	LogProvider *string `json:"log_provider,omitempty"`
+	LogProvider *string `json:"log_provider,omitempty" url:"log_provider,omitempty"`
 	// The event log schema version that specifies the format of the original event. For example syslog version or Cisco Log Schema Version.
-	LogVersion *string `json:"log_version,omitempty"`
+	LogVersion *string `json:"log_version,omitempty" url:"log_version,omitempty"`
 	// <p>The time when the logging system collected and logged the event.</p>This attribute is distinct from the event time in that event time typically contain the time extracted from the original event. Most of the time, these two times will be different.
-	LoggedTime *Timestamp `json:"logged_time,omitempty"`
+	LoggedTime *Timestamp `json:"logged_time,omitempty" url:"logged_time,omitempty"`
 	// <p>The time when the logging system collected and logged the event.</p>This attribute is distinct from the event time in that event time typically contain the time extracted from the original event. Most of the time, these two times will be different.
-	LoggedTimeDt *time.Time `json:"logged_time_dt,omitempty"`
+	LoggedTimeDt *time.Time `json:"logged_time_dt,omitempty" url:"logged_time_dt,omitempty"`
 	// The name of the logging product instance.
-	Name *string `json:"name,omitempty"`
+	Name *string `json:"name,omitempty" url:"name,omitempty"`
 	// The product logging the event. This may be the event source product, a management server product, a scanning product, a SIEM, etc.
-	Product *Product `json:"product,omitempty"`
+	Product *Product `json:"product,omitempty" url:"product,omitempty"`
 	// The time when the event was transmitted from the logging device to it's next destination
-	TransmitTime *Timestamp `json:"transmit_time,omitempty"`
+	TransmitTime *Timestamp `json:"transmit_time,omitempty" url:"transmit_time,omitempty"`
 	// The time when the event was transmitted from the logging device to it's next destination
-	TransmitTimeDt *time.Time `json:"transmit_time_dt,omitempty"`
+	TransmitTimeDt *time.Time `json:"transmit_time_dt,omitempty" url:"transmit_time_dt,omitempty"`
 	// The unique identifier of the logging product instance.
-	Uid *string `json:"uid,omitempty"`
+	Uid *string `json:"uid,omitempty" url:"uid,omitempty"`
 	// The version of the logging product.
-	Version *string `json:"version,omitempty"`
+	Version *string `json:"version,omitempty" url:"version,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (l *Logger) GetExtraProperties() map[string]interface{} {
+	return l.extraProperties
+}
+
+func (l *Logger) UnmarshalJSON(data []byte) error {
+	type embed Logger
+	var unmarshaler = struct {
+		embed
+		LoggedTimeDt   *core.DateTime `json:"logged_time_dt,omitempty"`
+		TransmitTimeDt *core.DateTime `json:"transmit_time_dt,omitempty"`
+	}{
+		embed: embed(*l),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*l = Logger(unmarshaler.embed)
+	l.LoggedTimeDt = unmarshaler.LoggedTimeDt.TimePtr()
+	l.TransmitTimeDt = unmarshaler.TransmitTimeDt.TimePtr()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *l)
+	if err != nil {
+		return err
+	}
+	l.extraProperties = extraProperties
+
+	l._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (l *Logger) MarshalJSON() ([]byte, error) {
+	type embed Logger
+	var marshaler = struct {
+		embed
+		LoggedTimeDt   *core.DateTime `json:"logged_time_dt,omitempty"`
+		TransmitTimeDt *core.DateTime `json:"transmit_time_dt,omitempty"`
+	}{
+		embed:          embed(*l),
+		LoggedTimeDt:   core.NewOptionalDateTime(l.LoggedTimeDt),
+		TransmitTimeDt: core.NewOptionalDateTime(l.TransmitTimeDt),
+	}
+	return json.Marshal(marshaler)
+}
+
+func (l *Logger) String() string {
+	if len(l._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(l._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(l); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", l)
 }
 
 // The Metadata object describes the metadata associated with the event. Defined by D3FEND <a target='_blank' href='https://d3fend.mitre.org/dao/artifact/d3f:Metadata/'>d3f:Metadata</a>.
 type Metadata struct {
 	// The unique identifier used to correlate events.
-	CorrelationUid *string `json:"correlation_uid,omitempty"`
+	CorrelationUid *string `json:"correlation_uid,omitempty" url:"correlation_uid,omitempty"`
 	// The Event ID or Code that the product uses to describe the event.
-	EventCode *string `json:"event_code,omitempty"`
+	EventCode *string `json:"event_code,omitempty" url:"event_code,omitempty"`
 	// The schema extension used to create the event.
-	Extension *Extension `json:"extension,omitempty"`
+	Extension *Extension `json:"extension,omitempty" url:"extension,omitempty"`
 	// The schema extensions used to create the event.
-	Extensions []*Extension `json:"extensions,omitempty"`
+	Extensions []*Extension `json:"extensions,omitempty" url:"extensions,omitempty"`
 	// <p>The list of category labels attached to the event or specific attributes. Labels are user defined tags or aliases added at normalization time.</p>For example: <code>["network", "connection.ip:destination", "device.ip:source"]</code>
-	Labels []string `json:"labels,omitempty"`
+	Labels []string `json:"labels,omitempty" url:"labels,omitempty"`
 	// The audit level at which an event was generated.
-	LogLevel *string `json:"log_level,omitempty"`
+	LogLevel *string `json:"log_level,omitempty" url:"log_level,omitempty"`
 	// The event log name. For example, syslog file name or Windows logging subsystem: Security.
-	LogName *string `json:"log_name,omitempty"`
+	LogName *string `json:"log_name,omitempty" url:"log_name,omitempty"`
 	// The logging provider or logging service that logged the event. For example, Microsoft-Windows-Security-Auditing.
-	LogProvider *string `json:"log_provider,omitempty"`
+	LogProvider *string `json:"log_provider,omitempty" url:"log_provider,omitempty"`
 	// The event log schema version that specifies the format of the original event. For example syslog version or Cisco Log Schema Version.
-	LogVersion *string `json:"log_version,omitempty"`
+	LogVersion *string `json:"log_version,omitempty" url:"log_version,omitempty"`
 	// <p>The time when the logging system collected and logged the event.</p>This attribute is distinct from the event time in that event time typically contain the time extracted from the original event. Most of the time, these two times will be different.
-	LoggedTime *Timestamp `json:"logged_time,omitempty"`
+	LoggedTime *Timestamp `json:"logged_time,omitempty" url:"logged_time,omitempty"`
 	// <p>The time when the logging system collected and logged the event.</p>This attribute is distinct from the event time in that event time typically contain the time extracted from the original event. Most of the time, these two times will be different.
-	LoggedTimeDt *time.Time `json:"logged_time_dt,omitempty"`
+	LoggedTimeDt *time.Time `json:"logged_time_dt,omitempty" url:"logged_time_dt,omitempty"`
 	// An array of Logger objects that describe the devices and logging products between the event source and its eventual destination. Note, this attribute can be used when there is a complex end-to-end path of event flow.
-	Loggers []*Logger `json:"loggers,omitempty"`
+	Loggers []*Logger `json:"loggers,omitempty" url:"loggers,omitempty"`
 	// The time when the event was last modified or enriched.
-	ModifiedTime *Timestamp `json:"modified_time,omitempty"`
+	ModifiedTime *Timestamp `json:"modified_time,omitempty" url:"modified_time,omitempty"`
 	// The time when the event was last modified or enriched.
-	ModifiedTimeDt *time.Time `json:"modified_time_dt,omitempty"`
+	ModifiedTimeDt *time.Time `json:"modified_time_dt,omitempty" url:"modified_time_dt,omitempty"`
 	// The original event time as reported by the event source. For example, the time in the original format from system event log such as Syslog on Unix/Linux and the System event file on Windows. Omit if event is generated instead of collected via logs.
-	OriginalTime *string `json:"original_time,omitempty"`
+	OriginalTime *string `json:"original_time,omitempty" url:"original_time,omitempty"`
 	// The event processed time, such as an ETL operation.
-	ProcessedTime *Timestamp `json:"processed_time,omitempty"`
+	ProcessedTime *Timestamp `json:"processed_time,omitempty" url:"processed_time,omitempty"`
 	// The event processed time, such as an ETL operation.
-	ProcessedTimeDt *time.Time `json:"processed_time_dt,omitempty"`
+	ProcessedTimeDt *time.Time `json:"processed_time_dt,omitempty" url:"processed_time_dt,omitempty"`
 	// The product that reported the event.
-	Product *Product `json:"product,omitempty"`
+	Product *Product `json:"product" url:"product"`
 	// The list of profiles used to create the event.
-	Profiles []string `json:"profiles,omitempty"`
+	Profiles []string `json:"profiles,omitempty" url:"profiles,omitempty"`
 	// Sequence number of the event. The sequence number is a value available in some events, to make the exact ordering of events unambiguous, regardless of the event time precision.
-	Sequence *int `json:"sequence,omitempty"`
+	Sequence *int `json:"sequence,omitempty" url:"sequence,omitempty"`
 	// The unique tenant identifier.
-	TenantUid *string `json:"tenant_uid,omitempty"`
+	TenantUid *string `json:"tenant_uid,omitempty" url:"tenant_uid,omitempty"`
 	// The logging system-assigned unique identifier of an event instance.
-	Uid *string `json:"uid,omitempty"`
+	Uid *string `json:"uid,omitempty" url:"uid,omitempty"`
 	// The version of the OCSF schema, using Semantic Versioning Specification (<a target='_blank' href='https://semver.org'>SemVer</a>). For example: 1.0.0. Event consumers use the version to determine the available event attributes.
-	Version string `json:"version"`
+	Version string `json:"version" url:"version"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (m *Metadata) GetExtraProperties() map[string]interface{} {
+	return m.extraProperties
+}
+
+func (m *Metadata) UnmarshalJSON(data []byte) error {
+	type embed Metadata
+	var unmarshaler = struct {
+		embed
+		LoggedTimeDt    *core.DateTime `json:"logged_time_dt,omitempty"`
+		ModifiedTimeDt  *core.DateTime `json:"modified_time_dt,omitempty"`
+		ProcessedTimeDt *core.DateTime `json:"processed_time_dt,omitempty"`
+	}{
+		embed: embed(*m),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*m = Metadata(unmarshaler.embed)
+	m.LoggedTimeDt = unmarshaler.LoggedTimeDt.TimePtr()
+	m.ModifiedTimeDt = unmarshaler.ModifiedTimeDt.TimePtr()
+	m.ProcessedTimeDt = unmarshaler.ProcessedTimeDt.TimePtr()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *m)
+	if err != nil {
+		return err
+	}
+	m.extraProperties = extraProperties
+
+	m._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (m *Metadata) MarshalJSON() ([]byte, error) {
+	type embed Metadata
+	var marshaler = struct {
+		embed
+		LoggedTimeDt    *core.DateTime `json:"logged_time_dt,omitempty"`
+		ModifiedTimeDt  *core.DateTime `json:"modified_time_dt,omitempty"`
+		ProcessedTimeDt *core.DateTime `json:"processed_time_dt,omitempty"`
+	}{
+		embed:           embed(*m),
+		LoggedTimeDt:    core.NewOptionalDateTime(m.LoggedTimeDt),
+		ModifiedTimeDt:  core.NewOptionalDateTime(m.ModifiedTimeDt),
+		ProcessedTimeDt: core.NewOptionalDateTime(m.ProcessedTimeDt),
+	}
+	return json.Marshal(marshaler)
+}
+
+func (m *Metadata) String() string {
+	if len(m._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(m._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(m); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", m)
 }
 
 // The Network Interface object describes the type and associated attributes of a network interface.
 type NetworkInterface struct {
 	// The hostname associated with the network interface.
-	Hostname *Hostname `json:"hostname,omitempty"`
+	Hostname *Hostname `json:"hostname,omitempty" url:"hostname,omitempty"`
 	// The IP address associated with the network interface.
-	Ip *IpAddress `json:"ip,omitempty"`
+	Ip *IpAddress `json:"ip,omitempty" url:"ip,omitempty"`
 	// A list of IP addresses available on the network interface.
-	IpAddresses []string `json:"ip_addresses,omitempty"`
+	IpAddresses []string `json:"ip_addresses,omitempty" url:"ip_addresses,omitempty"`
 	// The MAC address of the network interface.
-	Mac *MacAddress `json:"mac,omitempty"`
+	Mac *MacAddress `json:"mac,omitempty" url:"mac,omitempty"`
 	// A list of MAC addresses available on the network interface.
-	MacAddresses []string `json:"mac_addresses,omitempty"`
+	MacAddresses []string `json:"mac_addresses,omitempty" url:"mac_addresses,omitempty"`
 	// The name of the network interface.
-	Name *string `json:"name,omitempty"`
+	Name *string `json:"name,omitempty" url:"name,omitempty"`
 	// The namespace is useful in merger or acquisition situations. For example, when similar entities exist that you need to keep separate.
-	Namespace *string `json:"namespace,omitempty"`
+	Namespace *string `json:"namespace,omitempty" url:"namespace,omitempty"`
 	// The subnet prefix length determines the number of bits used to represent the network part of the IP address. The remaining bits are reserved for identifying individual hosts within that subnet.
-	SubnetPrefix *int `json:"subnet_prefix,omitempty"`
+	SubnetPrefix *int `json:"subnet_prefix,omitempty" url:"subnet_prefix,omitempty"`
 	// The type of network interface.
-	Type *string `json:"type,omitempty"`
+	Type *string `json:"type,omitempty" url:"type,omitempty"`
 	// The network interface type identifier.
-	TypeId NetworkInterfaceTypeId `json:"type_id"`
+	TypeId NetworkInterfaceTypeId `json:"type_id" url:"type_id"`
 	// The unique identifier for the network interface.
-	Uid *string `json:"uid,omitempty"`
+	Uid *string `json:"uid,omitempty" url:"uid,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (n *NetworkInterface) GetExtraProperties() map[string]interface{} {
+	return n.extraProperties
+}
+
+func (n *NetworkInterface) UnmarshalJSON(data []byte) error {
+	type unmarshaler NetworkInterface
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*n = NetworkInterface(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *n)
+	if err != nil {
+		return err
+	}
+	n.extraProperties = extraProperties
+
+	n._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (n *NetworkInterface) String() string {
+	if len(n._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(n._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(n); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", n)
 }
 
 // NetworkInterfaceTypeId is an enum, and the following values are allowed.
@@ -904,15 +1967,52 @@ type Object = map[string]interface{}
 // The observable object is a pivot element that contains related information found in many places in the event.
 type Observable struct {
 	// The full name of the observable attribute. The <code>name</code> is a pointer/reference to an attribute within the event data. For example: <code>file.name</code>.
-	Name string `json:"name"`
+	Name string `json:"name" url:"name"`
 	// Contains the original and normalized reputation scores.
-	Reputation *Reputation `json:"reputation,omitempty"`
+	Reputation *Reputation `json:"reputation,omitempty" url:"reputation,omitempty"`
 	// The observable value type name.
-	Type *string `json:"type,omitempty"`
+	Type *string `json:"type,omitempty" url:"type,omitempty"`
 	// The observable value type identifier.
-	TypeId ObservableTypeId `json:"type_id"`
+	TypeId ObservableTypeId `json:"type_id" url:"type_id"`
 	// The value associated with the observable attribute. The meaning of the value depends on the observable type.<br/>If the <code>name</code> refers to a scalar attribute, then the <code>value</code> is the value of the attribute.<br/>If the <code>name</code> refers to an object attribute, then the <code>value</code> is not populated.
-	Value *string `json:"value,omitempty"`
+	Value *string `json:"value,omitempty" url:"value,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (o *Observable) GetExtraProperties() map[string]interface{} {
+	return o.extraProperties
+}
+
+func (o *Observable) UnmarshalJSON(data []byte) error {
+	type unmarshaler Observable
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*o = Observable(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *o)
+	if err != nil {
+		return err
+	}
+	o.extraProperties = extraProperties
+
+	o._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (o *Observable) String() string {
+	if len(o._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(o._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(o); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", o)
 }
 
 // ObservableTypeId is an enum, and the following values are allowed.
@@ -942,41 +2042,115 @@ type ObservableTypeId = int
 // The Organization object describes characteristics of an organization or company and its division if any.
 type Organization struct {
 	// The name of the organization. For example, Widget, Inc.
-	Name *string `json:"name,omitempty"`
+	Name *string `json:"name,omitempty" url:"name,omitempty"`
 	// The name of the organizational unit, within an organization. For example, Finance, IT, R&D
-	OuName *string `json:"ou_name,omitempty"`
+	OuName *string `json:"ou_name,omitempty" url:"ou_name,omitempty"`
 	// The alternate identifier for an entity's unique identifier. For example, its Active Directory OU DN or AWS OU ID.
-	OuUid *string `json:"ou_uid,omitempty"`
+	OuUid *string `json:"ou_uid,omitempty" url:"ou_uid,omitempty"`
 	// The unique identifier of the organization. For example, its Active Directory or AWS Org ID.
-	Uid *string `json:"uid,omitempty"`
+	Uid *string `json:"uid,omitempty" url:"uid,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (o *Organization) GetExtraProperties() map[string]interface{} {
+	return o.extraProperties
+}
+
+func (o *Organization) UnmarshalJSON(data []byte) error {
+	type unmarshaler Organization
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*o = Organization(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *o)
+	if err != nil {
+		return err
+	}
+	o.extraProperties = extraProperties
+
+	o._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (o *Organization) String() string {
+	if len(o._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(o._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(o); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", o)
 }
 
 // The Operating System (OS) object describes characteristics of an OS, such as Linux or Windows. Defined by D3FEND <a target='_blank' href='https://d3fend.mitre.org/dao/artifact/d3f:OperatingSystem/'>d3f:OperatingSystem</a>.
 type Os struct {
 	// The operating system build number.
-	Build *string `json:"build,omitempty"`
+	Build *string `json:"build,omitempty" url:"build,omitempty"`
 	// The operating system country code, as defined by the ISO 3166-1 standard (Alpha-2 code). For the complete list of country codes, see <a target='_blank' href='https://www.iso.org/obp/ui/#iso:pub:PUB500001:en'>ISO 3166-1 alpha-2 codes</a>.
-	Country *string `json:"country,omitempty"`
+	Country *string `json:"country,omitempty" url:"country,omitempty"`
 	// The Common Platform Enumeration (CPE) name as described by (<a target='_blank' href='https://nvd.nist.gov/products/cpe'>NIST</a>) For example: <code>cpe:/a:apple:safari:16.2</code>.
-	CpeName *string `json:"cpe_name,omitempty"`
+	CpeName *string `json:"cpe_name,omitempty" url:"cpe_name,omitempty"`
 	// The cpu architecture, the number of bits used for addressing in memory. For example: <code>32</code> or <code>64</code>.
-	CpuBits *int `json:"cpu_bits,omitempty"`
+	CpuBits *int `json:"cpu_bits,omitempty" url:"cpu_bits,omitempty"`
 	// The operating system edition. For example: <code>Professional</code>.
-	Edition *string `json:"edition,omitempty"`
+	Edition *string `json:"edition,omitempty" url:"edition,omitempty"`
 	// The two letter lower case language codes, as defined by <a target='_blank' href='https://en.wikipedia.org/wiki/ISO_639-1'>ISO 639-1</a>. For example: <code>en</code> (English), <code>de</code> (German), or <code>fr</code> (French).
-	Lang *string `json:"lang,omitempty"`
+	Lang *string `json:"lang,omitempty" url:"lang,omitempty"`
 	// The operating system name.
-	Name string `json:"name"`
+	Name string `json:"name" url:"name"`
 	// The name of the latest Service Pack.
-	SpName *string `json:"sp_name,omitempty"`
+	SpName *string `json:"sp_name,omitempty" url:"sp_name,omitempty"`
 	// The version number of the latest Service Pack.
-	SpVer *int `json:"sp_ver,omitempty"`
+	SpVer *int `json:"sp_ver,omitempty" url:"sp_ver,omitempty"`
 	// The type of the operating system.
-	Type *string `json:"type,omitempty"`
+	Type *string `json:"type,omitempty" url:"type,omitempty"`
 	// The type identifier of the operating system.
-	TypeId OsTypeId `json:"type_id"`
+	TypeId OsTypeId `json:"type_id" url:"type_id"`
 	// The version of the OS running on the device that originated the event. For example: "Windows 10", "OS X 10.7", or "iOS 9".
-	Version *string `json:"version,omitempty"`
+	Version *string `json:"version,omitempty" url:"version,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (o *Os) GetExtraProperties() map[string]interface{} {
+	return o.extraProperties
+}
+
+func (o *Os) UnmarshalJSON(data []byte) error {
+	type unmarshaler Os
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*o = Os(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *o)
+	if err != nil {
+		return err
+	}
+	o.extraProperties = extraProperties
+
+	o._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (o *Os) String() string {
+	if len(o._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(o._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(o); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", o)
 }
 
 // OsTypeId is an enum, and the following values are allowed.
@@ -997,53 +2171,164 @@ type OsTypeId = int
 // The Product object describes characteristics of a software product.
 type Product struct {
 	// The Common Platform Enumeration (CPE) name as described by (<a target='_blank' href='https://nvd.nist.gov/products/cpe'>NIST</a>) For example: <code>cpe:/a:apple:safari:16.2</code>.
-	CpeName *string `json:"cpe_name,omitempty"`
+	CpeName *string `json:"cpe_name,omitempty" url:"cpe_name,omitempty"`
 	// The feature that reported the event.
-	Feature *Feature `json:"feature,omitempty"`
+	Feature *Feature `json:"feature,omitempty" url:"feature,omitempty"`
 	// The two letter lower case language codes, as defined by <a target='_blank' href='https://en.wikipedia.org/wiki/ISO_639-1'>ISO 639-1</a>. For example: <code>en</code> (English), <code>de</code> (German), or <code>fr</code> (French).
-	Lang *string `json:"lang,omitempty"`
+	Lang *string `json:"lang,omitempty" url:"lang,omitempty"`
 	// The name of the product.
-	Name *string `json:"name,omitempty"`
+	Name *string `json:"name,omitempty" url:"name,omitempty"`
 	// The installation path of the product.
-	Path *string `json:"path,omitempty"`
+	Path *string `json:"path,omitempty" url:"path,omitempty"`
 	// The unique identifier of the product.
-	Uid *string `json:"uid,omitempty"`
+	Uid *string `json:"uid,omitempty" url:"uid,omitempty"`
 	// The URL pointing towards the product.
-	UrlString *UrlString `json:"url_string,omitempty"`
+	UrlString *UrlString `json:"url_string,omitempty" url:"url_string,omitempty"`
 	// The name of the vendor of the product.
-	VendorName string `json:"vendor_name"`
+	VendorName string `json:"vendor_name" url:"vendor_name"`
 	// The version of the product, as defined by the event source. For example: <code>2013.1.3-beta</code>.
-	Version *string `json:"version,omitempty"`
+	Version *string `json:"version,omitempty" url:"version,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (p *Product) GetExtraProperties() map[string]interface{} {
+	return p.extraProperties
+}
+
+func (p *Product) UnmarshalJSON(data []byte) error {
+	type unmarshaler Product
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*p = Product(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *p)
+	if err != nil {
+		return err
+	}
+	p.extraProperties = extraProperties
+
+	p._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (p *Product) String() string {
+	if len(p._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(p._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(p); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", p)
 }
 
 // The Related Event object describes an event related to a finding or detection as identified by the security product.
 type RelatedEvent struct {
 	// An array of <a target='_blank' href='https://attack.mitre.org'>MITRE ATT&CK®</a> objects describing the tactics, techniques & sub-techniques identified by a security control or finding.
-	Attacks []*Attack `json:"attacks,omitempty"`
+	Attacks []*Attack `json:"attacks,omitempty" url:"attacks,omitempty"`
 	// The <a target='_blank' href='https://www.lockheedmartin.com/en-us/capabilities/cyber/cyber-kill-chain.html'>Cyber Kill Chain®</a> provides a detailed description of each phase and its associated activities within the broader context of a cyber attack.
-	KillChain []*KillChainPhase `json:"kill_chain,omitempty"`
+	KillChain []*KillChainPhase `json:"kill_chain,omitempty" url:"kill_chain,omitempty"`
 	// The observables associated with the event or a finding.
-	Observables []*Observable `json:"observables,omitempty"`
+	Observables []*Observable `json:"observables,omitempty" url:"observables,omitempty"`
 	// The unique identifier of the product that reported the related event.
-	ProductUid *string `json:"product_uid,omitempty"`
+	ProductUid *string `json:"product_uid,omitempty" url:"product_uid,omitempty"`
 	// The type of the related event. For example: Process Activity: Launch.
-	Type *string `json:"type,omitempty"`
+	Type *string `json:"type,omitempty" url:"type,omitempty"`
 	// The unique identifier of the related event type. For example: 100701.
-	TypeUid *int `json:"type_uid,omitempty"`
+	TypeUid *int `json:"type_uid,omitempty" url:"type_uid,omitempty"`
 	// The unique identifier of the related event.
-	Uid string `json:"uid"`
+	Uid string `json:"uid" url:"uid"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (r *RelatedEvent) GetExtraProperties() map[string]interface{} {
+	return r.extraProperties
+}
+
+func (r *RelatedEvent) UnmarshalJSON(data []byte) error {
+	type unmarshaler RelatedEvent
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*r = RelatedEvent(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *r)
+	if err != nil {
+		return err
+	}
+	r.extraProperties = extraProperties
+
+	r._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (r *RelatedEvent) String() string {
+	if len(r._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(r._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(r); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", r)
 }
 
 // The Reputation object describes the reputation/risk score of an entity (e.g. device, user, domain).
 type Reputation struct {
 	// The reputation score as reported by the event source.
-	BaseScore float64 `json:"base_score"`
+	BaseScore float64 `json:"base_score" url:"base_score"`
 	// The provider of the reputation information.
-	Provider *string `json:"provider,omitempty"`
+	Provider *string `json:"provider,omitempty" url:"provider,omitempty"`
 	// The reputation score, normalized to the caption of the score_id value. In the case of 'Other', it is defined by the event source.
-	Score *string `json:"score,omitempty"`
+	Score *string `json:"score,omitempty" url:"score,omitempty"`
 	// The normalized reputation score identifier.
-	ScoreId ReputationScoreId `json:"score_id"`
+	ScoreId ReputationScoreId `json:"score_id" url:"score_id"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (r *Reputation) GetExtraProperties() map[string]interface{} {
+	return r.extraProperties
+}
+
+func (r *Reputation) UnmarshalJSON(data []byte) error {
+	type unmarshaler Reputation
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*r = Reputation(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *r)
+	if err != nil {
+		return err
+	}
+	r.extraProperties = extraProperties
+
+	r._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (r *Reputation) String() string {
+	if len(r._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(r._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(r); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", r)
 }
 
 // ReputationScoreId is an enum, and the following values are allowed.
@@ -1064,113 +2349,372 @@ type ReputationScoreId = int
 // The Request Elements object describes characteristics of an API request.
 type Request struct {
 	// When working with containerized applications, the set of containers which write to the standard the output of a particular logging driver. For example, this may be the set of containers involved in handling api requests and responses for a containerized application.
-	Containers []*Container `json:"containers,omitempty"`
+	Containers []*Container `json:"containers,omitempty" url:"containers,omitempty"`
 	// The additional data that is associated with the api request.
-	Data interface{} `json:"data,omitempty"`
+	Data interface{} `json:"data,omitempty" url:"data,omitempty"`
 	// The list of communication flags, normalized to the captions of the flag_ids values. In the case of 'Other', they are defined by the event source.
-	Flags []string `json:"flags,omitempty"`
+	Flags []string `json:"flags,omitempty" url:"flags,omitempty"`
 	// The unique request identifier.
-	Uid string `json:"uid"`
+	Uid string `json:"uid" url:"uid"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (r *Request) GetExtraProperties() map[string]interface{} {
+	return r.extraProperties
+}
+
+func (r *Request) UnmarshalJSON(data []byte) error {
+	type unmarshaler Request
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*r = Request(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *r)
+	if err != nil {
+		return err
+	}
+	r.extraProperties = extraProperties
+
+	r._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (r *Request) String() string {
+	if len(r._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(r._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(r); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", r)
 }
 
 // The Response Elements object describes characteristics of an API response.
 type Response struct {
 	// The numeric response sent to a request.
-	Code *int `json:"code,omitempty"`
+	Code *int `json:"code,omitempty" url:"code,omitempty"`
 	// When working with containerized applications, the set of containers which write to the standard the output of a particular logging driver. For example, this may be the set of containers involved in handling api requests and responses for a containerized application.
-	Containers []*Container `json:"containers,omitempty"`
+	Containers []*Container `json:"containers,omitempty" url:"containers,omitempty"`
 	// The additional data that is associated with the api response.
-	Data interface{} `json:"data,omitempty"`
+	Data interface{} `json:"data,omitempty" url:"data,omitempty"`
 	// Error Code
-	Error *string `json:"error,omitempty"`
+	Error *string `json:"error,omitempty" url:"error,omitempty"`
 	// Error Message
-	ErrorMessage *string `json:"error_message,omitempty"`
+	ErrorMessage *string `json:"error_message,omitempty" url:"error_message,omitempty"`
 	// The list of communication flags, normalized to the captions of the flag_ids values. In the case of 'Other', they are defined by the event source.
-	Flags []string `json:"flags,omitempty"`
+	Flags []string `json:"flags,omitempty" url:"flags,omitempty"`
 	// The description of the event/finding, as defined by the source.
-	Message *string `json:"message,omitempty"`
+	Message *string `json:"message,omitempty" url:"message,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (r *Response) GetExtraProperties() map[string]interface{} {
+	return r.extraProperties
+}
+
+func (r *Response) UnmarshalJSON(data []byte) error {
+	type unmarshaler Response
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*r = Response(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *r)
+	if err != nil {
+		return err
+	}
+	r.extraProperties = extraProperties
+
+	r._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (r *Response) String() string {
+	if len(r._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(r._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(r); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", r)
 }
 
 // The Service object describes characteristics of a service, <code> e.g. AWS EC2. </code>
 type Service struct {
 	// The list of labels associated with the service.
-	Labels []string `json:"labels,omitempty"`
+	Labels []string `json:"labels,omitempty" url:"labels,omitempty"`
 	// The name of the service.
-	Name *string `json:"name,omitempty"`
+	Name *string `json:"name,omitempty" url:"name,omitempty"`
 	// The unique identifier of the service.
-	Uid *string `json:"uid,omitempty"`
+	Uid *string `json:"uid,omitempty" url:"uid,omitempty"`
 	// The version of the service.
-	Version *string `json:"version,omitempty"`
+	Version *string `json:"version,omitempty" url:"version,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (s *Service) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
+}
+
+func (s *Service) UnmarshalJSON(data []byte) error {
+	type unmarshaler Service
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*s = Service(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+
+	s._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (s *Service) String() string {
+	if len(s._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(s); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", s)
 }
 
 // The Sub Technique object describes the sub technique ID and/or name associated to an attack, as defined by <a target='_blank' href='https://attack.mitre.org/wiki/ATT&CK_Matrix'>ATT&CK Matrix<sup>TM</sup></a>.
 type SubTechnique struct {
 	// The name of the attack sub technique, as defined by <a target='_blank' href='https://attack.mitre.org/wiki/ATT&CK_Matrix'>ATT&CK Matrix<sup>TM</sup></a>. For example: <code>Scanning IP Blocks</code>.
-	Name *string `json:"name,omitempty"`
+	Name *string `json:"name,omitempty" url:"name,omitempty"`
 	// The versioned permalink of the attack sub technique, as defined by <a target='_blank' href='https://attack.mitre.org/wiki/ATT&CK_Matrix'>ATT&CK Matrix<sup>TM</sup></a>. For example: <code>https://attack.mitre.org/versions/v14/techniques/T1595/001/</code>.
-	SrcUrl *UrlString `json:"src_url,omitempty"`
+	SrcUrl *UrlString `json:"src_url,omitempty" url:"src_url,omitempty"`
 	// The unique identifier of the attack sub technique, as defined by <a target='_blank' href='https://attack.mitre.org/wiki/ATT&CK_Matrix'>ATT&CK Matrix<sup>TM</sup></a>. For example: <code>T1595.001</code>.
-	Uid *string `json:"uid,omitempty"`
+	Uid *string `json:"uid,omitempty" url:"uid,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (s *SubTechnique) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
+}
+
+func (s *SubTechnique) UnmarshalJSON(data []byte) error {
+	type unmarshaler SubTechnique
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*s = SubTechnique(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+
+	s._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (s *SubTechnique) String() string {
+	if len(s._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(s); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", s)
 }
 
 // The Tactic object describes the tactic ID and/or name that is associated to an attack, as defined by <a target='_blank' href='https://attack.mitre.org/wiki/ATT&CK_Matrix'>ATT&CK Matrix<sup>TM</sup></a>.
 type Tactic struct {
 	// The tactic name that is associated with the attack technique, as defined by <a target='_blank' href='https://attack.mitre.org/wiki/ATT&CK_Matrix'>ATT&CK Matrix<sup>TM</sup></a>. For example: <code>Reconnaissance</code>.
-	Name *string `json:"name,omitempty"`
+	Name *string `json:"name,omitempty" url:"name,omitempty"`
 	// The versioned permalink of the attack tactic, as defined by <a target='_blank' href='https://attack.mitre.org/wiki/ATT&CK_Matrix'>ATT&CK Matrix<sup>TM</sup></a>. For example: <code>https://attack.mitre.org/versions/v14/tactics/TA0043/</code>.
-	SrcUrl *UrlString `json:"src_url,omitempty"`
+	SrcUrl *UrlString `json:"src_url,omitempty" url:"src_url,omitempty"`
 	// The tactic ID that is associated with the attack technique, as defined by <a target='_blank' href='https://attack.mitre.org/wiki/ATT&CK_Matrix'>ATT&CK Matrix<sup>TM</sup></a>. For example: <code>TA0043</code>.
-	Uid *string `json:"uid,omitempty"`
+	Uid *string `json:"uid,omitempty" url:"uid,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (t *Tactic) GetExtraProperties() map[string]interface{} {
+	return t.extraProperties
+}
+
+func (t *Tactic) UnmarshalJSON(data []byte) error {
+	type unmarshaler Tactic
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*t = Tactic(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *t)
+	if err != nil {
+		return err
+	}
+	t.extraProperties = extraProperties
+
+	t._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (t *Tactic) String() string {
+	if len(t._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(t._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(t); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", t)
 }
 
 // The Technique object describes the technique ID and/or name associated to an attack, as defined by <a target='_blank' href='https://attack.mitre.org/wiki/ATT&CK_Matrix'>ATT&CK Matrix<sup>TM</sup></a>.
 type Technique struct {
 	// The name of the attack technique, as defined by <a target='_blank' href='https://attack.mitre.org/wiki/ATT&CK_Matrix'>ATT&CK Matrix<sup>TM</sup></a>. For example: <code>Active Scanning</code>.
-	Name *string `json:"name,omitempty"`
+	Name *string `json:"name,omitempty" url:"name,omitempty"`
 	// The versioned permalink of the attack technique, as defined by <a target='_blank' href='https://attack.mitre.org/wiki/ATT&CK_Matrix'>ATT&CK Matrix<sup>TM</sup></a>. For example: <code>https://attack.mitre.org/versions/v14/techniques/T1595/</code>.
-	SrcUrl *UrlString `json:"src_url,omitempty"`
+	SrcUrl *UrlString `json:"src_url,omitempty" url:"src_url,omitempty"`
 	// The unique identifier of the attack technique, as defined by <a target='_blank' href='https://attack.mitre.org/wiki/ATT&CK_Matrix'>ATT&CK Matrix<sup>TM</sup></a>. For example: <code>T1595</code>.
-	Uid *string `json:"uid,omitempty"`
+	Uid *string `json:"uid,omitempty" url:"uid,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (t *Technique) GetExtraProperties() map[string]interface{} {
+	return t.extraProperties
+}
+
+func (t *Technique) UnmarshalJSON(data []byte) error {
+	type unmarshaler Technique
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*t = Technique(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *t)
+	if err != nil {
+		return err
+	}
+	t.extraProperties = extraProperties
+
+	t._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (t *Technique) String() string {
+	if len(t._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(t._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(t); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", t)
 }
 
 // The User object describes the characteristics of a user/person or a security principal. Defined by D3FEND <a target='_blank' href='https://d3fend.mitre.org/dao/artifact/d3f:UserAccount/'>d3f:UserAccount</a>.
 type User struct {
 	// The user's account or the account associated with the user.
-	Account *Account `json:"account,omitempty"`
+	Account *Account `json:"account,omitempty" url:"account,omitempty"`
 	// The unique identifier of the user's credential. For example, AWS Access Key ID.
-	CredentialUid *string `json:"credential_uid,omitempty"`
+	CredentialUid *string `json:"credential_uid,omitempty" url:"credential_uid,omitempty"`
 	// The domain where the user is defined. For example: the LDAP or Active Directory domain.
-	Domain *string `json:"domain,omitempty"`
+	Domain *string `json:"domain,omitempty" url:"domain,omitempty"`
 	// The user's primary email address.
-	EmailAddr *EmailAddress `json:"email_addr,omitempty"`
+	EmailAddr *EmailAddress `json:"email_addr,omitempty" url:"email_addr,omitempty"`
 	// The full name of the person, as per the LDAP Common Name attribute (cn).
-	FullName *string `json:"full_name,omitempty"`
+	FullName *string `json:"full_name,omitempty" url:"full_name,omitempty"`
 	// The administrative groups to which the user belongs.
-	Groups []*Group `json:"groups,omitempty"`
+	Groups []*Group `json:"groups,omitempty" url:"groups,omitempty"`
 	// The additional LDAP attributes that describe a person.
-	LdapPerson *LdapPerson `json:"ldap_person,omitempty"`
+	LdapPerson *LdapPerson `json:"ldap_person,omitempty" url:"ldap_person,omitempty"`
 	// The multi-factor authentication status, normalized to the caption of the mfa_status_id value. In the case of 'Other', it is defined by the data source.
-	MfaStatus *string `json:"mfa_status,omitempty"`
+	MfaStatus *string `json:"mfa_status,omitempty" url:"mfa_status,omitempty"`
 	// The normalized identifier of the user's multi-factor authentication status.
-	MfaStatusId *UserMfaStatusId `json:"mfa_status_id,omitempty"`
+	MfaStatusId *UserMfaStatusId `json:"mfa_status_id,omitempty" url:"mfa_status_id,omitempty"`
 	// The username. For example, <code>janedoe1</code>.
-	Name *UserName `json:"name,omitempty"`
+	Name *UserName `json:"name,omitempty" url:"name,omitempty"`
 	// Organization and org unit related to the user.
-	Org *Organization `json:"org,omitempty"`
+	Org *Organization `json:"org,omitempty" url:"org,omitempty"`
 	// The user's privileges.
-	Privileges []string `json:"privileges,omitempty"`
+	Privileges []string `json:"privileges,omitempty" url:"privileges,omitempty"`
 	// The type of the user. For example, System, AWS IAM User, etc.
-	Type *string `json:"type,omitempty"`
+	Type *string `json:"type,omitempty" url:"type,omitempty"`
 	// The account type identifier.
-	TypeId *UserTypeId `json:"type_id,omitempty"`
+	TypeId *UserTypeId `json:"type_id,omitempty" url:"type_id,omitempty"`
 	// The unique user identifier. For example, the Windows user SID, ActiveDirectory DN or AWS user ARN.
-	Uid *string `json:"uid,omitempty"`
+	Uid *string `json:"uid,omitempty" url:"uid,omitempty"`
 	// The alternate user identifier. For example, the Active Directory user GUID or AWS user Principal ID.
-	UidAlt *string `json:"uid_alt,omitempty"`
+	UidAlt *string `json:"uid_alt,omitempty" url:"uid_alt,omitempty"`
 	// The user status, normalized to the caption of the user_status_id value. In the case of 'Other', it is defined by the data source.
-	UserStatus *string `json:"user_status,omitempty"`
+	UserStatus *string `json:"user_status,omitempty" url:"user_status,omitempty"`
 	// The normalized identifier of the user's status.
-	UserStatusId *UserUserStatusId `json:"user_status_id,omitempty"`
+	UserStatusId *UserUserStatusId `json:"user_status_id,omitempty" url:"user_status_id,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (u *User) GetExtraProperties() map[string]interface{} {
+	return u.extraProperties
+}
+
+func (u *User) UnmarshalJSON(data []byte) error {
+	type unmarshaler User
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*u = User(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *u)
+	if err != nil {
+		return err
+	}
+	u.extraProperties = extraProperties
+
+	u._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (u *User) String() string {
+	if len(u._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(u._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(u); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", u)
 }
 
 // UserMfaStatusId is an enum, and the following values are allowed.

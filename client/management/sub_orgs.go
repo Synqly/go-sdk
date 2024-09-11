@@ -2,27 +2,144 @@
 
 package management
 
+import (
+	json "encoding/json"
+	fmt "fmt"
+	core "github.com/synqly/go-sdk/client/management/core"
+)
+
 type CreateOrganizationRequest struct {
 	// Unique short name for this Organization (lowercase [a-z0-9_-], can be used in URLs). Used for case insensitive duplicate name detection and default sort order. Defaults to OrganizationId if both name and fullname are not specified.
-	Name *string `json:"name,omitempty"`
+	Name *string `json:"name,omitempty" url:"name,omitempty"`
 	// Human friendly display name for this Organization, will auto-generate 'name' field (if 'name' is not specified). Defaults to the same value as the 'name' field if not specified.
-	Fullname *string `json:"fullname,omitempty"`
+	Fullname *string `json:"fullname,omitempty" url:"fullname,omitempty"`
 	// Organization email address
-	Contact string `json:"contact"`
+	Contact string `json:"contact" url:"contact"`
 	// Reply-to email address, used for SMTP emails. Defaults to no-reply@synqly.com
-	ReplyTo string `json:"reply_to"`
+	ReplyTo string `json:"reply_to" url:"reply_to"`
 	// URL of the organization
-	Picture string `json:"picture"`
+	Picture string `json:"picture" url:"picture"`
 	// Create organization member
-	Member *CreateMemberRequest `json:"member,omitempty"`
+	Member *CreateMemberRequest `json:"member,omitempty" url:"member,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *CreateOrganizationRequest) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
+}
+
+func (c *CreateOrganizationRequest) UnmarshalJSON(data []byte) error {
+	type unmarshaler CreateOrganizationRequest
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = CreateOrganizationRequest(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
+	c._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (c *CreateOrganizationRequest) String() string {
+	if len(c._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
 }
 
 type CreateOrganizationResponse struct {
-	Result *CreateOrganizationResponseResult `json:"result,omitempty"`
+	Result *CreateOrganizationResponseResult `json:"result" url:"result"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *CreateOrganizationResponse) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
+}
+
+func (c *CreateOrganizationResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler CreateOrganizationResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = CreateOrganizationResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
+	c._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (c *CreateOrganizationResponse) String() string {
+	if len(c._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
 }
 
 type ListOrganizationResponse struct {
-	Result []*Organization `json:"result,omitempty"`
+	Result []*Organization `json:"result" url:"result"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (l *ListOrganizationResponse) GetExtraProperties() map[string]interface{} {
+	return l.extraProperties
+}
+
+func (l *ListOrganizationResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler ListOrganizationResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*l = ListOrganizationResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *l)
+	if err != nil {
+		return err
+	}
+	l.extraProperties = extraProperties
+
+	l._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (l *ListOrganizationResponse) String() string {
+	if len(l._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(l._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(l); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", l)
 }
 
 // Unique identifier for this Organization

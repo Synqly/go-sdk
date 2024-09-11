@@ -3,71 +3,221 @@
 package management
 
 import (
+	json "encoding/json"
 	fmt "fmt"
+	core "github.com/synqly/go-sdk/client/management/core"
 )
 
 type ListIntegrationsRequest struct {
 	// Number of `Integration` objects to return in this page. Defaults to 100.
-	Limit *int `json:"-"`
+	Limit *int `json:"-" url:"limit,omitempty"`
 	// Return `Integration` objects starting after this `name`.
-	StartAfter *string `json:"-"`
+	StartAfter *string `json:"-" url:"start_after,omitempty"`
 	// Select a field to order the results by. Defaults to `name`. To control the direction of the sorting, append
 	// `[asc]` or `[desc]` to the field name. For example, `name[desc]` will sort the results by `name` in descending order.
 	// The ordering defaults to `asc` if not specified. May be used multiple times to order by multiple fields, and the
 	// ordering is applied in the order the fields are specified.
-	Order []*string `json:"-"`
+	Order []*string `json:"-" url:"order,omitempty"`
 	// Filter results by this query. For more information on filtering, refer to our Filtering Guide. Defaults to no filter.
 	// If used more than once, the queries are ANDed together.
-	Filter []*string `json:"-"`
+	Filter []*string `json:"-" url:"filter,omitempty"`
 	// Expand the integration result with the related integration point and/or account information.
-	Expand []*ListIntegrationOptions `json:"-"`
+	Expand []*ListIntegrationOptions `json:"-" url:"expand,omitempty"`
 	// Return total number of all integrations in the system, respecting all applied filters. This is expensive, use sparingly.
-	Total *bool `json:"-"`
+	Total *bool `json:"-" url:"total,omitempty"`
 }
 
 type ListAccountIntegrationsRequest struct {
 	// Number of `Integration` objects to return in this page. Defaults to 100.
-	Limit *int `json:"-"`
+	Limit *int `json:"-" url:"limit,omitempty"`
 	// Return `Integration` objects starting after this `name`.
-	StartAfter *string `json:"-"`
+	StartAfter *string `json:"-" url:"start_after,omitempty"`
 	// Select a field to order the results by. Defaults to `name`. To control the direction of the sorting, append
 	// `[asc]` or `[desc]` to the field name. For example, `name[desc]` will sort the results by `name` in descending order.
 	// The ordering defaults to `asc` if not specified. May be used multiple times to order by multiple fields, and the
 	// ordering is applied in the order the fields are specified.
-	Order []*string `json:"-"`
+	Order []*string `json:"-" url:"order,omitempty"`
 	// Filter results by this query. For more information on filtering, refer to our Filtering Guide. Defaults to no filter.
 	// If used more than once, the queries are ANDed together.
-	Filter []*string `json:"-"`
+	Filter []*string `json:"-" url:"filter,omitempty"`
 	// Expand the integration result with the related integration point and/or account information.
-	Expand []*ListIntegrationOptions `json:"-"`
+	Expand []*ListIntegrationOptions `json:"-" url:"expand,omitempty"`
 	// Return total number of integrations for a particular account. This is expensive, use sparingly.
-	Total *bool `json:"-"`
+	Total *bool `json:"-" url:"total,omitempty"`
 }
 
 type CreateIntegrationRequest struct {
 	// Unique short name for this Integrations (lowercase [a-z0-9_-], can be used in URLs). Also used for case insensitive duplicate name detection and default sort order. Defaults to IntegrationId if both name and fullname are not specified.
-	Name *string `json:"name,omitempty"`
+	Name *string `json:"name,omitempty" url:"name,omitempty"`
 	// Human friendly display name for this Integrations, will auto-generate 'name' field (if 'name' is not specified). Defaults to the same value as the 'name' field if not specified.
-	Fullname *string `json:"fullname,omitempty"`
+	Fullname *string `json:"fullname,omitempty" url:"fullname,omitempty"`
 	// Provider configuration for this Integration.
-	ProviderConfig *ProviderConfig `json:"provider_config,omitempty"`
+	ProviderConfig *ProviderConfig `json:"provider_config" url:"provider_config"`
 	// Integration Point associated with this integration.
-	IntegrationPointId *IntegrationPointId `json:"integration_point_id,omitempty"`
+	IntegrationPointId *IntegrationPointId `json:"integration_point_id,omitempty" url:"integration_point_id,omitempty"`
 	// Use a Bridge to connect to the provider.
-	BridgeSelector *BridgeSelector `json:"bridge_selector,omitempty"`
+	BridgeSelector *BridgeSelector `json:"bridge_selector,omitempty" url:"bridge_selector,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *CreateIntegrationRequest) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
+}
+
+func (c *CreateIntegrationRequest) UnmarshalJSON(data []byte) error {
+	type unmarshaler CreateIntegrationRequest
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = CreateIntegrationRequest(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
+	c._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (c *CreateIntegrationRequest) String() string {
+	if len(c._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
 }
 
 type CreateIntegrationResponse struct {
-	Result *CreateIntegrationResponseResult `json:"result,omitempty"`
+	Result *CreateIntegrationResponseResult `json:"result" url:"result"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *CreateIntegrationResponse) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
+}
+
+func (c *CreateIntegrationResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler CreateIntegrationResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = CreateIntegrationResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
+	c._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (c *CreateIntegrationResponse) String() string {
+	if len(c._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
 }
 
 type GetIntegrationResponse struct {
-	Result *Integration `json:"result,omitempty"`
+	Result *Integration `json:"result" url:"result"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (g *GetIntegrationResponse) GetExtraProperties() map[string]interface{} {
+	return g.extraProperties
+}
+
+func (g *GetIntegrationResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler GetIntegrationResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*g = GetIntegrationResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	if err != nil {
+		return err
+	}
+	g.extraProperties = extraProperties
+
+	g._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (g *GetIntegrationResponse) String() string {
+	if len(g._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(g._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(g); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", g)
 }
 
 type ListAccountIntegrationsResponse struct {
-	Result []*Integration `json:"result,omitempty"`
-	Total  *int           `json:"total,omitempty"`
+	Result []*Integration `json:"result" url:"result"`
+	Total  *int           `json:"total,omitempty" url:"total,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (l *ListAccountIntegrationsResponse) GetExtraProperties() map[string]interface{} {
+	return l.extraProperties
+}
+
+func (l *ListAccountIntegrationsResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler ListAccountIntegrationsResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*l = ListAccountIntegrationsResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *l)
+	if err != nil {
+		return err
+	}
+	l.extraProperties = extraProperties
+
+	l._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (l *ListAccountIntegrationsResponse) String() string {
+	if len(l._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(l._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(l); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", l)
 }
 
 type ListIntegrationOptions string
@@ -102,20 +252,168 @@ func (l ListIntegrationOptions) Ptr() *ListIntegrationOptions {
 }
 
 type ListIntegrationsResponse struct {
-	Result []*Integration `json:"result,omitempty"`
-	Total  *int           `json:"total,omitempty"`
+	Result []*Integration `json:"result" url:"result"`
+	Total  *int           `json:"total,omitempty" url:"total,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (l *ListIntegrationsResponse) GetExtraProperties() map[string]interface{} {
+	return l.extraProperties
+}
+
+func (l *ListIntegrationsResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler ListIntegrationsResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*l = ListIntegrationsResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *l)
+	if err != nil {
+		return err
+	}
+	l.extraProperties = extraProperties
+
+	l._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (l *ListIntegrationsResponse) String() string {
+	if len(l._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(l._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(l); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", l)
 }
 
 type PatchIntegrationResponse struct {
-	Result *Integration `json:"result,omitempty"`
+	Result *Integration `json:"result" url:"result"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (p *PatchIntegrationResponse) GetExtraProperties() map[string]interface{} {
+	return p.extraProperties
+}
+
+func (p *PatchIntegrationResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler PatchIntegrationResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*p = PatchIntegrationResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *p)
+	if err != nil {
+		return err
+	}
+	p.extraProperties = extraProperties
+
+	p._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (p *PatchIntegrationResponse) String() string {
+	if len(p._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(p._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(p); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", p)
 }
 
 type UpdateIntegrationRequest = *Integration
 
 type UpdateIntegrationResponse struct {
-	Result *Integration `json:"result,omitempty"`
+	Result *Integration `json:"result" url:"result"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (u *UpdateIntegrationResponse) GetExtraProperties() map[string]interface{} {
+	return u.extraProperties
+}
+
+func (u *UpdateIntegrationResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler UpdateIntegrationResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*u = UpdateIntegrationResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *u)
+	if err != nil {
+		return err
+	}
+	u.extraProperties = extraProperties
+
+	u._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (u *UpdateIntegrationResponse) String() string {
+	if len(u._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(u._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(u); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", u)
 }
 
 type VerifyIntegrationRequest struct {
-	Integration *CreateIntegrationRequest `json:"integration,omitempty"`
+	Integration *CreateIntegrationRequest `json:"integration" url:"integration"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (v *VerifyIntegrationRequest) GetExtraProperties() map[string]interface{} {
+	return v.extraProperties
+}
+
+func (v *VerifyIntegrationRequest) UnmarshalJSON(data []byte) error {
+	type unmarshaler VerifyIntegrationRequest
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*v = VerifyIntegrationRequest(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *v)
+	if err != nil {
+		return err
+	}
+	v.extraProperties = extraProperties
+
+	v._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (v *VerifyIntegrationRequest) String() string {
+	if len(v._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(v._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(v); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", v)
 }

@@ -9,6 +9,7 @@ import (
 	hooks "github.com/synqly/go-sdk/client/engine/hooks"
 	identity "github.com/synqly/go-sdk/client/engine/identity"
 	notifications "github.com/synqly/go-sdk/client/engine/notifications"
+	option "github.com/synqly/go-sdk/client/engine/option"
 	siem "github.com/synqly/go-sdk/client/engine/siem"
 	sink "github.com/synqly/go-sdk/client/engine/sink"
 	storage "github.com/synqly/go-sdk/client/engine/storage"
@@ -18,9 +19,9 @@ import (
 )
 
 type Client struct {
-	baseURL    string
-	httpClient core.HTTPClient
-	header     http.Header
+	baseURL string
+	caller  *core.Caller
+	header  http.Header
 
 	Assets          *assets.Client
 	Edr             *edr.Client
@@ -34,14 +35,16 @@ type Client struct {
 	Vulnerabilities *vulnerabilities.Client
 }
 
-func NewClient(opts ...core.ClientOption) *Client {
-	options := core.NewClientOptions()
-	for _, opt := range opts {
-		opt(options)
-	}
+func NewClient(opts ...option.RequestOption) *Client {
+	options := core.NewRequestOptions(opts...)
 	return &Client{
-		baseURL:         options.BaseURL,
-		httpClient:      options.HTTPClient,
+		baseURL: options.BaseURL,
+		caller: core.NewCaller(
+			&core.CallerParams{
+				Client:      options.HTTPClient,
+				MaxAttempts: options.MaxAttempts,
+			},
+		),
 		header:          options.ToHeader(),
 		Assets:          assets.NewClient(opts...),
 		Edr:             edr.NewClient(opts...),

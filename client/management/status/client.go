@@ -7,59 +7,59 @@ import (
 	context "context"
 	json "encoding/json"
 	errors "errors"
-	fmt "fmt"
 	management "github.com/synqly/go-sdk/client/management"
 	core "github.com/synqly/go-sdk/client/management/core"
+	option "github.com/synqly/go-sdk/client/management/option"
 	io "io"
 	http "net/http"
-	url "net/url"
 )
 
 type Client struct {
-	baseURL    string
-	httpClient core.HTTPClient
-	header     http.Header
+	baseURL string
+	caller  *core.Caller
+	header  http.Header
 }
 
-func NewClient(opts ...core.ClientOption) *Client {
-	options := core.NewClientOptions()
-	for _, opt := range opts {
-		opt(options)
-	}
+func NewClient(opts ...option.RequestOption) *Client {
+	options := core.NewRequestOptions(opts...)
 	return &Client{
-		baseURL:    options.BaseURL,
-		httpClient: options.HTTPClient,
-		header:     options.ToHeader(),
+		baseURL: options.BaseURL,
+		caller: core.NewCaller(
+			&core.CallerParams{
+				Client:      options.HTTPClient,
+				MaxAttempts: options.MaxAttempts,
+			},
+		),
+		header: options.ToHeader(),
 	}
 }
 
 // Returns all matching `Status` objects.
-func (c *Client) List(ctx context.Context, request *management.ListStatusRequest) (*management.ListStatusResponse, error) {
+func (c *Client) List(
+	ctx context.Context,
+	request *management.ListStatusRequest,
+	opts ...option.RequestOption,
+) (*management.ListStatusResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
-	endpointURL := baseURL + "/" + "v1/status"
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
+	endpointURL := baseURL + "/v1/status"
 
-	queryParams := make(url.Values)
-	if request.Limit != nil {
-		queryParams.Add("limit", fmt.Sprintf("%v", *request.Limit))
-	}
-	if request.StartAfter != nil {
-		queryParams.Add("start_after", fmt.Sprintf("%v", *request.StartAfter))
-	}
-	for _, value := range request.Order {
-		queryParams.Add("order", fmt.Sprintf("%v", *value))
-	}
-	for _, value := range request.Filter {
-		queryParams.Add("filter", fmt.Sprintf("%v", *value))
-	}
-	for _, value := range request.Expand {
-		queryParams.Add("expand", fmt.Sprintf("%v", *value))
+	queryParams, err := core.QueryValues(request)
+	if err != nil {
+		return nil, err
 	}
 	if len(queryParams) > 0 {
 		endpointURL += "?" + queryParams.Encode()
 	}
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -137,29 +137,46 @@ func (c *Client) List(ctx context.Context, request *management.ListStatusRequest
 	}
 
 	var response *management.ListStatusResponse
-	if err := core.DoRequest(
+	if err := c.caller.Call(
 		ctx,
-		c.httpClient,
-		endpointURL,
-		http.MethodGet,
-		request,
-		&response,
-		false,
-		c.header,
-		errorDecoder,
+		&core.CallParams{
+			URL:          endpointURL,
+			Method:       http.MethodGet,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
+			Response:     &response,
+			ErrorDecoder: errorDecoder,
+		},
 	); err != nil {
-		return response, err
+		return nil, err
 	}
 	return response, nil
 }
 
 // Returns the integration `Status` object.
-func (c *Client) Get(ctx context.Context, accountId management.AccountId, integrationId management.IntegrationId) (*management.GetStatusResponse, error) {
+func (c *Client) Get(
+	ctx context.Context,
+	accountId management.AccountId,
+	integrationId management.IntegrationId,
+	opts ...option.RequestOption,
+) (*management.GetStatusResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"v1/status/%v/%v", accountId, integrationId)
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
+	endpointURL := core.EncodeURL(
+		baseURL+"/v1/status/%v/%v",
+		accountId,
+		integrationId,
+	)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -237,29 +254,46 @@ func (c *Client) Get(ctx context.Context, accountId management.AccountId, integr
 	}
 
 	var response *management.GetStatusResponse
-	if err := core.DoRequest(
+	if err := c.caller.Call(
 		ctx,
-		c.httpClient,
-		endpointURL,
-		http.MethodGet,
-		nil,
-		&response,
-		false,
-		c.header,
-		errorDecoder,
+		&core.CallParams{
+			URL:          endpointURL,
+			Method:       http.MethodGet,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
+			Response:     &response,
+			ErrorDecoder: errorDecoder,
+		},
 	); err != nil {
-		return response, err
+		return nil, err
 	}
 	return response, nil
 }
 
 // Resets the integration `Status` object.
-func (c *Client) Reset(ctx context.Context, accountId management.AccountId, integrationId management.IntegrationId) error {
+func (c *Client) Reset(
+	ctx context.Context,
+	accountId management.AccountId,
+	integrationId management.IntegrationId,
+	opts ...option.RequestOption,
+) error {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"v1/status/%v/%v", accountId, integrationId)
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
+	endpointURL := core.EncodeURL(
+		baseURL+"/v1/status/%v/%v",
+		accountId,
+		integrationId,
+	)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -336,16 +370,16 @@ func (c *Client) Reset(ctx context.Context, accountId management.AccountId, inte
 		return apiError
 	}
 
-	if err := core.DoRequest(
+	if err := c.caller.Call(
 		ctx,
-		c.httpClient,
-		endpointURL,
-		http.MethodPut,
-		nil,
-		nil,
-		false,
-		c.header,
-		errorDecoder,
+		&core.CallParams{
+			URL:          endpointURL,
+			Method:       http.MethodPut,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
+			ErrorDecoder: errorDecoder,
+		},
 	); err != nil {
 		return err
 	}
@@ -353,29 +387,37 @@ func (c *Client) Reset(ctx context.Context, accountId management.AccountId, inte
 }
 
 // Returns integration `Status` object list of `StatusEvent` objects.
-func (c *Client) ListEvents(ctx context.Context, accountId management.AccountId, integrationId management.IntegrationId, request *management.ListStatusEventsRequest) (*management.ListStatusEventsResponse, error) {
+func (c *Client) ListEvents(
+	ctx context.Context,
+	accountId management.AccountId,
+	integrationId management.IntegrationId,
+	request *management.ListStatusEventsRequest,
+	opts ...option.RequestOption,
+) (*management.ListStatusEventsResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"v1/status/%v/%v/events", accountId, integrationId)
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
+	endpointURL := core.EncodeURL(
+		baseURL+"/v1/status/%v/%v/events",
+		accountId,
+		integrationId,
+	)
 
-	queryParams := make(url.Values)
-	if request.Limit != nil {
-		queryParams.Add("limit", fmt.Sprintf("%v", *request.Limit))
-	}
-	if request.StartAfter != nil {
-		queryParams.Add("start_after", fmt.Sprintf("%v", *request.StartAfter))
-	}
-	if request.Order != nil {
-		queryParams.Add("order", fmt.Sprintf("%v", *request.Order))
-	}
-	for _, value := range request.Filter {
-		queryParams.Add("filter", fmt.Sprintf("%v", *value))
+	queryParams, err := core.QueryValues(request)
+	if err != nil {
+		return nil, err
 	}
 	if len(queryParams) > 0 {
 		endpointURL += "?" + queryParams.Encode()
 	}
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -453,29 +495,40 @@ func (c *Client) ListEvents(ctx context.Context, accountId management.AccountId,
 	}
 
 	var response *management.ListStatusEventsResponse
-	if err := core.DoRequest(
+	if err := c.caller.Call(
 		ctx,
-		c.httpClient,
-		endpointURL,
-		http.MethodGet,
-		request,
-		&response,
-		false,
-		c.header,
-		errorDecoder,
+		&core.CallParams{
+			URL:          endpointURL,
+			Method:       http.MethodGet,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
+			Response:     &response,
+			ErrorDecoder: errorDecoder,
+		},
 	); err != nil {
-		return response, err
+		return nil, err
 	}
 	return response, nil
 }
 
 // Returns organization last hour usage timeseries.
-func (c *Client) GetTimeseries(ctx context.Context) (*management.GetStatusTimeseries, error) {
+func (c *Client) GetTimeseries(
+	ctx context.Context,
+	opts ...option.RequestOption,
+) (*management.GetStatusTimeseries, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
-	endpointURL := baseURL + "/" + "v1/status/timeseries"
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
+	endpointURL := baseURL + "/v1/status/timeseries"
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -553,37 +606,55 @@ func (c *Client) GetTimeseries(ctx context.Context) (*management.GetStatusTimese
 	}
 
 	var response *management.GetStatusTimeseries
-	if err := core.DoRequest(
+	if err := c.caller.Call(
 		ctx,
-		c.httpClient,
-		endpointURL,
-		http.MethodGet,
-		nil,
-		&response,
-		false,
-		c.header,
-		errorDecoder,
+		&core.CallParams{
+			URL:          endpointURL,
+			Method:       http.MethodGet,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
+			Response:     &response,
+			ErrorDecoder: errorDecoder,
+		},
 	); err != nil {
-		return response, err
+		return nil, err
 	}
 	return response, nil
 }
 
 // Returns organization last hour usage timeseries.
-func (c *Client) GetIntegrationTimeseries(ctx context.Context, accountId management.AccountId, integrationId management.IntegrationId, request *management.GetIntegrationTimeseriesRequest) (*management.GetIntegrationTimeseries, error) {
+func (c *Client) GetIntegrationTimeseries(
+	ctx context.Context,
+	accountId management.AccountId,
+	integrationId management.IntegrationId,
+	request *management.GetIntegrationTimeseriesRequest,
+	opts ...option.RequestOption,
+) (*management.GetIntegrationTimeseries, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"v1/status/%v/%v/timeseries", accountId, integrationId)
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
+	endpointURL := core.EncodeURL(
+		baseURL+"/v1/status/%v/%v/timeseries",
+		accountId,
+		integrationId,
+	)
 
-	queryParams := make(url.Values)
-	if request.Interval != nil {
-		queryParams.Add("interval", fmt.Sprintf("%v", *request.Interval))
+	queryParams, err := core.QueryValues(request)
+	if err != nil {
+		return nil, err
 	}
 	if len(queryParams) > 0 {
 		endpointURL += "?" + queryParams.Encode()
 	}
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -661,18 +732,19 @@ func (c *Client) GetIntegrationTimeseries(ctx context.Context, accountId managem
 	}
 
 	var response *management.GetIntegrationTimeseries
-	if err := core.DoRequest(
+	if err := c.caller.Call(
 		ctx,
-		c.httpClient,
-		endpointURL,
-		http.MethodGet,
-		request,
-		&response,
-		false,
-		c.header,
-		errorDecoder,
+		&core.CallParams{
+			URL:          endpointURL,
+			Method:       http.MethodGet,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
+			Response:     &response,
+			ErrorDecoder: errorDecoder,
+		},
 	); err != nil {
-		return response, err
+		return nil, err
 	}
 	return response, nil
 }

@@ -7,56 +7,59 @@ import (
 	context "context"
 	json "encoding/json"
 	errors "errors"
-	fmt "fmt"
 	management "github.com/synqly/go-sdk/client/management"
 	core "github.com/synqly/go-sdk/client/management/core"
+	option "github.com/synqly/go-sdk/client/management/option"
 	io "io"
 	http "net/http"
-	url "net/url"
 )
 
 type Client struct {
-	baseURL    string
-	httpClient core.HTTPClient
-	header     http.Header
+	baseURL string
+	caller  *core.Caller
+	header  http.Header
 }
 
-func NewClient(opts ...core.ClientOption) *Client {
-	options := core.NewClientOptions()
-	for _, opt := range opts {
-		opt(options)
-	}
+func NewClient(opts ...option.RequestOption) *Client {
+	options := core.NewRequestOptions(opts...)
 	return &Client{
-		baseURL:    options.BaseURL,
-		httpClient: options.HTTPClient,
-		header:     options.ToHeader(),
+		baseURL: options.BaseURL,
+		caller: core.NewCaller(
+			&core.CallerParams{
+				Client:      options.HTTPClient,
+				MaxAttempts: options.MaxAttempts,
+			},
+		),
+		header: options.ToHeader(),
 	}
 }
 
 // List webhooks for the organization
-func (c *Client) List(ctx context.Context, request *management.ListOrganizationWebhooksRequest) (*management.ListOrganizationWebhooksResponse, error) {
+func (c *Client) List(
+	ctx context.Context,
+	request *management.ListOrganizationWebhooksRequest,
+	opts ...option.RequestOption,
+) (*management.ListOrganizationWebhooksResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
-	endpointURL := baseURL + "/" + "v1/organization/webhooks"
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
+	endpointURL := baseURL + "/v1/organization/webhooks"
 
-	queryParams := make(url.Values)
-	if request.Limit != nil {
-		queryParams.Add("limit", fmt.Sprintf("%v", *request.Limit))
-	}
-	if request.StartAfter != nil {
-		queryParams.Add("start_after", fmt.Sprintf("%v", *request.StartAfter))
-	}
-	for _, value := range request.Order {
-		queryParams.Add("order", fmt.Sprintf("%v", *value))
-	}
-	for _, value := range request.Filter {
-		queryParams.Add("filter", fmt.Sprintf("%v", *value))
+	queryParams, err := core.QueryValues(request)
+	if err != nil {
+		return nil, err
 	}
 	if len(queryParams) > 0 {
 		endpointURL += "?" + queryParams.Encode()
 	}
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -134,29 +137,41 @@ func (c *Client) List(ctx context.Context, request *management.ListOrganizationW
 	}
 
 	var response *management.ListOrganizationWebhooksResponse
-	if err := core.DoRequest(
+	if err := c.caller.Call(
 		ctx,
-		c.httpClient,
-		endpointURL,
-		http.MethodGet,
-		request,
-		&response,
-		false,
-		c.header,
-		errorDecoder,
+		&core.CallParams{
+			URL:          endpointURL,
+			Method:       http.MethodGet,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
+			Response:     &response,
+			ErrorDecoder: errorDecoder,
+		},
 	); err != nil {
-		return response, err
+		return nil, err
 	}
 	return response, nil
 }
 
 // Returns the `Webhook` object matching `{webhookId}`.
-func (c *Client) Get(ctx context.Context, webhookId management.WebhookId) (*management.GetOrganizationWebhookResponse, error) {
+func (c *Client) Get(
+	ctx context.Context,
+	webhookId management.WebhookId,
+	opts ...option.RequestOption,
+) (*management.GetOrganizationWebhookResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"v1/organization/webhooks/%v", webhookId)
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
+	endpointURL := core.EncodeURL(baseURL+"/v1/organization/webhooks/%v", webhookId)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -234,29 +249,41 @@ func (c *Client) Get(ctx context.Context, webhookId management.WebhookId) (*mana
 	}
 
 	var response *management.GetOrganizationWebhookResponse
-	if err := core.DoRequest(
+	if err := c.caller.Call(
 		ctx,
-		c.httpClient,
-		endpointURL,
-		http.MethodGet,
-		nil,
-		&response,
-		false,
-		c.header,
-		errorDecoder,
+		&core.CallParams{
+			URL:          endpointURL,
+			Method:       http.MethodGet,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
+			Response:     &response,
+			ErrorDecoder: errorDecoder,
+		},
 	); err != nil {
-		return response, err
+		return nil, err
 	}
 	return response, nil
 }
 
 // Create a new webhook for the organization
-func (c *Client) Create(ctx context.Context, request *management.CreateOrganizationWebhookRequest) (*management.CreateOrganizationWebhookResponse, error) {
+func (c *Client) Create(
+	ctx context.Context,
+	request *management.CreateOrganizationWebhookRequest,
+	opts ...option.RequestOption,
+) (*management.CreateOrganizationWebhookResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
-	endpointURL := baseURL + "/" + "v1/organization/webhooks"
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
+	endpointURL := baseURL + "/v1/organization/webhooks"
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -334,18 +361,20 @@ func (c *Client) Create(ctx context.Context, request *management.CreateOrganizat
 	}
 
 	var response *management.CreateOrganizationWebhookResponse
-	if err := core.DoRequest(
+	if err := c.caller.Call(
 		ctx,
-		c.httpClient,
-		endpointURL,
-		http.MethodPost,
-		request,
-		&response,
-		false,
-		c.header,
-		errorDecoder,
+		&core.CallParams{
+			URL:          endpointURL,
+			Method:       http.MethodPost,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
+			Request:      request,
+			Response:     &response,
+			ErrorDecoder: errorDecoder,
+		},
 	); err != nil {
-		return response, err
+		return nil, err
 	}
 	return response, nil
 }
@@ -353,12 +382,24 @@ func (c *Client) Create(ctx context.Context, request *management.CreateOrganizat
 // Updates the `Webhook` object matching `{webhookId}`. For more information on
 // Organizations and Webhooks, refer to our
 // [Synqly Overview](https://docs.synqly.com/docs/synqly-overview).
-func (c *Client) Update(ctx context.Context, webhookId management.WebhookId, request management.UpdateOrganizationWebhookRequest) (*management.UpdateOrganizationWebhookResponse, error) {
+func (c *Client) Update(
+	ctx context.Context,
+	webhookId management.WebhookId,
+	request management.UpdateOrganizationWebhookRequest,
+	opts ...option.RequestOption,
+) (*management.UpdateOrganizationWebhookResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"v1/organization/webhooks/%v", webhookId)
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
+	endpointURL := core.EncodeURL(baseURL+"/v1/organization/webhooks/%v", webhookId)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -436,18 +477,20 @@ func (c *Client) Update(ctx context.Context, webhookId management.WebhookId, req
 	}
 
 	var response *management.UpdateOrganizationWebhookResponse
-	if err := core.DoRequest(
+	if err := c.caller.Call(
 		ctx,
-		c.httpClient,
-		endpointURL,
-		http.MethodPut,
-		request,
-		&response,
-		false,
-		c.header,
-		errorDecoder,
+		&core.CallParams{
+			URL:          endpointURL,
+			Method:       http.MethodPut,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
+			Request:      request,
+			Response:     &response,
+			ErrorDecoder: errorDecoder,
+		},
 	); err != nil {
-		return response, err
+		return nil, err
 	}
 	return response, nil
 }
@@ -455,12 +498,24 @@ func (c *Client) Update(ctx context.Context, webhookId management.WebhookId, req
 // Patches the `Webhook` object matching `{webhookId}`. For more information on
 // Organizations and Webhooks, refer to our
 // [Synqly Overview](https://docs.synqly.com/docs/synqly-overview).
-func (c *Client) Patch(ctx context.Context, webhookId management.WebhookId, request []map[string]interface{}) (*management.PatchOrganizationWebhookResponse, error) {
+func (c *Client) Patch(
+	ctx context.Context,
+	webhookId management.WebhookId,
+	request []map[string]interface{},
+	opts ...option.RequestOption,
+) (*management.PatchOrganizationWebhookResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"v1/organization/webhooks/%v", webhookId)
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
+	endpointURL := core.EncodeURL(baseURL+"/v1/organization/webhooks/%v", webhookId)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -538,29 +593,42 @@ func (c *Client) Patch(ctx context.Context, webhookId management.WebhookId, requ
 	}
 
 	var response *management.PatchOrganizationWebhookResponse
-	if err := core.DoRequest(
+	if err := c.caller.Call(
 		ctx,
-		c.httpClient,
-		endpointURL,
-		http.MethodPatch,
-		request,
-		&response,
-		false,
-		c.header,
-		errorDecoder,
+		&core.CallParams{
+			URL:          endpointURL,
+			Method:       http.MethodPatch,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
+			Request:      request,
+			Response:     &response,
+			ErrorDecoder: errorDecoder,
+		},
 	); err != nil {
-		return response, err
+		return nil, err
 	}
 	return response, nil
 }
 
 // Delete a webhook for the organization
-func (c *Client) Delete(ctx context.Context, webhookId management.WebhookId) error {
+func (c *Client) Delete(
+	ctx context.Context,
+	webhookId management.WebhookId,
+	opts ...option.RequestOption,
+) error {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"v1/organization/webhooks/%v", webhookId)
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
+	endpointURL := core.EncodeURL(baseURL+"/v1/organization/webhooks/%v", webhookId)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -637,16 +705,16 @@ func (c *Client) Delete(ctx context.Context, webhookId management.WebhookId) err
 		return apiError
 	}
 
-	if err := core.DoRequest(
+	if err := c.caller.Call(
 		ctx,
-		c.httpClient,
-		endpointURL,
-		http.MethodDelete,
-		nil,
-		nil,
-		false,
-		c.header,
-		errorDecoder,
+		&core.CallParams{
+			URL:          endpointURL,
+			Method:       http.MethodDelete,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
+			ErrorDecoder: errorDecoder,
+		},
 	); err != nil {
 		return err
 	}

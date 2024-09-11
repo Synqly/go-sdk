@@ -2,61 +2,141 @@
 
 package engine
 
+import (
+	json "encoding/json"
+	fmt "fmt"
+	core "github.com/synqly/go-sdk/client/engine/core"
+)
+
 type GetInvestigationEvidenceRequest struct {
 	// Include the raw data from the SIEM in the response. Defaults to `false`.
-	IncludeRawData *bool `json:"-"`
+	IncludeRawData *bool `json:"-" url:"include_raw_data,omitempty"`
 }
 
 type GetInvestigationRequest struct {
 	// Include the raw data from the SIEM in the response. Defaults to `false`.
-	IncludeRawData *bool `json:"-"`
+	IncludeRawData *bool `json:"-" url:"include_raw_data,omitempty"`
 }
 
 type QuerySiemEventsRequest struct {
 	// Cursor to use to retrieve the next page of results.
-	Cursor *string `json:"-"`
+	Cursor *string `json:"-" url:"cursor,omitempty"`
 	// Number of `Account` objects to return in this page. Defaults to 100.
-	Limit *int `json:"-"`
+	Limit *int `json:"-" url:"limit,omitempty"`
 	// Select a field to order the results by. Defaults to `time`. To control the direction of the sorting, append
 	// `[asc]` or `[desc]` to the field name. For example, `name[desc]` will sort the results by `name` in descending order.
 	// The ordering defaults to `asc` if not specified. May be used multiple times to order by multiple fields, and the
 	// ordering is applied in the order the fields are specified.
-	Order []*string `json:"-"`
+	Order []*string `json:"-" url:"order,omitempty"`
 	// Filter results by this query. For more information on filtering, refer to our Filtering Guide. Defaults to no filter.
 	// If used more than once, the queries are ANDed together.
-	Filter []*string `json:"-"`
+	Filter []*string `json:"-" url:"filter,omitempty"`
 	// Add metadata to the response by invoking meta functions.
-	Meta []*string `json:"-"`
+	Meta []*string `json:"-" url:"meta,omitempty"`
 	// Provider-specific query to pass through to the SIEM. This is useful for advanced queries that are not
 	// supported by the API. The keys and values are provider-specific. For example, to perform a specific query in
 	// Rapid7 IDR, you can use the `query: "{advanced query}"` key-value pair.
-	PassthroughParam []*string `json:"-"`
+	PassthroughParam []*string `json:"-" url:"passthrough-param,omitempty"`
 	// Include the raw data from the SIEM in the response. This is useful for debugging and troubleshooting.
 	// Defaults to `false`.
-	IncludeRawData *bool `json:"-"`
+	IncludeRawData *bool `json:"-" url:"include_raw_data,omitempty"`
 }
 
 type QueryInvestigationsRequest struct {
 	// Cursor to use to retrieve the next page of results.
-	Cursor *string `json:"-"`
+	Cursor *string `json:"-" url:"cursor,omitempty"`
 	// Number of `Investigation` objects to return in this page. Defaults to 100.
-	Limit *int `json:"-"`
+	Limit *int `json:"-" url:"limit,omitempty"`
 	// Select a field to order the results by.
-	Order []*string `json:"-"`
+	Order []*string `json:"-" url:"order,omitempty"`
 	// Filter results by this query.
-	Filter []*string `json:"-"`
+	Filter []*string `json:"-" url:"filter,omitempty"`
 	// Include the raw data from the SIEM in the response. Defaults to `false`.
-	IncludeRawData *bool `json:"-"`
+	IncludeRawData *bool `json:"-" url:"include_raw_data,omitempty"`
 }
 
 type GetEvidenceResponse struct {
 	// List of evidence associated with an investigation
-	Result *Evidence `json:"result,omitempty"`
+	Result *Evidence `json:"result" url:"result"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (g *GetEvidenceResponse) GetExtraProperties() map[string]interface{} {
+	return g.extraProperties
+}
+
+func (g *GetEvidenceResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler GetEvidenceResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*g = GetEvidenceResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	if err != nil {
+		return err
+	}
+	g.extraProperties = extraProperties
+
+	g._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (g *GetEvidenceResponse) String() string {
+	if len(g._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(g._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(g); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", g)
 }
 
 type GetInvestigationResponse struct {
 	// The investigation object
-	Result *Investigation `json:"result,omitempty"`
+	Result *Investigation `json:"result" url:"result"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (g *GetInvestigationResponse) GetExtraProperties() map[string]interface{} {
+	return g.extraProperties
+}
+
+func (g *GetInvestigationResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler GetInvestigationResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*g = GetInvestigationResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	if err != nil {
+		return err
+	}
+	g.extraProperties = extraProperties
+
+	g._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (g *GetInvestigationResponse) String() string {
+	if len(g._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(g._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(g); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", g)
 }
 
 // JSON patch to apply to an investigation. A JSON patch is a list of operations, and each operation
@@ -70,18 +150,92 @@ type PatchInvestigationRequest = []map[string]interface{}
 
 type QueryInvestigationResponse struct {
 	// List of investigations
-	Result []*Investigation `json:"result,omitempty"`
+	Result []*Investigation `json:"result" url:"result"`
 	// Cursor to use to retrieve the next page of results
-	Cursor string `json:"cursor"`
+	Cursor string `json:"cursor" url:"cursor"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (q *QueryInvestigationResponse) GetExtraProperties() map[string]interface{} {
+	return q.extraProperties
+}
+
+func (q *QueryInvestigationResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler QueryInvestigationResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*q = QueryInvestigationResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *q)
+	if err != nil {
+		return err
+	}
+	q.extraProperties = extraProperties
+
+	q._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (q *QueryInvestigationResponse) String() string {
+	if len(q._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(q._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(q); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", q)
 }
 
 type QuerySiemEventsResponse struct {
 	// List of events
-	Result []map[string]interface{} `json:"result,omitempty"`
+	Result []map[string]interface{} `json:"result" url:"result"`
 	// Metadata about the query results organized by group, then type, then field.
-	Meta *MetaResponse `json:"meta,omitempty"`
+	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
 	// Cursor to use to retrieve the next page of results
-	Cursor string `json:"cursor"`
+	Cursor string `json:"cursor" url:"cursor"`
 	// If the provider supports asynchronous queries and the query is still running, this will be PENDING. There will be a value in the `cursor` field allowing you to continue polling for results.
-	Status QueryEventStatus `json:"status,omitempty"`
+	Status QueryEventStatus `json:"status" url:"status"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (q *QuerySiemEventsResponse) GetExtraProperties() map[string]interface{} {
+	return q.extraProperties
+}
+
+func (q *QuerySiemEventsResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler QuerySiemEventsResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*q = QuerySiemEventsResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *q)
+	if err != nil {
+		return err
+	}
+	q.extraProperties = extraProperties
+
+	q._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (q *QuerySiemEventsResponse) String() string {
+	if len(q._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(q._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(q); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", q)
 }

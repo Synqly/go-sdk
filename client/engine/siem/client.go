@@ -7,59 +7,59 @@ import (
 	context "context"
 	json "encoding/json"
 	errors "errors"
-	fmt "fmt"
 	engine "github.com/synqly/go-sdk/client/engine"
 	core "github.com/synqly/go-sdk/client/engine/core"
+	option "github.com/synqly/go-sdk/client/engine/option"
 	io "io"
 	http "net/http"
-	url "net/url"
 )
 
 type Client struct {
-	baseURL    string
-	httpClient core.HTTPClient
-	header     http.Header
+	baseURL string
+	caller  *core.Caller
+	header  http.Header
 }
 
-func NewClient(opts ...core.ClientOption) *Client {
-	options := core.NewClientOptions()
-	for _, opt := range opts {
-		opt(options)
-	}
+func NewClient(opts ...option.RequestOption) *Client {
+	options := core.NewRequestOptions(opts...)
 	return &Client{
-		baseURL:    options.BaseURL,
-		httpClient: options.HTTPClient,
-		header:     options.ToHeader(),
+		baseURL: options.BaseURL,
+		caller: core.NewCaller(
+			&core.CallerParams{
+				Client:      options.HTTPClient,
+				MaxAttempts: options.MaxAttempts,
+			},
+		),
+		header: options.ToHeader(),
 	}
 }
 
 // Queries investigations
-func (c *Client) QueryInvestigations(ctx context.Context, request *engine.QueryInvestigationsRequest) (*engine.QueryInvestigationResponse, error) {
+func (c *Client) QueryInvestigations(
+	ctx context.Context,
+	request *engine.QueryInvestigationsRequest,
+	opts ...option.RequestOption,
+) (*engine.QueryInvestigationResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
-	endpointURL := baseURL + "/" + "v1/siem/investigations"
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
+	endpointURL := baseURL + "/v1/siem/investigations"
 
-	queryParams := make(url.Values)
-	if request.Cursor != nil {
-		queryParams.Add("cursor", fmt.Sprintf("%v", *request.Cursor))
-	}
-	if request.Limit != nil {
-		queryParams.Add("limit", fmt.Sprintf("%v", *request.Limit))
-	}
-	for _, value := range request.Order {
-		queryParams.Add("order", fmt.Sprintf("%v", *value))
-	}
-	for _, value := range request.Filter {
-		queryParams.Add("filter", fmt.Sprintf("%v", *value))
-	}
-	if request.IncludeRawData != nil {
-		queryParams.Add("include_raw_data", fmt.Sprintf("%v", *request.IncludeRawData))
+	queryParams, err := core.QueryValues(request)
+	if err != nil {
+		return nil, err
 	}
 	if len(queryParams) > 0 {
 		endpointURL += "?" + queryParams.Encode()
 	}
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -165,39 +165,51 @@ func (c *Client) QueryInvestigations(ctx context.Context, request *engine.QueryI
 	}
 
 	var response *engine.QueryInvestigationResponse
-	if err := core.DoRequest(
+	if err := c.caller.Call(
 		ctx,
-		c.httpClient,
-		endpointURL,
-		http.MethodGet,
-		request,
-		&response,
-		false,
-		c.header,
-		errorDecoder,
+		&core.CallParams{
+			URL:          endpointURL,
+			Method:       http.MethodGet,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
+			Response:     &response,
+			ErrorDecoder: errorDecoder,
+		},
 	); err != nil {
-		return response, err
+		return nil, err
 	}
 	return response, nil
 }
 
 // Retrieves an investigation by ID.
-//
-// ID of the investigation to retrieve.
-func (c *Client) GetInvestigation(ctx context.Context, id string, request *engine.GetInvestigationRequest) (*engine.GetInvestigationResponse, error) {
+func (c *Client) GetInvestigation(
+	ctx context.Context,
+	// ID of the investigation to retrieve.
+	id string,
+	request *engine.GetInvestigationRequest,
+	opts ...option.RequestOption,
+) (*engine.GetInvestigationResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"v1/siem/investigations/%v", id)
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
+	endpointURL := core.EncodeURL(baseURL+"/v1/siem/investigations/%v", id)
 
-	queryParams := make(url.Values)
-	if request.IncludeRawData != nil {
-		queryParams.Add("include_raw_data", fmt.Sprintf("%v", *request.IncludeRawData))
+	queryParams, err := core.QueryValues(request)
+	if err != nil {
+		return nil, err
 	}
 	if len(queryParams) > 0 {
 		endpointURL += "?" + queryParams.Encode()
 	}
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -303,31 +315,43 @@ func (c *Client) GetInvestigation(ctx context.Context, id string, request *engin
 	}
 
 	var response *engine.GetInvestigationResponse
-	if err := core.DoRequest(
+	if err := c.caller.Call(
 		ctx,
-		c.httpClient,
-		endpointURL,
-		http.MethodGet,
-		request,
-		&response,
-		false,
-		c.header,
-		errorDecoder,
+		&core.CallParams{
+			URL:          endpointURL,
+			Method:       http.MethodGet,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
+			Response:     &response,
+			ErrorDecoder: errorDecoder,
+		},
 	); err != nil {
-		return response, err
+		return nil, err
 	}
 	return response, nil
 }
 
 // Updates an investigation by ID.
-//
-// ID of the investigation to update.
-func (c *Client) PatchInvestigation(ctx context.Context, id string, request engine.PatchInvestigationRequest) (*engine.GetInvestigationResponse, error) {
+func (c *Client) PatchInvestigation(
+	ctx context.Context,
+	// ID of the investigation to update.
+	id string,
+	request engine.PatchInvestigationRequest,
+	opts ...option.RequestOption,
+) (*engine.GetInvestigationResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"v1/siem/investigations/%v", id)
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
+	endpointURL := core.EncodeURL(baseURL+"/v1/siem/investigations/%v", id)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -433,39 +457,52 @@ func (c *Client) PatchInvestigation(ctx context.Context, id string, request engi
 	}
 
 	var response *engine.GetInvestigationResponse
-	if err := core.DoRequest(
+	if err := c.caller.Call(
 		ctx,
-		c.httpClient,
-		endpointURL,
-		http.MethodPatch,
-		request,
-		&response,
-		false,
-		c.header,
-		errorDecoder,
+		&core.CallParams{
+			URL:          endpointURL,
+			Method:       http.MethodPatch,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
+			Request:      request,
+			Response:     &response,
+			ErrorDecoder: errorDecoder,
+		},
 	); err != nil {
-		return response, err
+		return nil, err
 	}
 	return response, nil
 }
 
 // Retrieves the evidence for an investigation.
-//
-// ID of the investigation to retrieve evidence for.
-func (c *Client) GetEvidence(ctx context.Context, id string, request *engine.GetInvestigationEvidenceRequest) (*engine.GetEvidenceResponse, error) {
+func (c *Client) GetEvidence(
+	ctx context.Context,
+	// ID of the investigation to retrieve evidence for.
+	id string,
+	request *engine.GetInvestigationEvidenceRequest,
+	opts ...option.RequestOption,
+) (*engine.GetEvidenceResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"v1/siem/investigations/%v/evidence", id)
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
+	endpointURL := core.EncodeURL(baseURL+"/v1/siem/investigations/%v/evidence", id)
 
-	queryParams := make(url.Values)
-	if request.IncludeRawData != nil {
-		queryParams.Add("include_raw_data", fmt.Sprintf("%v", *request.IncludeRawData))
+	queryParams, err := core.QueryValues(request)
+	if err != nil {
+		return nil, err
 	}
 	if len(queryParams) > 0 {
 		endpointURL += "?" + queryParams.Encode()
 	}
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -571,29 +608,41 @@ func (c *Client) GetEvidence(ctx context.Context, id string, request *engine.Get
 	}
 
 	var response *engine.GetEvidenceResponse
-	if err := core.DoRequest(
+	if err := c.caller.Call(
 		ctx,
-		c.httpClient,
-		endpointURL,
-		http.MethodGet,
-		request,
-		&response,
-		false,
-		c.header,
-		errorDecoder,
+		&core.CallParams{
+			URL:          endpointURL,
+			Method:       http.MethodGet,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
+			Response:     &response,
+			ErrorDecoder: errorDecoder,
+		},
 	); err != nil {
-		return response, err
+		return nil, err
 	}
 	return response, nil
 }
 
 // Writes a batch of `Event` objects to the SIEM configured with the token used for authentication.
-func (c *Client) PostEvents(ctx context.Context, request []*engine.Event) error {
+func (c *Client) PostEvents(
+	ctx context.Context,
+	request []*engine.Event,
+	opts ...option.RequestOption,
+) error {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
-	endpointURL := baseURL + "/" + "v1/siem/events"
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
+	endpointURL := baseURL + "/v1/siem/events"
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -698,16 +747,17 @@ func (c *Client) PostEvents(ctx context.Context, request []*engine.Event) error 
 		return apiError
 	}
 
-	if err := core.DoRequest(
+	if err := c.caller.Call(
 		ctx,
-		c.httpClient,
-		endpointURL,
-		http.MethodPost,
-		request,
-		nil,
-		false,
-		c.header,
-		errorDecoder,
+		&core.CallParams{
+			URL:          endpointURL,
+			Method:       http.MethodPost,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
+			Request:      request,
+			ErrorDecoder: errorDecoder,
+		},
 	); err != nil {
 		return err
 	}
@@ -715,38 +765,31 @@ func (c *Client) PostEvents(ctx context.Context, request []*engine.Event) error 
 }
 
 // Queries events from the SIEM configured with the token used for authentication.
-func (c *Client) QueryEvents(ctx context.Context, request *engine.QuerySiemEventsRequest) (*engine.QuerySiemEventsResponse, error) {
+func (c *Client) QueryEvents(
+	ctx context.Context,
+	request *engine.QuerySiemEventsRequest,
+	opts ...option.RequestOption,
+) (*engine.QuerySiemEventsResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
-	endpointURL := baseURL + "/" + "v1/siem/events"
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
+	endpointURL := baseURL + "/v1/siem/events"
 
-	queryParams := make(url.Values)
-	if request.Cursor != nil {
-		queryParams.Add("cursor", fmt.Sprintf("%v", *request.Cursor))
-	}
-	if request.Limit != nil {
-		queryParams.Add("limit", fmt.Sprintf("%v", *request.Limit))
-	}
-	for _, value := range request.Order {
-		queryParams.Add("order", fmt.Sprintf("%v", *value))
-	}
-	for _, value := range request.Filter {
-		queryParams.Add("filter", fmt.Sprintf("%v", *value))
-	}
-	for _, value := range request.Meta {
-		queryParams.Add("meta", fmt.Sprintf("%v", *value))
-	}
-	for _, value := range request.PassthroughParam {
-		queryParams.Add("passthrough-param", fmt.Sprintf("%v", *value))
-	}
-	if request.IncludeRawData != nil {
-		queryParams.Add("include_raw_data", fmt.Sprintf("%v", *request.IncludeRawData))
+	queryParams, err := core.QueryValues(request)
+	if err != nil {
+		return nil, err
 	}
 	if len(queryParams) > 0 {
 		endpointURL += "?" + queryParams.Encode()
 	}
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -852,18 +895,19 @@ func (c *Client) QueryEvents(ctx context.Context, request *engine.QuerySiemEvent
 	}
 
 	var response *engine.QuerySiemEventsResponse
-	if err := core.DoRequest(
+	if err := c.caller.Call(
 		ctx,
-		c.httpClient,
-		endpointURL,
-		http.MethodGet,
-		request,
-		&response,
-		false,
-		c.header,
-		errorDecoder,
+		&core.CallParams{
+			URL:          endpointURL,
+			Method:       http.MethodGet,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
+			Response:     &response,
+			ErrorDecoder: errorDecoder,
+		},
 	); err != nil {
-		return response, err
+		return nil, err
 	}
 	return response, nil
 }

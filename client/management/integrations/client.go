@@ -7,62 +7,59 @@ import (
 	context "context"
 	json "encoding/json"
 	errors "errors"
-	fmt "fmt"
 	management "github.com/synqly/go-sdk/client/management"
 	core "github.com/synqly/go-sdk/client/management/core"
+	option "github.com/synqly/go-sdk/client/management/option"
 	io "io"
 	http "net/http"
-	url "net/url"
 )
 
 type Client struct {
-	baseURL    string
-	httpClient core.HTTPClient
-	header     http.Header
+	baseURL string
+	caller  *core.Caller
+	header  http.Header
 }
 
-func NewClient(opts ...core.ClientOption) *Client {
-	options := core.NewClientOptions()
-	for _, opt := range opts {
-		opt(options)
-	}
+func NewClient(opts ...option.RequestOption) *Client {
+	options := core.NewRequestOptions(opts...)
 	return &Client{
-		baseURL:    options.BaseURL,
-		httpClient: options.HTTPClient,
-		header:     options.ToHeader(),
+		baseURL: options.BaseURL,
+		caller: core.NewCaller(
+			&core.CallerParams{
+				Client:      options.HTTPClient,
+				MaxAttempts: options.MaxAttempts,
+			},
+		),
+		header: options.ToHeader(),
 	}
 }
 
 // Returns a list of all `Integration` objects that match the query params.
-func (c *Client) List(ctx context.Context, request *management.ListIntegrationsRequest) (*management.ListIntegrationsResponse, error) {
+func (c *Client) List(
+	ctx context.Context,
+	request *management.ListIntegrationsRequest,
+	opts ...option.RequestOption,
+) (*management.ListIntegrationsResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
-	endpointURL := baseURL + "/" + "v1/integrations"
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
+	endpointURL := baseURL + "/v1/integrations"
 
-	queryParams := make(url.Values)
-	if request.Limit != nil {
-		queryParams.Add("limit", fmt.Sprintf("%v", *request.Limit))
-	}
-	if request.StartAfter != nil {
-		queryParams.Add("start_after", fmt.Sprintf("%v", *request.StartAfter))
-	}
-	for _, value := range request.Order {
-		queryParams.Add("order", fmt.Sprintf("%v", *value))
-	}
-	for _, value := range request.Filter {
-		queryParams.Add("filter", fmt.Sprintf("%v", *value))
-	}
-	for _, value := range request.Expand {
-		queryParams.Add("expand", fmt.Sprintf("%v", *value))
-	}
-	if request.Total != nil {
-		queryParams.Add("total", fmt.Sprintf("%v", *request.Total))
+	queryParams, err := core.QueryValues(request)
+	if err != nil {
+		return nil, err
 	}
 	if len(queryParams) > 0 {
 		endpointURL += "?" + queryParams.Encode()
 	}
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -140,53 +137,51 @@ func (c *Client) List(ctx context.Context, request *management.ListIntegrationsR
 	}
 
 	var response *management.ListIntegrationsResponse
-	if err := core.DoRequest(
+	if err := c.caller.Call(
 		ctx,
-		c.httpClient,
-		endpointURL,
-		http.MethodGet,
-		request,
-		&response,
-		false,
-		c.header,
-		errorDecoder,
+		&core.CallParams{
+			URL:          endpointURL,
+			Method:       http.MethodGet,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
+			Response:     &response,
+			ErrorDecoder: errorDecoder,
+		},
 	); err != nil {
-		return response, err
+		return nil, err
 	}
 	return response, nil
 }
 
 // Returns a list of all `Integration` objects belonging to the
 // `Account` matching `{accountId}`.
-func (c *Client) ListAccount(ctx context.Context, accountId management.AccountId, request *management.ListAccountIntegrationsRequest) (*management.ListAccountIntegrationsResponse, error) {
+func (c *Client) ListAccount(
+	ctx context.Context,
+	accountId management.AccountId,
+	request *management.ListAccountIntegrationsRequest,
+	opts ...option.RequestOption,
+) (*management.ListAccountIntegrationsResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"v1/integrations/%v", accountId)
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
+	endpointURL := core.EncodeURL(baseURL+"/v1/integrations/%v", accountId)
 
-	queryParams := make(url.Values)
-	if request.Limit != nil {
-		queryParams.Add("limit", fmt.Sprintf("%v", *request.Limit))
-	}
-	if request.StartAfter != nil {
-		queryParams.Add("start_after", fmt.Sprintf("%v", *request.StartAfter))
-	}
-	for _, value := range request.Order {
-		queryParams.Add("order", fmt.Sprintf("%v", *value))
-	}
-	for _, value := range request.Filter {
-		queryParams.Add("filter", fmt.Sprintf("%v", *value))
-	}
-	for _, value := range request.Expand {
-		queryParams.Add("expand", fmt.Sprintf("%v", *value))
-	}
-	if request.Total != nil {
-		queryParams.Add("total", fmt.Sprintf("%v", *request.Total))
+	queryParams, err := core.QueryValues(request)
+	if err != nil {
+		return nil, err
 	}
 	if len(queryParams) > 0 {
 		endpointURL += "?" + queryParams.Encode()
 	}
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -264,30 +259,47 @@ func (c *Client) ListAccount(ctx context.Context, accountId management.AccountId
 	}
 
 	var response *management.ListAccountIntegrationsResponse
-	if err := core.DoRequest(
+	if err := c.caller.Call(
 		ctx,
-		c.httpClient,
-		endpointURL,
-		http.MethodGet,
-		request,
-		&response,
-		false,
-		c.header,
-		errorDecoder,
+		&core.CallParams{
+			URL:          endpointURL,
+			Method:       http.MethodGet,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
+			Response:     &response,
+			ErrorDecoder: errorDecoder,
+		},
 	); err != nil {
-		return response, err
+		return nil, err
 	}
 	return response, nil
 }
 
 // Returns the `Integration` object matching `{integrationId}` where
 // the `Integration` belongs to the `Account` matching `{accountId}`.
-func (c *Client) Get(ctx context.Context, accountId management.AccountId, integrationId management.IntegrationId) (*management.GetIntegrationResponse, error) {
+func (c *Client) Get(
+	ctx context.Context,
+	accountId management.AccountId,
+	integrationId management.IntegrationId,
+	opts ...option.RequestOption,
+) (*management.GetIntegrationResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"v1/integrations/%v/%v", accountId, integrationId)
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
+	endpointURL := core.EncodeURL(
+		baseURL+"/v1/integrations/%v/%v",
+		accountId,
+		integrationId,
+	)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -365,18 +377,19 @@ func (c *Client) Get(ctx context.Context, accountId management.AccountId, integr
 	}
 
 	var response *management.GetIntegrationResponse
-	if err := core.DoRequest(
+	if err := c.caller.Call(
 		ctx,
-		c.httpClient,
-		endpointURL,
-		http.MethodGet,
-		nil,
-		&response,
-		false,
-		c.header,
-		errorDecoder,
+		&core.CallParams{
+			URL:          endpointURL,
+			Method:       http.MethodGet,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
+			Response:     &response,
+			ErrorDecoder: errorDecoder,
+		},
 	); err != nil {
-		return response, err
+		return nil, err
 	}
 	return response, nil
 }
@@ -384,12 +397,24 @@ func (c *Client) Get(ctx context.Context, accountId management.AccountId, integr
 // Creates an `Integration` object belonging to the `Account` matching
 // `{accountId}`. Configures the `Integration` with the Provider specified
 // in the request. Returns an `Integration` token for use with `Integration` APIs.
-func (c *Client) Create(ctx context.Context, accountId management.AccountId, request *management.CreateIntegrationRequest) (*management.CreateIntegrationResponse, error) {
+func (c *Client) Create(
+	ctx context.Context,
+	accountId management.AccountId,
+	request *management.CreateIntegrationRequest,
+	opts ...option.RequestOption,
+) (*management.CreateIntegrationResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"v1/integrations/%v", accountId)
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
+	endpointURL := core.EncodeURL(baseURL+"/v1/integrations/%v", accountId)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -495,18 +520,20 @@ func (c *Client) Create(ctx context.Context, accountId management.AccountId, req
 	}
 
 	var response *management.CreateIntegrationResponse
-	if err := core.DoRequest(
+	if err := c.caller.Call(
 		ctx,
-		c.httpClient,
-		endpointURL,
-		http.MethodPost,
-		request,
-		&response,
-		false,
-		c.header,
-		errorDecoder,
+		&core.CallParams{
+			URL:          endpointURL,
+			Method:       http.MethodPost,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
+			Request:      request,
+			Response:     &response,
+			ErrorDecoder: errorDecoder,
+		},
 	); err != nil {
-		return response, err
+		return nil, err
 	}
 	return response, nil
 }
@@ -514,12 +541,24 @@ func (c *Client) Create(ctx context.Context, accountId management.AccountId, req
 // Verifies an ephemeral `Integration` and provider configuration and tests the authentication and provider connectivity.
 // The provider config credential IDs can utilize persistent IDs or use "#/n" reference IDs;
 // where (n) is the zero based offset in the optional credentials list.
-func (c *Client) Verify(ctx context.Context, accountId management.AccountId, request *management.VerifyIntegrationRequest) error {
+func (c *Client) Verify(
+	ctx context.Context,
+	accountId management.AccountId,
+	request *management.VerifyIntegrationRequest,
+	opts ...option.RequestOption,
+) error {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"v1/integrations/%v/verify", accountId)
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
+	endpointURL := core.EncodeURL(baseURL+"/v1/integrations/%v/verify", accountId)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -624,16 +663,17 @@ func (c *Client) Verify(ctx context.Context, accountId management.AccountId, req
 		return apiError
 	}
 
-	if err := core.DoRequest(
+	if err := c.caller.Call(
 		ctx,
-		c.httpClient,
-		endpointURL,
-		http.MethodPost,
-		request,
-		nil,
-		false,
-		c.header,
-		errorDecoder,
+		&core.CallParams{
+			URL:          endpointURL,
+			Method:       http.MethodPost,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
+			Request:      request,
+			ErrorDecoder: errorDecoder,
+		},
 	); err != nil {
 		return err
 	}
@@ -642,12 +682,29 @@ func (c *Client) Verify(ctx context.Context, accountId management.AccountId, req
 
 // Updates the `Integration` object matching `{integrationId}`, where the
 // `Integration` belongs to the `Account` matching `{accountId}`.
-func (c *Client) Update(ctx context.Context, accountId management.AccountId, integrationId management.IntegrationId, request management.UpdateIntegrationRequest) (*management.UpdateIntegrationResponse, error) {
+func (c *Client) Update(
+	ctx context.Context,
+	accountId management.AccountId,
+	integrationId management.IntegrationId,
+	request management.UpdateIntegrationRequest,
+	opts ...option.RequestOption,
+) (*management.UpdateIntegrationResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"v1/integrations/%v/%v", accountId, integrationId)
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
+	endpointURL := core.EncodeURL(
+		baseURL+"/v1/integrations/%v/%v",
+		accountId,
+		integrationId,
+	)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -725,30 +782,49 @@ func (c *Client) Update(ctx context.Context, accountId management.AccountId, int
 	}
 
 	var response *management.UpdateIntegrationResponse
-	if err := core.DoRequest(
+	if err := c.caller.Call(
 		ctx,
-		c.httpClient,
-		endpointURL,
-		http.MethodPut,
-		request,
-		&response,
-		false,
-		c.header,
-		errorDecoder,
+		&core.CallParams{
+			URL:          endpointURL,
+			Method:       http.MethodPut,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
+			Request:      request,
+			Response:     &response,
+			ErrorDecoder: errorDecoder,
+		},
 	); err != nil {
-		return response, err
+		return nil, err
 	}
 	return response, nil
 }
 
 // Patches the `Integration` object matching `{integrationId}`, where the
 // `Integration` belongs to the `Account` matching `{accountId}`.
-func (c *Client) Patch(ctx context.Context, accountId management.AccountId, integrationId management.IntegrationId, request []map[string]interface{}) (*management.PatchIntegrationResponse, error) {
+func (c *Client) Patch(
+	ctx context.Context,
+	accountId management.AccountId,
+	integrationId management.IntegrationId,
+	request []map[string]interface{},
+	opts ...option.RequestOption,
+) (*management.PatchIntegrationResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"v1/integrations/%v/%v", accountId, integrationId)
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
+	endpointURL := core.EncodeURL(
+		baseURL+"/v1/integrations/%v/%v",
+		accountId,
+		integrationId,
+	)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -826,29 +902,47 @@ func (c *Client) Patch(ctx context.Context, accountId management.AccountId, inte
 	}
 
 	var response *management.PatchIntegrationResponse
-	if err := core.DoRequest(
+	if err := c.caller.Call(
 		ctx,
-		c.httpClient,
-		endpointURL,
-		http.MethodPatch,
-		request,
-		&response,
-		false,
-		c.header,
-		errorDecoder,
+		&core.CallParams{
+			URL:          endpointURL,
+			Method:       http.MethodPatch,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
+			Request:      request,
+			Response:     &response,
+			ErrorDecoder: errorDecoder,
+		},
 	); err != nil {
-		return response, err
+		return nil, err
 	}
 	return response, nil
 }
 
 // Deletes the `Integration` object matching `{integrationId}, where the `Integration`belongs to the`Account`matching`{accountId}`. Deleting an `Integration` also deletes any tokens that belong to it.
-func (c *Client) Delete(ctx context.Context, accountId management.AccountId, integrationId management.IntegrationId) error {
+func (c *Client) Delete(
+	ctx context.Context,
+	accountId management.AccountId,
+	integrationId management.IntegrationId,
+	opts ...option.RequestOption,
+) error {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"v1/integrations/%v/%v", accountId, integrationId)
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
+	endpointURL := core.EncodeURL(
+		baseURL+"/v1/integrations/%v/%v",
+		accountId,
+		integrationId,
+	)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -925,16 +1019,16 @@ func (c *Client) Delete(ctx context.Context, accountId management.AccountId, int
 		return apiError
 	}
 
-	if err := core.DoRequest(
+	if err := c.caller.Call(
 		ctx,
-		c.httpClient,
-		endpointURL,
-		http.MethodDelete,
-		nil,
-		nil,
-		false,
-		c.header,
-		errorDecoder,
+		&core.CallParams{
+			URL:          endpointURL,
+			Method:       http.MethodDelete,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
+			ErrorDecoder: errorDecoder,
+		},
 	); err != nil {
 		return err
 	}

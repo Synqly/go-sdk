@@ -2,53 +2,281 @@
 
 package management
 
+import (
+	json "encoding/json"
+	fmt "fmt"
+	core "github.com/synqly/go-sdk/client/management/core"
+)
+
 type ListAccountsRequest struct {
 	// Number of `Account` objects to return in this page. Defaults to 100.
-	Limit *int `json:"-"`
+	Limit *int `json:"-" url:"limit,omitempty"`
 	// Return `Account` objects starting after this `name`.
-	StartAfter *string `json:"-"`
+	StartAfter *string `json:"-" url:"start_after,omitempty"`
 	// Select a field to order the results by. Defaults to `name`. To control the direction of the sorting, append
 	// `[asc]` or `[desc]` to the field name. For example, `name[desc]` will sort the results by `name` in descending order.
 	// The ordering defaults to `asc` if not specified. May be used multiple times to order by multiple fields, and the
 	// ordering is applied in the order the fields are specified.
-	Order []*string `json:"-"`
+	Order []*string `json:"-" url:"order,omitempty"`
 	// Filter results by this query. For more information on filtering, refer to our Filtering Guide. Defaults to no filter.
 	// If used more than once, the queries are ANDed together.
-	Filter []*string `json:"-"`
+	Filter []*string `json:"-" url:"filter,omitempty"`
 	// Return total number of accounts in the system, respecting all applied filters. This is expensive, use sparingly.
-	Total *bool `json:"-"`
+	Total *bool `json:"-" url:"total,omitempty"`
 }
 
 type CreateAccountRequest struct {
 	// Unique short name for this Account (lowercase [a-z0-9_-], can be used in URLs). Also used for case insensitive duplicate name detection and default sort order. Defaults to AccountId if both name and fullname are not specified.
-	Name *string `json:"name,omitempty"`
+	Name *string `json:"name,omitempty" url:"name,omitempty"`
 	// Human friendly display name for this Account, will auto-generate 'name' field (if 'name' is not specified). Defaults to the same value as the 'name' field if not specified.
-	Fullname *string `json:"fullname,omitempty"`
+	Fullname *string `json:"fullname,omitempty" url:"fullname,omitempty"`
 	// Environment this account runs in. Defaults to `prod` if not specified.
-	Environment *Environment `json:"environment,omitempty"`
+	Environment *Environment `json:"environment,omitempty" url:"environment,omitempty"`
 	// User defined labels that apply to this account. These values can be used in role bindings to limit the scope of permissions.
-	Labels []string `json:"labels,omitempty"`
+	Labels []string `json:"labels,omitempty" url:"labels,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *CreateAccountRequest) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
+}
+
+func (c *CreateAccountRequest) UnmarshalJSON(data []byte) error {
+	type unmarshaler CreateAccountRequest
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = CreateAccountRequest(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
+	c._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (c *CreateAccountRequest) String() string {
+	if len(c._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
 }
 
 type CreateAccountResponse struct {
-	Result *CreateAccountResponseResult `json:"result,omitempty"`
+	Result *CreateAccountResponseResult `json:"result" url:"result"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *CreateAccountResponse) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
+}
+
+func (c *CreateAccountResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler CreateAccountResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = CreateAccountResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
+	c._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (c *CreateAccountResponse) String() string {
+	if len(c._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
 }
 
 type GetAccountResponse struct {
-	Result *Account `json:"result,omitempty"`
+	Result *Account `json:"result" url:"result"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (g *GetAccountResponse) GetExtraProperties() map[string]interface{} {
+	return g.extraProperties
+}
+
+func (g *GetAccountResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler GetAccountResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*g = GetAccountResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	if err != nil {
+		return err
+	}
+	g.extraProperties = extraProperties
+
+	g._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (g *GetAccountResponse) String() string {
+	if len(g._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(g._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(g); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", g)
 }
 
 type ListAccountsResponse struct {
-	Result []*Account `json:"result,omitempty"`
-	Total  *int       `json:"total,omitempty"`
+	Result []*Account `json:"result" url:"result"`
+	Total  *int       `json:"total,omitempty" url:"total,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (l *ListAccountsResponse) GetExtraProperties() map[string]interface{} {
+	return l.extraProperties
+}
+
+func (l *ListAccountsResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler ListAccountsResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*l = ListAccountsResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *l)
+	if err != nil {
+		return err
+	}
+	l.extraProperties = extraProperties
+
+	l._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (l *ListAccountsResponse) String() string {
+	if len(l._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(l._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(l); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", l)
 }
 
 type PatchAccountResponse struct {
-	Result *Account `json:"result,omitempty"`
+	Result *Account `json:"result" url:"result"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (p *PatchAccountResponse) GetExtraProperties() map[string]interface{} {
+	return p.extraProperties
+}
+
+func (p *PatchAccountResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler PatchAccountResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*p = PatchAccountResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *p)
+	if err != nil {
+		return err
+	}
+	p.extraProperties = extraProperties
+
+	p._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (p *PatchAccountResponse) String() string {
+	if len(p._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(p._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(p); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", p)
 }
 
 type UpdateAccountRequest = *Account
 
 type UpdateAccountResponse struct {
-	Result *Account `json:"result,omitempty"`
+	Result *Account `json:"result" url:"result"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (u *UpdateAccountResponse) GetExtraProperties() map[string]interface{} {
+	return u.extraProperties
+}
+
+func (u *UpdateAccountResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler UpdateAccountResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*u = UpdateAccountResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *u)
+	if err != nil {
+		return err
+	}
+	u.extraProperties = extraProperties
+
+	u._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (u *UpdateAccountResponse) String() string {
+	if len(u._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(u._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(u); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", u)
 }

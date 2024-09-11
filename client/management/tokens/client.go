@@ -7,29 +7,30 @@ import (
 	context "context"
 	json "encoding/json"
 	errors "errors"
-	fmt "fmt"
 	management "github.com/synqly/go-sdk/client/management"
 	core "github.com/synqly/go-sdk/client/management/core"
+	option "github.com/synqly/go-sdk/client/management/option"
 	io "io"
 	http "net/http"
-	url "net/url"
 )
 
 type Client struct {
-	baseURL    string
-	httpClient core.HTTPClient
-	header     http.Header
+	baseURL string
+	caller  *core.Caller
+	header  http.Header
 }
 
-func NewClient(opts ...core.ClientOption) *Client {
-	options := core.NewClientOptions()
-	for _, opt := range opts {
-		opt(options)
-	}
+func NewClient(opts ...option.RequestOption) *Client {
+	options := core.NewRequestOptions(opts...)
 	return &Client{
-		baseURL:    options.BaseURL,
-		httpClient: options.HTTPClient,
-		header:     options.ToHeader(),
+		baseURL: options.BaseURL,
+		caller: core.NewCaller(
+			&core.CallerParams{
+				Client:      options.HTTPClient,
+				MaxAttempts: options.MaxAttempts,
+			},
+		),
+		header: options.ToHeader(),
 	}
 }
 
@@ -37,12 +38,23 @@ func NewClient(opts ...core.ClientOption) *Client {
 // Tokens can only be reduced in scope, never expanded.
 // Permissions are inherited from the token used to call this API.
 // Permissions assigned to the new token will not be persisted, this is not a way to create roles.
-func (c *Client) CreateToken(ctx context.Context, request *management.CreateTokenRequest) (*management.CreateTokenResponse, error) {
+func (c *Client) CreateToken(
+	ctx context.Context,
+	request *management.CreateTokenRequest,
+	opts ...option.RequestOption,
+) (*management.CreateTokenResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
-	endpointURL := baseURL + "/" + "v1/tokens"
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
+	endpointURL := baseURL + "/v1/tokens"
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -120,18 +132,20 @@ func (c *Client) CreateToken(ctx context.Context, request *management.CreateToke
 	}
 
 	var response *management.CreateTokenResponse
-	if err := core.DoRequest(
+	if err := c.caller.Call(
 		ctx,
-		c.httpClient,
-		endpointURL,
-		http.MethodPost,
-		request,
-		&response,
-		false,
-		c.header,
-		errorDecoder,
+		&core.CallParams{
+			URL:          endpointURL,
+			Method:       http.MethodPost,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
+			Request:      request,
+			Response:     &response,
+			ErrorDecoder: errorDecoder,
+		},
 	); err != nil {
-		return response, err
+		return nil, err
 	}
 	return response, nil
 }
@@ -140,12 +154,29 @@ func (c *Client) CreateToken(ctx context.Context, request *management.CreateToke
 // this API must have the necessary permissions to create tokens and have access to the account
 // and integration IDs. Permissions may not be escalated, so any operation that the invocation
 // token does not have access to cannot be granted.
-func (c *Client) CreateIntegrationToken(ctx context.Context, accountId management.AccountId, integrationId management.IntegrationId, request *management.CreateIntegrationTokenRequest) (*management.CreateIntegrationTokenResponse, error) {
+func (c *Client) CreateIntegrationToken(
+	ctx context.Context,
+	accountId management.AccountId,
+	integrationId management.IntegrationId,
+	request *management.CreateIntegrationTokenRequest,
+	opts ...option.RequestOption,
+) (*management.CreateIntegrationTokenResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"v1/tokens/%v/%v", accountId, integrationId)
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
+	endpointURL := core.EncodeURL(
+		baseURL+"/v1/tokens/%v/%v",
+		accountId,
+		integrationId,
+	)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -223,18 +254,20 @@ func (c *Client) CreateIntegrationToken(ctx context.Context, accountId managemen
 	}
 
 	var response *management.CreateIntegrationTokenResponse
-	if err := core.DoRequest(
+	if err := c.caller.Call(
 		ctx,
-		c.httpClient,
-		endpointURL,
-		http.MethodPost,
-		request,
-		&response,
-		false,
-		c.header,
-		errorDecoder,
+		&core.CallParams{
+			URL:          endpointURL,
+			Method:       http.MethodPost,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
+			Request:      request,
+			Response:     &response,
+			ErrorDecoder: errorDecoder,
+		},
 	); err != nil {
-		return response, err
+		return nil, err
 	}
 	return response, nil
 }
@@ -242,29 +275,31 @@ func (c *Client) CreateIntegrationToken(ctx context.Context, accountId managemen
 // Returns a list of all `RefreshToken` objects belonging to the Authorization Bearer
 // token. For more infromation on Tokens, refer to
 // [Authentication](https://docs.synqly.com/reference/authentication).
-func (c *Client) List(ctx context.Context, request *management.ListTokensRequest) (*management.ListTokensResponse, error) {
+func (c *Client) List(
+	ctx context.Context,
+	request *management.ListTokensRequest,
+	opts ...option.RequestOption,
+) (*management.ListTokensResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
-	endpointURL := baseURL + "/" + "v1/tokens"
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
+	endpointURL := baseURL + "/v1/tokens"
 
-	queryParams := make(url.Values)
-	if request.Limit != nil {
-		queryParams.Add("limit", fmt.Sprintf("%v", *request.Limit))
-	}
-	if request.StartAfter != nil {
-		queryParams.Add("start_after", fmt.Sprintf("%v", *request.StartAfter))
-	}
-	for _, value := range request.Order {
-		queryParams.Add("order", fmt.Sprintf("%v", *value))
-	}
-	for _, value := range request.Filter {
-		queryParams.Add("filter", fmt.Sprintf("%v", *value))
+	queryParams, err := core.QueryValues(request)
+	if err != nil {
+		return nil, err
 	}
 	if len(queryParams) > 0 {
 		endpointURL += "?" + queryParams.Encode()
 	}
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -342,18 +377,19 @@ func (c *Client) List(ctx context.Context, request *management.ListTokensRequest
 	}
 
 	var response *management.ListTokensResponse
-	if err := core.DoRequest(
+	if err := c.caller.Call(
 		ctx,
-		c.httpClient,
-		endpointURL,
-		http.MethodGet,
-		request,
-		&response,
-		false,
-		c.header,
-		errorDecoder,
+		&core.CallParams{
+			URL:          endpointURL,
+			Method:       http.MethodGet,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
+			Response:     &response,
+			ErrorDecoder: errorDecoder,
+		},
 	); err != nil {
-		return response, err
+		return nil, err
 	}
 	return response, nil
 }
@@ -361,12 +397,23 @@ func (c *Client) List(ctx context.Context, request *management.ListTokensRequest
 // Returns the `RefreshToken` object matching `{tokenId}`. For more information on
 // Tokens, refer to
 // [Authentication](https://docs.synqly.com/reference/authentication).
-func (c *Client) Get(ctx context.Context, refreshTokenId management.TokenId) (*management.GetTokenResponse, error) {
+func (c *Client) Get(
+	ctx context.Context,
+	refreshTokenId management.TokenId,
+	opts ...option.RequestOption,
+) (*management.GetTokenResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"v1/tokens/%v/info", refreshTokenId)
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
+	endpointURL := core.EncodeURL(baseURL+"/v1/tokens/%v/info", refreshTokenId)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -444,18 +491,19 @@ func (c *Client) Get(ctx context.Context, refreshTokenId management.TokenId) (*m
 	}
 
 	var response *management.GetTokenResponse
-	if err := core.DoRequest(
+	if err := c.caller.Call(
 		ctx,
-		c.httpClient,
-		endpointURL,
-		http.MethodGet,
-		nil,
-		&response,
-		false,
-		c.header,
-		errorDecoder,
+		&core.CallParams{
+			URL:          endpointURL,
+			Method:       http.MethodGet,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
+			Response:     &response,
+			ErrorDecoder: errorDecoder,
+		},
 	); err != nil {
-		return response, err
+		return nil, err
 	}
 	return response, nil
 }
@@ -464,12 +512,28 @@ func (c *Client) Get(ctx context.Context, refreshTokenId management.TokenId) (*m
 // Resets the specified `RefreshToken` and expiration time, removes the secondary, and resets access and refresh tokens for the
 // `RefreshToken` object matching `{ownerId}/{refreshTokenId}` where `ownerId` is an `organizationId` or `integrationId`.
 // An `Organization` token with `administrator` permissions can be used to perform this operation.
-func (c *Client) Reset(ctx context.Context, ownerId management.Id, refreshTokenId management.TokenId) (*management.ResetTokenResponse, error) {
+func (c *Client) Reset(
+	ctx context.Context,
+	ownerId management.Id,
+	refreshTokenId management.TokenId,
+	opts ...option.RequestOption,
+) (*management.ResetTokenResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"v1/tokens/%v/%v/reset", ownerId, refreshTokenId)
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
+	endpointURL := core.EncodeURL(
+		baseURL+"/v1/tokens/%v/%v/reset",
+		ownerId,
+		refreshTokenId,
+	)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -547,18 +611,19 @@ func (c *Client) Reset(ctx context.Context, ownerId management.Id, refreshTokenI
 	}
 
 	var response *management.ResetTokenResponse
-	if err := core.DoRequest(
+	if err := c.caller.Call(
 		ctx,
-		c.httpClient,
-		endpointURL,
-		http.MethodPut,
-		nil,
-		&response,
-		false,
-		c.header,
-		errorDecoder,
+		&core.CallParams{
+			URL:          endpointURL,
+			Method:       http.MethodPut,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
+			Response:     &response,
+			ErrorDecoder: errorDecoder,
+		},
 	); err != nil {
-		return response, err
+		return nil, err
 	}
 	return response, nil
 }
@@ -566,12 +631,23 @@ func (c *Client) Reset(ctx context.Context, ownerId management.Id, refreshTokenI
 // Creates a new primary `TokenPair` object, setting the secondary `TokenPair`
 // to the previous primary value. Call `/v1/removeSecondaryToken` to remove
 // this secondary backup once the new primary `TokenPair` has been deployed.
-func (c *Client) Refresh(ctx context.Context, refreshTokenId management.TokenId) (*management.RefreshTokenResponse, error) {
+func (c *Client) Refresh(
+	ctx context.Context,
+	refreshTokenId management.TokenId,
+	opts ...option.RequestOption,
+) (*management.RefreshTokenResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"v1/tokens/%v/refresh", refreshTokenId)
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
+	endpointURL := core.EncodeURL(baseURL+"/v1/tokens/%v/refresh", refreshTokenId)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -649,30 +725,42 @@ func (c *Client) Refresh(ctx context.Context, refreshTokenId management.TokenId)
 	}
 
 	var response *management.RefreshTokenResponse
-	if err := core.DoRequest(
+	if err := c.caller.Call(
 		ctx,
-		c.httpClient,
-		endpointURL,
-		http.MethodPut,
-		nil,
-		&response,
-		false,
-		c.header,
-		errorDecoder,
+		&core.CallParams{
+			URL:          endpointURL,
+			Method:       http.MethodPut,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
+			Response:     &response,
+			ErrorDecoder: errorDecoder,
+		},
 	); err != nil {
-		return response, err
+		return nil, err
 	}
 	return response, nil
 }
 
 // Deletes the secondary `TokenPair` for the `RefreshToken` object
 // matching `{refreshTokenId}`.
-func (c *Client) RemoveSecondary(ctx context.Context, refreshTokenId management.TokenId) error {
+func (c *Client) RemoveSecondary(
+	ctx context.Context,
+	refreshTokenId management.TokenId,
+	opts ...option.RequestOption,
+) error {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"v1/tokens/%v/secondary", refreshTokenId)
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
+	endpointURL := core.EncodeURL(baseURL+"/v1/tokens/%v/secondary", refreshTokenId)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -749,16 +837,16 @@ func (c *Client) RemoveSecondary(ctx context.Context, refreshTokenId management.
 		return apiError
 	}
 
-	if err := core.DoRequest(
+	if err := c.caller.Call(
 		ctx,
-		c.httpClient,
-		endpointURL,
-		http.MethodDelete,
-		nil,
-		nil,
-		false,
-		c.header,
-		errorDecoder,
+		&core.CallParams{
+			URL:          endpointURL,
+			Method:       http.MethodDelete,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
+			ErrorDecoder: errorDecoder,
+		},
 	); err != nil {
 		return err
 	}

@@ -7,61 +7,61 @@ import (
 	context "context"
 	json "encoding/json"
 	errors "errors"
-	fmt "fmt"
 	management "github.com/synqly/go-sdk/client/management"
 	core "github.com/synqly/go-sdk/client/management/core"
+	option "github.com/synqly/go-sdk/client/management/option"
 	io "io"
 	http "net/http"
-	url "net/url"
 )
 
 type Client struct {
-	baseURL    string
-	httpClient core.HTTPClient
-	header     http.Header
+	baseURL string
+	caller  *core.Caller
+	header  http.Header
 }
 
-func NewClient(opts ...core.ClientOption) *Client {
-	options := core.NewClientOptions()
-	for _, opt := range opts {
-		opt(options)
-	}
+func NewClient(opts ...option.RequestOption) *Client {
+	options := core.NewRequestOptions(opts...)
 	return &Client{
-		baseURL:    options.BaseURL,
-		httpClient: options.HTTPClient,
-		header:     options.ToHeader(),
+		baseURL: options.BaseURL,
+		caller: core.NewCaller(
+			&core.CallerParams{
+				Client:      options.HTTPClient,
+				MaxAttempts: options.MaxAttempts,
+			},
+		),
+		header: options.ToHeader(),
 	}
 }
 
 // Returns a list of all `Account` objects. For more information on
 // Organizations and Accounts, refer to our
 // [Synqly Overview](https://docs.synqly.com/docs/synqly-overview).
-func (c *Client) List(ctx context.Context, request *management.ListAccountsRequest) (*management.ListAccountsResponse, error) {
+func (c *Client) List(
+	ctx context.Context,
+	request *management.ListAccountsRequest,
+	opts ...option.RequestOption,
+) (*management.ListAccountsResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
-	endpointURL := baseURL + "/" + "v1/accounts"
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
+	endpointURL := baseURL + "/v1/accounts"
 
-	queryParams := make(url.Values)
-	if request.Limit != nil {
-		queryParams.Add("limit", fmt.Sprintf("%v", *request.Limit))
-	}
-	if request.StartAfter != nil {
-		queryParams.Add("start_after", fmt.Sprintf("%v", *request.StartAfter))
-	}
-	for _, value := range request.Order {
-		queryParams.Add("order", fmt.Sprintf("%v", *value))
-	}
-	for _, value := range request.Filter {
-		queryParams.Add("filter", fmt.Sprintf("%v", *value))
-	}
-	if request.Total != nil {
-		queryParams.Add("total", fmt.Sprintf("%v", *request.Total))
+	queryParams, err := core.QueryValues(request)
+	if err != nil {
+		return nil, err
 	}
 	if len(queryParams) > 0 {
 		endpointURL += "?" + queryParams.Encode()
 	}
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -139,18 +139,19 @@ func (c *Client) List(ctx context.Context, request *management.ListAccountsReque
 	}
 
 	var response *management.ListAccountsResponse
-	if err := core.DoRequest(
+	if err := c.caller.Call(
 		ctx,
-		c.httpClient,
-		endpointURL,
-		http.MethodGet,
-		request,
-		&response,
-		false,
-		c.header,
-		errorDecoder,
+		&core.CallParams{
+			URL:          endpointURL,
+			Method:       http.MethodGet,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
+			Response:     &response,
+			ErrorDecoder: errorDecoder,
+		},
 	); err != nil {
-		return response, err
+		return nil, err
 	}
 	return response, nil
 }
@@ -158,12 +159,23 @@ func (c *Client) List(ctx context.Context, request *management.ListAccountsReque
 // Returns the `Account` object matching `{accountId}`. For more information on
 // Organizations and Accounts, refer to our
 // [Synqly Overview](https://docs.synqly.com/docs/synqly-overview).
-func (c *Client) Get(ctx context.Context, accountId management.AccountId) (*management.GetAccountResponse, error) {
+func (c *Client) Get(
+	ctx context.Context,
+	accountId management.AccountId,
+	opts ...option.RequestOption,
+) (*management.GetAccountResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"v1/accounts/%v", accountId)
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
+	endpointURL := core.EncodeURL(baseURL+"/v1/accounts/%v", accountId)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -241,18 +253,19 @@ func (c *Client) Get(ctx context.Context, accountId management.AccountId) (*mana
 	}
 
 	var response *management.GetAccountResponse
-	if err := core.DoRequest(
+	if err := c.caller.Call(
 		ctx,
-		c.httpClient,
-		endpointURL,
-		http.MethodGet,
-		nil,
-		&response,
-		false,
-		c.header,
-		errorDecoder,
+		&core.CallParams{
+			URL:          endpointURL,
+			Method:       http.MethodGet,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
+			Response:     &response,
+			ErrorDecoder: errorDecoder,
+		},
 	); err != nil {
-		return response, err
+		return nil, err
 	}
 	return response, nil
 }
@@ -260,12 +273,23 @@ func (c *Client) Get(ctx context.Context, accountId management.AccountId) (*mana
 // Creates an `Account` object. For more information on Organizations and
 // Accounts, refer to our
 // [Synqly Overview](https://docs.synqly.com/docs/synqly-overview).
-func (c *Client) Create(ctx context.Context, request *management.CreateAccountRequest) (*management.CreateAccountResponse, error) {
+func (c *Client) Create(
+	ctx context.Context,
+	request *management.CreateAccountRequest,
+	opts ...option.RequestOption,
+) (*management.CreateAccountResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
-	endpointURL := baseURL + "/" + "v1/accounts"
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
+	endpointURL := baseURL + "/v1/accounts"
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -343,18 +367,20 @@ func (c *Client) Create(ctx context.Context, request *management.CreateAccountRe
 	}
 
 	var response *management.CreateAccountResponse
-	if err := core.DoRequest(
+	if err := c.caller.Call(
 		ctx,
-		c.httpClient,
-		endpointURL,
-		http.MethodPost,
-		request,
-		&response,
-		false,
-		c.header,
-		errorDecoder,
+		&core.CallParams{
+			URL:          endpointURL,
+			Method:       http.MethodPost,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
+			Request:      request,
+			Response:     &response,
+			ErrorDecoder: errorDecoder,
+		},
 	); err != nil {
-		return response, err
+		return nil, err
 	}
 	return response, nil
 }
@@ -362,12 +388,24 @@ func (c *Client) Create(ctx context.Context, request *management.CreateAccountRe
 // Updates the `Account` object matching `{accountId}`. For more information on
 // Organizations and Accounts, refer to our
 // [Synqly Overview](https://docs.synqly.com/docs/synqly-overview).
-func (c *Client) Update(ctx context.Context, accountId management.AccountId, request management.UpdateAccountRequest) (*management.UpdateAccountResponse, error) {
+func (c *Client) Update(
+	ctx context.Context,
+	accountId management.AccountId,
+	request management.UpdateAccountRequest,
+	opts ...option.RequestOption,
+) (*management.UpdateAccountResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"v1/accounts/%v", accountId)
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
+	endpointURL := core.EncodeURL(baseURL+"/v1/accounts/%v", accountId)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -445,18 +483,20 @@ func (c *Client) Update(ctx context.Context, accountId management.AccountId, req
 	}
 
 	var response *management.UpdateAccountResponse
-	if err := core.DoRequest(
+	if err := c.caller.Call(
 		ctx,
-		c.httpClient,
-		endpointURL,
-		http.MethodPut,
-		request,
-		&response,
-		false,
-		c.header,
-		errorDecoder,
+		&core.CallParams{
+			URL:          endpointURL,
+			Method:       http.MethodPut,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
+			Request:      request,
+			Response:     &response,
+			ErrorDecoder: errorDecoder,
+		},
 	); err != nil {
-		return response, err
+		return nil, err
 	}
 	return response, nil
 }
@@ -464,12 +504,24 @@ func (c *Client) Update(ctx context.Context, accountId management.AccountId, req
 // Patches the `Account` object matching `{accountId}`. For more information on
 // Organizations and Accounts, refer to our
 // [Synqly Overview](https://docs.synqly.com/docs/synqly-overview).
-func (c *Client) Patch(ctx context.Context, accountId management.AccountId, request []map[string]interface{}) (*management.PatchAccountResponse, error) {
+func (c *Client) Patch(
+	ctx context.Context,
+	accountId management.AccountId,
+	request []map[string]interface{},
+	opts ...option.RequestOption,
+) (*management.PatchAccountResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"v1/accounts/%v", accountId)
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
+	endpointURL := core.EncodeURL(baseURL+"/v1/accounts/%v", accountId)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -547,30 +599,43 @@ func (c *Client) Patch(ctx context.Context, accountId management.AccountId, requ
 	}
 
 	var response *management.PatchAccountResponse
-	if err := core.DoRequest(
+	if err := c.caller.Call(
 		ctx,
-		c.httpClient,
-		endpointURL,
-		http.MethodPatch,
-		request,
-		&response,
-		false,
-		c.header,
-		errorDecoder,
+		&core.CallParams{
+			URL:          endpointURL,
+			Method:       http.MethodPatch,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
+			Request:      request,
+			Response:     &response,
+			ErrorDecoder: errorDecoder,
+		},
 	); err != nil {
-		return response, err
+		return nil, err
 	}
 	return response, nil
 }
 
 // Deletes the `Account` matching `{accountId}`. Deleting an `Account` also deletea
 // all `Tokens` and `Credentials` belonging to the `Account`.
-func (c *Client) Delete(ctx context.Context, accountId management.AccountId) error {
+func (c *Client) Delete(
+	ctx context.Context,
+	accountId management.AccountId,
+	opts ...option.RequestOption,
+) error {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"v1/accounts/%v", accountId)
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
+	endpointURL := core.EncodeURL(baseURL+"/v1/accounts/%v", accountId)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -647,16 +712,16 @@ func (c *Client) Delete(ctx context.Context, accountId management.AccountId) err
 		return apiError
 	}
 
-	if err := core.DoRequest(
+	if err := c.caller.Call(
 		ctx,
-		c.httpClient,
-		endpointURL,
-		http.MethodDelete,
-		nil,
-		nil,
-		false,
-		c.header,
-		errorDecoder,
+		&core.CallParams{
+			URL:          endpointURL,
+			Method:       http.MethodDelete,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
+			ErrorDecoder: errorDecoder,
+		},
 	); err != nil {
 		return err
 	}

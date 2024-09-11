@@ -3,62 +3,342 @@
 package management
 
 import (
+	json "encoding/json"
+	fmt "fmt"
+	core "github.com/synqly/go-sdk/client/management/core"
 	time "time"
 )
 
 type ListCredentialsRequest struct {
 	// Number of `Credential` objects to return in this page. Defaults to 100.
-	Limit *int `json:"-"`
+	Limit *int `json:"-" url:"limit,omitempty"`
 	// Return `Credential` objects starting after this `name`.
-	StartAfter *string `json:"-"`
+	StartAfter *string `json:"-" url:"start_after,omitempty"`
 	// Select a field to order the results by. Defaults to `name`. To control the direction of the sorting, append
 	// `[asc]` or `[desc]` to the field name. For example, `name[desc]` will sort the results by `name` in descending order.
 	// The ordering defaults to `asc` if not specified. May be used multiple times to order by multiple fields, and the
 	// ordering is applied in the order the fields are specified.
-	Order []*string `json:"-"`
+	Order []*string `json:"-" url:"order,omitempty"`
 	// Filter results by this query. For more information on filtering, refer to our Filtering Guide. Defaults to no filter.
 	// If used more than once, the queries are ANDed together.
-	Filter []*string `json:"-"`
+	Filter []*string `json:"-" url:"filter,omitempty"`
 }
 
 type CreateCredentialRequest struct {
 	// Unique short name for this Credential (lowercase [a-z0-9_-], can be used in URLs). Also used for case insensitive duplicate name detection and default sort order. Defaults to CredentialId if both name and fullname are not specified.
-	Name *string `json:"name,omitempty"`
+	Name *string `json:"name,omitempty" url:"name,omitempty"`
 	// Human friendly display name for this Credential, will auto-generate 'name' field (if 'name' is not specified). Defaults to the same value as the 'name' field if not specified.
-	Fullname *string `json:"fullname,omitempty"`
+	Fullname *string `json:"fullname,omitempty" url:"fullname,omitempty"`
 	// Credential configuration
-	Config *CredentialConfig `json:"config,omitempty"`
+	Config *CredentialConfig `json:"config,omitempty" url:"config,omitempty"`
 	// One of `account` or `integration_point`; defaults to `account` if not specified.
-	OwnerType *OwnerType `json:"owner_type,omitempty"`
+	OwnerType *OwnerType `json:"owner_type,omitempty" url:"owner_type,omitempty"`
 	// Time when this credential expires and can no longer be used again.
-	Expires *time.Time `json:"expires,omitempty"`
+	Expires *time.Time `json:"expires,omitempty" url:"expires,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *CreateCredentialRequest) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
+}
+
+func (c *CreateCredentialRequest) UnmarshalJSON(data []byte) error {
+	type embed CreateCredentialRequest
+	var unmarshaler = struct {
+		embed
+		Expires *core.DateTime `json:"expires,omitempty"`
+	}{
+		embed: embed(*c),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*c = CreateCredentialRequest(unmarshaler.embed)
+	c.Expires = unmarshaler.Expires.TimePtr()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
+	c._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (c *CreateCredentialRequest) MarshalJSON() ([]byte, error) {
+	type embed CreateCredentialRequest
+	var marshaler = struct {
+		embed
+		Expires *core.DateTime `json:"expires,omitempty"`
+	}{
+		embed:   embed(*c),
+		Expires: core.NewOptionalDateTime(c.Expires),
+	}
+	return json.Marshal(marshaler)
+}
+
+func (c *CreateCredentialRequest) String() string {
+	if len(c._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
 }
 
 type CreateCredentialResponse struct {
-	Result *CredentialResponse `json:"result,omitempty"`
+	Result *CredentialResponse `json:"result" url:"result"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *CreateCredentialResponse) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
+}
+
+func (c *CreateCredentialResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler CreateCredentialResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = CreateCredentialResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
+	c._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (c *CreateCredentialResponse) String() string {
+	if len(c._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
 }
 
 // Unique identifier for this Credential
 type CredentialId = Id
 
 type GetCredentialResponse struct {
-	Result *CredentialResponse `json:"result,omitempty"`
+	Result *CredentialResponse `json:"result" url:"result"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (g *GetCredentialResponse) GetExtraProperties() map[string]interface{} {
+	return g.extraProperties
+}
+
+func (g *GetCredentialResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler GetCredentialResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*g = GetCredentialResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	if err != nil {
+		return err
+	}
+	g.extraProperties = extraProperties
+
+	g._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (g *GetCredentialResponse) String() string {
+	if len(g._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(g._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(g); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", g)
 }
 
 type ListCredentialsResponse struct {
-	Result []*CredentialResponse `json:"result,omitempty"`
+	Result []*CredentialResponse `json:"result" url:"result"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (l *ListCredentialsResponse) GetExtraProperties() map[string]interface{} {
+	return l.extraProperties
+}
+
+func (l *ListCredentialsResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler ListCredentialsResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*l = ListCredentialsResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *l)
+	if err != nil {
+		return err
+	}
+	l.extraProperties = extraProperties
+
+	l._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (l *ListCredentialsResponse) String() string {
+	if len(l._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(l._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(l); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", l)
 }
 
 type LookupCredentialResponse struct {
-	Result *CredentialResponse `json:"result,omitempty"`
+	Result *CredentialResponse `json:"result" url:"result"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (l *LookupCredentialResponse) GetExtraProperties() map[string]interface{} {
+	return l.extraProperties
+}
+
+func (l *LookupCredentialResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler LookupCredentialResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*l = LookupCredentialResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *l)
+	if err != nil {
+		return err
+	}
+	l.extraProperties = extraProperties
+
+	l._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (l *LookupCredentialResponse) String() string {
+	if len(l._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(l._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(l); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", l)
 }
 
 type PatchCredentialResponse struct {
-	Result *CredentialResponse `json:"result,omitempty"`
+	Result *CredentialResponse `json:"result" url:"result"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (p *PatchCredentialResponse) GetExtraProperties() map[string]interface{} {
+	return p.extraProperties
+}
+
+func (p *PatchCredentialResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler PatchCredentialResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*p = PatchCredentialResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *p)
+	if err != nil {
+		return err
+	}
+	p.extraProperties = extraProperties
+
+	p._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (p *PatchCredentialResponse) String() string {
+	if len(p._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(p._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(p); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", p)
 }
 
 type UpdateCredentialRequest = *Credential
 
 type UpdateCredentialResponse struct {
-	Result *CredentialResponse `json:"result,omitempty"`
+	Result *CredentialResponse `json:"result" url:"result"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (u *UpdateCredentialResponse) GetExtraProperties() map[string]interface{} {
+	return u.extraProperties
+}
+
+func (u *UpdateCredentialResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler UpdateCredentialResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*u = UpdateCredentialResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *u)
+	if err != nil {
+		return err
+	}
+	u.extraProperties = extraProperties
+
+	u._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (u *UpdateCredentialResponse) String() string {
+	if len(u._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(u._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(u); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", u)
 }

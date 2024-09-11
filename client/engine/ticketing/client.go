@@ -7,40 +7,51 @@ import (
 	context "context"
 	json "encoding/json"
 	errors "errors"
-	fmt "fmt"
 	engine "github.com/synqly/go-sdk/client/engine"
 	core "github.com/synqly/go-sdk/client/engine/core"
+	option "github.com/synqly/go-sdk/client/engine/option"
 	io "io"
 	http "net/http"
-	url "net/url"
 )
 
 type Client struct {
-	baseURL    string
-	httpClient core.HTTPClient
-	header     http.Header
+	baseURL string
+	caller  *core.Caller
+	header  http.Header
 }
 
-func NewClient(opts ...core.ClientOption) *Client {
-	options := core.NewClientOptions()
-	for _, opt := range opts {
-		opt(options)
-	}
+func NewClient(opts ...option.RequestOption) *Client {
+	options := core.NewRequestOptions(opts...)
 	return &Client{
-		baseURL:    options.BaseURL,
-		httpClient: options.HTTPClient,
-		header:     options.ToHeader(),
+		baseURL: options.BaseURL,
+		caller: core.NewCaller(
+			&core.CallerParams{
+				Client:      options.HTTPClient,
+				MaxAttempts: options.MaxAttempts,
+			},
+		),
+		header: options.ToHeader(),
 	}
 }
 
 // List all remote fields for all Projects in a ticketing integration. The response will include a list of
 // fields for each issue type in the ticketing provider.
-func (c *Client) ListRemoteFields(ctx context.Context) (*engine.ListRemoteFieldsResponse, error) {
+func (c *Client) ListRemoteFields(
+	ctx context.Context,
+	opts ...option.RequestOption,
+) (*engine.ListRemoteFieldsResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
-	endpointURL := baseURL + "/" + "v1/ticketing/remote-fields"
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
+	endpointURL := baseURL + "/v1/ticketing/remote-fields"
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -146,30 +157,41 @@ func (c *Client) ListRemoteFields(ctx context.Context) (*engine.ListRemoteFields
 	}
 
 	var response *engine.ListRemoteFieldsResponse
-	if err := core.DoRequest(
+	if err := c.caller.Call(
 		ctx,
-		c.httpClient,
-		endpointURL,
-		http.MethodGet,
-		nil,
-		&response,
-		false,
-		c.header,
-		errorDecoder,
+		&core.CallParams{
+			URL:          endpointURL,
+			Method:       http.MethodGet,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
+			Response:     &response,
+			ErrorDecoder: errorDecoder,
+		},
 	); err != nil {
-		return response, err
+		return nil, err
 	}
 	return response, nil
 }
 
 // Returns a list of `Projects` from the token-linked `Integration`.
 // Tickets must be created and retrieved within the context of a specific Project.
-func (c *Client) ListProjects(ctx context.Context) (*engine.ListProjectsResponse, error) {
+func (c *Client) ListProjects(
+	ctx context.Context,
+	opts ...option.RequestOption,
+) (*engine.ListProjectsResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
-	endpointURL := baseURL + "/" + "v1/ticketing/projects"
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
+	endpointURL := baseURL + "/v1/ticketing/projects"
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -275,46 +297,49 @@ func (c *Client) ListProjects(ctx context.Context) (*engine.ListProjectsResponse
 	}
 
 	var response *engine.ListProjectsResponse
-	if err := core.DoRequest(
+	if err := c.caller.Call(
 		ctx,
-		c.httpClient,
-		endpointURL,
-		http.MethodGet,
-		nil,
-		&response,
-		false,
-		c.header,
-		errorDecoder,
+		&core.CallParams{
+			URL:          endpointURL,
+			Method:       http.MethodGet,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
+			Response:     &response,
+			ErrorDecoder: errorDecoder,
+		},
 	); err != nil {
-		return response, err
+		return nil, err
 	}
 	return response, nil
 }
 
 // Returns a list of `Ticket` objects from the token-linked `Integration`.
-func (c *Client) QueryTickets(ctx context.Context, request *engine.QueryTicketsRequest) (*engine.QueryTicketsResponse, error) {
+func (c *Client) QueryTickets(
+	ctx context.Context,
+	request *engine.QueryTicketsRequest,
+	opts ...option.RequestOption,
+) (*engine.QueryTicketsResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
-	endpointURL := baseURL + "/" + "v1/ticketing/tickets"
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
+	endpointURL := baseURL + "/v1/ticketing/tickets"
 
-	queryParams := make(url.Values)
-	if request.Cursor != nil {
-		queryParams.Add("cursor", fmt.Sprintf("%v", *request.Cursor))
-	}
-	if request.Limit != nil {
-		queryParams.Add("limit", fmt.Sprintf("%v", *request.Limit))
-	}
-	for _, value := range request.Order {
-		queryParams.Add("order", fmt.Sprintf("%v", *value))
-	}
-	for _, value := range request.Filter {
-		queryParams.Add("filter", fmt.Sprintf("%v", *value))
+	queryParams, err := core.QueryValues(request)
+	if err != nil {
+		return nil, err
 	}
 	if len(queryParams) > 0 {
 		endpointURL += "?" + queryParams.Encode()
 	}
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -420,29 +445,41 @@ func (c *Client) QueryTickets(ctx context.Context, request *engine.QueryTicketsR
 	}
 
 	var response *engine.QueryTicketsResponse
-	if err := core.DoRequest(
+	if err := c.caller.Call(
 		ctx,
-		c.httpClient,
-		endpointURL,
-		http.MethodGet,
-		request,
-		&response,
-		false,
-		c.header,
-		errorDecoder,
+		&core.CallParams{
+			URL:          endpointURL,
+			Method:       http.MethodGet,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
+			Response:     &response,
+			ErrorDecoder: errorDecoder,
+		},
 	); err != nil {
-		return response, err
+		return nil, err
 	}
 	return response, nil
 }
 
 // Returns a `Ticket` object matching `{ticketId}` from the token-linked `Integration`.
-func (c *Client) GetTicket(ctx context.Context, ticketId engine.TicketId) (*engine.GetTicketResponse, error) {
+func (c *Client) GetTicket(
+	ctx context.Context,
+	ticketId engine.TicketId,
+	opts ...option.RequestOption,
+) (*engine.GetTicketResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"v1/ticketing/tickets/%v", ticketId)
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
+	endpointURL := core.EncodeURL(baseURL+"/v1/ticketing/tickets/%v", ticketId)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -548,29 +585,41 @@ func (c *Client) GetTicket(ctx context.Context, ticketId engine.TicketId) (*engi
 	}
 
 	var response *engine.GetTicketResponse
-	if err := core.DoRequest(
+	if err := c.caller.Call(
 		ctx,
-		c.httpClient,
-		endpointURL,
-		http.MethodGet,
-		nil,
-		&response,
-		false,
-		c.header,
-		errorDecoder,
+		&core.CallParams{
+			URL:          endpointURL,
+			Method:       http.MethodGet,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
+			Response:     &response,
+			ErrorDecoder: errorDecoder,
+		},
 	); err != nil {
-		return response, err
+		return nil, err
 	}
 	return response, nil
 }
 
 // Creates a `Ticket` object in the token-linked Integration.
-func (c *Client) CreateTicket(ctx context.Context, request *engine.CreateTicketRequest) (*engine.CreateTicketResponse, error) {
+func (c *Client) CreateTicket(
+	ctx context.Context,
+	request *engine.CreateTicketRequest,
+	opts ...option.RequestOption,
+) (*engine.CreateTicketResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
-	endpointURL := baseURL + "/" + "v1/ticketing/tickets"
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
+	endpointURL := baseURL + "/v1/ticketing/tickets"
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -676,29 +725,43 @@ func (c *Client) CreateTicket(ctx context.Context, request *engine.CreateTicketR
 	}
 
 	var response *engine.CreateTicketResponse
-	if err := core.DoRequest(
+	if err := c.caller.Call(
 		ctx,
-		c.httpClient,
-		endpointURL,
-		http.MethodPost,
-		request,
-		&response,
-		false,
-		c.header,
-		errorDecoder,
+		&core.CallParams{
+			URL:          endpointURL,
+			Method:       http.MethodPost,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
+			Request:      request,
+			Response:     &response,
+			ErrorDecoder: errorDecoder,
+		},
 	); err != nil {
-		return response, err
+		return nil, err
 	}
 	return response, nil
 }
 
 // Updates the `Ticket` object matching `{ticketId}` in the token-linked `Integration`.
-func (c *Client) PatchTicket(ctx context.Context, ticketId engine.TicketId, request []map[string]interface{}) (*engine.PatchTicketResponse, error) {
+func (c *Client) PatchTicket(
+	ctx context.Context,
+	ticketId engine.TicketId,
+	request []map[string]interface{},
+	opts ...option.RequestOption,
+) (*engine.PatchTicketResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"v1/ticketing/tickets/%v", ticketId)
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
+	endpointURL := core.EncodeURL(baseURL+"/v1/ticketing/tickets/%v", ticketId)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -804,29 +867,43 @@ func (c *Client) PatchTicket(ctx context.Context, ticketId engine.TicketId, requ
 	}
 
 	var response *engine.PatchTicketResponse
-	if err := core.DoRequest(
+	if err := c.caller.Call(
 		ctx,
-		c.httpClient,
-		endpointURL,
-		http.MethodPatch,
-		request,
-		&response,
-		false,
-		c.header,
-		errorDecoder,
+		&core.CallParams{
+			URL:          endpointURL,
+			Method:       http.MethodPatch,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
+			Request:      request,
+			Response:     &response,
+			ErrorDecoder: errorDecoder,
+		},
 	); err != nil {
-		return response, err
+		return nil, err
 	}
 	return response, nil
 }
 
 // [beta: currently supported by Jira] Creates an `Attachment` for the ticket with id `{ticketId}` in the token-linked `Integration`.
-func (c *Client) CreateAttachment(ctx context.Context, ticketId engine.TicketId, request *engine.CreateAttachmentRequest) (*engine.CreateAttachmentResponse, error) {
+func (c *Client) CreateAttachment(
+	ctx context.Context,
+	ticketId engine.TicketId,
+	request *engine.CreateAttachmentRequest,
+	opts ...option.RequestOption,
+) (*engine.CreateAttachmentResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"v1/ticketing/attachments/%v", ticketId)
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
+	endpointURL := core.EncodeURL(baseURL+"/v1/ticketing/attachments/%v", ticketId)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -932,29 +1009,42 @@ func (c *Client) CreateAttachment(ctx context.Context, ticketId engine.TicketId,
 	}
 
 	var response *engine.CreateAttachmentResponse
-	if err := core.DoRequest(
+	if err := c.caller.Call(
 		ctx,
-		c.httpClient,
-		endpointURL,
-		http.MethodPost,
-		request,
-		&response,
-		false,
-		c.header,
-		errorDecoder,
+		&core.CallParams{
+			URL:          endpointURL,
+			Method:       http.MethodPost,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
+			Request:      request,
+			Response:     &response,
+			ErrorDecoder: errorDecoder,
+		},
 	); err != nil {
-		return response, err
+		return nil, err
 	}
 	return response, nil
 }
 
 // [beta: currently supported by Jira] Returns metadata for all Attachments for a `Ticket` object matching `{ticketId}` from the token-linked `Integration`.
-func (c *Client) ListAttachmentsMetadata(ctx context.Context, ticketId engine.TicketId) (*engine.ListAttachmentsMetadataResponse, error) {
+func (c *Client) ListAttachmentsMetadata(
+	ctx context.Context,
+	ticketId engine.TicketId,
+	opts ...option.RequestOption,
+) (*engine.ListAttachmentsMetadataResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"v1/ticketing/attachments/%v", ticketId)
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
+	endpointURL := core.EncodeURL(baseURL+"/v1/ticketing/attachments/%v", ticketId)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -1060,29 +1150,46 @@ func (c *Client) ListAttachmentsMetadata(ctx context.Context, ticketId engine.Ti
 	}
 
 	var response *engine.ListAttachmentsMetadataResponse
-	if err := core.DoRequest(
+	if err := c.caller.Call(
 		ctx,
-		c.httpClient,
-		endpointURL,
-		http.MethodGet,
-		nil,
-		&response,
-		false,
-		c.header,
-		errorDecoder,
+		&core.CallParams{
+			URL:          endpointURL,
+			Method:       http.MethodGet,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
+			Response:     &response,
+			ErrorDecoder: errorDecoder,
+		},
 	); err != nil {
-		return response, err
+		return nil, err
 	}
 	return response, nil
 }
 
 // [beta: currently supported by Jira] Downloads the Attachment object matching {attachmentId} for the Ticket matching {tickedId} from the token-linked Integration.
-func (c *Client) DownloadAttachment(ctx context.Context, ticketId engine.TicketId, attachmentId engine.AttachmentId) (*engine.DownloadAttachmentResponse, error) {
+func (c *Client) DownloadAttachment(
+	ctx context.Context,
+	ticketId engine.TicketId,
+	attachmentId engine.AttachmentId,
+	opts ...option.RequestOption,
+) (*engine.DownloadAttachmentResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"v1/ticketing/attachments/%v/%v/download", ticketId, attachmentId)
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
+	endpointURL := core.EncodeURL(
+		baseURL+"/v1/ticketing/attachments/%v/%v/download",
+		ticketId,
+		attachmentId,
+	)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -1188,29 +1295,46 @@ func (c *Client) DownloadAttachment(ctx context.Context, ticketId engine.TicketI
 	}
 
 	var response *engine.DownloadAttachmentResponse
-	if err := core.DoRequest(
+	if err := c.caller.Call(
 		ctx,
-		c.httpClient,
-		endpointURL,
-		http.MethodGet,
-		nil,
-		&response,
-		false,
-		c.header,
-		errorDecoder,
+		&core.CallParams{
+			URL:          endpointURL,
+			Method:       http.MethodGet,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
+			Response:     &response,
+			ErrorDecoder: errorDecoder,
+		},
 	); err != nil {
-		return response, err
+		return nil, err
 	}
 	return response, nil
 }
 
 // [beta: currently supported by Jira] Deletes the Attachment object matching {attachmentId} for the Ticket matching {tickedId} from the token-linked Integration.
-func (c *Client) DeleteAttachment(ctx context.Context, ticketId engine.TicketId, attachmentId engine.AttachmentId) error {
+func (c *Client) DeleteAttachment(
+	ctx context.Context,
+	ticketId engine.TicketId,
+	attachmentId engine.AttachmentId,
+	opts ...option.RequestOption,
+) error {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"v1/ticketing/attachments/%v/%v", ticketId, attachmentId)
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
+	endpointURL := core.EncodeURL(
+		baseURL+"/v1/ticketing/attachments/%v/%v",
+		ticketId,
+		attachmentId,
+	)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -1315,16 +1439,16 @@ func (c *Client) DeleteAttachment(ctx context.Context, ticketId engine.TicketId,
 		return apiError
 	}
 
-	if err := core.DoRequest(
+	if err := c.caller.Call(
 		ctx,
-		c.httpClient,
-		endpointURL,
-		http.MethodDelete,
-		nil,
-		nil,
-		false,
-		c.header,
-		errorDecoder,
+		&core.CallParams{
+			URL:          endpointURL,
+			Method:       http.MethodDelete,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
+			ErrorDecoder: errorDecoder,
+		},
 	); err != nil {
 		return err
 	}
@@ -1332,12 +1456,23 @@ func (c *Client) DeleteAttachment(ctx context.Context, ticketId engine.TicketId,
 }
 
 // Lists all comments for the ticket matching {ticketId} from the token-linked Integration.
-func (c *Client) ListComments(ctx context.Context, ticketId engine.TicketId) (*engine.ListCommentsResponse, error) {
+func (c *Client) ListComments(
+	ctx context.Context,
+	ticketId engine.TicketId,
+	opts ...option.RequestOption,
+) (*engine.ListCommentsResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"v1/ticketing/tickets/%v/comments", ticketId)
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
+	endpointURL := core.EncodeURL(baseURL+"/v1/ticketing/tickets/%v/comments", ticketId)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -1443,29 +1578,42 @@ func (c *Client) ListComments(ctx context.Context, ticketId engine.TicketId) (*e
 	}
 
 	var response *engine.ListCommentsResponse
-	if err := core.DoRequest(
+	if err := c.caller.Call(
 		ctx,
-		c.httpClient,
-		endpointURL,
-		http.MethodGet,
-		nil,
-		&response,
-		false,
-		c.header,
-		errorDecoder,
+		&core.CallParams{
+			URL:          endpointURL,
+			Method:       http.MethodGet,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
+			Response:     &response,
+			ErrorDecoder: errorDecoder,
+		},
 	); err != nil {
-		return response, err
+		return nil, err
 	}
 	return response, nil
 }
 
 // Creates a comment on the ticket matching {ticketId} from the token-linked Integration.
-func (c *Client) CreateComment(ctx context.Context, ticketId engine.TicketId, request *engine.CreateCommentRequest) (*engine.CreateCommentResponse, error) {
+func (c *Client) CreateComment(
+	ctx context.Context,
+	ticketId engine.TicketId,
+	request *engine.CreateCommentRequest,
+	opts ...option.RequestOption,
+) (*engine.CreateCommentResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"v1/ticketing/tickets/%v/comments", ticketId)
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
+	endpointURL := core.EncodeURL(baseURL+"/v1/ticketing/tickets/%v/comments", ticketId)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -1571,29 +1719,47 @@ func (c *Client) CreateComment(ctx context.Context, ticketId engine.TicketId, re
 	}
 
 	var response *engine.CreateCommentResponse
-	if err := core.DoRequest(
+	if err := c.caller.Call(
 		ctx,
-		c.httpClient,
-		endpointURL,
-		http.MethodPost,
-		request,
-		&response,
-		false,
-		c.header,
-		errorDecoder,
+		&core.CallParams{
+			URL:          endpointURL,
+			Method:       http.MethodPost,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
+			Request:      request,
+			Response:     &response,
+			ErrorDecoder: errorDecoder,
+		},
 	); err != nil {
-		return response, err
+		return nil, err
 	}
 	return response, nil
 }
 
 // Deletes the comment matching {commentId} form the ticket matching {ticketId} from the token-linked Integration.
-func (c *Client) DeleteComment(ctx context.Context, ticketId engine.TicketId, commentId engine.CommentId) error {
+func (c *Client) DeleteComment(
+	ctx context.Context,
+	ticketId engine.TicketId,
+	commentId engine.CommentId,
+	opts ...option.RequestOption,
+) error {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"v1/ticketing/tickets/%v/comments/%v", ticketId, commentId)
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
+	endpointURL := core.EncodeURL(
+		baseURL+"/v1/ticketing/tickets/%v/comments/%v",
+		ticketId,
+		commentId,
+	)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -1698,16 +1864,16 @@ func (c *Client) DeleteComment(ctx context.Context, ticketId engine.TicketId, co
 		return apiError
 	}
 
-	if err := core.DoRequest(
+	if err := c.caller.Call(
 		ctx,
-		c.httpClient,
-		endpointURL,
-		http.MethodDelete,
-		nil,
-		nil,
-		false,
-		c.header,
-		errorDecoder,
+		&core.CallParams{
+			URL:          endpointURL,
+			Method:       http.MethodDelete,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
+			ErrorDecoder: errorDecoder,
+		},
 	); err != nil {
 		return err
 	}

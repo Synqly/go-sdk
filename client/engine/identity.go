@@ -3,62 +3,176 @@
 package engine
 
 import (
+	json "encoding/json"
+	fmt "fmt"
+	core "github.com/synqly/go-sdk/client/engine/core"
 	latest "github.com/synqly/go-sdk/client/engine/ocsf/latest"
 )
 
 type QueryIdentityAuditLogRequest struct {
 	// Number of events to return. Defaults to 100.
-	Limit *int `json:"-"`
+	Limit *int `json:"-" url:"limit,omitempty"`
 	// Start search from cursor position.
-	Cursor *string `json:"-"`
+	Cursor *string `json:"-" url:"cursor,omitempty"`
 	// Select a field to order the results by. Defaults to `time`. To control the direction of the sorting, append
 	// `[asc]` or `[desc]` to the field name. For example, `time[asc]` will sort the results by `time` in ascending order.
 	// The ordering defaults to `asc` if not specified.
-	Order []*string `json:"-"`
+	Order []*string `json:"-" url:"order,omitempty"`
 	// Filter results by this query. For more information on filtering, refer to our Filtering Guide. Defaults to no filter.
 	// If used more than once, the queries are ANDed together.
-	Filter []*string `json:"-"`
+	Filter []*string `json:"-" url:"filter,omitempty"`
 }
 
 type QueryGroupRequest struct {
 	// Number of users to return. Defaults to 100.
-	Limit *int `json:"-"`
+	Limit *int `json:"-" url:"limit,omitempty"`
 	// Start search from cursor position.
-	Cursor *string `json:"-"`
+	Cursor *string `json:"-" url:"cursor,omitempty"`
 	// Select a field to order the results by. Defaults to `uid`. To control the direction of the sorting, append
 	// `[asc]` or `[desc]` to the field name. For example, `email_addr[asc]` will sort the results by `email_addr` in
 	// ascending order. The ordering defaults to `asc` if not specified.
-	Order []*string `json:"-"`
+	Order []*string `json:"-" url:"order,omitempty"`
 	// Filter results by this query. For more information on filtering, refer to our Filtering Guide. Defaults to no filter.
 	// If used more than once, the queries are ANDed together.
-	Filter []*string `json:"-"`
+	Filter []*string `json:"-" url:"filter,omitempty"`
 }
 
 type QueryUserRequest struct {
 	// Number of users to return. Defaults to 100.
-	Limit *int `json:"-"`
+	Limit *int `json:"-" url:"limit,omitempty"`
 	// Start search from cursor position.
-	Cursor *string `json:"-"`
+	Cursor *string `json:"-" url:"cursor,omitempty"`
 	// Select a field to order the results by. Defaults to `uid`. To control the direction of the sorting, append
 	// `[asc]` or `[desc]` to the field name. For example, `email_addr[asc]` will sort the results by `email_addr` in
 	// ascending order. The ordering defaults to `asc` if not specified.
-	Order []*string `json:"-"`
+	Order []*string `json:"-" url:"order,omitempty"`
 	// Filter results by this query. For more information on filtering, refer to our Filtering Guide. Defaults to no filter.
 	// If used more than once, the queries are ANDed together.
-	Filter []*string `json:"-"`
+	Filter []*string `json:"-" url:"filter,omitempty"`
 }
 
 type GetGroupMembersResponse struct {
 	// List of users wrapped in the OCSF Entity Management event of type Read that are members in the group referenced by ID.
-	Result []latest.EntityManagement `json:"result,omitempty"`
+	Result []latest.EntityManagement `json:"result" url:"result"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (g *GetGroupMembersResponse) GetExtraProperties() map[string]interface{} {
+	return g.extraProperties
+}
+
+func (g *GetGroupMembersResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler GetGroupMembersResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*g = GetGroupMembersResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	if err != nil {
+		return err
+	}
+	g.extraProperties = extraProperties
+
+	g._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (g *GetGroupMembersResponse) String() string {
+	if len(g._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(g._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(g); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", g)
 }
 
 type GetGroupResponse struct {
-	Result latest.EntityManagement `json:"result,omitempty"`
+	Result latest.EntityManagement `json:"result" url:"result"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (g *GetGroupResponse) GetExtraProperties() map[string]interface{} {
+	return g.extraProperties
+}
+
+func (g *GetGroupResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler GetGroupResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*g = GetGroupResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	if err != nil {
+		return err
+	}
+	g.extraProperties = extraProperties
+
+	g._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (g *GetGroupResponse) String() string {
+	if len(g._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(g._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(g); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", g)
 }
 
 type GetUserResponse struct {
-	Result latest.EntityManagement `json:"result,omitempty"`
+	Result latest.EntityManagement `json:"result" url:"result"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (g *GetUserResponse) GetExtraProperties() map[string]interface{} {
+	return g.extraProperties
+}
+
+func (g *GetUserResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler GetUserResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*g = GetUserResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	if err != nil {
+		return err
+	}
+	g.extraProperties = extraProperties
+
+	g._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (g *GetUserResponse) String() string {
+	if len(g._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(g._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(g); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", g)
 }
 
 // The unique identifier for a group in the identity provider's system
@@ -66,23 +180,134 @@ type GroupId = string
 
 type QueryGroupsResponse struct {
 	// List groups wrapped in the OCSF Entity Management event of type Read.
-	Result []latest.EntityManagement `json:"result,omitempty"`
+	Result []latest.EntityManagement `json:"result" url:"result"`
 	// Cursor to use to retrieve the next page of results
-	Cursor string `json:"cursor"`
+	Cursor string `json:"cursor" url:"cursor"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (q *QueryGroupsResponse) GetExtraProperties() map[string]interface{} {
+	return q.extraProperties
+}
+
+func (q *QueryGroupsResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler QueryGroupsResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*q = QueryGroupsResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *q)
+	if err != nil {
+		return err
+	}
+	q.extraProperties = extraProperties
+
+	q._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (q *QueryGroupsResponse) String() string {
+	if len(q._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(q._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(q); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", q)
 }
 
 type QueryIdentityAuditLogResponse struct {
 	// List of events from the audit log. Each event will be one of the OCSF Types Account Change, Authentication, or Group Management.
-	Result []*Event `json:"result,omitempty"`
+	Result []*Event `json:"result" url:"result"`
 	// Cursor to use to retrieve the next page of results
-	Cursor string `json:"cursor"`
+	Cursor string `json:"cursor" url:"cursor"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (q *QueryIdentityAuditLogResponse) GetExtraProperties() map[string]interface{} {
+	return q.extraProperties
+}
+
+func (q *QueryIdentityAuditLogResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler QueryIdentityAuditLogResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*q = QueryIdentityAuditLogResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *q)
+	if err != nil {
+		return err
+	}
+	q.extraProperties = extraProperties
+
+	q._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (q *QueryIdentityAuditLogResponse) String() string {
+	if len(q._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(q._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(q); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", q)
 }
 
 type QueryUsersResponse struct {
 	// List users wrapped in the OCSF Entity Management event of type Read.
-	Result []latest.EntityManagement `json:"result,omitempty"`
+	Result []latest.EntityManagement `json:"result" url:"result"`
 	// Cursor to use to retrieve the next page of results
-	Cursor string `json:"cursor"`
+	Cursor string `json:"cursor" url:"cursor"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (q *QueryUsersResponse) GetExtraProperties() map[string]interface{} {
+	return q.extraProperties
+}
+
+func (q *QueryUsersResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler QueryUsersResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*q = QueryUsersResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *q)
+	if err != nil {
+		return err
+	}
+	q.extraProperties = extraProperties
+
+	q._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (q *QueryUsersResponse) String() string {
+	if len(q._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(q._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(q); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", q)
 }
 
 // The unique identifier for a user in the identity provider's system

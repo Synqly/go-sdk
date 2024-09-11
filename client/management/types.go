@@ -5,49 +5,201 @@ package management
 import (
 	json "encoding/json"
 	fmt "fmt"
+	core "github.com/synqly/go-sdk/client/management/core"
 	time "time"
 )
 
 type Account struct {
 	// Human-readable name for this resource
-	Name string `json:"name"`
+	Name string `json:"name" url:"name"`
 	// Time object was originally created
-	CreatedAt time.Time `json:"created_at"`
+	CreatedAt time.Time `json:"created_at" url:"created_at"`
 	// Last time object was updated
-	UpdatedAt time.Time `json:"updated_at"`
-	Id        AccountId `json:"id,omitempty"`
+	UpdatedAt time.Time `json:"updated_at" url:"updated_at"`
+	Id        AccountId `json:"id" url:"id"`
 	// Human friendly display name for this account.
-	Fullname string `json:"fullname"`
+	Fullname string `json:"fullname" url:"fullname"`
 	// Organization that manages this Account.
-	OrganizationId OrganizationId `json:"organization_id,omitempty"`
+	OrganizationId OrganizationId `json:"organization_id" url:"organization_id"`
 	// Environment this account runs in.
-	Environment Environment `json:"environment,omitempty"`
+	Environment Environment `json:"environment" url:"environment"`
 	// User defined labels that apply to this account. These values can be used in role bindings to limit the scope of permissions.
-	Labels []string `json:"labels,omitempty"`
+	Labels []string `json:"labels,omitempty" url:"labels,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (a *Account) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
+}
+
+func (a *Account) UnmarshalJSON(data []byte) error {
+	type embed Account
+	var unmarshaler = struct {
+		embed
+		CreatedAt *core.DateTime `json:"created_at"`
+		UpdatedAt *core.DateTime `json:"updated_at"`
+	}{
+		embed: embed(*a),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*a = Account(unmarshaler.embed)
+	a.CreatedAt = unmarshaler.CreatedAt.Time()
+	a.UpdatedAt = unmarshaler.UpdatedAt.Time()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+
+	a._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (a *Account) MarshalJSON() ([]byte, error) {
+	type embed Account
+	var marshaler = struct {
+		embed
+		CreatedAt *core.DateTime `json:"created_at"`
+		UpdatedAt *core.DateTime `json:"updated_at"`
+	}{
+		embed:     embed(*a),
+		CreatedAt: core.NewDateTime(a.CreatedAt),
+		UpdatedAt: core.NewDateTime(a.UpdatedAt),
+	}
+	return json.Marshal(marshaler)
+}
+
+func (a *Account) String() string {
+	if len(a._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(a); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", a)
 }
 
 // Unique identifier for this Account
 type AccountId = Id
 
 type CreateAccountResponseResult struct {
-	Account *Account `json:"account,omitempty"`
+	Account *Account `json:"account" url:"account"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *CreateAccountResponseResult) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
+}
+
+func (c *CreateAccountResponseResult) UnmarshalJSON(data []byte) error {
+	type unmarshaler CreateAccountResponseResult
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = CreateAccountResponseResult(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
+	c._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (c *CreateAccountResponseResult) String() string {
+	if len(c._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
 }
 
 type Audit struct {
-	Environment string `json:"environment"`
+	Environment string `json:"environment" url:"environment"`
 	// Time when the API request occurred.
-	CreatedAt     time.Time      `json:"created_at"`
-	RemoteAddr    string         `json:"remote_addr"`
-	UserAgent     string         `json:"user_agent"`
-	Method        HttpMethod     `json:"method,omitempty"`
-	Path          string         `json:"path"`
-	Code          string         `json:"code"`
-	Body          interface{}    `json:"body,omitempty"`
-	Response      *string        `json:"response,omitempty"`
-	Status        *string        `json:"status,omitempty"`
-	MemberId      *MemberId      `json:"member_id,omitempty"`
-	AccountId     *AccountId     `json:"account_id,omitempty"`
-	IntegrationId *IntegrationId `json:"integration_id,omitempty"`
+	CreatedAt     time.Time      `json:"created_at" url:"created_at"`
+	RemoteAddr    string         `json:"remote_addr" url:"remote_addr"`
+	UserAgent     string         `json:"user_agent" url:"user_agent"`
+	Method        HttpMethod     `json:"method" url:"method"`
+	Path          string         `json:"path" url:"path"`
+	Code          string         `json:"code" url:"code"`
+	Body          interface{}    `json:"body,omitempty" url:"body,omitempty"`
+	Response      *string        `json:"response,omitempty" url:"response,omitempty"`
+	Status        *string        `json:"status,omitempty" url:"status,omitempty"`
+	MemberId      *MemberId      `json:"member_id,omitempty" url:"member_id,omitempty"`
+	AccountId     *AccountId     `json:"account_id,omitempty" url:"account_id,omitempty"`
+	IntegrationId *IntegrationId `json:"integration_id,omitempty" url:"integration_id,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (a *Audit) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
+}
+
+func (a *Audit) UnmarshalJSON(data []byte) error {
+	type embed Audit
+	var unmarshaler = struct {
+		embed
+		CreatedAt *core.DateTime `json:"created_at"`
+	}{
+		embed: embed(*a),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*a = Audit(unmarshaler.embed)
+	a.CreatedAt = unmarshaler.CreatedAt.Time()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+
+	a._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (a *Audit) MarshalJSON() ([]byte, error) {
+	type embed Audit
+	var marshaler = struct {
+		embed
+		CreatedAt *core.DateTime `json:"created_at"`
+	}{
+		embed:     embed(*a),
+		CreatedAt: core.NewDateTime(a.CreatedAt),
+	}
+	return json.Marshal(marshaler)
+}
+
+func (a *Audit) String() string {
+	if len(a._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(a); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", a)
 }
 
 type HttpMethod string
@@ -117,73 +269,317 @@ func (a AuthCode) Ptr() *AuthCode {
 
 type ChangePasswordResponseResult struct {
 	// Authentication result
-	AuthCode AuthCode `json:"auth_code,omitempty"`
+	AuthCode AuthCode `json:"auth_code" url:"auth_code"`
 	// Authentication failure message
-	AuthMsg *string `json:"auth_msg,omitempty"`
+	AuthMsg *string `json:"auth_msg,omitempty" url:"auth_msg,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *ChangePasswordResponseResult) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
+}
+
+func (c *ChangePasswordResponseResult) UnmarshalJSON(data []byte) error {
+	type unmarshaler ChangePasswordResponseResult
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = ChangePasswordResponseResult(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
+	c._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (c *ChangePasswordResponseResult) String() string {
+	if len(c._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
 }
 
 type LogonResponseResult struct {
 	// Authentication result
-	AuthCode AuthCode `json:"auth_code,omitempty"`
+	AuthCode AuthCode `json:"auth_code" url:"auth_code"`
 	// Authentication failure message
-	AuthMsg        *string       `json:"auth_msg,omitempty"`
-	RefreshTokenId TokenId       `json:"refresh_token_id,omitempty"`
-	Token          *TokenPair    `json:"token,omitempty"`
-	Organization   *Organization `json:"organization,omitempty"`
-	Member         *Member       `json:"member,omitempty"`
+	AuthMsg        *string       `json:"auth_msg,omitempty" url:"auth_msg,omitempty"`
+	RefreshTokenId TokenId       `json:"refresh_token_id" url:"refresh_token_id"`
+	Token          *TokenPair    `json:"token" url:"token"`
+	Organization   *Organization `json:"organization" url:"organization"`
+	Member         *Member       `json:"member" url:"member"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (l *LogonResponseResult) GetExtraProperties() map[string]interface{} {
+	return l.extraProperties
+}
+
+func (l *LogonResponseResult) UnmarshalJSON(data []byte) error {
+	type unmarshaler LogonResponseResult
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*l = LogonResponseResult(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *l)
+	if err != nil {
+		return err
+	}
+	l.extraProperties = extraProperties
+
+	l._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (l *LogonResponseResult) String() string {
+	if len(l._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(l._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(l); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", l)
 }
 
 // A Bridge Group represents a connection between the Synqly Saas or Embedded service and a Bridge Agent. See 'Synqly Bridge Agent' guide in Synqly docs for additional information.
 type BridgeGroup struct {
 	// Human-readable name for this resource
-	Name string `json:"name"`
+	Name string `json:"name" url:"name"`
 	// Time object was originally created
-	CreatedAt time.Time `json:"created_at"`
+	CreatedAt time.Time `json:"created_at" url:"created_at"`
 	// Last time object was updated
-	UpdatedAt time.Time     `json:"updated_at"`
-	Id        BridgeGroupId `json:"id,omitempty"`
+	UpdatedAt time.Time     `json:"updated_at" url:"updated_at"`
+	Id        BridgeGroupId `json:"id" url:"id"`
 	// Full name of bridge
-	Fullname string `json:"fullname"`
+	Fullname string `json:"fullname" url:"fullname"`
 	// Description of the resources included in the bridge and permissions granted on those resources. Includes details of when to use this bridge along with the intended personas.
-	Description *string `json:"description,omitempty"`
+	Description *string `json:"description,omitempty" url:"description,omitempty"`
 	// Labels applied to Bridges within the group. These labels can be used by integrations to select the groups of bridges capable of handling requests to the integration.
-	Labels []string `json:"labels,omitempty"`
+	Labels []string `json:"labels,omitempty" url:"labels,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (b *BridgeGroup) GetExtraProperties() map[string]interface{} {
+	return b.extraProperties
+}
+
+func (b *BridgeGroup) UnmarshalJSON(data []byte) error {
+	type embed BridgeGroup
+	var unmarshaler = struct {
+		embed
+		CreatedAt *core.DateTime `json:"created_at"`
+		UpdatedAt *core.DateTime `json:"updated_at"`
+	}{
+		embed: embed(*b),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*b = BridgeGroup(unmarshaler.embed)
+	b.CreatedAt = unmarshaler.CreatedAt.Time()
+	b.UpdatedAt = unmarshaler.UpdatedAt.Time()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *b)
+	if err != nil {
+		return err
+	}
+	b.extraProperties = extraProperties
+
+	b._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (b *BridgeGroup) MarshalJSON() ([]byte, error) {
+	type embed BridgeGroup
+	var marshaler = struct {
+		embed
+		CreatedAt *core.DateTime `json:"created_at"`
+		UpdatedAt *core.DateTime `json:"updated_at"`
+	}{
+		embed:     embed(*b),
+		CreatedAt: core.NewDateTime(b.CreatedAt),
+		UpdatedAt: core.NewDateTime(b.UpdatedAt),
+	}
+	return json.Marshal(marshaler)
+}
+
+func (b *BridgeGroup) String() string {
+	if len(b._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(b._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(b); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", b)
 }
 
 type CreateBridgeResponseResult struct {
-	Bridge *BridgeGroup `json:"bridge,omitempty"`
+	Bridge *BridgeGroup `json:"bridge" url:"bridge"`
 	// JWT for the Bridge Group to connect to Synqly. This must be saved in a file {bridgeId}.creds in the same directory as the bridge executable.
-	Credential string `json:"credential"`
+	Credential string `json:"credential" url:"credential"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *CreateBridgeResponseResult) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
+}
+
+func (c *CreateBridgeResponseResult) UnmarshalJSON(data []byte) error {
+	type unmarshaler CreateBridgeResponseResult
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = CreateBridgeResponseResult(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
+	c._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (c *CreateBridgeResponseResult) String() string {
+	if len(c._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
 }
 
 type CapabilitiesProviderConfig = map[string]interface{}
 
 // Provides details on an available Integration.
 type Category struct {
-	Category CategoryId `json:"category,omitempty"`
+	Category CategoryId `json:"category" url:"category"`
 	// Description of what this Integration does.
-	Description string `json:"description"`
+	Description string `json:"description" url:"description"`
 	// List of Providers that implement this Integration.
-	Providers []ProviderId `json:"providers,omitempty"`
+	Providers []ProviderId `json:"providers" url:"providers"`
 	// URL of the icon representing this type of Integration.
-	Picture *string `json:"picture,omitempty"`
+	Picture *string `json:"picture,omitempty" url:"picture,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *Category) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
+}
+
+func (c *Category) UnmarshalJSON(data []byte) error {
+	type unmarshaler Category
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = Category(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
+	c._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (c *Category) String() string {
+	if len(c._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
 }
 
 type Provider struct {
 	// Name of the Provider.
-	Name string `json:"name"`
+	Name string `json:"name" url:"name"`
 	// Description of what this Provider does.
-	Description string `json:"description"`
+	Description string `json:"description" url:"description"`
 	// Categories that this Provider implements.
-	Categories []CategoryId `json:"categories,omitempty"`
+	Categories []CategoryId `json:"categories" url:"categories"`
 	// URL of the icon representing this type of Provider.
-	Picture *string `json:"picture,omitempty"`
+	Picture *string `json:"picture,omitempty" url:"picture,omitempty"`
 	// Operations that this Provider implements.
-	SupportedOperations interface{} `json:"supported_operations,omitempty"`
+	SupportedOperations interface{} `json:"supported_operations" url:"supported_operations"`
 	// List of credential types that this Provider supports.
-	Credentials []ProviderCredentialConfig `json:"credentials,omitempty"`
+	Credentials []ProviderCredentialConfig `json:"credentials" url:"credentials"`
 	// Details on the specific configuration options for this Provider.
-	ProviderConfig map[string]CapabilitiesProviderConfig `json:"provider_config,omitempty"`
+	ProviderConfig map[string]CapabilitiesProviderConfig `json:"provider_config" url:"provider_config"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (p *Provider) GetExtraProperties() map[string]interface{} {
+	return p.extraProperties
+}
+
+func (p *Provider) UnmarshalJSON(data []byte) error {
+	type unmarshaler Provider
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*p = Provider(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *p)
+	if err != nil {
+		return err
+	}
+	p.extraProperties = extraProperties
+
+	p._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (p *Provider) String() string {
+	if len(p._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(p._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(p); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", p)
 }
 
 type ProviderCredentialConfig = map[string]interface{}
@@ -239,23 +635,156 @@ type ProviderId = string
 
 type Base struct {
 	// Human-readable name for this resource
-	Name string `json:"name"`
+	Name string `json:"name" url:"name"`
 	// Time object was originally created
-	CreatedAt time.Time `json:"created_at"`
+	CreatedAt time.Time `json:"created_at" url:"created_at"`
 	// Last time object was updated
-	UpdatedAt time.Time `json:"updated_at"`
+	UpdatedAt time.Time `json:"updated_at" url:"updated_at"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (b *Base) GetExtraProperties() map[string]interface{} {
+	return b.extraProperties
+}
+
+func (b *Base) UnmarshalJSON(data []byte) error {
+	type embed Base
+	var unmarshaler = struct {
+		embed
+		CreatedAt *core.DateTime `json:"created_at"`
+		UpdatedAt *core.DateTime `json:"updated_at"`
+	}{
+		embed: embed(*b),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*b = Base(unmarshaler.embed)
+	b.CreatedAt = unmarshaler.CreatedAt.Time()
+	b.UpdatedAt = unmarshaler.UpdatedAt.Time()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *b)
+	if err != nil {
+		return err
+	}
+	b.extraProperties = extraProperties
+
+	b._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (b *Base) MarshalJSON() ([]byte, error) {
+	type embed Base
+	var marshaler = struct {
+		embed
+		CreatedAt *core.DateTime `json:"created_at"`
+		UpdatedAt *core.DateTime `json:"updated_at"`
+	}{
+		embed:     embed(*b),
+		CreatedAt: core.NewDateTime(b.CreatedAt),
+		UpdatedAt: core.NewDateTime(b.UpdatedAt),
+	}
+	return json.Marshal(marshaler)
+}
+
+func (b *Base) String() string {
+	if len(b._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(b._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(b); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", b)
 }
 
 type ErrorBody struct {
-	Status     int           `json:"status"`
-	Message    *string       `json:"message,omitempty"`
-	Errors     []string      `json:"errors,omitempty"`
-	Parameters []*ErrorParam `json:"parameters,omitempty"`
+	Status     int           `json:"status" url:"status"`
+	Message    *string       `json:"message,omitempty" url:"message,omitempty"`
+	Errors     []string      `json:"errors,omitempty" url:"errors,omitempty"`
+	Parameters []*ErrorParam `json:"parameters,omitempty" url:"parameters,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (e *ErrorBody) GetExtraProperties() map[string]interface{} {
+	return e.extraProperties
+}
+
+func (e *ErrorBody) UnmarshalJSON(data []byte) error {
+	type unmarshaler ErrorBody
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*e = ErrorBody(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *e)
+	if err != nil {
+		return err
+	}
+	e.extraProperties = extraProperties
+
+	e._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (e *ErrorBody) String() string {
+	if len(e._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(e._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(e); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", e)
 }
 
 type ErrorParam struct {
-	Name  string `json:"name"`
-	Value string `json:"value"`
+	Name  string `json:"name" url:"name"`
+	Value string `json:"value" url:"value"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (e *ErrorParam) GetExtraProperties() map[string]interface{} {
+	return e.extraProperties
+}
+
+func (e *ErrorParam) UnmarshalJSON(data []byte) error {
+	type unmarshaler ErrorParam
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*e = ErrorParam(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *e)
+	if err != nil {
+		return err
+	}
+	e.extraProperties = extraProperties
+
+	e._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (e *ErrorParam) String() string {
+	if len(e._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(e._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(e); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", e)
 }
 
 type Id = string
@@ -263,11 +792,48 @@ type Id = string
 // AWS access key to authenticate with AWS. Access keys are long-term credentials for an IAM user and consist of an ID and secret. Follow [this guide to generate access and secret keys](https://docs.aws.amazon.com/general/latest/gr/aws-sec-cred-types.html#access-keys-and-secret-access-keys). You may optionally provide a session token if you are using temporary credentials.
 type AwsCredential struct {
 	// ID portion of the AWS access key pair.
-	AccessKeyId string `json:"access_key_id"`
+	AccessKeyId string `json:"access_key_id" url:"access_key_id"`
 	// Secret portion of the AWS access key pair.
-	SecretAccessKey string `json:"secret_access_key"`
+	SecretAccessKey string `json:"secret_access_key" url:"secret_access_key"`
 	// A temporary session token. Session tokens are optional and are only necessary if you are using temporary credentials.
-	Session *string `json:"session,omitempty"`
+	Session *string `json:"session,omitempty" url:"session,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (a *AwsCredential) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
+}
+
+func (a *AwsCredential) UnmarshalJSON(data []byte) error {
+	type unmarshaler AwsCredential
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*a = AwsCredential(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+
+	a._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (a *AwsCredential) String() string {
+	if len(a._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(a); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", a)
 }
 
 // Unique identifier for an AWS Credential
@@ -276,9 +842,46 @@ type AwsCredentialId = CredentialId
 // Username and secret used to authenticate with an external service.
 type BasicCredential struct {
 	// Username value for authentication
-	Username string `json:"username"`
+	Username string `json:"username" url:"username"`
 	// Secret value for authentication
-	Secret string `json:"secret"`
+	Secret string `json:"secret" url:"secret"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (b *BasicCredential) GetExtraProperties() map[string]interface{} {
+	return b.extraProperties
+}
+
+func (b *BasicCredential) UnmarshalJSON(data []byte) error {
+	type unmarshaler BasicCredential
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*b = BasicCredential(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *b)
+	if err != nil {
+		return err
+	}
+	b.extraProperties = extraProperties
+
+	b._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (b *BasicCredential) String() string {
+	if len(b._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(b._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(b); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", b)
 }
 
 // Unique identifier for a basic auth Credential
@@ -287,30 +890,93 @@ type BasicCredentialId = CredentialId
 // Credential to access an integration. Each credential is owned by an Account, Integration, IntegrationPoint or OrganizationWebhook.
 type Credential struct {
 	// Human-readable name for this resource
-	Name string `json:"name"`
+	Name string `json:"name" url:"name"`
 	// Time object was originally created
-	CreatedAt time.Time `json:"created_at"`
+	CreatedAt time.Time `json:"created_at" url:"created_at"`
 	// Last time object was updated
-	UpdatedAt time.Time    `json:"updated_at"`
-	Id        CredentialId `json:"id,omitempty"`
+	UpdatedAt time.Time    `json:"updated_at" url:"updated_at"`
+	Id        CredentialId `json:"id" url:"id"`
 	// Account that manages this credential.
-	AccountId *AccountId `json:"account_id,omitempty"`
+	AccountId *AccountId `json:"account_id,omitempty" url:"account_id,omitempty"`
 	// Integration associated with this credential.
-	IntegrationId *IntegrationId `json:"integration_id,omitempty"`
+	IntegrationId *IntegrationId `json:"integration_id,omitempty" url:"integration_id,omitempty"`
 	// Integration Point associated with this credential.
-	IntegrationPointId *IntegrationPointId `json:"integration_point_id,omitempty"`
+	IntegrationPointId *IntegrationPointId `json:"integration_point_id,omitempty" url:"integration_point_id,omitempty"`
 	// Integration Point associated with this credential.
-	OrganizationWebhookId *WebhookId `json:"organization_webhook_id,omitempty"`
+	OrganizationWebhookId *WebhookId `json:"organization_webhook_id,omitempty" url:"organization_webhook_id,omitempty"`
 	// One of `account` or `integration_point`.
-	OwnerType OwnerType `json:"owner_type,omitempty"`
+	OwnerType OwnerType `json:"owner_type" url:"owner_type"`
 	// Human friendly display name for this Credential
-	Fullname string `json:"fullname"`
+	Fullname string `json:"fullname" url:"fullname"`
 	// Credential configuration
-	Config *CredentialConfig `json:"config,omitempty"`
+	Config *CredentialConfig `json:"config,omitempty" url:"config,omitempty"`
 	// Time when this credential expires and can no longer be used again.
-	Expires *time.Time `json:"expires,omitempty"`
+	Expires *time.Time `json:"expires,omitempty" url:"expires,omitempty"`
 	// Field is set by the management process. Determines lifecycle and ownership of the credential.
-	Managed ManagedType `json:"managed,omitempty"`
+	Managed ManagedType `json:"managed" url:"managed"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *Credential) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
+}
+
+func (c *Credential) UnmarshalJSON(data []byte) error {
+	type embed Credential
+	var unmarshaler = struct {
+		embed
+		CreatedAt *core.DateTime `json:"created_at"`
+		UpdatedAt *core.DateTime `json:"updated_at"`
+		Expires   *core.DateTime `json:"expires,omitempty"`
+	}{
+		embed: embed(*c),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*c = Credential(unmarshaler.embed)
+	c.CreatedAt = unmarshaler.CreatedAt.Time()
+	c.UpdatedAt = unmarshaler.UpdatedAt.Time()
+	c.Expires = unmarshaler.Expires.TimePtr()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
+	c._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (c *Credential) MarshalJSON() ([]byte, error) {
+	type embed Credential
+	var marshaler = struct {
+		embed
+		CreatedAt *core.DateTime `json:"created_at"`
+		UpdatedAt *core.DateTime `json:"updated_at"`
+		Expires   *core.DateTime `json:"expires,omitempty"`
+	}{
+		embed:     embed(*c),
+		CreatedAt: core.NewDateTime(c.CreatedAt),
+		UpdatedAt: core.NewDateTime(c.UpdatedAt),
+		Expires:   core.NewOptionalDateTime(c.Expires),
+	}
+	return json.Marshal(marshaler)
+}
+
+func (c *Credential) String() string {
+	if len(c._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
 }
 
 type CredentialConfig struct {
@@ -322,26 +988,6 @@ type CredentialConfig struct {
 	OAuthClient *OAuthClientCredential
 }
 
-func NewCredentialConfigFromAws(value *AwsCredential) *CredentialConfig {
-	return &CredentialConfig{Type: "aws", Aws: value}
-}
-
-func NewCredentialConfigFromToken(value *TokenCredential) *CredentialConfig {
-	return &CredentialConfig{Type: "token", Token: value}
-}
-
-func NewCredentialConfigFromBasic(value *BasicCredential) *CredentialConfig {
-	return &CredentialConfig{Type: "basic", Basic: value}
-}
-
-func NewCredentialConfigFromSecret(value *SecretCredential) *CredentialConfig {
-	return &CredentialConfig{Type: "secret", Secret: value}
-}
-
-func NewCredentialConfigFromOAuthClient(value *OAuthClientCredential) *CredentialConfig {
-	return &CredentialConfig{Type: "o_auth_client", OAuthClient: value}
-}
-
 func (c *CredentialConfig) UnmarshalJSON(data []byte) error {
 	var unmarshaler struct {
 		Type string `json:"type"`
@@ -350,6 +996,9 @@ func (c *CredentialConfig) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	c.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", c)
+	}
 	switch unmarshaler.Type {
 	case "aws":
 		value := new(AwsCredential)
@@ -386,55 +1035,22 @@ func (c *CredentialConfig) UnmarshalJSON(data []byte) error {
 }
 
 func (c CredentialConfig) MarshalJSON() ([]byte, error) {
-	switch c.Type {
-	default:
-		return nil, fmt.Errorf("invalid type %s in %T", c.Type, c)
-	case "aws":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*AwsCredential
-		}{
-			Type:          c.Type,
-			AwsCredential: c.Aws,
-		}
-		return json.Marshal(marshaler)
-	case "token":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*TokenCredential
-		}{
-			Type:            c.Type,
-			TokenCredential: c.Token,
-		}
-		return json.Marshal(marshaler)
-	case "basic":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*BasicCredential
-		}{
-			Type:            c.Type,
-			BasicCredential: c.Basic,
-		}
-		return json.Marshal(marshaler)
-	case "secret":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*SecretCredential
-		}{
-			Type:             c.Type,
-			SecretCredential: c.Secret,
-		}
-		return json.Marshal(marshaler)
-	case "o_auth_client":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*OAuthClientCredential
-		}{
-			Type:                  c.Type,
-			OAuthClientCredential: c.OAuthClient,
-		}
-		return json.Marshal(marshaler)
+	if c.Aws != nil {
+		return core.MarshalJSONWithExtraProperty(c.Aws, "type", "aws")
 	}
+	if c.Token != nil {
+		return core.MarshalJSONWithExtraProperty(c.Token, "type", "token")
+	}
+	if c.Basic != nil {
+		return core.MarshalJSONWithExtraProperty(c.Basic, "type", "basic")
+	}
+	if c.Secret != nil {
+		return core.MarshalJSONWithExtraProperty(c.Secret, "type", "secret")
+	}
+	if c.OAuthClient != nil {
+		return core.MarshalJSONWithExtraProperty(c.OAuthClient, "type", "o_auth_client")
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", c)
 }
 
 type CredentialConfigVisitor interface {
@@ -446,52 +1062,154 @@ type CredentialConfigVisitor interface {
 }
 
 func (c *CredentialConfig) Accept(visitor CredentialConfigVisitor) error {
-	switch c.Type {
-	default:
-		return fmt.Errorf("invalid type %s in %T", c.Type, c)
-	case "aws":
+	if c.Aws != nil {
 		return visitor.VisitAws(c.Aws)
-	case "token":
+	}
+	if c.Token != nil {
 		return visitor.VisitToken(c.Token)
-	case "basic":
+	}
+	if c.Basic != nil {
 		return visitor.VisitBasic(c.Basic)
-	case "secret":
+	}
+	if c.Secret != nil {
 		return visitor.VisitSecret(c.Secret)
-	case "o_auth_client":
+	}
+	if c.OAuthClient != nil {
 		return visitor.VisitOAuthClient(c.OAuthClient)
 	}
+	return fmt.Errorf("type %T does not define a non-empty union type", c)
 }
 
 type CredentialConfigNoSecret struct {
-	Type string `json:"type"`
+	Type string `json:"type" url:"type"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *CredentialConfigNoSecret) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
+}
+
+func (c *CredentialConfigNoSecret) UnmarshalJSON(data []byte) error {
+	type unmarshaler CredentialConfigNoSecret
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = CredentialConfigNoSecret(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
+	c._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (c *CredentialConfigNoSecret) String() string {
+	if len(c._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
 }
 
 // Response object for a Credential
 type CredentialResponse struct {
 	// Human-readable name for this resource
-	Name string `json:"name"`
+	Name string `json:"name" url:"name"`
 	// Time object was originally created
-	CreatedAt time.Time `json:"created_at"`
+	CreatedAt time.Time `json:"created_at" url:"created_at"`
 	// Last time object was updated
-	UpdatedAt time.Time    `json:"updated_at"`
-	Id        CredentialId `json:"id,omitempty"`
+	UpdatedAt time.Time    `json:"updated_at" url:"updated_at"`
+	Id        CredentialId `json:"id" url:"id"`
 	// Account that manages this credential.
-	AccountId *AccountId `json:"account_id,omitempty"`
+	AccountId *AccountId `json:"account_id,omitempty" url:"account_id,omitempty"`
 	// Integration associated with this credential.
-	IntegrationId *IntegrationId `json:"integration_id,omitempty"`
+	IntegrationId *IntegrationId `json:"integration_id,omitempty" url:"integration_id,omitempty"`
 	// Integration Point associated with this credential.
-	IntegrationPointId *IntegrationPointId `json:"integration_point_id,omitempty"`
+	IntegrationPointId *IntegrationPointId `json:"integration_point_id,omitempty" url:"integration_point_id,omitempty"`
 	// Integration Point associated with this credential.
-	OrganizationWebhookId *WebhookId `json:"organization_webhook_id,omitempty"`
+	OrganizationWebhookId *WebhookId `json:"organization_webhook_id,omitempty" url:"organization_webhook_id,omitempty"`
 	// One of `account` or `integration_point`.
-	OwnerType OwnerType `json:"owner_type,omitempty"`
+	OwnerType OwnerType `json:"owner_type" url:"owner_type"`
 	// Human friendly display name for this Credential. Defaults to the same value as the 'name' field if not specified.
-	Fullname string                    `json:"fullname"`
-	Config   *CredentialConfigNoSecret `json:"config,omitempty"`
+	Fullname string                    `json:"fullname" url:"fullname"`
+	Config   *CredentialConfigNoSecret `json:"config" url:"config"`
 	// Time when this credential expires and can no longer be used again.
-	Expires *time.Time `json:"expires,omitempty"`
+	Expires *time.Time `json:"expires,omitempty" url:"expires,omitempty"`
 	// Field is set by the management process. Determines lifecycle and ownership of the credential.
-	Managed ManagedType `json:"managed,omitempty"`
+	Managed ManagedType `json:"managed" url:"managed"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *CredentialResponse) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
+}
+
+func (c *CredentialResponse) UnmarshalJSON(data []byte) error {
+	type embed CredentialResponse
+	var unmarshaler = struct {
+		embed
+		CreatedAt *core.DateTime `json:"created_at"`
+		UpdatedAt *core.DateTime `json:"updated_at"`
+		Expires   *core.DateTime `json:"expires,omitempty"`
+	}{
+		embed: embed(*c),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*c = CredentialResponse(unmarshaler.embed)
+	c.CreatedAt = unmarshaler.CreatedAt.Time()
+	c.UpdatedAt = unmarshaler.UpdatedAt.Time()
+	c.Expires = unmarshaler.Expires.TimePtr()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
+	c._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (c *CredentialResponse) MarshalJSON() ([]byte, error) {
+	type embed CredentialResponse
+	var marshaler = struct {
+		embed
+		CreatedAt *core.DateTime `json:"created_at"`
+		UpdatedAt *core.DateTime `json:"updated_at"`
+		Expires   *core.DateTime `json:"expires,omitempty"`
+	}{
+		embed:     embed(*c),
+		CreatedAt: core.NewDateTime(c.CreatedAt),
+		UpdatedAt: core.NewDateTime(c.UpdatedAt),
+		Expires:   core.NewOptionalDateTime(c.Expires),
+	}
+	return json.Marshal(marshaler)
+}
+
+func (c *CredentialResponse) String() string {
+	if len(c._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
 }
 
 type CredentialType string
@@ -550,13 +1268,50 @@ func (m ManagedType) Ptr() *ManagedType {
 // A Client ID and secret used for authenticating with OAuth 2.0 compatible service using the client credentials grant.
 type OAuthClientCredential struct {
 	// Optional URL for the OAuth 2.0 token exchange if it can not be constructed based on provider configuration
-	TokenUrl *string `json:"token_url,omitempty"`
+	TokenUrl *string `json:"token_url,omitempty" url:"token_url,omitempty"`
 	// The ID of the client application defined at the service provider
-	ClientId string `json:"client_id"`
+	ClientId string `json:"client_id" url:"client_id"`
 	// Secret value for authentication
-	ClientSecret string `json:"client_secret"`
+	ClientSecret string `json:"client_secret" url:"client_secret"`
 	// Optional connection specific meta data such as a signing key ID or organization ID
-	Extra map[string]interface{} `json:"extra,omitempty"`
+	Extra map[string]interface{} `json:"extra,omitempty" url:"extra,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (o *OAuthClientCredential) GetExtraProperties() map[string]interface{} {
+	return o.extraProperties
+}
+
+func (o *OAuthClientCredential) UnmarshalJSON(data []byte) error {
+	type unmarshaler OAuthClientCredential
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*o = OAuthClientCredential(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *o)
+	if err != nil {
+		return err
+	}
+	o.extraProperties = extraProperties
+
+	o._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (o *OAuthClientCredential) String() string {
+	if len(o._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(o._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(o); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", o)
 }
 
 // Unique identifier for an OAuth client Credential
@@ -593,7 +1348,44 @@ func (o OwnerType) Ptr() *OwnerType {
 // Secret value such as password or webhook url
 type SecretCredential struct {
 	// Secret value
-	Secret string `json:"secret"`
+	Secret string `json:"secret" url:"secret"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (s *SecretCredential) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
+}
+
+func (s *SecretCredential) UnmarshalJSON(data []byte) error {
+	type unmarshaler SecretCredential
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*s = SecretCredential(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+
+	s._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (s *SecretCredential) String() string {
+	if len(s._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(s); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", s)
 }
 
 // Unique identifier for a secret Credential
@@ -602,7 +1394,44 @@ type SecretCredentialId = CredentialId
 // Token used to authenticate with an external service.
 type TokenCredential struct {
 	// Secret value of the token.
-	Secret string `json:"secret"`
+	Secret string `json:"secret" url:"secret"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (t *TokenCredential) GetExtraProperties() map[string]interface{} {
+	return t.extraProperties
+}
+
+func (t *TokenCredential) UnmarshalJSON(data []byte) error {
+	type unmarshaler TokenCredential
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*t = TokenCredential(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *t)
+	if err != nil {
+		return err
+	}
+	t.extraProperties = extraProperties
+
+	t._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (t *TokenCredential) String() string {
+	if len(t._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(t._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(t); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", t)
 }
 
 // Unique identifier for a token Credential
@@ -613,28 +1442,124 @@ type IntegrationId = Id
 
 type IntegrationEnvironments struct {
 	// List of allowed providers for test environment.
-	Test []ProviderConfigId `json:"test,omitempty"`
+	Test []ProviderConfigId `json:"test,omitempty" url:"test,omitempty"`
 	// List of allowed providers for production environment.
-	Prod []ProviderConfigId `json:"prod,omitempty"`
+	Prod []ProviderConfigId `json:"prod,omitempty" url:"prod,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (i *IntegrationEnvironments) GetExtraProperties() map[string]interface{} {
+	return i.extraProperties
+}
+
+func (i *IntegrationEnvironments) UnmarshalJSON(data []byte) error {
+	type unmarshaler IntegrationEnvironments
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*i = IntegrationEnvironments(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *i)
+	if err != nil {
+		return err
+	}
+	i.extraProperties = extraProperties
+
+	i._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (i *IntegrationEnvironments) String() string {
+	if len(i._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(i._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(i); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", i)
 }
 
 // Enables creation, editing and deletion of Integrations.
 type IntegrationPoint struct {
 	// Human-readable name for this resource
-	Name string `json:"name"`
+	Name string `json:"name" url:"name"`
 	// Time object was originally created
-	CreatedAt time.Time `json:"created_at"`
+	CreatedAt time.Time `json:"created_at" url:"created_at"`
 	// Last time object was updated
-	UpdatedAt time.Time          `json:"updated_at"`
-	Id        IntegrationPointId `json:"id,omitempty"`
+	UpdatedAt time.Time          `json:"updated_at" url:"updated_at"`
+	Id        IntegrationPointId `json:"id" url:"id"`
 	// Name of integration point, will be shown to end-users in the Connect UI.
-	Fullname *string `json:"fullname,omitempty"`
+	Fullname *string `json:"fullname,omitempty" url:"fullname,omitempty"`
 	// Optional description of the Integration Point. Will not be displayed to end-users of Connect UI.
-	Description *string `json:"description,omitempty"`
+	Description *string `json:"description,omitempty" url:"description,omitempty"`
 	// Connector to use for the Integration Point.
-	Connector CategoryId `json:"connector,omitempty"`
+	Connector CategoryId `json:"connector" url:"connector"`
 	// Selects providers to use for account environments.
-	Environments *IntegrationEnvironments `json:"environments,omitempty"`
+	Environments *IntegrationEnvironments `json:"environments" url:"environments"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (i *IntegrationPoint) GetExtraProperties() map[string]interface{} {
+	return i.extraProperties
+}
+
+func (i *IntegrationPoint) UnmarshalJSON(data []byte) error {
+	type embed IntegrationPoint
+	var unmarshaler = struct {
+		embed
+		CreatedAt *core.DateTime `json:"created_at"`
+		UpdatedAt *core.DateTime `json:"updated_at"`
+	}{
+		embed: embed(*i),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*i = IntegrationPoint(unmarshaler.embed)
+	i.CreatedAt = unmarshaler.CreatedAt.Time()
+	i.UpdatedAt = unmarshaler.UpdatedAt.Time()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *i)
+	if err != nil {
+		return err
+	}
+	i.extraProperties = extraProperties
+
+	i._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (i *IntegrationPoint) MarshalJSON() ([]byte, error) {
+	type embed IntegrationPoint
+	var marshaler = struct {
+		embed
+		CreatedAt *core.DateTime `json:"created_at"`
+		UpdatedAt *core.DateTime `json:"updated_at"`
+	}{
+		embed:     embed(*i),
+		CreatedAt: core.NewDateTime(i.CreatedAt),
+		UpdatedAt: core.NewDateTime(i.UpdatedAt),
+	}
+	return json.Marshal(marshaler)
+}
+
+func (i *IntegrationPoint) String() string {
+	if len(i._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(i._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(i); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", i)
 }
 
 type BridgeSelector struct {
@@ -645,14 +1570,6 @@ type BridgeSelector struct {
 	Labels []string
 }
 
-func NewBridgeSelectorFromId(value string) *BridgeSelector {
-	return &BridgeSelector{Type: "id", Id: value}
-}
-
-func NewBridgeSelectorFromLabels(value []string) *BridgeSelector {
-	return &BridgeSelector{Type: "labels", Labels: value}
-}
-
 func (b *BridgeSelector) UnmarshalJSON(data []byte) error {
 	var unmarshaler struct {
 		Type string `json:"type"`
@@ -661,6 +1578,9 @@ func (b *BridgeSelector) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	b.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", b)
+	}
 	switch unmarshaler.Type {
 	case "id":
 		var valueUnmarshaler struct {
@@ -672,7 +1592,7 @@ func (b *BridgeSelector) UnmarshalJSON(data []byte) error {
 		b.Id = valueUnmarshaler.Id
 	case "labels":
 		var valueUnmarshaler struct {
-			Labels []string `json:"value,omitempty"`
+			Labels []string `json:"value"`
 		}
 		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
 			return err
@@ -683,28 +1603,27 @@ func (b *BridgeSelector) UnmarshalJSON(data []byte) error {
 }
 
 func (b BridgeSelector) MarshalJSON() ([]byte, error) {
-	switch b.Type {
-	default:
-		return nil, fmt.Errorf("invalid type %s in %T", b.Type, b)
-	case "id":
+	if b.Id != "" {
 		var marshaler = struct {
 			Type string `json:"type"`
 			Id   string `json:"value"`
 		}{
-			Type: b.Type,
+			Type: "id",
 			Id:   b.Id,
 		}
 		return json.Marshal(marshaler)
-	case "labels":
+	}
+	if b.Labels != nil {
 		var marshaler = struct {
 			Type   string   `json:"type"`
-			Labels []string `json:"value,omitempty"`
+			Labels []string `json:"value"`
 		}{
-			Type:   b.Type,
+			Type:   "labels",
 			Labels: b.Labels,
 		}
 		return json.Marshal(marshaler)
 	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", b)
 }
 
 type BridgeSelectorVisitor interface {
@@ -713,91 +1632,331 @@ type BridgeSelectorVisitor interface {
 }
 
 func (b *BridgeSelector) Accept(visitor BridgeSelectorVisitor) error {
-	switch b.Type {
-	default:
-		return fmt.Errorf("invalid type %s in %T", b.Type, b)
-	case "id":
+	if b.Id != "" {
 		return visitor.VisitId(b.Id)
-	case "labels":
+	}
+	if b.Labels != nil {
 		return visitor.VisitLabels(b.Labels)
 	}
+	return fmt.Errorf("type %T does not define a non-empty union type", b)
 }
 
 type CreateIntegrationResponseResult struct {
-	CredentialsCreated []*CredentialResponse `json:"credentials_created,omitempty"`
-	Integration        *Integration          `json:"integration,omitempty"`
-	Token              *TokenPair            `json:"token,omitempty"`
+	CredentialsCreated []*CredentialResponse `json:"credentials_created,omitempty" url:"credentials_created,omitempty"`
+	Integration        *Integration          `json:"integration" url:"integration"`
+	Token              *TokenPair            `json:"token" url:"token"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *CreateIntegrationResponseResult) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
+}
+
+func (c *CreateIntegrationResponseResult) UnmarshalJSON(data []byte) error {
+	type unmarshaler CreateIntegrationResponseResult
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = CreateIntegrationResponseResult(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
+	c._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (c *CreateIntegrationResponseResult) String() string {
+	if len(c._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
 }
 
 // Connects an Account to an external service
 type Integration struct {
 	// Human-readable name for this resource
-	Name string `json:"name"`
+	Name string `json:"name" url:"name"`
 	// Time object was originally created
-	CreatedAt time.Time `json:"created_at"`
+	CreatedAt time.Time `json:"created_at" url:"created_at"`
 	// Last time object was updated
-	UpdatedAt time.Time     `json:"updated_at"`
-	Id        IntegrationId `json:"id,omitempty"`
+	UpdatedAt time.Time     `json:"updated_at" url:"updated_at"`
+	Id        IntegrationId `json:"id" url:"id"`
 	// Human friendly display name for this integration.
-	Fullname string `json:"fullname"`
+	Fullname string `json:"fullname" url:"fullname"`
 	// Integration refresh token id
-	RefreshTokenId TokenId `json:"refresh_token_id,omitempty"`
+	RefreshTokenId TokenId `json:"refresh_token_id" url:"refresh_token_id"`
 	// Account associated with this integration. Use the expand=accounts parameter with the List and ListAccount APIs to expand the Account to the full object
-	AccountId AccountId `json:"account_id,omitempty"`
+	AccountId AccountId `json:"account_id" url:"account_id"`
 	// When using the expand option on the List or ListAccount APIs, the full account object is included in the response
-	Account *Account `json:"account,omitempty"`
+	Account *Account `json:"account,omitempty" url:"account,omitempty"`
 	// Id of the Connector Category for this Integration.
-	Category CategoryId `json:"category,omitempty"`
+	Category CategoryId `json:"category" url:"category"`
 	// Provider configuration for this Integration.
-	ProviderConfig *ProviderConfig `json:"provider_config,omitempty"`
+	ProviderConfig *ProviderConfig `json:"provider_config" url:"provider_config"`
 	// Human friendly display name for the provider.
-	ProviderFullname string `json:"provider_fullname"`
+	ProviderFullname string `json:"provider_fullname" url:"provider_fullname"`
 	// Type of the provider for this Integration.
-	ProviderType string `json:"provider_type"`
+	ProviderType string `json:"provider_type" url:"provider_type"`
 	// Integration Point associated with this integration. Use the expand=integration_points parameter with the List and ListAccount APIs to expand the Integration Point to the full object
-	IntegrationPointId *IntegrationPointId `json:"integration_point_id,omitempty"`
+	IntegrationPointId *IntegrationPointId `json:"integration_point_id,omitempty" url:"integration_point_id,omitempty"`
 	// When using the expand option on the List or ListAccount APIs, the full integration_point object is included in the response
-	IntegrationPoint *IntegrationPoint `json:"integration_point,omitempty"`
+	IntegrationPoint *IntegrationPoint `json:"integration_point,omitempty" url:"integration_point,omitempty"`
 	// Use a Bridge to connect to the provider.
-	BridgeSelector *BridgeSelector `json:"bridge_selector,omitempty"`
+	BridgeSelector *BridgeSelector `json:"bridge_selector,omitempty" url:"bridge_selector,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (i *Integration) GetExtraProperties() map[string]interface{} {
+	return i.extraProperties
+}
+
+func (i *Integration) UnmarshalJSON(data []byte) error {
+	type embed Integration
+	var unmarshaler = struct {
+		embed
+		CreatedAt *core.DateTime `json:"created_at"`
+		UpdatedAt *core.DateTime `json:"updated_at"`
+	}{
+		embed: embed(*i),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*i = Integration(unmarshaler.embed)
+	i.CreatedAt = unmarshaler.CreatedAt.Time()
+	i.UpdatedAt = unmarshaler.UpdatedAt.Time()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *i)
+	if err != nil {
+		return err
+	}
+	i.extraProperties = extraProperties
+
+	i._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (i *Integration) MarshalJSON() ([]byte, error) {
+	type embed Integration
+	var marshaler = struct {
+		embed
+		CreatedAt *core.DateTime `json:"created_at"`
+		UpdatedAt *core.DateTime `json:"updated_at"`
+	}{
+		embed:     embed(*i),
+		CreatedAt: core.NewDateTime(i.CreatedAt),
+		UpdatedAt: core.NewDateTime(i.UpdatedAt),
+	}
+	return json.Marshal(marshaler)
+}
+
+func (i *Integration) String() string {
+	if len(i._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(i._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(i); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", i)
 }
 
 type CreateMemberResponseResult struct {
-	Member *Member `json:"member,omitempty"`
+	Member *Member `json:"member" url:"member"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *CreateMemberResponseResult) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
+}
+
+func (c *CreateMemberResponseResult) UnmarshalJSON(data []byte) error {
+	type unmarshaler CreateMemberResponseResult
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = CreateMemberResponseResult(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
+	c._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (c *CreateMemberResponseResult) String() string {
+	if len(c._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
 }
 
 type Member struct {
 	// Human-readable name for this resource
-	Name string `json:"name"`
+	Name string `json:"name" url:"name"`
 	// Time object was originally created
-	CreatedAt time.Time `json:"created_at"`
+	CreatedAt time.Time `json:"created_at" url:"created_at"`
 	// Last time object was updated
-	UpdatedAt time.Time `json:"updated_at"`
-	Id        MemberId  `json:"id,omitempty"`
-	State     State     `json:"state,omitempty"`
+	UpdatedAt time.Time `json:"updated_at" url:"updated_at"`
+	Id        MemberId  `json:"id" url:"id"`
+	State     State     `json:"state" url:"state"`
 	// Last logon time
-	LastLogon time.Time `json:"last_logon"`
+	LastLogon time.Time `json:"last_logon" url:"last_logon"`
 	// User's full display name.
-	Fullname string `json:"fullname"`
+	Fullname string `json:"fullname" url:"fullname"`
 	// User's nickname
-	Nickname string `json:"nickname"`
+	Nickname string `json:"nickname" url:"nickname"`
 	// Url of user's picture
-	Picture    string    `json:"picture"`
-	Ttl        string    `json:"ttl"`
-	TokenTtl   string    `json:"token_ttl"`
-	Expires    time.Time `json:"expires"`
-	PinExpires time.Time `json:"pin_expires"`
+	Picture    string    `json:"picture" url:"picture"`
+	Ttl        string    `json:"ttl" url:"ttl"`
+	TokenTtl   string    `json:"token_ttl" url:"token_ttl"`
+	Expires    time.Time `json:"expires" url:"expires"`
+	PinExpires time.Time `json:"pin_expires" url:"pin_expires"`
 	// Roles granted to this member. Tokens inherit this access.
-	RoleBinding []RoleName `json:"role_binding,omitempty"`
+	RoleBinding []RoleName `json:"role_binding" url:"role_binding"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (m *Member) GetExtraProperties() map[string]interface{} {
+	return m.extraProperties
+}
+
+func (m *Member) UnmarshalJSON(data []byte) error {
+	type embed Member
+	var unmarshaler = struct {
+		embed
+		CreatedAt  *core.DateTime `json:"created_at"`
+		UpdatedAt  *core.DateTime `json:"updated_at"`
+		LastLogon  *core.DateTime `json:"last_logon"`
+		Expires    *core.DateTime `json:"expires"`
+		PinExpires *core.DateTime `json:"pin_expires"`
+	}{
+		embed: embed(*m),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*m = Member(unmarshaler.embed)
+	m.CreatedAt = unmarshaler.CreatedAt.Time()
+	m.UpdatedAt = unmarshaler.UpdatedAt.Time()
+	m.LastLogon = unmarshaler.LastLogon.Time()
+	m.Expires = unmarshaler.Expires.Time()
+	m.PinExpires = unmarshaler.PinExpires.Time()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *m)
+	if err != nil {
+		return err
+	}
+	m.extraProperties = extraProperties
+
+	m._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (m *Member) MarshalJSON() ([]byte, error) {
+	type embed Member
+	var marshaler = struct {
+		embed
+		CreatedAt  *core.DateTime `json:"created_at"`
+		UpdatedAt  *core.DateTime `json:"updated_at"`
+		LastLogon  *core.DateTime `json:"last_logon"`
+		Expires    *core.DateTime `json:"expires"`
+		PinExpires *core.DateTime `json:"pin_expires"`
+	}{
+		embed:      embed(*m),
+		CreatedAt:  core.NewDateTime(m.CreatedAt),
+		UpdatedAt:  core.NewDateTime(m.UpdatedAt),
+		LastLogon:  core.NewDateTime(m.LastLogon),
+		Expires:    core.NewDateTime(m.Expires),
+		PinExpires: core.NewDateTime(m.PinExpires),
+	}
+	return json.Marshal(marshaler)
+}
+
+func (m *Member) String() string {
+	if len(m._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(m._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(m); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", m)
 }
 
 type MemberOptions struct {
 	// Optional member time-to-live duration. After a member expires, system requires a change password to re-enable member. Minimum 1 day, Maximum 1 year, Default 180 days.
-	Ttl string `json:"ttl"`
+	Ttl string `json:"ttl" url:"ttl"`
 	// Options: "expired" will force change password on first logon.
-	Options []Options `json:"options,omitempty"`
+	Options []Options `json:"options" url:"options"`
 	// Optional token time-to-live duration. Tokens are created for this member with this duration as their TTL. Minimum 10 miniutes, Maximum 1 week, Defaults 1 hour.
-	TokenTtl string `json:"token_ttl"`
+	TokenTtl string `json:"token_ttl" url:"token_ttl"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (m *MemberOptions) GetExtraProperties() map[string]interface{} {
+	return m.extraProperties
+}
+
+func (m *MemberOptions) UnmarshalJSON(data []byte) error {
+	type unmarshaler MemberOptions
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*m = MemberOptions(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *m)
+	if err != nil {
+		return err
+	}
+	m.extraProperties = extraProperties
+
+	m._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (m *MemberOptions) String() string {
+	if len(m._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(m._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(m); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", m)
 }
 
 type Options string
@@ -863,9 +2022,46 @@ func (s State) Ptr() *State {
 }
 
 type CreateOrganizationResponseResult struct {
-	Member       *Member       `json:"member,omitempty"`
-	Organization *Organization `json:"organization,omitempty"`
-	Token        *TokenPair    `json:"token,omitempty"`
+	Member       *Member       `json:"member,omitempty" url:"member,omitempty"`
+	Organization *Organization `json:"organization" url:"organization"`
+	Token        *TokenPair    `json:"token" url:"token"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *CreateOrganizationResponseResult) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
+}
+
+func (c *CreateOrganizationResponseResult) UnmarshalJSON(data []byte) error {
+	type unmarshaler CreateOrganizationResponseResult
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = CreateOrganizationResponseResult(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
+	c._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (c *CreateOrganizationResponseResult) String() string {
+	if len(c._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
 }
 
 type Environment string
@@ -891,42 +2087,175 @@ func (e Environment) Ptr() *Environment {
 }
 
 type GetOrganizationResponse struct {
-	Result *Organization `json:"result,omitempty"`
+	Result *Organization `json:"result" url:"result"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (g *GetOrganizationResponse) GetExtraProperties() map[string]interface{} {
+	return g.extraProperties
+}
+
+func (g *GetOrganizationResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler GetOrganizationResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*g = GetOrganizationResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	if err != nil {
+		return err
+	}
+	g.extraProperties = extraProperties
+
+	g._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (g *GetOrganizationResponse) String() string {
+	if len(g._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(g._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(g); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", g)
 }
 
 type Organization struct {
 	// Human-readable name for this resource
-	Name string `json:"name"`
+	Name string `json:"name" url:"name"`
 	// Time object was originally created
-	CreatedAt time.Time `json:"created_at"`
+	CreatedAt time.Time `json:"created_at" url:"created_at"`
 	// Last time object was updated
-	UpdatedAt time.Time      `json:"updated_at"`
-	Id        OrganizationId `json:"id,omitempty"`
+	UpdatedAt time.Time      `json:"updated_at" url:"updated_at"`
+	Id        OrganizationId `json:"id" url:"id"`
 	// Organization refresh token id
-	RefreshTokenId TokenId `json:"refresh_token_id,omitempty"`
+	RefreshTokenId TokenId `json:"refresh_token_id" url:"refresh_token_id"`
 	// Organization type: root or standard
-	OrganizationType OrganizationType `json:"organization_type,omitempty"`
+	OrganizationType OrganizationType `json:"organization_type" url:"organization_type"`
 	// Human friendly display name for this Organization
-	Fullname string `json:"fullname"`
+	Fullname string `json:"fullname" url:"fullname"`
 	// Organization email address
-	Contact string `json:"contact"`
+	Contact string `json:"contact" url:"contact"`
 	// Reply-to email address, used for SMTP emails. Defaults to no-reply@synqly.com
-	ReplyTo string `json:"reply_to"`
+	ReplyTo string `json:"reply_to" url:"reply_to"`
 	// Picture URL of the organization
-	Picture string `json:"picture"`
+	Picture string `json:"picture" url:"picture"`
 	// Organization options
-	Options *OrganizationOptions `json:"options,omitempty"`
+	Options *OrganizationOptions `json:"options,omitempty" url:"options,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (o *Organization) GetExtraProperties() map[string]interface{} {
+	return o.extraProperties
+}
+
+func (o *Organization) UnmarshalJSON(data []byte) error {
+	type embed Organization
+	var unmarshaler = struct {
+		embed
+		CreatedAt *core.DateTime `json:"created_at"`
+		UpdatedAt *core.DateTime `json:"updated_at"`
+	}{
+		embed: embed(*o),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*o = Organization(unmarshaler.embed)
+	o.CreatedAt = unmarshaler.CreatedAt.Time()
+	o.UpdatedAt = unmarshaler.UpdatedAt.Time()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *o)
+	if err != nil {
+		return err
+	}
+	o.extraProperties = extraProperties
+
+	o._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (o *Organization) MarshalJSON() ([]byte, error) {
+	type embed Organization
+	var marshaler = struct {
+		embed
+		CreatedAt *core.DateTime `json:"created_at"`
+		UpdatedAt *core.DateTime `json:"updated_at"`
+	}{
+		embed:     embed(*o),
+		CreatedAt: core.NewDateTime(o.CreatedAt),
+		UpdatedAt: core.NewDateTime(o.UpdatedAt),
+	}
+	return json.Marshal(marshaler)
+}
+
+func (o *Organization) String() string {
+	if len(o._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(o._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(o); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", o)
 }
 
 type OrganizationOptions struct {
 	// Duration new member invitations will be valid. Default: 168h (7 days), minimum 24h, maximum 168h (7 days).
-	InviteDuration *string `json:"invite_duration,omitempty"`
+	InviteDuration *string `json:"invite_duration,omitempty" url:"invite_duration,omitempty"`
 	// Duration forgotten password invitations will be valid. Default: 24h, minimum 24h, maximum 168h (7 days).
-	ForgotDuration *string `json:"forgot_duration,omitempty"`
+	ForgotDuration *string `json:"forgot_duration,omitempty" url:"forgot_duration,omitempty"`
 	// Duration before member password expires, part of required password rotation. Default: 4320h (180 days), minimum: 24h, maximum: 8760h (365 days).
-	PasswordDuration *string `json:"password_duration,omitempty"`
+	PasswordDuration *string `json:"password_duration,omitempty" url:"password_duration,omitempty"`
 	// Minimum password length. Default: 8, minimum 8, maximum 72.
-	MinimumPasswordLength *int `json:"minimum_password_length,omitempty"`
+	MinimumPasswordLength *int `json:"minimum_password_length,omitempty" url:"minimum_password_length,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (o *OrganizationOptions) GetExtraProperties() map[string]interface{} {
+	return o.extraProperties
+}
+
+func (o *OrganizationOptions) UnmarshalJSON(data []byte) error {
+	type unmarshaler OrganizationOptions
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*o = OrganizationOptions(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *o)
+	if err != nil {
+		return err
+	}
+	o.extraProperties = extraProperties
+
+	o._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (o *OrganizationOptions) String() string {
+	if len(o._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(o._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(o); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", o)
 }
 
 type OrganizationType string
@@ -991,61 +2320,249 @@ func (w WebhookFilter) Ptr() *WebhookFilter {
 // Response payload for webhook events. This payload is sent to the webhook URL when an event occurs.
 type OrganizationWebhookPayload struct {
 	// The event that triggered the webhook
-	Event WebhookFilter `json:"event,omitempty"`
+	Event WebhookFilter `json:"event" url:"event"`
 	// The account that the event occurred in
-	Account *Account `json:"account,omitempty"`
+	Account *Account `json:"account,omitempty" url:"account,omitempty"`
 	// The integration that the event occurred in
-	Integration *Integration `json:"integration,omitempty"`
+	Integration *Integration `json:"integration,omitempty" url:"integration,omitempty"`
 	// A unique identifier for this webhook event
-	Nonce string `json:"nonce"`
+	Nonce string `json:"nonce" url:"nonce"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (o *OrganizationWebhookPayload) GetExtraProperties() map[string]interface{} {
+	return o.extraProperties
+}
+
+func (o *OrganizationWebhookPayload) UnmarshalJSON(data []byte) error {
+	type unmarshaler OrganizationWebhookPayload
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*o = OrganizationWebhookPayload(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *o)
+	if err != nil {
+		return err
+	}
+	o.extraProperties = extraProperties
+
+	o._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (o *OrganizationWebhookPayload) String() string {
+	if len(o._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(o._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(o); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", o)
 }
 
 type OrganizationWebhook struct {
 	// Human-readable name for this resource
-	Name string `json:"name"`
+	Name string `json:"name" url:"name"`
 	// Time object was originally created
-	CreatedAt time.Time `json:"created_at"`
+	CreatedAt time.Time `json:"created_at" url:"created_at"`
 	// Last time object was updated
-	UpdatedAt time.Time `json:"updated_at"`
-	Id        WebhookId `json:"id,omitempty"`
+	UpdatedAt time.Time `json:"updated_at" url:"updated_at"`
+	Id        WebhookId `json:"id" url:"id"`
 	// Human friendly slug for this webhook
-	Fullname string `json:"fullname"`
+	Fullname string `json:"fullname" url:"fullname"`
 	// Environment that the webhook is configured for. Only events associated with this environment will trigger the webhook.
-	Environment Environment `json:"environment,omitempty"`
+	Environment Environment `json:"environment" url:"environment"`
 	// Specifies which Webhooks to send.
-	Filters []WebhookFilter `json:"filters,omitempty"`
+	Filters []WebhookFilter `json:"filters" url:"filters"`
 	// URL that webhooks will be sent to
-	Url string `json:"url"`
+	Url string `json:"url" url:"url"`
 	// Credential contain secret
-	CredentialId CredentialId `json:"credential_id,omitempty"`
+	CredentialId CredentialId `json:"credential_id" url:"credential_id"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (o *OrganizationWebhook) GetExtraProperties() map[string]interface{} {
+	return o.extraProperties
+}
+
+func (o *OrganizationWebhook) UnmarshalJSON(data []byte) error {
+	type embed OrganizationWebhook
+	var unmarshaler = struct {
+		embed
+		CreatedAt *core.DateTime `json:"created_at"`
+		UpdatedAt *core.DateTime `json:"updated_at"`
+	}{
+		embed: embed(*o),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*o = OrganizationWebhook(unmarshaler.embed)
+	o.CreatedAt = unmarshaler.CreatedAt.Time()
+	o.UpdatedAt = unmarshaler.UpdatedAt.Time()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *o)
+	if err != nil {
+		return err
+	}
+	o.extraProperties = extraProperties
+
+	o._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (o *OrganizationWebhook) MarshalJSON() ([]byte, error) {
+	type embed OrganizationWebhook
+	var marshaler = struct {
+		embed
+		CreatedAt *core.DateTime `json:"created_at"`
+		UpdatedAt *core.DateTime `json:"updated_at"`
+	}{
+		embed:     embed(*o),
+		CreatedAt: core.NewDateTime(o.CreatedAt),
+		UpdatedAt: core.NewDateTime(o.UpdatedAt),
+	}
+	return json.Marshal(marshaler)
+}
+
+func (o *OrganizationWebhook) String() string {
+	if len(o._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(o._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(o); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", o)
 }
 
 type OrganizationWebhookSecret struct {
 	// Secret used for signing webhooks. This value is used to verify the authenticity of the webhook payload.
-	Value string `json:"value"`
+	Value string `json:"value" url:"value"`
 	// Time when this secret expires and can no longer be used again.
-	Expires *time.Time `json:"expires,omitempty"`
+	Expires *time.Time `json:"expires,omitempty" url:"expires,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (o *OrganizationWebhookSecret) GetExtraProperties() map[string]interface{} {
+	return o.extraProperties
+}
+
+func (o *OrganizationWebhookSecret) UnmarshalJSON(data []byte) error {
+	type embed OrganizationWebhookSecret
+	var unmarshaler = struct {
+		embed
+		Expires *core.DateTime `json:"expires,omitempty"`
+	}{
+		embed: embed(*o),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*o = OrganizationWebhookSecret(unmarshaler.embed)
+	o.Expires = unmarshaler.Expires.TimePtr()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *o)
+	if err != nil {
+		return err
+	}
+	o.extraProperties = extraProperties
+
+	o._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (o *OrganizationWebhookSecret) MarshalJSON() ([]byte, error) {
+	type embed OrganizationWebhookSecret
+	var marshaler = struct {
+		embed
+		Expires *core.DateTime `json:"expires,omitempty"`
+	}{
+		embed:   embed(*o),
+		Expires: core.NewOptionalDateTime(o.Expires),
+	}
+	return json.Marshal(marshaler)
+}
+
+func (o *OrganizationWebhookSecret) String() string {
+	if len(o._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(o._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(o); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", o)
 }
 
 type Permission struct {
 	// Roles granted to this token.
-	RoleBinding []RoleName `json:"role_binding,omitempty"`
+	RoleBinding []RoleName `json:"role_binding,omitempty" url:"role_binding,omitempty"`
 	// Adhoc role granted to this token.
-	AdhocRole *AdhocRole `json:"adhoc_role,omitempty"`
+	AdhocRole *AdhocRole `json:"adhoc_role,omitempty" url:"adhoc_role,omitempty"`
 	// ID of the resource that this permission grants access to.
-	ResourceId Id `json:"resource_id"`
+	ResourceId Id `json:"resource_id" url:"resource_id"`
 	// Type of the resource that this permission grants access to. Must be one of the following: "organization, "integration"
-	ResourceType string `json:"resource_type"`
+	ResourceType string `json:"resource_type" url:"resource_type"`
 	// Token parentId
-	ParentId Id `json:"parent_id"`
+	ParentId Id `json:"parent_id" url:"parent_id"`
 	// Token Id
-	Id Id `json:"id"`
+	Id Id `json:"id" url:"id"`
 	// Token organizationId
-	OrganizationId Id `json:"organization_id"`
+	OrganizationId Id `json:"organization_id" url:"organization_id"`
 	// Token root organizationId
-	RootOrganizationId *Id `json:"root_organization_id,omitempty"`
+	RootOrganizationId *Id `json:"root_organization_id,omitempty" url:"root_organization_id,omitempty"`
 	// Token memberId
-	MemberId Id `json:"member_id"`
+	MemberId Id `json:"member_id" url:"member_id"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (p *Permission) GetExtraProperties() map[string]interface{} {
+	return p.extraProperties
+}
+
+func (p *Permission) UnmarshalJSON(data []byte) error {
+	type unmarshaler Permission
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*p = Permission(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *p)
+	if err != nil {
+		return err
+	}
+	p.extraProperties = extraProperties
+
+	p._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (p *Permission) String() string {
+	if len(p._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(p._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(p); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", p)
 }
 
 type AccountsActions string
@@ -1087,28 +2604,102 @@ func (a AccountsActions) Ptr() *AccountsActions {
 
 // Permissions for the accounts API
 type AccountsPermissions struct {
-	Actions []AccountsActions `json:"actions,omitempty"`
+	Actions []AccountsActions `json:"actions" url:"actions"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (a *AccountsPermissions) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
+}
+
+func (a *AccountsPermissions) UnmarshalJSON(data []byte) error {
+	type unmarshaler AccountsPermissions
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*a = AccountsPermissions(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+
+	a._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (a *AccountsPermissions) String() string {
+	if len(a._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(a); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", a)
 }
 
 type ApiPermissionMap struct {
-	All               *ReadWritePermissions         `json:"all,omitempty"`
-	Accounts          *AccountsPermissions          `json:"accounts,omitempty"`
-	Audit             *AuditPermissions             `json:"audit,omitempty"`
-	Auth              *AuthPermissions              `json:"auth,omitempty"`
-	Bridges           *BridgesPermissions           `json:"bridges,omitempty"`
-	Capabilities      *CapabilitiesPermissions      `json:"capabilities,omitempty"`
-	Credentials       *CredentialsPermissions       `json:"credentials,omitempty"`
-	Integrations      *IntegrationsPermissions      `json:"integrations,omitempty"`
-	IntegrationPoints *IntegrationPointsPermissions `json:"integration_points,omitempty"`
-	Members           *MembersPermissions           `json:"members,omitempty"`
-	Organizations     *OrganizationPermissions      `json:"organizations,omitempty"`
-	PermissionSet     *PermissionSetPermissions     `json:"permission_set,omitempty"`
-	Roles             *RolesPermissions             `json:"roles,omitempty"`
-	Status            *StatusPermissions            `json:"status,omitempty"`
-	Suborgs           *SubOrgsPermissions           `json:"suborgs,omitempty"`
-	Tokens            *TokensPermissions            `json:"tokens,omitempty"`
-	Transforms        *TransformsPermissions        `json:"transforms,omitempty"`
-	Webhooks          *WebhooksPermissions          `json:"webhooks,omitempty"`
+	All               *ReadWritePermissions         `json:"all,omitempty" url:"all,omitempty"`
+	Accounts          *AccountsPermissions          `json:"accounts,omitempty" url:"accounts,omitempty"`
+	Audit             *AuditPermissions             `json:"audit,omitempty" url:"audit,omitempty"`
+	Auth              *AuthPermissions              `json:"auth,omitempty" url:"auth,omitempty"`
+	Bridges           *BridgesPermissions           `json:"bridges,omitempty" url:"bridges,omitempty"`
+	Capabilities      *CapabilitiesPermissions      `json:"capabilities,omitempty" url:"capabilities,omitempty"`
+	Credentials       *CredentialsPermissions       `json:"credentials,omitempty" url:"credentials,omitempty"`
+	Integrations      *IntegrationsPermissions      `json:"integrations,omitempty" url:"integrations,omitempty"`
+	IntegrationPoints *IntegrationPointsPermissions `json:"integration_points,omitempty" url:"integration_points,omitempty"`
+	Members           *MembersPermissions           `json:"members,omitempty" url:"members,omitempty"`
+	Organizations     *OrganizationPermissions      `json:"organizations,omitempty" url:"organizations,omitempty"`
+	PermissionSet     *PermissionSetPermissions     `json:"permission_set,omitempty" url:"permission_set,omitempty"`
+	Roles             *RolesPermissions             `json:"roles,omitempty" url:"roles,omitempty"`
+	Status            *StatusPermissions            `json:"status,omitempty" url:"status,omitempty"`
+	Suborgs           *SubOrgsPermissions           `json:"suborgs,omitempty" url:"suborgs,omitempty"`
+	Tokens            *TokensPermissions            `json:"tokens,omitempty" url:"tokens,omitempty"`
+	Transforms        *TransformsPermissions        `json:"transforms,omitempty" url:"transforms,omitempty"`
+	Webhooks          *WebhooksPermissions          `json:"webhooks,omitempty" url:"webhooks,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (a *ApiPermissionMap) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
+}
+
+func (a *ApiPermissionMap) UnmarshalJSON(data []byte) error {
+	type unmarshaler ApiPermissionMap
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*a = ApiPermissionMap(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+
+	a._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (a *ApiPermissionMap) String() string {
+	if len(a._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(a); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", a)
 }
 
 type AuditActions string
@@ -1135,7 +2726,44 @@ func (a AuditActions) Ptr() *AuditActions {
 
 // Permissions for the audit API
 type AuditPermissions struct {
-	Actions []AuditActions `json:"actions,omitempty"`
+	Actions []AuditActions `json:"actions" url:"actions"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (a *AuditPermissions) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
+}
+
+func (a *AuditPermissions) UnmarshalJSON(data []byte) error {
+	type unmarshaler AuditPermissions
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*a = AuditPermissions(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+
+	a._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (a *AuditPermissions) String() string {
+	if len(a._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(a); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", a)
 }
 
 type AuthActions string
@@ -1168,7 +2796,44 @@ func (a AuthActions) Ptr() *AuthActions {
 
 // Permissions for the auth logon/logoff API
 type AuthPermissions struct {
-	Actions []AuthActions `json:"actions,omitempty"`
+	Actions []AuthActions `json:"actions" url:"actions"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (a *AuthPermissions) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
+}
+
+func (a *AuthPermissions) UnmarshalJSON(data []byte) error {
+	type unmarshaler AuthPermissions
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*a = AuthPermissions(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+
+	a._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (a *AuthPermissions) String() string {
+	if len(a._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(a); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", a)
 }
 
 type BridgesActions string
@@ -1210,7 +2875,44 @@ func (b BridgesActions) Ptr() *BridgesActions {
 
 // Permissions for the bridge API
 type BridgesPermissions struct {
-	Actions []BridgesActions `json:"actions,omitempty"`
+	Actions []BridgesActions `json:"actions" url:"actions"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (b *BridgesPermissions) GetExtraProperties() map[string]interface{} {
+	return b.extraProperties
+}
+
+func (b *BridgesPermissions) UnmarshalJSON(data []byte) error {
+	type unmarshaler BridgesPermissions
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*b = BridgesPermissions(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *b)
+	if err != nil {
+		return err
+	}
+	b.extraProperties = extraProperties
+
+	b._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (b *BridgesPermissions) String() string {
+	if len(b._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(b._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(b); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", b)
 }
 
 type CapabilitiesActions string
@@ -1240,7 +2942,44 @@ func (c CapabilitiesActions) Ptr() *CapabilitiesActions {
 
 // Permissions for the capabilities API
 type CapabilitiesPermissions struct {
-	Actions []CapabilitiesActions `json:"actions,omitempty"`
+	Actions []CapabilitiesActions `json:"actions" url:"actions"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *CapabilitiesPermissions) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
+}
+
+func (c *CapabilitiesPermissions) UnmarshalJSON(data []byte) error {
+	type unmarshaler CapabilitiesPermissions
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = CapabilitiesPermissions(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
+	c._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (c *CapabilitiesPermissions) String() string {
+	if len(c._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
 }
 
 type CredentialsActions string
@@ -1285,7 +3024,44 @@ func (c CredentialsActions) Ptr() *CredentialsActions {
 
 // Permissions for the credentials API
 type CredentialsPermissions struct {
-	Actions []CredentialsActions `json:"actions,omitempty"`
+	Actions []CredentialsActions `json:"actions" url:"actions"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *CredentialsPermissions) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
+}
+
+func (c *CredentialsPermissions) UnmarshalJSON(data []byte) error {
+	type unmarshaler CredentialsPermissions
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = CredentialsPermissions(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
+	c._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (c *CredentialsPermissions) String() string {
+	if len(c._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
 }
 
 type IntegrationPointsActions string
@@ -1327,7 +3103,44 @@ func (i IntegrationPointsActions) Ptr() *IntegrationPointsActions {
 
 // Permissions for the integrations points API
 type IntegrationPointsPermissions struct {
-	Actions []IntegrationPointsActions `json:"actions,omitempty"`
+	Actions []IntegrationPointsActions `json:"actions" url:"actions"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (i *IntegrationPointsPermissions) GetExtraProperties() map[string]interface{} {
+	return i.extraProperties
+}
+
+func (i *IntegrationPointsPermissions) UnmarshalJSON(data []byte) error {
+	type unmarshaler IntegrationPointsPermissions
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*i = IntegrationPointsPermissions(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *i)
+	if err != nil {
+		return err
+	}
+	i.extraProperties = extraProperties
+
+	i._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (i *IntegrationPointsPermissions) String() string {
+	if len(i._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(i._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(i); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", i)
 }
 
 type IntegrationsActions string
@@ -1375,7 +3188,44 @@ func (i IntegrationsActions) Ptr() *IntegrationsActions {
 
 // Permissions for the integrations API
 type IntegrationsPermissions struct {
-	Actions []IntegrationsActions `json:"actions,omitempty"`
+	Actions []IntegrationsActions `json:"actions" url:"actions"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (i *IntegrationsPermissions) GetExtraProperties() map[string]interface{} {
+	return i.extraProperties
+}
+
+func (i *IntegrationsPermissions) UnmarshalJSON(data []byte) error {
+	type unmarshaler IntegrationsPermissions
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*i = IntegrationsPermissions(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *i)
+	if err != nil {
+		return err
+	}
+	i.extraProperties = extraProperties
+
+	i._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (i *IntegrationsPermissions) String() string {
+	if len(i._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(i._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(i); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", i)
 }
 
 type MembersActions string
@@ -1417,7 +3267,44 @@ func (m MembersActions) Ptr() *MembersActions {
 
 // Permissions for the members API
 type MembersPermissions struct {
-	Actions []MembersActions `json:"actions,omitempty"`
+	Actions []MembersActions `json:"actions" url:"actions"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (m *MembersPermissions) GetExtraProperties() map[string]interface{} {
+	return m.extraProperties
+}
+
+func (m *MembersPermissions) UnmarshalJSON(data []byte) error {
+	type unmarshaler MembersPermissions
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*m = MembersPermissions(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *m)
+	if err != nil {
+		return err
+	}
+	m.extraProperties = extraProperties
+
+	m._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (m *MembersPermissions) String() string {
+	if len(m._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(m._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(m); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", m)
 }
 
 type OrganizationActions string
@@ -1450,17 +3337,91 @@ func (o OrganizationActions) Ptr() *OrganizationActions {
 
 // Permissions for the organization API
 type OrganizationPermissions struct {
-	Actions []OrganizationActions `json:"actions,omitempty"`
+	Actions []OrganizationActions `json:"actions" url:"actions"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (o *OrganizationPermissions) GetExtraProperties() map[string]interface{} {
+	return o.extraProperties
+}
+
+func (o *OrganizationPermissions) UnmarshalJSON(data []byte) error {
+	type unmarshaler OrganizationPermissions
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*o = OrganizationPermissions(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *o)
+	if err != nil {
+		return err
+	}
+	o.extraProperties = extraProperties
+
+	o._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (o *OrganizationPermissions) String() string {
+	if len(o._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(o._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(o); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", o)
 }
 
 type PermissionSet struct {
-	Name Permissions `json:"name,omitempty"`
+	Name Permissions `json:"name" url:"name"`
 	// Description of when the permission set should be used and what permissions are granted by the permission set.
-	Description *string `json:"description,omitempty"`
+	Description *string `json:"description,omitempty" url:"description,omitempty"`
 	// Resources that can be used with this permission set
-	ResourceRestrictions []ResourceRestrictions `json:"resource_restrictions,omitempty"`
+	ResourceRestrictions []ResourceRestrictions `json:"resource_restrictions,omitempty" url:"resource_restrictions,omitempty"`
 	// API permissions granted by the permission set.
-	Permissions *ApiPermissionMap `json:"permissions,omitempty"`
+	Permissions *ApiPermissionMap `json:"permissions" url:"permissions"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (p *PermissionSet) GetExtraProperties() map[string]interface{} {
+	return p.extraProperties
+}
+
+func (p *PermissionSet) UnmarshalJSON(data []byte) error {
+	type unmarshaler PermissionSet
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*p = PermissionSet(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *p)
+	if err != nil {
+		return err
+	}
+	p.extraProperties = extraProperties
+
+	p._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (p *PermissionSet) String() string {
+	if len(p._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(p._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(p); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", p)
 }
 
 type PermissionSetActions string
@@ -1490,7 +3451,44 @@ func (p PermissionSetActions) Ptr() *PermissionSetActions {
 
 // Permissions for the permissionset API
 type PermissionSetPermissions struct {
-	Actions []PermissionSetActions `json:"actions,omitempty"`
+	Actions []PermissionSetActions `json:"actions" url:"actions"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (p *PermissionSetPermissions) GetExtraProperties() map[string]interface{} {
+	return p.extraProperties
+}
+
+func (p *PermissionSetPermissions) UnmarshalJSON(data []byte) error {
+	type unmarshaler PermissionSetPermissions
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*p = PermissionSetPermissions(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *p)
+	if err != nil {
+		return err
+	}
+	p.extraProperties = extraProperties
+
+	p._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (p *PermissionSetPermissions) String() string {
+	if len(p._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(p._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(p); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", p)
 }
 
 type ReadWriteActions string
@@ -1517,7 +3515,44 @@ func (r ReadWriteActions) Ptr() *ReadWriteActions {
 
 // Permissions for all accounts
 type ReadWritePermissions struct {
-	Actions []ReadWriteActions `json:"actions,omitempty"`
+	Actions []ReadWriteActions `json:"actions" url:"actions"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (r *ReadWritePermissions) GetExtraProperties() map[string]interface{} {
+	return r.extraProperties
+}
+
+func (r *ReadWritePermissions) UnmarshalJSON(data []byte) error {
+	type unmarshaler ReadWritePermissions
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*r = ReadWritePermissions(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *r)
+	if err != nil {
+		return err
+	}
+	r.extraProperties = extraProperties
+
+	r._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (r *ReadWritePermissions) String() string {
+	if len(r._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(r._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(r); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", r)
 }
 
 type ResourceRestrictions string
@@ -1581,7 +3616,44 @@ func (r RolesActions) Ptr() *RolesActions {
 
 // Permissions for the roles API
 type RolesPermissions struct {
-	Actions []RolesActions `json:"actions,omitempty"`
+	Actions []RolesActions `json:"actions" url:"actions"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (r *RolesPermissions) GetExtraProperties() map[string]interface{} {
+	return r.extraProperties
+}
+
+func (r *RolesPermissions) UnmarshalJSON(data []byte) error {
+	type unmarshaler RolesPermissions
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*r = RolesPermissions(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *r)
+	if err != nil {
+		return err
+	}
+	r.extraProperties = extraProperties
+
+	r._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (r *RolesPermissions) String() string {
+	if len(r._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(r._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(r); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", r)
 }
 
 type StatusActions string
@@ -1623,7 +3695,44 @@ func (s StatusActions) Ptr() *StatusActions {
 
 // Permissions for the status API
 type StatusPermissions struct {
-	Actions []StatusActions `json:"actions,omitempty"`
+	Actions []StatusActions `json:"actions" url:"actions"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (s *StatusPermissions) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
+}
+
+func (s *StatusPermissions) UnmarshalJSON(data []byte) error {
+	type unmarshaler StatusPermissions
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*s = StatusPermissions(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+
+	s._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (s *StatusPermissions) String() string {
+	if len(s._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(s); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", s)
 }
 
 type SubOrgsActions string
@@ -1659,7 +3768,44 @@ func (s SubOrgsActions) Ptr() *SubOrgsActions {
 
 // Permissions for the roles API
 type SubOrgsPermissions struct {
-	Actions []SubOrgsActions `json:"actions,omitempty"`
+	Actions []SubOrgsActions `json:"actions" url:"actions"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (s *SubOrgsPermissions) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
+}
+
+func (s *SubOrgsPermissions) UnmarshalJSON(data []byte) error {
+	type unmarshaler SubOrgsPermissions
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*s = SubOrgsPermissions(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+
+	s._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (s *SubOrgsPermissions) String() string {
+	if len(s._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(s); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", s)
 }
 
 type TokensActions string
@@ -1704,7 +3850,44 @@ func (t TokensActions) Ptr() *TokensActions {
 
 // Permissions for the tokens API
 type TokensPermissions struct {
-	Actions []TokensActions `json:"actions,omitempty"`
+	Actions []TokensActions `json:"actions" url:"actions"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (t *TokensPermissions) GetExtraProperties() map[string]interface{} {
+	return t.extraProperties
+}
+
+func (t *TokensPermissions) UnmarshalJSON(data []byte) error {
+	type unmarshaler TokensPermissions
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*t = TokensPermissions(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *t)
+	if err != nil {
+		return err
+	}
+	t.extraProperties = extraProperties
+
+	t._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (t *TokensPermissions) String() string {
+	if len(t._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(t._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(t); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", t)
 }
 
 type TransformsActions string
@@ -1746,7 +3929,44 @@ func (t TransformsActions) Ptr() *TransformsActions {
 
 // Permissions for the transforms API
 type TransformsPermissions struct {
-	Actions []TransformsActions `json:"actions,omitempty"`
+	Actions []TransformsActions `json:"actions" url:"actions"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (t *TransformsPermissions) GetExtraProperties() map[string]interface{} {
+	return t.extraProperties
+}
+
+func (t *TransformsPermissions) UnmarshalJSON(data []byte) error {
+	type unmarshaler TransformsPermissions
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*t = TransformsPermissions(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *t)
+	if err != nil {
+		return err
+	}
+	t.extraProperties = extraProperties
+
+	t._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (t *TransformsPermissions) String() string {
+	if len(t._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(t._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(t); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", t)
 }
 
 type WebhooksActions string
@@ -1788,21 +4008,50 @@ func (w WebhooksActions) Ptr() *WebhooksActions {
 
 // Permissions for the webhooks API
 type WebhooksPermissions struct {
-	Actions []WebhooksActions `json:"actions,omitempty"`
+	Actions []WebhooksActions `json:"actions" url:"actions"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (w *WebhooksPermissions) GetExtraProperties() map[string]interface{} {
+	return w.extraProperties
+}
+
+func (w *WebhooksPermissions) UnmarshalJSON(data []byte) error {
+	type unmarshaler WebhooksPermissions
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*w = WebhooksPermissions(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *w)
+	if err != nil {
+		return err
+	}
+	w.extraProperties = extraProperties
+
+	w._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (w *WebhooksPermissions) String() string {
+	if len(w._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(w._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(w); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", w)
 }
 
 type ArmisCredential struct {
 	Type    string
 	Token   *TokenCredential
 	TokenId TokenCredentialId
-}
-
-func NewArmisCredentialFromToken(value *TokenCredential) *ArmisCredential {
-	return &ArmisCredential{Type: "token", Token: value}
-}
-
-func NewArmisCredentialFromTokenId(value TokenCredentialId) *ArmisCredential {
-	return &ArmisCredential{Type: "token_id", TokenId: value}
 }
 
 func (a *ArmisCredential) UnmarshalJSON(data []byte) error {
@@ -1813,6 +4062,9 @@ func (a *ArmisCredential) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	a.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", a)
+	}
 	switch unmarshaler.Type {
 	case "token":
 		value := new(TokenCredential)
@@ -1822,7 +4074,7 @@ func (a *ArmisCredential) UnmarshalJSON(data []byte) error {
 		a.Token = value
 	case "token_id":
 		var valueUnmarshaler struct {
-			TokenId TokenCredentialId `json:"value,omitempty"`
+			TokenId TokenCredentialId `json:"value"`
 		}
 		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
 			return err
@@ -1833,28 +4085,20 @@ func (a *ArmisCredential) UnmarshalJSON(data []byte) error {
 }
 
 func (a ArmisCredential) MarshalJSON() ([]byte, error) {
-	switch a.Type {
-	default:
-		return nil, fmt.Errorf("invalid type %s in %T", a.Type, a)
-	case "token":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*TokenCredential
-		}{
-			Type:            a.Type,
-			TokenCredential: a.Token,
-		}
-		return json.Marshal(marshaler)
-	case "token_id":
+	if a.Token != nil {
+		return core.MarshalJSONWithExtraProperty(a.Token, "type", "token")
+	}
+	if a.TokenId != "" {
 		var marshaler = struct {
 			Type    string            `json:"type"`
-			TokenId TokenCredentialId `json:"value,omitempty"`
+			TokenId TokenCredentialId `json:"value"`
 		}{
-			Type:    a.Type,
+			Type:    "token_id",
 			TokenId: a.TokenId,
 		}
 		return json.Marshal(marshaler)
 	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", a)
 }
 
 type ArmisCredentialVisitor interface {
@@ -1863,49 +4107,151 @@ type ArmisCredentialVisitor interface {
 }
 
 func (a *ArmisCredential) Accept(visitor ArmisCredentialVisitor) error {
-	switch a.Type {
-	default:
-		return fmt.Errorf("invalid type %s in %T", a.Type, a)
-	case "token":
+	if a.Token != nil {
 		return visitor.VisitToken(a.Token)
-	case "token_id":
+	}
+	if a.TokenId != "" {
 		return visitor.VisitTokenId(a.TokenId)
 	}
+	return fmt.Errorf("type %T does not define a non-empty union type", a)
 }
 
 // Configuration for the Armis Centrix Assets Provider
 type AssetsArmisCentrix struct {
-	Credential *ArmisCredential `json:"credential,omitempty"`
+	Credential *ArmisCredential `json:"credential" url:"credential"`
 	// URL for the Armis Centrix API. This should be the base URL for the API, without any path components. For example, "https://tenant.armis.com".
-	Url string `json:"url"`
+	Url string `json:"url" url:"url"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (a *AssetsArmisCentrix) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
+}
+
+func (a *AssetsArmisCentrix) UnmarshalJSON(data []byte) error {
+	type unmarshaler AssetsArmisCentrix
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*a = AssetsArmisCentrix(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+
+	a._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (a *AssetsArmisCentrix) String() string {
+	if len(a._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(a); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", a)
 }
 
 // Configuration for the Nozomi Vantage provider
 type AssetsNozomiVantage struct {
-	Credential *NozomiVantageCredential `json:"credential,omitempty"`
+	Credential *NozomiVantageCredential `json:"credential" url:"credential"`
 	// URL for the Nozomi Vantage API. This should be the base URL for the API, without any path components. For example, "https://tenant.us1.vantage.nozominetworks.io".
-	Url string `json:"url"`
+	Url string `json:"url" url:"url"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (a *AssetsNozomiVantage) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
+}
+
+func (a *AssetsNozomiVantage) UnmarshalJSON(data []byte) error {
+	type unmarshaler AssetsNozomiVantage
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*a = AssetsNozomiVantage(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+
+	a._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (a *AssetsNozomiVantage) String() string {
+	if len(a._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(a); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", a)
 }
 
 // Configuration for ServiceNow as an Assets Provider
 type AssetsServiceNow struct {
-	Credential *ServiceNowCredential `json:"credential,omitempty"`
+	Credential *ServiceNowCredential `json:"credential" url:"credential"`
 	// URL for the ServiceNow API. This should be the base URL for the API, without any path components and must be HTTPS. For example, "https://tenant.service-now.com".
-	Url string `json:"url"`
+	Url string `json:"url" url:"url"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (a *AssetsServiceNow) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
+}
+
+func (a *AssetsServiceNow) UnmarshalJSON(data []byte) error {
+	type unmarshaler AssetsServiceNow
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*a = AssetsServiceNow(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+
+	a._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (a *AssetsServiceNow) String() string {
+	if len(a._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(a); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", a)
 }
 
 type AwsS3Credential struct {
 	Type  string
 	Aws   *AwsCredential
 	AwsId AwsCredentialId
-}
-
-func NewAwsS3CredentialFromAws(value *AwsCredential) *AwsS3Credential {
-	return &AwsS3Credential{Type: "aws", Aws: value}
-}
-
-func NewAwsS3CredentialFromAwsId(value AwsCredentialId) *AwsS3Credential {
-	return &AwsS3Credential{Type: "aws_id", AwsId: value}
 }
 
 func (a *AwsS3Credential) UnmarshalJSON(data []byte) error {
@@ -1916,6 +4262,9 @@ func (a *AwsS3Credential) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	a.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", a)
+	}
 	switch unmarshaler.Type {
 	case "aws":
 		value := new(AwsCredential)
@@ -1925,7 +4274,7 @@ func (a *AwsS3Credential) UnmarshalJSON(data []byte) error {
 		a.Aws = value
 	case "aws_id":
 		var valueUnmarshaler struct {
-			AwsId AwsCredentialId `json:"value,omitempty"`
+			AwsId AwsCredentialId `json:"value"`
 		}
 		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
 			return err
@@ -1936,28 +4285,20 @@ func (a *AwsS3Credential) UnmarshalJSON(data []byte) error {
 }
 
 func (a AwsS3Credential) MarshalJSON() ([]byte, error) {
-	switch a.Type {
-	default:
-		return nil, fmt.Errorf("invalid type %s in %T", a.Type, a)
-	case "aws":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*AwsCredential
-		}{
-			Type:          a.Type,
-			AwsCredential: a.Aws,
-		}
-		return json.Marshal(marshaler)
-	case "aws_id":
+	if a.Aws != nil {
+		return core.MarshalJSONWithExtraProperty(a.Aws, "type", "aws")
+	}
+	if a.AwsId != "" {
 		var marshaler = struct {
 			Type  string          `json:"type"`
-			AwsId AwsCredentialId `json:"value,omitempty"`
+			AwsId AwsCredentialId `json:"value"`
 		}{
-			Type:  a.Type,
+			Type:  "aws_id",
 			AwsId: a.AwsId,
 		}
 		return json.Marshal(marshaler)
 	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", a)
 }
 
 type AwsS3CredentialVisitor interface {
@@ -1966,28 +4307,19 @@ type AwsS3CredentialVisitor interface {
 }
 
 func (a *AwsS3Credential) Accept(visitor AwsS3CredentialVisitor) error {
-	switch a.Type {
-	default:
-		return fmt.Errorf("invalid type %s in %T", a.Type, a)
-	case "aws":
+	if a.Aws != nil {
 		return visitor.VisitAws(a.Aws)
-	case "aws_id":
+	}
+	if a.AwsId != "" {
 		return visitor.VisitAwsId(a.AwsId)
 	}
+	return fmt.Errorf("type %T does not define a non-empty union type", a)
 }
 
 type AwsSqsCredential struct {
 	Type  string
 	Aws   *AwsCredential
 	AwsId AwsCredentialId
-}
-
-func NewAwsSqsCredentialFromAws(value *AwsCredential) *AwsSqsCredential {
-	return &AwsSqsCredential{Type: "aws", Aws: value}
-}
-
-func NewAwsSqsCredentialFromAwsId(value AwsCredentialId) *AwsSqsCredential {
-	return &AwsSqsCredential{Type: "aws_id", AwsId: value}
 }
 
 func (a *AwsSqsCredential) UnmarshalJSON(data []byte) error {
@@ -1998,6 +4330,9 @@ func (a *AwsSqsCredential) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	a.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", a)
+	}
 	switch unmarshaler.Type {
 	case "aws":
 		value := new(AwsCredential)
@@ -2007,7 +4342,7 @@ func (a *AwsSqsCredential) UnmarshalJSON(data []byte) error {
 		a.Aws = value
 	case "aws_id":
 		var valueUnmarshaler struct {
-			AwsId AwsCredentialId `json:"value,omitempty"`
+			AwsId AwsCredentialId `json:"value"`
 		}
 		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
 			return err
@@ -2018,28 +4353,20 @@ func (a *AwsSqsCredential) UnmarshalJSON(data []byte) error {
 }
 
 func (a AwsSqsCredential) MarshalJSON() ([]byte, error) {
-	switch a.Type {
-	default:
-		return nil, fmt.Errorf("invalid type %s in %T", a.Type, a)
-	case "aws":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*AwsCredential
-		}{
-			Type:          a.Type,
-			AwsCredential: a.Aws,
-		}
-		return json.Marshal(marshaler)
-	case "aws_id":
+	if a.Aws != nil {
+		return core.MarshalJSONWithExtraProperty(a.Aws, "type", "aws")
+	}
+	if a.AwsId != "" {
 		var marshaler = struct {
 			Type  string          `json:"type"`
-			AwsId AwsCredentialId `json:"value,omitempty"`
+			AwsId AwsCredentialId `json:"value"`
 		}{
-			Type:  a.Type,
+			Type:  "aws_id",
 			AwsId: a.AwsId,
 		}
 		return json.Marshal(marshaler)
 	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", a)
 }
 
 type AwsSqsCredentialVisitor interface {
@@ -2048,28 +4375,19 @@ type AwsSqsCredentialVisitor interface {
 }
 
 func (a *AwsSqsCredential) Accept(visitor AwsSqsCredentialVisitor) error {
-	switch a.Type {
-	default:
-		return fmt.Errorf("invalid type %s in %T", a.Type, a)
-	case "aws":
+	if a.Aws != nil {
 		return visitor.VisitAws(a.Aws)
-	case "aws_id":
+	}
+	if a.AwsId != "" {
 		return visitor.VisitAwsId(a.AwsId)
 	}
+	return fmt.Errorf("type %T does not define a non-empty union type", a)
 }
 
 type AwsSecurityLakeCredential struct {
 	Type  string
 	Aws   *AwsCredential
 	AwsId AwsCredentialId
-}
-
-func NewAwsSecurityLakeCredentialFromAws(value *AwsCredential) *AwsSecurityLakeCredential {
-	return &AwsSecurityLakeCredential{Type: "aws", Aws: value}
-}
-
-func NewAwsSecurityLakeCredentialFromAwsId(value AwsCredentialId) *AwsSecurityLakeCredential {
-	return &AwsSecurityLakeCredential{Type: "aws_id", AwsId: value}
 }
 
 func (a *AwsSecurityLakeCredential) UnmarshalJSON(data []byte) error {
@@ -2080,6 +4398,9 @@ func (a *AwsSecurityLakeCredential) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	a.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", a)
+	}
 	switch unmarshaler.Type {
 	case "aws":
 		value := new(AwsCredential)
@@ -2089,7 +4410,7 @@ func (a *AwsSecurityLakeCredential) UnmarshalJSON(data []byte) error {
 		a.Aws = value
 	case "aws_id":
 		var valueUnmarshaler struct {
-			AwsId AwsCredentialId `json:"value,omitempty"`
+			AwsId AwsCredentialId `json:"value"`
 		}
 		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
 			return err
@@ -2100,28 +4421,20 @@ func (a *AwsSecurityLakeCredential) UnmarshalJSON(data []byte) error {
 }
 
 func (a AwsSecurityLakeCredential) MarshalJSON() ([]byte, error) {
-	switch a.Type {
-	default:
-		return nil, fmt.Errorf("invalid type %s in %T", a.Type, a)
-	case "aws":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*AwsCredential
-		}{
-			Type:          a.Type,
-			AwsCredential: a.Aws,
-		}
-		return json.Marshal(marshaler)
-	case "aws_id":
+	if a.Aws != nil {
+		return core.MarshalJSONWithExtraProperty(a.Aws, "type", "aws")
+	}
+	if a.AwsId != "" {
 		var marshaler = struct {
 			Type  string          `json:"type"`
-			AwsId AwsCredentialId `json:"value,omitempty"`
+			AwsId AwsCredentialId `json:"value"`
 		}{
-			Type:  a.Type,
+			Type:  "aws_id",
 			AwsId: a.AwsId,
 		}
 		return json.Marshal(marshaler)
 	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", a)
 }
 
 type AwsSecurityLakeCredentialVisitor interface {
@@ -2130,28 +4443,19 @@ type AwsSecurityLakeCredentialVisitor interface {
 }
 
 func (a *AwsSecurityLakeCredential) Accept(visitor AwsSecurityLakeCredentialVisitor) error {
-	switch a.Type {
-	default:
-		return fmt.Errorf("invalid type %s in %T", a.Type, a)
-	case "aws":
+	if a.Aws != nil {
 		return visitor.VisitAws(a.Aws)
-	case "aws_id":
+	}
+	if a.AwsId != "" {
 		return visitor.VisitAwsId(a.AwsId)
 	}
+	return fmt.Errorf("type %T does not define a non-empty union type", a)
 }
 
 type AzureBlobCredential struct {
 	Type    string
 	Token   *TokenCredential
 	TokenId TokenCredentialId
-}
-
-func NewAzureBlobCredentialFromToken(value *TokenCredential) *AzureBlobCredential {
-	return &AzureBlobCredential{Type: "token", Token: value}
-}
-
-func NewAzureBlobCredentialFromTokenId(value TokenCredentialId) *AzureBlobCredential {
-	return &AzureBlobCredential{Type: "token_id", TokenId: value}
 }
 
 func (a *AzureBlobCredential) UnmarshalJSON(data []byte) error {
@@ -2162,6 +4466,9 @@ func (a *AzureBlobCredential) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	a.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", a)
+	}
 	switch unmarshaler.Type {
 	case "token":
 		value := new(TokenCredential)
@@ -2171,7 +4478,7 @@ func (a *AzureBlobCredential) UnmarshalJSON(data []byte) error {
 		a.Token = value
 	case "token_id":
 		var valueUnmarshaler struct {
-			TokenId TokenCredentialId `json:"value,omitempty"`
+			TokenId TokenCredentialId `json:"value"`
 		}
 		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
 			return err
@@ -2182,28 +4489,20 @@ func (a *AzureBlobCredential) UnmarshalJSON(data []byte) error {
 }
 
 func (a AzureBlobCredential) MarshalJSON() ([]byte, error) {
-	switch a.Type {
-	default:
-		return nil, fmt.Errorf("invalid type %s in %T", a.Type, a)
-	case "token":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*TokenCredential
-		}{
-			Type:            a.Type,
-			TokenCredential: a.Token,
-		}
-		return json.Marshal(marshaler)
-	case "token_id":
+	if a.Token != nil {
+		return core.MarshalJSONWithExtraProperty(a.Token, "type", "token")
+	}
+	if a.TokenId != "" {
 		var marshaler = struct {
 			Type    string            `json:"type"`
-			TokenId TokenCredentialId `json:"value,omitempty"`
+			TokenId TokenCredentialId `json:"value"`
 		}{
-			Type:    a.Type,
+			Type:    "token_id",
 			TokenId: a.TokenId,
 		}
 		return json.Marshal(marshaler)
 	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", a)
 }
 
 type AzureBlobCredentialVisitor interface {
@@ -2212,28 +4511,19 @@ type AzureBlobCredentialVisitor interface {
 }
 
 func (a *AzureBlobCredential) Accept(visitor AzureBlobCredentialVisitor) error {
-	switch a.Type {
-	default:
-		return fmt.Errorf("invalid type %s in %T", a.Type, a)
-	case "token":
+	if a.Token != nil {
 		return visitor.VisitToken(a.Token)
-	case "token_id":
+	}
+	if a.TokenId != "" {
 		return visitor.VisitTokenId(a.TokenId)
 	}
+	return fmt.Errorf("type %T does not define a non-empty union type", a)
 }
 
 type AzureMonitorLogsCredential struct {
 	Type    string
 	Token   *TokenCredential
 	TokenId TokenCredentialId
-}
-
-func NewAzureMonitorLogsCredentialFromToken(value *TokenCredential) *AzureMonitorLogsCredential {
-	return &AzureMonitorLogsCredential{Type: "token", Token: value}
-}
-
-func NewAzureMonitorLogsCredentialFromTokenId(value TokenCredentialId) *AzureMonitorLogsCredential {
-	return &AzureMonitorLogsCredential{Type: "token_id", TokenId: value}
 }
 
 func (a *AzureMonitorLogsCredential) UnmarshalJSON(data []byte) error {
@@ -2244,6 +4534,9 @@ func (a *AzureMonitorLogsCredential) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	a.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", a)
+	}
 	switch unmarshaler.Type {
 	case "token":
 		value := new(TokenCredential)
@@ -2253,7 +4546,7 @@ func (a *AzureMonitorLogsCredential) UnmarshalJSON(data []byte) error {
 		a.Token = value
 	case "token_id":
 		var valueUnmarshaler struct {
-			TokenId TokenCredentialId `json:"value,omitempty"`
+			TokenId TokenCredentialId `json:"value"`
 		}
 		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
 			return err
@@ -2264,28 +4557,20 @@ func (a *AzureMonitorLogsCredential) UnmarshalJSON(data []byte) error {
 }
 
 func (a AzureMonitorLogsCredential) MarshalJSON() ([]byte, error) {
-	switch a.Type {
-	default:
-		return nil, fmt.Errorf("invalid type %s in %T", a.Type, a)
-	case "token":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*TokenCredential
-		}{
-			Type:            a.Type,
-			TokenCredential: a.Token,
-		}
-		return json.Marshal(marshaler)
-	case "token_id":
+	if a.Token != nil {
+		return core.MarshalJSONWithExtraProperty(a.Token, "type", "token")
+	}
+	if a.TokenId != "" {
 		var marshaler = struct {
 			Type    string            `json:"type"`
-			TokenId TokenCredentialId `json:"value,omitempty"`
+			TokenId TokenCredentialId `json:"value"`
 		}{
-			Type:    a.Type,
+			Type:    "token_id",
 			TokenId: a.TokenId,
 		}
 		return json.Marshal(marshaler)
 	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", a)
 }
 
 type AzureMonitorLogsCredentialVisitor interface {
@@ -2294,28 +4579,19 @@ type AzureMonitorLogsCredentialVisitor interface {
 }
 
 func (a *AzureMonitorLogsCredential) Accept(visitor AzureMonitorLogsCredentialVisitor) error {
-	switch a.Type {
-	default:
-		return fmt.Errorf("invalid type %s in %T", a.Type, a)
-	case "token":
+	if a.Token != nil {
 		return visitor.VisitToken(a.Token)
-	case "token_id":
+	}
+	if a.TokenId != "" {
 		return visitor.VisitTokenId(a.TokenId)
 	}
+	return fmt.Errorf("type %T does not define a non-empty union type", a)
 }
 
 type CrowdStrikeCredential struct {
 	Type          string
 	OAuthClient   *OAuthClientCredential
 	OAuthClientId OAuthClientCredentialId
-}
-
-func NewCrowdStrikeCredentialFromOAuthClient(value *OAuthClientCredential) *CrowdStrikeCredential {
-	return &CrowdStrikeCredential{Type: "o_auth_client", OAuthClient: value}
-}
-
-func NewCrowdStrikeCredentialFromOAuthClientId(value OAuthClientCredentialId) *CrowdStrikeCredential {
-	return &CrowdStrikeCredential{Type: "o_auth_client_id", OAuthClientId: value}
 }
 
 func (c *CrowdStrikeCredential) UnmarshalJSON(data []byte) error {
@@ -2326,6 +4602,9 @@ func (c *CrowdStrikeCredential) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	c.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", c)
+	}
 	switch unmarshaler.Type {
 	case "o_auth_client":
 		value := new(OAuthClientCredential)
@@ -2335,7 +4614,7 @@ func (c *CrowdStrikeCredential) UnmarshalJSON(data []byte) error {
 		c.OAuthClient = value
 	case "o_auth_client_id":
 		var valueUnmarshaler struct {
-			OAuthClientId OAuthClientCredentialId `json:"value,omitempty"`
+			OAuthClientId OAuthClientCredentialId `json:"value"`
 		}
 		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
 			return err
@@ -2346,28 +4625,20 @@ func (c *CrowdStrikeCredential) UnmarshalJSON(data []byte) error {
 }
 
 func (c CrowdStrikeCredential) MarshalJSON() ([]byte, error) {
-	switch c.Type {
-	default:
-		return nil, fmt.Errorf("invalid type %s in %T", c.Type, c)
-	case "o_auth_client":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*OAuthClientCredential
-		}{
-			Type:                  c.Type,
-			OAuthClientCredential: c.OAuthClient,
-		}
-		return json.Marshal(marshaler)
-	case "o_auth_client_id":
+	if c.OAuthClient != nil {
+		return core.MarshalJSONWithExtraProperty(c.OAuthClient, "type", "o_auth_client")
+	}
+	if c.OAuthClientId != "" {
 		var marshaler = struct {
 			Type          string                  `json:"type"`
-			OAuthClientId OAuthClientCredentialId `json:"value,omitempty"`
+			OAuthClientId OAuthClientCredentialId `json:"value"`
 		}{
-			Type:          c.Type,
+			Type:          "o_auth_client_id",
 			OAuthClientId: c.OAuthClientId,
 		}
 		return json.Marshal(marshaler)
 	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", c)
 }
 
 type CrowdStrikeCredentialVisitor interface {
@@ -2376,37 +4647,65 @@ type CrowdStrikeCredentialVisitor interface {
 }
 
 func (c *CrowdStrikeCredential) Accept(visitor CrowdStrikeCredentialVisitor) error {
-	switch c.Type {
-	default:
-		return fmt.Errorf("invalid type %s in %T", c.Type, c)
-	case "o_auth_client":
+	if c.OAuthClient != nil {
 		return visitor.VisitOAuthClient(c.OAuthClient)
-	case "o_auth_client_id":
+	}
+	if c.OAuthClientId != "" {
 		return visitor.VisitOAuthClientId(c.OAuthClientId)
 	}
+	return fmt.Errorf("type %T does not define a non-empty union type", c)
 }
 
 type CustomFieldMapping struct {
 	// Name for the custom field that you will use in the `custom_fields` field in ticket objects within Synqly.
-	Name string `json:"name"`
+	Name string `json:"name" url:"name"`
 	// ID of the project this field mapping is associated with. ID of "\*" is used to apply to all projects.
-	ProjectId string `json:"project_id"`
+	ProjectId string `json:"project_id" url:"project_id"`
 	// Path to or name of the custom field in the provider.
-	ProviderFieldPath string `json:"provider_field_path"`
+	ProviderFieldPath string `json:"provider_field_path" url:"provider_field_path"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *CustomFieldMapping) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
+}
+
+func (c *CustomFieldMapping) UnmarshalJSON(data []byte) error {
+	type unmarshaler CustomFieldMapping
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = CustomFieldMapping(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
+	c._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (c *CustomFieldMapping) String() string {
+	if len(c._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
 }
 
 type DefenderCredential struct {
 	Type          string
 	OAuthClient   *OAuthClientCredential
 	OAuthClientId OAuthClientCredentialId
-}
-
-func NewDefenderCredentialFromOAuthClient(value *OAuthClientCredential) *DefenderCredential {
-	return &DefenderCredential{Type: "o_auth_client", OAuthClient: value}
-}
-
-func NewDefenderCredentialFromOAuthClientId(value OAuthClientCredentialId) *DefenderCredential {
-	return &DefenderCredential{Type: "o_auth_client_id", OAuthClientId: value}
 }
 
 func (d *DefenderCredential) UnmarshalJSON(data []byte) error {
@@ -2417,6 +4716,9 @@ func (d *DefenderCredential) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	d.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", d)
+	}
 	switch unmarshaler.Type {
 	case "o_auth_client":
 		value := new(OAuthClientCredential)
@@ -2426,7 +4728,7 @@ func (d *DefenderCredential) UnmarshalJSON(data []byte) error {
 		d.OAuthClient = value
 	case "o_auth_client_id":
 		var valueUnmarshaler struct {
-			OAuthClientId OAuthClientCredentialId `json:"value,omitempty"`
+			OAuthClientId OAuthClientCredentialId `json:"value"`
 		}
 		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
 			return err
@@ -2437,28 +4739,20 @@ func (d *DefenderCredential) UnmarshalJSON(data []byte) error {
 }
 
 func (d DefenderCredential) MarshalJSON() ([]byte, error) {
-	switch d.Type {
-	default:
-		return nil, fmt.Errorf("invalid type %s in %T", d.Type, d)
-	case "o_auth_client":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*OAuthClientCredential
-		}{
-			Type:                  d.Type,
-			OAuthClientCredential: d.OAuthClient,
-		}
-		return json.Marshal(marshaler)
-	case "o_auth_client_id":
+	if d.OAuthClient != nil {
+		return core.MarshalJSONWithExtraProperty(d.OAuthClient, "type", "o_auth_client")
+	}
+	if d.OAuthClientId != "" {
 		var marshaler = struct {
 			Type          string                  `json:"type"`
-			OAuthClientId OAuthClientCredentialId `json:"value,omitempty"`
+			OAuthClientId OAuthClientCredentialId `json:"value"`
 		}{
-			Type:          d.Type,
+			Type:          "o_auth_client_id",
 			OAuthClientId: d.OAuthClientId,
 		}
 		return json.Marshal(marshaler)
 	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", d)
 }
 
 type DefenderCredentialVisitor interface {
@@ -2467,37 +4761,147 @@ type DefenderCredentialVisitor interface {
 }
 
 func (d *DefenderCredential) Accept(visitor DefenderCredentialVisitor) error {
-	switch d.Type {
-	default:
-		return fmt.Errorf("invalid type %s in %T", d.Type, d)
-	case "o_auth_client":
+	if d.OAuthClient != nil {
 		return visitor.VisitOAuthClient(d.OAuthClient)
-	case "o_auth_client_id":
+	}
+	if d.OAuthClientId != "" {
 		return visitor.VisitOAuthClientId(d.OAuthClientId)
 	}
+	return fmt.Errorf("type %T does not define a non-empty union type", d)
 }
 
 // Configuration for the CrowdStrike EDR Provider
 type EdrCrowdStrike struct {
-	Credential *CrowdStrikeCredential `json:"credential,omitempty"`
+	Credential *CrowdStrikeCredential `json:"credential" url:"credential"`
 	// The root domain where your CrowdStrike Falcon tenant is located. Default "https://api.crowdstrike.com".
-	Url *string `json:"url,omitempty"`
+	Url *string `json:"url,omitempty" url:"url,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (e *EdrCrowdStrike) GetExtraProperties() map[string]interface{} {
+	return e.extraProperties
+}
+
+func (e *EdrCrowdStrike) UnmarshalJSON(data []byte) error {
+	type unmarshaler EdrCrowdStrike
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*e = EdrCrowdStrike(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *e)
+	if err != nil {
+		return err
+	}
+	e.extraProperties = extraProperties
+
+	e._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (e *EdrCrowdStrike) String() string {
+	if len(e._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(e._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(e); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", e)
 }
 
 // Configuration for the Microsoft Defender EDR Provider
 type EdrDefender struct {
-	Credential *DefenderCredential `json:"credential,omitempty"`
+	Credential *DefenderCredential `json:"credential" url:"credential"`
 	// TenantId for the Microsoft Defender Management Console.
-	TenantId string `json:"tenant_id"`
+	TenantId string `json:"tenant_id" url:"tenant_id"`
 	// URL for the Microsoft Defender Management Console.
-	Url string `json:"url"`
+	Url string `json:"url" url:"url"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (e *EdrDefender) GetExtraProperties() map[string]interface{} {
+	return e.extraProperties
+}
+
+func (e *EdrDefender) UnmarshalJSON(data []byte) error {
+	type unmarshaler EdrDefender
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*e = EdrDefender(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *e)
+	if err != nil {
+		return err
+	}
+	e.extraProperties = extraProperties
+
+	e._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (e *EdrDefender) String() string {
+	if len(e._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(e._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(e); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", e)
 }
 
 // Configuration for the SentinelOne EDR Provider
 type EdrSentinelOne struct {
-	Credential *SentinelOneCredential `json:"credential,omitempty"`
+	Credential *SentinelOneCredential `json:"credential" url:"credential"`
 	// URL for the SentinelOne Management API. This should be the base URL for the API, without any path components. For example, "https://your_management_url".
-	Url string `json:"url"`
+	Url string `json:"url" url:"url"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (e *EdrSentinelOne) GetExtraProperties() map[string]interface{} {
+	return e.extraProperties
+}
+
+func (e *EdrSentinelOne) UnmarshalJSON(data []byte) error {
+	type unmarshaler EdrSentinelOne
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*e = EdrSentinelOne(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *e)
+	if err != nil {
+		return err
+	}
+	e.extraProperties = extraProperties
+
+	e._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (e *EdrSentinelOne) String() string {
+	if len(e._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(e._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(e); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", e)
 }
 
 // Options used to control how requests are made to elasticsearch when different authentication types are used.
@@ -2505,10 +4909,47 @@ type ElasticsearchAuthOptions struct {
 	// When you have the correct permissions, this allows API requests to get made as a specific user, with all of their roles
 	// and permissions. When populated, this option will send the 'es-security-runas-user' header with every request made to
 	// the Elasticsearch API.
-	RunAs *string `json:"run_as,omitempty"`
+	RunAs *string `json:"run_as,omitempty" url:"run_as,omitempty"`
 	// Some auth cases, notably JWT auth can be configured to require sending a shared secret in the `ES-Client-Authentication`
 	// header. When this secret is populated, it will get added as the shared secret for every request made to Elasticsearch.
-	SharedSecret *ElasticsearchSharedSecret `json:"shared_secret,omitempty"`
+	SharedSecret *ElasticsearchSharedSecret `json:"shared_secret,omitempty" url:"shared_secret,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (e *ElasticsearchAuthOptions) GetExtraProperties() map[string]interface{} {
+	return e.extraProperties
+}
+
+func (e *ElasticsearchAuthOptions) UnmarshalJSON(data []byte) error {
+	type unmarshaler ElasticsearchAuthOptions
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*e = ElasticsearchAuthOptions(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *e)
+	if err != nil {
+		return err
+	}
+	e.extraProperties = extraProperties
+
+	e._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (e *ElasticsearchAuthOptions) String() string {
+	if len(e._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(e._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(e); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", e)
 }
 
 type ElasticsearchCredential struct {
@@ -2519,22 +4960,6 @@ type ElasticsearchCredential struct {
 	TokenId       TokenCredentialId
 }
 
-func NewElasticsearchCredentialFromOAuthClient(value *OAuthClientCredential) *ElasticsearchCredential {
-	return &ElasticsearchCredential{Type: "o_auth_client", OAuthClient: value}
-}
-
-func NewElasticsearchCredentialFromOAuthClientId(value OAuthClientCredentialId) *ElasticsearchCredential {
-	return &ElasticsearchCredential{Type: "o_auth_client_id", OAuthClientId: value}
-}
-
-func NewElasticsearchCredentialFromToken(value *TokenCredential) *ElasticsearchCredential {
-	return &ElasticsearchCredential{Type: "token", Token: value}
-}
-
-func NewElasticsearchCredentialFromTokenId(value TokenCredentialId) *ElasticsearchCredential {
-	return &ElasticsearchCredential{Type: "token_id", TokenId: value}
-}
-
 func (e *ElasticsearchCredential) UnmarshalJSON(data []byte) error {
 	var unmarshaler struct {
 		Type string `json:"type"`
@@ -2543,6 +4968,9 @@ func (e *ElasticsearchCredential) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	e.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", e)
+	}
 	switch unmarshaler.Type {
 	case "o_auth_client":
 		value := new(OAuthClientCredential)
@@ -2552,7 +4980,7 @@ func (e *ElasticsearchCredential) UnmarshalJSON(data []byte) error {
 		e.OAuthClient = value
 	case "o_auth_client_id":
 		var valueUnmarshaler struct {
-			OAuthClientId OAuthClientCredentialId `json:"value,omitempty"`
+			OAuthClientId OAuthClientCredentialId `json:"value"`
 		}
 		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
 			return err
@@ -2566,7 +4994,7 @@ func (e *ElasticsearchCredential) UnmarshalJSON(data []byte) error {
 		e.Token = value
 	case "token_id":
 		var valueUnmarshaler struct {
-			TokenId TokenCredentialId `json:"value,omitempty"`
+			TokenId TokenCredentialId `json:"value"`
 		}
 		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
 			return err
@@ -2577,46 +5005,33 @@ func (e *ElasticsearchCredential) UnmarshalJSON(data []byte) error {
 }
 
 func (e ElasticsearchCredential) MarshalJSON() ([]byte, error) {
-	switch e.Type {
-	default:
-		return nil, fmt.Errorf("invalid type %s in %T", e.Type, e)
-	case "o_auth_client":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*OAuthClientCredential
-		}{
-			Type:                  e.Type,
-			OAuthClientCredential: e.OAuthClient,
-		}
-		return json.Marshal(marshaler)
-	case "o_auth_client_id":
+	if e.OAuthClient != nil {
+		return core.MarshalJSONWithExtraProperty(e.OAuthClient, "type", "o_auth_client")
+	}
+	if e.OAuthClientId != "" {
 		var marshaler = struct {
 			Type          string                  `json:"type"`
-			OAuthClientId OAuthClientCredentialId `json:"value,omitempty"`
+			OAuthClientId OAuthClientCredentialId `json:"value"`
 		}{
-			Type:          e.Type,
+			Type:          "o_auth_client_id",
 			OAuthClientId: e.OAuthClientId,
 		}
 		return json.Marshal(marshaler)
-	case "token":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*TokenCredential
-		}{
-			Type:            e.Type,
-			TokenCredential: e.Token,
-		}
-		return json.Marshal(marshaler)
-	case "token_id":
+	}
+	if e.Token != nil {
+		return core.MarshalJSONWithExtraProperty(e.Token, "type", "token")
+	}
+	if e.TokenId != "" {
 		var marshaler = struct {
 			Type    string            `json:"type"`
-			TokenId TokenCredentialId `json:"value,omitempty"`
+			TokenId TokenCredentialId `json:"value"`
 		}{
-			Type:    e.Type,
+			Type:    "token_id",
 			TokenId: e.TokenId,
 		}
 		return json.Marshal(marshaler)
 	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", e)
 }
 
 type ElasticsearchCredentialVisitor interface {
@@ -2627,32 +5042,25 @@ type ElasticsearchCredentialVisitor interface {
 }
 
 func (e *ElasticsearchCredential) Accept(visitor ElasticsearchCredentialVisitor) error {
-	switch e.Type {
-	default:
-		return fmt.Errorf("invalid type %s in %T", e.Type, e)
-	case "o_auth_client":
+	if e.OAuthClient != nil {
 		return visitor.VisitOAuthClient(e.OAuthClient)
-	case "o_auth_client_id":
+	}
+	if e.OAuthClientId != "" {
 		return visitor.VisitOAuthClientId(e.OAuthClientId)
-	case "token":
+	}
+	if e.Token != nil {
 		return visitor.VisitToken(e.Token)
-	case "token_id":
+	}
+	if e.TokenId != "" {
 		return visitor.VisitTokenId(e.TokenId)
 	}
+	return fmt.Errorf("type %T does not define a non-empty union type", e)
 }
 
 type ElasticsearchSharedSecret struct {
 	Type     string
 	Secret   *SecretCredential
 	SecretId SecretCredentialId
-}
-
-func NewElasticsearchSharedSecretFromSecret(value *SecretCredential) *ElasticsearchSharedSecret {
-	return &ElasticsearchSharedSecret{Type: "secret", Secret: value}
-}
-
-func NewElasticsearchSharedSecretFromSecretId(value SecretCredentialId) *ElasticsearchSharedSecret {
-	return &ElasticsearchSharedSecret{Type: "secret_id", SecretId: value}
 }
 
 func (e *ElasticsearchSharedSecret) UnmarshalJSON(data []byte) error {
@@ -2663,6 +5071,9 @@ func (e *ElasticsearchSharedSecret) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	e.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", e)
+	}
 	switch unmarshaler.Type {
 	case "secret":
 		value := new(SecretCredential)
@@ -2672,7 +5083,7 @@ func (e *ElasticsearchSharedSecret) UnmarshalJSON(data []byte) error {
 		e.Secret = value
 	case "secret_id":
 		var valueUnmarshaler struct {
-			SecretId SecretCredentialId `json:"value,omitempty"`
+			SecretId SecretCredentialId `json:"value"`
 		}
 		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
 			return err
@@ -2683,28 +5094,20 @@ func (e *ElasticsearchSharedSecret) UnmarshalJSON(data []byte) error {
 }
 
 func (e ElasticsearchSharedSecret) MarshalJSON() ([]byte, error) {
-	switch e.Type {
-	default:
-		return nil, fmt.Errorf("invalid type %s in %T", e.Type, e)
-	case "secret":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*SecretCredential
-		}{
-			Type:             e.Type,
-			SecretCredential: e.Secret,
-		}
-		return json.Marshal(marshaler)
-	case "secret_id":
+	if e.Secret != nil {
+		return core.MarshalJSONWithExtraProperty(e.Secret, "type", "secret")
+	}
+	if e.SecretId != "" {
 		var marshaler = struct {
 			Type     string             `json:"type"`
-			SecretId SecretCredentialId `json:"value,omitempty"`
+			SecretId SecretCredentialId `json:"value"`
 		}{
-			Type:     e.Type,
+			Type:     "secret_id",
 			SecretId: e.SecretId,
 		}
 		return json.Marshal(marshaler)
 	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", e)
 }
 
 type ElasticsearchSharedSecretVisitor interface {
@@ -2713,28 +5116,19 @@ type ElasticsearchSharedSecretVisitor interface {
 }
 
 func (e *ElasticsearchSharedSecret) Accept(visitor ElasticsearchSharedSecretVisitor) error {
-	switch e.Type {
-	default:
-		return fmt.Errorf("invalid type %s in %T", e.Type, e)
-	case "secret":
+	if e.Secret != nil {
 		return visitor.VisitSecret(e.Secret)
-	case "secret_id":
+	}
+	if e.SecretId != "" {
 		return visitor.VisitSecretId(e.SecretId)
 	}
+	return fmt.Errorf("type %T does not define a non-empty union type", e)
 }
 
 type EntraIdCredential struct {
 	Type          string
 	OAuthClient   *OAuthClientCredential
 	OAuthClientId OAuthClientCredentialId
-}
-
-func NewEntraIdCredentialFromOAuthClient(value *OAuthClientCredential) *EntraIdCredential {
-	return &EntraIdCredential{Type: "o_auth_client", OAuthClient: value}
-}
-
-func NewEntraIdCredentialFromOAuthClientId(value OAuthClientCredentialId) *EntraIdCredential {
-	return &EntraIdCredential{Type: "o_auth_client_id", OAuthClientId: value}
 }
 
 func (e *EntraIdCredential) UnmarshalJSON(data []byte) error {
@@ -2745,6 +5139,9 @@ func (e *EntraIdCredential) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	e.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", e)
+	}
 	switch unmarshaler.Type {
 	case "o_auth_client":
 		value := new(OAuthClientCredential)
@@ -2754,7 +5151,7 @@ func (e *EntraIdCredential) UnmarshalJSON(data []byte) error {
 		e.OAuthClient = value
 	case "o_auth_client_id":
 		var valueUnmarshaler struct {
-			OAuthClientId OAuthClientCredentialId `json:"value,omitempty"`
+			OAuthClientId OAuthClientCredentialId `json:"value"`
 		}
 		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
 			return err
@@ -2765,28 +5162,20 @@ func (e *EntraIdCredential) UnmarshalJSON(data []byte) error {
 }
 
 func (e EntraIdCredential) MarshalJSON() ([]byte, error) {
-	switch e.Type {
-	default:
-		return nil, fmt.Errorf("invalid type %s in %T", e.Type, e)
-	case "o_auth_client":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*OAuthClientCredential
-		}{
-			Type:                  e.Type,
-			OAuthClientCredential: e.OAuthClient,
-		}
-		return json.Marshal(marshaler)
-	case "o_auth_client_id":
+	if e.OAuthClient != nil {
+		return core.MarshalJSONWithExtraProperty(e.OAuthClient, "type", "o_auth_client")
+	}
+	if e.OAuthClientId != "" {
 		var marshaler = struct {
 			Type          string                  `json:"type"`
-			OAuthClientId OAuthClientCredentialId `json:"value,omitempty"`
+			OAuthClientId OAuthClientCredentialId `json:"value"`
 		}{
-			Type:          e.Type,
+			Type:          "o_auth_client_id",
 			OAuthClientId: e.OAuthClientId,
 		}
 		return json.Marshal(marshaler)
 	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", e)
 }
 
 type EntraIdCredentialVisitor interface {
@@ -2795,28 +5184,19 @@ type EntraIdCredentialVisitor interface {
 }
 
 func (e *EntraIdCredential) Accept(visitor EntraIdCredentialVisitor) error {
-	switch e.Type {
-	default:
-		return fmt.Errorf("invalid type %s in %T", e.Type, e)
-	case "o_auth_client":
+	if e.OAuthClient != nil {
 		return visitor.VisitOAuthClient(e.OAuthClient)
-	case "o_auth_client_id":
+	}
+	if e.OAuthClientId != "" {
 		return visitor.VisitOAuthClientId(e.OAuthClientId)
 	}
+	return fmt.Errorf("type %T does not define a non-empty union type", e)
 }
 
 type GcsCredential struct {
 	Type  string
 	Aws   *AwsCredential
 	AwsId AwsCredentialId
-}
-
-func NewGcsCredentialFromAws(value *AwsCredential) *GcsCredential {
-	return &GcsCredential{Type: "aws", Aws: value}
-}
-
-func NewGcsCredentialFromAwsId(value AwsCredentialId) *GcsCredential {
-	return &GcsCredential{Type: "aws_id", AwsId: value}
 }
 
 func (g *GcsCredential) UnmarshalJSON(data []byte) error {
@@ -2827,6 +5207,9 @@ func (g *GcsCredential) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	g.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", g)
+	}
 	switch unmarshaler.Type {
 	case "aws":
 		value := new(AwsCredential)
@@ -2836,7 +5219,7 @@ func (g *GcsCredential) UnmarshalJSON(data []byte) error {
 		g.Aws = value
 	case "aws_id":
 		var valueUnmarshaler struct {
-			AwsId AwsCredentialId `json:"value,omitempty"`
+			AwsId AwsCredentialId `json:"value"`
 		}
 		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
 			return err
@@ -2847,28 +5230,20 @@ func (g *GcsCredential) UnmarshalJSON(data []byte) error {
 }
 
 func (g GcsCredential) MarshalJSON() ([]byte, error) {
-	switch g.Type {
-	default:
-		return nil, fmt.Errorf("invalid type %s in %T", g.Type, g)
-	case "aws":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*AwsCredential
-		}{
-			Type:          g.Type,
-			AwsCredential: g.Aws,
-		}
-		return json.Marshal(marshaler)
-	case "aws_id":
+	if g.Aws != nil {
+		return core.MarshalJSONWithExtraProperty(g.Aws, "type", "aws")
+	}
+	if g.AwsId != "" {
 		var marshaler = struct {
 			Type  string          `json:"type"`
-			AwsId AwsCredentialId `json:"value,omitempty"`
+			AwsId AwsCredentialId `json:"value"`
 		}{
-			Type:  g.Type,
+			Type:  "aws_id",
 			AwsId: g.AwsId,
 		}
 		return json.Marshal(marshaler)
 	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", g)
 }
 
 type GcsCredentialVisitor interface {
@@ -2877,28 +5252,19 @@ type GcsCredentialVisitor interface {
 }
 
 func (g *GcsCredential) Accept(visitor GcsCredentialVisitor) error {
-	switch g.Type {
-	default:
-		return fmt.Errorf("invalid type %s in %T", g.Type, g)
-	case "aws":
+	if g.Aws != nil {
 		return visitor.VisitAws(g.Aws)
-	case "aws_id":
+	}
+	if g.AwsId != "" {
 		return visitor.VisitAwsId(g.AwsId)
 	}
+	return fmt.Errorf("type %T does not define a non-empty union type", g)
 }
 
 type HooksHttpCredential struct {
 	Type    string
 	Token   *TokenCredential
 	TokenId TokenCredentialId
-}
-
-func NewHooksHttpCredentialFromToken(value *TokenCredential) *HooksHttpCredential {
-	return &HooksHttpCredential{Type: "token", Token: value}
-}
-
-func NewHooksHttpCredentialFromTokenId(value TokenCredentialId) *HooksHttpCredential {
-	return &HooksHttpCredential{Type: "token_id", TokenId: value}
 }
 
 func (h *HooksHttpCredential) UnmarshalJSON(data []byte) error {
@@ -2909,6 +5275,9 @@ func (h *HooksHttpCredential) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	h.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", h)
+	}
 	switch unmarshaler.Type {
 	case "token":
 		value := new(TokenCredential)
@@ -2918,7 +5287,7 @@ func (h *HooksHttpCredential) UnmarshalJSON(data []byte) error {
 		h.Token = value
 	case "token_id":
 		var valueUnmarshaler struct {
-			TokenId TokenCredentialId `json:"value,omitempty"`
+			TokenId TokenCredentialId `json:"value"`
 		}
 		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
 			return err
@@ -2929,28 +5298,20 @@ func (h *HooksHttpCredential) UnmarshalJSON(data []byte) error {
 }
 
 func (h HooksHttpCredential) MarshalJSON() ([]byte, error) {
-	switch h.Type {
-	default:
-		return nil, fmt.Errorf("invalid type %s in %T", h.Type, h)
-	case "token":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*TokenCredential
-		}{
-			Type:            h.Type,
-			TokenCredential: h.Token,
-		}
-		return json.Marshal(marshaler)
-	case "token_id":
+	if h.Token != nil {
+		return core.MarshalJSONWithExtraProperty(h.Token, "type", "token")
+	}
+	if h.TokenId != "" {
 		var marshaler = struct {
 			Type    string            `json:"type"`
-			TokenId TokenCredentialId `json:"value,omitempty"`
+			TokenId TokenCredentialId `json:"value"`
 		}{
-			Type:    h.Type,
+			Type:    "token_id",
 			TokenId: h.TokenId,
 		}
 		return json.Marshal(marshaler)
 	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", h)
 }
 
 type HooksHttpCredentialVisitor interface {
@@ -2959,74 +5320,213 @@ type HooksHttpCredentialVisitor interface {
 }
 
 func (h *HooksHttpCredential) Accept(visitor HooksHttpCredentialVisitor) error {
-	switch h.Type {
-	default:
-		return fmt.Errorf("invalid type %s in %T", h.Type, h)
-	case "token":
+	if h.Token != nil {
 		return visitor.VisitToken(h.Token)
-	case "token_id":
+	}
+	if h.TokenId != "" {
 		return visitor.VisitTokenId(h.TokenId)
 	}
+	return fmt.Errorf("type %T does not define a non-empty union type", h)
 }
 
 // Configuration for a Webhook Provider
 type HooksHttp struct {
-	Credential *HooksHttpCredential `json:"credential,omitempty"`
+	Credential *HooksHttpCredential `json:"credential" url:"credential"`
 	// Optional webhook filter specification
-	Filter *string `json:"filter,omitempty"`
+	Filter *string `json:"filter,omitempty" url:"filter,omitempty"`
 	// Events to hook or empty list for all events
-	SourceEvents []string `json:"source_events,omitempty"`
+	SourceEvents []string `json:"source_events" url:"source_events"`
 	// Webhook verification secret
-	SourceSecret *CredentialId `json:"source_secret,omitempty"`
+	SourceSecret *CredentialId `json:"source_secret,omitempty" url:"source_secret,omitempty"`
 	// Add optional webhook secure hash for verification
-	TargetSecret *CredentialId `json:"target_secret,omitempty"`
+	TargetSecret *CredentialId `json:"target_secret,omitempty" url:"target_secret,omitempty"`
 	// Optional list of transformations used to modify the webhook responses.
-	Transforms []TransformId `json:"transforms,omitempty"`
+	Transforms []TransformId `json:"transforms,omitempty" url:"transforms,omitempty"`
 	// URL of the endpoint used for connecting to the external service.
-	Url string `json:"url"`
+	Url string `json:"url" url:"url"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (h *HooksHttp) GetExtraProperties() map[string]interface{} {
+	return h.extraProperties
+}
+
+func (h *HooksHttp) UnmarshalJSON(data []byte) error {
+	type unmarshaler HooksHttp
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*h = HooksHttp(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *h)
+	if err != nil {
+		return err
+	}
+	h.extraProperties = extraProperties
+
+	h._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (h *HooksHttp) String() string {
+	if len(h._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(h._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(h); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", h)
 }
 
 // Configuration for the Microsoft Entra ID Identity Provider
 type IdentityEntraId struct {
-	Credential *EntraIdCredential `json:"credential,omitempty"`
+	Credential *EntraIdCredential `json:"credential" url:"credential"`
 	// Azure Directory (tenant) ID.
-	TenantId string `json:"tenant_id"`
+	TenantId string `json:"tenant_id" url:"tenant_id"`
 	// Optional URL override for the Microsoft Graph API. This should be the base URL for the API without any path components.
-	Url *string `json:"url,omitempty"`
+	Url *string `json:"url,omitempty" url:"url,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (i *IdentityEntraId) GetExtraProperties() map[string]interface{} {
+	return i.extraProperties
+}
+
+func (i *IdentityEntraId) UnmarshalJSON(data []byte) error {
+	type unmarshaler IdentityEntraId
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*i = IdentityEntraId(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *i)
+	if err != nil {
+		return err
+	}
+	i.extraProperties = extraProperties
+
+	i._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (i *IdentityEntraId) String() string {
+	if len(i._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(i._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(i); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", i)
 }
 
 // Configuration for the Okta Identity Provider
 type IdentityOkta struct {
-	Credential *OktaCredential `json:"credential,omitempty"`
+	Credential *OktaCredential `json:"credential" url:"credential"`
 	// URL for the Okta API. This should be the base URL for the API, without any path components and must be HTTPS. For example, "https://tenant.okta.com".
-	Url string `json:"url"`
+	Url string `json:"url" url:"url"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (i *IdentityOkta) GetExtraProperties() map[string]interface{} {
+	return i.extraProperties
+}
+
+func (i *IdentityOkta) UnmarshalJSON(data []byte) error {
+	type unmarshaler IdentityOkta
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*i = IdentityOkta(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *i)
+	if err != nil {
+		return err
+	}
+	i.extraProperties = extraProperties
+
+	i._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (i *IdentityOkta) String() string {
+	if len(i._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(i._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(i); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", i)
 }
 
 // Configuration for the PingOne Identity Platform
 type IdentityPingOne struct {
 	// The URL base for making authentication requests to PingOne.
-	AuthUrl string `json:"auth_url"`
+	AuthUrl string `json:"auth_url" url:"auth_url"`
 	// The client ID for the application set up as a worker.
-	ClientId   string             `json:"client_id"`
-	Credential *PingOneCredential `json:"credential,omitempty"`
+	ClientId   string             `json:"client_id" url:"client_id"`
+	Credential *PingOneCredential `json:"credential" url:"credential"`
 	// The organization ID that the client app is a part of.
-	OrganizationId string `json:"organization_id"`
+	OrganizationId string `json:"organization_id" url:"organization_id"`
 	// URL for the PingOne API. This should be the base URL for the API, without any path components.
-	Url string `json:"url"`
+	Url string `json:"url" url:"url"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (i *IdentityPingOne) GetExtraProperties() map[string]interface{} {
+	return i.extraProperties
+}
+
+func (i *IdentityPingOne) UnmarshalJSON(data []byte) error {
+	type unmarshaler IdentityPingOne
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*i = IdentityPingOne(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *i)
+	if err != nil {
+		return err
+	}
+	i.extraProperties = extraProperties
+
+	i._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (i *IdentityPingOne) String() string {
+	if len(i._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(i._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(i); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", i)
 }
 
 type JiraCredential struct {
 	Type    string
 	Basic   *BasicCredential
 	BasicId BasicCredentialId
-}
-
-func NewJiraCredentialFromBasic(value *BasicCredential) *JiraCredential {
-	return &JiraCredential{Type: "basic", Basic: value}
-}
-
-func NewJiraCredentialFromBasicId(value BasicCredentialId) *JiraCredential {
-	return &JiraCredential{Type: "basic_id", BasicId: value}
 }
 
 func (j *JiraCredential) UnmarshalJSON(data []byte) error {
@@ -3037,6 +5537,9 @@ func (j *JiraCredential) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	j.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", j)
+	}
 	switch unmarshaler.Type {
 	case "basic":
 		value := new(BasicCredential)
@@ -3046,7 +5549,7 @@ func (j *JiraCredential) UnmarshalJSON(data []byte) error {
 		j.Basic = value
 	case "basic_id":
 		var valueUnmarshaler struct {
-			BasicId BasicCredentialId `json:"value,omitempty"`
+			BasicId BasicCredentialId `json:"value"`
 		}
 		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
 			return err
@@ -3057,28 +5560,20 @@ func (j *JiraCredential) UnmarshalJSON(data []byte) error {
 }
 
 func (j JiraCredential) MarshalJSON() ([]byte, error) {
-	switch j.Type {
-	default:
-		return nil, fmt.Errorf("invalid type %s in %T", j.Type, j)
-	case "basic":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*BasicCredential
-		}{
-			Type:            j.Type,
-			BasicCredential: j.Basic,
-		}
-		return json.Marshal(marshaler)
-	case "basic_id":
+	if j.Basic != nil {
+		return core.MarshalJSONWithExtraProperty(j.Basic, "type", "basic")
+	}
+	if j.BasicId != "" {
 		var marshaler = struct {
 			Type    string            `json:"type"`
-			BasicId BasicCredentialId `json:"value,omitempty"`
+			BasicId BasicCredentialId `json:"value"`
 		}{
-			Type:    j.Type,
+			Type:    "basic_id",
 			BasicId: j.BasicId,
 		}
 		return json.Marshal(marshaler)
 	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", j)
 }
 
 type JiraCredentialVisitor interface {
@@ -3087,55 +5582,194 @@ type JiraCredentialVisitor interface {
 }
 
 func (j *JiraCredential) Accept(visitor JiraCredentialVisitor) error {
-	switch j.Type {
-	default:
-		return fmt.Errorf("invalid type %s in %T", j.Type, j)
-	case "basic":
+	if j.Basic != nil {
 		return visitor.VisitBasic(j.Basic)
-	case "basic_id":
+	}
+	if j.BasicId != "" {
 		return visitor.VisitBasicId(j.BasicId)
 	}
+	return fmt.Errorf("type %T does not define a non-empty union type", j)
 }
 
 // Configuration for Jira as a Notification Provider
 type NotificationsJira struct {
-	Credential *JiraCredential `json:"credential,omitempty"`
+	Credential *JiraCredential `json:"credential" url:"credential"`
 	// URL for the Jira API. This should be the base URL for the API, without any path components and must be HTTPS. For example, "https://tenant.atlassian.net".
-	Url string `json:"url"`
+	Url string `json:"url" url:"url"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (n *NotificationsJira) GetExtraProperties() map[string]interface{} {
+	return n.extraProperties
+}
+
+func (n *NotificationsJira) UnmarshalJSON(data []byte) error {
+	type unmarshaler NotificationsJira
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*n = NotificationsJira(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *n)
+	if err != nil {
+		return err
+	}
+	n.extraProperties = extraProperties
+
+	n._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (n *NotificationsJira) String() string {
+	if len(n._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(n._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(n); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", n)
 }
 
 // Configuration for the Mock in-memory notification handler. This provider is for testing purposes only.
 type NotificationsMock struct {
 	// The channel to send notifications to.
-	Channel *string `json:"channel,omitempty"`
+	Channel *string `json:"channel,omitempty" url:"channel,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (n *NotificationsMock) GetExtraProperties() map[string]interface{} {
+	return n.extraProperties
+}
+
+func (n *NotificationsMock) UnmarshalJSON(data []byte) error {
+	type unmarshaler NotificationsMock
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*n = NotificationsMock(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *n)
+	if err != nil {
+		return err
+	}
+	n.extraProperties = extraProperties
+
+	n._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (n *NotificationsMock) String() string {
+	if len(n._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(n._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(n); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", n)
 }
 
 // Configuration for the Slack Notification Provider
 type NotificationsSlack struct {
 	// The channel to send notifications to. Should be the ID of the desired channel.
-	Channel    string           `json:"channel"`
-	Credential *SlackCredential `json:"credential,omitempty"`
+	Channel    string           `json:"channel" url:"channel"`
+	Credential *SlackCredential `json:"credential" url:"credential"`
 	// Optional URL override for the Slack API. This should include the full path to the API endpoint. Defaults to "https://slack.com_api_chat.postMessage".
-	Url *string `json:"url,omitempty"`
+	Url *string `json:"url,omitempty" url:"url,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (n *NotificationsSlack) GetExtraProperties() map[string]interface{} {
+	return n.extraProperties
+}
+
+func (n *NotificationsSlack) UnmarshalJSON(data []byte) error {
+	type unmarshaler NotificationsSlack
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*n = NotificationsSlack(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *n)
+	if err != nil {
+		return err
+	}
+	n.extraProperties = extraProperties
+
+	n._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (n *NotificationsSlack) String() string {
+	if len(n._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(n._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(n); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", n)
 }
 
 // Configuration for Microsoft Teams Notification Provider
 type NotificationsTeams struct {
-	Credential *TeamsCredential `json:"credential,omitempty"`
+	Credential *TeamsCredential `json:"credential" url:"credential"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (n *NotificationsTeams) GetExtraProperties() map[string]interface{} {
+	return n.extraProperties
+}
+
+func (n *NotificationsTeams) UnmarshalJSON(data []byte) error {
+	type unmarshaler NotificationsTeams
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*n = NotificationsTeams(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *n)
+	if err != nil {
+		return err
+	}
+	n.extraProperties = extraProperties
+
+	n._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (n *NotificationsTeams) String() string {
+	if len(n._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(n._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(n); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", n)
 }
 
 type NozomiVantageCredential struct {
 	Type    string
 	Basic   *BasicCredential
 	BasicId BasicCredentialId
-}
-
-func NewNozomiVantageCredentialFromBasic(value *BasicCredential) *NozomiVantageCredential {
-	return &NozomiVantageCredential{Type: "basic", Basic: value}
-}
-
-func NewNozomiVantageCredentialFromBasicId(value BasicCredentialId) *NozomiVantageCredential {
-	return &NozomiVantageCredential{Type: "basic_id", BasicId: value}
 }
 
 func (n *NozomiVantageCredential) UnmarshalJSON(data []byte) error {
@@ -3146,6 +5780,9 @@ func (n *NozomiVantageCredential) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	n.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", n)
+	}
 	switch unmarshaler.Type {
 	case "basic":
 		value := new(BasicCredential)
@@ -3155,7 +5792,7 @@ func (n *NozomiVantageCredential) UnmarshalJSON(data []byte) error {
 		n.Basic = value
 	case "basic_id":
 		var valueUnmarshaler struct {
-			BasicId BasicCredentialId `json:"value,omitempty"`
+			BasicId BasicCredentialId `json:"value"`
 		}
 		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
 			return err
@@ -3166,28 +5803,20 @@ func (n *NozomiVantageCredential) UnmarshalJSON(data []byte) error {
 }
 
 func (n NozomiVantageCredential) MarshalJSON() ([]byte, error) {
-	switch n.Type {
-	default:
-		return nil, fmt.Errorf("invalid type %s in %T", n.Type, n)
-	case "basic":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*BasicCredential
-		}{
-			Type:            n.Type,
-			BasicCredential: n.Basic,
-		}
-		return json.Marshal(marshaler)
-	case "basic_id":
+	if n.Basic != nil {
+		return core.MarshalJSONWithExtraProperty(n.Basic, "type", "basic")
+	}
+	if n.BasicId != "" {
 		var marshaler = struct {
 			Type    string            `json:"type"`
-			BasicId BasicCredentialId `json:"value,omitempty"`
+			BasicId BasicCredentialId `json:"value"`
 		}{
-			Type:    n.Type,
+			Type:    "basic_id",
 			BasicId: n.BasicId,
 		}
 		return json.Marshal(marshaler)
 	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", n)
 }
 
 type NozomiVantageCredentialVisitor interface {
@@ -3196,14 +5825,13 @@ type NozomiVantageCredentialVisitor interface {
 }
 
 func (n *NozomiVantageCredential) Accept(visitor NozomiVantageCredentialVisitor) error {
-	switch n.Type {
-	default:
-		return fmt.Errorf("invalid type %s in %T", n.Type, n)
-	case "basic":
+	if n.Basic != nil {
 		return visitor.VisitBasic(n.Basic)
-	case "basic_id":
+	}
+	if n.BasicId != "" {
 		return visitor.VisitBasicId(n.BasicId)
 	}
+	return fmt.Errorf("type %T does not define a non-empty union type", n)
 }
 
 type OktaCredential struct {
@@ -3214,22 +5842,6 @@ type OktaCredential struct {
 	TokenId       TokenCredentialId
 }
 
-func NewOktaCredentialFromOAuthClient(value *OAuthClientCredential) *OktaCredential {
-	return &OktaCredential{Type: "o_auth_client", OAuthClient: value}
-}
-
-func NewOktaCredentialFromOAuthClientId(value OAuthClientCredentialId) *OktaCredential {
-	return &OktaCredential{Type: "o_auth_client_id", OAuthClientId: value}
-}
-
-func NewOktaCredentialFromToken(value *TokenCredential) *OktaCredential {
-	return &OktaCredential{Type: "token", Token: value}
-}
-
-func NewOktaCredentialFromTokenId(value TokenCredentialId) *OktaCredential {
-	return &OktaCredential{Type: "token_id", TokenId: value}
-}
-
 func (o *OktaCredential) UnmarshalJSON(data []byte) error {
 	var unmarshaler struct {
 		Type string `json:"type"`
@@ -3238,6 +5850,9 @@ func (o *OktaCredential) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	o.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", o)
+	}
 	switch unmarshaler.Type {
 	case "o_auth_client":
 		value := new(OAuthClientCredential)
@@ -3247,7 +5862,7 @@ func (o *OktaCredential) UnmarshalJSON(data []byte) error {
 		o.OAuthClient = value
 	case "o_auth_client_id":
 		var valueUnmarshaler struct {
-			OAuthClientId OAuthClientCredentialId `json:"value,omitempty"`
+			OAuthClientId OAuthClientCredentialId `json:"value"`
 		}
 		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
 			return err
@@ -3261,7 +5876,7 @@ func (o *OktaCredential) UnmarshalJSON(data []byte) error {
 		o.Token = value
 	case "token_id":
 		var valueUnmarshaler struct {
-			TokenId TokenCredentialId `json:"value,omitempty"`
+			TokenId TokenCredentialId `json:"value"`
 		}
 		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
 			return err
@@ -3272,46 +5887,33 @@ func (o *OktaCredential) UnmarshalJSON(data []byte) error {
 }
 
 func (o OktaCredential) MarshalJSON() ([]byte, error) {
-	switch o.Type {
-	default:
-		return nil, fmt.Errorf("invalid type %s in %T", o.Type, o)
-	case "o_auth_client":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*OAuthClientCredential
-		}{
-			Type:                  o.Type,
-			OAuthClientCredential: o.OAuthClient,
-		}
-		return json.Marshal(marshaler)
-	case "o_auth_client_id":
+	if o.OAuthClient != nil {
+		return core.MarshalJSONWithExtraProperty(o.OAuthClient, "type", "o_auth_client")
+	}
+	if o.OAuthClientId != "" {
 		var marshaler = struct {
 			Type          string                  `json:"type"`
-			OAuthClientId OAuthClientCredentialId `json:"value,omitempty"`
+			OAuthClientId OAuthClientCredentialId `json:"value"`
 		}{
-			Type:          o.Type,
+			Type:          "o_auth_client_id",
 			OAuthClientId: o.OAuthClientId,
 		}
 		return json.Marshal(marshaler)
-	case "token":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*TokenCredential
-		}{
-			Type:            o.Type,
-			TokenCredential: o.Token,
-		}
-		return json.Marshal(marshaler)
-	case "token_id":
+	}
+	if o.Token != nil {
+		return core.MarshalJSONWithExtraProperty(o.Token, "type", "token")
+	}
+	if o.TokenId != "" {
 		var marshaler = struct {
 			Type    string            `json:"type"`
-			TokenId TokenCredentialId `json:"value,omitempty"`
+			TokenId TokenCredentialId `json:"value"`
 		}{
-			Type:    o.Type,
+			Type:    "token_id",
 			TokenId: o.TokenId,
 		}
 		return json.Marshal(marshaler)
 	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", o)
 }
 
 type OktaCredentialVisitor interface {
@@ -3322,32 +5924,25 @@ type OktaCredentialVisitor interface {
 }
 
 func (o *OktaCredential) Accept(visitor OktaCredentialVisitor) error {
-	switch o.Type {
-	default:
-		return fmt.Errorf("invalid type %s in %T", o.Type, o)
-	case "o_auth_client":
+	if o.OAuthClient != nil {
 		return visitor.VisitOAuthClient(o.OAuthClient)
-	case "o_auth_client_id":
+	}
+	if o.OAuthClientId != "" {
 		return visitor.VisitOAuthClientId(o.OAuthClientId)
-	case "token":
+	}
+	if o.Token != nil {
 		return visitor.VisitToken(o.Token)
-	case "token_id":
+	}
+	if o.TokenId != "" {
 		return visitor.VisitTokenId(o.TokenId)
 	}
+	return fmt.Errorf("type %T does not define a non-empty union type", o)
 }
 
 type PagerDutyCredential struct {
 	Type    string
 	Token   *TokenCredential
 	TokenId TokenCredentialId
-}
-
-func NewPagerDutyCredentialFromToken(value *TokenCredential) *PagerDutyCredential {
-	return &PagerDutyCredential{Type: "token", Token: value}
-}
-
-func NewPagerDutyCredentialFromTokenId(value TokenCredentialId) *PagerDutyCredential {
-	return &PagerDutyCredential{Type: "token_id", TokenId: value}
 }
 
 func (p *PagerDutyCredential) UnmarshalJSON(data []byte) error {
@@ -3358,6 +5953,9 @@ func (p *PagerDutyCredential) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	p.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", p)
+	}
 	switch unmarshaler.Type {
 	case "token":
 		value := new(TokenCredential)
@@ -3367,7 +5965,7 @@ func (p *PagerDutyCredential) UnmarshalJSON(data []byte) error {
 		p.Token = value
 	case "token_id":
 		var valueUnmarshaler struct {
-			TokenId TokenCredentialId `json:"value,omitempty"`
+			TokenId TokenCredentialId `json:"value"`
 		}
 		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
 			return err
@@ -3378,28 +5976,20 @@ func (p *PagerDutyCredential) UnmarshalJSON(data []byte) error {
 }
 
 func (p PagerDutyCredential) MarshalJSON() ([]byte, error) {
-	switch p.Type {
-	default:
-		return nil, fmt.Errorf("invalid type %s in %T", p.Type, p)
-	case "token":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*TokenCredential
-		}{
-			Type:            p.Type,
-			TokenCredential: p.Token,
-		}
-		return json.Marshal(marshaler)
-	case "token_id":
+	if p.Token != nil {
+		return core.MarshalJSONWithExtraProperty(p.Token, "type", "token")
+	}
+	if p.TokenId != "" {
 		var marshaler = struct {
 			Type    string            `json:"type"`
-			TokenId TokenCredentialId `json:"value,omitempty"`
+			TokenId TokenCredentialId `json:"value"`
 		}{
-			Type:    p.Type,
+			Type:    "token_id",
 			TokenId: p.TokenId,
 		}
 		return json.Marshal(marshaler)
 	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", p)
 }
 
 type PagerDutyCredentialVisitor interface {
@@ -3408,28 +5998,19 @@ type PagerDutyCredentialVisitor interface {
 }
 
 func (p *PagerDutyCredential) Accept(visitor PagerDutyCredentialVisitor) error {
-	switch p.Type {
-	default:
-		return fmt.Errorf("invalid type %s in %T", p.Type, p)
-	case "token":
+	if p.Token != nil {
 		return visitor.VisitToken(p.Token)
-	case "token_id":
+	}
+	if p.TokenId != "" {
 		return visitor.VisitTokenId(p.TokenId)
 	}
+	return fmt.Errorf("type %T does not define a non-empty union type", p)
 }
 
 type PingOneCredential struct {
 	Type    string
 	Token   *TokenCredential
 	TokenId TokenCredentialId
-}
-
-func NewPingOneCredentialFromToken(value *TokenCredential) *PingOneCredential {
-	return &PingOneCredential{Type: "token", Token: value}
-}
-
-func NewPingOneCredentialFromTokenId(value TokenCredentialId) *PingOneCredential {
-	return &PingOneCredential{Type: "token_id", TokenId: value}
 }
 
 func (p *PingOneCredential) UnmarshalJSON(data []byte) error {
@@ -3440,6 +6021,9 @@ func (p *PingOneCredential) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	p.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", p)
+	}
 	switch unmarshaler.Type {
 	case "token":
 		value := new(TokenCredential)
@@ -3449,7 +6033,7 @@ func (p *PingOneCredential) UnmarshalJSON(data []byte) error {
 		p.Token = value
 	case "token_id":
 		var valueUnmarshaler struct {
-			TokenId TokenCredentialId `json:"value,omitempty"`
+			TokenId TokenCredentialId `json:"value"`
 		}
 		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
 			return err
@@ -3460,28 +6044,20 @@ func (p *PingOneCredential) UnmarshalJSON(data []byte) error {
 }
 
 func (p PingOneCredential) MarshalJSON() ([]byte, error) {
-	switch p.Type {
-	default:
-		return nil, fmt.Errorf("invalid type %s in %T", p.Type, p)
-	case "token":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*TokenCredential
-		}{
-			Type:            p.Type,
-			TokenCredential: p.Token,
-		}
-		return json.Marshal(marshaler)
-	case "token_id":
+	if p.Token != nil {
+		return core.MarshalJSONWithExtraProperty(p.Token, "type", "token")
+	}
+	if p.TokenId != "" {
 		var marshaler = struct {
 			Type    string            `json:"type"`
-			TokenId TokenCredentialId `json:"value,omitempty"`
+			TokenId TokenCredentialId `json:"value"`
 		}{
-			Type:    p.Type,
+			Type:    "token_id",
 			TokenId: p.TokenId,
 		}
 		return json.Marshal(marshaler)
 	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", p)
 }
 
 type PingOneCredentialVisitor interface {
@@ -3490,25 +6066,61 @@ type PingOneCredentialVisitor interface {
 }
 
 func (p *PingOneCredential) Accept(visitor PingOneCredentialVisitor) error {
-	switch p.Type {
-	default:
-		return fmt.Errorf("invalid type %s in %T", p.Type, p)
-	case "token":
+	if p.Token != nil {
 		return visitor.VisitToken(p.Token)
-	case "token_id":
+	}
+	if p.TokenId != "" {
 		return visitor.VisitTokenId(p.TokenId)
 	}
+	return fmt.Errorf("type %T does not define a non-empty union type", p)
 }
 
 type PriorityMapping struct {
 	// Custom value for the "High" priority.
-	High *string `json:"high,omitempty"`
+	High *string `json:"high,omitempty" url:"high,omitempty"`
 	// Custom value for the "Low" priority.
-	Low *string `json:"low,omitempty"`
+	Low *string `json:"low,omitempty" url:"low,omitempty"`
 	// Custom value for the "Medium" priority.
-	Medium *string `json:"medium,omitempty"`
+	Medium *string `json:"medium,omitempty" url:"medium,omitempty"`
 	// Custom value for the "Urgent" priority.
-	Urgent *string `json:"urgent,omitempty"`
+	Urgent *string `json:"urgent,omitempty" url:"urgent,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (p *PriorityMapping) GetExtraProperties() map[string]interface{} {
+	return p.extraProperties
+}
+
+func (p *PriorityMapping) UnmarshalJSON(data []byte) error {
+	type unmarshaler PriorityMapping
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*p = PriorityMapping(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *p)
+	if err != nil {
+		return err
+	}
+	p.extraProperties = extraProperties
+
+	p._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (p *PriorityMapping) String() string {
+	if len(p._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(p._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(p); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", p)
 }
 
 type ProviderConfig struct {
@@ -3553,158 +6165,6 @@ type ProviderConfig struct {
 	VulnerabilitiesTenableCloud       *VulnerabilitiesTenableCloud
 }
 
-func NewProviderConfigFromAssetsArmisCentrix(value *AssetsArmisCentrix) *ProviderConfig {
-	return &ProviderConfig{Type: "assets_armis_centrix", AssetsArmisCentrix: value}
-}
-
-func NewProviderConfigFromAssetsNozomiVantage(value *AssetsNozomiVantage) *ProviderConfig {
-	return &ProviderConfig{Type: "assets_nozomi_vantage", AssetsNozomiVantage: value}
-}
-
-func NewProviderConfigFromAssetsServicenow(value *AssetsServiceNow) *ProviderConfig {
-	return &ProviderConfig{Type: "assets_servicenow", AssetsServicenow: value}
-}
-
-func NewProviderConfigFromEdrCrowdstrike(value *EdrCrowdStrike) *ProviderConfig {
-	return &ProviderConfig{Type: "edr_crowdstrike", EdrCrowdstrike: value}
-}
-
-func NewProviderConfigFromEdrDefender(value *EdrDefender) *ProviderConfig {
-	return &ProviderConfig{Type: "edr_defender", EdrDefender: value}
-}
-
-func NewProviderConfigFromEdrSentinelone(value *EdrSentinelOne) *ProviderConfig {
-	return &ProviderConfig{Type: "edr_sentinelone", EdrSentinelone: value}
-}
-
-func NewProviderConfigFromHooksHttp(value *HooksHttp) *ProviderConfig {
-	return &ProviderConfig{Type: "hooks_http", HooksHttp: value}
-}
-
-func NewProviderConfigFromIdentityEntraId(value *IdentityEntraId) *ProviderConfig {
-	return &ProviderConfig{Type: "identity_entra_id", IdentityEntraId: value}
-}
-
-func NewProviderConfigFromIdentityOkta(value *IdentityOkta) *ProviderConfig {
-	return &ProviderConfig{Type: "identity_okta", IdentityOkta: value}
-}
-
-func NewProviderConfigFromIdentityPingone(value *IdentityPingOne) *ProviderConfig {
-	return &ProviderConfig{Type: "identity_pingone", IdentityPingone: value}
-}
-
-func NewProviderConfigFromNotificationsJira(value *NotificationsJira) *ProviderConfig {
-	return &ProviderConfig{Type: "notifications_jira", NotificationsJira: value}
-}
-
-func NewProviderConfigFromNotificationsMockNotifications(value *NotificationsMock) *ProviderConfig {
-	return &ProviderConfig{Type: "notifications_mock_notifications", NotificationsMockNotifications: value}
-}
-
-func NewProviderConfigFromNotificationsSlack(value *NotificationsSlack) *ProviderConfig {
-	return &ProviderConfig{Type: "notifications_slack", NotificationsSlack: value}
-}
-
-func NewProviderConfigFromNotificationsTeams(value *NotificationsTeams) *ProviderConfig {
-	return &ProviderConfig{Type: "notifications_teams", NotificationsTeams: value}
-}
-
-func NewProviderConfigFromSiemElasticsearch(value *SiemElasticsearch) *ProviderConfig {
-	return &ProviderConfig{Type: "siem_elasticsearch", SiemElasticsearch: value}
-}
-
-func NewProviderConfigFromSiemMockSiem(value *SiemMock) *ProviderConfig {
-	return &ProviderConfig{Type: "siem_mock_siem", SiemMockSiem: value}
-}
-
-func NewProviderConfigFromSiemQRadar(value *SiemQRadar) *ProviderConfig {
-	return &ProviderConfig{Type: "siem_q_radar", SiemQRadar: value}
-}
-
-func NewProviderConfigFromSiemRapid7Insightidr(value *SiemRapid7InsightIdr) *ProviderConfig {
-	return &ProviderConfig{Type: "siem_rapid7_insightidr", SiemRapid7Insightidr: value}
-}
-
-func NewProviderConfigFromSiemSplunk(value *SiemSplunk) *ProviderConfig {
-	return &ProviderConfig{Type: "siem_splunk", SiemSplunk: value}
-}
-
-func NewProviderConfigFromSiemSumoLogic(value *SiemSumoLogic) *ProviderConfig {
-	return &ProviderConfig{Type: "siem_sumo_logic", SiemSumoLogic: value}
-}
-
-func NewProviderConfigFromSinkAwsSecurityLake(value *SinkAwsSecurityLake) *ProviderConfig {
-	return &ProviderConfig{Type: "sink_aws_security_lake", SinkAwsSecurityLake: value}
-}
-
-func NewProviderConfigFromSinkAwsSqs(value *SinkAwsSqs) *ProviderConfig {
-	return &ProviderConfig{Type: "sink_aws_sqs", SinkAwsSqs: value}
-}
-
-func NewProviderConfigFromSinkAzureMonitorLogs(value *SinkAzureMonitorLogs) *ProviderConfig {
-	return &ProviderConfig{Type: "sink_azure_monitor_logs", SinkAzureMonitorLogs: value}
-}
-
-func NewProviderConfigFromSinkMockSink(value *SinkMock) *ProviderConfig {
-	return &ProviderConfig{Type: "sink_mock_sink", SinkMockSink: value}
-}
-
-func NewProviderConfigFromStorageAwsS3(value *StorageAwsS3) *ProviderConfig {
-	return &ProviderConfig{Type: "storage_aws_s3", StorageAwsS3: value}
-}
-
-func NewProviderConfigFromStorageAzureBlob(value *StorageAzureBlob) *ProviderConfig {
-	return &ProviderConfig{Type: "storage_azure_blob", StorageAzureBlob: value}
-}
-
-func NewProviderConfigFromStorageGcs(value *StorageGcs) *ProviderConfig {
-	return &ProviderConfig{Type: "storage_gcs", StorageGcs: value}
-}
-
-func NewProviderConfigFromStorageMockStorage(value *StorageMock) *ProviderConfig {
-	return &ProviderConfig{Type: "storage_mock_storage", StorageMockStorage: value}
-}
-
-func NewProviderConfigFromTicketingJira(value *TicketingJira) *ProviderConfig {
-	return &ProviderConfig{Type: "ticketing_jira", TicketingJira: value}
-}
-
-func NewProviderConfigFromTicketingMockTicketing(value *TicketingMock) *ProviderConfig {
-	return &ProviderConfig{Type: "ticketing_mock_ticketing", TicketingMockTicketing: value}
-}
-
-func NewProviderConfigFromTicketingPagerduty(value *TicketingPagerDuty) *ProviderConfig {
-	return &ProviderConfig{Type: "ticketing_pagerduty", TicketingPagerduty: value}
-}
-
-func NewProviderConfigFromTicketingServicenow(value *TicketingServiceNow) *ProviderConfig {
-	return &ProviderConfig{Type: "ticketing_servicenow", TicketingServicenow: value}
-}
-
-func NewProviderConfigFromTicketingTorq(value *TicketingTorq) *ProviderConfig {
-	return &ProviderConfig{Type: "ticketing_torq", TicketingTorq: value}
-}
-
-func NewProviderConfigFromVulnerabilitiesCrowdstrike(value *VulnerabilitiesCrowdStrike) *ProviderConfig {
-	return &ProviderConfig{Type: "vulnerabilities_crowdstrike", VulnerabilitiesCrowdstrike: value}
-}
-
-func NewProviderConfigFromVulnerabilitiesQualysCloud(value *VulnerabilitiesQualysCloud) *ProviderConfig {
-	return &ProviderConfig{Type: "vulnerabilities_qualys_cloud", VulnerabilitiesQualysCloud: value}
-}
-
-func NewProviderConfigFromVulnerabilitiesRapid7InsightCloud(value *VulnerabilitiesRapid7InsightCloud) *ProviderConfig {
-	return &ProviderConfig{Type: "vulnerabilities_rapid7_insight_cloud", VulnerabilitiesRapid7InsightCloud: value}
-}
-
-func NewProviderConfigFromVulnerabilitiesTaniumCloud(value *VulnerabilitiesTaniumCloud) *ProviderConfig {
-	return &ProviderConfig{Type: "vulnerabilities_tanium_cloud", VulnerabilitiesTaniumCloud: value}
-}
-
-func NewProviderConfigFromVulnerabilitiesTenableCloud(value *VulnerabilitiesTenableCloud) *ProviderConfig {
-	return &ProviderConfig{Type: "vulnerabilities_tenable_cloud", VulnerabilitiesTenableCloud: value}
-}
-
 func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 	var unmarshaler struct {
 		Type string `json:"type"`
@@ -3713,6 +6173,9 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	p.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", p)
+	}
 	switch unmarshaler.Type {
 	case "assets_armis_centrix":
 		value := new(AssetsArmisCentrix)
@@ -3947,352 +6410,121 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 }
 
 func (p ProviderConfig) MarshalJSON() ([]byte, error) {
-	switch p.Type {
-	default:
-		return nil, fmt.Errorf("invalid type %s in %T", p.Type, p)
-	case "assets_armis_centrix":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*AssetsArmisCentrix
-		}{
-			Type:               p.Type,
-			AssetsArmisCentrix: p.AssetsArmisCentrix,
-		}
-		return json.Marshal(marshaler)
-	case "assets_nozomi_vantage":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*AssetsNozomiVantage
-		}{
-			Type:                p.Type,
-			AssetsNozomiVantage: p.AssetsNozomiVantage,
-		}
-		return json.Marshal(marshaler)
-	case "assets_servicenow":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*AssetsServiceNow
-		}{
-			Type:             p.Type,
-			AssetsServiceNow: p.AssetsServicenow,
-		}
-		return json.Marshal(marshaler)
-	case "edr_crowdstrike":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*EdrCrowdStrike
-		}{
-			Type:           p.Type,
-			EdrCrowdStrike: p.EdrCrowdstrike,
-		}
-		return json.Marshal(marshaler)
-	case "edr_defender":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*EdrDefender
-		}{
-			Type:        p.Type,
-			EdrDefender: p.EdrDefender,
-		}
-		return json.Marshal(marshaler)
-	case "edr_sentinelone":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*EdrSentinelOne
-		}{
-			Type:           p.Type,
-			EdrSentinelOne: p.EdrSentinelone,
-		}
-		return json.Marshal(marshaler)
-	case "hooks_http":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*HooksHttp
-		}{
-			Type:      p.Type,
-			HooksHttp: p.HooksHttp,
-		}
-		return json.Marshal(marshaler)
-	case "identity_entra_id":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*IdentityEntraId
-		}{
-			Type:            p.Type,
-			IdentityEntraId: p.IdentityEntraId,
-		}
-		return json.Marshal(marshaler)
-	case "identity_okta":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*IdentityOkta
-		}{
-			Type:         p.Type,
-			IdentityOkta: p.IdentityOkta,
-		}
-		return json.Marshal(marshaler)
-	case "identity_pingone":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*IdentityPingOne
-		}{
-			Type:            p.Type,
-			IdentityPingOne: p.IdentityPingone,
-		}
-		return json.Marshal(marshaler)
-	case "notifications_jira":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*NotificationsJira
-		}{
-			Type:              p.Type,
-			NotificationsJira: p.NotificationsJira,
-		}
-		return json.Marshal(marshaler)
-	case "notifications_mock_notifications":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*NotificationsMock
-		}{
-			Type:              p.Type,
-			NotificationsMock: p.NotificationsMockNotifications,
-		}
-		return json.Marshal(marshaler)
-	case "notifications_slack":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*NotificationsSlack
-		}{
-			Type:               p.Type,
-			NotificationsSlack: p.NotificationsSlack,
-		}
-		return json.Marshal(marshaler)
-	case "notifications_teams":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*NotificationsTeams
-		}{
-			Type:               p.Type,
-			NotificationsTeams: p.NotificationsTeams,
-		}
-		return json.Marshal(marshaler)
-	case "siem_elasticsearch":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*SiemElasticsearch
-		}{
-			Type:              p.Type,
-			SiemElasticsearch: p.SiemElasticsearch,
-		}
-		return json.Marshal(marshaler)
-	case "siem_mock_siem":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*SiemMock
-		}{
-			Type:     p.Type,
-			SiemMock: p.SiemMockSiem,
-		}
-		return json.Marshal(marshaler)
-	case "siem_q_radar":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*SiemQRadar
-		}{
-			Type:       p.Type,
-			SiemQRadar: p.SiemQRadar,
-		}
-		return json.Marshal(marshaler)
-	case "siem_rapid7_insightidr":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*SiemRapid7InsightIdr
-		}{
-			Type:                 p.Type,
-			SiemRapid7InsightIdr: p.SiemRapid7Insightidr,
-		}
-		return json.Marshal(marshaler)
-	case "siem_splunk":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*SiemSplunk
-		}{
-			Type:       p.Type,
-			SiemSplunk: p.SiemSplunk,
-		}
-		return json.Marshal(marshaler)
-	case "siem_sumo_logic":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*SiemSumoLogic
-		}{
-			Type:          p.Type,
-			SiemSumoLogic: p.SiemSumoLogic,
-		}
-		return json.Marshal(marshaler)
-	case "sink_aws_security_lake":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*SinkAwsSecurityLake
-		}{
-			Type:                p.Type,
-			SinkAwsSecurityLake: p.SinkAwsSecurityLake,
-		}
-		return json.Marshal(marshaler)
-	case "sink_aws_sqs":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*SinkAwsSqs
-		}{
-			Type:       p.Type,
-			SinkAwsSqs: p.SinkAwsSqs,
-		}
-		return json.Marshal(marshaler)
-	case "sink_azure_monitor_logs":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*SinkAzureMonitorLogs
-		}{
-			Type:                 p.Type,
-			SinkAzureMonitorLogs: p.SinkAzureMonitorLogs,
-		}
-		return json.Marshal(marshaler)
-	case "sink_mock_sink":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*SinkMock
-		}{
-			Type:     p.Type,
-			SinkMock: p.SinkMockSink,
-		}
-		return json.Marshal(marshaler)
-	case "storage_aws_s3":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*StorageAwsS3
-		}{
-			Type:         p.Type,
-			StorageAwsS3: p.StorageAwsS3,
-		}
-		return json.Marshal(marshaler)
-	case "storage_azure_blob":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*StorageAzureBlob
-		}{
-			Type:             p.Type,
-			StorageAzureBlob: p.StorageAzureBlob,
-		}
-		return json.Marshal(marshaler)
-	case "storage_gcs":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*StorageGcs
-		}{
-			Type:       p.Type,
-			StorageGcs: p.StorageGcs,
-		}
-		return json.Marshal(marshaler)
-	case "storage_mock_storage":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*StorageMock
-		}{
-			Type:        p.Type,
-			StorageMock: p.StorageMockStorage,
-		}
-		return json.Marshal(marshaler)
-	case "ticketing_jira":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*TicketingJira
-		}{
-			Type:          p.Type,
-			TicketingJira: p.TicketingJira,
-		}
-		return json.Marshal(marshaler)
-	case "ticketing_mock_ticketing":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*TicketingMock
-		}{
-			Type:          p.Type,
-			TicketingMock: p.TicketingMockTicketing,
-		}
-		return json.Marshal(marshaler)
-	case "ticketing_pagerduty":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*TicketingPagerDuty
-		}{
-			Type:               p.Type,
-			TicketingPagerDuty: p.TicketingPagerduty,
-		}
-		return json.Marshal(marshaler)
-	case "ticketing_servicenow":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*TicketingServiceNow
-		}{
-			Type:                p.Type,
-			TicketingServiceNow: p.TicketingServicenow,
-		}
-		return json.Marshal(marshaler)
-	case "ticketing_torq":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*TicketingTorq
-		}{
-			Type:          p.Type,
-			TicketingTorq: p.TicketingTorq,
-		}
-		return json.Marshal(marshaler)
-	case "vulnerabilities_crowdstrike":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*VulnerabilitiesCrowdStrike
-		}{
-			Type:                       p.Type,
-			VulnerabilitiesCrowdStrike: p.VulnerabilitiesCrowdstrike,
-		}
-		return json.Marshal(marshaler)
-	case "vulnerabilities_qualys_cloud":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*VulnerabilitiesQualysCloud
-		}{
-			Type:                       p.Type,
-			VulnerabilitiesQualysCloud: p.VulnerabilitiesQualysCloud,
-		}
-		return json.Marshal(marshaler)
-	case "vulnerabilities_rapid7_insight_cloud":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*VulnerabilitiesRapid7InsightCloud
-		}{
-			Type:                              p.Type,
-			VulnerabilitiesRapid7InsightCloud: p.VulnerabilitiesRapid7InsightCloud,
-		}
-		return json.Marshal(marshaler)
-	case "vulnerabilities_tanium_cloud":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*VulnerabilitiesTaniumCloud
-		}{
-			Type:                       p.Type,
-			VulnerabilitiesTaniumCloud: p.VulnerabilitiesTaniumCloud,
-		}
-		return json.Marshal(marshaler)
-	case "vulnerabilities_tenable_cloud":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*VulnerabilitiesTenableCloud
-		}{
-			Type:                        p.Type,
-			VulnerabilitiesTenableCloud: p.VulnerabilitiesTenableCloud,
-		}
-		return json.Marshal(marshaler)
+	if p.AssetsArmisCentrix != nil {
+		return core.MarshalJSONWithExtraProperty(p.AssetsArmisCentrix, "type", "assets_armis_centrix")
 	}
+	if p.AssetsNozomiVantage != nil {
+		return core.MarshalJSONWithExtraProperty(p.AssetsNozomiVantage, "type", "assets_nozomi_vantage")
+	}
+	if p.AssetsServicenow != nil {
+		return core.MarshalJSONWithExtraProperty(p.AssetsServicenow, "type", "assets_servicenow")
+	}
+	if p.EdrCrowdstrike != nil {
+		return core.MarshalJSONWithExtraProperty(p.EdrCrowdstrike, "type", "edr_crowdstrike")
+	}
+	if p.EdrDefender != nil {
+		return core.MarshalJSONWithExtraProperty(p.EdrDefender, "type", "edr_defender")
+	}
+	if p.EdrSentinelone != nil {
+		return core.MarshalJSONWithExtraProperty(p.EdrSentinelone, "type", "edr_sentinelone")
+	}
+	if p.HooksHttp != nil {
+		return core.MarshalJSONWithExtraProperty(p.HooksHttp, "type", "hooks_http")
+	}
+	if p.IdentityEntraId != nil {
+		return core.MarshalJSONWithExtraProperty(p.IdentityEntraId, "type", "identity_entra_id")
+	}
+	if p.IdentityOkta != nil {
+		return core.MarshalJSONWithExtraProperty(p.IdentityOkta, "type", "identity_okta")
+	}
+	if p.IdentityPingone != nil {
+		return core.MarshalJSONWithExtraProperty(p.IdentityPingone, "type", "identity_pingone")
+	}
+	if p.NotificationsJira != nil {
+		return core.MarshalJSONWithExtraProperty(p.NotificationsJira, "type", "notifications_jira")
+	}
+	if p.NotificationsMockNotifications != nil {
+		return core.MarshalJSONWithExtraProperty(p.NotificationsMockNotifications, "type", "notifications_mock_notifications")
+	}
+	if p.NotificationsSlack != nil {
+		return core.MarshalJSONWithExtraProperty(p.NotificationsSlack, "type", "notifications_slack")
+	}
+	if p.NotificationsTeams != nil {
+		return core.MarshalJSONWithExtraProperty(p.NotificationsTeams, "type", "notifications_teams")
+	}
+	if p.SiemElasticsearch != nil {
+		return core.MarshalJSONWithExtraProperty(p.SiemElasticsearch, "type", "siem_elasticsearch")
+	}
+	if p.SiemMockSiem != nil {
+		return core.MarshalJSONWithExtraProperty(p.SiemMockSiem, "type", "siem_mock_siem")
+	}
+	if p.SiemQRadar != nil {
+		return core.MarshalJSONWithExtraProperty(p.SiemQRadar, "type", "siem_q_radar")
+	}
+	if p.SiemRapid7Insightidr != nil {
+		return core.MarshalJSONWithExtraProperty(p.SiemRapid7Insightidr, "type", "siem_rapid7_insightidr")
+	}
+	if p.SiemSplunk != nil {
+		return core.MarshalJSONWithExtraProperty(p.SiemSplunk, "type", "siem_splunk")
+	}
+	if p.SiemSumoLogic != nil {
+		return core.MarshalJSONWithExtraProperty(p.SiemSumoLogic, "type", "siem_sumo_logic")
+	}
+	if p.SinkAwsSecurityLake != nil {
+		return core.MarshalJSONWithExtraProperty(p.SinkAwsSecurityLake, "type", "sink_aws_security_lake")
+	}
+	if p.SinkAwsSqs != nil {
+		return core.MarshalJSONWithExtraProperty(p.SinkAwsSqs, "type", "sink_aws_sqs")
+	}
+	if p.SinkAzureMonitorLogs != nil {
+		return core.MarshalJSONWithExtraProperty(p.SinkAzureMonitorLogs, "type", "sink_azure_monitor_logs")
+	}
+	if p.SinkMockSink != nil {
+		return core.MarshalJSONWithExtraProperty(p.SinkMockSink, "type", "sink_mock_sink")
+	}
+	if p.StorageAwsS3 != nil {
+		return core.MarshalJSONWithExtraProperty(p.StorageAwsS3, "type", "storage_aws_s3")
+	}
+	if p.StorageAzureBlob != nil {
+		return core.MarshalJSONWithExtraProperty(p.StorageAzureBlob, "type", "storage_azure_blob")
+	}
+	if p.StorageGcs != nil {
+		return core.MarshalJSONWithExtraProperty(p.StorageGcs, "type", "storage_gcs")
+	}
+	if p.StorageMockStorage != nil {
+		return core.MarshalJSONWithExtraProperty(p.StorageMockStorage, "type", "storage_mock_storage")
+	}
+	if p.TicketingJira != nil {
+		return core.MarshalJSONWithExtraProperty(p.TicketingJira, "type", "ticketing_jira")
+	}
+	if p.TicketingMockTicketing != nil {
+		return core.MarshalJSONWithExtraProperty(p.TicketingMockTicketing, "type", "ticketing_mock_ticketing")
+	}
+	if p.TicketingPagerduty != nil {
+		return core.MarshalJSONWithExtraProperty(p.TicketingPagerduty, "type", "ticketing_pagerduty")
+	}
+	if p.TicketingServicenow != nil {
+		return core.MarshalJSONWithExtraProperty(p.TicketingServicenow, "type", "ticketing_servicenow")
+	}
+	if p.TicketingTorq != nil {
+		return core.MarshalJSONWithExtraProperty(p.TicketingTorq, "type", "ticketing_torq")
+	}
+	if p.VulnerabilitiesCrowdstrike != nil {
+		return core.MarshalJSONWithExtraProperty(p.VulnerabilitiesCrowdstrike, "type", "vulnerabilities_crowdstrike")
+	}
+	if p.VulnerabilitiesQualysCloud != nil {
+		return core.MarshalJSONWithExtraProperty(p.VulnerabilitiesQualysCloud, "type", "vulnerabilities_qualys_cloud")
+	}
+	if p.VulnerabilitiesRapid7InsightCloud != nil {
+		return core.MarshalJSONWithExtraProperty(p.VulnerabilitiesRapid7InsightCloud, "type", "vulnerabilities_rapid7_insight_cloud")
+	}
+	if p.VulnerabilitiesTaniumCloud != nil {
+		return core.MarshalJSONWithExtraProperty(p.VulnerabilitiesTaniumCloud, "type", "vulnerabilities_tanium_cloud")
+	}
+	if p.VulnerabilitiesTenableCloud != nil {
+		return core.MarshalJSONWithExtraProperty(p.VulnerabilitiesTenableCloud, "type", "vulnerabilities_tenable_cloud")
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", p)
 }
 
 type ProviderConfigVisitor interface {
@@ -4337,86 +6569,121 @@ type ProviderConfigVisitor interface {
 }
 
 func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
-	switch p.Type {
-	default:
-		return fmt.Errorf("invalid type %s in %T", p.Type, p)
-	case "assets_armis_centrix":
+	if p.AssetsArmisCentrix != nil {
 		return visitor.VisitAssetsArmisCentrix(p.AssetsArmisCentrix)
-	case "assets_nozomi_vantage":
+	}
+	if p.AssetsNozomiVantage != nil {
 		return visitor.VisitAssetsNozomiVantage(p.AssetsNozomiVantage)
-	case "assets_servicenow":
+	}
+	if p.AssetsServicenow != nil {
 		return visitor.VisitAssetsServicenow(p.AssetsServicenow)
-	case "edr_crowdstrike":
+	}
+	if p.EdrCrowdstrike != nil {
 		return visitor.VisitEdrCrowdstrike(p.EdrCrowdstrike)
-	case "edr_defender":
+	}
+	if p.EdrDefender != nil {
 		return visitor.VisitEdrDefender(p.EdrDefender)
-	case "edr_sentinelone":
+	}
+	if p.EdrSentinelone != nil {
 		return visitor.VisitEdrSentinelone(p.EdrSentinelone)
-	case "hooks_http":
+	}
+	if p.HooksHttp != nil {
 		return visitor.VisitHooksHttp(p.HooksHttp)
-	case "identity_entra_id":
+	}
+	if p.IdentityEntraId != nil {
 		return visitor.VisitIdentityEntraId(p.IdentityEntraId)
-	case "identity_okta":
+	}
+	if p.IdentityOkta != nil {
 		return visitor.VisitIdentityOkta(p.IdentityOkta)
-	case "identity_pingone":
+	}
+	if p.IdentityPingone != nil {
 		return visitor.VisitIdentityPingone(p.IdentityPingone)
-	case "notifications_jira":
+	}
+	if p.NotificationsJira != nil {
 		return visitor.VisitNotificationsJira(p.NotificationsJira)
-	case "notifications_mock_notifications":
+	}
+	if p.NotificationsMockNotifications != nil {
 		return visitor.VisitNotificationsMockNotifications(p.NotificationsMockNotifications)
-	case "notifications_slack":
+	}
+	if p.NotificationsSlack != nil {
 		return visitor.VisitNotificationsSlack(p.NotificationsSlack)
-	case "notifications_teams":
+	}
+	if p.NotificationsTeams != nil {
 		return visitor.VisitNotificationsTeams(p.NotificationsTeams)
-	case "siem_elasticsearch":
+	}
+	if p.SiemElasticsearch != nil {
 		return visitor.VisitSiemElasticsearch(p.SiemElasticsearch)
-	case "siem_mock_siem":
+	}
+	if p.SiemMockSiem != nil {
 		return visitor.VisitSiemMockSiem(p.SiemMockSiem)
-	case "siem_q_radar":
+	}
+	if p.SiemQRadar != nil {
 		return visitor.VisitSiemQRadar(p.SiemQRadar)
-	case "siem_rapid7_insightidr":
+	}
+	if p.SiemRapid7Insightidr != nil {
 		return visitor.VisitSiemRapid7Insightidr(p.SiemRapid7Insightidr)
-	case "siem_splunk":
+	}
+	if p.SiemSplunk != nil {
 		return visitor.VisitSiemSplunk(p.SiemSplunk)
-	case "siem_sumo_logic":
+	}
+	if p.SiemSumoLogic != nil {
 		return visitor.VisitSiemSumoLogic(p.SiemSumoLogic)
-	case "sink_aws_security_lake":
+	}
+	if p.SinkAwsSecurityLake != nil {
 		return visitor.VisitSinkAwsSecurityLake(p.SinkAwsSecurityLake)
-	case "sink_aws_sqs":
+	}
+	if p.SinkAwsSqs != nil {
 		return visitor.VisitSinkAwsSqs(p.SinkAwsSqs)
-	case "sink_azure_monitor_logs":
+	}
+	if p.SinkAzureMonitorLogs != nil {
 		return visitor.VisitSinkAzureMonitorLogs(p.SinkAzureMonitorLogs)
-	case "sink_mock_sink":
+	}
+	if p.SinkMockSink != nil {
 		return visitor.VisitSinkMockSink(p.SinkMockSink)
-	case "storage_aws_s3":
+	}
+	if p.StorageAwsS3 != nil {
 		return visitor.VisitStorageAwsS3(p.StorageAwsS3)
-	case "storage_azure_blob":
+	}
+	if p.StorageAzureBlob != nil {
 		return visitor.VisitStorageAzureBlob(p.StorageAzureBlob)
-	case "storage_gcs":
+	}
+	if p.StorageGcs != nil {
 		return visitor.VisitStorageGcs(p.StorageGcs)
-	case "storage_mock_storage":
+	}
+	if p.StorageMockStorage != nil {
 		return visitor.VisitStorageMockStorage(p.StorageMockStorage)
-	case "ticketing_jira":
+	}
+	if p.TicketingJira != nil {
 		return visitor.VisitTicketingJira(p.TicketingJira)
-	case "ticketing_mock_ticketing":
+	}
+	if p.TicketingMockTicketing != nil {
 		return visitor.VisitTicketingMockTicketing(p.TicketingMockTicketing)
-	case "ticketing_pagerduty":
+	}
+	if p.TicketingPagerduty != nil {
 		return visitor.VisitTicketingPagerduty(p.TicketingPagerduty)
-	case "ticketing_servicenow":
+	}
+	if p.TicketingServicenow != nil {
 		return visitor.VisitTicketingServicenow(p.TicketingServicenow)
-	case "ticketing_torq":
+	}
+	if p.TicketingTorq != nil {
 		return visitor.VisitTicketingTorq(p.TicketingTorq)
-	case "vulnerabilities_crowdstrike":
+	}
+	if p.VulnerabilitiesCrowdstrike != nil {
 		return visitor.VisitVulnerabilitiesCrowdstrike(p.VulnerabilitiesCrowdstrike)
-	case "vulnerabilities_qualys_cloud":
+	}
+	if p.VulnerabilitiesQualysCloud != nil {
 		return visitor.VisitVulnerabilitiesQualysCloud(p.VulnerabilitiesQualysCloud)
-	case "vulnerabilities_rapid7_insight_cloud":
+	}
+	if p.VulnerabilitiesRapid7InsightCloud != nil {
 		return visitor.VisitVulnerabilitiesRapid7InsightCloud(p.VulnerabilitiesRapid7InsightCloud)
-	case "vulnerabilities_tanium_cloud":
+	}
+	if p.VulnerabilitiesTaniumCloud != nil {
 		return visitor.VisitVulnerabilitiesTaniumCloud(p.VulnerabilitiesTaniumCloud)
-	case "vulnerabilities_tenable_cloud":
+	}
+	if p.VulnerabilitiesTenableCloud != nil {
 		return visitor.VisitVulnerabilitiesTenableCloud(p.VulnerabilitiesTenableCloud)
 	}
+	return fmt.Errorf("type %T does not define a non-empty union type", p)
 }
 
 // List of supported providers.
@@ -4598,14 +6865,6 @@ type QRadarCredential struct {
 	TokenId TokenCredentialId
 }
 
-func NewQRadarCredentialFromToken(value *TokenCredential) *QRadarCredential {
-	return &QRadarCredential{Type: "token", Token: value}
-}
-
-func NewQRadarCredentialFromTokenId(value TokenCredentialId) *QRadarCredential {
-	return &QRadarCredential{Type: "token_id", TokenId: value}
-}
-
 func (q *QRadarCredential) UnmarshalJSON(data []byte) error {
 	var unmarshaler struct {
 		Type string `json:"type"`
@@ -4614,6 +6873,9 @@ func (q *QRadarCredential) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	q.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", q)
+	}
 	switch unmarshaler.Type {
 	case "token":
 		value := new(TokenCredential)
@@ -4623,7 +6885,7 @@ func (q *QRadarCredential) UnmarshalJSON(data []byte) error {
 		q.Token = value
 	case "token_id":
 		var valueUnmarshaler struct {
-			TokenId TokenCredentialId `json:"value,omitempty"`
+			TokenId TokenCredentialId `json:"value"`
 		}
 		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
 			return err
@@ -4634,28 +6896,20 @@ func (q *QRadarCredential) UnmarshalJSON(data []byte) error {
 }
 
 func (q QRadarCredential) MarshalJSON() ([]byte, error) {
-	switch q.Type {
-	default:
-		return nil, fmt.Errorf("invalid type %s in %T", q.Type, q)
-	case "token":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*TokenCredential
-		}{
-			Type:            q.Type,
-			TokenCredential: q.Token,
-		}
-		return json.Marshal(marshaler)
-	case "token_id":
+	if q.Token != nil {
+		return core.MarshalJSONWithExtraProperty(q.Token, "type", "token")
+	}
+	if q.TokenId != "" {
 		var marshaler = struct {
 			Type    string            `json:"type"`
-			TokenId TokenCredentialId `json:"value,omitempty"`
+			TokenId TokenCredentialId `json:"value"`
 		}{
-			Type:    q.Type,
+			Type:    "token_id",
 			TokenId: q.TokenId,
 		}
 		return json.Marshal(marshaler)
 	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", q)
 }
 
 type QRadarCredentialVisitor interface {
@@ -4664,28 +6918,19 @@ type QRadarCredentialVisitor interface {
 }
 
 func (q *QRadarCredential) Accept(visitor QRadarCredentialVisitor) error {
-	switch q.Type {
-	default:
-		return fmt.Errorf("invalid type %s in %T", q.Type, q)
-	case "token":
+	if q.Token != nil {
 		return visitor.VisitToken(q.Token)
-	case "token_id":
+	}
+	if q.TokenId != "" {
 		return visitor.VisitTokenId(q.TokenId)
 	}
+	return fmt.Errorf("type %T does not define a non-empty union type", q)
 }
 
 type QualysCloudCredential struct {
 	Type    string
 	Basic   *BasicCredential
 	BasicId BasicCredentialId
-}
-
-func NewQualysCloudCredentialFromBasic(value *BasicCredential) *QualysCloudCredential {
-	return &QualysCloudCredential{Type: "basic", Basic: value}
-}
-
-func NewQualysCloudCredentialFromBasicId(value BasicCredentialId) *QualysCloudCredential {
-	return &QualysCloudCredential{Type: "basic_id", BasicId: value}
 }
 
 func (q *QualysCloudCredential) UnmarshalJSON(data []byte) error {
@@ -4696,6 +6941,9 @@ func (q *QualysCloudCredential) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	q.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", q)
+	}
 	switch unmarshaler.Type {
 	case "basic":
 		value := new(BasicCredential)
@@ -4705,7 +6953,7 @@ func (q *QualysCloudCredential) UnmarshalJSON(data []byte) error {
 		q.Basic = value
 	case "basic_id":
 		var valueUnmarshaler struct {
-			BasicId BasicCredentialId `json:"value,omitempty"`
+			BasicId BasicCredentialId `json:"value"`
 		}
 		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
 			return err
@@ -4716,28 +6964,20 @@ func (q *QualysCloudCredential) UnmarshalJSON(data []byte) error {
 }
 
 func (q QualysCloudCredential) MarshalJSON() ([]byte, error) {
-	switch q.Type {
-	default:
-		return nil, fmt.Errorf("invalid type %s in %T", q.Type, q)
-	case "basic":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*BasicCredential
-		}{
-			Type:            q.Type,
-			BasicCredential: q.Basic,
-		}
-		return json.Marshal(marshaler)
-	case "basic_id":
+	if q.Basic != nil {
+		return core.MarshalJSONWithExtraProperty(q.Basic, "type", "basic")
+	}
+	if q.BasicId != "" {
 		var marshaler = struct {
 			Type    string            `json:"type"`
-			BasicId BasicCredentialId `json:"value,omitempty"`
+			BasicId BasicCredentialId `json:"value"`
 		}{
-			Type:    q.Type,
+			Type:    "basic_id",
 			BasicId: q.BasicId,
 		}
 		return json.Marshal(marshaler)
 	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", q)
 }
 
 type QualysCloudCredentialVisitor interface {
@@ -4746,28 +6986,19 @@ type QualysCloudCredentialVisitor interface {
 }
 
 func (q *QualysCloudCredential) Accept(visitor QualysCloudCredentialVisitor) error {
-	switch q.Type {
-	default:
-		return fmt.Errorf("invalid type %s in %T", q.Type, q)
-	case "basic":
+	if q.Basic != nil {
 		return visitor.VisitBasic(q.Basic)
-	case "basic_id":
+	}
+	if q.BasicId != "" {
 		return visitor.VisitBasicId(q.BasicId)
 	}
+	return fmt.Errorf("type %T does not define a non-empty union type", q)
 }
 
 type Rapid7InsightCloudCredential struct {
 	Type    string
 	Token   *TokenCredential
 	TokenId TokenCredentialId
-}
-
-func NewRapid7InsightCloudCredentialFromToken(value *TokenCredential) *Rapid7InsightCloudCredential {
-	return &Rapid7InsightCloudCredential{Type: "token", Token: value}
-}
-
-func NewRapid7InsightCloudCredentialFromTokenId(value TokenCredentialId) *Rapid7InsightCloudCredential {
-	return &Rapid7InsightCloudCredential{Type: "token_id", TokenId: value}
 }
 
 func (r *Rapid7InsightCloudCredential) UnmarshalJSON(data []byte) error {
@@ -4778,6 +7009,9 @@ func (r *Rapid7InsightCloudCredential) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	r.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", r)
+	}
 	switch unmarshaler.Type {
 	case "token":
 		value := new(TokenCredential)
@@ -4787,7 +7021,7 @@ func (r *Rapid7InsightCloudCredential) UnmarshalJSON(data []byte) error {
 		r.Token = value
 	case "token_id":
 		var valueUnmarshaler struct {
-			TokenId TokenCredentialId `json:"value,omitempty"`
+			TokenId TokenCredentialId `json:"value"`
 		}
 		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
 			return err
@@ -4798,28 +7032,20 @@ func (r *Rapid7InsightCloudCredential) UnmarshalJSON(data []byte) error {
 }
 
 func (r Rapid7InsightCloudCredential) MarshalJSON() ([]byte, error) {
-	switch r.Type {
-	default:
-		return nil, fmt.Errorf("invalid type %s in %T", r.Type, r)
-	case "token":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*TokenCredential
-		}{
-			Type:            r.Type,
-			TokenCredential: r.Token,
-		}
-		return json.Marshal(marshaler)
-	case "token_id":
+	if r.Token != nil {
+		return core.MarshalJSONWithExtraProperty(r.Token, "type", "token")
+	}
+	if r.TokenId != "" {
 		var marshaler = struct {
 			Type    string            `json:"type"`
-			TokenId TokenCredentialId `json:"value,omitempty"`
+			TokenId TokenCredentialId `json:"value"`
 		}{
-			Type:    r.Type,
+			Type:    "token_id",
 			TokenId: r.TokenId,
 		}
 		return json.Marshal(marshaler)
 	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", r)
 }
 
 type Rapid7InsightCloudCredentialVisitor interface {
@@ -4828,94 +7054,307 @@ type Rapid7InsightCloudCredentialVisitor interface {
 }
 
 func (r *Rapid7InsightCloudCredential) Accept(visitor Rapid7InsightCloudCredentialVisitor) error {
-	switch r.Type {
-	default:
-		return fmt.Errorf("invalid type %s in %T", r.Type, r)
-	case "token":
+	if r.Token != nil {
 		return visitor.VisitToken(r.Token)
-	case "token_id":
+	}
+	if r.TokenId != "" {
 		return visitor.VisitTokenId(r.TokenId)
 	}
+	return fmt.Errorf("type %T does not define a non-empty union type", r)
 }
 
 // Configuration for Elasticsearch search and analytics engine. Supports both managed and self-hosted Elasticsearch deployments
 type SiemElasticsearch struct {
-	AuthOptions *ElasticsearchAuthOptions `json:"auth_options,omitempty"`
-	Credential  *ElasticsearchCredential  `json:"credential,omitempty"`
+	AuthOptions *ElasticsearchAuthOptions `json:"auth_options,omitempty" url:"auth_options,omitempty"`
+	Credential  *ElasticsearchCredential  `json:"credential" url:"credential"`
 	// Elasticsearch index to send events to.
-	Index string `json:"index"`
+	Index string `json:"index" url:"index"`
 	// URL for the Elasticsearch API. This should be the base URL for the API, without any path components and must be HTTPS. For example, "https://tenant.elastic.com".
-	Url string `json:"url"`
+	Url string `json:"url" url:"url"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (s *SiemElasticsearch) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
+}
+
+func (s *SiemElasticsearch) UnmarshalJSON(data []byte) error {
+	type unmarshaler SiemElasticsearch
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*s = SiemElasticsearch(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+
+	s._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (s *SiemElasticsearch) String() string {
+	if len(s._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(s); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", s)
 }
 
 // Configuration for the Synqly mock in-memory SIEM handler. This provider is for testing purposes only and does not retain events pushed to it.
 type SiemMock struct {
 	// Name of the index where events are stored.
-	Index *string `json:"index,omitempty"`
+	Index *string `json:"index,omitempty" url:"index,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (s *SiemMock) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
+}
+
+func (s *SiemMock) UnmarshalJSON(data []byte) error {
+	type unmarshaler SiemMock
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*s = SiemMock(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+
+	s._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (s *SiemMock) String() string {
+	if len(s._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(s); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", s)
 }
 
 // Configuration for IBM QRadar as a SIEM Provider.
 type SiemQRadar struct {
 	// The QRadar HTTP Receiver URL, stored as a secret. This URL has a special port in QRadar and is stored in a credential to protect that information. See https://www.youtube.com/watch?v=UEBLVVNpyfg for a demonstration of setting up and mapping and HTTP Receiver in QRadar.
-	CollectionPort int               `json:"collection_port"`
-	Credential     *QRadarCredential `json:"credential,omitempty"`
+	CollectionPort int               `json:"collection_port" url:"collection_port"`
+	Credential     *QRadarCredential `json:"credential" url:"credential"`
 	// If true, skips verification of the QRadar server's TLS certificate. Defaults to false.
-	SkipTlsVerify bool `json:"skip_tls_verify"`
+	SkipTlsVerify bool `json:"skip_tls_verify" url:"skip_tls_verify"`
 	// URL for the QRadar instance. This should be the base URL instance, without any path components and must be HTTPS. For example, "https://qradar.westus2.cloudapp.azure.com".
-	Url string `json:"url"`
+	Url string `json:"url" url:"url"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (s *SiemQRadar) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
+}
+
+func (s *SiemQRadar) UnmarshalJSON(data []byte) error {
+	type unmarshaler SiemQRadar
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*s = SiemQRadar(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+
+	s._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (s *SiemQRadar) String() string {
+	if len(s._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(s); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", s)
 }
 
 // Configuration for Rapid7 InsightIDR as a SIEM Provider.
 type SiemRapid7InsightIdr struct {
-	Credential *Rapid7InsightCloudCredential `json:"credential,omitempty"`
+	Credential *Rapid7InsightCloudCredential `json:"credential" url:"credential"`
 	// URL for the Rapid7 API. This should be the base URL for the API, without any path components and must be HTTPS. For example, "https://us2.api.insight.rapid7.com".
-	Url string `json:"url"`
+	Url string `json:"url" url:"url"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (s *SiemRapid7InsightIdr) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
+}
+
+func (s *SiemRapid7InsightIdr) UnmarshalJSON(data []byte) error {
+	type unmarshaler SiemRapid7InsightIdr
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*s = SiemRapid7InsightIdr(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+
+	s._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (s *SiemRapid7InsightIdr) String() string {
+	if len(s._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(s); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", s)
 }
 
 // Configuration for Splunk as a SIEM Provider. This integration allows sending data to Splunk using an HTTP Event Collector (HEC). Additionally, it can be used to query Splunk using the Splunk Search Service.
 type SiemSplunk struct {
-	HecCredential *SplunkHecToken `json:"hec_credential,omitempty"`
+	HecCredential *SplunkHecToken `json:"hec_credential" url:"hec_credential"`
 	// URL for the Splunk HEC endpoint. This must include the full path to the HEC endpoint. For example, "https://tenant.cloud.splunk.com:8088/services_collector_event".
-	HecUrl string `json:"hec_url"`
+	HecUrl string `json:"hec_url" url:"hec_url"`
 	// Splunk index to send events to. If not provided, will use the default index for the Splunk collector.
-	Index *string `json:"index,omitempty"`
+	Index *string `json:"index,omitempty" url:"index,omitempty"`
 	// Optional id of a credential used for connecting to the Splunk search service. If not provided, querying is disabled.
-	SearchServiceCredential *SplunkSearchCredential `json:"search_service_credential,omitempty"`
+	SearchServiceCredential *SplunkSearchCredential `json:"search_service_credential,omitempty" url:"search_service_credential,omitempty"`
 	// Optional URL used for connecting to the Splunk search service. If not provided, querying is disabled.
-	SearchServiceUrl *string `json:"search_service_url,omitempty"`
+	SearchServiceUrl *string `json:"search_service_url,omitempty" url:"search_service_url,omitempty"`
 	// If true, skips verification of the Splunk server's TLS certificate. Defaults to false.
-	SkipTlsVerify bool `json:"skip_tls_verify"`
+	SkipTlsVerify bool `json:"skip_tls_verify" url:"skip_tls_verify"`
 	// Splunk source to send events to. If not provided, will use the default source for the Splunk collector.
-	Source *string `json:"source,omitempty"`
+	Source *string `json:"source,omitempty" url:"source,omitempty"`
 	// Splunk source type to send events to. If not provided, will use the default source type for the Splunk collector.
-	SourceType *string `json:"source_type,omitempty"`
+	SourceType *string `json:"source_type,omitempty" url:"source_type,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (s *SiemSplunk) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
+}
+
+func (s *SiemSplunk) UnmarshalJSON(data []byte) error {
+	type unmarshaler SiemSplunk
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*s = SiemSplunk(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+
+	s._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (s *SiemSplunk) String() string {
+	if len(s._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(s); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", s)
 }
 
 // Configuration for Sumo Logic Cloud SIEM.
 type SiemSumoLogic struct {
 	// Automatically parse logs as JSON when running log queries against Sumo Logic. Default is true.
-	AutoParseLogs *bool `json:"auto_parse_logs,omitempty"`
+	AutoParseLogs *bool `json:"auto_parse_logs,omitempty" url:"auto_parse_logs,omitempty"`
 	// Required if you need to send Sumo Logic events from the Synqly API.
-	CollectionUrl *SumoLogicCollectionUrl `json:"collection_url,omitempty"`
-	Credential    *SumoLogicCredential    `json:"credential,omitempty"`
+	CollectionUrl *SumoLogicCollectionUrl `json:"collection_url,omitempty" url:"collection_url,omitempty"`
+	Credential    *SumoLogicCredential    `json:"credential" url:"credential"`
 	// Only query for logs that have been processed into the Sumo Logic Cloud SIEM app. Default is false.
-	SiemLogsOnly *bool `json:"siem_logs_only,omitempty"`
+	SiemLogsOnly *bool `json:"siem_logs_only,omitempty" url:"siem_logs_only,omitempty"`
 	// Your Sumo Logic API endpoint. See https://help.sumologic.com/docs/api/getting-started/#sumo-logic-endpoints-by-deployment-and-firewall-security for help determining which base URL to use.
-	Url string `json:"url"`
+	Url string `json:"url" url:"url"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (s *SiemSumoLogic) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
+}
+
+func (s *SiemSumoLogic) UnmarshalJSON(data []byte) error {
+	type unmarshaler SiemSumoLogic
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*s = SiemSumoLogic(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+
+	s._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (s *SiemSumoLogic) String() string {
+	if len(s._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(s); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", s)
 }
 
 type SentinelOneCredential struct {
 	Type    string
 	Token   *TokenCredential
 	TokenId TokenCredentialId
-}
-
-func NewSentinelOneCredentialFromToken(value *TokenCredential) *SentinelOneCredential {
-	return &SentinelOneCredential{Type: "token", Token: value}
-}
-
-func NewSentinelOneCredentialFromTokenId(value TokenCredentialId) *SentinelOneCredential {
-	return &SentinelOneCredential{Type: "token_id", TokenId: value}
 }
 
 func (s *SentinelOneCredential) UnmarshalJSON(data []byte) error {
@@ -4926,6 +7365,9 @@ func (s *SentinelOneCredential) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	s.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", s)
+	}
 	switch unmarshaler.Type {
 	case "token":
 		value := new(TokenCredential)
@@ -4935,7 +7377,7 @@ func (s *SentinelOneCredential) UnmarshalJSON(data []byte) error {
 		s.Token = value
 	case "token_id":
 		var valueUnmarshaler struct {
-			TokenId TokenCredentialId `json:"value,omitempty"`
+			TokenId TokenCredentialId `json:"value"`
 		}
 		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
 			return err
@@ -4946,28 +7388,20 @@ func (s *SentinelOneCredential) UnmarshalJSON(data []byte) error {
 }
 
 func (s SentinelOneCredential) MarshalJSON() ([]byte, error) {
-	switch s.Type {
-	default:
-		return nil, fmt.Errorf("invalid type %s in %T", s.Type, s)
-	case "token":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*TokenCredential
-		}{
-			Type:            s.Type,
-			TokenCredential: s.Token,
-		}
-		return json.Marshal(marshaler)
-	case "token_id":
+	if s.Token != nil {
+		return core.MarshalJSONWithExtraProperty(s.Token, "type", "token")
+	}
+	if s.TokenId != "" {
 		var marshaler = struct {
 			Type    string            `json:"type"`
-			TokenId TokenCredentialId `json:"value,omitempty"`
+			TokenId TokenCredentialId `json:"value"`
 		}{
-			Type:    s.Type,
+			Type:    "token_id",
 			TokenId: s.TokenId,
 		}
 		return json.Marshal(marshaler)
 	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", s)
 }
 
 type SentinelOneCredentialVisitor interface {
@@ -4976,28 +7410,19 @@ type SentinelOneCredentialVisitor interface {
 }
 
 func (s *SentinelOneCredential) Accept(visitor SentinelOneCredentialVisitor) error {
-	switch s.Type {
-	default:
-		return fmt.Errorf("invalid type %s in %T", s.Type, s)
-	case "token":
+	if s.Token != nil {
 		return visitor.VisitToken(s.Token)
-	case "token_id":
+	}
+	if s.TokenId != "" {
 		return visitor.VisitTokenId(s.TokenId)
 	}
+	return fmt.Errorf("type %T does not define a non-empty union type", s)
 }
 
 type ServiceNowCredential struct {
 	Type    string
 	Basic   *BasicCredential
 	BasicId BasicCredentialId
-}
-
-func NewServiceNowCredentialFromBasic(value *BasicCredential) *ServiceNowCredential {
-	return &ServiceNowCredential{Type: "basic", Basic: value}
-}
-
-func NewServiceNowCredentialFromBasicId(value BasicCredentialId) *ServiceNowCredential {
-	return &ServiceNowCredential{Type: "basic_id", BasicId: value}
 }
 
 func (s *ServiceNowCredential) UnmarshalJSON(data []byte) error {
@@ -5008,6 +7433,9 @@ func (s *ServiceNowCredential) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	s.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", s)
+	}
 	switch unmarshaler.Type {
 	case "basic":
 		value := new(BasicCredential)
@@ -5017,7 +7445,7 @@ func (s *ServiceNowCredential) UnmarshalJSON(data []byte) error {
 		s.Basic = value
 	case "basic_id":
 		var valueUnmarshaler struct {
-			BasicId BasicCredentialId `json:"value,omitempty"`
+			BasicId BasicCredentialId `json:"value"`
 		}
 		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
 			return err
@@ -5028,28 +7456,20 @@ func (s *ServiceNowCredential) UnmarshalJSON(data []byte) error {
 }
 
 func (s ServiceNowCredential) MarshalJSON() ([]byte, error) {
-	switch s.Type {
-	default:
-		return nil, fmt.Errorf("invalid type %s in %T", s.Type, s)
-	case "basic":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*BasicCredential
-		}{
-			Type:            s.Type,
-			BasicCredential: s.Basic,
-		}
-		return json.Marshal(marshaler)
-	case "basic_id":
+	if s.Basic != nil {
+		return core.MarshalJSONWithExtraProperty(s.Basic, "type", "basic")
+	}
+	if s.BasicId != "" {
 		var marshaler = struct {
 			Type    string            `json:"type"`
-			BasicId BasicCredentialId `json:"value,omitempty"`
+			BasicId BasicCredentialId `json:"value"`
 		}{
-			Type:    s.Type,
+			Type:    "basic_id",
 			BasicId: s.BasicId,
 		}
 		return json.Marshal(marshaler)
 	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", s)
 }
 
 type ServiceNowCredentialVisitor interface {
@@ -5058,68 +7478,207 @@ type ServiceNowCredentialVisitor interface {
 }
 
 func (s *ServiceNowCredential) Accept(visitor ServiceNowCredentialVisitor) error {
-	switch s.Type {
-	default:
-		return fmt.Errorf("invalid type %s in %T", s.Type, s)
-	case "basic":
+	if s.Basic != nil {
 		return visitor.VisitBasic(s.Basic)
-	case "basic_id":
+	}
+	if s.BasicId != "" {
 		return visitor.VisitBasicId(s.BasicId)
 	}
+	return fmt.Errorf("type %T does not define a non-empty union type", s)
 }
 
 // Configuration for AWS Simple Queue Service (SQS) as a Sink Provider.
 type SinkAwsSqs struct {
 	// Credential ID that stores AWS authentication key and secret. This token pair must have write access to the configured SQS queue
-	Credential *AwsSqsCredential `json:"credential,omitempty"`
+	Credential *AwsSqsCredential `json:"credential" url:"credential"`
 	// Override the default AWS region for this integration. If not present, the region will be inferred from the URL.
-	Region *string `json:"region,omitempty"`
+	Region *string `json:"region,omitempty" url:"region,omitempty"`
 	// URL of the SQS queue where events are sent. Must be in the format `https://sqs.{region}.amazonaws.com_{account_id}/{queue_name}`.
-	Url string `json:"url"`
+	Url string `json:"url" url:"url"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (s *SinkAwsSqs) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
+}
+
+func (s *SinkAwsSqs) UnmarshalJSON(data []byte) error {
+	type unmarshaler SinkAwsSqs
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*s = SinkAwsSqs(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+
+	s._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (s *SinkAwsSqs) String() string {
+	if len(s._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(s); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", s)
 }
 
 // Configuration for AWS Security Lake provider. Events are written directly to an AWS S3 bucket in Apache Parquet format.
 type SinkAwsSecurityLake struct {
-	Credential *AwsSecurityLakeCredential `json:"credential,omitempty"`
+	Credential *AwsSecurityLakeCredential `json:"credential" url:"credential"`
 	// Override the default AWS region for this integration. If not present, the region will be inferred from the URL.
-	Region *string `json:"region,omitempty"`
+	Region *string `json:"region,omitempty" url:"region,omitempty"`
 	// URL of the S3 bucket where the AWS Security Lake events are stored.
-	Url string `json:"url"`
+	Url string `json:"url" url:"url"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (s *SinkAwsSecurityLake) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
+}
+
+func (s *SinkAwsSecurityLake) UnmarshalJSON(data []byte) error {
+	type unmarshaler SinkAwsSecurityLake
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*s = SinkAwsSecurityLake(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+
+	s._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (s *SinkAwsSecurityLake) String() string {
+	if len(s._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(s); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", s)
 }
 
 // Configuration for Azure Monitor Logs as a Sink Provider. Azure Monitor Logs is a feature of Azure Monitor that collects and organizes log and performance data from monitored resources.
 type SinkAzureMonitorLogs struct {
 	// Azure Client (Application) ID.
-	ClientId   string                      `json:"client_id"`
-	Credential *AzureMonitorLogsCredential `json:"credential,omitempty"`
+	ClientId   string                      `json:"client_id" url:"client_id"`
+	Credential *AzureMonitorLogsCredential `json:"credential" url:"credential"`
 	// Data collection rule immutable ID.
-	RuleId string `json:"rule_id"`
+	RuleId string `json:"rule_id" url:"rule_id"`
 	// Name of the Data collection rule stream.
-	StreamName string `json:"stream_name"`
+	StreamName string `json:"stream_name" url:"stream_name"`
 	// Azure Directory (tenant) ID.
-	TenantId string `json:"tenant_id"`
+	TenantId string `json:"tenant_id" url:"tenant_id"`
 	// URL of the Azure data collection endpoint.
-	Url string `json:"url"`
+	Url string `json:"url" url:"url"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (s *SinkAzureMonitorLogs) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
+}
+
+func (s *SinkAzureMonitorLogs) UnmarshalJSON(data []byte) error {
+	type unmarshaler SinkAzureMonitorLogs
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*s = SinkAzureMonitorLogs(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+
+	s._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (s *SinkAzureMonitorLogs) String() string {
+	if len(s._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(s); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", s)
 }
 
 // Configuration for the Synqly mock in-memory sink handler. This provider is for testing purposes only and does not retain events pushed to it.
 type SinkMock struct {
 	// Name of the destination where events are stored. This property is unused.
-	Destination *string `json:"destination,omitempty"`
+	Destination *string `json:"destination,omitempty" url:"destination,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (s *SinkMock) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
+}
+
+func (s *SinkMock) UnmarshalJSON(data []byte) error {
+	type unmarshaler SinkMock
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*s = SinkMock(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+
+	s._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (s *SinkMock) String() string {
+	if len(s._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(s); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", s)
 }
 
 type SlackCredential struct {
 	Type    string
 	Token   *TokenCredential
 	TokenId TokenCredentialId
-}
-
-func NewSlackCredentialFromToken(value *TokenCredential) *SlackCredential {
-	return &SlackCredential{Type: "token", Token: value}
-}
-
-func NewSlackCredentialFromTokenId(value TokenCredentialId) *SlackCredential {
-	return &SlackCredential{Type: "token_id", TokenId: value}
 }
 
 func (s *SlackCredential) UnmarshalJSON(data []byte) error {
@@ -5130,6 +7689,9 @@ func (s *SlackCredential) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	s.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", s)
+	}
 	switch unmarshaler.Type {
 	case "token":
 		value := new(TokenCredential)
@@ -5139,7 +7701,7 @@ func (s *SlackCredential) UnmarshalJSON(data []byte) error {
 		s.Token = value
 	case "token_id":
 		var valueUnmarshaler struct {
-			TokenId TokenCredentialId `json:"value,omitempty"`
+			TokenId TokenCredentialId `json:"value"`
 		}
 		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
 			return err
@@ -5150,28 +7712,20 @@ func (s *SlackCredential) UnmarshalJSON(data []byte) error {
 }
 
 func (s SlackCredential) MarshalJSON() ([]byte, error) {
-	switch s.Type {
-	default:
-		return nil, fmt.Errorf("invalid type %s in %T", s.Type, s)
-	case "token":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*TokenCredential
-		}{
-			Type:            s.Type,
-			TokenCredential: s.Token,
-		}
-		return json.Marshal(marshaler)
-	case "token_id":
+	if s.Token != nil {
+		return core.MarshalJSONWithExtraProperty(s.Token, "type", "token")
+	}
+	if s.TokenId != "" {
 		var marshaler = struct {
 			Type    string            `json:"type"`
-			TokenId TokenCredentialId `json:"value,omitempty"`
+			TokenId TokenCredentialId `json:"value"`
 		}{
-			Type:    s.Type,
+			Type:    "token_id",
 			TokenId: s.TokenId,
 		}
 		return json.Marshal(marshaler)
 	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", s)
 }
 
 type SlackCredentialVisitor interface {
@@ -5180,28 +7734,19 @@ type SlackCredentialVisitor interface {
 }
 
 func (s *SlackCredential) Accept(visitor SlackCredentialVisitor) error {
-	switch s.Type {
-	default:
-		return fmt.Errorf("invalid type %s in %T", s.Type, s)
-	case "token":
+	if s.Token != nil {
 		return visitor.VisitToken(s.Token)
-	case "token_id":
+	}
+	if s.TokenId != "" {
 		return visitor.VisitTokenId(s.TokenId)
 	}
+	return fmt.Errorf("type %T does not define a non-empty union type", s)
 }
 
 type SplunkHecToken struct {
 	Type    string
 	Token   *TokenCredential
 	TokenId TokenCredentialId
-}
-
-func NewSplunkHecTokenFromToken(value *TokenCredential) *SplunkHecToken {
-	return &SplunkHecToken{Type: "token", Token: value}
-}
-
-func NewSplunkHecTokenFromTokenId(value TokenCredentialId) *SplunkHecToken {
-	return &SplunkHecToken{Type: "token_id", TokenId: value}
 }
 
 func (s *SplunkHecToken) UnmarshalJSON(data []byte) error {
@@ -5212,6 +7757,9 @@ func (s *SplunkHecToken) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	s.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", s)
+	}
 	switch unmarshaler.Type {
 	case "token":
 		value := new(TokenCredential)
@@ -5221,7 +7769,7 @@ func (s *SplunkHecToken) UnmarshalJSON(data []byte) error {
 		s.Token = value
 	case "token_id":
 		var valueUnmarshaler struct {
-			TokenId TokenCredentialId `json:"value,omitempty"`
+			TokenId TokenCredentialId `json:"value"`
 		}
 		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
 			return err
@@ -5232,28 +7780,20 @@ func (s *SplunkHecToken) UnmarshalJSON(data []byte) error {
 }
 
 func (s SplunkHecToken) MarshalJSON() ([]byte, error) {
-	switch s.Type {
-	default:
-		return nil, fmt.Errorf("invalid type %s in %T", s.Type, s)
-	case "token":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*TokenCredential
-		}{
-			Type:            s.Type,
-			TokenCredential: s.Token,
-		}
-		return json.Marshal(marshaler)
-	case "token_id":
+	if s.Token != nil {
+		return core.MarshalJSONWithExtraProperty(s.Token, "type", "token")
+	}
+	if s.TokenId != "" {
 		var marshaler = struct {
 			Type    string            `json:"type"`
-			TokenId TokenCredentialId `json:"value,omitempty"`
+			TokenId TokenCredentialId `json:"value"`
 		}{
-			Type:    s.Type,
+			Type:    "token_id",
 			TokenId: s.TokenId,
 		}
 		return json.Marshal(marshaler)
 	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", s)
 }
 
 type SplunkHecTokenVisitor interface {
@@ -5262,28 +7802,19 @@ type SplunkHecTokenVisitor interface {
 }
 
 func (s *SplunkHecToken) Accept(visitor SplunkHecTokenVisitor) error {
-	switch s.Type {
-	default:
-		return fmt.Errorf("invalid type %s in %T", s.Type, s)
-	case "token":
+	if s.Token != nil {
 		return visitor.VisitToken(s.Token)
-	case "token_id":
+	}
+	if s.TokenId != "" {
 		return visitor.VisitTokenId(s.TokenId)
 	}
+	return fmt.Errorf("type %T does not define a non-empty union type", s)
 }
 
 type SplunkSearchCredential struct {
 	Type    string
 	Token   *TokenCredential
 	TokenId TokenCredentialId
-}
-
-func NewSplunkSearchCredentialFromToken(value *TokenCredential) *SplunkSearchCredential {
-	return &SplunkSearchCredential{Type: "token", Token: value}
-}
-
-func NewSplunkSearchCredentialFromTokenId(value TokenCredentialId) *SplunkSearchCredential {
-	return &SplunkSearchCredential{Type: "token_id", TokenId: value}
 }
 
 func (s *SplunkSearchCredential) UnmarshalJSON(data []byte) error {
@@ -5294,6 +7825,9 @@ func (s *SplunkSearchCredential) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	s.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", s)
+	}
 	switch unmarshaler.Type {
 	case "token":
 		value := new(TokenCredential)
@@ -5303,7 +7837,7 @@ func (s *SplunkSearchCredential) UnmarshalJSON(data []byte) error {
 		s.Token = value
 	case "token_id":
 		var valueUnmarshaler struct {
-			TokenId TokenCredentialId `json:"value,omitempty"`
+			TokenId TokenCredentialId `json:"value"`
 		}
 		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
 			return err
@@ -5314,28 +7848,20 @@ func (s *SplunkSearchCredential) UnmarshalJSON(data []byte) error {
 }
 
 func (s SplunkSearchCredential) MarshalJSON() ([]byte, error) {
-	switch s.Type {
-	default:
-		return nil, fmt.Errorf("invalid type %s in %T", s.Type, s)
-	case "token":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*TokenCredential
-		}{
-			Type:            s.Type,
-			TokenCredential: s.Token,
-		}
-		return json.Marshal(marshaler)
-	case "token_id":
+	if s.Token != nil {
+		return core.MarshalJSONWithExtraProperty(s.Token, "type", "token")
+	}
+	if s.TokenId != "" {
 		var marshaler = struct {
 			Type    string            `json:"type"`
-			TokenId TokenCredentialId `json:"value,omitempty"`
+			TokenId TokenCredentialId `json:"value"`
 		}{
-			Type:    s.Type,
+			Type:    "token_id",
 			TokenId: s.TokenId,
 		}
 		return json.Marshal(marshaler)
 	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", s)
 }
 
 type SplunkSearchCredentialVisitor interface {
@@ -5344,82 +7870,258 @@ type SplunkSearchCredentialVisitor interface {
 }
 
 func (s *SplunkSearchCredential) Accept(visitor SplunkSearchCredentialVisitor) error {
-	switch s.Type {
-	default:
-		return fmt.Errorf("invalid type %s in %T", s.Type, s)
-	case "token":
+	if s.Token != nil {
 		return visitor.VisitToken(s.Token)
-	case "token_id":
+	}
+	if s.TokenId != "" {
 		return visitor.VisitTokenId(s.TokenId)
 	}
+	return fmt.Errorf("type %T does not define a non-empty union type", s)
 }
 
 type StatusMapping struct {
 	// Custom value for the "Closed" status.
-	Closed *string `json:"closed,omitempty"`
+	Closed *string `json:"closed,omitempty" url:"closed,omitempty"`
 	// Custom value for the "Done" status.
-	Done *string `json:"done,omitempty"`
+	Done *string `json:"done,omitempty" url:"done,omitempty"`
 	// Custom value for the "In Progress" status.
-	InProgress *string `json:"in_progress,omitempty"`
+	InProgress *string `json:"in_progress,omitempty" url:"in_progress,omitempty"`
 	// Custom value for the "On Hold" status.
-	OnHold *string `json:"on_hold,omitempty"`
+	OnHold *string `json:"on_hold,omitempty" url:"on_hold,omitempty"`
 	// Custom value for the "Open" status.
-	Open *string `json:"open,omitempty"`
+	Open *string `json:"open,omitempty" url:"open,omitempty"`
 	// Custom value for the "To Do" status.
-	Todo *string `json:"todo,omitempty"`
+	Todo *string `json:"todo,omitempty" url:"todo,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (s *StatusMapping) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
+}
+
+func (s *StatusMapping) UnmarshalJSON(data []byte) error {
+	type unmarshaler StatusMapping
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*s = StatusMapping(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+
+	s._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (s *StatusMapping) String() string {
+	if len(s._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(s); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", s)
 }
 
 // Configuration for AWS S3 as a Storage Provider
 type StorageAwsS3 struct {
 	// Name of the AWS S3 bucket where files are stored.
-	Bucket     string           `json:"bucket"`
-	Credential *AwsS3Credential `json:"credential,omitempty"`
+	Bucket     string           `json:"bucket" url:"bucket"`
+	Credential *AwsS3Credential `json:"credential" url:"credential"`
 	// Endpoint used for connecting to the external service. If not provided, will connect to the default endpoint for the Provider.
-	Endpoint *string `json:"endpoint,omitempty"`
+	Endpoint *string `json:"endpoint,omitempty" url:"endpoint,omitempty"`
 	// AWS region where the S3 bucket is located.
-	Region string `json:"region"`
+	Region string `json:"region" url:"region"`
 	// Optional list of transformations used to modify requests before they are sent to the external service.
-	Transforms []TransformId `json:"transforms,omitempty"`
+	Transforms []TransformId `json:"transforms,omitempty" url:"transforms,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (s *StorageAwsS3) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
+}
+
+func (s *StorageAwsS3) UnmarshalJSON(data []byte) error {
+	type unmarshaler StorageAwsS3
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*s = StorageAwsS3(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+
+	s._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (s *StorageAwsS3) String() string {
+	if len(s._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(s); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", s)
 }
 
 // Configuration for Azure Blob Storage as a Storage Provider
 type StorageAzureBlob struct {
 	// Name of the blob container where files are stored.
-	Bucket     string               `json:"bucket"`
-	Credential *AzureBlobCredential `json:"credential,omitempty"`
+	Bucket     string               `json:"bucket" url:"bucket"`
+	Credential *AzureBlobCredential `json:"credential" url:"credential"`
 	// Optional list of transformations used to modify requests before they are sent to the external service.
-	Transforms []TransformId `json:"transforms,omitempty"`
+	Transforms []TransformId `json:"transforms,omitempty" url:"transforms,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (s *StorageAzureBlob) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
+}
+
+func (s *StorageAzureBlob) UnmarshalJSON(data []byte) error {
+	type unmarshaler StorageAzureBlob
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*s = StorageAzureBlob(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+
+	s._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (s *StorageAzureBlob) String() string {
+	if len(s._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(s); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", s)
 }
 
 // Configuration for Google Cloud Storage for storing unstructured data
 type StorageGcs struct {
 	// Name of the bucket where files are stored.
-	Bucket     string         `json:"bucket"`
-	Credential *GcsCredential `json:"credential,omitempty"`
+	Bucket     string         `json:"bucket" url:"bucket"`
+	Credential *GcsCredential `json:"credential" url:"credential"`
 	// Google Cloud region where the bucket is located.
-	Region string `json:"region"`
+	Region string `json:"region" url:"region"`
 	// Optional list of transformations used to modify requests before they are sent to the external service.
-	Transforms []TransformId `json:"transforms,omitempty"`
+	Transforms []TransformId `json:"transforms,omitempty" url:"transforms,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (s *StorageGcs) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
+}
+
+func (s *StorageGcs) UnmarshalJSON(data []byte) error {
+	type unmarshaler StorageGcs
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*s = StorageGcs(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+
+	s._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (s *StorageGcs) String() string {
+	if len(s._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(s); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", s)
 }
 
 // Configuration for the Synqly mock in-memory storage handler. This provider is for testing purposes only and does not retain files pushed to it.
 type StorageMock struct {
 	// Name of the bucket where files are stored.
-	Bucket string `json:"bucket"`
+	Bucket string `json:"bucket" url:"bucket"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (s *StorageMock) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
+}
+
+func (s *StorageMock) UnmarshalJSON(data []byte) error {
+	type unmarshaler StorageMock
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*s = StorageMock(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+
+	s._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (s *StorageMock) String() string {
+	if len(s._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(s); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", s)
 }
 
 type SumoLogicCollectionUrl struct {
 	Type     string
 	Secret   *SecretCredential
 	SecretId SecretCredentialId
-}
-
-func NewSumoLogicCollectionUrlFromSecret(value *SecretCredential) *SumoLogicCollectionUrl {
-	return &SumoLogicCollectionUrl{Type: "secret", Secret: value}
-}
-
-func NewSumoLogicCollectionUrlFromSecretId(value SecretCredentialId) *SumoLogicCollectionUrl {
-	return &SumoLogicCollectionUrl{Type: "secret_id", SecretId: value}
 }
 
 func (s *SumoLogicCollectionUrl) UnmarshalJSON(data []byte) error {
@@ -5430,6 +8132,9 @@ func (s *SumoLogicCollectionUrl) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	s.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", s)
+	}
 	switch unmarshaler.Type {
 	case "secret":
 		value := new(SecretCredential)
@@ -5439,7 +8144,7 @@ func (s *SumoLogicCollectionUrl) UnmarshalJSON(data []byte) error {
 		s.Secret = value
 	case "secret_id":
 		var valueUnmarshaler struct {
-			SecretId SecretCredentialId `json:"value,omitempty"`
+			SecretId SecretCredentialId `json:"value"`
 		}
 		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
 			return err
@@ -5450,28 +8155,20 @@ func (s *SumoLogicCollectionUrl) UnmarshalJSON(data []byte) error {
 }
 
 func (s SumoLogicCollectionUrl) MarshalJSON() ([]byte, error) {
-	switch s.Type {
-	default:
-		return nil, fmt.Errorf("invalid type %s in %T", s.Type, s)
-	case "secret":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*SecretCredential
-		}{
-			Type:             s.Type,
-			SecretCredential: s.Secret,
-		}
-		return json.Marshal(marshaler)
-	case "secret_id":
+	if s.Secret != nil {
+		return core.MarshalJSONWithExtraProperty(s.Secret, "type", "secret")
+	}
+	if s.SecretId != "" {
 		var marshaler = struct {
 			Type     string             `json:"type"`
-			SecretId SecretCredentialId `json:"value,omitempty"`
+			SecretId SecretCredentialId `json:"value"`
 		}{
-			Type:     s.Type,
+			Type:     "secret_id",
 			SecretId: s.SecretId,
 		}
 		return json.Marshal(marshaler)
 	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", s)
 }
 
 type SumoLogicCollectionUrlVisitor interface {
@@ -5480,28 +8177,19 @@ type SumoLogicCollectionUrlVisitor interface {
 }
 
 func (s *SumoLogicCollectionUrl) Accept(visitor SumoLogicCollectionUrlVisitor) error {
-	switch s.Type {
-	default:
-		return fmt.Errorf("invalid type %s in %T", s.Type, s)
-	case "secret":
+	if s.Secret != nil {
 		return visitor.VisitSecret(s.Secret)
-	case "secret_id":
+	}
+	if s.SecretId != "" {
 		return visitor.VisitSecretId(s.SecretId)
 	}
+	return fmt.Errorf("type %T does not define a non-empty union type", s)
 }
 
 type SumoLogicCredential struct {
 	Type    string
 	Basic   *BasicCredential
 	BasicId BasicCredentialId
-}
-
-func NewSumoLogicCredentialFromBasic(value *BasicCredential) *SumoLogicCredential {
-	return &SumoLogicCredential{Type: "basic", Basic: value}
-}
-
-func NewSumoLogicCredentialFromBasicId(value BasicCredentialId) *SumoLogicCredential {
-	return &SumoLogicCredential{Type: "basic_id", BasicId: value}
 }
 
 func (s *SumoLogicCredential) UnmarshalJSON(data []byte) error {
@@ -5512,6 +8200,9 @@ func (s *SumoLogicCredential) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	s.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", s)
+	}
 	switch unmarshaler.Type {
 	case "basic":
 		value := new(BasicCredential)
@@ -5521,7 +8212,7 @@ func (s *SumoLogicCredential) UnmarshalJSON(data []byte) error {
 		s.Basic = value
 	case "basic_id":
 		var valueUnmarshaler struct {
-			BasicId BasicCredentialId `json:"value,omitempty"`
+			BasicId BasicCredentialId `json:"value"`
 		}
 		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
 			return err
@@ -5532,28 +8223,20 @@ func (s *SumoLogicCredential) UnmarshalJSON(data []byte) error {
 }
 
 func (s SumoLogicCredential) MarshalJSON() ([]byte, error) {
-	switch s.Type {
-	default:
-		return nil, fmt.Errorf("invalid type %s in %T", s.Type, s)
-	case "basic":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*BasicCredential
-		}{
-			Type:            s.Type,
-			BasicCredential: s.Basic,
-		}
-		return json.Marshal(marshaler)
-	case "basic_id":
+	if s.Basic != nil {
+		return core.MarshalJSONWithExtraProperty(s.Basic, "type", "basic")
+	}
+	if s.BasicId != "" {
 		var marshaler = struct {
 			Type    string            `json:"type"`
-			BasicId BasicCredentialId `json:"value,omitempty"`
+			BasicId BasicCredentialId `json:"value"`
 		}{
-			Type:    s.Type,
+			Type:    "basic_id",
 			BasicId: s.BasicId,
 		}
 		return json.Marshal(marshaler)
 	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", s)
 }
 
 type SumoLogicCredentialVisitor interface {
@@ -5562,14 +8245,13 @@ type SumoLogicCredentialVisitor interface {
 }
 
 func (s *SumoLogicCredential) Accept(visitor SumoLogicCredentialVisitor) error {
-	switch s.Type {
-	default:
-		return fmt.Errorf("invalid type %s in %T", s.Type, s)
-	case "basic":
+	if s.Basic != nil {
 		return visitor.VisitBasic(s.Basic)
-	case "basic_id":
+	}
+	if s.BasicId != "" {
 		return visitor.VisitBasicId(s.BasicId)
 	}
+	return fmt.Errorf("type %T does not define a non-empty union type", s)
 }
 
 // Supported credential types for Tanium Cloud
@@ -5577,14 +8259,6 @@ type TaniumCloudCredential struct {
 	Type    string
 	Token   *TokenCredential
 	TokenId TokenCredentialId
-}
-
-func NewTaniumCloudCredentialFromToken(value *TokenCredential) *TaniumCloudCredential {
-	return &TaniumCloudCredential{Type: "token", Token: value}
-}
-
-func NewTaniumCloudCredentialFromTokenId(value TokenCredentialId) *TaniumCloudCredential {
-	return &TaniumCloudCredential{Type: "token_id", TokenId: value}
 }
 
 func (t *TaniumCloudCredential) UnmarshalJSON(data []byte) error {
@@ -5595,6 +8269,9 @@ func (t *TaniumCloudCredential) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	t.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", t)
+	}
 	switch unmarshaler.Type {
 	case "token":
 		value := new(TokenCredential)
@@ -5604,7 +8281,7 @@ func (t *TaniumCloudCredential) UnmarshalJSON(data []byte) error {
 		t.Token = value
 	case "token_id":
 		var valueUnmarshaler struct {
-			TokenId TokenCredentialId `json:"value,omitempty"`
+			TokenId TokenCredentialId `json:"value"`
 		}
 		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
 			return err
@@ -5615,28 +8292,20 @@ func (t *TaniumCloudCredential) UnmarshalJSON(data []byte) error {
 }
 
 func (t TaniumCloudCredential) MarshalJSON() ([]byte, error) {
-	switch t.Type {
-	default:
-		return nil, fmt.Errorf("invalid type %s in %T", t.Type, t)
-	case "token":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*TokenCredential
-		}{
-			Type:            t.Type,
-			TokenCredential: t.Token,
-		}
-		return json.Marshal(marshaler)
-	case "token_id":
+	if t.Token != nil {
+		return core.MarshalJSONWithExtraProperty(t.Token, "type", "token")
+	}
+	if t.TokenId != "" {
 		var marshaler = struct {
 			Type    string            `json:"type"`
-			TokenId TokenCredentialId `json:"value,omitempty"`
+			TokenId TokenCredentialId `json:"value"`
 		}{
-			Type:    t.Type,
+			Type:    "token_id",
 			TokenId: t.TokenId,
 		}
 		return json.Marshal(marshaler)
 	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", t)
 }
 
 type TaniumCloudCredentialVisitor interface {
@@ -5645,28 +8314,19 @@ type TaniumCloudCredentialVisitor interface {
 }
 
 func (t *TaniumCloudCredential) Accept(visitor TaniumCloudCredentialVisitor) error {
-	switch t.Type {
-	default:
-		return fmt.Errorf("invalid type %s in %T", t.Type, t)
-	case "token":
+	if t.Token != nil {
 		return visitor.VisitToken(t.Token)
-	case "token_id":
+	}
+	if t.TokenId != "" {
 		return visitor.VisitTokenId(t.TokenId)
 	}
+	return fmt.Errorf("type %T does not define a non-empty union type", t)
 }
 
 type TeamsCredential struct {
 	Type     string
 	Secret   *SecretCredential
 	SecretId SecretCredentialId
-}
-
-func NewTeamsCredentialFromSecret(value *SecretCredential) *TeamsCredential {
-	return &TeamsCredential{Type: "secret", Secret: value}
-}
-
-func NewTeamsCredentialFromSecretId(value SecretCredentialId) *TeamsCredential {
-	return &TeamsCredential{Type: "secret_id", SecretId: value}
 }
 
 func (t *TeamsCredential) UnmarshalJSON(data []byte) error {
@@ -5677,6 +8337,9 @@ func (t *TeamsCredential) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	t.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", t)
+	}
 	switch unmarshaler.Type {
 	case "secret":
 		value := new(SecretCredential)
@@ -5686,7 +8349,7 @@ func (t *TeamsCredential) UnmarshalJSON(data []byte) error {
 		t.Secret = value
 	case "secret_id":
 		var valueUnmarshaler struct {
-			SecretId SecretCredentialId `json:"value,omitempty"`
+			SecretId SecretCredentialId `json:"value"`
 		}
 		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
 			return err
@@ -5697,28 +8360,20 @@ func (t *TeamsCredential) UnmarshalJSON(data []byte) error {
 }
 
 func (t TeamsCredential) MarshalJSON() ([]byte, error) {
-	switch t.Type {
-	default:
-		return nil, fmt.Errorf("invalid type %s in %T", t.Type, t)
-	case "secret":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*SecretCredential
-		}{
-			Type:             t.Type,
-			SecretCredential: t.Secret,
-		}
-		return json.Marshal(marshaler)
-	case "secret_id":
+	if t.Secret != nil {
+		return core.MarshalJSONWithExtraProperty(t.Secret, "type", "secret")
+	}
+	if t.SecretId != "" {
 		var marshaler = struct {
 			Type     string             `json:"type"`
-			SecretId SecretCredentialId `json:"value,omitempty"`
+			SecretId SecretCredentialId `json:"value"`
 		}{
-			Type:     t.Type,
+			Type:     "secret_id",
 			SecretId: t.SecretId,
 		}
 		return json.Marshal(marshaler)
 	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", t)
 }
 
 type TeamsCredentialVisitor interface {
@@ -5727,14 +8382,13 @@ type TeamsCredentialVisitor interface {
 }
 
 func (t *TeamsCredential) Accept(visitor TeamsCredentialVisitor) error {
-	switch t.Type {
-	default:
-		return fmt.Errorf("invalid type %s in %T", t.Type, t)
-	case "secret":
+	if t.Secret != nil {
 		return visitor.VisitSecret(t.Secret)
-	case "secret_id":
+	}
+	if t.SecretId != "" {
 		return visitor.VisitSecretId(t.SecretId)
 	}
+	return fmt.Errorf("type %T does not define a non-empty union type", t)
 }
 
 // Supported credential types for Tenable Cloud
@@ -5742,14 +8396,6 @@ type TenableCloudCredential struct {
 	Type    string
 	Token   *TokenCredential
 	TokenId TokenCredentialId
-}
-
-func NewTenableCloudCredentialFromToken(value *TokenCredential) *TenableCloudCredential {
-	return &TenableCloudCredential{Type: "token", Token: value}
-}
-
-func NewTenableCloudCredentialFromTokenId(value TokenCredentialId) *TenableCloudCredential {
-	return &TenableCloudCredential{Type: "token_id", TokenId: value}
 }
 
 func (t *TenableCloudCredential) UnmarshalJSON(data []byte) error {
@@ -5760,6 +8406,9 @@ func (t *TenableCloudCredential) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	t.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", t)
+	}
 	switch unmarshaler.Type {
 	case "token":
 		value := new(TokenCredential)
@@ -5769,7 +8418,7 @@ func (t *TenableCloudCredential) UnmarshalJSON(data []byte) error {
 		t.Token = value
 	case "token_id":
 		var valueUnmarshaler struct {
-			TokenId TokenCredentialId `json:"value,omitempty"`
+			TokenId TokenCredentialId `json:"value"`
 		}
 		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
 			return err
@@ -5780,28 +8429,20 @@ func (t *TenableCloudCredential) UnmarshalJSON(data []byte) error {
 }
 
 func (t TenableCloudCredential) MarshalJSON() ([]byte, error) {
-	switch t.Type {
-	default:
-		return nil, fmt.Errorf("invalid type %s in %T", t.Type, t)
-	case "token":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*TokenCredential
-		}{
-			Type:            t.Type,
-			TokenCredential: t.Token,
-		}
-		return json.Marshal(marshaler)
-	case "token_id":
+	if t.Token != nil {
+		return core.MarshalJSONWithExtraProperty(t.Token, "type", "token")
+	}
+	if t.TokenId != "" {
 		var marshaler = struct {
 			Type    string            `json:"type"`
-			TokenId TokenCredentialId `json:"value,omitempty"`
+			TokenId TokenCredentialId `json:"value"`
 		}{
-			Type:    t.Type,
+			Type:    "token_id",
 			TokenId: t.TokenId,
 		}
 		return json.Marshal(marshaler)
 	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", t)
 }
 
 type TenableCloudCredentialVisitor interface {
@@ -5810,72 +8451,248 @@ type TenableCloudCredentialVisitor interface {
 }
 
 func (t *TenableCloudCredential) Accept(visitor TenableCloudCredentialVisitor) error {
-	switch t.Type {
-	default:
-		return fmt.Errorf("invalid type %s in %T", t.Type, t)
-	case "token":
+	if t.Token != nil {
 		return visitor.VisitToken(t.Token)
-	case "token_id":
+	}
+	if t.TokenId != "" {
 		return visitor.VisitTokenId(t.TokenId)
 	}
+	return fmt.Errorf("type %T does not define a non-empty union type", t)
 }
 
 // Configuration for Jira as a Ticketing Provider
 type TicketingJira struct {
-	Credential *JiraCredential `json:"credential,omitempty"`
+	Credential *JiraCredential `json:"credential" url:"credential"`
 	// Custom field mappings for this provider.
-	CustomFieldMappings []*CustomFieldMapping `json:"custom_field_mappings,omitempty"`
+	CustomFieldMappings []*CustomFieldMapping `json:"custom_field_mappings,omitempty" url:"custom_field_mappings,omitempty"`
 	// Default Project for the integration.
-	DefaultProject *string `json:"default_project,omitempty"`
+	DefaultProject *string `json:"default_project,omitempty" url:"default_project,omitempty"`
 	// URL for the Jira API. This should be the base URL for the API, without any path components and must be HTTPS. For example, "https://tenant.atlassian.net".
-	Url string `json:"url"`
+	Url string `json:"url" url:"url"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (t *TicketingJira) GetExtraProperties() map[string]interface{} {
+	return t.extraProperties
+}
+
+func (t *TicketingJira) UnmarshalJSON(data []byte) error {
+	type unmarshaler TicketingJira
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*t = TicketingJira(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *t)
+	if err != nil {
+		return err
+	}
+	t.extraProperties = extraProperties
+
+	t._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (t *TicketingJira) String() string {
+	if len(t._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(t._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(t); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", t)
 }
 
 // Configuration for the Synqly mock in-memory ticketing handler. This provider is for testing purposes only. It retains tickets for a limited time and does not persist them for long-term usage.
 type TicketingMock struct {
 	// Custom field mappings for this provider.
-	CustomFieldMappings []*CustomFieldMapping `json:"custom_field_mappings,omitempty"`
+	CustomFieldMappings []*CustomFieldMapping `json:"custom_field_mappings,omitempty" url:"custom_field_mappings,omitempty"`
 	// Optional name of the mock provider. This value is unused.
-	Name *string `json:"name,omitempty"`
+	Name *string `json:"name,omitempty" url:"name,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (t *TicketingMock) GetExtraProperties() map[string]interface{} {
+	return t.extraProperties
+}
+
+func (t *TicketingMock) UnmarshalJSON(data []byte) error {
+	type unmarshaler TicketingMock
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*t = TicketingMock(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *t)
+	if err != nil {
+		return err
+	}
+	t.extraProperties = extraProperties
+
+	t._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (t *TicketingMock) String() string {
+	if len(t._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(t._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(t); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", t)
 }
 
 // Configuration for PagerDuty as a Ticketing Provider
 type TicketingPagerDuty struct {
-	Credential *PagerDutyCredential `json:"credential,omitempty"`
+	Credential *PagerDutyCredential `json:"credential" url:"credential"`
 	// URL for the PagerDuty API. This should be the base URL for the API, without any path components and must be HTTPS. For example, "https://api.pagerduty.com".
-	Url string `json:"url"`
+	Url string `json:"url" url:"url"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (t *TicketingPagerDuty) GetExtraProperties() map[string]interface{} {
+	return t.extraProperties
+}
+
+func (t *TicketingPagerDuty) UnmarshalJSON(data []byte) error {
+	type unmarshaler TicketingPagerDuty
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*t = TicketingPagerDuty(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *t)
+	if err != nil {
+		return err
+	}
+	t.extraProperties = extraProperties
+
+	t._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (t *TicketingPagerDuty) String() string {
+	if len(t._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(t._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(t); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", t)
 }
 
 // Configuration for ServiceNow as a Ticketing Provider
 type TicketingServiceNow struct {
-	Credential *ServiceNowCredential `json:"credential,omitempty"`
+	Credential *ServiceNowCredential `json:"credential" url:"credential"`
 	// Custom field mappings for this provider.
-	CustomFieldMappings []*CustomFieldMapping `json:"custom_field_mappings,omitempty"`
+	CustomFieldMappings []*CustomFieldMapping `json:"custom_field_mappings,omitempty" url:"custom_field_mappings,omitempty"`
 	// Default Project for the integration. This maps to the custom table for tickets. This table should be derived from Incident table. If not provided, defaults to the incident table.
-	DefaultProject *string `json:"default_project,omitempty"`
+	DefaultProject *string `json:"default_project,omitempty" url:"default_project,omitempty"`
 	// URL for the ServiceNow API. This should be the base URL for the API, without any path components and must be HTTPS. For example, "https://tenant.service-now.com".
-	Url string `json:"url"`
+	Url string `json:"url" url:"url"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (t *TicketingServiceNow) GetExtraProperties() map[string]interface{} {
+	return t.extraProperties
+}
+
+func (t *TicketingServiceNow) UnmarshalJSON(data []byte) error {
+	type unmarshaler TicketingServiceNow
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*t = TicketingServiceNow(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *t)
+	if err != nil {
+		return err
+	}
+	t.extraProperties = extraProperties
+
+	t._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (t *TicketingServiceNow) String() string {
+	if len(t._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(t._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(t); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", t)
 }
 
 // Configuration for Torq as a Ticketing Provider
 type TicketingTorq struct {
-	Credential *TorqCredential `json:"credential,omitempty"`
+	Credential *TorqCredential `json:"credential" url:"credential"`
 	// Custom field mappings for this provider.
-	CustomFieldMappings []*CustomFieldMapping `json:"custom_field_mappings,omitempty"`
+	CustomFieldMappings []*CustomFieldMapping `json:"custom_field_mappings,omitempty" url:"custom_field_mappings,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (t *TicketingTorq) GetExtraProperties() map[string]interface{} {
+	return t.extraProperties
+}
+
+func (t *TicketingTorq) UnmarshalJSON(data []byte) error {
+	type unmarshaler TicketingTorq
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*t = TicketingTorq(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *t)
+	if err != nil {
+		return err
+	}
+	t.extraProperties = extraProperties
+
+	t._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (t *TicketingTorq) String() string {
+	if len(t._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(t._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(t); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", t)
 }
 
 type TorqCredential struct {
 	Type          string
 	OAuthClient   *OAuthClientCredential
 	OAuthClientId OAuthClientCredentialId
-}
-
-func NewTorqCredentialFromOAuthClient(value *OAuthClientCredential) *TorqCredential {
-	return &TorqCredential{Type: "o_auth_client", OAuthClient: value}
-}
-
-func NewTorqCredentialFromOAuthClientId(value OAuthClientCredentialId) *TorqCredential {
-	return &TorqCredential{Type: "o_auth_client_id", OAuthClientId: value}
 }
 
 func (t *TorqCredential) UnmarshalJSON(data []byte) error {
@@ -5886,6 +8703,9 @@ func (t *TorqCredential) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	t.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", t)
+	}
 	switch unmarshaler.Type {
 	case "o_auth_client":
 		value := new(OAuthClientCredential)
@@ -5895,7 +8715,7 @@ func (t *TorqCredential) UnmarshalJSON(data []byte) error {
 		t.OAuthClient = value
 	case "o_auth_client_id":
 		var valueUnmarshaler struct {
-			OAuthClientId OAuthClientCredentialId `json:"value,omitempty"`
+			OAuthClientId OAuthClientCredentialId `json:"value"`
 		}
 		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
 			return err
@@ -5906,28 +8726,20 @@ func (t *TorqCredential) UnmarshalJSON(data []byte) error {
 }
 
 func (t TorqCredential) MarshalJSON() ([]byte, error) {
-	switch t.Type {
-	default:
-		return nil, fmt.Errorf("invalid type %s in %T", t.Type, t)
-	case "o_auth_client":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*OAuthClientCredential
-		}{
-			Type:                  t.Type,
-			OAuthClientCredential: t.OAuthClient,
-		}
-		return json.Marshal(marshaler)
-	case "o_auth_client_id":
+	if t.OAuthClient != nil {
+		return core.MarshalJSONWithExtraProperty(t.OAuthClient, "type", "o_auth_client")
+	}
+	if t.OAuthClientId != "" {
 		var marshaler = struct {
 			Type          string                  `json:"type"`
-			OAuthClientId OAuthClientCredentialId `json:"value,omitempty"`
+			OAuthClientId OAuthClientCredentialId `json:"value"`
 		}{
-			Type:          t.Type,
+			Type:          "o_auth_client_id",
 			OAuthClientId: t.OAuthClientId,
 		}
 		return json.Marshal(marshaler)
 	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", t)
 }
 
 type TorqCredentialVisitor interface {
@@ -5936,85 +8748,454 @@ type TorqCredentialVisitor interface {
 }
 
 func (t *TorqCredential) Accept(visitor TorqCredentialVisitor) error {
-	switch t.Type {
-	default:
-		return fmt.Errorf("invalid type %s in %T", t.Type, t)
-	case "o_auth_client":
+	if t.OAuthClient != nil {
 		return visitor.VisitOAuthClient(t.OAuthClient)
-	case "o_auth_client_id":
+	}
+	if t.OAuthClientId != "" {
 		return visitor.VisitOAuthClientId(t.OAuthClientId)
 	}
+	return fmt.Errorf("type %T does not define a non-empty union type", t)
 }
 
 type ValueMapping struct {
 	// Optionally restrict this value mapping to a specific issue type. If not provided, the mapping will apply to all issue types.
-	IssueType *string `json:"issue_type,omitempty"`
+	IssueType *string `json:"issue_type,omitempty" url:"issue_type,omitempty"`
 	// Remap the standard Synqly priorities to custom values.
-	Priority *PriorityMapping `json:"priority,omitempty"`
+	Priority *PriorityMapping `json:"priority,omitempty" url:"priority,omitempty"`
 	// ID of the project this value mapping is associated with. ID of "\*" is used to apply to all projects.
-	ProjectId string `json:"project_id"`
+	ProjectId string `json:"project_id" url:"project_id"`
 	// Remap the standard Synqly statuses to custom values.
-	Status *StatusMapping `json:"status,omitempty"`
+	Status *StatusMapping `json:"status,omitempty" url:"status,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (v *ValueMapping) GetExtraProperties() map[string]interface{} {
+	return v.extraProperties
+}
+
+func (v *ValueMapping) UnmarshalJSON(data []byte) error {
+	type unmarshaler ValueMapping
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*v = ValueMapping(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *v)
+	if err != nil {
+		return err
+	}
+	v.extraProperties = extraProperties
+
+	v._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (v *ValueMapping) String() string {
+	if len(v._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(v._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(v); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", v)
 }
 
 // Configuration for CrowdStrike Falcon as a Vulnerabilities Provider
 type VulnerabilitiesCrowdStrike struct {
-	Credential *CrowdStrikeCredential `json:"credential,omitempty"`
+	Credential *CrowdStrikeCredential `json:"credential" url:"credential"`
 	// The root domain where your CrowdStrike Falcon tenant is located. Default "https://api.crowdstrike.com".
-	Url *string `json:"url,omitempty"`
+	Url *string `json:"url,omitempty" url:"url,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (v *VulnerabilitiesCrowdStrike) GetExtraProperties() map[string]interface{} {
+	return v.extraProperties
+}
+
+func (v *VulnerabilitiesCrowdStrike) UnmarshalJSON(data []byte) error {
+	type unmarshaler VulnerabilitiesCrowdStrike
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*v = VulnerabilitiesCrowdStrike(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *v)
+	if err != nil {
+		return err
+	}
+	v.extraProperties = extraProperties
+
+	v._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (v *VulnerabilitiesCrowdStrike) String() string {
+	if len(v._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(v._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(v); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", v)
 }
 
 // Configuration for Qualys Cloud Platform as a Vulnerabilities Provider
 type VulnerabilitiesQualysCloud struct {
-	Credential *QualysCloudCredential `json:"credential,omitempty"`
+	Credential *QualysCloudCredential `json:"credential" url:"credential"`
 	// URL for the Qualys Cloud API. This should be the base URL for the API, without any path components and must be HTTPS. For example, "https://qualysguard.qg4.apps.qualys.com".
-	Url string `json:"url"`
+	Url string `json:"url" url:"url"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (v *VulnerabilitiesQualysCloud) GetExtraProperties() map[string]interface{} {
+	return v.extraProperties
+}
+
+func (v *VulnerabilitiesQualysCloud) UnmarshalJSON(data []byte) error {
+	type unmarshaler VulnerabilitiesQualysCloud
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*v = VulnerabilitiesQualysCloud(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *v)
+	if err != nil {
+		return err
+	}
+	v.extraProperties = extraProperties
+
+	v._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (v *VulnerabilitiesQualysCloud) String() string {
+	if len(v._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(v._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(v); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", v)
 }
 
 // Configuration for Rapid7 Insight Cloud as a Vulnerabilities Provider
 type VulnerabilitiesRapid7InsightCloud struct {
-	Credential *Rapid7InsightCloudCredential `json:"credential,omitempty"`
+	Credential *Rapid7InsightCloudCredential `json:"credential" url:"credential"`
 	// URL for the Rapid7 API. This should be the base URL for the API, without any path components and must be HTTPS. For example, "https://us2.api.insight.rapid7.com".
-	Url string `json:"url"`
+	Url string `json:"url" url:"url"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (v *VulnerabilitiesRapid7InsightCloud) GetExtraProperties() map[string]interface{} {
+	return v.extraProperties
+}
+
+func (v *VulnerabilitiesRapid7InsightCloud) UnmarshalJSON(data []byte) error {
+	type unmarshaler VulnerabilitiesRapid7InsightCloud
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*v = VulnerabilitiesRapid7InsightCloud(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *v)
+	if err != nil {
+		return err
+	}
+	v.extraProperties = extraProperties
+
+	v._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (v *VulnerabilitiesRapid7InsightCloud) String() string {
+	if len(v._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(v._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(v); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", v)
 }
 
 // Configuration for Tanium Cloud as a Vulnerabilities Provider
 type VulnerabilitiesTaniumCloud struct {
-	Credential *TaniumCloudCredential `json:"credential,omitempty"`
+	Credential *TaniumCloudCredential `json:"credential" url:"credential"`
 	// URL for the Tanium Cloud API. This should be the base URL for the API, without any path components and must be HTTPS, e.g. "https://<customername>-api.cloud.tanium.com" or "https://<customername>-api.titankube.com".
-	Url *string `json:"url,omitempty"`
+	Url *string `json:"url,omitempty" url:"url,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (v *VulnerabilitiesTaniumCloud) GetExtraProperties() map[string]interface{} {
+	return v.extraProperties
+}
+
+func (v *VulnerabilitiesTaniumCloud) UnmarshalJSON(data []byte) error {
+	type unmarshaler VulnerabilitiesTaniumCloud
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*v = VulnerabilitiesTaniumCloud(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *v)
+	if err != nil {
+		return err
+	}
+	v.extraProperties = extraProperties
+
+	v._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (v *VulnerabilitiesTaniumCloud) String() string {
+	if len(v._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(v._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(v); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", v)
 }
 
 // Configuration for Tenable Cloud as a Vulnerabilities Provider
 type VulnerabilitiesTenableCloud struct {
-	Credential *TenableCloudCredential `json:"credential,omitempty"`
+	Credential *TenableCloudCredential `json:"credential" url:"credential"`
 	// URL for the Tenable Cloud API. This should be the base URL for the API, without any path components and must be HTTPS. If not provided, defaults to "https://cloud.tenable.com".
-	Url *string `json:"url,omitempty"`
+	Url *string `json:"url,omitempty" url:"url,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (v *VulnerabilitiesTenableCloud) GetExtraProperties() map[string]interface{} {
+	return v.extraProperties
+}
+
+func (v *VulnerabilitiesTenableCloud) UnmarshalJSON(data []byte) error {
+	type unmarshaler VulnerabilitiesTenableCloud
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*v = VulnerabilitiesTenableCloud(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *v)
+	if err != nil {
+		return err
+	}
+	v.extraProperties = extraProperties
+
+	v._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (v *VulnerabilitiesTenableCloud) String() string {
+	if len(v._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(v._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(v); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", v)
 }
 
 type AdhocRole struct {
-	Resources     *Resources  `json:"resources,omitempty"`
-	PermissionSet Permissions `json:"permission_set,omitempty"`
+	Resources     *Resources  `json:"resources" url:"resources"`
+	PermissionSet Permissions `json:"permission_set" url:"permission_set"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (a *AdhocRole) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
+}
+
+func (a *AdhocRole) UnmarshalJSON(data []byte) error {
+	type unmarshaler AdhocRole
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*a = AdhocRole(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+
+	a._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (a *AdhocRole) String() string {
+	if len(a._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(a); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", a)
 }
 
 type Resources struct {
-	Organizations *RoleOrganizations `json:"organizations,omitempty"`
-	Accounts      *RoleAccounts      `json:"accounts,omitempty"`
-	Integrations  *RoleIntegrations  `json:"integrations,omitempty"`
+	Organizations *RoleOrganizations `json:"organizations,omitempty" url:"organizations,omitempty"`
+	Accounts      *RoleAccounts      `json:"accounts,omitempty" url:"accounts,omitempty"`
+	Integrations  *RoleIntegrations  `json:"integrations,omitempty" url:"integrations,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (r *Resources) GetExtraProperties() map[string]interface{} {
+	return r.extraProperties
+}
+
+func (r *Resources) UnmarshalJSON(data []byte) error {
+	type unmarshaler Resources
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*r = Resources(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *r)
+	if err != nil {
+		return err
+	}
+	r.extraProperties = extraProperties
+
+	r._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (r *Resources) String() string {
+	if len(r._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(r._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(r); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", r)
 }
 
 type RoleAccounts struct {
 	// List of account ids that this role definition grants access to. Use "\*" to grant access to all account ids.
-	Ids []IntegrationId `json:"ids,omitempty"`
+	Ids []IntegrationId `json:"ids" url:"ids"`
 	// List of account labels this role definition grants access to. If both labels and environments are specified both must pass
-	Labels []string `json:"labels,omitempty"`
+	Labels []string `json:"labels,omitempty" url:"labels,omitempty"`
 	// Account environments this role definition grants access to. If both labels and environments are specified both must pass
-	Environments []Environment `json:"environments,omitempty"`
+	Environments []Environment `json:"environments,omitempty" url:"environments,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (r *RoleAccounts) GetExtraProperties() map[string]interface{} {
+	return r.extraProperties
+}
+
+func (r *RoleAccounts) UnmarshalJSON(data []byte) error {
+	type unmarshaler RoleAccounts
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*r = RoleAccounts(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *r)
+	if err != nil {
+		return err
+	}
+	r.extraProperties = extraProperties
+
+	r._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (r *RoleAccounts) String() string {
+	if len(r._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(r._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(r); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", r)
 }
 
 type RoleIntegrations struct {
 	// List of categories ids that this role definition grants access to. Use "\*" to grant access to all category ids.
-	Categories []CategoryId `json:"categories,omitempty"`
+	Categories []CategoryId `json:"categories" url:"categories"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (r *RoleIntegrations) GetExtraProperties() map[string]interface{} {
+	return r.extraProperties
+}
+
+func (r *RoleIntegrations) UnmarshalJSON(data []byte) error {
+	type unmarshaler RoleIntegrations
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*r = RoleIntegrations(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *r)
+	if err != nil {
+		return err
+	}
+	r.extraProperties = extraProperties
+
+	r._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (r *RoleIntegrations) String() string {
+	if len(r._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(r._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(r); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", r)
 }
 
 // Unique identifier for this Role
@@ -6022,9 +9203,46 @@ type RoleName = string
 
 type RoleOrganizations struct {
 	// List of organization ids that this role definition grants access to. Use "\*" to grant access to all organization ids.
-	Ids []OrganizationId `json:"ids,omitempty"`
+	Ids []OrganizationId `json:"ids" url:"ids"`
 	// List of organization labels this role definition grants access to.
-	Labels []string `json:"labels,omitempty"`
+	Labels []string `json:"labels,omitempty" url:"labels,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (r *RoleOrganizations) GetExtraProperties() map[string]interface{} {
+	return r.extraProperties
+}
+
+func (r *RoleOrganizations) UnmarshalJSON(data []byte) error {
+	type unmarshaler RoleOrganizations
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*r = RoleOrganizations(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *r)
+	if err != nil {
+		return err
+	}
+	r.extraProperties = extraProperties
+
+	r._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (r *RoleOrganizations) String() string {
+	if len(r._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(r._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(r); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", r)
 }
 
 type BuiltinRoles string
@@ -6057,20 +9275,79 @@ func (b BuiltinRoles) Ptr() *BuiltinRoles {
 
 type RoleDefinition struct {
 	// Human-readable name for this resource
-	Name string `json:"name"`
+	Name string `json:"name" url:"name"`
 	// Time object was originally created
-	CreatedAt time.Time `json:"created_at"`
+	CreatedAt time.Time `json:"created_at" url:"created_at"`
 	// Last time object was updated
-	UpdatedAt time.Time `json:"updated_at"`
-	Id        RoleId    `json:"id,omitempty"`
+	UpdatedAt time.Time `json:"updated_at" url:"updated_at"`
+	Id        RoleId    `json:"id" url:"id"`
 	// Full name of role
-	Fullname string `json:"fullname"`
+	Fullname string `json:"fullname" url:"fullname"`
 	// Description of the resources included in the role and permissions granted on those resources. Includes details of when to use this role along with the intended personas.
-	Description *string `json:"description,omitempty"`
+	Description *string `json:"description,omitempty" url:"description,omitempty"`
 	// Selects the resources the permission set applies to.
-	Resources *Resources `json:"resources,omitempty"`
+	Resources *Resources `json:"resources,omitempty" url:"resources,omitempty"`
 	// Permission set for this role.
-	PermissionSet Permissions `json:"permission_set,omitempty"`
+	PermissionSet Permissions `json:"permission_set" url:"permission_set"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (r *RoleDefinition) GetExtraProperties() map[string]interface{} {
+	return r.extraProperties
+}
+
+func (r *RoleDefinition) UnmarshalJSON(data []byte) error {
+	type embed RoleDefinition
+	var unmarshaler = struct {
+		embed
+		CreatedAt *core.DateTime `json:"created_at"`
+		UpdatedAt *core.DateTime `json:"updated_at"`
+	}{
+		embed: embed(*r),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*r = RoleDefinition(unmarshaler.embed)
+	r.CreatedAt = unmarshaler.CreatedAt.Time()
+	r.UpdatedAt = unmarshaler.UpdatedAt.Time()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *r)
+	if err != nil {
+		return err
+	}
+	r.extraProperties = extraProperties
+
+	r._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (r *RoleDefinition) MarshalJSON() ([]byte, error) {
+	type embed RoleDefinition
+	var marshaler = struct {
+		embed
+		CreatedAt *core.DateTime `json:"created_at"`
+		UpdatedAt *core.DateTime `json:"updated_at"`
+	}{
+		embed:     embed(*r),
+		CreatedAt: core.NewDateTime(r.CreatedAt),
+		UpdatedAt: core.NewDateTime(r.UpdatedAt),
+	}
+	return json.Marshal(marshaler)
+}
+
+func (r *RoleDefinition) String() string {
+	if len(r._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(r._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(r); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", r)
 }
 
 type GetIntegrationTimeseriesResult = *GetStatusTimeseriesResult
@@ -6078,79 +9355,362 @@ type GetIntegrationTimeseriesResult = *GetStatusTimeseriesResult
 // Status timeseries object
 type GetStatusTimeseriesResult struct {
 	// start time
-	StartTime time.Time `json:"start_time"`
+	StartTime time.Time `json:"start_time" url:"start_time"`
 	// end time
-	EndTime time.Time `json:"end_time"`
+	EndTime time.Time `json:"end_time" url:"end_time"`
 	// interval duration
-	Interval string              `json:"interval"`
-	Series   []*TimeseriesResult `json:"series,omitempty"`
+	Interval string              `json:"interval" url:"interval"`
+	Series   []*TimeseriesResult `json:"series" url:"series"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (g *GetStatusTimeseriesResult) GetExtraProperties() map[string]interface{} {
+	return g.extraProperties
+}
+
+func (g *GetStatusTimeseriesResult) UnmarshalJSON(data []byte) error {
+	type embed GetStatusTimeseriesResult
+	var unmarshaler = struct {
+		embed
+		StartTime *core.DateTime `json:"start_time"`
+		EndTime   *core.DateTime `json:"end_time"`
+	}{
+		embed: embed(*g),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*g = GetStatusTimeseriesResult(unmarshaler.embed)
+	g.StartTime = unmarshaler.StartTime.Time()
+	g.EndTime = unmarshaler.EndTime.Time()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	if err != nil {
+		return err
+	}
+	g.extraProperties = extraProperties
+
+	g._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (g *GetStatusTimeseriesResult) MarshalJSON() ([]byte, error) {
+	type embed GetStatusTimeseriesResult
+	var marshaler = struct {
+		embed
+		StartTime *core.DateTime `json:"start_time"`
+		EndTime   *core.DateTime `json:"end_time"`
+	}{
+		embed:     embed(*g),
+		StartTime: core.NewDateTime(g.StartTime),
+		EndTime:   core.NewDateTime(g.EndTime),
+	}
+	return json.Marshal(marshaler)
+}
+
+func (g *GetStatusTimeseriesResult) String() string {
+	if len(g._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(g._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(g); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", g)
 }
 
 // Status object
 type Status struct {
 	// Time object was originally created
-	CreatedAt time.Time `json:"created_at"`
+	CreatedAt time.Time `json:"created_at" url:"created_at"`
 	// Last time object was updated
-	UpdatedAt time.Time `json:"updated_at"`
+	UpdatedAt time.Time `json:"updated_at" url:"updated_at"`
 	// Account associated with this status. Use the expand=accounts parameter with the List API to expand the Account to the full object
-	AccountId AccountId `json:"account_id,omitempty"`
+	AccountId AccountId `json:"account_id" url:"account_id"`
 	// When using the expand option on the List API, the full account object is included in the response
-	Account *Account `json:"account,omitempty"`
+	Account *Account `json:"account,omitempty" url:"account,omitempty"`
 	// Integration associated with this status. Use the expand=integrations parameter with the List API to expand the Account to the full object
-	IntegrationId IntegrationId `json:"integration_id,omitempty"`
+	IntegrationId IntegrationId `json:"integration_id" url:"integration_id"`
 	// When using the expand option on the List API, the full integration object is included in the response
-	Integration *Integration `json:"integration,omitempty"`
+	Integration *Integration `json:"integration,omitempty" url:"integration,omitempty"`
 	// The current status of the notification.
-	Status string `json:"status"`
+	Status string `json:"status" url:"status"`
 	// Request count
-	Requests int64 `json:"requests"`
+	Requests int64 `json:"requests" url:"requests"`
 	// Failed count
-	Failed int64 `json:"failed"`
+	Failed int64 `json:"failed" url:"failed"`
 	// Cpu time in microseconds
-	CpuTime int64 `json:"cpu_time"`
+	CpuTime int64 `json:"cpu_time" url:"cpu_time"`
 	// Database operations count
-	DbOps int64 `json:"db_ops"`
+	DbOps int64 `json:"db_ops" url:"db_ops"`
 	// API operations count
-	ApiOps int64 `json:"api_ops"`
+	ApiOps int64 `json:"api_ops" url:"api_ops"`
 	// API input byte count
-	InBytes int64 `json:"in_bytes"`
+	InBytes int64 `json:"in_bytes" url:"in_bytes"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (s *Status) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
+}
+
+func (s *Status) UnmarshalJSON(data []byte) error {
+	type embed Status
+	var unmarshaler = struct {
+		embed
+		CreatedAt *core.DateTime `json:"created_at"`
+		UpdatedAt *core.DateTime `json:"updated_at"`
+	}{
+		embed: embed(*s),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*s = Status(unmarshaler.embed)
+	s.CreatedAt = unmarshaler.CreatedAt.Time()
+	s.UpdatedAt = unmarshaler.UpdatedAt.Time()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+
+	s._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (s *Status) MarshalJSON() ([]byte, error) {
+	type embed Status
+	var marshaler = struct {
+		embed
+		CreatedAt *core.DateTime `json:"created_at"`
+		UpdatedAt *core.DateTime `json:"updated_at"`
+	}{
+		embed:     embed(*s),
+		CreatedAt: core.NewDateTime(s.CreatedAt),
+		UpdatedAt: core.NewDateTime(s.UpdatedAt),
+	}
+	return json.Marshal(marshaler)
+}
+
+func (s *Status) String() string {
+	if len(s._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(s); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", s)
 }
 
 // Status event object
 type StatusEvent struct {
 	// Account owner
-	AccountId AccountId `json:"account_id,omitempty"`
+	AccountId AccountId `json:"account_id" url:"account_id"`
 	// Integration object
-	IntegrationId IntegrationId `json:"integration_id,omitempty"`
+	IntegrationId IntegrationId `json:"integration_id" url:"integration_id"`
 	// Time created
-	CreatedAt time.Time `json:"created_at"`
+	CreatedAt time.Time `json:"created_at" url:"created_at"`
 	// Error message
-	Error *string `json:"error,omitempty"`
+	Error *string `json:"error,omitempty" url:"error,omitempty"`
 	// Request number
-	Request int64 `json:"request"`
+	Request int64 `json:"request" url:"request"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (s *StatusEvent) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
+}
+
+func (s *StatusEvent) UnmarshalJSON(data []byte) error {
+	type embed StatusEvent
+	var unmarshaler = struct {
+		embed
+		CreatedAt *core.DateTime `json:"created_at"`
+	}{
+		embed: embed(*s),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*s = StatusEvent(unmarshaler.embed)
+	s.CreatedAt = unmarshaler.CreatedAt.Time()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+
+	s._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (s *StatusEvent) MarshalJSON() ([]byte, error) {
+	type embed StatusEvent
+	var marshaler = struct {
+		embed
+		CreatedAt *core.DateTime `json:"created_at"`
+	}{
+		embed:     embed(*s),
+		CreatedAt: core.NewDateTime(s.CreatedAt),
+	}
+	return json.Marshal(marshaler)
+}
+
+func (s *StatusEvent) String() string {
+	if len(s._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(s); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", s)
 }
 
 // Status timeseries object
 type TimeseriesResult struct {
 	// Interval time
-	CreatedAt time.Time `json:"created_at"`
+	CreatedAt time.Time `json:"created_at" url:"created_at"`
 	// Succeeded count
-	Succeeded int64 `json:"succeeded"`
+	Succeeded int64 `json:"succeeded" url:"succeeded"`
 	// Failed count
-	Failed int64 `json:"failed"`
+	Failed int64 `json:"failed" url:"failed"`
 	// Cpu time in microseconds
-	CpuTime int64 `json:"cpu_time"`
+	CpuTime int64 `json:"cpu_time" url:"cpu_time"`
 	// API input byte count
-	InBytes int64 `json:"in_bytes"`
+	InBytes int64 `json:"in_bytes" url:"in_bytes"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (t *TimeseriesResult) GetExtraProperties() map[string]interface{} {
+	return t.extraProperties
+}
+
+func (t *TimeseriesResult) UnmarshalJSON(data []byte) error {
+	type embed TimeseriesResult
+	var unmarshaler = struct {
+		embed
+		CreatedAt *core.DateTime `json:"created_at"`
+	}{
+		embed: embed(*t),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*t = TimeseriesResult(unmarshaler.embed)
+	t.CreatedAt = unmarshaler.CreatedAt.Time()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *t)
+	if err != nil {
+		return err
+	}
+	t.extraProperties = extraProperties
+
+	t._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (t *TimeseriesResult) MarshalJSON() ([]byte, error) {
+	type embed TimeseriesResult
+	var marshaler = struct {
+		embed
+		CreatedAt *core.DateTime `json:"created_at"`
+	}{
+		embed:     embed(*t),
+		CreatedAt: core.NewDateTime(t.CreatedAt),
+	}
+	return json.Marshal(marshaler)
+}
+
+func (t *TimeseriesResult) String() string {
+	if len(t._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(t._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(t); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", t)
 }
 
 type Token struct {
 	// Secret value for the token; used for authentication when making requests.
-	Secret string `json:"secret"`
+	Secret string `json:"secret" url:"secret"`
 	// Time when this token expires and can no longer be used again.
-	Expires time.Time `json:"expires"`
+	Expires time.Time `json:"expires" url:"expires"`
 	// Permissions granted to this token.
-	Permissions *Permission `json:"permissions,omitempty"`
+	Permissions *Permission `json:"permissions" url:"permissions"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (t *Token) GetExtraProperties() map[string]interface{} {
+	return t.extraProperties
+}
+
+func (t *Token) UnmarshalJSON(data []byte) error {
+	type embed Token
+	var unmarshaler = struct {
+		embed
+		Expires *core.DateTime `json:"expires"`
+	}{
+		embed: embed(*t),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*t = Token(unmarshaler.embed)
+	t.Expires = unmarshaler.Expires.Time()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *t)
+	if err != nil {
+		return err
+	}
+	t.extraProperties = extraProperties
+
+	t._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (t *Token) MarshalJSON() ([]byte, error) {
+	type embed Token
+	var marshaler = struct {
+		embed
+		Expires *core.DateTime `json:"expires"`
+	}{
+		embed:   embed(*t),
+		Expires: core.NewDateTime(t.Expires),
+	}
+	return json.Marshal(marshaler)
+}
+
+func (t *Token) String() string {
+	if len(t._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(t._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(t); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", t)
 }
 
 type TokenOwnerType string
@@ -6177,56 +9737,252 @@ func (t TokenOwnerType) Ptr() *TokenOwnerType {
 
 type TokenPair struct {
 	// Access token contains the bearer secret
-	Access *Token `json:"access,omitempty"`
+	Access *Token `json:"access" url:"access"`
 	// Refresh token used for RefreshToken API
-	Refresh *Token `json:"refresh,omitempty"`
+	Refresh *Token `json:"refresh" url:"refresh"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (t *TokenPair) GetExtraProperties() map[string]interface{} {
+	return t.extraProperties
+}
+
+func (t *TokenPair) UnmarshalJSON(data []byte) error {
+	type unmarshaler TokenPair
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*t = TokenPair(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *t)
+	if err != nil {
+		return err
+	}
+	t.extraProperties = extraProperties
+
+	t._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (t *TokenPair) String() string {
+	if len(t._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(t._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(t); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", t)
 }
 
 type RefreshToken struct {
 	// Human-readable name for this resource
-	Name string `json:"name"`
+	Name string `json:"name" url:"name"`
 	// Time object was originally created
-	CreatedAt time.Time `json:"created_at"`
+	CreatedAt time.Time `json:"created_at" url:"created_at"`
 	// Last time object was updated
-	UpdatedAt time.Time `json:"updated_at"`
-	Id        TokenId   `json:"id,omitempty"`
+	UpdatedAt time.Time `json:"updated_at" url:"updated_at"`
+	Id        TokenId   `json:"id" url:"id"`
 	// Member Id
-	MemberId *Id `json:"member_id,omitempty"`
+	MemberId *Id `json:"member_id,omitempty" url:"member_id,omitempty"`
 	// ID of the entity that owns this token
-	OwnerId Id `json:"owner_id"`
+	OwnerId Id `json:"owner_id" url:"owner_id"`
 	// Type of the entity that owns this token
-	OwnerType TokenOwnerType `json:"owner_type,omitempty"`
+	OwnerType TokenOwnerType `json:"owner_type" url:"owner_type"`
 	// Time when this token expires and can no longer be used again.
-	Expires time.Time `json:"expires"`
+	Expires time.Time `json:"expires" url:"expires"`
 	// Token time-to-live
-	TokenTtl string `json:"token_ttl"`
+	TokenTtl string `json:"token_ttl" url:"token_ttl"`
 	// Primary running access and refresh tokens
-	Primary *TokenPair `json:"primary,omitempty"`
+	Primary *TokenPair `json:"primary" url:"primary"`
 	// Temporary secondary TokenPair created after a RefreshToken operation
-	Secondary *TokenPair `json:"secondary,omitempty"`
+	Secondary *TokenPair `json:"secondary,omitempty" url:"secondary,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (r *RefreshToken) GetExtraProperties() map[string]interface{} {
+	return r.extraProperties
+}
+
+func (r *RefreshToken) UnmarshalJSON(data []byte) error {
+	type embed RefreshToken
+	var unmarshaler = struct {
+		embed
+		CreatedAt *core.DateTime `json:"created_at"`
+		UpdatedAt *core.DateTime `json:"updated_at"`
+		Expires   *core.DateTime `json:"expires"`
+	}{
+		embed: embed(*r),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*r = RefreshToken(unmarshaler.embed)
+	r.CreatedAt = unmarshaler.CreatedAt.Time()
+	r.UpdatedAt = unmarshaler.UpdatedAt.Time()
+	r.Expires = unmarshaler.Expires.Time()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *r)
+	if err != nil {
+		return err
+	}
+	r.extraProperties = extraProperties
+
+	r._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (r *RefreshToken) MarshalJSON() ([]byte, error) {
+	type embed RefreshToken
+	var marshaler = struct {
+		embed
+		CreatedAt *core.DateTime `json:"created_at"`
+		UpdatedAt *core.DateTime `json:"updated_at"`
+		Expires   *core.DateTime `json:"expires"`
+	}{
+		embed:     embed(*r),
+		CreatedAt: core.NewDateTime(r.CreatedAt),
+		UpdatedAt: core.NewDateTime(r.UpdatedAt),
+		Expires:   core.NewDateTime(r.Expires),
+	}
+	return json.Marshal(marshaler)
+}
+
+func (r *RefreshToken) String() string {
+	if len(r._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(r._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(r); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", r)
 }
 
 // Transforms data collected before it is sent to the target Integration.
 type Transform struct {
 	// Human-readable name for this resource
-	Name string `json:"name"`
+	Name string `json:"name" url:"name"`
 	// Time object was originally created
-	CreatedAt time.Time `json:"created_at"`
+	CreatedAt time.Time `json:"created_at" url:"created_at"`
 	// Last time object was updated
-	UpdatedAt time.Time   `json:"updated_at"`
-	Id        TransformId `json:"id,omitempty"`
+	UpdatedAt time.Time   `json:"updated_at" url:"updated_at"`
+	Id        TransformId `json:"id" url:"id"`
 	// Account that manages this Transform.
-	AccountId AccountId `json:"account_id,omitempty"`
+	AccountId AccountId `json:"account_id" url:"account_id"`
 	// Human friendly display name for this Transform.
-	Fullname string `json:"fullname"`
+	Fullname string `json:"fullname" url:"fullname"`
 	// JSON Patch transform to apply (rfc6902).
-	Patch []byte `json:"patch"`
+	Patch []byte `json:"patch" url:"patch"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (t *Transform) GetExtraProperties() map[string]interface{} {
+	return t.extraProperties
+}
+
+func (t *Transform) UnmarshalJSON(data []byte) error {
+	type embed Transform
+	var unmarshaler = struct {
+		embed
+		CreatedAt *core.DateTime `json:"created_at"`
+		UpdatedAt *core.DateTime `json:"updated_at"`
+	}{
+		embed: embed(*t),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*t = Transform(unmarshaler.embed)
+	t.CreatedAt = unmarshaler.CreatedAt.Time()
+	t.UpdatedAt = unmarshaler.UpdatedAt.Time()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *t)
+	if err != nil {
+		return err
+	}
+	t.extraProperties = extraProperties
+
+	t._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (t *Transform) MarshalJSON() ([]byte, error) {
+	type embed Transform
+	var marshaler = struct {
+		embed
+		CreatedAt *core.DateTime `json:"created_at"`
+		UpdatedAt *core.DateTime `json:"updated_at"`
+	}{
+		embed:     embed(*t),
+		CreatedAt: core.NewDateTime(t.CreatedAt),
+		UpdatedAt: core.NewDateTime(t.UpdatedAt),
+	}
+	return json.Marshal(marshaler)
+}
+
+func (t *Transform) String() string {
+	if len(t._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(t._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(t); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", t)
 }
 
 type Usage struct {
-	IntegrationId     Id      `json:"integration_id"`
-	RequestsCount     float64 `json:"requests_count"`
-	CpuTimeSeconds    float64 `json:"cpu_time_seconds"`
-	DbOperationsCount float64 `json:"db_operations_count"`
-	IntOpsCount       float64 `json:"int_ops_count"`
+	IntegrationId     Id      `json:"integration_id" url:"integration_id"`
+	RequestsCount     float64 `json:"requests_count" url:"requests_count"`
+	CpuTimeSeconds    float64 `json:"cpu_time_seconds" url:"cpu_time_seconds"`
+	DbOperationsCount float64 `json:"db_operations_count" url:"db_operations_count"`
+	IntOpsCount       float64 `json:"int_ops_count" url:"int_ops_count"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (u *Usage) GetExtraProperties() map[string]interface{} {
+	return u.extraProperties
+}
+
+func (u *Usage) UnmarshalJSON(data []byte) error {
+	type unmarshaler Usage
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*u = Usage(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *u)
+	if err != nil {
+		return err
+	}
+	u.extraProperties = extraProperties
+
+	u._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (u *Usage) String() string {
+	if len(u._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(u._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(u); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", u)
 }

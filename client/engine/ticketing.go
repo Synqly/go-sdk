@@ -3,22 +3,25 @@
 package engine
 
 import (
+	json "encoding/json"
+	fmt "fmt"
+	core "github.com/synqly/go-sdk/client/engine/core"
 	time "time"
 )
 
 type QueryTicketsRequest struct {
 	// Cursor to use to retrieve the next page of results.
-	Cursor *string `json:"-"`
+	Cursor *string `json:"-" url:"cursor,omitempty"`
 	// Number of `Account` objects to return in this page. Defaults to 100.
-	Limit *int `json:"-"`
+	Limit *int `json:"-" url:"limit,omitempty"`
 	// Select a field to order the results by. Defaults to `time`. To control the direction of the sorting, append
 	// `[asc]` or `[desc]` to the field name. For example, `name[desc]` will sort the results by `name` in descending order.
 	// The ordering defaults to `asc` if not specified. May be used multiple times to order by multiple fields, and the
 	// ordering is applied in the order the fields are specified.
-	Order []*string `json:"-"`
+	Order []*string `json:"-" url:"order,omitempty"`
 	// Filter results by this query. For more information on filtering, refer to our Filtering Guide. Defaults to no filter.
 	// If used more than once, the queries are ANDed together.
-	Filter []*string `json:"-"`
+	Filter []*string `json:"-" url:"filter,omitempty"`
 }
 
 // Unique identifier for an attachment
@@ -29,94 +32,634 @@ type CommentId = Id
 
 type CreateAttachmentRequest struct {
 	// The name of the file.
-	FileName string `json:"file_name"`
+	FileName string `json:"file_name" url:"file_name"`
 	// File contents
-	Content []byte `json:"content"`
+	Content []byte `json:"content" url:"content"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *CreateAttachmentRequest) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
+}
+
+func (c *CreateAttachmentRequest) UnmarshalJSON(data []byte) error {
+	type unmarshaler CreateAttachmentRequest
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = CreateAttachmentRequest(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
+	c._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (c *CreateAttachmentRequest) String() string {
+	if len(c._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
 }
 
 type CreateAttachmentResponse struct {
-	Result *AttachmentMetadata `json:"result,omitempty"`
+	Result *AttachmentMetadata `json:"result" url:"result"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *CreateAttachmentResponse) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
+}
+
+func (c *CreateAttachmentResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler CreateAttachmentResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = CreateAttachmentResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
+	c._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (c *CreateAttachmentResponse) String() string {
+	if len(c._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
 }
 
 type CreateCommentRequest struct {
 	// Email address of user who created this ticket. Required by PagerDuty. Not supported by Jira, ServiceNow, or Torq.
-	Creator *string `json:"creator,omitempty"`
+	Creator *string `json:"creator,omitempty" url:"creator,omitempty"`
 	// The content of the comment.
-	Content string `json:"content"`
+	Content string `json:"content" url:"content"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *CreateCommentRequest) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
+}
+
+func (c *CreateCommentRequest) UnmarshalJSON(data []byte) error {
+	type unmarshaler CreateCommentRequest
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = CreateCommentRequest(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
+	c._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (c *CreateCommentRequest) String() string {
+	if len(c._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
 }
 
 type CreateCommentResponse struct {
-	Result *Comment `json:"result,omitempty"`
+	Result *Comment `json:"result" url:"result"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *CreateCommentResponse) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
+}
+
+func (c *CreateCommentResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler CreateCommentResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = CreateCommentResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
+	c._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (c *CreateCommentResponse) String() string {
+	if len(c._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
 }
 
 type CreateTicketRequest struct {
 	// Human-readable name for this resource
-	Name string `json:"name"`
+	Name string `json:"name" url:"name"`
 	// Ticket summary.
-	Summary string `json:"summary"`
+	Summary string `json:"summary" url:"summary"`
 	// User who created this ticket.
-	Creator *string `json:"creator,omitempty"`
+	Creator *string `json:"creator,omitempty" url:"creator,omitempty"`
 	// Who ticket is assigned to.
-	Assignee *string `json:"assignee,omitempty"`
+	Assignee *string `json:"assignee,omitempty" url:"assignee,omitempty"`
 	// Ticket contact information.
-	Contact *string `json:"contact,omitempty"`
+	Contact *string `json:"contact,omitempty" url:"contact,omitempty"`
 	// Ticket description.
-	Description *string `json:"description,omitempty"`
+	Description *string `json:"description,omitempty" url:"description,omitempty"`
 	// The priority of the Ticket
-	Priority *Priority `json:"priority,omitempty"`
+	Priority *Priority `json:"priority,omitempty" url:"priority,omitempty"`
 	// The ticket's due date.
-	DueDate *time.Time `json:"due_date,omitempty"`
+	DueDate *time.Time `json:"due_date,omitempty" url:"due_date,omitempty"`
 	// The ticket's complete date.
-	CompletionDate *time.Time `json:"completion_date,omitempty"`
+	CompletionDate *time.Time `json:"completion_date,omitempty" url:"completion_date,omitempty"`
 	// The current status of the ticket.
-	Status *Status `json:"status,omitempty"`
+	Status *Status `json:"status,omitempty" url:"status,omitempty"`
 	// The ticket project.
-	Project *string `json:"project,omitempty"`
+	Project *string `json:"project,omitempty" url:"project,omitempty"`
 	// The ticket's type.
-	IssueType *string `json:"issue_type,omitempty"`
+	IssueType *string `json:"issue_type,omitempty" url:"issue_type,omitempty"`
 	// Associate tags with Ticket
-	Tags []string `json:"tags,omitempty"`
+	Tags []string `json:"tags,omitempty" url:"tags,omitempty"`
 	// Set custom fields for this ticket, keys are the custom field names.
-	CustomFields map[string]interface{} `json:"custom_fields,omitempty"`
+	CustomFields map[string]interface{} `json:"custom_fields,omitempty" url:"custom_fields,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *CreateTicketRequest) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
+}
+
+func (c *CreateTicketRequest) UnmarshalJSON(data []byte) error {
+	type embed CreateTicketRequest
+	var unmarshaler = struct {
+		embed
+		DueDate        *core.DateTime `json:"due_date,omitempty"`
+		CompletionDate *core.DateTime `json:"completion_date,omitempty"`
+	}{
+		embed: embed(*c),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*c = CreateTicketRequest(unmarshaler.embed)
+	c.DueDate = unmarshaler.DueDate.TimePtr()
+	c.CompletionDate = unmarshaler.CompletionDate.TimePtr()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
+	c._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (c *CreateTicketRequest) MarshalJSON() ([]byte, error) {
+	type embed CreateTicketRequest
+	var marshaler = struct {
+		embed
+		DueDate        *core.DateTime `json:"due_date,omitempty"`
+		CompletionDate *core.DateTime `json:"completion_date,omitempty"`
+	}{
+		embed:          embed(*c),
+		DueDate:        core.NewOptionalDateTime(c.DueDate),
+		CompletionDate: core.NewOptionalDateTime(c.CompletionDate),
+	}
+	return json.Marshal(marshaler)
+}
+
+func (c *CreateTicketRequest) String() string {
+	if len(c._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
 }
 
 type CreateTicketResponse struct {
-	Result *Ticket `json:"result,omitempty"`
+	Result *Ticket `json:"result" url:"result"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *CreateTicketResponse) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
+}
+
+func (c *CreateTicketResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler CreateTicketResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = CreateTicketResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
+	c._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (c *CreateTicketResponse) String() string {
+	if len(c._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
 }
 
 type DownloadAttachmentResponse struct {
-	Result *Attachment `json:"result,omitempty"`
+	Result *Attachment `json:"result" url:"result"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (d *DownloadAttachmentResponse) GetExtraProperties() map[string]interface{} {
+	return d.extraProperties
+}
+
+func (d *DownloadAttachmentResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler DownloadAttachmentResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*d = DownloadAttachmentResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *d)
+	if err != nil {
+		return err
+	}
+	d.extraProperties = extraProperties
+
+	d._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (d *DownloadAttachmentResponse) String() string {
+	if len(d._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(d._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(d); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", d)
 }
 
 type GetTicketResponse struct {
-	Result *Ticket `json:"result,omitempty"`
+	Result *Ticket `json:"result" url:"result"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (g *GetTicketResponse) GetExtraProperties() map[string]interface{} {
+	return g.extraProperties
+}
+
+func (g *GetTicketResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler GetTicketResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*g = GetTicketResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	if err != nil {
+		return err
+	}
+	g.extraProperties = extraProperties
+
+	g._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (g *GetTicketResponse) String() string {
+	if len(g._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(g._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(g); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", g)
 }
 
 type ListAttachmentsMetadataResponse struct {
-	Result []*AttachmentMetadata `json:"result,omitempty"`
+	Result []*AttachmentMetadata `json:"result" url:"result"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (l *ListAttachmentsMetadataResponse) GetExtraProperties() map[string]interface{} {
+	return l.extraProperties
+}
+
+func (l *ListAttachmentsMetadataResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler ListAttachmentsMetadataResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*l = ListAttachmentsMetadataResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *l)
+	if err != nil {
+		return err
+	}
+	l.extraProperties = extraProperties
+
+	l._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (l *ListAttachmentsMetadataResponse) String() string {
+	if len(l._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(l._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(l); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", l)
 }
 
 type ListCommentsResponse struct {
-	Result []*Comment `json:"result,omitempty"`
+	Result []*Comment `json:"result" url:"result"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (l *ListCommentsResponse) GetExtraProperties() map[string]interface{} {
+	return l.extraProperties
+}
+
+func (l *ListCommentsResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler ListCommentsResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*l = ListCommentsResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *l)
+	if err != nil {
+		return err
+	}
+	l.extraProperties = extraProperties
+
+	l._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (l *ListCommentsResponse) String() string {
+	if len(l._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(l._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(l); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", l)
 }
 
 type ListProjectsResponse struct {
-	Result []*Project `json:"result,omitempty"`
+	Result []*Project `json:"result" url:"result"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (l *ListProjectsResponse) GetExtraProperties() map[string]interface{} {
+	return l.extraProperties
+}
+
+func (l *ListProjectsResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler ListProjectsResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*l = ListProjectsResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *l)
+	if err != nil {
+		return err
+	}
+	l.extraProperties = extraProperties
+
+	l._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (l *ListProjectsResponse) String() string {
+	if len(l._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(l._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(l); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", l)
 }
 
 type ListRemoteFieldsResponse struct {
-	Result []*RemoteField `json:"result,omitempty"`
+	Result []*RemoteField `json:"result" url:"result"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (l *ListRemoteFieldsResponse) GetExtraProperties() map[string]interface{} {
+	return l.extraProperties
+}
+
+func (l *ListRemoteFieldsResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler ListRemoteFieldsResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*l = ListRemoteFieldsResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *l)
+	if err != nil {
+		return err
+	}
+	l.extraProperties = extraProperties
+
+	l._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (l *ListRemoteFieldsResponse) String() string {
+	if len(l._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(l._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(l); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", l)
 }
 
 type PatchTicketResponse struct {
-	Result *Ticket `json:"result,omitempty"`
+	Result *Ticket `json:"result" url:"result"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (p *PatchTicketResponse) GetExtraProperties() map[string]interface{} {
+	return p.extraProperties
+}
+
+func (p *PatchTicketResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler PatchTicketResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*p = PatchTicketResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *p)
+	if err != nil {
+		return err
+	}
+	p.extraProperties = extraProperties
+
+	p._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (p *PatchTicketResponse) String() string {
+	if len(p._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(p._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(p); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", p)
 }
 
 type QueryTicketsResponse struct {
 	// list of results
-	Result []*Ticket `json:"result,omitempty"`
+	Result []*Ticket `json:"result" url:"result"`
 	// Cursor position for subsequent searches
-	Cursor string `json:"cursor"`
+	Cursor string `json:"cursor" url:"cursor"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (q *QueryTicketsResponse) GetExtraProperties() map[string]interface{} {
+	return q.extraProperties
+}
+
+func (q *QueryTicketsResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler QueryTicketsResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*q = QueryTicketsResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *q)
+	if err != nil {
+		return err
+	}
+	q.extraProperties = extraProperties
+
+	q._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (q *QueryTicketsResponse) String() string {
+	if len(q._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(q._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(q); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", q)
 }
 
 // Unique identifier for this ticket

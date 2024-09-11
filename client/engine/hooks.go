@@ -8,8 +8,8 @@ import (
 
 type PostProxyHook struct {
 	// Optional: if you can't use the HTTP Authorization Bearer, specify integration access token here.
-	Token string      `json:"-"`
-	Body  interface{} `json:"-"`
+	Token string      `json:"-" url:"token"`
+	Body  interface{} `json:"-" url:"-"`
 }
 
 func (p *PostProxyHook) UnmarshalJSON(data []byte) error {

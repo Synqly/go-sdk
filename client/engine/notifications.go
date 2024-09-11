@@ -2,38 +2,155 @@
 
 package engine
 
+import (
+	json "encoding/json"
+	fmt "fmt"
+	core "github.com/synqly/go-sdk/client/engine/core"
+)
+
 // Notification object
 type CreateNotificationRequest struct {
 	// Human-readable name for this resource
-	Name string `json:"name"`
+	Name string `json:"name" url:"name"`
 	// Notification summary.
-	Summary string `json:"summary"`
+	Summary string `json:"summary" url:"summary"`
 	// Notification priority
-	Priority *Priority `json:"priority,omitempty"`
+	Priority *Priority `json:"priority,omitempty" url:"priority,omitempty"`
 	// Notification project
-	Project *string `json:"project,omitempty"`
+	Project *string `json:"project,omitempty" url:"project,omitempty"`
 	// The current status of the notification.
-	Status *string `json:"status,omitempty"`
+	Status *string `json:"status,omitempty" url:"status,omitempty"`
 	// Notification description.
-	Description *string `json:"description,omitempty"`
+	Description *string `json:"description,omitempty" url:"description,omitempty"`
 	// The notification's type.
-	IssueType *string `json:"issue_type,omitempty"`
+	IssueType *string `json:"issue_type,omitempty" url:"issue_type,omitempty"`
 	// The user who created this notification.
-	Creator *string `json:"creator,omitempty"`
+	Creator *string `json:"creator,omitempty" url:"creator,omitempty"`
 	// Who notification is assigned to.
-	Assignee *string `json:"assignee,omitempty"`
+	Assignee *string `json:"assignee,omitempty" url:"assignee,omitempty"`
 	// The notification contact information.
-	Contact *string `json:"contact,omitempty"`
+	Contact *string `json:"contact,omitempty" url:"contact,omitempty"`
 	// Associate tags with Notification
-	Tags []string `json:"tags,omitempty"`
+	Tags []string `json:"tags,omitempty" url:"tags,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *CreateNotificationRequest) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
+}
+
+func (c *CreateNotificationRequest) UnmarshalJSON(data []byte) error {
+	type unmarshaler CreateNotificationRequest
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = CreateNotificationRequest(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
+	c._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (c *CreateNotificationRequest) String() string {
+	if len(c._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
 }
 
 type CreateNotificationResponse struct {
-	Result *Notification `json:"result,omitempty"`
+	Result *Notification `json:"result" url:"result"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *CreateNotificationResponse) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
+}
+
+func (c *CreateNotificationResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler CreateNotificationResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = CreateNotificationResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
+	c._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (c *CreateNotificationResponse) String() string {
+	if len(c._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
 }
 
 type GetNotificationResponse struct {
-	Result *Notification `json:"result,omitempty"`
+	Result *Notification `json:"result" url:"result"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (g *GetNotificationResponse) GetExtraProperties() map[string]interface{} {
+	return g.extraProperties
+}
+
+func (g *GetNotificationResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler GetNotificationResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*g = GetNotificationResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	if err != nil {
+		return err
+	}
+	g.extraProperties = extraProperties
+
+	g._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (g *GetNotificationResponse) String() string {
+	if len(g._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(g._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(g); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", g)
 }
 
 // Unique identifier for this notification

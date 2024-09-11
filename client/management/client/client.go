@@ -14,6 +14,7 @@ import (
 	integrations "github.com/synqly/go-sdk/client/management/integrations"
 	members "github.com/synqly/go-sdk/client/management/members"
 	meta "github.com/synqly/go-sdk/client/management/meta"
+	option "github.com/synqly/go-sdk/client/management/option"
 	organization "github.com/synqly/go-sdk/client/management/organization"
 	organizationwebhooks "github.com/synqly/go-sdk/client/management/organizationwebhooks"
 	permissionset "github.com/synqly/go-sdk/client/management/permissionset"
@@ -26,9 +27,9 @@ import (
 )
 
 type Client struct {
-	baseURL    string
-	httpClient core.HTTPClient
-	header     http.Header
+	baseURL string
+	caller  *core.Caller
+	header  http.Header
 
 	Accounts             *accounts.Client
 	Audit                *audit.Client
@@ -50,14 +51,16 @@ type Client struct {
 	Transforms           *transforms.Client
 }
 
-func NewClient(opts ...core.ClientOption) *Client {
-	options := core.NewClientOptions()
-	for _, opt := range opts {
-		opt(options)
-	}
+func NewClient(opts ...option.RequestOption) *Client {
+	options := core.NewRequestOptions(opts...)
 	return &Client{
-		baseURL:              options.BaseURL,
-		httpClient:           options.HTTPClient,
+		baseURL: options.BaseURL,
+		caller: core.NewCaller(
+			&core.CallerParams{
+				Client:      options.HTTPClient,
+				MaxAttempts: options.MaxAttempts,
+			},
+		),
 		header:               options.ToHeader(),
 		Accounts:             accounts.NewClient(opts...),
 		Audit:                audit.NewClient(opts...),

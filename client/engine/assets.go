@@ -2,21 +2,64 @@
 
 package engine
 
+import (
+	json "encoding/json"
+	fmt "fmt"
+	core "github.com/synqly/go-sdk/client/engine/core"
+)
+
 type QueryDevicesRequest struct {
 	// Number of finding reports to return. Defaults to 50.
-	Limit *int `json:"-"`
+	Limit *int `json:"-" url:"limit,omitempty"`
 	// Start search from cursor position.
-	Cursor *string `json:"-"`
+	Cursor *string `json:"-" url:"cursor,omitempty"`
 	// Filter results by this query. For more information on filtering, refer to the Assets Filtering Guide.
 	// Defaults to no filter. If used more than once, the queries are ANDed together.
-	Filter []*string `json:"-"`
+	Filter []*string `json:"-" url:"filter,omitempty"`
 	// Select a field to order the results by. Defaults to `time`. To control the direction of the sorting, append
 	// `[asc]` or `[desc]` to the field name. For example, `time[asc]` will sort the results by `time` in ascending order.
 	// The ordering defaults to `asc` if not specified.
-	Order *string `json:"-"`
+	Order *string `json:"-" url:"order,omitempty"`
 }
 
 type QueryDevicesResponse struct {
-	Result []Device `json:"result,omitempty"`
-	Cursor string   `json:"cursor"`
+	Result []Device `json:"result" url:"result"`
+	Cursor string   `json:"cursor" url:"cursor"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (q *QueryDevicesResponse) GetExtraProperties() map[string]interface{} {
+	return q.extraProperties
+}
+
+func (q *QueryDevicesResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler QueryDevicesResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*q = QueryDevicesResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *q)
+	if err != nil {
+		return err
+	}
+	q.extraProperties = extraProperties
+
+	q._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (q *QueryDevicesResponse) String() string {
+	if len(q._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(q._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(q); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", q)
 }

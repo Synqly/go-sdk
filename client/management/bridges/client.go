@@ -7,56 +7,60 @@ import (
 	context "context"
 	json "encoding/json"
 	errors "errors"
-	fmt "fmt"
 	management "github.com/synqly/go-sdk/client/management"
 	core "github.com/synqly/go-sdk/client/management/core"
+	option "github.com/synqly/go-sdk/client/management/option"
 	io "io"
 	http "net/http"
-	url "net/url"
 )
 
 type Client struct {
-	baseURL    string
-	httpClient core.HTTPClient
-	header     http.Header
+	baseURL string
+	caller  *core.Caller
+	header  http.Header
 }
 
-func NewClient(opts ...core.ClientOption) *Client {
-	options := core.NewClientOptions()
-	for _, opt := range opts {
-		opt(options)
-	}
+func NewClient(opts ...option.RequestOption) *Client {
+	options := core.NewRequestOptions(opts...)
 	return &Client{
-		baseURL:    options.BaseURL,
-		httpClient: options.HTTPClient,
-		header:     options.ToHeader(),
+		baseURL: options.BaseURL,
+		caller: core.NewCaller(
+			&core.CallerParams{
+				Client:      options.HTTPClient,
+				MaxAttempts: options.MaxAttempts,
+			},
+		),
+		header: options.ToHeader(),
 	}
 }
 
 // Returns a list of all `Bridge Group` objects that match the query params.
-func (c *Client) List(ctx context.Context, accountId management.AccountId, request *management.ListBridgesRequest) (*management.ListBridgesResponse, error) {
+func (c *Client) List(
+	ctx context.Context,
+	accountId management.AccountId,
+	request *management.ListBridgesRequest,
+	opts ...option.RequestOption,
+) (*management.ListBridgesResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"v1/bridges/%v", accountId)
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
+	endpointURL := core.EncodeURL(baseURL+"/v1/bridges/%v", accountId)
 
-	queryParams := make(url.Values)
-	if request.Limit != nil {
-		queryParams.Add("limit", fmt.Sprintf("%v", *request.Limit))
-	}
-	if request.StartAfter != nil {
-		queryParams.Add("start_after", fmt.Sprintf("%v", *request.StartAfter))
-	}
-	for _, value := range request.Order {
-		queryParams.Add("order", fmt.Sprintf("%v", *value))
-	}
-	for _, value := range request.Filter {
-		queryParams.Add("filter", fmt.Sprintf("%v", *value))
+	queryParams, err := core.QueryValues(request)
+	if err != nil {
+		return nil, err
 	}
 	if len(queryParams) > 0 {
 		endpointURL += "?" + queryParams.Encode()
 	}
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -134,30 +138,47 @@ func (c *Client) List(ctx context.Context, accountId management.AccountId, reque
 	}
 
 	var response *management.ListBridgesResponse
-	if err := core.DoRequest(
+	if err := c.caller.Call(
 		ctx,
-		c.httpClient,
-		endpointURL,
-		http.MethodGet,
-		request,
-		&response,
-		false,
-		c.header,
-		errorDecoder,
+		&core.CallParams{
+			URL:          endpointURL,
+			Method:       http.MethodGet,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
+			Response:     &response,
+			ErrorDecoder: errorDecoder,
+		},
 	); err != nil {
-		return response, err
+		return nil, err
 	}
 	return response, nil
 }
 
 // Returns the `Bridge` object matching `{bridgeId}`. For more information on Bridges, refer to our
 // [Synqly Overview](https://docs.synqly.com/docs/synqly-overview).
-func (c *Client) Get(ctx context.Context, accountId management.AccountId, bridgeId management.BridgeGroupId) (*management.GetBridgeResponse, error) {
+func (c *Client) Get(
+	ctx context.Context,
+	accountId management.AccountId,
+	bridgeId management.BridgeGroupId,
+	opts ...option.RequestOption,
+) (*management.GetBridgeResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"v1/bridges/%v/%v", accountId, bridgeId)
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
+	endpointURL := core.EncodeURL(
+		baseURL+"/v1/bridges/%v/%v",
+		accountId,
+		bridgeId,
+	)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -235,30 +256,43 @@ func (c *Client) Get(ctx context.Context, accountId management.AccountId, bridge
 	}
 
 	var response *management.GetBridgeResponse
-	if err := core.DoRequest(
+	if err := c.caller.Call(
 		ctx,
-		c.httpClient,
-		endpointURL,
-		http.MethodGet,
-		nil,
-		&response,
-		false,
-		c.header,
-		errorDecoder,
+		&core.CallParams{
+			URL:          endpointURL,
+			Method:       http.MethodGet,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
+			Response:     &response,
+			ErrorDecoder: errorDecoder,
+		},
 	); err != nil {
-		return response, err
+		return nil, err
 	}
 	return response, nil
 }
 
 // Creates an `Bridge` object. For more information on Bridges, refer to our
 // [Synqly Overview](https://docs.synqly.com/docs/synqly-overview).
-func (c *Client) Create(ctx context.Context, accountId management.AccountId, request *management.CreateBridgeRequest) (*management.CreateBridgeResponse, error) {
+func (c *Client) Create(
+	ctx context.Context,
+	accountId management.AccountId,
+	request *management.CreateBridgeRequest,
+	opts ...option.RequestOption,
+) (*management.CreateBridgeResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"v1/bridges/%v", accountId)
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
+	endpointURL := core.EncodeURL(baseURL+"/v1/bridges/%v", accountId)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -336,30 +370,49 @@ func (c *Client) Create(ctx context.Context, accountId management.AccountId, req
 	}
 
 	var response *management.CreateBridgeResponse
-	if err := core.DoRequest(
+	if err := c.caller.Call(
 		ctx,
-		c.httpClient,
-		endpointURL,
-		http.MethodPost,
-		request,
-		&response,
-		false,
-		c.header,
-		errorDecoder,
+		&core.CallParams{
+			URL:          endpointURL,
+			Method:       http.MethodPost,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
+			Request:      request,
+			Response:     &response,
+			ErrorDecoder: errorDecoder,
+		},
 	); err != nil {
-		return response, err
+		return nil, err
 	}
 	return response, nil
 }
 
 // Updates the `Bridge` object matching `{bridgeId}`. For more information on Bridges, refer to our
 // [Synqly Overview](https://docs.synqly.com/docs/synqly-overview).
-func (c *Client) Update(ctx context.Context, accountId management.AccountId, bridgeId management.BridgeGroupId, request management.UpdateBridgeRequest) (*management.UpdateBridgeResponse, error) {
+func (c *Client) Update(
+	ctx context.Context,
+	accountId management.AccountId,
+	bridgeId management.BridgeGroupId,
+	request management.UpdateBridgeRequest,
+	opts ...option.RequestOption,
+) (*management.UpdateBridgeResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"v1/bridges/%v/%v", accountId, bridgeId)
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
+	endpointURL := core.EncodeURL(
+		baseURL+"/v1/bridges/%v/%v",
+		accountId,
+		bridgeId,
+	)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -437,30 +490,49 @@ func (c *Client) Update(ctx context.Context, accountId management.AccountId, bri
 	}
 
 	var response *management.UpdateBridgeResponse
-	if err := core.DoRequest(
+	if err := c.caller.Call(
 		ctx,
-		c.httpClient,
-		endpointURL,
-		http.MethodPut,
-		request,
-		&response,
-		false,
-		c.header,
-		errorDecoder,
+		&core.CallParams{
+			URL:          endpointURL,
+			Method:       http.MethodPut,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
+			Request:      request,
+			Response:     &response,
+			ErrorDecoder: errorDecoder,
+		},
 	); err != nil {
-		return response, err
+		return nil, err
 	}
 	return response, nil
 }
 
 // Patches the `Bridge` object matching `{bridgeId}`. For more information on Bridges, refer to our
 // [Synqly Overview](https://docs.synqly.com/docs/synqly-overview).
-func (c *Client) Patch(ctx context.Context, accountId management.AccountId, bridgeId management.BridgeGroupId, request []map[string]interface{}) (*management.PatchBridgeResponse, error) {
+func (c *Client) Patch(
+	ctx context.Context,
+	accountId management.AccountId,
+	bridgeId management.BridgeGroupId,
+	request []map[string]interface{},
+	opts ...option.RequestOption,
+) (*management.PatchBridgeResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"v1/bridges/%v/%v", accountId, bridgeId)
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
+	endpointURL := core.EncodeURL(
+		baseURL+"/v1/bridges/%v/%v",
+		accountId,
+		bridgeId,
+	)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -538,30 +610,48 @@ func (c *Client) Patch(ctx context.Context, accountId management.AccountId, brid
 	}
 
 	var response *management.PatchBridgeResponse
-	if err := core.DoRequest(
+	if err := c.caller.Call(
 		ctx,
-		c.httpClient,
-		endpointURL,
-		http.MethodPatch,
-		request,
-		&response,
-		false,
-		c.header,
-		errorDecoder,
+		&core.CallParams{
+			URL:          endpointURL,
+			Method:       http.MethodPatch,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
+			Request:      request,
+			Response:     &response,
+			ErrorDecoder: errorDecoder,
+		},
 	); err != nil {
-		return response, err
+		return nil, err
 	}
 	return response, nil
 }
 
 // Deletes the `Bridge` matching `{bridgeId}`. Deleting an `Bridge` also deletea
 // all `Tokens` and `Credentials` belonging to the `Bridge`.
-func (c *Client) Delete(ctx context.Context, accountId management.AccountId, bridgeId management.BridgeGroupId) error {
+func (c *Client) Delete(
+	ctx context.Context,
+	accountId management.AccountId,
+	bridgeId management.BridgeGroupId,
+	opts ...option.RequestOption,
+) error {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.synqly.com"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"v1/bridges/%v/%v", accountId, bridgeId)
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
+	endpointURL := core.EncodeURL(
+		baseURL+"/v1/bridges/%v/%v",
+		accountId,
+		bridgeId,
+	)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -638,16 +728,16 @@ func (c *Client) Delete(ctx context.Context, accountId management.AccountId, bri
 		return apiError
 	}
 
-	if err := core.DoRequest(
+	if err := c.caller.Call(
 		ctx,
-		c.httpClient,
-		endpointURL,
-		http.MethodDelete,
-		nil,
-		nil,
-		false,
-		c.header,
-		errorDecoder,
+		&core.CallParams{
+			URL:          endpointURL,
+			Method:       http.MethodDelete,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
+			ErrorDecoder: errorDecoder,
+		},
 	); err != nil {
 		return err
 	}

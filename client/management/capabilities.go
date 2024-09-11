@@ -2,20 +2,100 @@
 
 package management
 
+import (
+	json "encoding/json"
+	fmt "fmt"
+	core "github.com/synqly/go-sdk/client/management/core"
+)
+
 type ListCategoryCapabilitiesRequest struct {
 	// Optional comma separated list of categories to return; "storage,tickets"
-	Category *string `json:"-"`
+	Category *string `json:"-" url:"category,omitempty"`
 }
 
 type ListProviderCapabilitiesRequest struct {
 	// Optional comma separated list of providers to return; "aws_s3,aws_sqs"
-	Provider *string `json:"-"`
+	Provider *string `json:"-" url:"provider,omitempty"`
 }
 
 type ListCategoryCapabilitiesResponse struct {
-	Result map[CategoryId]*Category `json:"result,omitempty"`
+	Result map[CategoryId]*Category `json:"result" url:"result"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (l *ListCategoryCapabilitiesResponse) GetExtraProperties() map[string]interface{} {
+	return l.extraProperties
+}
+
+func (l *ListCategoryCapabilitiesResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler ListCategoryCapabilitiesResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*l = ListCategoryCapabilitiesResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *l)
+	if err != nil {
+		return err
+	}
+	l.extraProperties = extraProperties
+
+	l._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (l *ListCategoryCapabilitiesResponse) String() string {
+	if len(l._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(l._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(l); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", l)
 }
 
 type ListProviderCapabilitiesResponse struct {
-	Result map[ProviderId]*Provider `json:"result,omitempty"`
+	Result map[ProviderId]*Provider `json:"result" url:"result"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (l *ListProviderCapabilitiesResponse) GetExtraProperties() map[string]interface{} {
+	return l.extraProperties
+}
+
+func (l *ListProviderCapabilitiesResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler ListProviderCapabilitiesResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*l = ListProviderCapabilitiesResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *l)
+	if err != nil {
+		return err
+	}
+	l.extraProperties = extraProperties
+
+	l._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (l *ListProviderCapabilitiesResponse) String() string {
+	if len(l._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(l._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(l); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", l)
 }

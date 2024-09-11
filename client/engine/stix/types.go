@@ -5,15 +5,23 @@ package stix
 import (
 	json "encoding/json"
 	fmt "fmt"
+	core "github.com/synqly/go-sdk/client/engine/core"
 	time "time"
 )
 
 type Bundle struct {
 	// The id property is a required property that uniquely identifies the bundle.
-	Id BundleId `json:"id,omitempty"`
+	Id BundleId `json:"id" url:"id"`
 	// The objects property is an array of STIX Objects (json representation) that are part of the bundle.
-	Objects []interface{} `json:"objects,omitempty"`
+	Objects []interface{} `json:"objects" url:"objects"`
 	type_   string
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (b *Bundle) GetExtraProperties() map[string]interface{} {
+	return b.extraProperties
 }
 
 func (b *Bundle) Type() string {
@@ -21,13 +29,29 @@ func (b *Bundle) Type() string {
 }
 
 func (b *Bundle) UnmarshalJSON(data []byte) error {
-	type unmarshaler Bundle
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
+	type embed Bundle
+	var unmarshaler = struct {
+		embed
+		Type string `json:"type"`
+	}{
+		embed: embed(*b),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
 		return err
 	}
-	*b = Bundle(value)
-	b.type_ = "bundle"
+	*b = Bundle(unmarshaler.embed)
+	if unmarshaler.Type != "bundle" {
+		return fmt.Errorf("unexpected value for literal on type %T; expected %v got %v", b, "bundle", unmarshaler.Type)
+	}
+	b.type_ = unmarshaler.Type
+
+	extraProperties, err := core.ExtractExtraProperties(data, *b, "type")
+	if err != nil {
+		return err
+	}
+	b.extraProperties = extraProperties
+
+	b._rawJSON = json.RawMessage(data)
 	return nil
 }
 
@@ -43,35 +67,54 @@ func (b *Bundle) MarshalJSON() ([]byte, error) {
 	return json.Marshal(marshaler)
 }
 
+func (b *Bundle) String() string {
+	if len(b._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(b._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(b); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", b)
+}
+
 // The id property is a required property that uniquely identifies the bundle.
 type BundleId = Id
 
 type CommonProperties struct {
 	// The id property uniquely identifies this object.
-	Id Id `json:"id"`
+	Id Id `json:"id" url:"id"`
 	// The created_by_ref property specifies the id property of the identity object that describes the entity that created this object.
-	CreatedByRef *Identity `json:"created_by_ref,omitempty"`
+	CreatedByRef *Identity `json:"created_by_ref,omitempty" url:"created_by_ref,omitempty"`
 	// The created property represents the time at which the object was originally created.
-	Created time.Time `json:"created"`
+	Created time.Time `json:"created" url:"created"`
 	// The modified property is only used by STIX Objects that support versioning and represents the time that this particular version of the object was last modified.
-	Modified time.Time `json:"modified"`
+	Modified time.Time `json:"modified" url:"modified"`
 	// The revoked property indicates whether this object has been revoked. If the revoked property is present and set to true, then the object has been revoked.
-	Revoked *bool `json:"revoked,omitempty"`
+	Revoked *bool `json:"revoked,omitempty" url:"revoked,omitempty"`
 	// The labels property is an array of strings that are used to categorize this object.
-	Labels []string `json:"labels,omitempty"`
+	Labels []string `json:"labels,omitempty" url:"labels,omitempty"`
 	// The confidence property is an integer from 0 to 100 that represents the confidence that this object is accurate and valid.
-	Confidence *int `json:"confidence,omitempty"`
+	Confidence *int `json:"confidence,omitempty" url:"confidence,omitempty"`
 	// The lang property specifies the language used in the properties of the object.
-	Lang *string `json:"lang,omitempty"`
+	Lang *string `json:"lang,omitempty" url:"lang,omitempty"`
 	// The external_references property is an array of external references that are relevant to this object.
-	ExternalReferences []*ExternalReference `json:"external_references,omitempty"`
+	ExternalReferences []*ExternalReference `json:"external_references,omitempty" url:"external_references,omitempty"`
 	// The object_marking_refs property is an array of ids of marking_definition objects that apply to this object.
-	ObjectMarkingRefs []*MarkingDefinition `json:"object_marking_refs,omitempty"`
+	ObjectMarkingRefs []*MarkingDefinition `json:"object_marking_refs,omitempty" url:"object_marking_refs,omitempty"`
 	// The granular_markings property is an array of granular markings that are applied to this object.
-	GranularMarkings []*GranularMarking `json:"granular_markings,omitempty"`
+	GranularMarkings []*GranularMarking `json:"granular_markings,omitempty" url:"granular_markings,omitempty"`
 	// The extensions property is an object that contains custom properties or objects that extend the object.
-	Extensions  map[string]interface{} `json:"extensions,omitempty"`
+	Extensions  map[string]interface{} `json:"extensions,omitempty" url:"extensions,omitempty"`
 	specVersion string
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *CommonProperties) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
 }
 
 func (c *CommonProperties) SpecVersion() string {
@@ -79,13 +122,33 @@ func (c *CommonProperties) SpecVersion() string {
 }
 
 func (c *CommonProperties) UnmarshalJSON(data []byte) error {
-	type unmarshaler CommonProperties
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
+	type embed CommonProperties
+	var unmarshaler = struct {
+		embed
+		Created     *core.DateTime `json:"created"`
+		Modified    *core.DateTime `json:"modified"`
+		SpecVersion string         `json:"spec_version"`
+	}{
+		embed: embed(*c),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
 		return err
 	}
-	*c = CommonProperties(value)
-	c.specVersion = "2.1"
+	*c = CommonProperties(unmarshaler.embed)
+	c.Created = unmarshaler.Created.Time()
+	c.Modified = unmarshaler.Modified.Time()
+	if unmarshaler.SpecVersion != "2.1" {
+		return fmt.Errorf("unexpected value for literal on type %T; expected %v got %v", c, "2.1", unmarshaler.SpecVersion)
+	}
+	c.specVersion = unmarshaler.SpecVersion
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c, "spec_version")
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
+	c._rawJSON = json.RawMessage(data)
 	return nil
 }
 
@@ -93,72 +156,169 @@ func (c *CommonProperties) MarshalJSON() ([]byte, error) {
 	type embed CommonProperties
 	var marshaler = struct {
 		embed
-		SpecVersion string `json:"spec_version"`
+		Created     *core.DateTime `json:"created"`
+		Modified    *core.DateTime `json:"modified"`
+		SpecVersion string         `json:"spec_version"`
 	}{
 		embed:       embed(*c),
+		Created:     core.NewDateTime(c.Created),
+		Modified:    core.NewDateTime(c.Modified),
 		SpecVersion: "2.1",
 	}
 	return json.Marshal(marshaler)
 }
 
+func (c *CommonProperties) String() string {
+	if len(c._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
 type ExternalReference struct {
 	// The source_name property specifies the name of the source that provided the external reference.
-	SourceName string `json:"source_name"`
+	SourceName string `json:"source_name" url:"source_name"`
 	// The description property provides a human-readable explanation of the external reference.
-	Description *string `json:"description,omitempty"`
+	Description *string `json:"description,omitempty" url:"description,omitempty"`
 	// The url property specifies the URL of the external reference.
-	Url *string `json:"url,omitempty"`
+	Url *string `json:"url,omitempty" url:"url,omitempty"`
 	// The hash property specifies a hash value that uniquely identifies the external reference.
-	Hash *string `json:"hash,omitempty"`
+	Hash *string `json:"hash,omitempty" url:"hash,omitempty"`
 	// The external_id property specifies an identifier used by the source of the external reference.
-	ExternalId *string `json:"external_id,omitempty"`
+	ExternalId *string `json:"external_id,omitempty" url:"external_id,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (e *ExternalReference) GetExtraProperties() map[string]interface{} {
+	return e.extraProperties
+}
+
+func (e *ExternalReference) UnmarshalJSON(data []byte) error {
+	type unmarshaler ExternalReference
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*e = ExternalReference(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *e)
+	if err != nil {
+		return err
+	}
+	e.extraProperties = extraProperties
+
+	e._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (e *ExternalReference) String() string {
+	if len(e._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(e._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(e); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", e)
 }
 
 type GranularMarking struct {
 	// The lang property specifies the language used in the properties of the marking_definition object.
-	Lang *string `json:"lang,omitempty"`
+	Lang *string `json:"lang,omitempty" url:"lang,omitempty"`
 	// The marking_ref property specifies the id property of the marking_definition object that applies to this object.
-	MarkingRef *MarkingDefinition `json:"marking_ref,omitempty"`
+	MarkingRef *MarkingDefinition `json:"marking_ref,omitempty" url:"marking_ref,omitempty"`
 	// The selectors property is an array of strings that represent the selectors that are used to apply the marking_definition object to this object.
-	Selectors []string `json:"selectors,omitempty"`
+	Selectors []string `json:"selectors" url:"selectors"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (g *GranularMarking) GetExtraProperties() map[string]interface{} {
+	return g.extraProperties
+}
+
+func (g *GranularMarking) UnmarshalJSON(data []byte) error {
+	type unmarshaler GranularMarking
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*g = GranularMarking(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	if err != nil {
+		return err
+	}
+	g.extraProperties = extraProperties
+
+	g._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (g *GranularMarking) String() string {
+	if len(g._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(g._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(g); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", g)
 }
 
 type Id = string
 
 type Identity struct {
 	// The id property uniquely identifies this object.
-	Id Id `json:"id"`
+	Id Id `json:"id" url:"id"`
 	// The created_by_ref property specifies the id property of the identity object that describes the entity that created this object.
-	CreatedByRef *Identity `json:"created_by_ref,omitempty"`
+	CreatedByRef *Identity `json:"created_by_ref,omitempty" url:"created_by_ref,omitempty"`
 	// The created property represents the time at which the object was originally created.
-	Created time.Time `json:"created"`
+	Created time.Time `json:"created" url:"created"`
 	// The modified property is only used by STIX Objects that support versioning and represents the time that this particular version of the object was last modified.
-	Modified time.Time `json:"modified"`
+	Modified time.Time `json:"modified" url:"modified"`
 	// The revoked property indicates whether this object has been revoked. If the revoked property is present and set to true, then the object has been revoked.
-	Revoked *bool `json:"revoked,omitempty"`
+	Revoked *bool `json:"revoked,omitempty" url:"revoked,omitempty"`
 	// The labels property is an array of strings that are used to categorize this object.
-	Labels []string `json:"labels,omitempty"`
+	Labels []string `json:"labels,omitempty" url:"labels,omitempty"`
 	// The confidence property is an integer from 0 to 100 that represents the confidence that this object is accurate and valid.
-	Confidence *int `json:"confidence,omitempty"`
+	Confidence *int `json:"confidence,omitempty" url:"confidence,omitempty"`
 	// The lang property specifies the language used in the properties of the object.
-	Lang *string `json:"lang,omitempty"`
+	Lang *string `json:"lang,omitempty" url:"lang,omitempty"`
 	// The external_references property is an array of external references that are relevant to this object.
-	ExternalReferences []*ExternalReference `json:"external_references,omitempty"`
+	ExternalReferences []*ExternalReference `json:"external_references,omitempty" url:"external_references,omitempty"`
 	// The object_marking_refs property is an array of ids of marking_definition objects that apply to this object.
-	ObjectMarkingRefs []*MarkingDefinition `json:"object_marking_refs,omitempty"`
+	ObjectMarkingRefs []*MarkingDefinition `json:"object_marking_refs,omitempty" url:"object_marking_refs,omitempty"`
 	// The granular_markings property is an array of granular markings that are applied to this object.
-	GranularMarkings []*GranularMarking `json:"granular_markings,omitempty"`
+	GranularMarkings []*GranularMarking `json:"granular_markings,omitempty" url:"granular_markings,omitempty"`
 	// The extensions property is an object that contains custom properties or objects that extend the object.
-	Extensions map[string]interface{} `json:"extensions,omitempty"`
+	Extensions map[string]interface{} `json:"extensions,omitempty" url:"extensions,omitempty"`
 	// The value of this property MUST be identity.
-	Type string `json:"type"`
+	Type string `json:"type" url:"type"`
 	// The name of this Identity. When referring to a specific entity (e.g., an individual or organization), this property SHOULD contain the canonical name of the specific entity.
-	Name        string  `json:"name"`
-	Description *string `json:"description,omitempty"`
+	Name        string  `json:"name" url:"name"`
+	Description *string `json:"description,omitempty" url:"description,omitempty"`
 	// The list of roles that this Identity performs. No open vocabulary is yet defined for this property.
-	Roles         *string          `json:"roles,omitempty"`
-	IdentityClass *IdentityClassOv `json:"identity_class,omitempty"`
+	Roles         *string          `json:"roles,omitempty" url:"roles,omitempty"`
+	IdentityClass *IdentityClassOv `json:"identity_class,omitempty" url:"identity_class,omitempty"`
 	specVersion   string
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (i *Identity) GetExtraProperties() map[string]interface{} {
+	return i.extraProperties
 }
 
 func (i *Identity) SpecVersion() string {
@@ -166,13 +326,33 @@ func (i *Identity) SpecVersion() string {
 }
 
 func (i *Identity) UnmarshalJSON(data []byte) error {
-	type unmarshaler Identity
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
+	type embed Identity
+	var unmarshaler = struct {
+		embed
+		Created     *core.DateTime `json:"created"`
+		Modified    *core.DateTime `json:"modified"`
+		SpecVersion string         `json:"spec_version"`
+	}{
+		embed: embed(*i),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
 		return err
 	}
-	*i = Identity(value)
-	i.specVersion = "2.1"
+	*i = Identity(unmarshaler.embed)
+	i.Created = unmarshaler.Created.Time()
+	i.Modified = unmarshaler.Modified.Time()
+	if unmarshaler.SpecVersion != "2.1" {
+		return fmt.Errorf("unexpected value for literal on type %T; expected %v got %v", i, "2.1", unmarshaler.SpecVersion)
+	}
+	i.specVersion = unmarshaler.SpecVersion
+
+	extraProperties, err := core.ExtractExtraProperties(data, *i, "spec_version")
+	if err != nil {
+		return err
+	}
+	i.extraProperties = extraProperties
+
+	i._rawJSON = json.RawMessage(data)
 	return nil
 }
 
@@ -180,59 +360,156 @@ func (i *Identity) MarshalJSON() ([]byte, error) {
 	type embed Identity
 	var marshaler = struct {
 		embed
-		SpecVersion string `json:"spec_version"`
+		Created     *core.DateTime `json:"created"`
+		Modified    *core.DateTime `json:"modified"`
+		SpecVersion string         `json:"spec_version"`
 	}{
 		embed:       embed(*i),
+		Created:     core.NewDateTime(i.Created),
+		Modified:    core.NewDateTime(i.Modified),
 		SpecVersion: "2.1",
 	}
 	return json.Marshal(marshaler)
 }
 
+func (i *Identity) String() string {
+	if len(i._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(i._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(i); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", i)
+}
+
 type KillChainPhase struct {
 	// The kill_chain_name property specifies the name of the kill chain to which the phase belongs.
-	KillChainName string `json:"kill_chain_name"`
+	KillChainName string `json:"kill_chain_name" url:"kill_chain_name"`
 	// The phase_name property specifies the name of the phase within the kill chain.
-	PhaseName string `json:"phase_name"`
+	PhaseName string `json:"phase_name" url:"phase_name"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (k *KillChainPhase) GetExtraProperties() map[string]interface{} {
+	return k.extraProperties
+}
+
+func (k *KillChainPhase) UnmarshalJSON(data []byte) error {
+	type unmarshaler KillChainPhase
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*k = KillChainPhase(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *k)
+	if err != nil {
+		return err
+	}
+	k.extraProperties = extraProperties
+
+	k._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (k *KillChainPhase) String() string {
+	if len(k._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(k._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(k); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", k)
 }
 
 type MarkingDefinition struct {
 	// The type property identifies the type of object. The value of this property MUST be marking_definition.
-	Type string  `json:"type"`
-	Name *string `json:"name,omitempty"`
+	Type string  `json:"type" url:"type"`
+	Name *string `json:"name,omitempty" url:"name,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (m *MarkingDefinition) GetExtraProperties() map[string]interface{} {
+	return m.extraProperties
+}
+
+func (m *MarkingDefinition) UnmarshalJSON(data []byte) error {
+	type unmarshaler MarkingDefinition
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*m = MarkingDefinition(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *m)
+	if err != nil {
+		return err
+	}
+	m.extraProperties = extraProperties
+
+	m._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (m *MarkingDefinition) String() string {
+	if len(m._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(m._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(m); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", m)
 }
 
 type Relationships struct {
 	// The id property uniquely identifies this object.
-	Id Id `json:"id"`
+	Id Id `json:"id" url:"id"`
 	// The created_by_ref property specifies the id property of the identity object that describes the entity that created this object.
-	CreatedByRef *Identity `json:"created_by_ref,omitempty"`
+	CreatedByRef *Identity `json:"created_by_ref,omitempty" url:"created_by_ref,omitempty"`
 	// The created property represents the time at which the object was originally created.
-	Created time.Time `json:"created"`
+	Created time.Time `json:"created" url:"created"`
 	// The modified property is only used by STIX Objects that support versioning and represents the time that this particular version of the object was last modified.
-	Modified time.Time `json:"modified"`
+	Modified time.Time `json:"modified" url:"modified"`
 	// The revoked property indicates whether this object has been revoked. If the revoked property is present and set to true, then the object has been revoked.
-	Revoked *bool `json:"revoked,omitempty"`
+	Revoked *bool `json:"revoked,omitempty" url:"revoked,omitempty"`
 	// The labels property is an array of strings that are used to categorize this object.
-	Labels []string `json:"labels,omitempty"`
+	Labels []string `json:"labels,omitempty" url:"labels,omitempty"`
 	// The confidence property is an integer from 0 to 100 that represents the confidence that this object is accurate and valid.
-	Confidence *int `json:"confidence,omitempty"`
+	Confidence *int `json:"confidence,omitempty" url:"confidence,omitempty"`
 	// The lang property specifies the language used in the properties of the object.
-	Lang *string `json:"lang,omitempty"`
+	Lang *string `json:"lang,omitempty" url:"lang,omitempty"`
 	// The external_references property is an array of external references that are relevant to this object.
-	ExternalReferences []*ExternalReference `json:"external_references,omitempty"`
+	ExternalReferences []*ExternalReference `json:"external_references,omitempty" url:"external_references,omitempty"`
 	// The object_marking_refs property is an array of ids of marking_definition objects that apply to this object.
-	ObjectMarkingRefs []*MarkingDefinition `json:"object_marking_refs,omitempty"`
+	ObjectMarkingRefs []*MarkingDefinition `json:"object_marking_refs,omitempty" url:"object_marking_refs,omitempty"`
 	// The granular_markings property is an array of granular markings that are applied to this object.
-	GranularMarkings []*GranularMarking `json:"granular_markings,omitempty"`
+	GranularMarkings []*GranularMarking `json:"granular_markings,omitempty" url:"granular_markings,omitempty"`
 	// The extensions property is an object that contains custom properties or objects that extend the object.
-	Extensions       map[string]interface{} `json:"extensions,omitempty"`
-	RelationshipType string                 `json:"relationship_type"`
-	Description      *string                `json:"description,omitempty"`
-	SourceRef        Id                     `json:"source_ref"`
-	TargetRef        Id                     `json:"target_ref"`
-	StartTime        *time.Time             `json:"start_time,omitempty"`
-	StopTime         *time.Time             `json:"stop_time,omitempty"`
+	Extensions       map[string]interface{} `json:"extensions,omitempty" url:"extensions,omitempty"`
+	RelationshipType string                 `json:"relationship_type" url:"relationship_type"`
+	Description      *string                `json:"description,omitempty" url:"description,omitempty"`
+	SourceRef        Id                     `json:"source_ref" url:"source_ref"`
+	TargetRef        Id                     `json:"target_ref" url:"target_ref"`
+	StartTime        *time.Time             `json:"start_time,omitempty" url:"start_time,omitempty"`
+	StopTime         *time.Time             `json:"stop_time,omitempty" url:"stop_time,omitempty"`
 	specVersion      string
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (r *Relationships) GetExtraProperties() map[string]interface{} {
+	return r.extraProperties
 }
 
 func (r *Relationships) SpecVersion() string {
@@ -240,13 +517,37 @@ func (r *Relationships) SpecVersion() string {
 }
 
 func (r *Relationships) UnmarshalJSON(data []byte) error {
-	type unmarshaler Relationships
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
+	type embed Relationships
+	var unmarshaler = struct {
+		embed
+		Created     *core.DateTime `json:"created"`
+		Modified    *core.DateTime `json:"modified"`
+		StartTime   *core.DateTime `json:"start_time,omitempty"`
+		StopTime    *core.DateTime `json:"stop_time,omitempty"`
+		SpecVersion string         `json:"spec_version"`
+	}{
+		embed: embed(*r),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
 		return err
 	}
-	*r = Relationships(value)
-	r.specVersion = "2.1"
+	*r = Relationships(unmarshaler.embed)
+	r.Created = unmarshaler.Created.Time()
+	r.Modified = unmarshaler.Modified.Time()
+	r.StartTime = unmarshaler.StartTime.TimePtr()
+	r.StopTime = unmarshaler.StopTime.TimePtr()
+	if unmarshaler.SpecVersion != "2.1" {
+		return fmt.Errorf("unexpected value for literal on type %T; expected %v got %v", r, "2.1", unmarshaler.SpecVersion)
+	}
+	r.specVersion = unmarshaler.SpecVersion
+
+	extraProperties, err := core.ExtractExtraProperties(data, *r, "spec_version")
+	if err != nil {
+		return err
+	}
+	r.extraProperties = extraProperties
+
+	r._rawJSON = json.RawMessage(data)
 	return nil
 }
 
@@ -254,47 +555,74 @@ func (r *Relationships) MarshalJSON() ([]byte, error) {
 	type embed Relationships
 	var marshaler = struct {
 		embed
-		SpecVersion string `json:"spec_version"`
+		Created     *core.DateTime `json:"created"`
+		Modified    *core.DateTime `json:"modified"`
+		StartTime   *core.DateTime `json:"start_time,omitempty"`
+		StopTime    *core.DateTime `json:"stop_time,omitempty"`
+		SpecVersion string         `json:"spec_version"`
 	}{
 		embed:       embed(*r),
+		Created:     core.NewDateTime(r.Created),
+		Modified:    core.NewDateTime(r.Modified),
+		StartTime:   core.NewOptionalDateTime(r.StartTime),
+		StopTime:    core.NewOptionalDateTime(r.StopTime),
 		SpecVersion: "2.1",
 	}
 	return json.Marshal(marshaler)
 }
 
+func (r *Relationships) String() string {
+	if len(r._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(r._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(r); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", r)
+}
+
 type Software struct {
 	// The id property uniquely identifies this object.
-	Id Id `json:"id"`
+	Id Id `json:"id" url:"id"`
 	// The created_by_ref property specifies the id property of the identity object that describes the entity that created this object.
-	CreatedByRef *Identity `json:"created_by_ref,omitempty"`
+	CreatedByRef *Identity `json:"created_by_ref,omitempty" url:"created_by_ref,omitempty"`
 	// The created property represents the time at which the object was originally created.
-	Created time.Time `json:"created"`
+	Created time.Time `json:"created" url:"created"`
 	// The modified property is only used by STIX Objects that support versioning and represents the time that this particular version of the object was last modified.
-	Modified time.Time `json:"modified"`
+	Modified time.Time `json:"modified" url:"modified"`
 	// The revoked property indicates whether this object has been revoked. If the revoked property is present and set to true, then the object has been revoked.
-	Revoked *bool `json:"revoked,omitempty"`
+	Revoked *bool `json:"revoked,omitempty" url:"revoked,omitempty"`
 	// The labels property is an array of strings that are used to categorize this object.
-	Labels []string `json:"labels,omitempty"`
+	Labels []string `json:"labels,omitempty" url:"labels,omitempty"`
 	// The confidence property is an integer from 0 to 100 that represents the confidence that this object is accurate and valid.
-	Confidence *int `json:"confidence,omitempty"`
+	Confidence *int `json:"confidence,omitempty" url:"confidence,omitempty"`
 	// The lang property specifies the language used in the properties of the object.
-	Lang *string `json:"lang,omitempty"`
+	Lang *string `json:"lang,omitempty" url:"lang,omitempty"`
 	// The external_references property is an array of external references that are relevant to this object.
-	ExternalReferences []*ExternalReference `json:"external_references,omitempty"`
+	ExternalReferences []*ExternalReference `json:"external_references,omitempty" url:"external_references,omitempty"`
 	// The object_marking_refs property is an array of ids of marking_definition objects that apply to this object.
-	ObjectMarkingRefs []*MarkingDefinition `json:"object_marking_refs,omitempty"`
+	ObjectMarkingRefs []*MarkingDefinition `json:"object_marking_refs,omitempty" url:"object_marking_refs,omitempty"`
 	// The granular_markings property is an array of granular markings that are applied to this object.
-	GranularMarkings []*GranularMarking `json:"granular_markings,omitempty"`
+	GranularMarkings []*GranularMarking `json:"granular_markings,omitempty" url:"granular_markings,omitempty"`
 	// The extensions property is an object that contains custom properties or objects that extend the object.
-	Extensions map[string]interface{} `json:"extensions,omitempty"`
-	Name       string                 `json:"name"`
+	Extensions map[string]interface{} `json:"extensions,omitempty" url:"extensions,omitempty"`
+	Name       string                 `json:"name" url:"name"`
 	// Specifies the Common Platform Enumeration
-	Cpe         *string `json:"cpe,omitempty"`
-	Swid        *string `json:"swid,omitempty"`
-	Languages   *string `json:"languages,omitempty"`
-	Vendor      *string `json:"vendor,omitempty"`
-	Version     *string `json:"version,omitempty"`
+	Cpe         *string `json:"cpe,omitempty" url:"cpe,omitempty"`
+	Swid        *string `json:"swid,omitempty" url:"swid,omitempty"`
+	Languages   *string `json:"languages,omitempty" url:"languages,omitempty"`
+	Vendor      *string `json:"vendor,omitempty" url:"vendor,omitempty"`
+	Version     *string `json:"version,omitempty" url:"version,omitempty"`
 	specVersion string
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (s *Software) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
 }
 
 func (s *Software) SpecVersion() string {
@@ -302,13 +630,33 @@ func (s *Software) SpecVersion() string {
 }
 
 func (s *Software) UnmarshalJSON(data []byte) error {
-	type unmarshaler Software
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
+	type embed Software
+	var unmarshaler = struct {
+		embed
+		Created     *core.DateTime `json:"created"`
+		Modified    *core.DateTime `json:"modified"`
+		SpecVersion string         `json:"spec_version"`
+	}{
+		embed: embed(*s),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
 		return err
 	}
-	*s = Software(value)
-	s.specVersion = "2.1"
+	*s = Software(unmarshaler.embed)
+	s.Created = unmarshaler.Created.Time()
+	s.Modified = unmarshaler.Modified.Time()
+	if unmarshaler.SpecVersion != "2.1" {
+		return fmt.Errorf("unexpected value for literal on type %T; expected %v got %v", s, "2.1", unmarshaler.SpecVersion)
+	}
+	s.specVersion = unmarshaler.SpecVersion
+
+	extraProperties, err := core.ExtractExtraProperties(data, *s, "spec_version")
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+
+	s._rawJSON = json.RawMessage(data)
 	return nil
 }
 
@@ -316,61 +664,84 @@ func (s *Software) MarshalJSON() ([]byte, error) {
 	type embed Software
 	var marshaler = struct {
 		embed
-		SpecVersion string `json:"spec_version"`
+		Created     *core.DateTime `json:"created"`
+		Modified    *core.DateTime `json:"modified"`
+		SpecVersion string         `json:"spec_version"`
 	}{
 		embed:       embed(*s),
+		Created:     core.NewDateTime(s.Created),
+		Modified:    core.NewDateTime(s.Modified),
 		SpecVersion: "2.1",
 	}
 	return json.Marshal(marshaler)
 }
 
+func (s *Software) String() string {
+	if len(s._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(s); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", s)
+}
+
 type Indicator struct {
 	// The id property uniquely identifies this object.
-	Id Id `json:"id"`
+	Id Id `json:"id" url:"id"`
 	// The created_by_ref property specifies the id property of the identity object that describes the entity that created this object.
-	CreatedByRef *Identity `json:"created_by_ref,omitempty"`
+	CreatedByRef *Identity `json:"created_by_ref,omitempty" url:"created_by_ref,omitempty"`
 	// The created property represents the time at which the object was originally created.
-	Created time.Time `json:"created"`
+	Created time.Time `json:"created" url:"created"`
 	// The modified property is only used by STIX Objects that support versioning and represents the time that this particular version of the object was last modified.
-	Modified time.Time `json:"modified"`
+	Modified time.Time `json:"modified" url:"modified"`
 	// The revoked property indicates whether this object has been revoked. If the revoked property is present and set to true, then the object has been revoked.
-	Revoked *bool `json:"revoked,omitempty"`
+	Revoked *bool `json:"revoked,omitempty" url:"revoked,omitempty"`
 	// The labels property is an array of strings that are used to categorize this object.
-	Labels []string `json:"labels,omitempty"`
+	Labels []string `json:"labels,omitempty" url:"labels,omitempty"`
 	// The confidence property is an integer from 0 to 100 that represents the confidence that this object is accurate and valid.
-	Confidence *int `json:"confidence,omitempty"`
+	Confidence *int `json:"confidence,omitempty" url:"confidence,omitempty"`
 	// The lang property specifies the language used in the properties of the object.
-	Lang *string `json:"lang,omitempty"`
+	Lang *string `json:"lang,omitempty" url:"lang,omitempty"`
 	// The external_references property is an array of external references that are relevant to this object.
-	ExternalReferences []*ExternalReference `json:"external_references,omitempty"`
+	ExternalReferences []*ExternalReference `json:"external_references,omitempty" url:"external_references,omitempty"`
 	// The object_marking_refs property is an array of ids of marking_definition objects that apply to this object.
-	ObjectMarkingRefs []*MarkingDefinition `json:"object_marking_refs,omitempty"`
+	ObjectMarkingRefs []*MarkingDefinition `json:"object_marking_refs,omitempty" url:"object_marking_refs,omitempty"`
 	// The granular_markings property is an array of granular markings that are applied to this object.
-	GranularMarkings []*GranularMarking `json:"granular_markings,omitempty"`
+	GranularMarkings []*GranularMarking `json:"granular_markings,omitempty" url:"granular_markings,omitempty"`
 	// The extensions property is an object that contains custom properties or objects that extend the object.
-	Extensions map[string]interface{} `json:"extensions,omitempty"`
+	Extensions map[string]interface{} `json:"extensions,omitempty" url:"extensions,omitempty"`
 	// A name used to identify the Indicator.
-	Name *string `json:"name,omitempty"`
+	Name *string `json:"name,omitempty" url:"name,omitempty"`
 	// A description that provides more details and context about the Indicator, potentially including its purpose and its key characteristics.
-	Description *string `json:"description,omitempty"`
+	Description *string `json:"description,omitempty" url:"description,omitempty"`
 	// A set of categorizations for this indicator.
-	IndicatorTypes []IndicatorTypeOv `json:"indicator_types,omitempty"`
+	IndicatorTypes []IndicatorTypeOv `json:"indicator_types,omitempty" url:"indicator_types,omitempty"`
 	// The detection pattern for this Indicator MAY be expressed as a STIX Pattern as specified in section 9 or another appropriate language such as SNORT, YARA, etc.
-	Pattern *string `json:"pattern,omitempty"`
+	Pattern *string `json:"pattern,omitempty" url:"pattern,omitempty"`
 	// The type of pattern expression used in the pattern property.
-	PatternType *PatternTypeOv `json:"pattern_type,omitempty"`
+	PatternType *PatternTypeOv `json:"pattern_type,omitempty" url:"pattern_type,omitempty"`
 	// The version of the pattern expression used in the pattern property.
-	PatternVersion *string `json:"pattern_version,omitempty"`
+	PatternVersion *string `json:"pattern_version,omitempty" url:"pattern_version,omitempty"`
 	// The time from which this Indicator is considered a valid indicator of the behaviors it is related or represents.
-	ValidFrom time.Time `json:"valid_from"`
+	ValidFrom time.Time `json:"valid_from" url:"valid_from"`
 	// The time at which this Indicator is no longer considered valid.
-	ValidUntil *time.Time `json:"valid_until,omitempty"`
+	ValidUntil *time.Time `json:"valid_until,omitempty" url:"valid_until,omitempty"`
 	// The kill chain phase to which this Indicator corresponds.
-	KillChainPhases []*KillChainPhase `json:"kill_chain_phases,omitempty"`
+	KillChainPhases []*KillChainPhase `json:"kill_chain_phases,omitempty" url:"kill_chain_phases,omitempty"`
 	// The data as received from the source.
-	RawData     *string `json:"raw_data,omitempty"`
+	RawData     *string `json:"raw_data,omitempty" url:"raw_data,omitempty"`
 	specVersion string
 	type_       string
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (i *Indicator) GetExtraProperties() map[string]interface{} {
+	return i.extraProperties
 }
 
 func (i *Indicator) SpecVersion() string {
@@ -382,14 +753,42 @@ func (i *Indicator) Type() string {
 }
 
 func (i *Indicator) UnmarshalJSON(data []byte) error {
-	type unmarshaler Indicator
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
+	type embed Indicator
+	var unmarshaler = struct {
+		embed
+		Created     *core.DateTime `json:"created"`
+		Modified    *core.DateTime `json:"modified"`
+		ValidFrom   *core.DateTime `json:"valid_from"`
+		ValidUntil  *core.DateTime `json:"valid_until,omitempty"`
+		SpecVersion string         `json:"spec_version"`
+		Type        string         `json:"type"`
+	}{
+		embed: embed(*i),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
 		return err
 	}
-	*i = Indicator(value)
-	i.specVersion = "2.1"
-	i.type_ = "indicator"
+	*i = Indicator(unmarshaler.embed)
+	i.Created = unmarshaler.Created.Time()
+	i.Modified = unmarshaler.Modified.Time()
+	i.ValidFrom = unmarshaler.ValidFrom.Time()
+	i.ValidUntil = unmarshaler.ValidUntil.TimePtr()
+	if unmarshaler.SpecVersion != "2.1" {
+		return fmt.Errorf("unexpected value for literal on type %T; expected %v got %v", i, "2.1", unmarshaler.SpecVersion)
+	}
+	i.specVersion = unmarshaler.SpecVersion
+	if unmarshaler.Type != "indicator" {
+		return fmt.Errorf("unexpected value for literal on type %T; expected %v got %v", i, "indicator", unmarshaler.Type)
+	}
+	i.type_ = unmarshaler.Type
+
+	extraProperties, err := core.ExtractExtraProperties(data, *i, "spec_version", "type")
+	if err != nil {
+		return err
+	}
+	i.extraProperties = extraProperties
+
+	i._rawJSON = json.RawMessage(data)
 	return nil
 }
 
@@ -397,59 +796,86 @@ func (i *Indicator) MarshalJSON() ([]byte, error) {
 	type embed Indicator
 	var marshaler = struct {
 		embed
-		SpecVersion string `json:"spec_version"`
-		Type        string `json:"type"`
+		Created     *core.DateTime `json:"created"`
+		Modified    *core.DateTime `json:"modified"`
+		ValidFrom   *core.DateTime `json:"valid_from"`
+		ValidUntil  *core.DateTime `json:"valid_until,omitempty"`
+		SpecVersion string         `json:"spec_version"`
+		Type        string         `json:"type"`
 	}{
 		embed:       embed(*i),
+		Created:     core.NewDateTime(i.Created),
+		Modified:    core.NewDateTime(i.Modified),
+		ValidFrom:   core.NewDateTime(i.ValidFrom),
+		ValidUntil:  core.NewOptionalDateTime(i.ValidUntil),
 		SpecVersion: "2.1",
 		Type:        "indicator",
 	}
 	return json.Marshal(marshaler)
 }
 
+func (i *Indicator) String() string {
+	if len(i._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(i._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(i); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", i)
+}
+
 type Malware struct {
 	// The id property uniquely identifies this object.
-	Id Id `json:"id"`
+	Id Id `json:"id" url:"id"`
 	// The created_by_ref property specifies the id property of the identity object that describes the entity that created this object.
-	CreatedByRef *Identity `json:"created_by_ref,omitempty"`
+	CreatedByRef *Identity `json:"created_by_ref,omitempty" url:"created_by_ref,omitempty"`
 	// The created property represents the time at which the object was originally created.
-	Created time.Time `json:"created"`
+	Created time.Time `json:"created" url:"created"`
 	// The modified property is only used by STIX Objects that support versioning and represents the time that this particular version of the object was last modified.
-	Modified time.Time `json:"modified"`
+	Modified time.Time `json:"modified" url:"modified"`
 	// The revoked property indicates whether this object has been revoked. If the revoked property is present and set to true, then the object has been revoked.
-	Revoked *bool `json:"revoked,omitempty"`
+	Revoked *bool `json:"revoked,omitempty" url:"revoked,omitempty"`
 	// The labels property is an array of strings that are used to categorize this object.
-	Labels []string `json:"labels,omitempty"`
+	Labels []string `json:"labels,omitempty" url:"labels,omitempty"`
 	// The confidence property is an integer from 0 to 100 that represents the confidence that this object is accurate and valid.
-	Confidence *int `json:"confidence,omitempty"`
+	Confidence *int `json:"confidence,omitempty" url:"confidence,omitempty"`
 	// The lang property specifies the language used in the properties of the object.
-	Lang *string `json:"lang,omitempty"`
+	Lang *string `json:"lang,omitempty" url:"lang,omitempty"`
 	// The external_references property is an array of external references that are relevant to this object.
-	ExternalReferences []*ExternalReference `json:"external_references,omitempty"`
+	ExternalReferences []*ExternalReference `json:"external_references,omitempty" url:"external_references,omitempty"`
 	// The object_marking_refs property is an array of ids of marking_definition objects that apply to this object.
-	ObjectMarkingRefs []*MarkingDefinition `json:"object_marking_refs,omitempty"`
+	ObjectMarkingRefs []*MarkingDefinition `json:"object_marking_refs,omitempty" url:"object_marking_refs,omitempty"`
 	// The granular_markings property is an array of granular markings that are applied to this object.
-	GranularMarkings []*GranularMarking `json:"granular_markings,omitempty"`
+	GranularMarkings []*GranularMarking `json:"granular_markings,omitempty" url:"granular_markings,omitempty"`
 	// The extensions property is an object that contains custom properties or objects that extend the object.
-	Extensions map[string]interface{} `json:"extensions,omitempty"`
+	Extensions map[string]interface{} `json:"extensions,omitempty" url:"extensions,omitempty"`
 	// A description that provides more details and context about the Malware, potentially including its purpose and its key characteristics.
-	Description *string `json:"description,omitempty"`
+	Description *string `json:"description,omitempty" url:"description,omitempty"`
 	// A set of categorizations for this malware.
-	MalwareTypes []MalwareTypeOv `json:"malware_types,omitempty"`
+	MalwareTypes []MalwareTypeOv `json:"malware_types,omitempty" url:"malware_types,omitempty"`
 	// Whether the object represents a malware family (if true) or a malware instance (if false).
-	IsFamily bool `json:"is_family"`
+	IsFamily bool `json:"is_family" url:"is_family"`
 	// Alternative names used to identify this malware or malware family.
-	Aliases         []string          `json:"aliases,omitempty"`
-	KillChainPhases []*KillChainPhase `json:"kill_chain_phases,omitempty"`
-	FirstSeen       *time.Time        `json:"first_seen,omitempty"`
-	LastSeen        *time.Time        `json:"last_seen,omitempty"`
+	Aliases         []string          `json:"aliases,omitempty" url:"aliases,omitempty"`
+	KillChainPhases []*KillChainPhase `json:"kill_chain_phases,omitempty" url:"kill_chain_phases,omitempty"`
+	FirstSeen       *time.Time        `json:"first_seen,omitempty" url:"first_seen,omitempty"`
+	LastSeen        *time.Time        `json:"last_seen,omitempty" url:"last_seen,omitempty"`
 	// The operating systems that the malware family or malware instance is executable on. This applies to virtualized operating systems as well as those running on bare metal.
-	OperatingSystemRefs       []*Software                `json:"operating_system_refs,omitempty"`
-	ArchitectureExecutionEnvs []ProcessorArchitectureOv  `json:"architecture_execution_envs,omitempty"`
-	ImplementationLanguages   []ImplementationLanguageOv `json:"implementation_languages,omitempty"`
-	Capabilities              []MalwareCapabilitiesOv    `json:"capabilities,omitempty"`
+	OperatingSystemRefs       []*Software                `json:"operating_system_refs,omitempty" url:"operating_system_refs,omitempty"`
+	ArchitectureExecutionEnvs []ProcessorArchitectureOv  `json:"architecture_execution_envs,omitempty" url:"architecture_execution_envs,omitempty"`
+	ImplementationLanguages   []ImplementationLanguageOv `json:"implementation_languages,omitempty" url:"implementation_languages,omitempty"`
+	Capabilities              []MalwareCapabilitiesOv    `json:"capabilities,omitempty" url:"capabilities,omitempty"`
 	specVersion               string
 	type_                     string
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (m *Malware) GetExtraProperties() map[string]interface{} {
+	return m.extraProperties
 }
 
 func (m *Malware) SpecVersion() string {
@@ -461,14 +887,42 @@ func (m *Malware) Type() string {
 }
 
 func (m *Malware) UnmarshalJSON(data []byte) error {
-	type unmarshaler Malware
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
+	type embed Malware
+	var unmarshaler = struct {
+		embed
+		Created     *core.DateTime `json:"created"`
+		Modified    *core.DateTime `json:"modified"`
+		FirstSeen   *core.DateTime `json:"first_seen,omitempty"`
+		LastSeen    *core.DateTime `json:"last_seen,omitempty"`
+		SpecVersion string         `json:"spec_version"`
+		Type        string         `json:"type"`
+	}{
+		embed: embed(*m),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
 		return err
 	}
-	*m = Malware(value)
-	m.specVersion = "2.1"
-	m.type_ = "malware"
+	*m = Malware(unmarshaler.embed)
+	m.Created = unmarshaler.Created.Time()
+	m.Modified = unmarshaler.Modified.Time()
+	m.FirstSeen = unmarshaler.FirstSeen.TimePtr()
+	m.LastSeen = unmarshaler.LastSeen.TimePtr()
+	if unmarshaler.SpecVersion != "2.1" {
+		return fmt.Errorf("unexpected value for literal on type %T; expected %v got %v", m, "2.1", unmarshaler.SpecVersion)
+	}
+	m.specVersion = unmarshaler.SpecVersion
+	if unmarshaler.Type != "malware" {
+		return fmt.Errorf("unexpected value for literal on type %T; expected %v got %v", m, "malware", unmarshaler.Type)
+	}
+	m.type_ = unmarshaler.Type
+
+	extraProperties, err := core.ExtractExtraProperties(data, *m, "spec_version", "type")
+	if err != nil {
+		return err
+	}
+	m.extraProperties = extraProperties
+
+	m._rawJSON = json.RawMessage(data)
 	return nil
 }
 
@@ -476,14 +930,34 @@ func (m *Malware) MarshalJSON() ([]byte, error) {
 	type embed Malware
 	var marshaler = struct {
 		embed
-		SpecVersion string `json:"spec_version"`
-		Type        string `json:"type"`
+		Created     *core.DateTime `json:"created"`
+		Modified    *core.DateTime `json:"modified"`
+		FirstSeen   *core.DateTime `json:"first_seen,omitempty"`
+		LastSeen    *core.DateTime `json:"last_seen,omitempty"`
+		SpecVersion string         `json:"spec_version"`
+		Type        string         `json:"type"`
 	}{
 		embed:       embed(*m),
+		Created:     core.NewDateTime(m.Created),
+		Modified:    core.NewDateTime(m.Modified),
+		FirstSeen:   core.NewOptionalDateTime(m.FirstSeen),
+		LastSeen:    core.NewOptionalDateTime(m.LastSeen),
 		SpecVersion: "2.1",
 		Type:        "malware",
 	}
 	return json.Marshal(marshaler)
+}
+
+func (m *Malware) String() string {
+	if len(m._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(m._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(m); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", m)
 }
 
 type IdentityClassOv string
@@ -922,10 +1396,84 @@ func (p ProcessorArchitectureOv) Ptr() *ProcessorArchitectureOv {
 
 type Statement struct {
 	// A Statement (e.g., copyright, terms of use) applied to the content marked by this marking definition.
-	Statement string `json:"statement"`
+	Statement string `json:"statement" url:"statement"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (s *Statement) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
+}
+
+func (s *Statement) UnmarshalJSON(data []byte) error {
+	type unmarshaler Statement
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*s = Statement(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+
+	s._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (s *Statement) String() string {
+	if len(s._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(s); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", s)
 }
 
 type Tlp struct {
 	// The TLP level [TLP] of the content marked by this marking definition, as defined in this section.
-	Tlp string `json:"tlp"`
+	Tlp string `json:"tlp" url:"tlp"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (t *Tlp) GetExtraProperties() map[string]interface{} {
+	return t.extraProperties
+}
+
+func (t *Tlp) UnmarshalJSON(data []byte) error {
+	type unmarshaler Tlp
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*t = Tlp(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *t)
+	if err != nil {
+		return err
+	}
+	t.extraProperties = extraProperties
+
+	t._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (t *Tlp) String() string {
+	if len(t._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(t._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(t); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", t)
 }
