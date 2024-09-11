@@ -58,7 +58,7 @@ func (c *CreateAttachmentRequest) UnmarshalJSON(data []byte) error {
 	}
 	c.extraProperties = extraProperties
 
-	c._rawJSON = json.RawMessage(data)
+	c._rawJSON = nil
 	return nil
 }
 
@@ -99,7 +99,7 @@ func (c *CreateAttachmentResponse) UnmarshalJSON(data []byte) error {
 	}
 	c.extraProperties = extraProperties
 
-	c._rawJSON = json.RawMessage(data)
+	c._rawJSON = nil
 	return nil
 }
 
@@ -143,7 +143,7 @@ func (c *CreateCommentRequest) UnmarshalJSON(data []byte) error {
 	}
 	c.extraProperties = extraProperties
 
-	c._rawJSON = json.RawMessage(data)
+	c._rawJSON = nil
 	return nil
 }
 
@@ -184,7 +184,7 @@ func (c *CreateCommentResponse) UnmarshalJSON(data []byte) error {
 	}
 	c.extraProperties = extraProperties
 
-	c._rawJSON = json.RawMessage(data)
+	c._rawJSON = nil
 	return nil
 }
 
@@ -260,7 +260,7 @@ func (c *CreateTicketRequest) UnmarshalJSON(data []byte) error {
 	}
 	c.extraProperties = extraProperties
 
-	c._rawJSON = json.RawMessage(data)
+	c._rawJSON = nil
 	return nil
 }
 
@@ -315,7 +315,7 @@ func (c *CreateTicketResponse) UnmarshalJSON(data []byte) error {
 	}
 	c.extraProperties = extraProperties
 
-	c._rawJSON = json.RawMessage(data)
+	c._rawJSON = nil
 	return nil
 }
 
@@ -356,7 +356,7 @@ func (d *DownloadAttachmentResponse) UnmarshalJSON(data []byte) error {
 	}
 	d.extraProperties = extraProperties
 
-	d._rawJSON = json.RawMessage(data)
+	d._rawJSON = nil
 	return nil
 }
 
@@ -397,7 +397,7 @@ func (g *GetTicketResponse) UnmarshalJSON(data []byte) error {
 	}
 	g.extraProperties = extraProperties
 
-	g._rawJSON = json.RawMessage(data)
+	g._rawJSON = nil
 	return nil
 }
 
@@ -438,7 +438,7 @@ func (l *ListAttachmentsMetadataResponse) UnmarshalJSON(data []byte) error {
 	}
 	l.extraProperties = extraProperties
 
-	l._rawJSON = json.RawMessage(data)
+	l._rawJSON = nil
 	return nil
 }
 
@@ -479,7 +479,7 @@ func (l *ListCommentsResponse) UnmarshalJSON(data []byte) error {
 	}
 	l.extraProperties = extraProperties
 
-	l._rawJSON = json.RawMessage(data)
+	l._rawJSON = nil
 	return nil
 }
 
@@ -520,7 +520,7 @@ func (l *ListProjectsResponse) UnmarshalJSON(data []byte) error {
 	}
 	l.extraProperties = extraProperties
 
-	l._rawJSON = json.RawMessage(data)
+	l._rawJSON = nil
 	return nil
 }
 
@@ -561,7 +561,7 @@ func (l *ListRemoteFieldsResponse) UnmarshalJSON(data []byte) error {
 	}
 	l.extraProperties = extraProperties
 
-	l._rawJSON = json.RawMessage(data)
+	l._rawJSON = nil
 	return nil
 }
 
@@ -602,7 +602,7 @@ func (p *PatchTicketResponse) UnmarshalJSON(data []byte) error {
 	}
 	p.extraProperties = extraProperties
 
-	p._rawJSON = json.RawMessage(data)
+	p._rawJSON = nil
 	return nil
 }
 
@@ -646,7 +646,7 @@ func (q *QueryTicketsResponse) UnmarshalJSON(data []byte) error {
 	}
 	q.extraProperties = extraProperties
 
-	q._rawJSON = json.RawMessage(data)
+	q._rawJSON = nil
 	return nil
 }
 

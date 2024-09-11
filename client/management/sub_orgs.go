@@ -44,7 +44,7 @@ func (c *CreateOrganizationRequest) UnmarshalJSON(data []byte) error {
 	}
 	c.extraProperties = extraProperties
 
-	c._rawJSON = json.RawMessage(data)
+	c._rawJSON = nil
 	return nil
 }
 
@@ -85,7 +85,7 @@ func (c *CreateOrganizationResponse) UnmarshalJSON(data []byte) error {
 	}
 	c.extraProperties = extraProperties
 
-	c._rawJSON = json.RawMessage(data)
+	c._rawJSON = nil
 	return nil
 }
 
@@ -126,7 +126,7 @@ func (l *ListOrganizationResponse) UnmarshalJSON(data []byte) error {
 	}
 	l.extraProperties = extraProperties
 
-	l._rawJSON = json.RawMessage(data)
+	l._rawJSON = nil
 	return nil
 }
 

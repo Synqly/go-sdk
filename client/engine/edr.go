@@ -132,7 +132,7 @@ func (c *CreateIocsRequest) UnmarshalJSON(data []byte) error {
 	}
 	c.extraProperties = extraProperties
 
-	c._rawJSON = json.RawMessage(data)
+	c._rawJSON = nil
 	return nil
 }
 
@@ -174,7 +174,7 @@ func (c *CreateIocsResponse) UnmarshalJSON(data []byte) error {
 	}
 	c.extraProperties = extraProperties
 
-	c._rawJSON = json.RawMessage(data)
+	c._rawJSON = nil
 	return nil
 }
 
@@ -216,7 +216,7 @@ func (d *DeleteIocsResponse) UnmarshalJSON(data []byte) error {
 	}
 	d.extraProperties = extraProperties
 
-	d._rawJSON = json.RawMessage(data)
+	d._rawJSON = nil
 	return nil
 }
 
@@ -260,7 +260,7 @@ func (n *NetworkQuarantineRequest) UnmarshalJSON(data []byte) error {
 	}
 	n.extraProperties = extraProperties
 
-	n._rawJSON = json.RawMessage(data)
+	n._rawJSON = nil
 	return nil
 }
 
@@ -302,7 +302,7 @@ func (n *NetworkQuarantineResponse) UnmarshalJSON(data []byte) error {
 	}
 	n.extraProperties = extraProperties
 
-	n._rawJSON = json.RawMessage(data)
+	n._rawJSON = nil
 	return nil
 }
 
@@ -346,7 +346,7 @@ func (q *QueryAlertsResponse) UnmarshalJSON(data []byte) error {
 	}
 	q.extraProperties = extraProperties
 
-	q._rawJSON = json.RawMessage(data)
+	q._rawJSON = nil
 	return nil
 }
 
@@ -390,7 +390,7 @@ func (q *QueryApplicationsResponse) UnmarshalJSON(data []byte) error {
 	}
 	q.extraProperties = extraProperties
 
-	q._rawJSON = json.RawMessage(data)
+	q._rawJSON = nil
 	return nil
 }
 
@@ -434,7 +434,7 @@ func (q *QueryEndpointsResponse) UnmarshalJSON(data []byte) error {
 	}
 	q.extraProperties = extraProperties
 
-	q._rawJSON = json.RawMessage(data)
+	q._rawJSON = nil
 	return nil
 }
 
@@ -478,7 +478,7 @@ func (q *QueryIocsResponse) UnmarshalJSON(data []byte) error {
 	}
 	q.extraProperties = extraProperties
 
-	q._rawJSON = json.RawMessage(data)
+	q._rawJSON = nil
 	return nil
 }
 
@@ -522,7 +522,7 @@ func (q *QueryPostureScoreResponse) UnmarshalJSON(data []byte) error {
 	}
 	q.extraProperties = extraProperties
 
-	q._rawJSON = json.RawMessage(data)
+	q._rawJSON = nil
 	return nil
 }
 
@@ -566,7 +566,7 @@ func (q *QueryThreatsResponse) UnmarshalJSON(data []byte) error {
 	}
 	q.extraProperties = extraProperties
 
-	q._rawJSON = json.RawMessage(data)
+	q._rawJSON = nil
 	return nil
 }
 

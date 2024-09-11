@@ -81,7 +81,7 @@ func (g *GetEvidenceResponse) UnmarshalJSON(data []byte) error {
 	}
 	g.extraProperties = extraProperties
 
-	g._rawJSON = json.RawMessage(data)
+	g._rawJSON = nil
 	return nil
 }
 
@@ -123,7 +123,7 @@ func (g *GetInvestigationResponse) UnmarshalJSON(data []byte) error {
 	}
 	g.extraProperties = extraProperties
 
-	g._rawJSON = json.RawMessage(data)
+	g._rawJSON = nil
 	return nil
 }
 
@@ -176,7 +176,7 @@ func (q *QueryInvestigationResponse) UnmarshalJSON(data []byte) error {
 	}
 	q.extraProperties = extraProperties
 
-	q._rawJSON = json.RawMessage(data)
+	q._rawJSON = nil
 	return nil
 }
 
@@ -224,7 +224,7 @@ func (q *QuerySiemEventsResponse) UnmarshalJSON(data []byte) error {
 	}
 	q.extraProperties = extraProperties
 
-	q._rawJSON = json.RawMessage(data)
+	q._rawJSON = nil
 	return nil
 }
 

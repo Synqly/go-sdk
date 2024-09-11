@@ -58,7 +58,7 @@ func (c *CreateBridgeRequest) UnmarshalJSON(data []byte) error {
 	}
 	c.extraProperties = extraProperties
 
-	c._rawJSON = json.RawMessage(data)
+	c._rawJSON = nil
 	return nil
 }
 
@@ -99,7 +99,7 @@ func (c *CreateBridgeResponse) UnmarshalJSON(data []byte) error {
 	}
 	c.extraProperties = extraProperties
 
-	c._rawJSON = json.RawMessage(data)
+	c._rawJSON = nil
 	return nil
 }
 
@@ -140,7 +140,7 @@ func (g *GetBridgeResponse) UnmarshalJSON(data []byte) error {
 	}
 	g.extraProperties = extraProperties
 
-	g._rawJSON = json.RawMessage(data)
+	g._rawJSON = nil
 	return nil
 }
 
@@ -181,7 +181,7 @@ func (l *ListBridgesResponse) UnmarshalJSON(data []byte) error {
 	}
 	l.extraProperties = extraProperties
 
-	l._rawJSON = json.RawMessage(data)
+	l._rawJSON = nil
 	return nil
 }
 
@@ -222,7 +222,7 @@ func (p *PatchBridgeResponse) UnmarshalJSON(data []byte) error {
 	}
 	p.extraProperties = extraProperties
 
-	p._rawJSON = json.RawMessage(data)
+	p._rawJSON = nil
 	return nil
 }
 
@@ -265,7 +265,7 @@ func (u *UpdateBridgeResponse) UnmarshalJSON(data []byte) error {
 	}
 	u.extraProperties = extraProperties
 
-	u._rawJSON = json.RawMessage(data)
+	u._rawJSON = nil
 	return nil
 }
 

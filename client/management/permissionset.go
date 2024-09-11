@@ -33,7 +33,7 @@ func (g *GetPermissionSetResponse) UnmarshalJSON(data []byte) error {
 	}
 	g.extraProperties = extraProperties
 
-	g._rawJSON = json.RawMessage(data)
+	g._rawJSON = nil
 	return nil
 }
 
@@ -74,7 +74,7 @@ func (l *ListPermissionSetsResponse) UnmarshalJSON(data []byte) error {
 	}
 	l.extraProperties = extraProperties
 
-	l._rawJSON = json.RawMessage(data)
+	l._rawJSON = nil
 	return nil
 }
 

@@ -36,7 +36,7 @@ func (c *ChangePasswordRequest) UnmarshalJSON(data []byte) error {
 	}
 	c.extraProperties = extraProperties
 
-	c._rawJSON = json.RawMessage(data)
+	c._rawJSON = nil
 	return nil
 }
 
@@ -77,7 +77,7 @@ func (c *ChangePasswordResponse) UnmarshalJSON(data []byte) error {
 	}
 	c.extraProperties = extraProperties
 
-	c._rawJSON = json.RawMessage(data)
+	c._rawJSON = nil
 	return nil
 }
 
@@ -121,7 +121,7 @@ func (l *LogonRequest) UnmarshalJSON(data []byte) error {
 	}
 	l.extraProperties = extraProperties
 
-	l._rawJSON = json.RawMessage(data)
+	l._rawJSON = nil
 	return nil
 }
 
@@ -162,7 +162,7 @@ func (l *LogonResponse) UnmarshalJSON(data []byte) error {
 	}
 	l.extraProperties = extraProperties
 
-	l._rawJSON = json.RawMessage(data)
+	l._rawJSON = nil
 	return nil
 }
 

@@ -80,7 +80,7 @@ func (c *CreateIntegrationRequest) UnmarshalJSON(data []byte) error {
 	}
 	c.extraProperties = extraProperties
 
-	c._rawJSON = json.RawMessage(data)
+	c._rawJSON = nil
 	return nil
 }
 
@@ -121,7 +121,7 @@ func (c *CreateIntegrationResponse) UnmarshalJSON(data []byte) error {
 	}
 	c.extraProperties = extraProperties
 
-	c._rawJSON = json.RawMessage(data)
+	c._rawJSON = nil
 	return nil
 }
 
@@ -162,7 +162,7 @@ func (g *GetIntegrationResponse) UnmarshalJSON(data []byte) error {
 	}
 	g.extraProperties = extraProperties
 
-	g._rawJSON = json.RawMessage(data)
+	g._rawJSON = nil
 	return nil
 }
 
@@ -204,7 +204,7 @@ func (l *ListAccountIntegrationsResponse) UnmarshalJSON(data []byte) error {
 	}
 	l.extraProperties = extraProperties
 
-	l._rawJSON = json.RawMessage(data)
+	l._rawJSON = nil
 	return nil
 }
 
@@ -277,7 +277,7 @@ func (l *ListIntegrationsResponse) UnmarshalJSON(data []byte) error {
 	}
 	l.extraProperties = extraProperties
 
-	l._rawJSON = json.RawMessage(data)
+	l._rawJSON = nil
 	return nil
 }
 
@@ -318,7 +318,7 @@ func (p *PatchIntegrationResponse) UnmarshalJSON(data []byte) error {
 	}
 	p.extraProperties = extraProperties
 
-	p._rawJSON = json.RawMessage(data)
+	p._rawJSON = nil
 	return nil
 }
 
@@ -361,7 +361,7 @@ func (u *UpdateIntegrationResponse) UnmarshalJSON(data []byte) error {
 	}
 	u.extraProperties = extraProperties
 
-	u._rawJSON = json.RawMessage(data)
+	u._rawJSON = nil
 	return nil
 }
 
@@ -402,7 +402,7 @@ func (v *VerifyIntegrationRequest) UnmarshalJSON(data []byte) error {
 	}
 	v.extraProperties = extraProperties
 
-	v._rawJSON = json.RawMessage(data)
+	v._rawJSON = nil
 	return nil
 }
 

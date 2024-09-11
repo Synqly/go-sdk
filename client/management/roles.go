@@ -60,7 +60,7 @@ func (c *CreateRoleRequest) UnmarshalJSON(data []byte) error {
 	}
 	c.extraProperties = extraProperties
 
-	c._rawJSON = json.RawMessage(data)
+	c._rawJSON = nil
 	return nil
 }
 
@@ -101,7 +101,7 @@ func (c *CreateRoleResponse) UnmarshalJSON(data []byte) error {
 	}
 	c.extraProperties = extraProperties
 
-	c._rawJSON = json.RawMessage(data)
+	c._rawJSON = nil
 	return nil
 }
 
@@ -142,7 +142,7 @@ func (g *GetRoleResponse) UnmarshalJSON(data []byte) error {
 	}
 	g.extraProperties = extraProperties
 
-	g._rawJSON = json.RawMessage(data)
+	g._rawJSON = nil
 	return nil
 }
 
@@ -183,7 +183,7 @@ func (l *ListRolesResponse) UnmarshalJSON(data []byte) error {
 	}
 	l.extraProperties = extraProperties
 
-	l._rawJSON = json.RawMessage(data)
+	l._rawJSON = nil
 	return nil
 }
 
@@ -224,7 +224,7 @@ func (p *PatchRoleResponse) UnmarshalJSON(data []byte) error {
 	}
 	p.extraProperties = extraProperties
 
-	p._rawJSON = json.RawMessage(data)
+	p._rawJSON = nil
 	return nil
 }
 
@@ -267,7 +267,7 @@ func (u *UpdateRoleResponse) UnmarshalJSON(data []byte) error {
 	}
 	u.extraProperties = extraProperties
 
-	u._rawJSON = json.RawMessage(data)
+	u._rawJSON = nil
 	return nil
 }
 

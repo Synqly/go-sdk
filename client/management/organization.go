@@ -33,7 +33,7 @@ func (p *PatchOrganizationResponse) UnmarshalJSON(data []byte) error {
 	}
 	p.extraProperties = extraProperties
 
-	p._rawJSON = json.RawMessage(data)
+	p._rawJSON = nil
 	return nil
 }
 
@@ -76,7 +76,7 @@ func (u *UpdateOrganizationResponse) UnmarshalJSON(data []byte) error {
 	}
 	u.extraProperties = extraProperties
 
-	u._rawJSON = json.RawMessage(data)
+	u._rawJSON = nil
 	return nil
 }
 

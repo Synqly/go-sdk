@@ -54,7 +54,7 @@ func (c *CreateIntegrationTokenRequest) UnmarshalJSON(data []byte) error {
 	}
 	c.extraProperties = extraProperties
 
-	c._rawJSON = json.RawMessage(data)
+	c._rawJSON = nil
 	return nil
 }
 
@@ -95,7 +95,7 @@ func (c *CreateIntegrationTokenResponse) UnmarshalJSON(data []byte) error {
 	}
 	c.extraProperties = extraProperties
 
-	c._rawJSON = json.RawMessage(data)
+	c._rawJSON = nil
 	return nil
 }
 
@@ -143,7 +143,7 @@ func (c *CreateTokenRequest) UnmarshalJSON(data []byte) error {
 	}
 	c.extraProperties = extraProperties
 
-	c._rawJSON = json.RawMessage(data)
+	c._rawJSON = nil
 	return nil
 }
 
@@ -184,7 +184,7 @@ func (c *CreateTokenResponse) UnmarshalJSON(data []byte) error {
 	}
 	c.extraProperties = extraProperties
 
-	c._rawJSON = json.RawMessage(data)
+	c._rawJSON = nil
 	return nil
 }
 
@@ -225,7 +225,7 @@ func (g *GetTokenResponse) UnmarshalJSON(data []byte) error {
 	}
 	g.extraProperties = extraProperties
 
-	g._rawJSON = json.RawMessage(data)
+	g._rawJSON = nil
 	return nil
 }
 
@@ -266,7 +266,7 @@ func (l *ListTokensResponse) UnmarshalJSON(data []byte) error {
 	}
 	l.extraProperties = extraProperties
 
-	l._rawJSON = json.RawMessage(data)
+	l._rawJSON = nil
 	return nil
 }
 
@@ -307,7 +307,7 @@ func (r *RefreshTokenResponse) UnmarshalJSON(data []byte) error {
 	}
 	r.extraProperties = extraProperties
 
-	r._rawJSON = json.RawMessage(data)
+	r._rawJSON = nil
 	return nil
 }
 
@@ -348,7 +348,7 @@ func (r *ResetTokenResponse) UnmarshalJSON(data []byte) error {
 	}
 	r.extraProperties = extraProperties
 
-	r._rawJSON = json.RawMessage(data)
+	r._rawJSON = nil
 	return nil
 }
 

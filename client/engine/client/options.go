@@ -33,3 +33,8 @@ func WithMaxAttempts(attempts uint) *core.MaxAttemptsOption {
 func WithToken(token string) *core.TokenOption {
 	return option.WithToken(token)
 }
+
+// WithAuthToken is deprecated; use WithToken instead. Sets the Authorization request header.\n
+func WithAuthToken(token string) *core.TokenOption {
+	return option.WithToken(token)
+}

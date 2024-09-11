@@ -56,7 +56,7 @@ func (a *Account) UnmarshalJSON(data []byte) error {
 	}
 	a.extraProperties = extraProperties
 
-	a._rawJSON = json.RawMessage(data)
+	a._rawJSON = nil
 	return nil
 }
 
@@ -114,7 +114,7 @@ func (c *CreateAccountResponseResult) UnmarshalJSON(data []byte) error {
 	}
 	c.extraProperties = extraProperties
 
-	c._rawJSON = json.RawMessage(data)
+	c._rawJSON = nil
 	return nil
 }
 
@@ -174,7 +174,7 @@ func (a *Audit) UnmarshalJSON(data []byte) error {
 	}
 	a.extraProperties = extraProperties
 
-	a._rawJSON = json.RawMessage(data)
+	a._rawJSON = nil
 	return nil
 }
 
@@ -295,7 +295,7 @@ func (c *ChangePasswordResponseResult) UnmarshalJSON(data []byte) error {
 	}
 	c.extraProperties = extraProperties
 
-	c._rawJSON = json.RawMessage(data)
+	c._rawJSON = nil
 	return nil
 }
 
@@ -343,7 +343,7 @@ func (l *LogonResponseResult) UnmarshalJSON(data []byte) error {
 	}
 	l.extraProperties = extraProperties
 
-	l._rawJSON = json.RawMessage(data)
+	l._rawJSON = nil
 	return nil
 }
 
@@ -405,7 +405,7 @@ func (b *BridgeGroup) UnmarshalJSON(data []byte) error {
 	}
 	b.extraProperties = extraProperties
 
-	b._rawJSON = json.RawMessage(data)
+	b._rawJSON = nil
 	return nil
 }
 
@@ -462,7 +462,7 @@ func (c *CreateBridgeResponseResult) UnmarshalJSON(data []byte) error {
 	}
 	c.extraProperties = extraProperties
 
-	c._rawJSON = json.RawMessage(data)
+	c._rawJSON = nil
 	return nil
 }
 
@@ -512,7 +512,7 @@ func (c *Category) UnmarshalJSON(data []byte) error {
 	}
 	c.extraProperties = extraProperties
 
-	c._rawJSON = json.RawMessage(data)
+	c._rawJSON = nil
 	return nil
 }
 
@@ -566,7 +566,7 @@ func (p *Provider) UnmarshalJSON(data []byte) error {
 	}
 	p.extraProperties = extraProperties
 
-	p._rawJSON = json.RawMessage(data)
+	p._rawJSON = nil
 	return nil
 }
 
@@ -671,7 +671,7 @@ func (b *Base) UnmarshalJSON(data []byte) error {
 	}
 	b.extraProperties = extraProperties
 
-	b._rawJSON = json.RawMessage(data)
+	b._rawJSON = nil
 	return nil
 }
 
@@ -729,7 +729,7 @@ func (e *ErrorBody) UnmarshalJSON(data []byte) error {
 	}
 	e.extraProperties = extraProperties
 
-	e._rawJSON = json.RawMessage(data)
+	e._rawJSON = nil
 	return nil
 }
 
@@ -771,7 +771,7 @@ func (e *ErrorParam) UnmarshalJSON(data []byte) error {
 	}
 	e.extraProperties = extraProperties
 
-	e._rawJSON = json.RawMessage(data)
+	e._rawJSON = nil
 	return nil
 }
 
@@ -820,7 +820,7 @@ func (a *AwsCredential) UnmarshalJSON(data []byte) error {
 	}
 	a.extraProperties = extraProperties
 
-	a._rawJSON = json.RawMessage(data)
+	a._rawJSON = nil
 	return nil
 }
 
@@ -868,7 +868,7 @@ func (b *BasicCredential) UnmarshalJSON(data []byte) error {
 	}
 	b.extraProperties = extraProperties
 
-	b._rawJSON = json.RawMessage(data)
+	b._rawJSON = nil
 	return nil
 }
 
@@ -947,7 +947,7 @@ func (c *Credential) UnmarshalJSON(data []byte) error {
 	}
 	c.extraProperties = extraProperties
 
-	c._rawJSON = json.RawMessage(data)
+	c._rawJSON = nil
 	return nil
 }
 
@@ -1105,7 +1105,7 @@ func (c *CredentialConfigNoSecret) UnmarshalJSON(data []byte) error {
 	}
 	c.extraProperties = extraProperties
 
-	c._rawJSON = json.RawMessage(data)
+	c._rawJSON = nil
 	return nil
 }
 
@@ -1180,7 +1180,7 @@ func (c *CredentialResponse) UnmarshalJSON(data []byte) error {
 	}
 	c.extraProperties = extraProperties
 
-	c._rawJSON = json.RawMessage(data)
+	c._rawJSON = nil
 	return nil
 }
 
@@ -1298,7 +1298,7 @@ func (o *OAuthClientCredential) UnmarshalJSON(data []byte) error {
 	}
 	o.extraProperties = extraProperties
 
-	o._rawJSON = json.RawMessage(data)
+	o._rawJSON = nil
 	return nil
 }
 
@@ -1372,7 +1372,7 @@ func (s *SecretCredential) UnmarshalJSON(data []byte) error {
 	}
 	s.extraProperties = extraProperties
 
-	s._rawJSON = json.RawMessage(data)
+	s._rawJSON = nil
 	return nil
 }
 
@@ -1418,7 +1418,7 @@ func (t *TokenCredential) UnmarshalJSON(data []byte) error {
 	}
 	t.extraProperties = extraProperties
 
-	t._rawJSON = json.RawMessage(data)
+	t._rawJSON = nil
 	return nil
 }
 
@@ -1468,7 +1468,7 @@ func (i *IntegrationEnvironments) UnmarshalJSON(data []byte) error {
 	}
 	i.extraProperties = extraProperties
 
-	i._rawJSON = json.RawMessage(data)
+	i._rawJSON = nil
 	return nil
 }
 
@@ -1532,7 +1532,7 @@ func (i *IntegrationPoint) UnmarshalJSON(data []byte) error {
 	}
 	i.extraProperties = extraProperties
 
-	i._rawJSON = json.RawMessage(data)
+	i._rawJSON = nil
 	return nil
 }
 
@@ -1668,7 +1668,7 @@ func (c *CreateIntegrationResponseResult) UnmarshalJSON(data []byte) error {
 	}
 	c.extraProperties = extraProperties
 
-	c._rawJSON = json.RawMessage(data)
+	c._rawJSON = nil
 	return nil
 }
 
@@ -1746,7 +1746,7 @@ func (i *Integration) UnmarshalJSON(data []byte) error {
 	}
 	i.extraProperties = extraProperties
 
-	i._rawJSON = json.RawMessage(data)
+	i._rawJSON = nil
 	return nil
 }
 
@@ -1801,7 +1801,7 @@ func (c *CreateMemberResponseResult) UnmarshalJSON(data []byte) error {
 	}
 	c.extraProperties = extraProperties
 
-	c._rawJSON = json.RawMessage(data)
+	c._rawJSON = nil
 	return nil
 }
 
@@ -1877,7 +1877,7 @@ func (m *Member) UnmarshalJSON(data []byte) error {
 	}
 	m.extraProperties = extraProperties
 
-	m._rawJSON = json.RawMessage(data)
+	m._rawJSON = nil
 	return nil
 }
 
@@ -1943,7 +1943,7 @@ func (m *MemberOptions) UnmarshalJSON(data []byte) error {
 	}
 	m.extraProperties = extraProperties
 
-	m._rawJSON = json.RawMessage(data)
+	m._rawJSON = nil
 	return nil
 }
 
@@ -2048,7 +2048,7 @@ func (c *CreateOrganizationResponseResult) UnmarshalJSON(data []byte) error {
 	}
 	c.extraProperties = extraProperties
 
-	c._rawJSON = json.RawMessage(data)
+	c._rawJSON = nil
 	return nil
 }
 
@@ -2111,7 +2111,7 @@ func (g *GetOrganizationResponse) UnmarshalJSON(data []byte) error {
 	}
 	g.extraProperties = extraProperties
 
-	g._rawJSON = json.RawMessage(data)
+	g._rawJSON = nil
 	return nil
 }
 
@@ -2180,7 +2180,7 @@ func (o *Organization) UnmarshalJSON(data []byte) error {
 	}
 	o.extraProperties = extraProperties
 
-	o._rawJSON = json.RawMessage(data)
+	o._rawJSON = nil
 	return nil
 }
 
@@ -2242,7 +2242,7 @@ func (o *OrganizationOptions) UnmarshalJSON(data []byte) error {
 	}
 	o.extraProperties = extraProperties
 
-	o._rawJSON = json.RawMessage(data)
+	o._rawJSON = nil
 	return nil
 }
 
@@ -2350,7 +2350,7 @@ func (o *OrganizationWebhookPayload) UnmarshalJSON(data []byte) error {
 	}
 	o.extraProperties = extraProperties
 
-	o._rawJSON = json.RawMessage(data)
+	o._rawJSON = nil
 	return nil
 }
 
@@ -2415,7 +2415,7 @@ func (o *OrganizationWebhook) UnmarshalJSON(data []byte) error {
 	}
 	o.extraProperties = extraProperties
 
-	o._rawJSON = json.RawMessage(data)
+	o._rawJSON = nil
 	return nil
 }
 
@@ -2479,7 +2479,7 @@ func (o *OrganizationWebhookSecret) UnmarshalJSON(data []byte) error {
 	}
 	o.extraProperties = extraProperties
 
-	o._rawJSON = json.RawMessage(data)
+	o._rawJSON = nil
 	return nil
 }
 
@@ -2549,7 +2549,7 @@ func (p *Permission) UnmarshalJSON(data []byte) error {
 	}
 	p.extraProperties = extraProperties
 
-	p._rawJSON = json.RawMessage(data)
+	p._rawJSON = nil
 	return nil
 }
 
@@ -2628,7 +2628,7 @@ func (a *AccountsPermissions) UnmarshalJSON(data []byte) error {
 	}
 	a.extraProperties = extraProperties
 
-	a._rawJSON = json.RawMessage(data)
+	a._rawJSON = nil
 	return nil
 }
 
@@ -2686,7 +2686,7 @@ func (a *ApiPermissionMap) UnmarshalJSON(data []byte) error {
 	}
 	a.extraProperties = extraProperties
 
-	a._rawJSON = json.RawMessage(data)
+	a._rawJSON = nil
 	return nil
 }
 
@@ -2750,7 +2750,7 @@ func (a *AuditPermissions) UnmarshalJSON(data []byte) error {
 	}
 	a.extraProperties = extraProperties
 
-	a._rawJSON = json.RawMessage(data)
+	a._rawJSON = nil
 	return nil
 }
 
@@ -2820,7 +2820,7 @@ func (a *AuthPermissions) UnmarshalJSON(data []byte) error {
 	}
 	a.extraProperties = extraProperties
 
-	a._rawJSON = json.RawMessage(data)
+	a._rawJSON = nil
 	return nil
 }
 
@@ -2899,7 +2899,7 @@ func (b *BridgesPermissions) UnmarshalJSON(data []byte) error {
 	}
 	b.extraProperties = extraProperties
 
-	b._rawJSON = json.RawMessage(data)
+	b._rawJSON = nil
 	return nil
 }
 
@@ -2966,7 +2966,7 @@ func (c *CapabilitiesPermissions) UnmarshalJSON(data []byte) error {
 	}
 	c.extraProperties = extraProperties
 
-	c._rawJSON = json.RawMessage(data)
+	c._rawJSON = nil
 	return nil
 }
 
@@ -3048,7 +3048,7 @@ func (c *CredentialsPermissions) UnmarshalJSON(data []byte) error {
 	}
 	c.extraProperties = extraProperties
 
-	c._rawJSON = json.RawMessage(data)
+	c._rawJSON = nil
 	return nil
 }
 
@@ -3127,7 +3127,7 @@ func (i *IntegrationPointsPermissions) UnmarshalJSON(data []byte) error {
 	}
 	i.extraProperties = extraProperties
 
-	i._rawJSON = json.RawMessage(data)
+	i._rawJSON = nil
 	return nil
 }
 
@@ -3212,7 +3212,7 @@ func (i *IntegrationsPermissions) UnmarshalJSON(data []byte) error {
 	}
 	i.extraProperties = extraProperties
 
-	i._rawJSON = json.RawMessage(data)
+	i._rawJSON = nil
 	return nil
 }
 
@@ -3291,7 +3291,7 @@ func (m *MembersPermissions) UnmarshalJSON(data []byte) error {
 	}
 	m.extraProperties = extraProperties
 
-	m._rawJSON = json.RawMessage(data)
+	m._rawJSON = nil
 	return nil
 }
 
@@ -3361,7 +3361,7 @@ func (o *OrganizationPermissions) UnmarshalJSON(data []byte) error {
 	}
 	o.extraProperties = extraProperties
 
-	o._rawJSON = json.RawMessage(data)
+	o._rawJSON = nil
 	return nil
 }
 
@@ -3408,7 +3408,7 @@ func (p *PermissionSet) UnmarshalJSON(data []byte) error {
 	}
 	p.extraProperties = extraProperties
 
-	p._rawJSON = json.RawMessage(data)
+	p._rawJSON = nil
 	return nil
 }
 
@@ -3475,7 +3475,7 @@ func (p *PermissionSetPermissions) UnmarshalJSON(data []byte) error {
 	}
 	p.extraProperties = extraProperties
 
-	p._rawJSON = json.RawMessage(data)
+	p._rawJSON = nil
 	return nil
 }
 
@@ -3539,7 +3539,7 @@ func (r *ReadWritePermissions) UnmarshalJSON(data []byte) error {
 	}
 	r.extraProperties = extraProperties
 
-	r._rawJSON = json.RawMessage(data)
+	r._rawJSON = nil
 	return nil
 }
 
@@ -3640,7 +3640,7 @@ func (r *RolesPermissions) UnmarshalJSON(data []byte) error {
 	}
 	r.extraProperties = extraProperties
 
-	r._rawJSON = json.RawMessage(data)
+	r._rawJSON = nil
 	return nil
 }
 
@@ -3719,7 +3719,7 @@ func (s *StatusPermissions) UnmarshalJSON(data []byte) error {
 	}
 	s.extraProperties = extraProperties
 
-	s._rawJSON = json.RawMessage(data)
+	s._rawJSON = nil
 	return nil
 }
 
@@ -3792,7 +3792,7 @@ func (s *SubOrgsPermissions) UnmarshalJSON(data []byte) error {
 	}
 	s.extraProperties = extraProperties
 
-	s._rawJSON = json.RawMessage(data)
+	s._rawJSON = nil
 	return nil
 }
 
@@ -3874,7 +3874,7 @@ func (t *TokensPermissions) UnmarshalJSON(data []byte) error {
 	}
 	t.extraProperties = extraProperties
 
-	t._rawJSON = json.RawMessage(data)
+	t._rawJSON = nil
 	return nil
 }
 
@@ -3953,7 +3953,7 @@ func (t *TransformsPermissions) UnmarshalJSON(data []byte) error {
 	}
 	t.extraProperties = extraProperties
 
-	t._rawJSON = json.RawMessage(data)
+	t._rawJSON = nil
 	return nil
 }
 
@@ -4032,7 +4032,7 @@ func (w *WebhooksPermissions) UnmarshalJSON(data []byte) error {
 	}
 	w.extraProperties = extraProperties
 
-	w._rawJSON = json.RawMessage(data)
+	w._rawJSON = nil
 	return nil
 }
 
@@ -4144,7 +4144,7 @@ func (a *AssetsArmisCentrix) UnmarshalJSON(data []byte) error {
 	}
 	a.extraProperties = extraProperties
 
-	a._rawJSON = json.RawMessage(data)
+	a._rawJSON = nil
 	return nil
 }
 
@@ -4188,7 +4188,7 @@ func (a *AssetsNozomiVantage) UnmarshalJSON(data []byte) error {
 	}
 	a.extraProperties = extraProperties
 
-	a._rawJSON = json.RawMessage(data)
+	a._rawJSON = nil
 	return nil
 }
 
@@ -4232,7 +4232,7 @@ func (a *AssetsServiceNow) UnmarshalJSON(data []byte) error {
 	}
 	a.extraProperties = extraProperties
 
-	a._rawJSON = json.RawMessage(data)
+	a._rawJSON = nil
 	return nil
 }
 
@@ -4686,7 +4686,7 @@ func (c *CustomFieldMapping) UnmarshalJSON(data []byte) error {
 	}
 	c.extraProperties = extraProperties
 
-	c._rawJSON = json.RawMessage(data)
+	c._rawJSON = nil
 	return nil
 }
 
@@ -4798,7 +4798,7 @@ func (e *EdrCrowdStrike) UnmarshalJSON(data []byte) error {
 	}
 	e.extraProperties = extraProperties
 
-	e._rawJSON = json.RawMessage(data)
+	e._rawJSON = nil
 	return nil
 }
 
@@ -4844,7 +4844,7 @@ func (e *EdrDefender) UnmarshalJSON(data []byte) error {
 	}
 	e.extraProperties = extraProperties
 
-	e._rawJSON = json.RawMessage(data)
+	e._rawJSON = nil
 	return nil
 }
 
@@ -4888,7 +4888,7 @@ func (e *EdrSentinelOne) UnmarshalJSON(data []byte) error {
 	}
 	e.extraProperties = extraProperties
 
-	e._rawJSON = json.RawMessage(data)
+	e._rawJSON = nil
 	return nil
 }
 
@@ -4936,7 +4936,7 @@ func (e *ElasticsearchAuthOptions) UnmarshalJSON(data []byte) error {
 	}
 	e.extraProperties = extraProperties
 
-	e._rawJSON = json.RawMessage(data)
+	e._rawJSON = nil
 	return nil
 }
 
@@ -5367,7 +5367,7 @@ func (h *HooksHttp) UnmarshalJSON(data []byte) error {
 	}
 	h.extraProperties = extraProperties
 
-	h._rawJSON = json.RawMessage(data)
+	h._rawJSON = nil
 	return nil
 }
 
@@ -5413,7 +5413,7 @@ func (i *IdentityEntraId) UnmarshalJSON(data []byte) error {
 	}
 	i.extraProperties = extraProperties
 
-	i._rawJSON = json.RawMessage(data)
+	i._rawJSON = nil
 	return nil
 }
 
@@ -5457,7 +5457,7 @@ func (i *IdentityOkta) UnmarshalJSON(data []byte) error {
 	}
 	i.extraProperties = extraProperties
 
-	i._rawJSON = json.RawMessage(data)
+	i._rawJSON = nil
 	return nil
 }
 
@@ -5507,7 +5507,7 @@ func (i *IdentityPingOne) UnmarshalJSON(data []byte) error {
 	}
 	i.extraProperties = extraProperties
 
-	i._rawJSON = json.RawMessage(data)
+	i._rawJSON = nil
 	return nil
 }
 
@@ -5619,7 +5619,7 @@ func (n *NotificationsJira) UnmarshalJSON(data []byte) error {
 	}
 	n.extraProperties = extraProperties
 
-	n._rawJSON = json.RawMessage(data)
+	n._rawJSON = nil
 	return nil
 }
 
@@ -5662,7 +5662,7 @@ func (n *NotificationsMock) UnmarshalJSON(data []byte) error {
 	}
 	n.extraProperties = extraProperties
 
-	n._rawJSON = json.RawMessage(data)
+	n._rawJSON = nil
 	return nil
 }
 
@@ -5708,7 +5708,7 @@ func (n *NotificationsSlack) UnmarshalJSON(data []byte) error {
 	}
 	n.extraProperties = extraProperties
 
-	n._rawJSON = json.RawMessage(data)
+	n._rawJSON = nil
 	return nil
 }
 
@@ -5750,7 +5750,7 @@ func (n *NotificationsTeams) UnmarshalJSON(data []byte) error {
 	}
 	n.extraProperties = extraProperties
 
-	n._rawJSON = json.RawMessage(data)
+	n._rawJSON = nil
 	return nil
 }
 
@@ -6107,7 +6107,7 @@ func (p *PriorityMapping) UnmarshalJSON(data []byte) error {
 	}
 	p.extraProperties = extraProperties
 
-	p._rawJSON = json.RawMessage(data)
+	p._rawJSON = nil
 	return nil
 }
 
@@ -7094,7 +7094,7 @@ func (s *SiemElasticsearch) UnmarshalJSON(data []byte) error {
 	}
 	s.extraProperties = extraProperties
 
-	s._rawJSON = json.RawMessage(data)
+	s._rawJSON = nil
 	return nil
 }
 
@@ -7137,7 +7137,7 @@ func (s *SiemMock) UnmarshalJSON(data []byte) error {
 	}
 	s.extraProperties = extraProperties
 
-	s._rawJSON = json.RawMessage(data)
+	s._rawJSON = nil
 	return nil
 }
 
@@ -7185,7 +7185,7 @@ func (s *SiemQRadar) UnmarshalJSON(data []byte) error {
 	}
 	s.extraProperties = extraProperties
 
-	s._rawJSON = json.RawMessage(data)
+	s._rawJSON = nil
 	return nil
 }
 
@@ -7229,7 +7229,7 @@ func (s *SiemRapid7InsightIdr) UnmarshalJSON(data []byte) error {
 	}
 	s.extraProperties = extraProperties
 
-	s._rawJSON = json.RawMessage(data)
+	s._rawJSON = nil
 	return nil
 }
 
@@ -7285,7 +7285,7 @@ func (s *SiemSplunk) UnmarshalJSON(data []byte) error {
 	}
 	s.extraProperties = extraProperties
 
-	s._rawJSON = json.RawMessage(data)
+	s._rawJSON = nil
 	return nil
 }
 
@@ -7335,7 +7335,7 @@ func (s *SiemSumoLogic) UnmarshalJSON(data []byte) error {
 	}
 	s.extraProperties = extraProperties
 
-	s._rawJSON = json.RawMessage(data)
+	s._rawJSON = nil
 	return nil
 }
 
@@ -7518,7 +7518,7 @@ func (s *SinkAwsSqs) UnmarshalJSON(data []byte) error {
 	}
 	s.extraProperties = extraProperties
 
-	s._rawJSON = json.RawMessage(data)
+	s._rawJSON = nil
 	return nil
 }
 
@@ -7564,7 +7564,7 @@ func (s *SinkAwsSecurityLake) UnmarshalJSON(data []byte) error {
 	}
 	s.extraProperties = extraProperties
 
-	s._rawJSON = json.RawMessage(data)
+	s._rawJSON = nil
 	return nil
 }
 
@@ -7616,7 +7616,7 @@ func (s *SinkAzureMonitorLogs) UnmarshalJSON(data []byte) error {
 	}
 	s.extraProperties = extraProperties
 
-	s._rawJSON = json.RawMessage(data)
+	s._rawJSON = nil
 	return nil
 }
 
@@ -7659,7 +7659,7 @@ func (s *SinkMock) UnmarshalJSON(data []byte) error {
 	}
 	s.extraProperties = extraProperties
 
-	s._rawJSON = json.RawMessage(data)
+	s._rawJSON = nil
 	return nil
 }
 
@@ -7915,7 +7915,7 @@ func (s *StatusMapping) UnmarshalJSON(data []byte) error {
 	}
 	s.extraProperties = extraProperties
 
-	s._rawJSON = json.RawMessage(data)
+	s._rawJSON = nil
 	return nil
 }
 
@@ -7965,7 +7965,7 @@ func (s *StorageAwsS3) UnmarshalJSON(data []byte) error {
 	}
 	s.extraProperties = extraProperties
 
-	s._rawJSON = json.RawMessage(data)
+	s._rawJSON = nil
 	return nil
 }
 
@@ -8011,7 +8011,7 @@ func (s *StorageAzureBlob) UnmarshalJSON(data []byte) error {
 	}
 	s.extraProperties = extraProperties
 
-	s._rawJSON = json.RawMessage(data)
+	s._rawJSON = nil
 	return nil
 }
 
@@ -8059,7 +8059,7 @@ func (s *StorageGcs) UnmarshalJSON(data []byte) error {
 	}
 	s.extraProperties = extraProperties
 
-	s._rawJSON = json.RawMessage(data)
+	s._rawJSON = nil
 	return nil
 }
 
@@ -8102,7 +8102,7 @@ func (s *StorageMock) UnmarshalJSON(data []byte) error {
 	}
 	s.extraProperties = extraProperties
 
-	s._rawJSON = json.RawMessage(data)
+	s._rawJSON = nil
 	return nil
 }
 
@@ -8492,7 +8492,7 @@ func (t *TicketingJira) UnmarshalJSON(data []byte) error {
 	}
 	t.extraProperties = extraProperties
 
-	t._rawJSON = json.RawMessage(data)
+	t._rawJSON = nil
 	return nil
 }
 
@@ -8537,7 +8537,7 @@ func (t *TicketingMock) UnmarshalJSON(data []byte) error {
 	}
 	t.extraProperties = extraProperties
 
-	t._rawJSON = json.RawMessage(data)
+	t._rawJSON = nil
 	return nil
 }
 
@@ -8581,7 +8581,7 @@ func (t *TicketingPagerDuty) UnmarshalJSON(data []byte) error {
 	}
 	t.extraProperties = extraProperties
 
-	t._rawJSON = json.RawMessage(data)
+	t._rawJSON = nil
 	return nil
 }
 
@@ -8629,7 +8629,7 @@ func (t *TicketingServiceNow) UnmarshalJSON(data []byte) error {
 	}
 	t.extraProperties = extraProperties
 
-	t._rawJSON = json.RawMessage(data)
+	t._rawJSON = nil
 	return nil
 }
 
@@ -8673,7 +8673,7 @@ func (t *TicketingTorq) UnmarshalJSON(data []byte) error {
 	}
 	t.extraProperties = extraProperties
 
-	t._rawJSON = json.RawMessage(data)
+	t._rawJSON = nil
 	return nil
 }
 
@@ -8789,7 +8789,7 @@ func (v *ValueMapping) UnmarshalJSON(data []byte) error {
 	}
 	v.extraProperties = extraProperties
 
-	v._rawJSON = json.RawMessage(data)
+	v._rawJSON = nil
 	return nil
 }
 
@@ -8833,7 +8833,7 @@ func (v *VulnerabilitiesCrowdStrike) UnmarshalJSON(data []byte) error {
 	}
 	v.extraProperties = extraProperties
 
-	v._rawJSON = json.RawMessage(data)
+	v._rawJSON = nil
 	return nil
 }
 
@@ -8877,7 +8877,7 @@ func (v *VulnerabilitiesQualysCloud) UnmarshalJSON(data []byte) error {
 	}
 	v.extraProperties = extraProperties
 
-	v._rawJSON = json.RawMessage(data)
+	v._rawJSON = nil
 	return nil
 }
 
@@ -8921,7 +8921,7 @@ func (v *VulnerabilitiesRapid7InsightCloud) UnmarshalJSON(data []byte) error {
 	}
 	v.extraProperties = extraProperties
 
-	v._rawJSON = json.RawMessage(data)
+	v._rawJSON = nil
 	return nil
 }
 
@@ -8965,7 +8965,7 @@ func (v *VulnerabilitiesTaniumCloud) UnmarshalJSON(data []byte) error {
 	}
 	v.extraProperties = extraProperties
 
-	v._rawJSON = json.RawMessage(data)
+	v._rawJSON = nil
 	return nil
 }
 
@@ -9009,7 +9009,7 @@ func (v *VulnerabilitiesTenableCloud) UnmarshalJSON(data []byte) error {
 	}
 	v.extraProperties = extraProperties
 
-	v._rawJSON = json.RawMessage(data)
+	v._rawJSON = nil
 	return nil
 }
 
@@ -9051,7 +9051,7 @@ func (a *AdhocRole) UnmarshalJSON(data []byte) error {
 	}
 	a.extraProperties = extraProperties
 
-	a._rawJSON = json.RawMessage(data)
+	a._rawJSON = nil
 	return nil
 }
 
@@ -9094,7 +9094,7 @@ func (r *Resources) UnmarshalJSON(data []byte) error {
 	}
 	r.extraProperties = extraProperties
 
-	r._rawJSON = json.RawMessage(data)
+	r._rawJSON = nil
 	return nil
 }
 
@@ -9140,7 +9140,7 @@ func (r *RoleAccounts) UnmarshalJSON(data []byte) error {
 	}
 	r.extraProperties = extraProperties
 
-	r._rawJSON = json.RawMessage(data)
+	r._rawJSON = nil
 	return nil
 }
 
@@ -9182,7 +9182,7 @@ func (r *RoleIntegrations) UnmarshalJSON(data []byte) error {
 	}
 	r.extraProperties = extraProperties
 
-	r._rawJSON = json.RawMessage(data)
+	r._rawJSON = nil
 	return nil
 }
 
@@ -9229,7 +9229,7 @@ func (r *RoleOrganizations) UnmarshalJSON(data []byte) error {
 	}
 	r.extraProperties = extraProperties
 
-	r._rawJSON = json.RawMessage(data)
+	r._rawJSON = nil
 	return nil
 }
 
@@ -9320,7 +9320,7 @@ func (r *RoleDefinition) UnmarshalJSON(data []byte) error {
 	}
 	r.extraProperties = extraProperties
 
-	r._rawJSON = json.RawMessage(data)
+	r._rawJSON = nil
 	return nil
 }
 
@@ -9392,7 +9392,7 @@ func (g *GetStatusTimeseriesResult) UnmarshalJSON(data []byte) error {
 	}
 	g.extraProperties = extraProperties
 
-	g._rawJSON = json.RawMessage(data)
+	g._rawJSON = nil
 	return nil
 }
 
@@ -9481,7 +9481,7 @@ func (s *Status) UnmarshalJSON(data []byte) error {
 	}
 	s.extraProperties = extraProperties
 
-	s._rawJSON = json.RawMessage(data)
+	s._rawJSON = nil
 	return nil
 }
 
@@ -9552,7 +9552,7 @@ func (s *StatusEvent) UnmarshalJSON(data []byte) error {
 	}
 	s.extraProperties = extraProperties
 
-	s._rawJSON = json.RawMessage(data)
+	s._rawJSON = nil
 	return nil
 }
 
@@ -9621,7 +9621,7 @@ func (t *TimeseriesResult) UnmarshalJSON(data []byte) error {
 	}
 	t.extraProperties = extraProperties
 
-	t._rawJSON = json.RawMessage(data)
+	t._rawJSON = nil
 	return nil
 }
 
@@ -9685,7 +9685,7 @@ func (t *Token) UnmarshalJSON(data []byte) error {
 	}
 	t.extraProperties = extraProperties
 
-	t._rawJSON = json.RawMessage(data)
+	t._rawJSON = nil
 	return nil
 }
 
@@ -9763,7 +9763,7 @@ func (t *TokenPair) UnmarshalJSON(data []byte) error {
 	}
 	t.extraProperties = extraProperties
 
-	t._rawJSON = json.RawMessage(data)
+	t._rawJSON = nil
 	return nil
 }
 
@@ -9834,7 +9834,7 @@ func (r *RefreshToken) UnmarshalJSON(data []byte) error {
 	}
 	r.extraProperties = extraProperties
 
-	r._rawJSON = json.RawMessage(data)
+	r._rawJSON = nil
 	return nil
 }
 
@@ -9912,7 +9912,7 @@ func (t *Transform) UnmarshalJSON(data []byte) error {
 	}
 	t.extraProperties = extraProperties
 
-	t._rawJSON = json.RawMessage(data)
+	t._rawJSON = nil
 	return nil
 }
 
@@ -9971,7 +9971,7 @@ func (u *Usage) UnmarshalJSON(data []byte) error {
 	}
 	u.extraProperties = extraProperties
 
-	u._rawJSON = json.RawMessage(data)
+	u._rawJSON = nil
 	return nil
 }
 

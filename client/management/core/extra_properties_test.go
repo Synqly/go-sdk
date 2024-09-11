@@ -24,7 +24,7 @@ func (t *testMarshaler) MarshalJSON() ([]byte, error) {
 	}{
 		embed:     embed(*t),
 		BirthDate: t.BirthDate.Format("2006-01-02"),
-		CreatedAt: t.CreatedAt.Format(time.RFC3339),
+		CreatedAt: t.CreatedAt.Format(time.RFC3339Nano),
 	}
 	return MarshalJSONWithExtraProperty(marshaler, "type", "test")
 }

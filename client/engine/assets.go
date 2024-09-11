@@ -48,7 +48,7 @@ func (q *QueryDevicesResponse) UnmarshalJSON(data []byte) error {
 	}
 	q.extraProperties = extraProperties
 
-	q._rawJSON = json.RawMessage(data)
+	q._rawJSON = nil
 	return nil
 }
 

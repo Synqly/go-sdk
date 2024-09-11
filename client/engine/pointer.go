@@ -124,7 +124,7 @@ func MustParseDate(date string) time.Time {
 // MustParseDateTime attempts to parse the given string as a
 // datetime time.Time, and panics upon failure.
 func MustParseDateTime(datetime string) time.Time {
-	t, err := time.Parse(time.RFC3339, datetime)
+	t, err := time.Parse(time.RFC3339Nano, datetime)
 	if err != nil {
 		panic(err)
 	}

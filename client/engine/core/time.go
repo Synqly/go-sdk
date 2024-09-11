@@ -118,7 +118,7 @@ func (d *DateTime) MarshalJSON() ([]byte, error) {
 	if d == nil || d.t == nil {
 		return nil, nil
 	}
-	return json.Marshal(d.t.Format(time.RFC3339))
+	return json.Marshal(d.t.Format(time.RFC3339Nano))
 }
 
 func (d *DateTime) UnmarshalJSON(data []byte) error {
@@ -127,7 +127,7 @@ func (d *DateTime) UnmarshalJSON(data []byte) error {
 		return err
 	}
 
-	parsedTime, err := time.Parse(time.RFC3339, raw)
+	parsedTime, err := time.Parse(time.RFC3339Nano, raw)
 	if err != nil {
 		return err
 	}

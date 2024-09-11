@@ -64,7 +64,7 @@ func (c *CreateAssetRequest) UnmarshalJSON(data []byte) error {
 	}
 	c.extraProperties = extraProperties
 
-	c._rawJSON = json.RawMessage(data)
+	c._rawJSON = nil
 	return nil
 }
 
@@ -105,7 +105,7 @@ func (g *GetScanActivityResponse) UnmarshalJSON(data []byte) error {
 	}
 	g.extraProperties = extraProperties
 
-	g._rawJSON = json.RawMessage(data)
+	g._rawJSON = nil
 	return nil
 }
 
@@ -147,7 +147,7 @@ func (q *QueryAssetsResponse) UnmarshalJSON(data []byte) error {
 	}
 	q.extraProperties = extraProperties
 
-	q._rawJSON = json.RawMessage(data)
+	q._rawJSON = nil
 	return nil
 }
 
@@ -189,7 +189,7 @@ func (q *QueryFindingsResponse) UnmarshalJSON(data []byte) error {
 	}
 	q.extraProperties = extraProperties
 
-	q._rawJSON = json.RawMessage(data)
+	q._rawJSON = nil
 	return nil
 }
 
@@ -231,7 +231,7 @@ func (q *QueryScansResponse) UnmarshalJSON(data []byte) error {
 	}
 	q.extraProperties = extraProperties
 
-	q._rawJSON = json.RawMessage(data)
+	q._rawJSON = nil
 	return nil
 }
 
