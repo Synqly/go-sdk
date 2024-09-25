@@ -57,6 +57,8 @@ type CreateIntegrationRequest struct {
 	IntegrationPointId *IntegrationPointId `json:"integration_point_id,omitempty" url:"integration_point_id,omitempty"`
 	// Use a Bridge to connect to the provider.
 	BridgeSelector *BridgeSelector `json:"bridge_selector,omitempty" url:"bridge_selector,omitempty"`
+	// Web hook config for this integration
+	WebhookConfig *WebhookConfig `json:"webhook_config,omitempty" url:"webhook_config,omitempty"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage

@@ -590,7 +590,6 @@ type CategoryId string
 const (
 	CategoryIdAssets          CategoryId = "assets"
 	CategoryIdEdr             CategoryId = "edr"
-	CategoryIdHooks           CategoryId = "hooks"
 	CategoryIdIdentity        CategoryId = "identity"
 	CategoryIdNotifications   CategoryId = "notifications"
 	CategoryIdSiem            CategoryId = "siem"
@@ -606,8 +605,6 @@ func NewCategoryIdFromString(s string) (CategoryId, error) {
 		return CategoryIdAssets, nil
 	case "edr":
 		return CategoryIdEdr, nil
-	case "hooks":
-		return CategoryIdHooks, nil
 	case "identity":
 		return CategoryIdIdentity, nil
 	case "notifications":
@@ -2351,6 +2348,8 @@ type Integration struct {
 	IntegrationPoint *IntegrationPoint `json:"integration_point,omitempty" url:"integration_point,omitempty"`
 	// Use a Bridge to connect to the provider.
 	BridgeSelector *BridgeSelector `json:"bridge_selector,omitempty" url:"bridge_selector,omitempty"`
+	// Webhook configuration for this integration. Some providers support webhooks, and will allow end users providers to send events to a server for new or updated data.
+	WebhookConfig *WebhookConfig `json:"webhook_config,omitempty" url:"webhook_config,omitempty"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
@@ -2410,6 +2409,123 @@ func (i *Integration) String() string {
 		return value
 	}
 	return fmt.Sprintf("%#v", i)
+}
+
+type WebhookConfig struct {
+	// List of webhooks for an integration. If the provider supports webhooks, they will be sent to the servers provided in this list.
+	Items []*WebhookItem `json:"items" url:"items"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (w *WebhookConfig) GetExtraProperties() map[string]interface{} {
+	return w.extraProperties
+}
+
+func (w *WebhookConfig) UnmarshalJSON(data []byte) error {
+	type unmarshaler WebhookConfig
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*w = WebhookConfig(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *w)
+	if err != nil {
+		return err
+	}
+	w.extraProperties = extraProperties
+
+	w._rawJSON = nil
+	return nil
+}
+
+func (w *WebhookConfig) String() string {
+	if len(w._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(w._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(w); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", w)
+}
+
+type WebhookEvent string
+
+const (
+	WebhookEventTicketCreated        WebhookEvent = "TicketCreated"
+	WebhookEventTicketUpdated        WebhookEvent = "TicketUpdated"
+	WebhookEventTicketDeleted        WebhookEvent = "TicketDeleted"
+	WebhookEventTicketCommentCreated WebhookEvent = "TicketCommentCreated"
+	WebhookEventTicketCommentDeleted WebhookEvent = "TicketCommentDeleted"
+)
+
+func NewWebhookEventFromString(s string) (WebhookEvent, error) {
+	switch s {
+	case "TicketCreated":
+		return WebhookEventTicketCreated, nil
+	case "TicketUpdated":
+		return WebhookEventTicketUpdated, nil
+	case "TicketDeleted":
+		return WebhookEventTicketDeleted, nil
+	case "TicketCommentCreated":
+		return WebhookEventTicketCommentCreated, nil
+	case "TicketCommentDeleted":
+		return WebhookEventTicketCommentDeleted, nil
+	}
+	var t WebhookEvent
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (w WebhookEvent) Ptr() *WebhookEvent {
+	return &w
+}
+
+type WebhookItem struct {
+	// Webhook URL. Events from providers will be sent to this URL.
+	WebhookUrl string `json:"webhook_url" url:"webhook_url"`
+	// If specified, only events matching this list will be sent to `webhook_url`. If no filters are specified, all events sent from providers will be forwarded to `webhook_url`.
+	EventFilter []WebhookEvent `json:"event_filter,omitempty" url:"event_filter,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (w *WebhookItem) GetExtraProperties() map[string]interface{} {
+	return w.extraProperties
+}
+
+func (w *WebhookItem) UnmarshalJSON(data []byte) error {
+	type unmarshaler WebhookItem
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*w = WebhookItem(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *w)
+	if err != nil {
+		return err
+	}
+	w.extraProperties = extraProperties
+
+	w._rawJSON = nil
+	return nil
+}
+
+func (w *WebhookItem) String() string {
+	if len(w._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(w._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(w); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", w)
 }
 
 type CreateMemberResponseResult struct {
@@ -6116,128 +6232,6 @@ func (g *GcsCredential) Accept(visitor GcsCredentialVisitor) error {
 	return fmt.Errorf("type %T does not define a non-empty union type", g)
 }
 
-type HooksHttpCredential struct {
-	Type    string
-	Token   *TokenCredential
-	TokenId TokenCredentialId
-}
-
-func (h *HooksHttpCredential) UnmarshalJSON(data []byte) error {
-	var unmarshaler struct {
-		Type string `json:"type"`
-	}
-	if err := json.Unmarshal(data, &unmarshaler); err != nil {
-		return err
-	}
-	h.Type = unmarshaler.Type
-	if unmarshaler.Type == "" {
-		return fmt.Errorf("%T did not include discriminant type", h)
-	}
-	switch unmarshaler.Type {
-	case "token":
-		value := new(TokenCredential)
-		if err := json.Unmarshal(data, &value); err != nil {
-			return err
-		}
-		h.Token = value
-	case "token_id":
-		var valueUnmarshaler struct {
-			TokenId TokenCredentialId `json:"value"`
-		}
-		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
-			return err
-		}
-		h.TokenId = valueUnmarshaler.TokenId
-	}
-	return nil
-}
-
-func (h HooksHttpCredential) MarshalJSON() ([]byte, error) {
-	if h.Token != nil {
-		return core.MarshalJSONWithExtraProperty(h.Token, "type", "token")
-	}
-	if h.TokenId != "" {
-		var marshaler = struct {
-			Type    string            `json:"type"`
-			TokenId TokenCredentialId `json:"value"`
-		}{
-			Type:    "token_id",
-			TokenId: h.TokenId,
-		}
-		return json.Marshal(marshaler)
-	}
-	return nil, fmt.Errorf("type %T does not define a non-empty union type", h)
-}
-
-type HooksHttpCredentialVisitor interface {
-	VisitToken(*TokenCredential) error
-	VisitTokenId(TokenCredentialId) error
-}
-
-func (h *HooksHttpCredential) Accept(visitor HooksHttpCredentialVisitor) error {
-	if h.Token != nil {
-		return visitor.VisitToken(h.Token)
-	}
-	if h.TokenId != "" {
-		return visitor.VisitTokenId(h.TokenId)
-	}
-	return fmt.Errorf("type %T does not define a non-empty union type", h)
-}
-
-// Configuration for a Webhook Provider
-type HooksHttp struct {
-	Credential *HooksHttpCredential `json:"credential" url:"credential"`
-	// Optional webhook filter specification
-	Filter *string `json:"filter,omitempty" url:"filter,omitempty"`
-	// Events to hook or empty list for all events
-	SourceEvents []string `json:"source_events" url:"source_events"`
-	// Webhook verification secret
-	SourceSecret *CredentialId `json:"source_secret,omitempty" url:"source_secret,omitempty"`
-	// Add optional webhook secure hash for verification
-	TargetSecret *CredentialId `json:"target_secret,omitempty" url:"target_secret,omitempty"`
-	// Optional list of transformations used to modify the webhook responses.
-	Transforms []TransformId `json:"transforms,omitempty" url:"transforms,omitempty"`
-	// URL of the endpoint used for connecting to the external service.
-	Url string `json:"url" url:"url"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (h *HooksHttp) GetExtraProperties() map[string]interface{} {
-	return h.extraProperties
-}
-
-func (h *HooksHttp) UnmarshalJSON(data []byte) error {
-	type unmarshaler HooksHttp
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*h = HooksHttp(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *h)
-	if err != nil {
-		return err
-	}
-	h.extraProperties = extraProperties
-
-	h._rawJSON = nil
-	return nil
-}
-
-func (h *HooksHttp) String() string {
-	if len(h._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(h._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(h); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", h)
-}
-
 // Configuration for the Microsoft Entra ID Identity Provider
 type IdentityEntraId struct {
 	Credential *EntraIdCredential `json:"credential" url:"credential"`
@@ -6986,7 +6980,6 @@ type ProviderConfig struct {
 	EdrCrowdstrike                    *EdrCrowdStrike
 	EdrDefender                       *EdrDefender
 	EdrSentinelone                    *EdrSentinelOne
-	HooksHttp                         *HooksHttp
 	IdentityEntraId                   *IdentityEntraId
 	IdentityOkta                      *IdentityOkta
 	IdentityPingone                   *IdentityPingOne
@@ -7068,12 +7061,6 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.EdrSentinelone = value
-	case "hooks_http":
-		value := new(HooksHttp)
-		if err := json.Unmarshal(data, &value); err != nil {
-			return err
-		}
-		p.HooksHttp = value
 	case "identity_entra_id":
 		value := new(IdentityEntraId)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -7283,9 +7270,6 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.EdrSentinelone != nil {
 		return core.MarshalJSONWithExtraProperty(p.EdrSentinelone, "type", "edr_sentinelone")
 	}
-	if p.HooksHttp != nil {
-		return core.MarshalJSONWithExtraProperty(p.HooksHttp, "type", "hooks_http")
-	}
 	if p.IdentityEntraId != nil {
 		return core.MarshalJSONWithExtraProperty(p.IdentityEntraId, "type", "identity_entra_id")
 	}
@@ -7389,7 +7373,6 @@ type ProviderConfigVisitor interface {
 	VisitEdrCrowdstrike(*EdrCrowdStrike) error
 	VisitEdrDefender(*EdrDefender) error
 	VisitEdrSentinelone(*EdrSentinelOne) error
-	VisitHooksHttp(*HooksHttp) error
 	VisitIdentityEntraId(*IdentityEntraId) error
 	VisitIdentityOkta(*IdentityOkta) error
 	VisitIdentityPingone(*IdentityPingOne) error
@@ -7441,9 +7424,6 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.EdrSentinelone != nil {
 		return visitor.VisitEdrSentinelone(p.EdrSentinelone)
-	}
-	if p.HooksHttp != nil {
-		return visitor.VisitHooksHttp(p.HooksHttp)
 	}
 	if p.IdentityEntraId != nil {
 		return visitor.VisitIdentityEntraId(p.IdentityEntraId)
@@ -7557,8 +7537,6 @@ const (
 	ProviderConfigIdEdrDefender ProviderConfigId = "edr_defender"
 	// SentinelOne Singularity™ Endpoint
 	ProviderConfigIdEdrSentinelOne ProviderConfigId = "edr_sentinelone"
-	// HTTP Webhook
-	ProviderConfigIdHooksHttp ProviderConfigId = "hooks_http"
 	// Microsoft Entra ID
 	ProviderConfigIdIdentityEntraId ProviderConfigId = "identity_entra_id"
 	// Okta Identity
@@ -7639,8 +7617,6 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdEdrDefender, nil
 	case "edr_sentinelone":
 		return ProviderConfigIdEdrSentinelOne, nil
-	case "hooks_http":
-		return ProviderConfigIdHooksHttp, nil
 	case "identity_entra_id":
 		return ProviderConfigIdIdentityEntraId, nil
 	case "identity_okta":
