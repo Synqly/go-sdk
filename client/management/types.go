@@ -630,6 +630,291 @@ func (c CategoryId) Ptr() *CategoryId {
 
 type ProviderId = string
 
+// Provides details on an available Integration.
+type Connector struct {
+	Connector CategoryId `json:"connector" url:"connector"`
+	// Description of what this Integration does.
+	Description string `json:"description" url:"description"`
+	// List of Providers that implement this Connector.
+	Providers []*ProviderCapabilities `json:"providers" url:"providers"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *Connector) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
+}
+
+func (c *Connector) UnmarshalJSON(data []byte) error {
+	type unmarshaler Connector
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = Connector(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
+	c._rawJSON = nil
+	return nil
+}
+
+func (c *Connector) String() string {
+	if len(c._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
+type FilterOperation string
+
+const (
+	// Filter for exact matches.
+	FilterOperationEquals FilterOperation = "eq"
+	// Filter for non-matches.
+	FilterOperationNotEquals FilterOperation = "neq"
+	// Filter for values greater than the provided value.
+	FilterOperationGreaterThan FilterOperation = "gt"
+	// Filter for values less than the provided value.
+	FilterOperationLessThan FilterOperation = "lt"
+	// Filter for values greater than or equal to the provided value.
+	FilterOperationGreaterThanOrEquals FilterOperation = "gte"
+	// Filter for values less than or equal to the provided value.
+	FilterOperationLessThanOrEquals FilterOperation = "lte"
+	// Filter to match values in the provided comma-separated list.
+	FilterOperationIn FilterOperation = "in"
+	// Filter to match values that contain the provided value.
+	FilterOperationLike FilterOperation = "like"
+	// Filter to match values not in the provided comma-separated list.
+	FilterOperationNotIn FilterOperation = "not in"
+	// Filter to match values that do not contain the provided value.
+	FilterOperationNotLike FilterOperation = "not like"
+)
+
+func NewFilterOperationFromString(s string) (FilterOperation, error) {
+	switch s {
+	case "eq":
+		return FilterOperationEquals, nil
+	case "neq":
+		return FilterOperationNotEquals, nil
+	case "gt":
+		return FilterOperationGreaterThan, nil
+	case "lt":
+		return FilterOperationLessThan, nil
+	case "gte":
+		return FilterOperationGreaterThanOrEquals, nil
+	case "lte":
+		return FilterOperationLessThanOrEquals, nil
+	case "in":
+		return FilterOperationIn, nil
+	case "like":
+		return FilterOperationLike, nil
+	case "not in":
+		return FilterOperationNotIn, nil
+	case "not like":
+		return FilterOperationNotLike, nil
+	}
+	var t FilterOperation
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (f FilterOperation) Ptr() *FilterOperation {
+	return &f
+}
+
+type FilterType string
+
+const (
+	FilterTypeString   FilterType = "string"
+	FilterTypeDatetime FilterType = "datetime"
+	FilterTypeEnum     FilterType = "enum"
+	FilterTypeBoolean  FilterType = "boolean"
+	FilterTypeNumber   FilterType = "number"
+)
+
+func NewFilterTypeFromString(s string) (FilterType, error) {
+	switch s {
+	case "string":
+		return FilterTypeString, nil
+	case "datetime":
+		return FilterTypeDatetime, nil
+	case "enum":
+		return FilterTypeEnum, nil
+	case "boolean":
+		return FilterTypeBoolean, nil
+	case "number":
+		return FilterTypeNumber, nil
+	}
+	var t FilterType
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (f FilterType) Ptr() *FilterType {
+	return &f
+}
+
+type ProviderCapabilities struct {
+	// Unique identifier for the Provider.
+	Id ProviderId `json:"id" url:"id"`
+	// Name of the Provider.
+	Name string `json:"name" url:"name"`
+	// Description of what this Provider does.
+	Description string `json:"description" url:"description"`
+	// Categories that this Provider implements.
+	Connector CategoryId `json:"connector" url:"connector"`
+	// Operations that this Provider implements.
+	Operations []*ProviderOperations `json:"operations,omitempty" url:"operations,omitempty"`
+	// Details on the specific configuration options for this Provider.
+	ProviderConfig map[string]interface{} `json:"provider_config" url:"provider_config"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (p *ProviderCapabilities) GetExtraProperties() map[string]interface{} {
+	return p.extraProperties
+}
+
+func (p *ProviderCapabilities) UnmarshalJSON(data []byte) error {
+	type unmarshaler ProviderCapabilities
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*p = ProviderCapabilities(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *p)
+	if err != nil {
+		return err
+	}
+	p.extraProperties = extraProperties
+
+	p._rawJSON = nil
+	return nil
+}
+
+func (p *ProviderCapabilities) String() string {
+	if len(p._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(p._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(p); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", p)
+}
+
+type ProviderFilter struct {
+	// Name of the filter.
+	Name string `json:"name" url:"name"`
+	// Type of the value that this filter can apply to
+	Type FilterType `json:"type" url:"type"`
+	// List of operators that this filter supports.
+	Operators []string `json:"operators" url:"operators"`
+	// List of possible values for this filter.
+	Values []string `json:"values,omitempty" url:"values,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (p *ProviderFilter) GetExtraProperties() map[string]interface{} {
+	return p.extraProperties
+}
+
+func (p *ProviderFilter) UnmarshalJSON(data []byte) error {
+	type unmarshaler ProviderFilter
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*p = ProviderFilter(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *p)
+	if err != nil {
+		return err
+	}
+	p.extraProperties = extraProperties
+
+	p._rawJSON = nil
+	return nil
+}
+
+func (p *ProviderFilter) String() string {
+	if len(p._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(p._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(p); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", p)
+}
+
+type ProviderOperations struct {
+	// Name of the operation.
+	Name string `json:"name" url:"name"`
+	// Whether the operation is supported by the provider.
+	Supported bool `json:"supported" url:"supported"`
+	// List of fields in the request body that are required by the provider for this
+	// operation. Due to limitations of the OpenAPI format these fields may be marked as
+	// optional, even though they are in fact required by this provider.
+	RequiredFields []string `json:"required_fields,omitempty" url:"required_fields,omitempty"`
+	// List of fields that may be returned in the response body. Any fields not listed in this array are not supported by this provider and will not be returned in the response body.
+	SupportedResponseFields []string `json:"supported_response_fields,omitempty" url:"supported_response_fields,omitempty"`
+	// Filters that can be applied to this operation.
+	Filters []*ProviderFilter `json:"filters,omitempty" url:"filters,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (p *ProviderOperations) GetExtraProperties() map[string]interface{} {
+	return p.extraProperties
+}
+
+func (p *ProviderOperations) UnmarshalJSON(data []byte) error {
+	type unmarshaler ProviderOperations
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*p = ProviderOperations(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *p)
+	if err != nil {
+		return err
+	}
+	p.extraProperties = extraProperties
+
+	p._rawJSON = nil
+	return nil
+}
+
+func (p *ProviderOperations) String() string {
+	if len(p._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(p._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(p); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", p)
+}
+
 type Base struct {
 	// Human-readable name for this resource
 	Name string `json:"name" url:"name"`
