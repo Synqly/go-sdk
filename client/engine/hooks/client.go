@@ -34,7 +34,7 @@ func NewClient(opts ...option.RequestOption) *Client {
 	}
 }
 
-// Proxy webhook messages from webhook providers to webhook recievers
+// Proxy webhook messages from webhook providers to webhook recievers. For exact webhook implementations please refer to providers e.g. Ticketing. This is just an API call used in that context, not a standalone implementation.
 func (c *Client) Proxy(
 	ctx context.Context,
 	request *engine.PostProxyHook,
