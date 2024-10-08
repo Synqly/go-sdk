@@ -8539,6 +8539,8 @@ type ServiceNowCredential struct {
 	Type    string
 	Basic   *BasicCredential
 	BasicId BasicCredentialId
+	Token   *TokenCredential
+	TokenId TokenCredentialId
 }
 
 func (s *ServiceNowCredential) UnmarshalJSON(data []byte) error {
@@ -8567,6 +8569,20 @@ func (s *ServiceNowCredential) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		s.BasicId = valueUnmarshaler.BasicId
+	case "token":
+		value := new(TokenCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		s.Token = value
+	case "token_id":
+		var valueUnmarshaler struct {
+			TokenId TokenCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		s.TokenId = valueUnmarshaler.TokenId
 	}
 	return nil
 }
@@ -8585,12 +8601,27 @@ func (s ServiceNowCredential) MarshalJSON() ([]byte, error) {
 		}
 		return json.Marshal(marshaler)
 	}
+	if s.Token != nil {
+		return core.MarshalJSONWithExtraProperty(s.Token, "type", "token")
+	}
+	if s.TokenId != "" {
+		var marshaler = struct {
+			Type    string            `json:"type"`
+			TokenId TokenCredentialId `json:"value"`
+		}{
+			Type:    "token_id",
+			TokenId: s.TokenId,
+		}
+		return json.Marshal(marshaler)
+	}
 	return nil, fmt.Errorf("type %T does not define a non-empty union type", s)
 }
 
 type ServiceNowCredentialVisitor interface {
 	VisitBasic(*BasicCredential) error
 	VisitBasicId(BasicCredentialId) error
+	VisitToken(*TokenCredential) error
+	VisitTokenId(TokenCredentialId) error
 }
 
 func (s *ServiceNowCredential) Accept(visitor ServiceNowCredentialVisitor) error {
@@ -8599,6 +8630,12 @@ func (s *ServiceNowCredential) Accept(visitor ServiceNowCredentialVisitor) error
 	}
 	if s.BasicId != "" {
 		return visitor.VisitBasicId(s.BasicId)
+	}
+	if s.Token != nil {
+		return visitor.VisitToken(s.Token)
+	}
+	if s.TokenId != "" {
+		return visitor.VisitTokenId(s.TokenId)
 	}
 	return fmt.Errorf("type %T does not define a non-empty union type", s)
 }
