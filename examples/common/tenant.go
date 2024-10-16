@@ -7,11 +7,10 @@ import (
 	"log"
 	"os"
 
-	"gopkg.in/yaml.v2"
-
 	engineClient "github.com/synqly/go-sdk/client/engine/client"
 	mgmt "github.com/synqly/go-sdk/client/management"
 	mgmtClient "github.com/synqly/go-sdk/client/management/client"
+	"gopkg.in/yaml.v2"
 )
 
 var consoleLogger = log.New(os.Stdout, "INFO: ", log.Ldate|log.Ltime)
