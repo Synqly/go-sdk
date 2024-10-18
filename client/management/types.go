@@ -2868,9 +2868,9 @@ type Member struct {
 	// User's full display name.
 	Fullname string `json:"fullname" url:"fullname"`
 	// User's nickname
-	Nickname string `json:"nickname" url:"nickname"`
+	Nickname *string `json:"nickname,omitempty" url:"nickname,omitempty"`
 	// Url of user's picture
-	Picture    string    `json:"picture" url:"picture"`
+	Picture    *string   `json:"picture,omitempty" url:"picture,omitempty"`
 	Ttl        string    `json:"ttl" url:"ttl"`
 	TokenTtl   string    `json:"token_ttl" url:"token_ttl"`
 	Expires    time.Time `json:"expires" url:"expires"`
@@ -3179,11 +3179,11 @@ type Organization struct {
 	// Human friendly display name for this Organization
 	Fullname string `json:"fullname" url:"fullname"`
 	// Organization email address
-	Contact string `json:"contact" url:"contact"`
+	Contact *string `json:"contact,omitempty" url:"contact,omitempty"`
 	// Reply-to email address, used for SMTP emails. Defaults to no-reply@synqly.com
-	ReplyTo string `json:"reply_to" url:"reply_to"`
+	ReplyTo *string `json:"reply_to,omitempty" url:"reply_to,omitempty"`
 	// Picture URL of the organization
-	Picture string `json:"picture" url:"picture"`
+	Picture *string `json:"picture,omitempty" url:"picture,omitempty"`
 	// Organization options
 	Options *OrganizationOptions `json:"options,omitempty" url:"options,omitempty"`
 

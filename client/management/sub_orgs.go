@@ -14,11 +14,11 @@ type CreateOrganizationRequest struct {
 	// Human friendly display name for this Organization, will auto-generate 'name' field (if 'name' is not specified). Defaults to the same value as the 'name' field if not specified.
 	Fullname *string `json:"fullname,omitempty" url:"fullname,omitempty"`
 	// Organization email address
-	Contact string `json:"contact" url:"contact"`
+	Contact *string `json:"contact,omitempty" url:"contact,omitempty"`
 	// Reply-to email address, used for SMTP emails. Defaults to no-reply@synqly.com
-	ReplyTo string `json:"reply_to" url:"reply_to"`
+	ReplyTo *string `json:"reply_to,omitempty" url:"reply_to,omitempty"`
 	// URL of the organization
-	Picture string `json:"picture" url:"picture"`
+	Picture *string `json:"picture,omitempty" url:"picture,omitempty"`
 	// Create organization member
 	Member *CreateMemberRequest `json:"member,omitempty" url:"member,omitempty"`
 
