@@ -478,158 +478,6 @@ func (c *CreateBridgeResponseResult) String() string {
 	return fmt.Sprintf("%#v", c)
 }
 
-type CapabilitiesProviderConfig = map[string]interface{}
-
-// Provides details on an available Integration.
-type Category struct {
-	Category CategoryId `json:"category" url:"category"`
-	// Description of what this Integration does.
-	Description string `json:"description" url:"description"`
-	// List of Providers that implement this Integration.
-	Providers []ProviderId `json:"providers" url:"providers"`
-	// URL of the icon representing this type of Integration.
-	Picture *string `json:"picture,omitempty" url:"picture,omitempty"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (c *Category) GetExtraProperties() map[string]interface{} {
-	return c.extraProperties
-}
-
-func (c *Category) UnmarshalJSON(data []byte) error {
-	type unmarshaler Category
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*c = Category(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *c)
-	if err != nil {
-		return err
-	}
-	c.extraProperties = extraProperties
-
-	c._rawJSON = nil
-	return nil
-}
-
-func (c *Category) String() string {
-	if len(c._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(c); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", c)
-}
-
-type Provider struct {
-	// Name of the Provider.
-	Name string `json:"name" url:"name"`
-	// Description of what this Provider does.
-	Description string `json:"description" url:"description"`
-	// Categories that this Provider implements.
-	Categories []CategoryId `json:"categories" url:"categories"`
-	// URL of the icon representing this type of Provider.
-	Picture *string `json:"picture,omitempty" url:"picture,omitempty"`
-	// Operations that this Provider implements.
-	SupportedOperations interface{} `json:"supported_operations" url:"supported_operations"`
-	// List of credential types that this Provider supports.
-	Credentials []ProviderCredentialConfig `json:"credentials" url:"credentials"`
-	// Details on the specific configuration options for this Provider.
-	ProviderConfig map[string]CapabilitiesProviderConfig `json:"provider_config" url:"provider_config"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (p *Provider) GetExtraProperties() map[string]interface{} {
-	return p.extraProperties
-}
-
-func (p *Provider) UnmarshalJSON(data []byte) error {
-	type unmarshaler Provider
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*p = Provider(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *p)
-	if err != nil {
-		return err
-	}
-	p.extraProperties = extraProperties
-
-	p._rawJSON = nil
-	return nil
-}
-
-func (p *Provider) String() string {
-	if len(p._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(p._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(p); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", p)
-}
-
-type ProviderCredentialConfig = map[string]interface{}
-
-// Id of the Integrations category
-type CategoryId string
-
-const (
-	CategoryIdAssets          CategoryId = "assets"
-	CategoryIdEdr             CategoryId = "edr"
-	CategoryIdIdentity        CategoryId = "identity"
-	CategoryIdNotifications   CategoryId = "notifications"
-	CategoryIdSiem            CategoryId = "siem"
-	CategoryIdSink            CategoryId = "sink"
-	CategoryIdStorage         CategoryId = "storage"
-	CategoryIdTicketing       CategoryId = "ticketing"
-	CategoryIdVulnerabilities CategoryId = "vulnerabilities"
-)
-
-func NewCategoryIdFromString(s string) (CategoryId, error) {
-	switch s {
-	case "assets":
-		return CategoryIdAssets, nil
-	case "edr":
-		return CategoryIdEdr, nil
-	case "identity":
-		return CategoryIdIdentity, nil
-	case "notifications":
-		return CategoryIdNotifications, nil
-	case "siem":
-		return CategoryIdSiem, nil
-	case "sink":
-		return CategoryIdSink, nil
-	case "storage":
-		return CategoryIdStorage, nil
-	case "ticketing":
-		return CategoryIdTicketing, nil
-	case "vulnerabilities":
-		return CategoryIdVulnerabilities, nil
-	}
-	var t CategoryId
-	return "", fmt.Errorf("%s is not a valid %T", s, t)
-}
-
-func (c CategoryId) Ptr() *CategoryId {
-	return &c
-}
-
-type ProviderId = string
-
 // Provides details on an available Integration.
 type Connector struct {
 	Connector CategoryId `json:"connector" url:"connector"`
@@ -914,6 +762,158 @@ func (p *ProviderOperations) String() string {
 	}
 	return fmt.Sprintf("%#v", p)
 }
+
+// Id of the Integrations category
+type CategoryId string
+
+const (
+	CategoryIdAssets          CategoryId = "assets"
+	CategoryIdEdr             CategoryId = "edr"
+	CategoryIdIdentity        CategoryId = "identity"
+	CategoryIdNotifications   CategoryId = "notifications"
+	CategoryIdSiem            CategoryId = "siem"
+	CategoryIdSink            CategoryId = "sink"
+	CategoryIdStorage         CategoryId = "storage"
+	CategoryIdTicketing       CategoryId = "ticketing"
+	CategoryIdVulnerabilities CategoryId = "vulnerabilities"
+)
+
+func NewCategoryIdFromString(s string) (CategoryId, error) {
+	switch s {
+	case "assets":
+		return CategoryIdAssets, nil
+	case "edr":
+		return CategoryIdEdr, nil
+	case "identity":
+		return CategoryIdIdentity, nil
+	case "notifications":
+		return CategoryIdNotifications, nil
+	case "siem":
+		return CategoryIdSiem, nil
+	case "sink":
+		return CategoryIdSink, nil
+	case "storage":
+		return CategoryIdStorage, nil
+	case "ticketing":
+		return CategoryIdTicketing, nil
+	case "vulnerabilities":
+		return CategoryIdVulnerabilities, nil
+	}
+	var t CategoryId
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (c CategoryId) Ptr() *CategoryId {
+	return &c
+}
+
+type ProviderId = string
+
+type CapabilitiesProviderConfig = map[string]interface{}
+
+// Provides details on an available Integration.
+type Category struct {
+	Category CategoryId `json:"category" url:"category"`
+	// Description of what this Integration does.
+	Description string `json:"description" url:"description"`
+	// List of Providers that implement this Integration.
+	Providers []ProviderId `json:"providers" url:"providers"`
+	// URL of the icon representing this type of Integration.
+	Picture *string `json:"picture,omitempty" url:"picture,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *Category) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
+}
+
+func (c *Category) UnmarshalJSON(data []byte) error {
+	type unmarshaler Category
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = Category(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
+	c._rawJSON = nil
+	return nil
+}
+
+func (c *Category) String() string {
+	if len(c._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
+type Provider struct {
+	// Name of the Provider.
+	Name string `json:"name" url:"name"`
+	// Description of what this Provider does.
+	Description string `json:"description" url:"description"`
+	// Categories that this Provider implements.
+	Categories []CategoryId `json:"categories" url:"categories"`
+	// URL of the icon representing this type of Provider.
+	Picture *string `json:"picture,omitempty" url:"picture,omitempty"`
+	// Operations that this Provider implements.
+	SupportedOperations interface{} `json:"supported_operations" url:"supported_operations"`
+	// List of credential types that this Provider supports.
+	Credentials []ProviderCredentialConfig `json:"credentials" url:"credentials"`
+	// Details on the specific configuration options for this Provider.
+	ProviderConfig map[string]CapabilitiesProviderConfig `json:"provider_config" url:"provider_config"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (p *Provider) GetExtraProperties() map[string]interface{} {
+	return p.extraProperties
+}
+
+func (p *Provider) UnmarshalJSON(data []byte) error {
+	type unmarshaler Provider
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*p = Provider(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *p)
+	if err != nil {
+		return err
+	}
+	p.extraProperties = extraProperties
+
+	p._rawJSON = nil
+	return nil
+}
+
+func (p *Provider) String() string {
+	if len(p._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(p._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(p); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", p)
+}
+
+type ProviderCredentialConfig = map[string]interface{}
 
 type Base struct {
 	// Human-readable name for this resource
@@ -3687,7 +3687,6 @@ type ApiPermissionMap struct {
 	Audit             *AuditPermissions             `json:"audit,omitempty" url:"audit,omitempty"`
 	Auth              *AuthPermissions              `json:"auth,omitempty" url:"auth,omitempty"`
 	Bridges           *BridgesPermissions           `json:"bridges,omitempty" url:"bridges,omitempty"`
-	Capabilities      *CapabilitiesPermissions      `json:"capabilities,omitempty" url:"capabilities,omitempty"`
 	Credentials       *CredentialsPermissions       `json:"credentials,omitempty" url:"credentials,omitempty"`
 	Integrations      *IntegrationsPermissions      `json:"integrations,omitempty" url:"integrations,omitempty"`
 	IntegrationPoints *IntegrationPointsPermissions `json:"integration_points,omitempty" url:"integration_points,omitempty"`
@@ -3950,73 +3949,6 @@ func (b *BridgesPermissions) String() string {
 		return value
 	}
 	return fmt.Sprintf("%#v", b)
-}
-
-type CapabilitiesActions string
-
-const (
-	CapabilitiesActionsListCategory  CapabilitiesActions = "list_category"
-	CapabilitiesActionsListProviders CapabilitiesActions = "list_providers"
-	CapabilitiesActionsAll           CapabilitiesActions = "*"
-)
-
-func NewCapabilitiesActionsFromString(s string) (CapabilitiesActions, error) {
-	switch s {
-	case "list_category":
-		return CapabilitiesActionsListCategory, nil
-	case "list_providers":
-		return CapabilitiesActionsListProviders, nil
-	case "*":
-		return CapabilitiesActionsAll, nil
-	}
-	var t CapabilitiesActions
-	return "", fmt.Errorf("%s is not a valid %T", s, t)
-}
-
-func (c CapabilitiesActions) Ptr() *CapabilitiesActions {
-	return &c
-}
-
-// Permissions for the capabilities API
-type CapabilitiesPermissions struct {
-	Actions []CapabilitiesActions `json:"actions" url:"actions"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (c *CapabilitiesPermissions) GetExtraProperties() map[string]interface{} {
-	return c.extraProperties
-}
-
-func (c *CapabilitiesPermissions) UnmarshalJSON(data []byte) error {
-	type unmarshaler CapabilitiesPermissions
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*c = CapabilitiesPermissions(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *c)
-	if err != nil {
-		return err
-	}
-	c.extraProperties = extraProperties
-
-	c._rawJSON = nil
-	return nil
-}
-
-func (c *CapabilitiesPermissions) String() string {
-	if len(c._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(c); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", c)
 }
 
 type CredentialsActions string

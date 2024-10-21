@@ -8,24 +8,34 @@ import (
 	core "github.com/synqly/go-sdk/client/management/core"
 )
 
-type ListConnectorsCapabilitiesResponse struct {
-	Result []*Connector `json:"result" url:"result"`
+type ListCategoryCapabilitiesRequest struct {
+	// Optional comma separated list of categories to return; "storage,tickets"
+	Category *string `json:"-" url:"category,omitempty"`
+}
+
+type ListProviderCapabilitiesRequest struct {
+	// Optional comma separated list of providers to return; "aws_s3,aws_sqs"
+	Provider *string `json:"-" url:"provider,omitempty"`
+}
+
+type ListCategoryCapabilitiesResponse struct {
+	Result map[CategoryId]*Category `json:"result" url:"result"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
 }
 
-func (l *ListConnectorsCapabilitiesResponse) GetExtraProperties() map[string]interface{} {
+func (l *ListCategoryCapabilitiesResponse) GetExtraProperties() map[string]interface{} {
 	return l.extraProperties
 }
 
-func (l *ListConnectorsCapabilitiesResponse) UnmarshalJSON(data []byte) error {
-	type unmarshaler ListConnectorsCapabilitiesResponse
+func (l *ListCategoryCapabilitiesResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler ListCategoryCapabilitiesResponse
 	var value unmarshaler
 	if err := json.Unmarshal(data, &value); err != nil {
 		return err
 	}
-	*l = ListConnectorsCapabilitiesResponse(value)
+	*l = ListCategoryCapabilitiesResponse(value)
 
 	extraProperties, err := core.ExtractExtraProperties(data, *l)
 	if err != nil {
@@ -37,7 +47,7 @@ func (l *ListConnectorsCapabilitiesResponse) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (l *ListConnectorsCapabilitiesResponse) String() string {
+func (l *ListCategoryCapabilitiesResponse) String() string {
 	if len(l._rawJSON) > 0 {
 		if value, err := core.StringifyJSON(l._rawJSON); err == nil {
 			return value
@@ -49,24 +59,24 @@ func (l *ListConnectorsCapabilitiesResponse) String() string {
 	return fmt.Sprintf("%#v", l)
 }
 
-type ListProvidersCapabilitiesResponse struct {
-	Result []*ProviderCapabilities `json:"result" url:"result"`
+type ListProviderCapabilitiesResponse struct {
+	Result map[ProviderId]*Provider `json:"result" url:"result"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
 }
 
-func (l *ListProvidersCapabilitiesResponse) GetExtraProperties() map[string]interface{} {
+func (l *ListProviderCapabilitiesResponse) GetExtraProperties() map[string]interface{} {
 	return l.extraProperties
 }
 
-func (l *ListProvidersCapabilitiesResponse) UnmarshalJSON(data []byte) error {
-	type unmarshaler ListProvidersCapabilitiesResponse
+func (l *ListProviderCapabilitiesResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler ListProviderCapabilitiesResponse
 	var value unmarshaler
 	if err := json.Unmarshal(data, &value); err != nil {
 		return err
 	}
-	*l = ListProvidersCapabilitiesResponse(value)
+	*l = ListProviderCapabilitiesResponse(value)
 
 	extraProperties, err := core.ExtractExtraProperties(data, *l)
 	if err != nil {
@@ -78,7 +88,7 @@ func (l *ListProvidersCapabilitiesResponse) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (l *ListProvidersCapabilitiesResponse) String() string {
+func (l *ListProviderCapabilitiesResponse) String() string {
 	if len(l._rawJSON) > 0 {
 		if value, err := core.StringifyJSON(l._rawJSON); err == nil {
 			return value

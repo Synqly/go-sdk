@@ -34,12 +34,11 @@ func NewClient(opts ...option.RequestOption) *Client {
 	}
 }
 
-// Returns a list of all `Capabilities`, optionally filtered by connector.
-func (c *Client) ListCategory(
+// Returns a list of all `Connectors`.
+func (c *Client) ListConnectors(
 	ctx context.Context,
-	request *management.ListCategoryCapabilitiesRequest,
 	opts ...option.RequestOption,
-) (*management.ListCategoryCapabilitiesResponse, error) {
+) (*management.ListConnectorsCapabilitiesResponse, error) {
 	options := core.NewRequestOptions(opts...)
 
 	baseURL := "https://api.synqly.com"
@@ -49,15 +48,7 @@ func (c *Client) ListCategory(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := baseURL + "/v1/capabilities/category"
-
-	queryParams, err := core.QueryValues(request)
-	if err != nil {
-		return nil, err
-	}
-	if len(queryParams) > 0 {
-		endpointURL += "?" + queryParams.Encode()
-	}
+	endpointURL := baseURL + "/v1/capabilities/connectors"
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
@@ -136,7 +127,7 @@ func (c *Client) ListCategory(
 		return apiError
 	}
 
-	var response *management.ListCategoryCapabilitiesResponse
+	var response *management.ListConnectorsCapabilitiesResponse
 	if err := c.caller.Call(
 		ctx,
 		&core.CallParams{
@@ -154,12 +145,11 @@ func (c *Client) ListCategory(
 	return response, nil
 }
 
-// Returns a list of all `Capabilities`, optionally filtered by provider.
+// Returns a list of all Provider capabilities and their configurations.
 func (c *Client) ListProviders(
 	ctx context.Context,
-	request *management.ListProviderCapabilitiesRequest,
 	opts ...option.RequestOption,
-) (*management.ListProviderCapabilitiesResponse, error) {
+) (*management.ListProvidersCapabilitiesResponse, error) {
 	options := core.NewRequestOptions(opts...)
 
 	baseURL := "https://api.synqly.com"
@@ -169,15 +159,7 @@ func (c *Client) ListProviders(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := baseURL + "/v1/capabilities/provider"
-
-	queryParams, err := core.QueryValues(request)
-	if err != nil {
-		return nil, err
-	}
-	if len(queryParams) > 0 {
-		endpointURL += "?" + queryParams.Encode()
-	}
+	endpointURL := baseURL + "/v1/capabilities/providers"
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
@@ -256,7 +238,7 @@ func (c *Client) ListProviders(
 		return apiError
 	}
 
-	var response *management.ListProviderCapabilitiesResponse
+	var response *management.ListProvidersCapabilitiesResponse
 	if err := c.caller.Call(
 		ctx,
 		&core.CallParams{
