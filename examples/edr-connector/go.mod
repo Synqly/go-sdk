@@ -1,6 +1,6 @@
 module edr-connector
 
-go 1.22.5
+go 1.22.8
 
 require (
 	github.com/knadh/koanf v1.5.0

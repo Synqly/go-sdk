@@ -1,6 +1,6 @@
 module sentinel-example
 
-go 1.22.5
+go 1.22.8
 
 require (
 	github.com/brianvoe/gofakeit v3.18.0+incompatible
