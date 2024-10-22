@@ -5625,6 +5625,75 @@ func (c *CrowdStrikeCredential) Accept(visitor CrowdStrikeCredentialVisitor) err
 	return fmt.Errorf("type %T does not define a non-empty union type", c)
 }
 
+// Supported credential types for Crowdstrike HEC
+type CrowdstrikeHecCredential struct {
+	Type    string
+	Token   *TokenCredential
+	TokenId TokenCredentialId
+}
+
+func (c *CrowdstrikeHecCredential) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	c.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", c)
+	}
+	switch unmarshaler.Type {
+	case "token":
+		value := new(TokenCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		c.Token = value
+	case "token_id":
+		var valueUnmarshaler struct {
+			TokenId TokenCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		c.TokenId = valueUnmarshaler.TokenId
+	}
+	return nil
+}
+
+func (c CrowdstrikeHecCredential) MarshalJSON() ([]byte, error) {
+	if c.Token != nil {
+		return core.MarshalJSONWithExtraProperty(c.Token, "type", "token")
+	}
+	if c.TokenId != "" {
+		var marshaler = struct {
+			Type    string            `json:"type"`
+			TokenId TokenCredentialId `json:"value"`
+		}{
+			Type:    "token_id",
+			TokenId: c.TokenId,
+		}
+		return json.Marshal(marshaler)
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", c)
+}
+
+type CrowdstrikeHecCredentialVisitor interface {
+	VisitToken(*TokenCredential) error
+	VisitTokenId(TokenCredentialId) error
+}
+
+func (c *CrowdstrikeHecCredential) Accept(visitor CrowdstrikeHecCredentialVisitor) error {
+	if c.Token != nil {
+		return visitor.VisitToken(c.Token)
+	}
+	if c.TokenId != "" {
+		return visitor.VisitTokenId(c.TokenId)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", c)
+}
+
 type CustomFieldMapping struct {
 	// Name for the custom field that you will use in the `custom_fields` field in ticket objects within Synqly.
 	Name string `json:"name" url:"name"`
@@ -7213,6 +7282,7 @@ type ProviderConfig struct {
 	SinkAwsSecurityLake               *SinkAwsSecurityLake
 	SinkAwsSqs                        *SinkAwsSqs
 	SinkAzureMonitorLogs              *SinkAzureMonitorLogs
+	SinkCrowdstrikeHec                *SinkCrowdstrikeHec
 	SinkMockSink                      *SinkMock
 	StorageAwsS3                      *StorageAwsS3
 	StorageAzureBlob                  *StorageAzureBlob
@@ -7374,6 +7444,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.SinkAzureMonitorLogs = value
+	case "sink_crowdstrike_hec":
+		value := new(SinkCrowdstrikeHec)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.SinkCrowdstrikeHec = value
 	case "sink_mock_sink":
 		value := new(SinkMock)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -7535,6 +7611,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.SinkAzureMonitorLogs != nil {
 		return core.MarshalJSONWithExtraProperty(p.SinkAzureMonitorLogs, "type", "sink_azure_monitor_logs")
 	}
+	if p.SinkCrowdstrikeHec != nil {
+		return core.MarshalJSONWithExtraProperty(p.SinkCrowdstrikeHec, "type", "sink_crowdstrike_hec")
+	}
 	if p.SinkMockSink != nil {
 		return core.MarshalJSONWithExtraProperty(p.SinkMockSink, "type", "sink_mock_sink")
 	}
@@ -7606,6 +7685,7 @@ type ProviderConfigVisitor interface {
 	VisitSinkAwsSecurityLake(*SinkAwsSecurityLake) error
 	VisitSinkAwsSqs(*SinkAwsSqs) error
 	VisitSinkAzureMonitorLogs(*SinkAzureMonitorLogs) error
+	VisitSinkCrowdstrikeHec(*SinkCrowdstrikeHec) error
 	VisitSinkMockSink(*SinkMock) error
 	VisitStorageAwsS3(*StorageAwsS3) error
 	VisitStorageAzureBlob(*StorageAzureBlob) error
@@ -7689,6 +7769,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.SinkAzureMonitorLogs != nil {
 		return visitor.VisitSinkAzureMonitorLogs(p.SinkAzureMonitorLogs)
+	}
+	if p.SinkCrowdstrikeHec != nil {
+		return visitor.VisitSinkCrowdstrikeHec(p.SinkCrowdstrikeHec)
 	}
 	if p.SinkMockSink != nil {
 		return visitor.VisitSinkMockSink(p.SinkMockSink)
@@ -7786,6 +7869,8 @@ const (
 	ProviderConfigIdSinkAwsSqs ProviderConfigId = "sink_aws_sqs"
 	// Microsoft Azure Monitor Logs
 	ProviderConfigIdSinkAzureMonitorLogs ProviderConfigId = "sink_azure_monitor_logs"
+	// Crowdstrike HEC
+	ProviderConfigIdSinkCrowdstrikeHec ProviderConfigId = "sink_crowdstrike_hec"
 	// Sink Test
 	ProviderConfigIdSinkMock ProviderConfigId = "sink_mock_sink"
 	// AWS S3
@@ -7866,6 +7951,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdSinkAwsSqs, nil
 	case "sink_azure_monitor_logs":
 		return ProviderConfigIdSinkAzureMonitorLogs, nil
+	case "sink_crowdstrike_hec":
+		return ProviderConfigIdSinkCrowdstrikeHec, nil
 	case "sink_mock_sink":
 		return ProviderConfigIdSinkMock, nil
 	case "storage_aws_s3":
@@ -8706,6 +8793,50 @@ func (s *SinkAzureMonitorLogs) UnmarshalJSON(data []byte) error {
 }
 
 func (s *SinkAzureMonitorLogs) String() string {
+	if len(s._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(s); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", s)
+}
+
+// Configuration for Crowdstrike HEC as a Sink Provider
+type SinkCrowdstrikeHec struct {
+	Credential *CrowdstrikeHecCredential `json:"credential" url:"credential"`
+	// API URL for the CrowdStrike HEC API. This must be an HTTPS URL, for example "https://<some-guid>.ingest.us-2.crowdstrike.com/services/collector".
+	Url string `json:"url" url:"url"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (s *SinkCrowdstrikeHec) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
+}
+
+func (s *SinkCrowdstrikeHec) UnmarshalJSON(data []byte) error {
+	type unmarshaler SinkCrowdstrikeHec
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*s = SinkCrowdstrikeHec(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+
+	s._rawJSON = nil
+	return nil
+}
+
+func (s *SinkCrowdstrikeHec) String() string {
 	if len(s._rawJSON) > 0 {
 		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
 			return value
