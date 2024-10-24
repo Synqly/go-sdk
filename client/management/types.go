@@ -5992,6 +5992,8 @@ func (e *ElasticsearchAuthOptions) String() string {
 
 type ElasticsearchBridgeCredentials struct {
 	Type                string
+	BridgeBasic         *BridgeBasicCredential
+	BridgeBasicId       BridgeBasicCredentialId
 	BridgeOAuthClient   *BridgeOAuthClientCredential
 	BridgeOAuthClientId BridgeOAuthClientCredentialId
 	BridgeToken         *BridgeTokenCredential
@@ -6010,6 +6012,20 @@ func (e *ElasticsearchBridgeCredentials) UnmarshalJSON(data []byte) error {
 		return fmt.Errorf("%T did not include discriminant type", e)
 	}
 	switch unmarshaler.Type {
+	case "bridge_basic":
+		value := new(BridgeBasicCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.BridgeBasic = value
+	case "bridge_basic_id":
+		var valueUnmarshaler struct {
+			BridgeBasicId BridgeBasicCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		e.BridgeBasicId = valueUnmarshaler.BridgeBasicId
 	case "bridge_o_auth_client":
 		value := new(BridgeOAuthClientCredential)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -6043,6 +6059,19 @@ func (e *ElasticsearchBridgeCredentials) UnmarshalJSON(data []byte) error {
 }
 
 func (e ElasticsearchBridgeCredentials) MarshalJSON() ([]byte, error) {
+	if e.BridgeBasic != nil {
+		return core.MarshalJSONWithExtraProperty(e.BridgeBasic, "type", "bridge_basic")
+	}
+	if e.BridgeBasicId != "" {
+		var marshaler = struct {
+			Type          string                  `json:"type"`
+			BridgeBasicId BridgeBasicCredentialId `json:"value"`
+		}{
+			Type:          "bridge_basic_id",
+			BridgeBasicId: e.BridgeBasicId,
+		}
+		return json.Marshal(marshaler)
+	}
 	if e.BridgeOAuthClient != nil {
 		return core.MarshalJSONWithExtraProperty(e.BridgeOAuthClient, "type", "bridge_o_auth_client")
 	}
@@ -6073,6 +6102,8 @@ func (e ElasticsearchBridgeCredentials) MarshalJSON() ([]byte, error) {
 }
 
 type ElasticsearchBridgeCredentialsVisitor interface {
+	VisitBridgeBasic(*BridgeBasicCredential) error
+	VisitBridgeBasicId(BridgeBasicCredentialId) error
 	VisitBridgeOAuthClient(*BridgeOAuthClientCredential) error
 	VisitBridgeOAuthClientId(BridgeOAuthClientCredentialId) error
 	VisitBridgeToken(*BridgeTokenCredential) error
@@ -6080,6 +6111,12 @@ type ElasticsearchBridgeCredentialsVisitor interface {
 }
 
 func (e *ElasticsearchBridgeCredentials) Accept(visitor ElasticsearchBridgeCredentialsVisitor) error {
+	if e.BridgeBasic != nil {
+		return visitor.VisitBridgeBasic(e.BridgeBasic)
+	}
+	if e.BridgeBasicId != "" {
+		return visitor.VisitBridgeBasicId(e.BridgeBasicId)
+	}
 	if e.BridgeOAuthClient != nil {
 		return visitor.VisitBridgeOAuthClient(e.BridgeOAuthClient)
 	}
@@ -6165,6 +6202,8 @@ func (e *ElasticsearchBridgeSharedSecret) Accept(visitor ElasticsearchBridgeShar
 
 type ElasticsearchCredential struct {
 	Type          string
+	Basic         *BasicCredential
+	BasicId       BasicCredentialId
 	Bridge        *ElasticsearchBridgeCredentials
 	OAuthClient   *OAuthClientCredential
 	OAuthClientId OAuthClientCredentialId
@@ -6184,6 +6223,20 @@ func (e *ElasticsearchCredential) UnmarshalJSON(data []byte) error {
 		return fmt.Errorf("%T did not include discriminant type", e)
 	}
 	switch unmarshaler.Type {
+	case "basic":
+		value := new(BasicCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.Basic = value
+	case "basic_id":
+		var valueUnmarshaler struct {
+			BasicId BasicCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		e.BasicId = valueUnmarshaler.BasicId
 	case "bridge":
 		var valueUnmarshaler struct {
 			Bridge *ElasticsearchBridgeCredentials `json:"value"`
@@ -6225,6 +6278,19 @@ func (e *ElasticsearchCredential) UnmarshalJSON(data []byte) error {
 }
 
 func (e ElasticsearchCredential) MarshalJSON() ([]byte, error) {
+	if e.Basic != nil {
+		return core.MarshalJSONWithExtraProperty(e.Basic, "type", "basic")
+	}
+	if e.BasicId != "" {
+		var marshaler = struct {
+			Type    string            `json:"type"`
+			BasicId BasicCredentialId `json:"value"`
+		}{
+			Type:    "basic_id",
+			BasicId: e.BasicId,
+		}
+		return json.Marshal(marshaler)
+	}
 	if e.Bridge != nil {
 		var marshaler = struct {
 			Type   string                          `json:"type"`
@@ -6265,6 +6331,8 @@ func (e ElasticsearchCredential) MarshalJSON() ([]byte, error) {
 }
 
 type ElasticsearchCredentialVisitor interface {
+	VisitBasic(*BasicCredential) error
+	VisitBasicId(BasicCredentialId) error
 	VisitBridge(*ElasticsearchBridgeCredentials) error
 	VisitOAuthClient(*OAuthClientCredential) error
 	VisitOAuthClientId(OAuthClientCredentialId) error
@@ -6273,6 +6341,12 @@ type ElasticsearchCredentialVisitor interface {
 }
 
 func (e *ElasticsearchCredential) Accept(visitor ElasticsearchCredentialVisitor) error {
+	if e.Basic != nil {
+		return visitor.VisitBasic(e.Basic)
+	}
+	if e.BasicId != "" {
+		return visitor.VisitBasicId(e.BasicId)
+	}
 	if e.Bridge != nil {
 		return visitor.VisitBridge(e.Bridge)
 	}
