@@ -8280,6 +8280,8 @@ type SiemElasticsearch struct {
 	Credential  *ElasticsearchCredential `json:"credential" url:"credential"`
 	// Optional. The index, data stream, or index alias to read events from. Default "\_all".
 	Index *string `json:"index,omitempty" url:"index,omitempty"`
+	// If true, skips verification of the Elasticsearch server's TLS certificate. Defaults to false.
+	SkipTlsVerify *bool `json:"skip_tls_verify,omitempty" url:"skip_tls_verify,omitempty"`
 	// URL for the Elasticsearch API. This should be the base URL for the API, without any path components and must be HTTPS. For example, "https://tenant.elastic.com".
 	Url string `json:"url" url:"url"`
 
