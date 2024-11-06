@@ -8275,9 +8275,11 @@ func (r *Rapid7InsightCloudCredential) Accept(visitor Rapid7InsightCloudCredenti
 // Configuration for Elasticsearch search and analytics engine. Supports both managed and self-hosted Elasticsearch deployments
 type SiemElasticsearch struct {
 	AuthOptions *ElasticsearchAuthOptions `json:"auth_options,omitempty" url:"auth_options,omitempty"`
-	Credential  *ElasticsearchCredential  `json:"credential" url:"credential"`
-	// Elasticsearch index to send events to.
-	Index string `json:"index" url:"index"`
+	// Optional. The index or data stream to use when writing events. Defaults to the 'index' setting if not set.
+	CreateIndex *string                  `json:"create_index,omitempty" url:"create_index,omitempty"`
+	Credential  *ElasticsearchCredential `json:"credential" url:"credential"`
+	// Optional. The index, data stream, or index alias to read events from. Default "\_all".
+	Index *string `json:"index,omitempty" url:"index,omitempty"`
 	// URL for the Elasticsearch API. This should be the base URL for the API, without any path components and must be HTTPS. For example, "https://tenant.elastic.com".
 	Url string `json:"url" url:"url"`
 
