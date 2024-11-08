@@ -1005,6 +1005,50 @@ func (i *Investigation) String() string {
 	return fmt.Sprintf("%#v", i)
 }
 
+type LogProvider struct {
+	// Some backing providers have multiple log source types. When available, this metadata provides an indication of the backing provider' log provider type.
+	Source *string `json:"source,omitempty" url:"source,omitempty"`
+	// Name of the log provider, usable as a filter value for metadata.log_provider when querying for events.
+	Name string `json:"name" url:"name"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (l *LogProvider) GetExtraProperties() map[string]interface{} {
+	return l.extraProperties
+}
+
+func (l *LogProvider) UnmarshalJSON(data []byte) error {
+	type unmarshaler LogProvider
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*l = LogProvider(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *l)
+	if err != nil {
+		return err
+	}
+	l.extraProperties = extraProperties
+
+	l._rawJSON = nil
+	return nil
+}
+
+func (l *LogProvider) String() string {
+	if len(l._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(l._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(l); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", l)
+}
+
 type QueryEventStatus string
 
 const (

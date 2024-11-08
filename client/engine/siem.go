@@ -55,6 +55,13 @@ type QueryInvestigationsRequest struct {
 	IncludeRawData *bool `json:"-" url:"include_raw_data,omitempty"`
 }
 
+type QueryLogProvidersRequest struct {
+	// Cursor to use to retrieve the next page of results.
+	Cursor *string `json:"-" url:"cursor,omitempty"`
+	// Number of log provider objects to return in this page. Defaults to 100.
+	Limit *int `json:"-" url:"limit,omitempty"`
+}
+
 type GetEvidenceResponse struct {
 	// List of evidence associated with an investigation
 	Result *Evidence `json:"result" url:"result"`
@@ -181,6 +188,50 @@ func (q *QueryInvestigationResponse) UnmarshalJSON(data []byte) error {
 }
 
 func (q *QueryInvestigationResponse) String() string {
+	if len(q._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(q._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(q); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", q)
+}
+
+type QueryLogProvidersResponse struct {
+	// List of available metadata.log_provider values available for querying events
+	Result []*LogProvider `json:"result" url:"result"`
+	// Cursor to use to retrieve the next page of results
+	Cursor string `json:"cursor" url:"cursor"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (q *QueryLogProvidersResponse) GetExtraProperties() map[string]interface{} {
+	return q.extraProperties
+}
+
+func (q *QueryLogProvidersResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler QueryLogProvidersResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*q = QueryLogProvidersResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *q)
+	if err != nil {
+		return err
+	}
+	q.extraProperties = extraProperties
+
+	q._rawJSON = nil
+	return nil
+}
+
+func (q *QueryLogProvidersResponse) String() string {
 	if len(q._rawJSON) > 0 {
 		if value, err := core.StringifyJSON(q._rawJSON); err == nil {
 			return value
