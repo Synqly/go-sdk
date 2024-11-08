@@ -1804,6 +1804,46 @@ func (c *Credential) String() string {
 	return fmt.Sprintf("%#v", c)
 }
 
+// Base type for all credential types
+type CredentialBase struct {
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *CredentialBase) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
+}
+
+func (c *CredentialBase) UnmarshalJSON(data []byte) error {
+	type unmarshaler CredentialBase
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = CredentialBase(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
+	c._rawJSON = nil
+	return nil
+}
+
+func (c *CredentialBase) String() string {
+	if len(c._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
 type CredentialConfig struct {
 	Type        string
 	Aws         *AwsCredential
@@ -5018,8 +5058,10 @@ func (w *WebhooksPermissions) String() string {
 }
 
 type ArmisCredential struct {
-	Type    string
-	Token   *TokenCredential
+	Type string
+	// This credential must be an API Secret Key. Generate this key in the UI console by navigating to "Settings", then "API Management".
+	Token *TokenCredential
+	// ID of an existing credential that stores an Armis Centrix API Secret Key.
 	TokenId TokenCredentialId
 }
 
@@ -5218,8 +5260,10 @@ func (a *AssetsServiceNow) String() string {
 }
 
 type AwsS3Credential struct {
-	Type  string
-	Aws   *AwsCredential
+	Type string
+	// AWS access key to authenticate with AWS. Access keys are long-term credentials for an IAM user and consist of an ID and secret. This token pair must have read and write access to the configured AWS S3 bucket. You may optionally provide a session token if you are using temporary credentials.
+	Aws *AwsCredential
+	// ID of a credential that stores an AWS access key for the AWS S3 bucket.
 	AwsId AwsCredentialId
 }
 
@@ -5286,8 +5330,10 @@ func (a *AwsS3Credential) Accept(visitor AwsS3CredentialVisitor) error {
 }
 
 type AwsSqsCredential struct {
-	Type  string
-	Aws   *AwsCredential
+	Type string
+	// AWS access key to authenticate with AWS. Access keys are long-term credentials for an IAM user and consist of an ID and secret. This token pair must have write access to the configured SQS queue. You may optionally provide a session token if you are using temporary credentials.
+	Aws *AwsCredential
+	// ID of a credential that stores an AWS access key for the SQS queue.
 	AwsId AwsCredentialId
 }
 
@@ -5354,8 +5400,10 @@ func (a *AwsSqsCredential) Accept(visitor AwsSqsCredentialVisitor) error {
 }
 
 type AwsSecurityLakeCredential struct {
-	Type  string
-	Aws   *AwsCredential
+	Type string
+	// AWS access key to authenticate with AWS. Access keys are long-term credentials for an IAM user and consist of an ID and secret. This token pair must have write access to the configured S3 bucket. You may optionally provide a session token if you are using temporary credentials.
+	Aws *AwsCredential
+	// ID of a credential that stores an AWS access key for the AWS Security Lake S3 bucket.
 	AwsId AwsCredentialId
 }
 
@@ -5422,8 +5470,10 @@ func (a *AwsSecurityLakeCredential) Accept(visitor AwsSecurityLakeCredentialVisi
 }
 
 type AzureBlobCredential struct {
-	Type    string
-	Token   *TokenCredential
+	Type string
+	// Azure token for authentication. Follow [this guide to generate an API token](https://learn.microsoft.com/en-us/entra/identity-platform/howto-create-service-principal-portal). The token must have access to the configured blob container.
+	Token *TokenCredential
+	// ID of a credential that stores an Azure token for authentication.
 	TokenId TokenCredentialId
 }
 
@@ -5490,8 +5540,10 @@ func (a *AzureBlobCredential) Accept(visitor AzureBlobCredentialVisitor) error {
 }
 
 type AzureMonitorLogsCredential struct {
-	Type    string
-	Token   *TokenCredential
+	Type string
+	// Azure token for authentication. Follow [this guide to generate an API token](https://docs.microsoft.com_en-us_azure_active-directory_develop_howto-create-service-principal-portal). The token must have access to the configured data collection endpoint.
+	Token *TokenCredential
+	// ID of a credential that stores an Azure token for authentication.
 	TokenId TokenCredentialId
 }
 
@@ -5558,8 +5610,10 @@ func (a *AzureMonitorLogsCredential) Accept(visitor AzureMonitorLogsCredentialVi
 }
 
 type CrowdStrikeCredential struct {
-	Type          string
-	OAuthClient   *OAuthClientCredential
+	Type string
+	// Docs for setting up oAuth
+	OAuthClient *OAuthClientCredential
+	// ID of a credential that stores a CrowdStrike oAuth client ID.
 	OAuthClientId OAuthClientCredentialId
 }
 
@@ -5627,8 +5681,10 @@ func (c *CrowdStrikeCredential) Accept(visitor CrowdStrikeCredentialVisitor) err
 
 // Supported credential types for Crowdstrike HEC
 type CrowdstrikeHecCredential struct {
-	Type    string
-	Token   *TokenCredential
+	Type string
+	// Crowdstrike HEC api-key
+	Token *TokenCredential
+	// ID of a credential that stores a Crowdstrike HEC authentication api-key.
 	TokenId TokenCredentialId
 }
 
@@ -5741,8 +5797,10 @@ func (c *CustomFieldMapping) String() string {
 }
 
 type DefenderCredential struct {
-	Type          string
-	OAuthClient   *OAuthClientCredential
+	Type string
+	// Docs for setting up oAuth
+	OAuthClient *OAuthClientCredential
+	// ID of a credential that stores a Defender oAuth client ID.
 	OAuthClientId OAuthClientCredentialId
 }
 
@@ -5991,13 +6049,19 @@ func (e *ElasticsearchAuthOptions) String() string {
 }
 
 type ElasticsearchBridgeCredentials struct {
-	Type                string
-	BridgeBasic         *BridgeBasicCredential
-	BridgeBasicId       BridgeBasicCredentialId
-	BridgeOAuthClient   *BridgeOAuthClientCredential
+	Type string
+	// Optional basic auth credential used for connecting to the Elasticsearch service through a synqly bridge agent with local credentials.
+	BridgeBasic *BridgeBasicCredential
+	// Optional id of a basic auth credential used for connecting to the Elasticsearch service through a synqly bridge agent with local credentials.
+	BridgeBasicId BridgeBasicCredentialId
+	// Optional OAuth JWT credential used for connecting to the Elasticsearch service through a synqly bridge agent with local credentails.
+	BridgeOAuthClient *BridgeOAuthClientCredential
+	// Optional ID of a OAuth JWT credential used for connecting to the Elasticsearch service through a synqly bridge agent with local credentails.
 	BridgeOAuthClientId BridgeOAuthClientCredentialId
-	BridgeToken         *BridgeTokenCredential
-	BridgeTokenId       BridgeTokenCredentialId
+	// Optional credential used for connecting to the Elasticsearch service through a synqly bridge agent with local credentials.
+	BridgeToken *BridgeTokenCredential
+	// Optional id of a credential used for connecting to the Elasticsearch service through a synqly bridge agent with local credentials.
+	BridgeTokenId BridgeTokenCredentialId
 }
 
 func (e *ElasticsearchBridgeCredentials) UnmarshalJSON(data []byte) error {
@@ -6133,8 +6197,10 @@ func (e *ElasticsearchBridgeCredentials) Accept(visitor ElasticsearchBridgeCrede
 }
 
 type ElasticsearchBridgeSharedSecret struct {
-	Type           string
-	BridgeSecret   *BridgeSecretCredential
+	Type string
+	// Optional credential used for connecting to the Elasticsearch service through a synqly bridge agent with local credentials.
+	BridgeSecret *BridgeSecretCredential
+	// Optional id of a credential used for connecting to the Elasticsearch service through a synqly bridge agent with local credentials.
 	BridgeSecretId BridgeSecretCredentialId
 }
 
@@ -6201,14 +6267,24 @@ func (e *ElasticsearchBridgeSharedSecret) Accept(visitor ElasticsearchBridgeShar
 }
 
 type ElasticsearchCredential struct {
-	Type          string
-	Basic         *BasicCredential
-	BasicId       BasicCredentialId
-	Bridge        *ElasticsearchBridgeCredentials
-	OAuthClient   *OAuthClientCredential
+	Type string
+	// Basic authentication credentials for Elasticsearch. When possible use an API key or oAuth credentials instead
+	Basic *BasicCredential
+	// ID of a credential that stores basic authentication credentials for Elasticsearch.
+	BasicId BasicCredentialId
+	// Bridge Agent local credentials
+	Bridge *ElasticsearchBridgeCredentials
+	// Configuration with credentials and connection data for an IdP that has been configured for use as a [JWT realm in Elasticsearch](https://www.elastic.co/guide/en/elasticsearch/reference/8.15/jwt-auth-realm.html).
+	// There are also [specific instructions for Elastic Cloud](https://www.elastic.co/guide/en/cloud/current/ec-securing-clusters-JWT.html). This configuration requires
+	// a token URL for the 3rd party identity provider. If you need to send specific scopes during the client credentials OAuth flow, specify them in the 'extra' configuration
+	// as a list of strings under the 'scopes' key.
+	OAuthClient *OAuthClientCredential
+	// The ID of a credential that stores the secrets and connection data for an IdP that has been configured for use as a JWT realm in Elasticsearch.
 	OAuthClientId OAuthClientCredentialId
-	Token         *TokenCredential
-	TokenId       TokenCredentialId
+	// Elasticsearch API Key. Follow [this guide to generate an API Key](https://www.elastic.co_guide_en_kibana_current_api-keys.html). The API Key must have sufficient permissions to the target index.
+	Token *TokenCredential
+	// ID of a credential that stores an Elasticsearch API Key.
+	TokenId TokenCredentialId
 }
 
 func (e *ElasticsearchCredential) UnmarshalJSON(data []byte) error {
@@ -6366,9 +6442,12 @@ func (e *ElasticsearchCredential) Accept(visitor ElasticsearchCredentialVisitor)
 }
 
 type ElasticsearchSharedSecret struct {
-	Type     string
-	Bridge   *ElasticsearchBridgeSharedSecret
-	Secret   *SecretCredential
+	Type string
+	// Bridge Agent shared secret local credentials
+	Bridge *ElasticsearchBridgeSharedSecret
+	// Shared secret used to populate the `ES-Client-Authentication` header during Elasticsearch requests.
+	Secret *SecretCredential
+	// ID of a credential that stores a shared secret.
 	SecretId SecretCredentialId
 }
 
@@ -6457,8 +6536,10 @@ func (e *ElasticsearchSharedSecret) Accept(visitor ElasticsearchSharedSecretVisi
 }
 
 type EntraIdCredential struct {
-	Type          string
-	OAuthClient   *OAuthClientCredential
+	Type string
+	// Azure OAuth 2.0 Client ID and Client Secret for a Synqly Identity Connector API service principal. Follow [this guide to generate an API token](https://docs.microsoft.com_en-us_azure_active-directory_develop_howto-create-service-principal-portal). The application must be configured with permissions to access the user, group, and audit log graph APIs.
+	OAuthClient *OAuthClientCredential
+	// The ID of a credential that stores the Azure OAuth 2.0 values for a Synqly Identity Connector API service principal.
 	OAuthClientId OAuthClientCredentialId
 }
 
@@ -6525,8 +6606,10 @@ func (e *EntraIdCredential) Accept(visitor EntraIdCredentialVisitor) error {
 }
 
 type GcsCredential struct {
-	Type  string
-	Aws   *AwsCredential
+	Type string
+	// AWS-type credential that stores [Hash-based message authentication code (HMAC) keys](https://cloud.google.com/storage/docs/authentication/hmackeys) with write access to the GCS bucket.
+	Aws *AwsCredential
+	// ID of a credential that stores HMAC access keys for the GCS bucket.
 	AwsId AwsCredentialId
 }
 
@@ -6733,8 +6816,10 @@ func (i *IdentityPingOne) String() string {
 }
 
 type JiraCredential struct {
-	Type    string
-	Basic   *BasicCredential
+	Type string
+	// Username and password used to authenticate with Jira. The password can be a token that is generated following [this guide to generate an API token](https://support.atlassian.com_atlassian-account_docs_manage-api-tokens-for-your-atlassian-account_). The token receives the same permissions as the user that generates it, so must have access to the projects you want to use.
+	Basic *BasicCredential
+	// ID of a credential that stores a username and password used to authenticate with Jira.
 	BasicId BasicCredentialId
 }
 
@@ -6976,8 +7061,11 @@ func (n *NotificationsTeams) String() string {
 }
 
 type NozomiVantageCredential struct {
-	Type    string
-	Basic   *BasicCredential
+	Type string
+	// This is your API key name and secret value of your Nozomi Vantage API token. The token name
+	// is supplied as the 'username' while the token secret value is supplied as the 'secret'.
+	Basic *BasicCredential
+	// ID of an existing Synqly credential that stores an Nozomi Vantage API token name and secret.
 	BasicId BasicCredentialId
 }
 
@@ -7044,11 +7132,15 @@ func (n *NozomiVantageCredential) Accept(visitor NozomiVantageCredentialVisitor)
 }
 
 type OktaCredential struct {
-	Type          string
-	OAuthClient   *OAuthClientCredential
+	Type string
+	// OAuth 2.0 Token URL, Client ID, and Client Secret for a Synqly Identity Connector API service application.
+	OAuthClient *OAuthClientCredential
+	// The ID of a credential that stores the OAuth 2.0 values for a Synqly Identity Connector API service application.
 	OAuthClientId OAuthClientCredentialId
-	Token         *TokenCredential
-	TokenId       TokenCredentialId
+	// Token to authenticate with Okta. Follow [this guide to generate an API token](https://developer.okta.com_docs_guides_create-an-api-token_overview_). The token must have access to list records in the system audit log. (Not for production use. Use `o_auth_client` instead)
+	Token *TokenCredential
+	// ID of a credential that stores a token used to authenticate with Okta. (Not for production use. Use `o_auth_client` instead)
+	TokenId TokenCredentialId
 }
 
 func (o *OktaCredential) UnmarshalJSON(data []byte) error {
@@ -7149,8 +7241,10 @@ func (o *OktaCredential) Accept(visitor OktaCredentialVisitor) error {
 }
 
 type PagerDutyCredential struct {
-	Type    string
-	Token   *TokenCredential
+	Type string
+	// PagerDuty authentication token. Follow [this guide to generate an REST API token](https://support.pagerduty.com/docs/api-access-keys#rest-api-keys).
+	Token *TokenCredential
+	// ID of a credential that stores a PagerDuty authentication token.
 	TokenId TokenCredentialId
 }
 
@@ -7217,8 +7311,10 @@ func (p *PagerDutyCredential) Accept(visitor PagerDutyCredentialVisitor) error {
 }
 
 type PingOneCredential struct {
-	Type    string
-	Token   *TokenCredential
+	Type string
+	// Client application secret for a worker app. See [these instructions](https://docs.pingidentity.com_r_en-us_pingone_p1_create_app_splunk) for help creating a worker application.
+	Token *TokenCredential
+	// ID of an existing credential that stores a PingOne client application secret.
 	TokenId TokenCredentialId
 }
 
@@ -8069,8 +8165,10 @@ func (p ProviderConfigId) Ptr() *ProviderConfigId {
 }
 
 type QRadarCredential struct {
-	Type    string
-	Token   *TokenCredential
+	Type string
+	// QRadar authorized service token. Follow [this guide to generate a token](https://www.ibm.com/docs/en/qradar-common?topic=app-creating-authorized-service-token-qradar-operations).
+	Token *TokenCredential
+	// ID of a Synqly Credential that stores an authorized service token.
 	TokenId TokenCredentialId
 }
 
@@ -8137,8 +8235,10 @@ func (q *QRadarCredential) Accept(visitor QRadarCredentialVisitor) error {
 }
 
 type QualysCloudCredential struct {
-	Type    string
-	Basic   *BasicCredential
+	Type string
+	// Qualys Cloud username and password used to authenticate with Qualys Cloud.
+	Basic *BasicCredential
+	// ID of a credential that stores a Qualys Cloud username and password.
 	BasicId BasicCredentialId
 }
 
@@ -8205,8 +8305,10 @@ func (q *QualysCloudCredential) Accept(visitor QualysCloudCredentialVisitor) err
 }
 
 type Rapid7InsightCloudCredential struct {
-	Type    string
-	Token   *TokenCredential
+	Type string
+	// Rapid7 Insight Cloud authentication token. Follow [this guide to generate an API token](https://docs.rapid7.com/insight/managing-platform-api-keys/).
+	Token *TokenCredential
+	// ID of a credential that stores a Rapid7 Insight Cloud authentication token.
 	TokenId TokenCredentialId
 }
 
@@ -8565,8 +8667,10 @@ func (s *SiemSumoLogic) String() string {
 }
 
 type SentinelOneCredential struct {
-	Type    string
-	Token   *TokenCredential
+	Type string
+	// SentinelOne API token for authentication. Follow the API DOC overview once logged into your SentinelOne Management URL, "https://your_management_url/docs/en/generating-api-tokens.html".
+	Token *TokenCredential
+	// ID of an existing credential that stores a SentinelOne API token.
 	TokenId TokenCredentialId
 }
 
@@ -8633,10 +8737,14 @@ func (s *SentinelOneCredential) Accept(visitor SentinelOneCredentialVisitor) err
 }
 
 type ServiceNowCredential struct {
-	Type    string
-	Basic   *BasicCredential
+	Type string
+	// Username and password used to authenticate with ServiceNow. The password can be a token that is generated following [this guide to generate an API token](https://docs.servicenow.com_bundle_vancouver-platform-administration_page_administer_users-and-groups_task_t_CreateAUser.html). The token receives the same permissions as the user that generates it, so must have access to the projects you want to use.
+	Basic *BasicCredential
+	// ID of a credential that stores a username and password used to authenticate with ServiceNow.
 	BasicId BasicCredentialId
-	Token   *TokenCredential
+	// Token used to authenticate with ServiceNow. This token will be used with the authentication header `x-sn-apikey`. To use token authentication, the version of ServiceNow must be Washington D.C. or later.
+	Token *TokenCredential
+	// ID of a credential that stores a token used to authenticate with ServiceNow.
 	TokenId TokenCredentialId
 }
 
@@ -8970,8 +9078,10 @@ func (s *SinkMock) String() string {
 }
 
 type SlackCredential struct {
-	Type    string
-	Token   *TokenCredential
+	Type string
+	// Slack authentication token. Follow [this guide to generate an API token](https://api.slack.com_authentication_token-types#granular_bot). The token must have access to the configured channel.
+	Token *TokenCredential
+	// ID of a credential that stores a token used to authenticate with Slack.
 	TokenId TokenCredentialId
 }
 
@@ -9038,8 +9148,10 @@ func (s *SlackCredential) Accept(visitor SlackCredentialVisitor) error {
 }
 
 type SplunkBridgeHecToken struct {
-	Type          string
-	BridgeToken   *BridgeTokenCredential
+	Type string
+	// Credential ID that stores a Splunk HTTP endpoint collector synqly bridge agent local token definition. Follow [this guide to generate an API token](https://docs.splunk.com_Documentation_Splunk_8.1.3/Data_UsetheHTTPEventCollector#Authentication). The token must have access to the configured data collection endpoint.
+	BridgeToken *BridgeTokenCredential
+	// ID of a credential that stores a Splunk HTTP endpoint collector (HEC) synqly bridge agent local token definition.
 	BridgeTokenId BridgeTokenCredentialId
 }
 
@@ -9106,8 +9218,10 @@ func (s *SplunkBridgeHecToken) Accept(visitor SplunkBridgeHecTokenVisitor) error
 }
 
 type SplunkBridgeSearchCredential struct {
-	Type          string
-	BridgeToken   *BridgeTokenCredential
+	Type string
+	// Optional URL used for connecting to the Splunk search service through a synqly bridge agent with local credentials. If not provided, querying is disabled.
+	BridgeToken *BridgeTokenCredential
+	// Optional id of a credential used for connecting to the Splunk search service through a synqly bridge agent with local credentials.
 	BridgeTokenId BridgeTokenCredentialId
 }
 
@@ -9174,9 +9288,12 @@ func (s *SplunkBridgeSearchCredential) Accept(visitor SplunkBridgeSearchCredenti
 }
 
 type SplunkHecToken struct {
-	Type    string
-	Bridge  *SplunkBridgeHecToken
-	Token   *TokenCredential
+	Type string
+	// Bridge Agent HEC local credentials
+	Bridge *SplunkBridgeHecToken
+	// Credential ID that stores a Splunk HTTP endpoint collector token. Follow [this guide to generate an API token](https://docs.splunk.com_Documentation_Splunk_8.1.3/Data_UsetheHTTPEventCollector#Authentication). The token must have access to the configured data collection endpoint.
+	Token *TokenCredential
+	// ID of a credential that stores a Splunk HTTP endpoint collector (HEC) token.
 	TokenId TokenCredentialId
 }
 
@@ -9265,9 +9382,12 @@ func (s *SplunkHecToken) Accept(visitor SplunkHecTokenVisitor) error {
 }
 
 type SplunkSearchCredential struct {
-	Type    string
-	Bridge  *SplunkBridgeSearchCredential
-	Token   *TokenCredential
+	Type string
+	// Bridge Agent search local credentials
+	Bridge *SplunkBridgeSearchCredential
+	// Optional URL used for connecting to the Splunk search service. If not provided, querying is disabled.
+	Token *TokenCredential
+	// Optional id of a credential used for connecting to the Splunk search service.
 	TokenId TokenCredentialId
 }
 
@@ -9595,8 +9715,10 @@ func (s *StorageMock) String() string {
 }
 
 type SumoLogicCollectionUrl struct {
-	Type     string
-	Secret   *SecretCredential
+	Type string
+	// The Sumo Logic HTTP collection URL, stored as a secret. This URL contains all of the authorization information for sending logs to Sumo Logic and is stored in a credential to protect that information. See https://help.sumologic.com/docs/send-data/hosted-collectors/http-source/logs-metrics/ for instruction on generating a collection URL.
+	Secret *SecretCredential
+	// ID of a credential that stores a Sumo Logic HTTP collection URL.
 	SecretId SecretCredentialId
 }
 
@@ -9663,8 +9785,10 @@ func (s *SumoLogicCollectionUrl) Accept(visitor SumoLogicCollectionUrlVisitor) e
 }
 
 type SumoLogicCredential struct {
-	Type    string
-	Basic   *BasicCredential
+	Type string
+	// Your Access ID and Access Key. See https://help.sumologic.com/docs/api/getting-started/#authentication for information on generating these values.
+	Basic *BasicCredential
+	// ID of a credential that stores a Sumo Logic Access ID and Access Key.
 	BasicId BasicCredentialId
 }
 
@@ -9732,8 +9856,10 @@ func (s *SumoLogicCredential) Accept(visitor SumoLogicCredentialVisitor) error {
 
 // Supported credential types for Tanium Cloud
 type TaniumCloudCredential struct {
-	Type    string
-	Token   *TokenCredential
+	Type string
+	// Tanium™ API authentication tokens allow users to maintain extended sessions with Tanium Cloud, eliminating the need for repeated authentication in long-running workflows that aren't continuously active. Each token is tied to a specific user or persona, authenticating based on their credentials and permissions. Multiple tokens can be created per user or persona, with a configurable expiration period. To avoid workflow disruptions, users should regularly rotate tokens by requesting new ones and revoking the old ones before they expire. For more details on generating, managing, rotating, or revoking an API token, please refer to [this API Token guide](https://help.tanium.com/bundle/ug_console_cloud/page/platform_user/console_api_tokens.html#add_API_tokens). A persona in Tanium is a set of roles and computer groups selected for a session, allowing different restrictions for a user without needing multiple accounts. For example, a user managing endpoints across various countries can have one persona for client maintenance in a specific country and another for security patch installations in only certain computer groups. For more details please refer our [Tanium Authentication Guide](ref:tanium-setup).
+	Token *TokenCredential
+	// ID of a credential that stores a Tanium Cloud authentication token.
 	TokenId TokenCredentialId
 }
 
@@ -9800,8 +9926,10 @@ func (t *TaniumCloudCredential) Accept(visitor TaniumCloudCredentialVisitor) err
 }
 
 type TeamsCredential struct {
-	Type     string
-	Secret   *SecretCredential
+	Type string
+	// Webhook URL used to authenticate with Teams. Follow [this guide to generate a webhook URL](https://docs.microsoft.com_en-us_microsoftteams_platform_webhooks-and-connectors_how-to_add-incoming-webhook). The webhook must have access to the configured channel.
+	Secret *SecretCredential
+	// ID of a credential that stores a webhook URL used to authenticate with Teams.
 	SecretId SecretCredentialId
 }
 
@@ -9869,8 +9997,10 @@ func (t *TeamsCredential) Accept(visitor TeamsCredentialVisitor) error {
 
 // Supported credential types for Tenable Cloud
 type TenableCloudCredential struct {
-	Type    string
-	Token   *TokenCredential
+	Type string
+	// Tenable Cloud authentication token. Follow [this guide to generate an API token](https://docs.tenable.com/vulnerability-management/Content/Settings/my-account/GenerateAPIKey.htm). Secret must be of the form accessKey=<key>;secretKey=<secret>.
+	Token *TokenCredential
+	// ID of a credential that stores a Tenable Cloud authentication token.
 	TokenId TokenCredentialId
 }
 
@@ -10166,8 +10296,10 @@ func (t *TicketingTorq) String() string {
 }
 
 type TorqCredential struct {
-	Type          string
-	OAuthClient   *OAuthClientCredential
+	Type string
+	// Client ID for the Torq REST API. [Torq API key generation documentation](https://learn.torq.io/apidocs/authentication).
+	OAuthClient *OAuthClientCredential
+	// Synqly credential id for the Torq Client ID and Client Secret.
 	OAuthClientId OAuthClientCredentialId
 }
 
