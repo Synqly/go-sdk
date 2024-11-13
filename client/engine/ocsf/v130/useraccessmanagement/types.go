@@ -1172,7 +1172,7 @@ type Device struct {
 	FirstSeenTime *Timestamp `json:"first_seen_time,omitempty" url:"first_seen_time,omitempty"`
 	// The initial discovery time of the device.
 	FirstSeenTimeDt *time.Time `json:"first_seen_time_dt,omitempty" url:"first_seen_time_dt,omitempty"`
-	// The group names to which the device belongs. For example: <code>["Windows Laptops", "Engineering"]<code/>.
+	// The group names to which the device belongs. For example: <code>["Windows Laptops", "Engineering"]</code>.
 	Groups []*Group `json:"groups,omitempty" url:"groups,omitempty"`
 	// The device hostname.
 	Hostname *Hostname `json:"hostname,omitempty" url:"hostname,omitempty"`
