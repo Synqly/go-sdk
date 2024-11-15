@@ -273,6 +273,47 @@ func (c *Client) Get(
 	return response, nil
 }
 
+// Returns the status and local configuration of running Bridges matching `{bridgeId}`.
+func (c *Client) GetStatus(
+	ctx context.Context,
+	accountId management.AccountId,
+	bridgeId management.BridgeGroupId,
+	opts ...option.RequestOption,
+) (*management.GetBridgeStatusResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
+	baseURL := "https://api.synqly.com"
+	if c.baseURL != "" {
+		baseURL = c.baseURL
+	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
+	endpointURL := core.EncodeURL(
+		baseURL+"/v1/bridges/%v/%v/status",
+		accountId,
+		bridgeId,
+	)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
+
+	var response *management.GetBridgeStatusResponse
+	if err := c.caller.Call(
+		ctx,
+		&core.CallParams{
+			URL:         endpointURL,
+			Method:      http.MethodGet,
+			MaxAttempts: options.MaxAttempts,
+			Headers:     headers,
+			Client:      options.HTTPClient,
+			Response:    &response,
+		},
+	); err != nil {
+		return nil, err
+	}
+	return response, nil
+}
+
 // Creates an `Bridge` object. For more information on Bridges, refer to our
 // [Synqly Overview](https://docs.synqly.com/docs/synqly-overview).
 func (c *Client) Create(

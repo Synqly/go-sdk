@@ -156,6 +156,47 @@ func (g *GetBridgeResponse) String() string {
 	return fmt.Sprintf("%#v", g)
 }
 
+type GetBridgeStatusResponse struct {
+	Result []*BridgeStatus `json:"result" url:"result"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (g *GetBridgeStatusResponse) GetExtraProperties() map[string]interface{} {
+	return g.extraProperties
+}
+
+func (g *GetBridgeStatusResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler GetBridgeStatusResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*g = GetBridgeStatusResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	if err != nil {
+		return err
+	}
+	g.extraProperties = extraProperties
+
+	g._rawJSON = nil
+	return nil
+}
+
+func (g *GetBridgeStatusResponse) String() string {
+	if len(g._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(g._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(g); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", g)
+}
+
 type ListBridgesResponse struct {
 	Result []*BridgeGroup `json:"result" url:"result"`
 

@@ -435,6 +435,116 @@ func (b *BridgeGroup) String() string {
 	return fmt.Sprintf("%#v", b)
 }
 
+type BridgeLocalConfig struct {
+	// Version of the Bridge.
+	Version string `json:"version" url:"version"`
+	// List of IP addresses that the Bridge is allowed to connect to.
+	AllowAddresses []string `json:"allow_addresses" url:"allow_addresses"`
+	// Vault configuration for the Bridge.
+	Vault map[string]string `json:"vault,omitempty" url:"vault,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (b *BridgeLocalConfig) GetExtraProperties() map[string]interface{} {
+	return b.extraProperties
+}
+
+func (b *BridgeLocalConfig) UnmarshalJSON(data []byte) error {
+	type unmarshaler BridgeLocalConfig
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*b = BridgeLocalConfig(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *b)
+	if err != nil {
+		return err
+	}
+	b.extraProperties = extraProperties
+
+	b._rawJSON = nil
+	return nil
+}
+
+func (b *BridgeLocalConfig) String() string {
+	if len(b._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(b._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(b); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", b)
+}
+
+type BridgeStatus struct {
+	// Local time on the Bridge when the status check was performed.
+	CurrentTime time.Time `json:"current_time" url:"current_time"`
+	// Round trip time for the status check.
+	ResponseDuration string `json:"response_duration" url:"response_duration"`
+	// Local configuration parameters for the Bridge.
+	LocalConfig *BridgeLocalConfig `json:"local_config" url:"local_config"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (b *BridgeStatus) GetExtraProperties() map[string]interface{} {
+	return b.extraProperties
+}
+
+func (b *BridgeStatus) UnmarshalJSON(data []byte) error {
+	type embed BridgeStatus
+	var unmarshaler = struct {
+		embed
+		CurrentTime *core.DateTime `json:"current_time"`
+	}{
+		embed: embed(*b),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*b = BridgeStatus(unmarshaler.embed)
+	b.CurrentTime = unmarshaler.CurrentTime.Time()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *b)
+	if err != nil {
+		return err
+	}
+	b.extraProperties = extraProperties
+
+	b._rawJSON = nil
+	return nil
+}
+
+func (b *BridgeStatus) MarshalJSON() ([]byte, error) {
+	type embed BridgeStatus
+	var marshaler = struct {
+		embed
+		CurrentTime *core.DateTime `json:"current_time"`
+	}{
+		embed:       embed(*b),
+		CurrentTime: core.NewDateTime(b.CurrentTime),
+	}
+	return json.Marshal(marshaler)
+}
+
+func (b *BridgeStatus) String() string {
+	if len(b._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(b._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(b); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", b)
+}
+
 type CreateBridgeResponseResult struct {
 	Bridge *BridgeGroup `json:"bridge" url:"bridge"`
 	// JWT for the Bridge Group to connect to Synqly. This must be saved in a file {bridgeId}.creds in the same directory as the bridge executable.
@@ -3921,6 +4031,7 @@ const (
 	BridgesActionsUpdate BridgesActions = "update"
 	BridgesActionsPatch  BridgesActions = "patch"
 	BridgesActionsDelete BridgesActions = "delete"
+	BridgesActionsStatus BridgesActions = "status"
 	BridgesActionsAll    BridgesActions = "*"
 )
 
@@ -3938,6 +4049,8 @@ func NewBridgesActionsFromString(s string) (BridgesActions, error) {
 		return BridgesActionsPatch, nil
 	case "delete":
 		return BridgesActionsDelete, nil
+	case "status":
+		return BridgesActionsStatus, nil
 	case "*":
 		return BridgesActionsAll, nil
 	}
