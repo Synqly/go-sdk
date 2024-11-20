@@ -204,6 +204,8 @@ type QueryLogProvidersResponse struct {
 	Result []*LogProvider `json:"result" url:"result"`
 	// Cursor to use to retrieve the next page of results
 	Cursor string `json:"cursor" url:"cursor"`
+	// If the provider supports asynchronous queries and the query is still running, this will be PENDING. There will be a value in the `cursor` field allowing you to continue polling for results.
+	Status QueryEventStatus `json:"status" url:"status"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
