@@ -3831,9 +3831,157 @@ func (a *AccountsPermissions) String() string {
 	return fmt.Sprintf("%#v", a)
 }
 
+type AlarmPoliciesActions string
+
+const (
+	AlarmPoliciesActionsGet    AlarmPoliciesActions = "get"
+	AlarmPoliciesActionsUpdate AlarmPoliciesActions = "update"
+	AlarmPoliciesActionsPatch  AlarmPoliciesActions = "patch"
+	AlarmPoliciesActionsAll    AlarmPoliciesActions = "*"
+)
+
+func NewAlarmPoliciesActionsFromString(s string) (AlarmPoliciesActions, error) {
+	switch s {
+	case "get":
+		return AlarmPoliciesActionsGet, nil
+	case "update":
+		return AlarmPoliciesActionsUpdate, nil
+	case "patch":
+		return AlarmPoliciesActionsPatch, nil
+	case "*":
+		return AlarmPoliciesActionsAll, nil
+	}
+	var t AlarmPoliciesActions
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (a AlarmPoliciesActions) Ptr() *AlarmPoliciesActions {
+	return &a
+}
+
+// Permissions for the alarm policy API
+type AlarmPoliciesPermissions struct {
+	Actions []AlarmPoliciesActions `json:"actions" url:"actions"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (a *AlarmPoliciesPermissions) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
+}
+
+func (a *AlarmPoliciesPermissions) UnmarshalJSON(data []byte) error {
+	type unmarshaler AlarmPoliciesPermissions
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*a = AlarmPoliciesPermissions(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+
+	a._rawJSON = nil
+	return nil
+}
+
+func (a *AlarmPoliciesPermissions) String() string {
+	if len(a._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(a); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", a)
+}
+
+type AlarmsActions string
+
+const (
+	AlarmsActionsList     AlarmsActions = "list"
+	AlarmsActionsGet      AlarmsActions = "get"
+	AlarmsActionsMode     AlarmsActions = "mode"
+	AlarmsActionsPriority AlarmsActions = "priority"
+	AlarmsActionsClear    AlarmsActions = "clear"
+	AlarmsActionsAll      AlarmsActions = "*"
+)
+
+func NewAlarmsActionsFromString(s string) (AlarmsActions, error) {
+	switch s {
+	case "list":
+		return AlarmsActionsList, nil
+	case "get":
+		return AlarmsActionsGet, nil
+	case "mode":
+		return AlarmsActionsMode, nil
+	case "priority":
+		return AlarmsActionsPriority, nil
+	case "clear":
+		return AlarmsActionsClear, nil
+	case "*":
+		return AlarmsActionsAll, nil
+	}
+	var t AlarmsActions
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (a AlarmsActions) Ptr() *AlarmsActions {
+	return &a
+}
+
+// Permissions for the alarms API
+type AlarmsPermissions struct {
+	Actions []AlarmsActions `json:"actions" url:"actions"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (a *AlarmsPermissions) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
+}
+
+func (a *AlarmsPermissions) UnmarshalJSON(data []byte) error {
+	type unmarshaler AlarmsPermissions
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*a = AlarmsPermissions(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+
+	a._rawJSON = nil
+	return nil
+}
+
+func (a *AlarmsPermissions) String() string {
+	if len(a._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(a); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", a)
+}
+
 type ApiPermissionMap struct {
 	All               *ReadWritePermissions         `json:"all,omitempty" url:"all,omitempty"`
 	Accounts          *AccountsPermissions          `json:"accounts,omitempty" url:"accounts,omitempty"`
+	Alarms            *AlarmsPermissions            `json:"alarms,omitempty" url:"alarms,omitempty"`
+	AlarmPolicies     *AlarmPoliciesPermissions     `json:"alarm_policies,omitempty" url:"alarm_policies,omitempty"`
 	Audit             *AuditPermissions             `json:"audit,omitempty" url:"audit,omitempty"`
 	Auth              *AuthPermissions              `json:"auth,omitempty" url:"auth,omitempty"`
 	Bridges           *BridgesPermissions           `json:"bridges,omitempty" url:"bridges,omitempty"`
@@ -7493,54 +7641,6 @@ func (p *PingOneCredential) Accept(visitor PingOneCredentialVisitor) error {
 	return fmt.Errorf("type %T does not define a non-empty union type", p)
 }
 
-type PriorityMapping struct {
-	// Custom value for the "High" priority.
-	High *string `json:"high,omitempty" url:"high,omitempty"`
-	// Custom value for the "Low" priority.
-	Low *string `json:"low,omitempty" url:"low,omitempty"`
-	// Custom value for the "Medium" priority.
-	Medium *string `json:"medium,omitempty" url:"medium,omitempty"`
-	// Custom value for the "Urgent" priority.
-	Urgent *string `json:"urgent,omitempty" url:"urgent,omitempty"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (p *PriorityMapping) GetExtraProperties() map[string]interface{} {
-	return p.extraProperties
-}
-
-func (p *PriorityMapping) UnmarshalJSON(data []byte) error {
-	type unmarshaler PriorityMapping
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*p = PriorityMapping(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *p)
-	if err != nil {
-		return err
-	}
-	p.extraProperties = extraProperties
-
-	p._rawJSON = nil
-	return nil
-}
-
-func (p *PriorityMapping) String() string {
-	if len(p._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(p._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(p); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", p)
-}
-
 type ProviderConfig struct {
 	Type                              string
 	AssetsArmisCentrix                *AssetsArmisCentrix
@@ -9588,58 +9688,6 @@ func (s *SplunkSearchCredential) Accept(visitor SplunkSearchCredentialVisitor) e
 	return fmt.Errorf("type %T does not define a non-empty union type", s)
 }
 
-type StatusMapping struct {
-	// Custom value for the "Closed" status.
-	Closed *string `json:"closed,omitempty" url:"closed,omitempty"`
-	// Custom value for the "Done" status.
-	Done *string `json:"done,omitempty" url:"done,omitempty"`
-	// Custom value for the "In Progress" status.
-	InProgress *string `json:"in_progress,omitempty" url:"in_progress,omitempty"`
-	// Custom value for the "On Hold" status.
-	OnHold *string `json:"on_hold,omitempty" url:"on_hold,omitempty"`
-	// Custom value for the "Open" status.
-	Open *string `json:"open,omitempty" url:"open,omitempty"`
-	// Custom value for the "To Do" status.
-	Todo *string `json:"todo,omitempty" url:"todo,omitempty"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (s *StatusMapping) GetExtraProperties() map[string]interface{} {
-	return s.extraProperties
-}
-
-func (s *StatusMapping) UnmarshalJSON(data []byte) error {
-	type unmarshaler StatusMapping
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*s = StatusMapping(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *s)
-	if err != nil {
-		return err
-	}
-	s.extraProperties = extraProperties
-
-	s._rawJSON = nil
-	return nil
-}
-
-func (s *StatusMapping) String() string {
-	if len(s._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(s); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", s)
-}
-
 // Configuration for AWS S3 as a Storage Provider
 type StorageAwsS3 struct {
 	// Name of the AWS S3 bucket where files are stored.
@@ -10476,54 +10524,6 @@ func (t *TorqCredential) Accept(visitor TorqCredentialVisitor) error {
 		return visitor.VisitOAuthClientId(t.OAuthClientId)
 	}
 	return fmt.Errorf("type %T does not define a non-empty union type", t)
-}
-
-type ValueMapping struct {
-	// Optionally restrict this value mapping to a specific issue type. If not provided, the mapping will apply to all issue types.
-	IssueType *string `json:"issue_type,omitempty" url:"issue_type,omitempty"`
-	// Remap the standard Synqly priorities to custom values.
-	Priority *PriorityMapping `json:"priority,omitempty" url:"priority,omitempty"`
-	// ID of the project this value mapping is associated with. ID of "\*" is used to apply to all projects.
-	ProjectId string `json:"project_id" url:"project_id"`
-	// Remap the standard Synqly statuses to custom values.
-	Status *StatusMapping `json:"status,omitempty" url:"status,omitempty"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (v *ValueMapping) GetExtraProperties() map[string]interface{} {
-	return v.extraProperties
-}
-
-func (v *ValueMapping) UnmarshalJSON(data []byte) error {
-	type unmarshaler ValueMapping
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*v = ValueMapping(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *v)
-	if err != nil {
-		return err
-	}
-	v.extraProperties = extraProperties
-
-	v._rawJSON = nil
-	return nil
-}
-
-func (v *ValueMapping) String() string {
-	if len(v._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(v._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(v); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", v)
 }
 
 // Configuration for CrowdStrike Falcon as a Vulnerabilities Provider
