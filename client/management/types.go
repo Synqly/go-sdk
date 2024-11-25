@@ -834,6 +834,10 @@ type ProviderOperations struct {
 	SupportedResponseFields []string `json:"supported_response_fields,omitempty" url:"supported_response_fields,omitempty"`
 	// Filters that can be applied to this operation.
 	Filters []*ProviderFilter `json:"filters,omitempty" url:"filters,omitempty"`
+	// If this operation requires a request body, this field will contain the schema for
+	// the request. The is a json schema object. This field is only present when getting
+	// the capabilities for a specific provider.
+	RequestBody map[string]interface{} `json:"request_body,omitempty" url:"request_body,omitempty"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
