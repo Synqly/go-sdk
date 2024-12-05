@@ -123,7 +123,10 @@ func (g *GetScanActivityResponse) String() string {
 
 type QueryAssetsResponse struct {
 	Result []Asset `json:"result" url:"result"`
-	Cursor string  `json:"cursor" url:"cursor"`
+	// Cursor to use to retrieve the next page of results.
+	Cursor string `json:"cursor" url:"cursor"`
+	// If the provider supports asynchronous queries and the query is still running, this field will be `PENDING` until the query is complete. In this case, the client should retry using the provided cursor.
+	Status QueryStatus `json:"status" url:"status"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
@@ -165,7 +168,10 @@ func (q *QueryAssetsResponse) String() string {
 
 type QueryFindingsResponse struct {
 	Result []SecurityFinding `json:"result" url:"result"`
-	Cursor string            `json:"cursor" url:"cursor"`
+	// Cursor to use to retrieve the next page of results.
+	Cursor string `json:"cursor" url:"cursor"`
+	// If the provider supports asynchronous queries and the query is still running, this field will be `PENDING` until the query is complete. In this case, the client should retry using the provided cursor.
+	Status QueryStatus `json:"status" url:"status"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage

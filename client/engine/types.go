@@ -467,6 +467,28 @@ func (o OrderOptions) Ptr() *OrderOptions {
 	return &o
 }
 
+type QueryStatus string
+
+const (
+	QueryStatusPending  QueryStatus = "PENDING"
+	QueryStatusComplete QueryStatus = "COMPLETE"
+)
+
+func NewQueryStatusFromString(s string) (QueryStatus, error) {
+	switch s {
+	case "PENDING":
+		return QueryStatusPending, nil
+	case "COMPLETE":
+		return QueryStatusComplete, nil
+	}
+	var t QueryStatus
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (q QueryStatus) Ptr() *QueryStatus {
+	return &q
+}
+
 // Application information represented by the extended OCSF Software Info event. The Product object describes characteristics of a software product.
 type Application = *softwareinfo.SoftwareInfo
 
@@ -1052,7 +1074,9 @@ func (l *LogProvider) String() string {
 type QueryEventStatus string
 
 const (
-	QueryEventStatusPending  QueryEventStatus = "PENDING"
+	// [deprecated] use `QueryStatusPending` instead
+	QueryEventStatusPending QueryEventStatus = "PENDING"
+	// [deprecated] use `QueryStatusComplete` instead
 	QueryEventStatusComplete QueryEventStatus = "COMPLETE"
 )
 
