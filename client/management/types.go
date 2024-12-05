@@ -6265,6 +6265,50 @@ func (e *EdrSentinelOne) String() string {
 	return fmt.Sprintf("%#v", e)
 }
 
+// Configuration for the Sophos EDR Provider
+type EdrSophos struct {
+	Credential *SophosCredential `json:"credential" url:"credential"`
+	// Optional root domain where your Sophos tenant is located. Default "https://api.central.sophos.com".
+	Url *string `json:"url,omitempty" url:"url,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (e *EdrSophos) GetExtraProperties() map[string]interface{} {
+	return e.extraProperties
+}
+
+func (e *EdrSophos) UnmarshalJSON(data []byte) error {
+	type unmarshaler EdrSophos
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*e = EdrSophos(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *e)
+	if err != nil {
+		return err
+	}
+	e.extraProperties = extraProperties
+
+	e._rawJSON = nil
+	return nil
+}
+
+func (e *EdrSophos) String() string {
+	if len(e._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(e._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(e); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", e)
+}
+
 // Options used to control how requests are made to elasticsearch when different authentication types are used.
 type ElasticsearchAuthOptions struct {
 	// When you have the correct permissions, this allows API requests to get made as a specific user, with all of their roles
@@ -7653,6 +7697,7 @@ type ProviderConfig struct {
 	EdrCrowdstrike                    *EdrCrowdStrike
 	EdrDefender                       *EdrDefender
 	EdrSentinelone                    *EdrSentinelOne
+	EdrSophos                         *EdrSophos
 	IdentityEntraId                   *IdentityEntraId
 	IdentityOkta                      *IdentityOkta
 	IdentityPingone                   *IdentityPingOne
@@ -7735,6 +7780,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.EdrSentinelone = value
+	case "edr_sophos":
+		value := new(EdrSophos)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.EdrSophos = value
 	case "identity_entra_id":
 		value := new(IdentityEntraId)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -7950,6 +8001,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.EdrSentinelone != nil {
 		return core.MarshalJSONWithExtraProperty(p.EdrSentinelone, "type", "edr_sentinelone")
 	}
+	if p.EdrSophos != nil {
+		return core.MarshalJSONWithExtraProperty(p.EdrSophos, "type", "edr_sophos")
+	}
 	if p.IdentityEntraId != nil {
 		return core.MarshalJSONWithExtraProperty(p.IdentityEntraId, "type", "identity_entra_id")
 	}
@@ -8056,6 +8110,7 @@ type ProviderConfigVisitor interface {
 	VisitEdrCrowdstrike(*EdrCrowdStrike) error
 	VisitEdrDefender(*EdrDefender) error
 	VisitEdrSentinelone(*EdrSentinelOne) error
+	VisitEdrSophos(*EdrSophos) error
 	VisitIdentityEntraId(*IdentityEntraId) error
 	VisitIdentityOkta(*IdentityOkta) error
 	VisitIdentityPingone(*IdentityPingOne) error
@@ -8108,6 +8163,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.EdrSentinelone != nil {
 		return visitor.VisitEdrSentinelone(p.EdrSentinelone)
+	}
+	if p.EdrSophos != nil {
+		return visitor.VisitEdrSophos(p.EdrSophos)
 	}
 	if p.IdentityEntraId != nil {
 		return visitor.VisitIdentityEntraId(p.IdentityEntraId)
@@ -8224,6 +8282,8 @@ const (
 	ProviderConfigIdEdrDefender ProviderConfigId = "edr_defender"
 	// SentinelOne Singularity™ Endpoint
 	ProviderConfigIdEdrSentinelOne ProviderConfigId = "edr_sentinelone"
+	// Sophos EDR
+	ProviderConfigIdEdrSophos ProviderConfigId = "edr_sophos"
 	// Microsoft Entra ID
 	ProviderConfigIdIdentityEntraId ProviderConfigId = "identity_entra_id"
 	// Okta Identity
@@ -8306,6 +8366,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdEdrDefender, nil
 	case "edr_sentinelone":
 		return ProviderConfigIdEdrSentinelOne, nil
+	case "edr_sophos":
+		return ProviderConfigIdEdrSophos, nil
 	case "identity_entra_id":
 		return ProviderConfigIdIdentityEntraId, nil
 	case "identity_okta":
@@ -9360,6 +9422,76 @@ func (s *SlackCredential) Accept(visitor SlackCredentialVisitor) error {
 	}
 	if s.TokenId != "" {
 		return visitor.VisitTokenId(s.TokenId)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", s)
+}
+
+type SophosCredential struct {
+	Type string
+	// Docs for setting up oAuth - https://developer.sophos.com/intro#getting-started
+	OAuthClient *OAuthClientCredential
+	// ID of a credential that stores a Sophos oAuth client ID.
+	OAuthClientId OAuthClientCredentialId
+}
+
+func (s *SophosCredential) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	s.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", s)
+	}
+	switch unmarshaler.Type {
+	case "o_auth_client":
+		value := new(OAuthClientCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		s.OAuthClient = value
+	case "o_auth_client_id":
+		var valueUnmarshaler struct {
+			OAuthClientId OAuthClientCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		s.OAuthClientId = valueUnmarshaler.OAuthClientId
+	}
+	return nil
+}
+
+func (s SophosCredential) MarshalJSON() ([]byte, error) {
+	if s.OAuthClient != nil {
+		return core.MarshalJSONWithExtraProperty(s.OAuthClient, "type", "o_auth_client")
+	}
+	if s.OAuthClientId != "" {
+		var marshaler = struct {
+			Type          string                  `json:"type"`
+			OAuthClientId OAuthClientCredentialId `json:"value"`
+		}{
+			Type:          "o_auth_client_id",
+			OAuthClientId: s.OAuthClientId,
+		}
+		return json.Marshal(marshaler)
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", s)
+}
+
+type SophosCredentialVisitor interface {
+	VisitOAuthClient(*OAuthClientCredential) error
+	VisitOAuthClientId(OAuthClientCredentialId) error
+}
+
+func (s *SophosCredential) Accept(visitor SophosCredentialVisitor) error {
+	if s.OAuthClient != nil {
+		return visitor.VisitOAuthClient(s.OAuthClient)
+	}
+	if s.OAuthClientId != "" {
+		return visitor.VisitOAuthClientId(s.OAuthClientId)
 	}
 	return fmt.Errorf("type %T does not define a non-empty union type", s)
 }
