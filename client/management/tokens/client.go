@@ -34,7 +34,7 @@ func NewClient(opts ...option.RequestOption) *Client {
 	}
 }
 
-// Create a token restricted to specified resources and permission set.
+// Create an adhoc organization token restricted to specified resources and permission set.
 // Tokens can only be reduced in scope, never expanded.
 // Permissions are inherited from the token used to call this API.
 // Permissions assigned to the new token will not be persisted, this is not a way to create roles.
@@ -150,7 +150,7 @@ func (c *Client) CreateToken(
 	return response, nil
 }
 
-// Create an integration token restricted to a single integration. The token used to call
+// Create an adhoc integration token restricted to a single integration. The token used to call
 // this API must have the necessary permissions to create tokens and have access to the account
 // and integration IDs. Permissions may not be escalated, so any operation that the invocation
 // token does not have access to cannot be granted.
@@ -270,6 +270,117 @@ func (c *Client) CreateIntegrationToken(
 		return nil, err
 	}
 	return response, nil
+}
+
+// Deletes the Refresh Token with id `{id}`. This immediately
+// invalidates both the primary and secondary token pairs.
+func (c *Client) Delete(
+	ctx context.Context,
+	refreshTokenId management.TokenId,
+	opts ...option.RequestOption,
+) error {
+	options := core.NewRequestOptions(opts...)
+
+	baseURL := "https://api.synqly.com"
+	if c.baseURL != "" {
+		baseURL = c.baseURL
+	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
+	endpointURL := core.EncodeURL(baseURL+"/v1/tokens/%v", refreshTokenId)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
+
+	errorDecoder := func(statusCode int, body io.Reader) error {
+		raw, err := io.ReadAll(body)
+		if err != nil {
+			return err
+		}
+		apiError := core.NewAPIError(statusCode, errors.New(string(raw)))
+		decoder := json.NewDecoder(bytes.NewReader(raw))
+		switch statusCode {
+		case 400:
+			value := new(management.BadRequestError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 401:
+			value := new(management.UnauthorizedError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 403:
+			value := new(management.ForbiddenError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 404:
+			value := new(management.NotFoundError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 405:
+			value := new(management.MethodNotAllowedError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 409:
+			value := new(management.ConflictError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 415:
+			value := new(management.UnsupportedMediaTypeError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 429:
+			value := new(management.TooManyRequestsError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 500:
+			value := new(management.InternalServerError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		}
+		return apiError
+	}
+
+	if err := c.caller.Call(
+		ctx,
+		&core.CallParams{
+			URL:          endpointURL,
+			Method:       http.MethodDelete,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
+			ErrorDecoder: errorDecoder,
+		},
+	); err != nil {
+		return err
+	}
+	return nil
 }
 
 // Returns a list of all `RefreshToken` objects belonging to the Authorization Bearer

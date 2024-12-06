@@ -5088,6 +5088,7 @@ const (
 	TokensActionsList              TokensActions = "list"
 	TokensActionsCreate            TokensActions = "create"
 	TokensActionsCreateIntegration TokensActions = "create_integration"
+	TokensActionsDelete            TokensActions = "delete"
 	TokensActionsGet               TokensActions = "get"
 	TokensActionsReset             TokensActions = "reset"
 	TokensActionsRefresh           TokensActions = "refresh"
@@ -5103,6 +5104,8 @@ func NewTokensActionsFromString(s string) (TokensActions, error) {
 		return TokensActionsCreate, nil
 	case "create_integration":
 		return TokensActionsCreateIntegration, nil
+	case "delete":
+		return TokensActionsDelete, nil
 	case "get":
 		return TokensActionsGet, nil
 	case "reset":
