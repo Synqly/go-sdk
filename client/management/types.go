@@ -7330,9 +7330,17 @@ func (n *NotificationsSlack) String() string {
 	return fmt.Sprintf("%#v", n)
 }
 
-// Configuration for Microsoft Teams Notification Provider
+// Configuration for sending messages to Microsoft Teams. This provider can be configured as a public webhook or with OAuth.
 type NotificationsTeams struct {
+	// The ID of the channel to send messages to.
+	ChannelId  string           `json:"channel_id" url:"channel_id"`
 	Credential *TeamsCredential `json:"credential" url:"credential"`
+	// The URL of the endpoint to send messages to. Only specified here if OAuth. For public, please refer to TeamsCredential.
+	Endpoint *string `json:"endpoint,omitempty" url:"endpoint,omitempty"`
+	// The ID of the team to send messages to.
+	TeamId string `json:"team_id" url:"team_id"`
+	// Azure Directory (tenant) ID. Only if OAuth is used.
+	TenantId *string `json:"tenant_id,omitempty" url:"tenant_id,omitempty"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
@@ -10227,10 +10235,14 @@ func (t *TaniumCloudCredential) Accept(visitor TaniumCloudCredentialVisitor) err
 
 type TeamsCredential struct {
 	Type string
-	// Webhook URL used to authenticate with Teams. Follow [this guide to generate a webhook URL](https://docs.microsoft.com_en-us_microsoftteams_platform_webhooks-and-connectors_how-to_add-incoming-webhook). The webhook must have access to the configured channel.
-	Secret *SecretCredential
-	// ID of a credential that stores a webhook URL used to authenticate with Teams.
-	SecretId SecretCredentialId
+	// Azure OAuth 2.0 Client ID and Client Secret for an Azure App Registration. Follow [this guide to generate an API token](https://learn.microsoft.com/en-us/connectors/azureadapplications/). The application must be configured with permissions to access Microsoft Power Automate with user delegation.
+	OAuthClient *OAuthClientCredential
+	// The ID of a credential that stores the Azure OAuth 2.0 values for an azure App Registration.
+	OAuthClientId OAuthClientCredentialId
+	// Public Webhook URL used to authenticate with Teams.
+	WebhookUrl *SecretCredential
+	// ID of a credential that stores a public Webhook URL used to authenticate with Teams.
+	WebhookUrlId SecretCredentialId
 }
 
 func (t *TeamsCredential) UnmarshalJSON(data []byte) error {
@@ -10245,35 +10257,62 @@ func (t *TeamsCredential) UnmarshalJSON(data []byte) error {
 		return fmt.Errorf("%T did not include discriminant type", t)
 	}
 	switch unmarshaler.Type {
-	case "secret":
-		value := new(SecretCredential)
+	case "o_auth_client":
+		value := new(OAuthClientCredential)
 		if err := json.Unmarshal(data, &value); err != nil {
 			return err
 		}
-		t.Secret = value
-	case "secret_id":
+		t.OAuthClient = value
+	case "o_auth_client_id":
 		var valueUnmarshaler struct {
-			SecretId SecretCredentialId `json:"value"`
+			OAuthClientId OAuthClientCredentialId `json:"value"`
 		}
 		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
 			return err
 		}
-		t.SecretId = valueUnmarshaler.SecretId
+		t.OAuthClientId = valueUnmarshaler.OAuthClientId
+	case "webhook_url":
+		value := new(SecretCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		t.WebhookUrl = value
+	case "webhook_url_id":
+		var valueUnmarshaler struct {
+			WebhookUrlId SecretCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		t.WebhookUrlId = valueUnmarshaler.WebhookUrlId
 	}
 	return nil
 }
 
 func (t TeamsCredential) MarshalJSON() ([]byte, error) {
-	if t.Secret != nil {
-		return core.MarshalJSONWithExtraProperty(t.Secret, "type", "secret")
+	if t.OAuthClient != nil {
+		return core.MarshalJSONWithExtraProperty(t.OAuthClient, "type", "o_auth_client")
 	}
-	if t.SecretId != "" {
+	if t.OAuthClientId != "" {
 		var marshaler = struct {
-			Type     string             `json:"type"`
-			SecretId SecretCredentialId `json:"value"`
+			Type          string                  `json:"type"`
+			OAuthClientId OAuthClientCredentialId `json:"value"`
 		}{
-			Type:     "secret_id",
-			SecretId: t.SecretId,
+			Type:          "o_auth_client_id",
+			OAuthClientId: t.OAuthClientId,
+		}
+		return json.Marshal(marshaler)
+	}
+	if t.WebhookUrl != nil {
+		return core.MarshalJSONWithExtraProperty(t.WebhookUrl, "type", "webhook_url")
+	}
+	if t.WebhookUrlId != "" {
+		var marshaler = struct {
+			Type         string             `json:"type"`
+			WebhookUrlId SecretCredentialId `json:"value"`
+		}{
+			Type:         "webhook_url_id",
+			WebhookUrlId: t.WebhookUrlId,
 		}
 		return json.Marshal(marshaler)
 	}
@@ -10281,16 +10320,24 @@ func (t TeamsCredential) MarshalJSON() ([]byte, error) {
 }
 
 type TeamsCredentialVisitor interface {
-	VisitSecret(*SecretCredential) error
-	VisitSecretId(SecretCredentialId) error
+	VisitOAuthClient(*OAuthClientCredential) error
+	VisitOAuthClientId(OAuthClientCredentialId) error
+	VisitWebhookUrl(*SecretCredential) error
+	VisitWebhookUrlId(SecretCredentialId) error
 }
 
 func (t *TeamsCredential) Accept(visitor TeamsCredentialVisitor) error {
-	if t.Secret != nil {
-		return visitor.VisitSecret(t.Secret)
+	if t.OAuthClient != nil {
+		return visitor.VisitOAuthClient(t.OAuthClient)
 	}
-	if t.SecretId != "" {
-		return visitor.VisitSecretId(t.SecretId)
+	if t.OAuthClientId != "" {
+		return visitor.VisitOAuthClientId(t.OAuthClientId)
+	}
+	if t.WebhookUrl != nil {
+		return visitor.VisitWebhookUrl(t.WebhookUrl)
+	}
+	if t.WebhookUrlId != "" {
+		return visitor.VisitWebhookUrlId(t.WebhookUrlId)
 	}
 	return fmt.Errorf("type %T does not define a non-empty union type", t)
 }
