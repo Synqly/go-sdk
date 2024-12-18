@@ -66,7 +66,7 @@ type ApiActivity struct {
 	// The actor object describes details about the user/role/process that was the source of the activity.
 	Actor *Actor `json:"actor" url:"actor"`
 	// Describes details about a typical API (Application Programming Interface) call.
-	Api *Api `json:"api" url:"api"`
+	Api *Api `json:"api,omitempty" url:"api,omitempty"`
 	// The event category name, as defined by category_uid value: <code>Application Activity</code>.
 	CategoryName *string `json:"category_name,omitempty" url:"category_name,omitempty"`
 	// The category unique identifier of the event.
@@ -96,7 +96,7 @@ type ApiActivity struct {
 	// The observables associated with the event or a finding.
 	Observables []*Observable `json:"observables,omitempty" url:"observables,omitempty"`
 	// The OSINT (Open Source Intelligence) object contains details related to an indicator such as the indicator itself, related indicators, geolocation, registrar information, subdomains, analyst commentary, and other contextual information. This information can be used to further enrich a detection or finding by providing decisioning support to other analysts and engineers.
-	Osint []*Osint `json:"osint" url:"osint"`
+	Osint []*Osint `json:"osint,omitempty" url:"osint,omitempty"`
 	// The raw event/finding data as received from the source.
 	RawData *string `json:"raw_data,omitempty" url:"raw_data,omitempty"`
 	// Details about resources that were affected by the activity/event.

@@ -84,7 +84,7 @@ type DetectionFinding struct {
 	// The normalized caption of <code>action_id</code>.
 	Action *string `json:"action,omitempty" url:"action,omitempty"`
 	// The action taken by a control or other policy-based system leading to an outcome or disposition. Dispositions conform to an action of <code>1</code> 'Allowed' or <code>2</code> 'Denied' in most cases. Note that <code>99</code> 'Other' is not an option. No action would equate to <code>1</code> 'Allowed'. An unknown action may still correspond to a known disposition. Refer to <code>disposition_id</code> for the outcome of the action.
-	ActionId ActionId `json:"action_id" url:"action_id"`
+	ActionId *ActionId `json:"action_id,omitempty" url:"action_id,omitempty"`
 	// The normalized identifier of the finding activity.
 	ActivityId ActivityId `json:"activity_id" url:"activity_id"`
 	// The finding activity name, as defined by the <code>activity_id</code>.
@@ -150,7 +150,7 @@ type DetectionFinding struct {
 	// The observables associated with the event or a finding.
 	Observables []*Observable `json:"observables,omitempty" url:"observables,omitempty"`
 	// The OSINT (Open Source Intelligence) object contains details related to an indicator such as the indicator itself, related indicators, geolocation, registrar information, subdomains, analyst commentary, and other contextual information. This information can be used to further enrich a detection or finding by providing decisioning support to other analysts and engineers.
-	Osint []*Osint `json:"osint" url:"osint"`
+	Osint []*Osint `json:"osint,omitempty" url:"osint,omitempty"`
 	// The raw event/finding data as received from the source.
 	RawData *string `json:"raw_data,omitempty" url:"raw_data,omitempty"`
 	// Describes the recommended remediation steps to address identified issue(s).

@@ -109,7 +109,7 @@ type SoftwareInfo struct {
 	// The observables associated with the event or a finding.
 	Observables []*Observable `json:"observables,omitempty" url:"observables,omitempty"`
 	// The OSINT (Open Source Intelligence) object contains details related to an indicator such as the indicator itself, related indicators, geolocation, registrar information, subdomains, analyst commentary, and other contextual information. This information can be used to further enrich a detection or finding by providing decisioning support to other analysts and engineers.
-	Osint []*Osint `json:"osint" url:"osint"`
+	Osint []*Osint `json:"osint,omitempty" url:"osint,omitempty"`
 	// The software product that is being discovered.
 	Product *Product `json:"product" url:"product"`
 	// The raw event/finding data as received from the source.

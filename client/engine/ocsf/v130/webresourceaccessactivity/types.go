@@ -133,7 +133,7 @@ type WebResourceAccessActivity struct {
 	// The observables associated with the event or a finding.
 	Observables []*Observable `json:"observables,omitempty" url:"observables,omitempty"`
 	// The OSINT (Open Source Intelligence) object contains details related to an indicator such as the indicator itself, related indicators, geolocation, registrar information, subdomains, analyst commentary, and other contextual information. This information can be used to further enrich a detection or finding by providing decisioning support to other analysts and engineers.
-	Osint []*Osint `json:"osint" url:"osint"`
+	Osint []*Osint `json:"osint,omitempty" url:"osint,omitempty"`
 	// Details about the proxy service, if available.
 	Proxy *NetworkProxy `json:"proxy,omitempty" url:"proxy,omitempty"`
 	// The connection information from the proxy server to the remote server.
