@@ -9,7 +9,7 @@ import (
 )
 
 type GetIntegrationTimeseriesRequest struct {
-	// [minute|hour] provide most recent 60 minute or 24 hour timeseries. default: minute
+	// [hour] provide most recent 24 hour timeseries. default: hour
 	Interval *string `json:"-" url:"interval,omitempty"`
 }
 

@@ -11570,6 +11570,25 @@ func (s *StatusEvent) String() string {
 	return fmt.Sprintf("%#v", s)
 }
 
+type TimeseriesOptions string
+
+const (
+	TimeseriesOptionsHour TimeseriesOptions = "hour"
+)
+
+func NewTimeseriesOptionsFromString(s string) (TimeseriesOptions, error) {
+	switch s {
+	case "hour":
+		return TimeseriesOptionsHour, nil
+	}
+	var t TimeseriesOptions
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (t TimeseriesOptions) Ptr() *TimeseriesOptions {
+	return &t
+}
+
 // Status timeseries object
 type TimeseriesResult struct {
 	// Interval time
