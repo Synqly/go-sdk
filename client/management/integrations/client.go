@@ -806,7 +806,7 @@ func (c *Client) Patch(
 	ctx context.Context,
 	accountId management.AccountId,
 	integrationId management.IntegrationId,
-	request []map[string]interface{},
+	request []*management.PatchOperation,
 	opts ...option.RequestOption,
 ) (*management.PatchIntegrationResponse, error) {
 	options := core.NewRequestOptions(opts...)

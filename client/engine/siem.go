@@ -146,14 +146,8 @@ func (g *GetInvestigationResponse) String() string {
 	return fmt.Sprintf("%#v", g)
 }
 
-// JSON patch to apply to an investigation. A JSON patch is a list of operations, and each operation
-// is a map with the following keys:
-//
-// - `op`: The operation to perform. Supported values are `add`, `replace`, `remove`, `copy`, and `move`.
-// - `path`: The path to the field to update. The path is a JSON Pointer.
-// - `value`: The value to set the field to. This is required for `add` and `replace` operations.
-// - `from`: The path to the field to copy from. This is required for `copy` and `move` operations.
-type PatchInvestigationRequest = []map[string]interface{}
+// JSON patch to apply to an investigation.
+type PatchInvestigationRequest = []*PatchOperation
 
 type QueryInvestigationResponse struct {
 	// List of investigations

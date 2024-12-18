@@ -24,6 +24,55 @@ type QueryTicketsRequest struct {
 	Filter []*string `json:"-" url:"filter,omitempty"`
 }
 
+// JSON patch to apply. A JSON patch is a list of patch operations. (see https://jsonpatch.com/)
+type PatchOperation struct {
+	// The operation to perform. Supported values are `add`, `copy`, `move`, `replace`, `remove`, and `test`.
+	Op PatchOp `json:"op" url:"op"`
+	// The path to the field to update. The path is a JSON Pointer.
+	Path string `json:"path" url:"path"`
+	// The path to the field to copy from. This is required for `copy` and `move` operations.
+	From *string `json:"from,omitempty" url:"from,omitempty"`
+	// The value to set the field to. This is required for `add`, `replace` and `test` operations.
+	Value interface{} `json:"value,omitempty" url:"value,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (p *PatchOperation) GetExtraProperties() map[string]interface{} {
+	return p.extraProperties
+}
+
+func (p *PatchOperation) UnmarshalJSON(data []byte) error {
+	type unmarshaler PatchOperation
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*p = PatchOperation(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *p)
+	if err != nil {
+		return err
+	}
+	p.extraProperties = extraProperties
+
+	p._rawJSON = nil
+	return nil
+}
+
+func (p *PatchOperation) String() string {
+	if len(p._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(p._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(p); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", p)
+}
+
 // Unique identifier for an attachment
 type AttachmentId = Id
 

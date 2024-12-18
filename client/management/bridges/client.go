@@ -631,7 +631,7 @@ func (c *Client) Patch(
 	ctx context.Context,
 	accountId management.AccountId,
 	bridgeId management.BridgeGroupId,
-	request []map[string]interface{},
+	request []*management.PatchOperation,
 	opts ...option.RequestOption,
 ) (*management.PatchBridgeResponse, error) {
 	options := core.NewRequestOptions(opts...)

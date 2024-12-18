@@ -628,7 +628,7 @@ func (c *Client) Patch(
 	ctx context.Context,
 	ownerId management.Id,
 	credentialId management.CredentialId,
-	request []map[string]interface{},
+	request []*management.PatchOperation,
 	opts ...option.RequestOption,
 ) (*management.PatchCredentialResponse, error) {
 	options := core.NewRequestOptions(opts...)

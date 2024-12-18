@@ -261,7 +261,7 @@ func (c *Client) Update(
 // Patch Organization
 func (c *Client) Patch(
 	ctx context.Context,
-	request []map[string]interface{},
+	request []*management.PatchOperation,
 	opts ...option.RequestOption,
 ) (*management.PatchOrganizationResponse, error) {
 	options := core.NewRequestOptions(opts...)

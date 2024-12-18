@@ -467,6 +467,40 @@ func (o OrderOptions) Ptr() *OrderOptions {
 	return &o
 }
 
+type PatchOp string
+
+const (
+	PatchOpAdd     PatchOp = "add"
+	PatchOpCopy    PatchOp = "copy"
+	PatchOpMove    PatchOp = "move"
+	PatchOpRemove  PatchOp = "remove"
+	PatchOpReplace PatchOp = "replace"
+	PatchOpTest    PatchOp = "test"
+)
+
+func NewPatchOpFromString(s string) (PatchOp, error) {
+	switch s {
+	case "add":
+		return PatchOpAdd, nil
+	case "copy":
+		return PatchOpCopy, nil
+	case "move":
+		return PatchOpMove, nil
+	case "remove":
+		return PatchOpRemove, nil
+	case "replace":
+		return PatchOpReplace, nil
+	case "test":
+		return PatchOpTest, nil
+	}
+	var t PatchOp
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (p PatchOp) Ptr() *PatchOp {
+	return &p
+}
+
 type QueryStatus string
 
 const (

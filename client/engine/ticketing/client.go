@@ -747,7 +747,7 @@ func (c *Client) CreateTicket(
 func (c *Client) PatchTicket(
 	ctx context.Context,
 	ticketId engine.TicketId,
-	request []map[string]interface{},
+	request []*engine.PatchOperation,
 	opts ...option.RequestOption,
 ) (*engine.PatchTicketResponse, error) {
 	options := core.NewRequestOptions(opts...)

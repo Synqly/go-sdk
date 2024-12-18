@@ -507,7 +507,7 @@ func (c *Client) Update(
 func (c *Client) Patch(
 	ctx context.Context,
 	accountId management.AccountId,
-	request []map[string]interface{},
+	request []*management.PatchOperation,
 	opts ...option.RequestOption,
 ) (*management.PatchAccountResponse, error) {
 	options := core.NewRequestOptions(opts...)

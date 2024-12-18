@@ -501,7 +501,7 @@ func (c *Client) Update(
 func (c *Client) Patch(
 	ctx context.Context,
 	roleId management.RoleId,
-	request []map[string]interface{},
+	request []*management.PatchOperation,
 	opts ...option.RequestOption,
 ) (*management.PatchRoleResponse, error) {
 	options := core.NewRequestOptions(opts...)

@@ -497,7 +497,7 @@ func (c *Client) Update(
 func (c *Client) Patch(
 	ctx context.Context,
 	memberId management.MemberId,
-	request []map[string]interface{},
+	request []*management.PatchOperation,
 	opts ...option.RequestOption,
 ) (*management.PatchMemberResponse, error) {
 	options := core.NewRequestOptions(opts...)

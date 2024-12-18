@@ -514,7 +514,7 @@ func (c *Client) Patch(
 	ctx context.Context,
 	accountId management.AccountId,
 	transformId management.TransformId,
-	request []map[string]interface{},
+	request []*management.PatchOperation,
 	opts ...option.RequestOption,
 ) (*management.PatchTransformResponse, error) {
 	options := core.NewRequestOptions(opts...)
