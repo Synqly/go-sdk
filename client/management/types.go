@@ -7534,6 +7534,77 @@ func (n *NozomiVantageCredential) Accept(visitor NozomiVantageCredentialVisitor)
 	return fmt.Errorf("type %T does not define a non-empty union type", n)
 }
 
+// Supported credential types for Nucleus
+type NucleusCredential struct {
+	Type string
+	// The Nucleus API key can be generated and copied from the **User Profile** settings, accessible via the avatar in the top-right corner.
+	Token *TokenCredential
+	// ID of a credential that stores a Nucleus authentication token.
+	TokenId TokenCredentialId
+}
+
+func (n *NucleusCredential) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	n.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", n)
+	}
+	switch unmarshaler.Type {
+	case "token":
+		value := new(TokenCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		n.Token = value
+	case "token_id":
+		var valueUnmarshaler struct {
+			TokenId TokenCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		n.TokenId = valueUnmarshaler.TokenId
+	}
+	return nil
+}
+
+func (n NucleusCredential) MarshalJSON() ([]byte, error) {
+	if n.Token != nil {
+		return core.MarshalJSONWithExtraProperty(n.Token, "type", "token")
+	}
+	if n.TokenId != "" {
+		var marshaler = struct {
+			Type    string            `json:"type"`
+			TokenId TokenCredentialId `json:"value"`
+		}{
+			Type:    "token_id",
+			TokenId: n.TokenId,
+		}
+		return json.Marshal(marshaler)
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", n)
+}
+
+type NucleusCredentialVisitor interface {
+	VisitToken(*TokenCredential) error
+	VisitTokenId(TokenCredentialId) error
+}
+
+func (n *NucleusCredential) Accept(visitor NucleusCredentialVisitor) error {
+	if n.Token != nil {
+		return visitor.VisitToken(n.Token)
+	}
+	if n.TokenId != "" {
+		return visitor.VisitTokenId(n.TokenId)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", n)
+}
+
 type OktaCredential struct {
 	Type string
 	// OAuth 2.0 Token URL, Client ID, and Client Secret for a Synqly Identity Connector API service application.
@@ -7820,6 +7891,7 @@ type ProviderConfig struct {
 	TicketingServicenow               *TicketingServiceNow
 	TicketingTorq                     *TicketingTorq
 	VulnerabilitiesCrowdstrike        *VulnerabilitiesCrowdStrike
+	VulnerabilitiesNucleus            *VulnerabilitiesNucleus
 	VulnerabilitiesQualysCloud        *VulnerabilitiesQualysCloud
 	VulnerabilitiesRapid7InsightCloud *VulnerabilitiesRapid7InsightCloud
 	VulnerabilitiesTaniumCloud        *VulnerabilitiesTaniumCloud
@@ -8048,6 +8120,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.VulnerabilitiesCrowdstrike = value
+	case "vulnerabilities_nucleus":
+		value := new(VulnerabilitiesNucleus)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.VulnerabilitiesNucleus = value
 	case "vulnerabilities_qualys_cloud":
 		value := new(VulnerabilitiesQualysCloud)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -8182,6 +8260,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.VulnerabilitiesCrowdstrike != nil {
 		return core.MarshalJSONWithExtraProperty(p.VulnerabilitiesCrowdstrike, "type", "vulnerabilities_crowdstrike")
 	}
+	if p.VulnerabilitiesNucleus != nil {
+		return core.MarshalJSONWithExtraProperty(p.VulnerabilitiesNucleus, "type", "vulnerabilities_nucleus")
+	}
 	if p.VulnerabilitiesQualysCloud != nil {
 		return core.MarshalJSONWithExtraProperty(p.VulnerabilitiesQualysCloud, "type", "vulnerabilities_qualys_cloud")
 	}
@@ -8233,6 +8314,7 @@ type ProviderConfigVisitor interface {
 	VisitTicketingServicenow(*TicketingServiceNow) error
 	VisitTicketingTorq(*TicketingTorq) error
 	VisitVulnerabilitiesCrowdstrike(*VulnerabilitiesCrowdStrike) error
+	VisitVulnerabilitiesNucleus(*VulnerabilitiesNucleus) error
 	VisitVulnerabilitiesQualysCloud(*VulnerabilitiesQualysCloud) error
 	VisitVulnerabilitiesRapid7InsightCloud(*VulnerabilitiesRapid7InsightCloud) error
 	VisitVulnerabilitiesTaniumCloud(*VulnerabilitiesTaniumCloud) error
@@ -8345,6 +8427,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	if p.VulnerabilitiesCrowdstrike != nil {
 		return visitor.VisitVulnerabilitiesCrowdstrike(p.VulnerabilitiesCrowdstrike)
 	}
+	if p.VulnerabilitiesNucleus != nil {
+		return visitor.VisitVulnerabilitiesNucleus(p.VulnerabilitiesNucleus)
+	}
 	if p.VulnerabilitiesQualysCloud != nil {
 		return visitor.VisitVulnerabilitiesQualysCloud(p.VulnerabilitiesQualysCloud)
 	}
@@ -8434,6 +8519,8 @@ const (
 	ProviderConfigIdTicketingTorq ProviderConfigId = "ticketing_torq"
 	// CrowdStrike Falcon Spotlight
 	ProviderConfigIdVulnerabilitiesCrowdStrike ProviderConfigId = "vulnerabilities_crowdstrike"
+	// Nucleus Vulnerability Management
+	ProviderConfigIdVulnerabilitiesNucleus ProviderConfigId = "vulnerabilities_nucleus"
 	// Qualys Vulnerability Management, Detection & Response (VMDR)
 	ProviderConfigIdVulnerabilitiesQualysCloud ProviderConfigId = "vulnerabilities_qualys_cloud"
 	// Rapid7 Insight Vulnerability Management Cloud
@@ -8518,6 +8605,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdTicketingTorq, nil
 	case "vulnerabilities_crowdstrike":
 		return ProviderConfigIdVulnerabilitiesCrowdStrike, nil
+	case "vulnerabilities_nucleus":
+		return ProviderConfigIdVulnerabilitiesNucleus, nil
 	case "vulnerabilities_qualys_cloud":
 		return ProviderConfigIdVulnerabilitiesQualysCloud, nil
 	case "vulnerabilities_rapid7_insight_cloud":
@@ -10828,6 +10917,52 @@ func (v *VulnerabilitiesCrowdStrike) UnmarshalJSON(data []byte) error {
 }
 
 func (v *VulnerabilitiesCrowdStrike) String() string {
+	if len(v._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(v._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(v); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", v)
+}
+
+// Configuration for Nucleus as a Vulnerabilities Provider
+type VulnerabilitiesNucleus struct {
+	Credential *NucleusCredential `json:"credential" url:"credential"`
+	// The **project_id** is a string representing a numeric ID (e.g., "12345") and can be found in the Nucleus UI by selecting **Global Dashboard** from the left-hand menu, then choosing **All Projects** at the top, where the **Projects** widget lists all projects with their IDs.
+	ProjectId string `json:"project_id" url:"project_id"`
+	// URL for the Nucleus API. This should be the base URL for the API, without any path components and must be HTTPS, e.g. "https://{sandbox}.nucleussec.com" .
+	Url *string `json:"url,omitempty" url:"url,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (v *VulnerabilitiesNucleus) GetExtraProperties() map[string]interface{} {
+	return v.extraProperties
+}
+
+func (v *VulnerabilitiesNucleus) UnmarshalJSON(data []byte) error {
+	type unmarshaler VulnerabilitiesNucleus
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*v = VulnerabilitiesNucleus(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *v)
+	if err != nil {
+		return err
+	}
+	v.extraProperties = extraProperties
+
+	v._rawJSON = nil
+	return nil
+}
+
+func (v *VulnerabilitiesNucleus) String() string {
 	if len(v._rawJSON) > 0 {
 		if value, err := core.StringifyJSON(v._rawJSON); err == nil {
 			return value
