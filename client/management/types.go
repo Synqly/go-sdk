@@ -10934,7 +10934,7 @@ type VulnerabilitiesNucleus struct {
 	// The **project_id** is a string representing a numeric ID (e.g., "12345") and can be found in the Nucleus UI by selecting **Global Dashboard** from the left-hand menu, then choosing **All Projects** at the top, where the **Projects** widget lists all projects with their IDs.
 	ProjectId string `json:"project_id" url:"project_id"`
 	// URL for the Nucleus API. This should be the base URL for the API, without any path components and must be HTTPS, e.g. "https://{sandbox}.nucleussec.com" .
-	Url *string `json:"url,omitempty" url:"url,omitempty"`
+	Url string `json:"url" url:"url"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
@@ -11066,7 +11066,7 @@ func (v *VulnerabilitiesRapid7InsightCloud) String() string {
 type VulnerabilitiesTaniumCloud struct {
 	Credential *TaniumCloudCredential `json:"credential" url:"credential"`
 	// URL for the Tanium Cloud API. This should be the base URL for the API, without any path components and must be HTTPS, e.g. "https://<customername>-api.cloud.tanium.com" or "https://<customername>-api.titankube.com".
-	Url *string `json:"url,omitempty" url:"url,omitempty"`
+	Url string `json:"url" url:"url"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
