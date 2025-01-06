@@ -6220,7 +6220,7 @@ func (d *DefenderCredential) Accept(visitor DefenderCredentialVisitor) error {
 // Configuration for the CrowdStrike EDR Provider
 type EdrCrowdStrike struct {
 	Credential *CrowdStrikeCredential `json:"credential" url:"credential"`
-	// The root domain where your CrowdStrike Falcon tenant is located. Default "https://api.crowdstrike.com".
+	// The root domain where your CrowdStrike Falcon tenant is located.
 	Url *string `json:"url,omitempty" url:"url,omitempty"`
 
 	extraProperties map[string]interface{}
@@ -6354,7 +6354,7 @@ func (e *EdrSentinelOne) String() string {
 // Configuration for the Sophos EDR Provider
 type EdrSophos struct {
 	Credential *SophosCredential `json:"credential" url:"credential"`
-	// Optional root domain where your Sophos tenant is located. Default "https://api.central.sophos.com".
+	// Optional root domain where your Sophos tenant is located.
 	Url *string `json:"url,omitempty" url:"url,omitempty"`
 
 	extraProperties map[string]interface{}
@@ -7372,7 +7372,7 @@ type NotificationsSlack struct {
 	// The channel to send notifications to. Should be the ID of the desired channel.
 	Channel    string           `json:"channel" url:"channel"`
 	Credential *SlackCredential `json:"credential" url:"credential"`
-	// Optional URL override for the Slack API. This should include the full path to the API endpoint. Defaults to "https://slack.com_api_chat.postMessage".
+	// Optional URL override for the Slack API. This should include the full path to the API endpoint.
 	Url *string `json:"url,omitempty" url:"url,omitempty"`
 
 	extraProperties map[string]interface{}
@@ -8842,9 +8842,9 @@ type SiemElasticsearch struct {
 	// Optional. The index or data stream to use when writing events. Defaults to the 'index' setting if not set.
 	CreateIndex *string                  `json:"create_index,omitempty" url:"create_index,omitempty"`
 	Credential  *ElasticsearchCredential `json:"credential" url:"credential"`
-	// Optional. The index, data stream, or index alias to read events from. Default "\_all".
+	// Optional. The index, data stream, or index alias to read events from.
 	Index *string `json:"index,omitempty" url:"index,omitempty"`
-	// If true, skips verification of the Elasticsearch server's TLS certificate. Defaults to false.
+	// If true, skips verification of the Elasticsearch server's TLS certificate.
 	SkipTlsVerify *bool `json:"skip_tls_verify,omitempty" url:"skip_tls_verify,omitempty"`
 	// URL for the Elasticsearch API. This should be the base URL for the API, without any path components and must be HTTPS. For example, "https://tenant.elastic.com".
 	Url string `json:"url" url:"url"`
@@ -8935,7 +8935,7 @@ type SiemQRadar struct {
 	// The QRadar HTTP Receiver URL, stored as a secret. This URL has a special port in QRadar and is stored in a credential to protect that information. See https://www.youtube.com/watch?v=UEBLVVNpyfg for a demonstration of setting up and mapping and HTTP Receiver in QRadar.
 	CollectionPort int               `json:"collection_port" url:"collection_port"`
 	Credential     *QRadarCredential `json:"credential" url:"credential"`
-	// If true, skips verification of the QRadar server's TLS certificate. Defaults to false.
+	// If true, skips verification of the QRadar server's TLS certificate.
 	SkipTlsVerify bool `json:"skip_tls_verify" url:"skip_tls_verify"`
 	// URL for the QRadar instance. This should be the base URL instance, without any path components and must be HTTPS. For example, "https://qradar.westus2.cloudapp.azure.com".
 	Url string `json:"url" url:"url"`
@@ -9033,7 +9033,7 @@ type SiemSplunk struct {
 	SearchServiceCredential *SplunkSearchCredential `json:"search_service_credential,omitempty" url:"search_service_credential,omitempty"`
 	// Optional URL used for connecting to the Splunk search service. If not provided, querying is disabled.
 	SearchServiceUrl *string `json:"search_service_url,omitempty" url:"search_service_url,omitempty"`
-	// If true, skips verification of the Splunk server's TLS certificate. Defaults to false.
+	// If true, skips verification of the Splunk server's TLS certificate.
 	SkipTlsVerify bool `json:"skip_tls_verify" url:"skip_tls_verify"`
 	// Splunk source to send events to. If not provided, will use the default source for the Splunk collector.
 	Source *string `json:"source,omitempty" url:"source,omitempty"`
@@ -9080,12 +9080,12 @@ func (s *SiemSplunk) String() string {
 
 // Configuration for Sumo Logic Cloud SIEM.
 type SiemSumoLogic struct {
-	// Automatically parse logs as JSON when running log queries against Sumo Logic. Default is true.
+	// Automatically parse logs as JSON when running log queries against Sumo Logic.
 	AutoParseLogs *bool `json:"auto_parse_logs,omitempty" url:"auto_parse_logs,omitempty"`
 	// Required if you need to send Sumo Logic events from the Synqly API.
 	CollectionUrl *SumoLogicCollectionUrl `json:"collection_url,omitempty" url:"collection_url,omitempty"`
 	Credential    *SumoLogicCredential    `json:"credential" url:"credential"`
-	// Only query for logs that have been processed into the Sumo Logic Cloud SIEM app. Default is false.
+	// Only query for logs that have been processed into the Sumo Logic Cloud SIEM app.
 	SiemLogsOnly *bool `json:"siem_logs_only,omitempty" url:"siem_logs_only,omitempty"`
 	// Your Sumo Logic API endpoint. See https://help.sumologic.com/docs/api/getting-started/#sumo-logic-endpoints-by-deployment-and-firewall-security for help determining which base URL to use.
 	Url string `json:"url" url:"url"`
@@ -10887,7 +10887,7 @@ func (t *TorqCredential) Accept(visitor TorqCredentialVisitor) error {
 // Configuration for CrowdStrike Falcon as a Vulnerabilities Provider
 type VulnerabilitiesCrowdStrike struct {
 	Credential *CrowdStrikeCredential `json:"credential" url:"credential"`
-	// The root domain where your CrowdStrike Falcon tenant is located. Default "https://api.crowdstrike.com".
+	// The root domain where your CrowdStrike Falcon tenant is located.
 	Url *string `json:"url,omitempty" url:"url,omitempty"`
 
 	extraProperties map[string]interface{}
