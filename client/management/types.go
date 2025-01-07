@@ -136,6 +136,7 @@ type Audit struct {
 	CreatedAt     time.Time      `json:"created_at" url:"created_at"`
 	RemoteAddr    string         `json:"remote_addr" url:"remote_addr"`
 	UserAgent     string         `json:"user_agent" url:"user_agent"`
+	AuditType     AuditType      `json:"audit_type" url:"audit_type"`
 	Method        HttpMethod     `json:"method" url:"method"`
 	Path          string         `json:"path" url:"path"`
 	Code          string         `json:"code" url:"code"`
@@ -202,18 +203,48 @@ func (a *Audit) String() string {
 	return fmt.Sprintf("%#v", a)
 }
 
+type AuditType string
+
+const (
+	AuditTypeAlarm   AuditType = "ALARM"
+	AuditTypeError   AuditType = "ERROR"
+	AuditTypeApi     AuditType = "API"
+	AuditTypeUnknown AuditType = "UNKNOWN"
+)
+
+func NewAuditTypeFromString(s string) (AuditType, error) {
+	switch s {
+	case "ALARM":
+		return AuditTypeAlarm, nil
+	case "ERROR":
+		return AuditTypeError, nil
+	case "API":
+		return AuditTypeApi, nil
+	case "UNKNOWN":
+		return AuditTypeUnknown, nil
+	}
+	var t AuditType
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (a AuditType) Ptr() *AuditType {
+	return &a
+}
+
 type HttpMethod string
 
 const (
+	HttpMethodDelete HttpMethod = "DELETE"
 	HttpMethodGet    HttpMethod = "GET"
 	HttpMethodPatch  HttpMethod = "PATCH"
 	HttpMethodPost   HttpMethod = "POST"
 	HttpMethodPut    HttpMethod = "PUT"
-	HttpMethodDelete HttpMethod = "DELETE"
 )
 
 func NewHttpMethodFromString(s string) (HttpMethod, error) {
 	switch s {
+	case "DELETE":
+		return HttpMethodDelete, nil
 	case "GET":
 		return HttpMethodGet, nil
 	case "PATCH":
@@ -222,8 +253,6 @@ func NewHttpMethodFromString(s string) (HttpMethod, error) {
 		return HttpMethodPost, nil
 	case "PUT":
 		return HttpMethodPut, nil
-	case "DELETE":
-		return HttpMethodDelete, nil
 	}
 	var t HttpMethod
 	return "", fmt.Errorf("%s is not a valid %T", s, t)
