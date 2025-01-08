@@ -510,6 +510,50 @@ func (b *BridgeLocalConfig) String() string {
 	return fmt.Sprintf("%#v", b)
 }
 
+type BridgeLocalStats struct {
+	Requests int64 `json:"requests" url:"requests"`
+	Failures int64 `json:"failures" url:"failures"`
+	InBytes  int64 `json:"in_bytes" url:"in_bytes"`
+	OutBytes int64 `json:"out_bytes" url:"out_bytes"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (b *BridgeLocalStats) GetExtraProperties() map[string]interface{} {
+	return b.extraProperties
+}
+
+func (b *BridgeLocalStats) UnmarshalJSON(data []byte) error {
+	type unmarshaler BridgeLocalStats
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*b = BridgeLocalStats(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *b)
+	if err != nil {
+		return err
+	}
+	b.extraProperties = extraProperties
+
+	b._rawJSON = nil
+	return nil
+}
+
+func (b *BridgeLocalStats) String() string {
+	if len(b._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(b._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(b); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", b)
+}
+
 type BridgeStatus struct {
 	// Local time on the Bridge when the status check was performed.
 	CurrentTime time.Time `json:"current_time" url:"current_time"`
@@ -517,6 +561,8 @@ type BridgeStatus struct {
 	ResponseDuration string `json:"response_duration" url:"response_duration"`
 	// Local configuration parameters for the Bridge.
 	LocalConfig *BridgeLocalConfig `json:"local_config" url:"local_config"`
+	// Local bridge statistics
+	LocalStats *BridgeLocalStats `json:"local_stats" url:"local_stats"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
