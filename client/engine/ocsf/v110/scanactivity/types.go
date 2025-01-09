@@ -95,6 +95,8 @@ type ScanActivity struct {
 	CommandUid *string `json:"command_uid,omitempty" url:"command_uid,omitempty"`
 	// The number of times that events in the same logical group occurred during the event <strong>Start Time</strong> to <strong>End Time</strong> period.
 	Count *int `json:"count,omitempty" url:"count,omitempty"`
+	// A list of custom fields
+	CustomFields *Object `json:"custom_fields,omitempty" url:"custom_fields,omitempty"`
 	// An addressable device, computer system or host.
 	Device *Device `json:"device,omitempty" url:"device,omitempty"`
 	// The duration of the scan

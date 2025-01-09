@@ -150,6 +150,8 @@ type FileActivity struct {
 	Count *int `json:"count,omitempty" url:"count,omitempty"`
 	// The original Windows mask that is required to create the object.
 	CreateMask *string `json:"create_mask,omitempty" url:"create_mask,omitempty"`
+	// A list of custom fields
+	CustomFields *Object `json:"custom_fields,omitempty" url:"custom_fields,omitempty"`
 	// An addressable device, computer system or host.
 	Device *Device `json:"device" url:"device"`
 	// The disposition name, normalized to the caption of the disposition_id value. In the case of 'Other', it is defined by the event source.

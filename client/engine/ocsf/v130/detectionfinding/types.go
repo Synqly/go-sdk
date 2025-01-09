@@ -115,6 +115,8 @@ type DetectionFinding struct {
 	ConfidenceScore *int `json:"confidence_score,omitempty" url:"confidence_score,omitempty"`
 	// The number of times that events in the same logical group occurred during the event <strong>Start Time</strong> to <strong>End Time</strong> period.
 	Count *int `json:"count,omitempty" url:"count,omitempty"`
+	// A list of custom fields
+	CustomFields *Object `json:"custom_fields,omitempty" url:"custom_fields,omitempty"`
 	// Describes the affected device/host. It can be used in conjunction with <code>Affected Resource(s)</code>. <p> e.g. Specific details about an AWS EC2 instance, that is affected by the Finding.</p>
 	Device *Device `json:"device,omitempty" url:"device,omitempty"`
 	// The disposition name, normalized to the caption of the disposition_id value. In the case of 'Other', it is defined by the event source.

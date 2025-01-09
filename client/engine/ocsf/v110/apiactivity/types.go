@@ -66,7 +66,7 @@ type ApiActivity struct {
 	// The actor object describes details about the user/role/process that was the source of the activity.
 	Actor *Actor `json:"actor" url:"actor"`
 	// Describes details about a typical API (Application Programming Interface) call.
-	Api *Api `json:"api" url:"api"`
+	Api *Api `json:"api,omitempty" url:"api,omitempty"`
 	// The event category name, as defined by category_uid value: <code>Application Activity</code>.
 	CategoryName *string `json:"category_name,omitempty" url:"category_name,omitempty"`
 	// The category unique identifier of the event.
@@ -77,6 +77,8 @@ type ApiActivity struct {
 	Cloud *Cloud `json:"cloud,omitempty" url:"cloud,omitempty"`
 	// The number of times that events in the same logical group occurred during the event <strong>Start Time</strong> to <strong>End Time</strong> period.
 	Count *int `json:"count,omitempty" url:"count,omitempty"`
+	// A list of custom fields
+	CustomFields *Object `json:"custom_fields,omitempty" url:"custom_fields,omitempty"`
 	// The network destination endpoint.
 	DstEndpoint *NetworkEndpoint `json:"dst_endpoint,omitempty" url:"dst_endpoint,omitempty"`
 	// The event duration or aggregate time, the amount of time the event covers from <code>start_time</code> to <code>end_time</code> in milliseconds.

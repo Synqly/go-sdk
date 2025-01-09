@@ -71,6 +71,8 @@ type BaseEvent struct {
 	Cloud *Cloud `json:"cloud,omitempty" url:"cloud,omitempty"`
 	// The number of times that events in the same logical group occurred during the event <strong>Start Time</strong> to <strong>End Time</strong> period.
 	Count *int `json:"count,omitempty" url:"count,omitempty"`
+	// A list of custom fields
+	CustomFields *Object `json:"custom_fields,omitempty" url:"custom_fields,omitempty"`
 	// The event duration or aggregate time, the amount of time the event covers from <code>start_time</code> to <code>end_time</code> in milliseconds.
 	Duration *int `json:"duration,omitempty" url:"duration,omitempty"`
 	// The end time of a time period, or the time of the most recent event included in the aggregate event.

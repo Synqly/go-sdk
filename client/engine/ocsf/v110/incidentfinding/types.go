@@ -113,6 +113,8 @@ type IncidentFinding struct {
 	ConfidenceScore *int `json:"confidence_score,omitempty" url:"confidence_score,omitempty"`
 	// The number of times that events in the same logical group occurred during the event <strong>Start Time</strong> to <strong>End Time</strong> period.
 	Count *int `json:"count,omitempty" url:"count,omitempty"`
+	// A list of custom fields
+	CustomFields *Object `json:"custom_fields,omitempty" url:"custom_fields,omitempty"`
 	// The short description of the Incident.
 	Desc *string `json:"desc,omitempty" url:"desc,omitempty"`
 	// The event duration or aggregate time, the amount of time the event covers from <code>start_time</code> to <code>end_time</code> in milliseconds.
