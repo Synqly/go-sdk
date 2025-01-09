@@ -7145,6 +7145,76 @@ func (g *GcsCredential) Accept(visitor GcsCredentialVisitor) error {
 	return fmt.Errorf("type %T does not define a non-empty union type", g)
 }
 
+type GoogleChronicleCredential struct {
+	Type string
+	// OAuth 2.0 Token URL, Client ID, and Client Secret for a Synqly Siem Connector API service application.
+	OAuthClient *OAuthClientCredential
+	// The ID of a credential that stores the OAuth 2.0 values for a Synqly Siem Connector API service application.
+	OAuthClientId OAuthClientCredentialId
+}
+
+func (g *GoogleChronicleCredential) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	g.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", g)
+	}
+	switch unmarshaler.Type {
+	case "o_auth_client":
+		value := new(OAuthClientCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		g.OAuthClient = value
+	case "o_auth_client_id":
+		var valueUnmarshaler struct {
+			OAuthClientId OAuthClientCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		g.OAuthClientId = valueUnmarshaler.OAuthClientId
+	}
+	return nil
+}
+
+func (g GoogleChronicleCredential) MarshalJSON() ([]byte, error) {
+	if g.OAuthClient != nil {
+		return core.MarshalJSONWithExtraProperty(g.OAuthClient, "type", "o_auth_client")
+	}
+	if g.OAuthClientId != "" {
+		var marshaler = struct {
+			Type          string                  `json:"type"`
+			OAuthClientId OAuthClientCredentialId `json:"value"`
+		}{
+			Type:          "o_auth_client_id",
+			OAuthClientId: g.OAuthClientId,
+		}
+		return json.Marshal(marshaler)
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", g)
+}
+
+type GoogleChronicleCredentialVisitor interface {
+	VisitOAuthClient(*OAuthClientCredential) error
+	VisitOAuthClientId(OAuthClientCredentialId) error
+}
+
+func (g *GoogleChronicleCredential) Accept(visitor GoogleChronicleCredentialVisitor) error {
+	if g.OAuthClient != nil {
+		return visitor.VisitOAuthClient(g.OAuthClient)
+	}
+	if g.OAuthClientId != "" {
+		return visitor.VisitOAuthClientId(g.OAuthClientId)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", g)
+}
+
 // Configuration for the Microsoft Entra ID Identity Provider
 type IdentityEntraId struct {
 	Credential *EntraIdCredential `json:"credential" url:"credential"`
@@ -7946,6 +8016,7 @@ type ProviderConfig struct {
 	NotificationsSlack                *NotificationsSlack
 	NotificationsTeams                *NotificationsTeams
 	SiemElasticsearch                 *SiemElasticsearch
+	SiemGoogleChronicle               *SiemGoogleChronicle
 	SiemMockSiem                      *SiemMock
 	SiemQRadar                        *SiemQRadar
 	SiemRapid7Insightidr              *SiemRapid7InsightIdr
@@ -8075,6 +8146,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.SiemElasticsearch = value
+	case "siem_google_chronicle":
+		value := new(SiemGoogleChronicle)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.SiemGoogleChronicle = value
 	case "siem_mock_siem":
 		value := new(SiemMock)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -8275,6 +8352,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.SiemElasticsearch != nil {
 		return core.MarshalJSONWithExtraProperty(p.SiemElasticsearch, "type", "siem_elasticsearch")
 	}
+	if p.SiemGoogleChronicle != nil {
+		return core.MarshalJSONWithExtraProperty(p.SiemGoogleChronicle, "type", "siem_google_chronicle")
+	}
 	if p.SiemMockSiem != nil {
 		return core.MarshalJSONWithExtraProperty(p.SiemMockSiem, "type", "siem_mock_siem")
 	}
@@ -8369,6 +8449,7 @@ type ProviderConfigVisitor interface {
 	VisitNotificationsSlack(*NotificationsSlack) error
 	VisitNotificationsTeams(*NotificationsTeams) error
 	VisitSiemElasticsearch(*SiemElasticsearch) error
+	VisitSiemGoogleChronicle(*SiemGoogleChronicle) error
 	VisitSiemMockSiem(*SiemMock) error
 	VisitSiemQRadar(*SiemQRadar) error
 	VisitSiemRapid7Insightidr(*SiemRapid7InsightIdr) error
@@ -8441,6 +8522,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.SiemElasticsearch != nil {
 		return visitor.VisitSiemElasticsearch(p.SiemElasticsearch)
+	}
+	if p.SiemGoogleChronicle != nil {
+		return visitor.VisitSiemGoogleChronicle(p.SiemGoogleChronicle)
 	}
 	if p.SiemMockSiem != nil {
 		return visitor.VisitSiemMockSiem(p.SiemMockSiem)
@@ -8554,6 +8638,8 @@ const (
 	ProviderConfigIdNotificationsTeams ProviderConfigId = "notifications_teams"
 	// Elastic SIEM
 	ProviderConfigIdSiemElasticsearch ProviderConfigId = "siem_elasticsearch"
+	// Google Chronicle
+	ProviderConfigIdSiemGoogleChronicle ProviderConfigId = "siem_google_chronicle"
 	// SIEM Test
 	ProviderConfigIdSiemMock ProviderConfigId = "siem_mock_siem"
 	// QRadar
@@ -8640,6 +8726,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdNotificationsTeams, nil
 	case "siem_elasticsearch":
 		return ProviderConfigIdSiemElasticsearch, nil
+	case "siem_google_chronicle":
+		return ProviderConfigIdSiemGoogleChronicle, nil
 	case "siem_mock_siem":
 		return ProviderConfigIdSiemMock, nil
 	case "siem_q_radar":
@@ -8951,6 +9039,54 @@ func (s *SiemElasticsearch) UnmarshalJSON(data []byte) error {
 }
 
 func (s *SiemElasticsearch) String() string {
+	if len(s._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(s); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", s)
+}
+
+// Configuration for Google Chronicle as a SIEM Provider.
+type SiemGoogleChronicle struct {
+	// Optional ingestion credential. Without this credential the provider will not be able to ingest events.
+	IngestionCredential *GoogleChronicleCredential `json:"ingestion_credential,omitempty" url:"ingestion_credential,omitempty"`
+	// (Optional) Ingestion URL for the Google Chronicle instance. This should be the base event ingestion URL, without any path components. Default "https://malachiteingestion-pa.googleapis.com"
+	IngestionUrl     *string                    `json:"ingestion_url,omitempty" url:"ingestion_url,omitempty"`
+	SearchCredential *GoogleChronicleCredential `json:"search_credential" url:"search_credential"`
+	// Search URL for the Google Chronicle instance. This should be the base event search URL, without any path components. Default "https://backstory.googleapis.com".
+	SearchUrl *string `json:"search_url,omitempty" url:"search_url,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (s *SiemGoogleChronicle) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
+}
+
+func (s *SiemGoogleChronicle) UnmarshalJSON(data []byte) error {
+	type unmarshaler SiemGoogleChronicle
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*s = SiemGoogleChronicle(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+
+	s._rawJSON = nil
+	return nil
+}
+
+func (s *SiemGoogleChronicle) String() string {
 	if len(s._rawJSON) > 0 {
 		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
 			return value
