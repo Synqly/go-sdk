@@ -663,13 +663,22 @@ func (c *CreateBridgeResponseResult) String() string {
 	return fmt.Sprintf("%#v", c)
 }
 
-// Provides details on an available Integration.
+// Provides details of the Connector.
 type Connector struct {
-	Connector CategoryId `json:"connector" url:"connector"`
-	// Description of what this Integration does.
+	// Unique identifier for the Connector.
+	Id CategoryId `json:"id" url:"id"`
+	// Name of the connector.
+	Name CategoryId `json:"name" url:"name"`
+	// Display name of the Connector.
+	Fullname string `json:"fullname" url:"fullname"`
+	// Description of the Connector.
 	Description string `json:"description" url:"description"`
-	// List of Providers that implement this Connector.
-	Providers []*ProviderCapabilities `json:"providers" url:"providers"`
+	// List of Providers that implement the Connector.
+	ProviderIds []ProviderId `json:"provider_ids" url:"provider_ids"`
+	// List of capabilities for Providers that implement the Connector.
+	Providers []*ProviderCapabilities `json:"providers,omitempty" url:"providers,omitempty"`
+	// DEPRECATED – use `id` instead.
+	Connector *CategoryId `json:"connector,omitempty" url:"connector,omitempty"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
@@ -707,6 +716,50 @@ func (c *Connector) String() string {
 		return value
 	}
 	return fmt.Sprintf("%#v", c)
+}
+
+type ConnectorOrId struct {
+	CategoryId CategoryId
+	Connector  *Connector
+}
+
+func (c *ConnectorOrId) UnmarshalJSON(data []byte) error {
+	var valueCategoryId CategoryId
+	if err := json.Unmarshal(data, &valueCategoryId); err == nil {
+		c.CategoryId = valueCategoryId
+		return nil
+	}
+	valueConnector := new(Connector)
+	if err := json.Unmarshal(data, &valueConnector); err == nil {
+		c.Connector = valueConnector
+		return nil
+	}
+	return fmt.Errorf("%s cannot be deserialized as a %T", data, c)
+}
+
+func (c ConnectorOrId) MarshalJSON() ([]byte, error) {
+	if c.CategoryId != "" {
+		return json.Marshal(c.CategoryId)
+	}
+	if c.Connector != nil {
+		return json.Marshal(c.Connector)
+	}
+	return nil, fmt.Errorf("type %T does not include a non-empty union type", c)
+}
+
+type ConnectorOrIdVisitor interface {
+	VisitCategoryId(CategoryId) error
+	VisitConnector(*Connector) error
+}
+
+func (c *ConnectorOrId) Accept(visitor ConnectorOrIdVisitor) error {
+	if c.CategoryId != "" {
+		return visitor.VisitCategoryId(c.CategoryId)
+	}
+	if c.Connector != nil {
+		return visitor.VisitConnector(c.Connector)
+	}
+	return fmt.Errorf("type %T does not include a non-empty union type", c)
 }
 
 type FilterOperation string
@@ -801,14 +854,25 @@ type ProviderCapabilities struct {
 	Id ProviderId `json:"id" url:"id"`
 	// Name of the Provider.
 	Name string `json:"name" url:"name"`
-	// Description of what this Provider does.
+	// Display name of the Provider.
+	Fullname string `json:"fullname" url:"fullname"`
+	// Description of the Provider.
 	Description string `json:"description" url:"description"`
-	// Categories that this Provider implements.
-	Connector CategoryId `json:"connector" url:"connector"`
-	// Operations that this Provider implements.
+	// Id of the Connector that the Provider implements.
+	ConnectorId CategoryId `json:"connector_id" url:"connector_id"`
+	// Id of the Connector that the Provider implements – or, if
+	// `expand=connector` is set – the details of the Connector. NOTE:
+	// The current default behavior is to return the ID of the
+	// Connector. This field will soon only be populated when
+	// `expand=connector` is set in the APIs that support it. It is
+	// recommended you use `connector_id` for a stable reference to the
+	// Connector ID. This field will soon only be populated when
+	// `expand=connector` is set in the APIs that support it.
+	Connector *ConnectorOrId `json:"connector,omitempty" url:"connector,omitempty"`
+	// Operations that the Provider implements.
 	Operations []*ProviderOperations `json:"operations,omitempty" url:"operations,omitempty"`
-	// Details on the specific configuration options for this Provider.
-	ProviderConfig map[string]interface{} `json:"provider_config" url:"provider_config"`
+	// Details on the specific configuration options for the Provider.
+	ProviderConfig interface{} `json:"provider_config,omitempty" url:"provider_config,omitempty"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
@@ -897,22 +961,34 @@ func (p *ProviderFilter) String() string {
 }
 
 type ProviderOperations struct {
+	// Unique identifier for the operation.
+	Id string `json:"id" url:"id"`
 	// Name of the operation.
 	Name string `json:"name" url:"name"`
+	// Display name of the operation.
+	Fullname *string `json:"fullname,omitempty" url:"fullname,omitempty"`
+	// Description of the operation.
+	Description *string `json:"description,omitempty" url:"description,omitempty"`
+	// HTTP method used for the operation.
+	RequestMethod *string `json:"request_method,omitempty" url:"request_method,omitempty"`
+	// URI template path for the operation, including path parameters.
+	RequestPath *string `json:"request_path,omitempty" url:"request_path,omitempty"`
 	// Whether the operation is supported by the provider.
 	Supported bool `json:"supported" url:"supported"`
-	// List of fields in the request body that are required by the provider for this
-	// operation. Due to limitations of the OpenAPI format these fields may be marked as
-	// optional, even though they are in fact required by this provider.
+	// List of fields in the request body that are required by the
+	// provider for this operation. Due to limitations of the OpenAPI
+	// format these fields may be marked as optional, even though they
+	// are in fact required by this provider.
 	RequiredFields []string `json:"required_fields,omitempty" url:"required_fields,omitempty"`
-	// List of fields that may be returned in the response body. Any fields not listed in this array are not supported by this provider and will not be returned in the response body.
+	// List of fields that may be returned in the response body. Any
+	// fields not listed in this array are not supported by this
+	// provider and will not be returned in the response body.
 	SupportedResponseFields []string `json:"supported_response_fields,omitempty" url:"supported_response_fields,omitempty"`
 	// Filters that can be applied to this operation.
 	Filters []*ProviderFilter `json:"filters,omitempty" url:"filters,omitempty"`
-	// If this operation requires a request body, this field will contain the schema for
-	// the request. The is a json schema object. This field is only present when getting
-	// the capabilities for a specific provider.
-	RequestBody map[string]interface{} `json:"request_body,omitempty" url:"request_body,omitempty"`
+	// This field is only available if the operation supports a request
+	// body. Describes the request body and its schema.
+	RequestBody *RequestBody `json:"request_body,omitempty" url:"request_body,omitempty"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
@@ -950,6 +1026,55 @@ func (p *ProviderOperations) String() string {
 		return value
 	}
 	return fmt.Sprintf("%#v", p)
+}
+
+// Describes the request body and its schema.
+type RequestBody struct {
+	// If true the request body is required, false otherwise.
+	Required bool `json:"required" url:"required"`
+	// The schema defining the type used for the request body. If
+	// expanded will be a full JSON schema of the entire request body,
+	// otherwise this will be a reference object. The reference object
+	// has a single key `$ref`, which is a URI [RFC3986] identifying the
+	// location of a component within the Engine OpenAPI specification.
+	Schema map[string]interface{} `json:"schema" url:"schema"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (r *RequestBody) GetExtraProperties() map[string]interface{} {
+	return r.extraProperties
+}
+
+func (r *RequestBody) UnmarshalJSON(data []byte) error {
+	type unmarshaler RequestBody
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*r = RequestBody(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *r)
+	if err != nil {
+		return err
+	}
+	r.extraProperties = extraProperties
+
+	r._rawJSON = nil
+	return nil
+}
+
+func (r *RequestBody) String() string {
+	if len(r._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(r._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(r); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", r)
 }
 
 // Id of the Integrations category
@@ -997,112 +1122,6 @@ func (c CategoryId) Ptr() *CategoryId {
 }
 
 type ProviderId = string
-
-type CapabilitiesProviderConfig = map[string]interface{}
-
-// Provides details on an available Integration.
-type Category struct {
-	Category CategoryId `json:"category" url:"category"`
-	// Description of what this Integration does.
-	Description string `json:"description" url:"description"`
-	// List of Providers that implement this Integration.
-	Providers []ProviderId `json:"providers" url:"providers"`
-	// URL of the icon representing this type of Integration.
-	Picture *string `json:"picture,omitempty" url:"picture,omitempty"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (c *Category) GetExtraProperties() map[string]interface{} {
-	return c.extraProperties
-}
-
-func (c *Category) UnmarshalJSON(data []byte) error {
-	type unmarshaler Category
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*c = Category(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *c)
-	if err != nil {
-		return err
-	}
-	c.extraProperties = extraProperties
-
-	c._rawJSON = nil
-	return nil
-}
-
-func (c *Category) String() string {
-	if len(c._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(c); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", c)
-}
-
-type Provider struct {
-	// Name of the Provider.
-	Name string `json:"name" url:"name"`
-	// Description of what this Provider does.
-	Description string `json:"description" url:"description"`
-	// Categories that this Provider implements.
-	Categories []CategoryId `json:"categories" url:"categories"`
-	// URL of the icon representing this type of Provider.
-	Picture *string `json:"picture,omitempty" url:"picture,omitempty"`
-	// Operations that this Provider implements.
-	SupportedOperations interface{} `json:"supported_operations" url:"supported_operations"`
-	// List of credential types that this Provider supports.
-	Credentials []ProviderCredentialConfig `json:"credentials" url:"credentials"`
-	// Details on the specific configuration options for this Provider.
-	ProviderConfig map[string]CapabilitiesProviderConfig `json:"provider_config" url:"provider_config"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (p *Provider) GetExtraProperties() map[string]interface{} {
-	return p.extraProperties
-}
-
-func (p *Provider) UnmarshalJSON(data []byte) error {
-	type unmarshaler Provider
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*p = Provider(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *p)
-	if err != nil {
-		return err
-	}
-	p.extraProperties = extraProperties
-
-	p._rawJSON = nil
-	return nil
-}
-
-func (p *Provider) String() string {
-	if len(p._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(p._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(p); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", p)
-}
-
-type ProviderCredentialConfig = map[string]interface{}
 
 type Base struct {
 	// Human-readable name for this resource

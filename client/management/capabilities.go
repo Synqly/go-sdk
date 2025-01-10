@@ -8,6 +8,74 @@ import (
 	core "github.com/synqly/go-sdk/client/management/core"
 )
 
+type ProviderCapabilitiesRequest struct {
+	// Expand the capabilities result fields that are otherwise
+	// omitted or returned as references to OpenAPI spec components.
+	// NOTE: This can yield very big response objects.
+	Expand []*GetProviderCapabilitiesExpandOptions `json:"-" url:"expand,omitempty"`
+}
+
+type ListConnectorsCapabilitiesRequest struct {
+	// Expand the capabilities result fields that are otherwise
+	// omitted or returned as references to OpenAPI spec components.
+	// NOTE: This can yield very big response objects.
+	Expand []*ListConnectorCapabilitiesExpandOptions `json:"-" url:"expand,omitempty"`
+}
+
+type ListProvidersCapabilitiesRequest struct {
+	// Expand the capabilities result fields that are otherwise
+	// omitted or returned as references to OpenAPI spec components.
+	// NOTE: This can yield very big response objects.
+	Expand []*ListProviderCapabilitiesExpandOptions `json:"-" url:"expand,omitempty"`
+}
+
+type GetProviderCapabilitiesExpandOptions string
+
+const (
+	GetProviderCapabilitiesExpandOptionsConnector      GetProviderCapabilitiesExpandOptions = "connector"
+	GetProviderCapabilitiesExpandOptionsOperations     GetProviderCapabilitiesExpandOptions = "operations"
+	GetProviderCapabilitiesExpandOptionsRequestBody    GetProviderCapabilitiesExpandOptions = "request_body"
+	GetProviderCapabilitiesExpandOptionsProviderConfig GetProviderCapabilitiesExpandOptions = "provider_config"
+)
+
+func NewGetProviderCapabilitiesExpandOptionsFromString(s string) (GetProviderCapabilitiesExpandOptions, error) {
+	switch s {
+	case "connector":
+		return GetProviderCapabilitiesExpandOptionsConnector, nil
+	case "operations":
+		return GetProviderCapabilitiesExpandOptionsOperations, nil
+	case "request_body":
+		return GetProviderCapabilitiesExpandOptionsRequestBody, nil
+	case "provider_config":
+		return GetProviderCapabilitiesExpandOptionsProviderConfig, nil
+	}
+	var t GetProviderCapabilitiesExpandOptions
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (g GetProviderCapabilitiesExpandOptions) Ptr() *GetProviderCapabilitiesExpandOptions {
+	return &g
+}
+
+type ListConnectorCapabilitiesExpandOptions string
+
+const (
+	ListConnectorCapabilitiesExpandOptionsProviders ListConnectorCapabilitiesExpandOptions = "providers"
+)
+
+func NewListConnectorCapabilitiesExpandOptionsFromString(s string) (ListConnectorCapabilitiesExpandOptions, error) {
+	switch s {
+	case "providers":
+		return ListConnectorCapabilitiesExpandOptionsProviders, nil
+	}
+	var t ListConnectorCapabilitiesExpandOptions
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (l ListConnectorCapabilitiesExpandOptions) Ptr() *ListConnectorCapabilitiesExpandOptions {
+	return &l
+}
+
 type ListConnectorsCapabilitiesResponse struct {
 	Result []*Connector `json:"result" url:"result"`
 
@@ -47,6 +115,31 @@ func (l *ListConnectorsCapabilitiesResponse) String() string {
 		return value
 	}
 	return fmt.Sprintf("%#v", l)
+}
+
+type ListProviderCapabilitiesExpandOptions string
+
+const (
+	ListProviderCapabilitiesExpandOptionsConnector      ListProviderCapabilitiesExpandOptions = "connector"
+	ListProviderCapabilitiesExpandOptionsOperations     ListProviderCapabilitiesExpandOptions = "operations"
+	ListProviderCapabilitiesExpandOptionsProviderConfig ListProviderCapabilitiesExpandOptions = "provider_config"
+)
+
+func NewListProviderCapabilitiesExpandOptionsFromString(s string) (ListProviderCapabilitiesExpandOptions, error) {
+	switch s {
+	case "connector":
+		return ListProviderCapabilitiesExpandOptionsConnector, nil
+	case "operations":
+		return ListProviderCapabilitiesExpandOptionsOperations, nil
+	case "provider_config":
+		return ListProviderCapabilitiesExpandOptionsProviderConfig, nil
+	}
+	var t ListProviderCapabilitiesExpandOptions
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (l ListProviderCapabilitiesExpandOptions) Ptr() *ListProviderCapabilitiesExpandOptions {
+	return &l
 }
 
 type ListProvidersCapabilitiesResponse struct {

@@ -37,6 +37,7 @@ func NewClient(opts ...option.RequestOption) *Client {
 // Returns a list of all `Connectors`.
 func (c *Client) ListConnectors(
 	ctx context.Context,
+	request *management.ListConnectorsCapabilitiesRequest,
 	opts ...option.RequestOption,
 ) (*management.ListConnectorsCapabilitiesResponse, error) {
 	options := core.NewRequestOptions(opts...)
@@ -49,6 +50,14 @@ func (c *Client) ListConnectors(
 		baseURL = options.BaseURL
 	}
 	endpointURL := baseURL + "/v1/capabilities/connectors"
+
+	queryParams, err := core.QueryValues(request)
+	if err != nil {
+		return nil, err
+	}
+	if len(queryParams) > 0 {
+		endpointURL += "?" + queryParams.Encode()
+	}
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
@@ -148,6 +157,7 @@ func (c *Client) ListConnectors(
 // Returns a list of all Provider capabilities and their configurations.
 func (c *Client) ListProviders(
 	ctx context.Context,
+	request *management.ListProvidersCapabilitiesRequest,
 	opts ...option.RequestOption,
 ) (*management.ListProvidersCapabilitiesResponse, error) {
 	options := core.NewRequestOptions(opts...)
@@ -160,6 +170,14 @@ func (c *Client) ListProviders(
 		baseURL = options.BaseURL
 	}
 	endpointURL := baseURL + "/v1/capabilities/providers"
+
+	queryParams, err := core.QueryValues(request)
+	if err != nil {
+		return nil, err
+	}
+	if len(queryParams) > 0 {
+		endpointURL += "?" + queryParams.Encode()
+	}
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
@@ -260,6 +278,7 @@ func (c *Client) ListProviders(
 func (c *Client) GetProvider(
 	ctx context.Context,
 	providerId management.ProviderConfigId,
+	request *management.ProviderCapabilitiesRequest,
 	opts ...option.RequestOption,
 ) (*management.ProviderCapabilitiesResponse, error) {
 	options := core.NewRequestOptions(opts...)
@@ -272,6 +291,14 @@ func (c *Client) GetProvider(
 		baseURL = options.BaseURL
 	}
 	endpointURL := core.EncodeURL(baseURL+"/v1/capabilities/providers/%v", providerId)
+
+	queryParams, err := core.QueryValues(request)
+	if err != nil {
+		return nil, err
+	}
+	if len(queryParams) > 0 {
+		endpointURL += "?" + queryParams.Encode()
+	}
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
