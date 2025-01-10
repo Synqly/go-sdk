@@ -155,8 +155,8 @@ func (c *Client) List(
 	return response, nil
 }
 
-// Returns the `Bridge` object matching `{bridgeId}`. For more information on Bridges, refer to our
-// [Synqly Overview](https://docs.synqly.com/docs/synqly-overview).
+// Returns the Bridge Group object matching `{bridgeId}`. For more information on Bridges, refer to the
+// [Bridge Overview](https://docs.synqly.com/docs/synqly-overview).
 func (c *Client) Get(
 	ctx context.Context,
 	accountId management.AccountId,
@@ -273,7 +273,7 @@ func (c *Client) Get(
 	return response, nil
 }
 
-// Returns the status and local configuration of running Bridges matching `{bridgeId}`.
+// Returns the status and local configuration of running Bridges Agents in the Bridge Group `{bridgeId}`.
 func (c *Client) GetStatus(
 	ctx context.Context,
 	accountId management.AccountId,
@@ -390,7 +390,9 @@ func (c *Client) GetStatus(
 	return response, nil
 }
 
-// Creates an `Bridge` object. For more information on Bridges, refer to our
+// Creates a `Bridge Group` with a unique identifier and authentication
+// credentials. This allows for Bridge Agents to connect to Synqly. For
+// more information on Bridges, refer to our
 // [Synqly Overview](https://docs.synqly.com/docs/synqly-overview).
 func (c *Client) Create(
 	ctx context.Context,
@@ -505,7 +507,7 @@ func (c *Client) Create(
 	return response, nil
 }
 
-// Updates the `Bridge` object matching `{bridgeId}`. For more information on Bridges, refer to our
+// Updates the `Bridge Group` object matching `{bridgeId}`. For more information on Bridges, refer to our
 // [Synqly Overview](https://docs.synqly.com/docs/synqly-overview).
 func (c *Client) Update(
 	ctx context.Context,
@@ -625,7 +627,7 @@ func (c *Client) Update(
 	return response, nil
 }
 
-// Patches the `Bridge` object matching `{bridgeId}`. For more information on Bridges, refer to our
+// Patches the `Bridge Group` object matching `{bridgeId}`. For more information on Bridges, refer to our
 // [Synqly Overview](https://docs.synqly.com/docs/synqly-overview).
 func (c *Client) Patch(
 	ctx context.Context,
@@ -745,8 +747,8 @@ func (c *Client) Patch(
 	return response, nil
 }
 
-// Deletes the `Bridge` matching `{bridgeId}`. Deleting an `Bridge` also deletea
-// all `Tokens` and `Credentials` belonging to the `Bridge`.
+// Deletes the `Bridge Group` matching `{bridgeId}`. Deleting an `Bridge Group` also deletea
+// all `Tokens` and `Credentials` belonging to the `Bridge Group`.
 func (c *Client) Delete(
 	ctx context.Context,
 	accountId management.AccountId,
