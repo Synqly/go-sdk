@@ -233,10 +233,11 @@ func (app *App) backgroundJob(durationSeconds int) {
 
 // createSampleEvent generates a sample ScheduledJobActivity OCSF (https://ocsf.io/) Event
 func createSampleEvent() *engine.Event {
+	actionId := scheduledJobActivity.Action_Allowed
 	return &engine.Event{
 		ScheduledJobActivity: &scheduledJobActivity.ScheduledJobActivity{
 			ActivityId: scheduledJobActivity.Activity_Update,
-			ActionId:   scheduledJobActivity.Action_Allowed,
+			ActionId:   &actionId,
 			Device: &scheduledJobActivity.Device{
 				TypeId: scheduledJobActivity.Device_Type_Server,
 			},
