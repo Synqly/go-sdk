@@ -10,20 +10,20 @@ import (
 	apiactivity "github.com/synqly/go-sdk/client/engine/ocsf/v110/apiactivity"
 	authentication "github.com/synqly/go-sdk/client/engine/ocsf/v110/authentication"
 	compliancefinding "github.com/synqly/go-sdk/client/engine/ocsf/v110/compliancefinding"
-	detectionfinding "github.com/synqly/go-sdk/client/engine/ocsf/v110/detectionfinding"
 	fileactivity "github.com/synqly/go-sdk/client/engine/ocsf/v110/fileactivity"
 	groupmanagement "github.com/synqly/go-sdk/client/engine/ocsf/v110/groupmanagement"
-	incidentfinding "github.com/synqly/go-sdk/client/engine/ocsf/v110/incidentfinding"
-	inventoryinfo "github.com/synqly/go-sdk/client/engine/ocsf/v110/inventoryinfo"
 	moduleactivity "github.com/synqly/go-sdk/client/engine/ocsf/v110/moduleactivity"
 	networkactivity "github.com/synqly/go-sdk/client/engine/ocsf/v110/networkactivity"
 	processactivity "github.com/synqly/go-sdk/client/engine/ocsf/v110/processactivity"
 	scheduledjobactivity "github.com/synqly/go-sdk/client/engine/ocsf/v110/scheduledjobactivity"
 	securityfinding "github.com/synqly/go-sdk/client/engine/ocsf/v110/securityfinding"
-	softwareinfo "github.com/synqly/go-sdk/client/engine/ocsf/v110/softwareinfo"
-	vulnerabilityfinding "github.com/synqly/go-sdk/client/engine/ocsf/v110/vulnerabilityfinding"
 	webresourceaccessactivity "github.com/synqly/go-sdk/client/engine/ocsf/v110/webresourceaccessactivity"
 	configstate "github.com/synqly/go-sdk/client/engine/ocsf/v130/configstate"
+	detectionfinding "github.com/synqly/go-sdk/client/engine/ocsf/v130/detectionfinding"
+	incidentfinding "github.com/synqly/go-sdk/client/engine/ocsf/v130/incidentfinding"
+	inventoryinfo "github.com/synqly/go-sdk/client/engine/ocsf/v130/inventoryinfo"
+	softwareinfo "github.com/synqly/go-sdk/client/engine/ocsf/v130/softwareinfo"
+	vulnerabilityfinding "github.com/synqly/go-sdk/client/engine/ocsf/v130/vulnerabilityfinding"
 	time "time"
 )
 
@@ -225,8 +225,6 @@ func (e *ErrorParam) String() string {
 	}
 	return fmt.Sprintf("%#v", e)
 }
-
-type Id = string
 
 type MetaApi struct {
 	Response *MetaApiResponse `json:"response,omitempty" url:"response,omitempty"`

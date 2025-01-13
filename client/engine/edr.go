@@ -106,6 +106,8 @@ type QueryThreatsRequest struct {
 	IncludeRawData *bool `json:"-" url:"include_raw_data,omitempty"`
 }
 
+type Id = string
+
 type CreateIocsRequest struct {
 	// The list of iocs to create
 	Indicators []*stix.Indicator `json:"indicators" url:"indicators"`
@@ -230,6 +232,48 @@ func (d *DeleteIocsResponse) String() string {
 		return value
 	}
 	return fmt.Sprintf("%#v", d)
+}
+
+type GetEndpointResponse struct {
+	// A single endpoint assets that match the Id.
+	Result Device `json:"result" url:"result"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (g *GetEndpointResponse) GetExtraProperties() map[string]interface{} {
+	return g.extraProperties
+}
+
+func (g *GetEndpointResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler GetEndpointResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*g = GetEndpointResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	if err != nil {
+		return err
+	}
+	g.extraProperties = extraProperties
+
+	g._rawJSON = nil
+	return nil
+}
+
+func (g *GetEndpointResponse) String() string {
+	if len(g._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(g._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(g); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", g)
 }
 
 type NetworkQuarantineRequest struct {

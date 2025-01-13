@@ -1244,6 +1244,10 @@ type Device struct {
 	NetbiosNames []string `json:"netbios_names,omitempty" url:"netbios_names,omitempty"`
 	// The network interfaces that are associated with the device, one for each unique MAC address/IP address/hostname/name combination.<p><b>Note:</b> The first element of the array is the network information that pertains to the event.</p>
 	NetworkInterfaces []*NetworkInterface `json:"network_interfaces,omitempty" url:"network_interfaces,omitempty"`
+	// The network isolation status of the endpoiint
+	NetworkStatus *string `json:"network_status,omitempty" url:"network_status,omitempty"`
+	// The network isolation status ID.
+	NetworkStatusId *DeviceNetworkStatusId `json:"network_status_id,omitempty" url:"network_status_id,omitempty"`
 	// Organization and org unit related to the device.
 	Org *Organization `json:"org,omitempty" url:"org,omitempty"`
 	// The endpoint operating system.
@@ -1421,6 +1425,12 @@ func (d *DeviceHwInfo) String() string {
 	}
 	return fmt.Sprintf("%#v", d)
 }
+
+// DeviceNetworkStatusId is an enum, and the following values are allowed.
+// 1 - NotIsolated: Device is not isolated from the network.
+// 2 - Isolated: Device is isolated from the network.
+// 99 - Unknown: The network isolation status is unknown.
+type DeviceNetworkStatusId = int
 
 // DeviceRiskLevelId is an enum, and the following values are allowed.
 // 0 - Info

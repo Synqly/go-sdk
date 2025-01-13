@@ -140,6 +140,16 @@ const Databucket_Type_GCPBucket DatabucketTypeId = 3
 // Other. The type is not mapped. See the <code>type</code> attribute, which contains a data source specific value.
 const Databucket_Type_Other DatabucketTypeId = 99
 
+// DeviceNetworkStatusId Values
+// . The network isolation status ID.
+
+// NotIsolated. Device is not isolated from the network.
+const Device_NetworkStatus_NotIsolated DeviceNetworkStatusId = 1
+// Isolated. Device is isolated from the network.
+const Device_NetworkStatus_Isolated DeviceNetworkStatusId = 2
+// Unknown. The network isolation status is unknown.
+const Device_NetworkStatus_Unknown DeviceNetworkStatusId = 99
+
 // DeviceRiskLevelId Values
 // Risk Level ID. The normalized risk level id.
 
