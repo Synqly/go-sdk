@@ -9,6 +9,9 @@ import (
 	time "time"
 )
 
+// Unique identifier for this Account
+type AccountId = Id
+
 type Account struct {
 	// Human-readable name for this resource
 	Name string `json:"name" url:"name"`
@@ -85,9 +88,6 @@ func (a *Account) String() string {
 	}
 	return fmt.Sprintf("%#v", a)
 }
-
-// Unique identifier for this Account
-type AccountId = Id
 
 type CreateAccountResponseResult struct {
 	Account *Account `json:"account" url:"account"`
@@ -5262,15 +5262,16 @@ func (s *SubOrgsPermissions) String() string {
 type TokensActions string
 
 const (
-	TokensActionsList              TokensActions = "list"
-	TokensActionsCreate            TokensActions = "create"
-	TokensActionsCreateIntegration TokensActions = "create_integration"
-	TokensActionsDelete            TokensActions = "delete"
-	TokensActionsGet               TokensActions = "get"
-	TokensActionsReset             TokensActions = "reset"
-	TokensActionsRefresh           TokensActions = "refresh"
-	TokensActionsRemoveSecondary   TokensActions = "remove_secondary"
-	TokensActionsAll               TokensActions = "*"
+	TokensActionsList                     TokensActions = "list"
+	TokensActionsCreate                   TokensActions = "create"
+	TokensActionsCreateIntegration        TokensActions = "create_integration"
+	TokensActionsCreateSynqlyIntegrations TokensActions = "create_synqly_integrations"
+	TokensActionsDelete                   TokensActions = "delete"
+	TokensActionsGet                      TokensActions = "get"
+	TokensActionsReset                    TokensActions = "reset"
+	TokensActionsRefresh                  TokensActions = "refresh"
+	TokensActionsRemoveSecondary          TokensActions = "remove_secondary"
+	TokensActionsAll                      TokensActions = "*"
 )
 
 func NewTokensActionsFromString(s string) (TokensActions, error) {
@@ -5281,6 +5282,8 @@ func NewTokensActionsFromString(s string) (TokensActions, error) {
 		return TokensActionsCreate, nil
 	case "create_integration":
 		return TokensActionsCreateIntegration, nil
+	case "create_synqly_integrations":
+		return TokensActionsCreateSynqlyIntegrations, nil
 	case "delete":
 		return TokensActionsDelete, nil
 	case "get":
@@ -11467,7 +11470,7 @@ func (r *Resources) String() string {
 
 type RoleAccounts struct {
 	// List of account ids that this role definition grants access to. Use "\*" to grant access to all account ids.
-	Ids []IntegrationId `json:"ids" url:"ids"`
+	Ids []AccountId `json:"ids" url:"ids"`
 	// List of account labels this role definition grants access to. If both labels and environments are specified both must pass
 	Labels []string `json:"labels,omitempty" url:"labels,omitempty"`
 	// Account environments this role definition grants access to. If both labels and environments are specified both must pass
