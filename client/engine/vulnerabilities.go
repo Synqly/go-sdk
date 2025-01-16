@@ -80,6 +80,91 @@ func (c *CreateAssetRequest) String() string {
 	return fmt.Sprintf("%#v", c)
 }
 
+type CreateFindingsRequest struct {
+	Findings []SecurityFinding `json:"findings" url:"findings"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *CreateFindingsRequest) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
+}
+
+func (c *CreateFindingsRequest) UnmarshalJSON(data []byte) error {
+	type unmarshaler CreateFindingsRequest
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = CreateFindingsRequest(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
+	c._rawJSON = nil
+	return nil
+}
+
+func (c *CreateFindingsRequest) String() string {
+	if len(c._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
+type CreateFindingsResponse struct {
+	// Specifies the status of the create/import findings job, which can be COMPLETE or PENDING.
+	Status QueryStatus `json:"status" url:"status"`
+	// Provides additional details about any errors encountered during the create/import operation.
+	Errors []*CreateFindingsError `json:"errors,omitempty" url:"errors,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *CreateFindingsResponse) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
+}
+
+func (c *CreateFindingsResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler CreateFindingsResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = CreateFindingsResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
+	c._rawJSON = nil
+	return nil
+}
+
+func (c *CreateFindingsResponse) String() string {
+	if len(c._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
 type GetScanActivityResponse struct {
 	Result *scanactivity.ScanActivity `json:"result" url:"result"`
 
