@@ -476,7 +476,7 @@ func (c *Client) CreateAsset(
 	ctx context.Context,
 	request *engine.CreateAssetRequest,
 	opts ...option.RequestOption,
-) error {
+) (*engine.CreateAssetResponse, error) {
 	options := core.NewRequestOptions(opts...)
 
 	baseURL := "https://api.synqly.com"
@@ -593,21 +593,24 @@ func (c *Client) CreateAsset(
 		return apiError
 	}
 
+	var response *engine.CreateAssetResponse
 	if err := c.caller.Call(
 		ctx,
 		&core.CallParams{
-			URL:          endpointURL,
-			Method:       http.MethodPost,
-			MaxAttempts:  options.MaxAttempts,
-			Headers:      headers,
-			Client:       options.HTTPClient,
-			Request:      request,
-			ErrorDecoder: errorDecoder,
+			URL:                endpointURL,
+			Method:             http.MethodPost,
+			MaxAttempts:        options.MaxAttempts,
+			Headers:            headers,
+			Client:             options.HTTPClient,
+			Request:            request,
+			Response:           &response,
+			ResponseIsOptional: true,
+			ErrorDecoder:       errorDecoder,
 		},
 	); err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+	return response, nil
 }
 
 // Query scans in a vulnerability scanning system

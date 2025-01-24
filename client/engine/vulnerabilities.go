@@ -80,6 +80,48 @@ func (c *CreateAssetRequest) String() string {
 	return fmt.Sprintf("%#v", c)
 }
 
+type CreateAssetResponse struct {
+	// Created device.
+	Device *CreateAssetDevice `json:"device" url:"device"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *CreateAssetResponse) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
+}
+
+func (c *CreateAssetResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler CreateAssetResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = CreateAssetResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
+	c._rawJSON = nil
+	return nil
+}
+
+func (c *CreateAssetResponse) String() string {
+	if len(c._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
 type CreateFindingsRequest struct {
 	Findings []SecurityFinding `json:"findings" url:"findings"`
 

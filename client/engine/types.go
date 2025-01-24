@@ -1720,6 +1720,48 @@ type ValueMappingId = Id
 // Asset in a vulnerability scanning system. Represented by OCSF Device Inventory Info class (class_uid 5001).
 type Asset = *inventoryinfo.InventoryInfo
 
+type CreateAssetDevice struct {
+	// ID of the device.
+	Uid string `json:"uid" url:"uid"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *CreateAssetDevice) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
+}
+
+func (c *CreateAssetDevice) UnmarshalJSON(data []byte) error {
+	type unmarshaler CreateAssetDevice
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = CreateAssetDevice(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
+	c._rawJSON = nil
+	return nil
+}
+
+func (c *CreateAssetDevice) String() string {
+	if len(c._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
 type CreateFindingsError struct {
 	// A descriptive error message providing more information about the issue.
 	Message string `json:"message" url:"message"`
