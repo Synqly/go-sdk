@@ -1454,7 +1454,7 @@ type RemoteField struct {
 	// Remote ID of the field.
 	FieldId string `json:"field_id" url:"field_id"`
 	// Schema of the field.
-	Schema *RemoteFieldSchema `json:"schema" url:"schema"`
+	Schema *RemoteFieldSchema `json:"schema,omitempty" url:"schema,omitempty"`
 	// Scope of remote field - standard or some kind of customization?
 	FieldScope RemoteFieldScope `json:"field_scope" url:"field_scope"`
 	// Name of field in the remote ticketing provider.
