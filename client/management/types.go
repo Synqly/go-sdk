@@ -5989,7 +5989,7 @@ func (a *AzureBlobCredential) Accept(visitor AzureBlobCredentialVisitor) error {
 
 type AzureMonitorLogsCredential struct {
 	Type string
-	// Azure token for authentication. Follow [this guide to generate an API token](https://docs.microsoft.com_en-us_azure_active-directory_develop_howto-create-service-principal-portal). The token must have access to the configured data collection endpoint.
+	// Azure token for authentication. Follow [this guide to generate an API token](https://docs.microsoft.com/en-us/azure/active-directory/develop/howto-create-service-principal-portal). The token must have access to the configured data collection endpoint.
 	Token *TokenCredential
 	// ID of a credential that stores an Azure token for authentication.
 	TokenId TokenCredentialId
@@ -6494,12 +6494,9 @@ func (e *EdrSophos) String() string {
 
 // Options used to control how requests are made to elasticsearch when different authentication types are used.
 type ElasticsearchAuthOptions struct {
-	// When you have the correct permissions, this allows API requests to get made as a specific user, with all of their roles
-	// and permissions. When populated, this option will send the 'es-security-runas-user' header with every request made to
-	// the Elasticsearch API.
+	// When you have the correct permissions, this allows API requests to get made as a specific user, with all of their roles and permissions. When populated, this option will send the 'es-security-runas-user' header with every request made to the Elasticsearch API.
 	RunAs *string `json:"run_as,omitempty" url:"run_as,omitempty"`
-	// Some auth cases, notably JWT auth can be configured to require sending a shared secret in the `ES-Client-Authentication`
-	// header. When this secret is populated, it will get added as the shared secret for every request made to Elasticsearch.
+	// Some auth cases, notably JWT auth can be configured to require sending a shared secret in the `ES-Client-Authentication` header. When this secret is populated, it will get added as the shared secret for every request made to Elasticsearch.
 	SharedSecret *ElasticsearchSharedSecret `json:"shared_secret,omitempty" url:"shared_secret,omitempty"`
 
 	extraProperties map[string]interface{}
@@ -6546,9 +6543,9 @@ type ElasticsearchBridgeCredentials struct {
 	BridgeBasic *BridgeBasicCredential
 	// Optional id of a basic auth credential used for connecting to the Elasticsearch service through a synqly bridge agent with local credentials.
 	BridgeBasicId BridgeBasicCredentialId
-	// Optional OAuth JWT credential used for connecting to the Elasticsearch service through a synqly bridge agent with local credentails.
+	// "Optional OAuth JWT credential used for connecting to the Elasticsearch service through a synqly bridge agent with local credentails."
 	BridgeOAuthClient *BridgeOAuthClientCredential
-	// Optional ID of a OAuth JWT credential used for connecting to the Elasticsearch service through a synqly bridge agent with local credentails.
+	// "Optional ID of a OAuth JWT credential used for connecting to the Elasticsearch service through a synqly bridge agent with local credentails."
 	BridgeOAuthClientId BridgeOAuthClientCredentialId
 	// Optional credential used for connecting to the Elasticsearch service through a synqly bridge agent with local credentials.
 	BridgeToken *BridgeTokenCredential
@@ -6766,14 +6763,11 @@ type ElasticsearchCredential struct {
 	BasicId BasicCredentialId
 	// Bridge Agent local credentials
 	Bridge *ElasticsearchBridgeCredentials
-	// Configuration with credentials and connection data for an IdP that has been configured for use as a [JWT realm in Elasticsearch](https://www.elastic.co/guide/en/elasticsearch/reference/8.15/jwt-auth-realm.html).
-	// There are also [specific instructions for Elastic Cloud](https://www.elastic.co/guide/en/cloud/current/ec-securing-clusters-JWT.html). This configuration requires
-	// a token URL for the 3rd party identity provider. If you need to send specific scopes during the client credentials OAuth flow, specify them in the 'extra' configuration
-	// as a list of strings under the 'scopes' key.
+	// Configuration with credentials and connection data for an IdP that has been configured for use as a [JWT realm in Elasticsearch](https://www.elastic.co/guide/en/elasticsearch/reference/8.15/jwt-auth-realm.html). There are also [specific instructions for Elastic Cloud](https://www.elastic.co/guide/en/cloud/current/ec-securing-clusters-JWT.html). This configuration requires a token URL for the 3rd party identity provider. If you need to send specific scopes during the client credentials OAuth flow, specify them in the 'extra' configuration as a list of strings under the 'scopes' key.
 	OAuthClient *OAuthClientCredential
 	// The ID of a credential that stores the secrets and connection data for an IdP that has been configured for use as a JWT realm in Elasticsearch.
 	OAuthClientId OAuthClientCredentialId
-	// Elasticsearch API Key. Follow [this guide to generate an API Key](https://www.elastic.co_guide_en_kibana_current_api-keys.html). The API Key must have sufficient permissions to the target index.
+	// Elasticsearch API Key. Follow [this guide to generate an API Key](https://www.elastic.co/guide/en/kibana/current/api-keys.html). The API Key must have sufficient permissions to the target index.
 	Token *TokenCredential
 	// ID of a credential that stores an Elasticsearch API Key.
 	TokenId TokenCredentialId
@@ -7029,7 +7023,7 @@ func (e *ElasticsearchSharedSecret) Accept(visitor ElasticsearchSharedSecretVisi
 
 type EntraIdCredential struct {
 	Type string
-	// Azure OAuth 2.0 Client ID and Client Secret for a Synqly Identity Connector API service principal. Follow [this guide to generate an API token](https://docs.microsoft.com_en-us_azure_active-directory_develop_howto-create-service-principal-portal). The application must be configured with permissions to access the user, group, and audit log graph APIs.
+	// Azure OAuth 2.0 Client ID and Client Secret for a Synqly Identity Connector API service principal. Follow [this guide to generate an API token](https://docs.microsoft.com/en-us/azure/active-directory/develop/howto-create-service-principal-portal). The application must be configured with permissions to access the user, group, and audit log graph APIs.
 	OAuthClient *OAuthClientCredential
 	// The ID of a credential that stores the Azure OAuth 2.0 values for a Synqly Identity Connector API service principal.
 	OAuthClientId OAuthClientCredentialId
@@ -7379,7 +7373,7 @@ func (i *IdentityPingOne) String() string {
 
 type JiraCredential struct {
 	Type string
-	// Username and password used to authenticate with Jira. The password can be a token that is generated following [this guide to generate an API token](https://support.atlassian.com_atlassian-account_docs_manage-api-tokens-for-your-atlassian-account_). The token receives the same permissions as the user that generates it, so must have access to the projects you want to use.
+	// Username and password used to authenticate with Jira. The password can be a token that is generated following [this guide to generate an API token](https://support.atlassian.com/atlassian-account/docs/manage-api-tokens-for-your-atlassian-account/). The token receives the same permissions as the user that generates it, so must have access to the projects you want to use.
 	Basic *BasicCredential
 	// ID of a credential that stores a username and password used to authenticate with Jira.
 	BasicId BasicCredentialId
@@ -7778,7 +7772,7 @@ type OktaCredential struct {
 	OAuthClient *OAuthClientCredential
 	// The ID of a credential that stores the OAuth 2.0 values for a Synqly Identity Connector API service application.
 	OAuthClientId OAuthClientCredentialId
-	// Token to authenticate with Okta. Follow [this guide to generate an API token](https://developer.okta.com_docs_guides_create-an-api-token_overview_). The token must have access to list records in the system audit log. (Not for production use. Use `o_auth_client` instead)
+	// Token to authenticate with Okta. Follow [this guide to generate an API token](https://developer.okta.com/docs/guides/create-an-api-token). The token must have access to list records in the system audit log. (Not for production use. Use `o_auth_client` instead)
 	Token *TokenCredential
 	// ID of a credential that stores a token used to authenticate with Okta. (Not for production use. Use `o_auth_client` instead)
 	TokenId TokenCredentialId
@@ -7953,7 +7947,7 @@ func (p *PagerDutyCredential) Accept(visitor PagerDutyCredentialVisitor) error {
 
 type PingOneCredential struct {
 	Type string
-	// Client application secret for a worker app. See [these instructions](https://docs.pingidentity.com_r_en-us_pingone_p1_create_app_splunk) for help creating a worker application.
+	// Client application secret for a worker app. See [these instructions](https://apidocs.pingidentity.com/pingone/tutorial/v1/api/#create-an-admin-worker-app-connection) for help creating a worker application.
 	Token *TokenCredential
 	// ID of an existing credential that stores a PingOne client application secret.
 	TokenId TokenCredentialId
@@ -9433,7 +9427,7 @@ func (s *SentinelOneCredential) Accept(visitor SentinelOneCredentialVisitor) err
 
 type ServiceNowCredential struct {
 	Type string
-	// Username and password used to authenticate with ServiceNow. The password can be a token that is generated following [this guide to generate an API token](https://docs.servicenow.com_bundle_vancouver-platform-administration_page_administer_users-and-groups_task_t_CreateAUser.html). The token receives the same permissions as the user that generates it, so must have access to the projects you want to use.
+	// Username and password used to authenticate with ServiceNow. The password can be a token that is generated following [this guide to generate an API token](https://docs.servicenow.com/bundle/vancouver-platform-administration/page/administer/users-and-groups/task/t_CreateAUser.html). The token receives the same permissions as the user that generates it, so must have access to the projects you want to use.
 	Basic *BasicCredential
 	// ID of a credential that stores a username and password used to authenticate with ServiceNow.
 	BasicId BasicCredentialId
@@ -9774,7 +9768,7 @@ func (s *SinkMock) String() string {
 
 type SlackCredential struct {
 	Type string
-	// Slack authentication token. Follow [this guide to generate an API token](https://api.slack.com_authentication_token-types#granular_bot). The token must have access to the configured channel.
+	// Slack authentication token. Follow [this guide to generate an API token](https://api.slack.com/concepts/token-types#bot). The token must have access to the configured channel.
 	Token *TokenCredential
 	// ID of a credential that stores a token used to authenticate with Slack.
 	TokenId TokenCredentialId
@@ -9914,7 +9908,7 @@ func (s *SophosCredential) Accept(visitor SophosCredentialVisitor) error {
 
 type SplunkBridgeHecToken struct {
 	Type string
-	// Credential ID that stores a Splunk HTTP endpoint collector synqly bridge agent local token definition. Follow [this guide to generate an API token](https://docs.splunk.com_Documentation_Splunk_8.1.3/Data_UsetheHTTPEventCollector#Authentication). The token must have access to the configured data collection endpoint.
+	// Credential ID that stores a Splunk HTTP endpoint collector synqly bridge agent local token definition. Follow [this guide to generate an API token](https://docs.splunk.com/Documentation/Splunk/8.1.3/Data/UsetheHTTPEventCollector#Authentication). The token must have access to the configured data collection endpoint.
 	BridgeToken *BridgeTokenCredential
 	// ID of a credential that stores a Splunk HTTP endpoint collector (HEC) synqly bridge agent local token definition.
 	BridgeTokenId BridgeTokenCredentialId
@@ -10056,7 +10050,7 @@ type SplunkHecToken struct {
 	Type string
 	// Bridge Agent HEC local credentials
 	Bridge *SplunkBridgeHecToken
-	// Credential ID that stores a Splunk HTTP endpoint collector token. Follow [this guide to generate an API token](https://docs.splunk.com_Documentation_Splunk_8.1.3/Data_UsetheHTTPEventCollector#Authentication). The token must have access to the configured data collection endpoint.
+	// Credential ID that stores a Splunk HTTP endpoint collector token. Follow [this guide to generate an API token](https://docs.splunk.com/Documentation/Splunk/8.1.3/Data/UsetheHTTPEventCollector#Authentication). The token must have access to the configured data collection endpoint.
 	Token *TokenCredential
 	// ID of a credential that stores a Splunk HTTP endpoint collector (HEC) token.
 	TokenId TokenCredentialId
