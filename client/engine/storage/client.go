@@ -11,6 +11,7 @@ import (
 	core "github.com/synqly/go-sdk/client/engine/core"
 	option "github.com/synqly/go-sdk/client/engine/option"
 	io "io"
+	multipart "mime/multipart"
 	http "net/http"
 )
 
@@ -178,7 +179,7 @@ func (c *Client) ListFiles(
 func (c *Client) UploadFile(
 	ctx context.Context,
 	path string,
-	request interface{},
+	file io.Reader,
 	opts ...option.RequestOption,
 ) error {
 	options := core.NewRequestOptions(opts...)
@@ -297,6 +298,24 @@ func (c *Client) UploadFile(
 		return apiError
 	}
 
+	requestBuffer := bytes.NewBuffer(nil)
+	writer := multipart.NewWriter(requestBuffer)
+	fileFilename := "file_filename"
+	if named, ok := file.(interface{ Name() string }); ok {
+		fileFilename = named.Name()
+	}
+	filePart, err := writer.CreateFormFile("file", fileFilename)
+	if err != nil {
+		return err
+	}
+	if _, err := io.Copy(filePart, file); err != nil {
+		return err
+	}
+	if err := writer.Close(); err != nil {
+		return err
+	}
+	headers.Set("Content-Type", writer.FormDataContentType())
+
 	if err := c.caller.Call(
 		ctx,
 		&core.CallParams{
@@ -305,7 +324,7 @@ func (c *Client) UploadFile(
 			MaxAttempts:  options.MaxAttempts,
 			Headers:      headers,
 			Client:       options.HTTPClient,
-			Request:      request,
+			Request:      requestBuffer,
 			ErrorDecoder: errorDecoder,
 		},
 	); err != nil {
@@ -320,7 +339,7 @@ func (c *Client) DownloadFile(
 	ctx context.Context,
 	path string,
 	opts ...option.RequestOption,
-) ([]byte, error) {
+) (io.Reader, error) {
 	options := core.NewRequestOptions(opts...)
 
 	baseURL := "https://api.synqly.com"
@@ -437,7 +456,7 @@ func (c *Client) DownloadFile(
 		return apiError
 	}
 
-	var response []byte
+	response := bytes.NewBuffer(nil)
 	if err := c.caller.Call(
 		ctx,
 		&core.CallParams{
@@ -446,7 +465,7 @@ func (c *Client) DownloadFile(
 			MaxAttempts:  options.MaxAttempts,
 			Headers:      headers,
 			Client:       options.HTTPClient,
-			Response:     &response,
+			Response:     response,
 			ErrorDecoder: errorDecoder,
 		},
 	); err != nil {
