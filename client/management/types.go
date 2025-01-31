@@ -7231,6 +7231,76 @@ func (g *GoogleChronicleCredential) Accept(visitor GoogleChronicleCredentialVisi
 	return fmt.Errorf("type %T does not define a non-empty union type", g)
 }
 
+type GoogleCredential struct {
+	Type string
+	// OAuth 2.0 Token URL, Client ID, and Client Secret for a Synqly Identity Connector API service application.
+	OAuthClient *OAuthClientCredential
+	// The ID of a credential that stores the OAuth 2.0 values for a Synqly Identity Connector API service application.
+	OAuthClientId OAuthClientCredentialId
+}
+
+func (g *GoogleCredential) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	g.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", g)
+	}
+	switch unmarshaler.Type {
+	case "o_auth_client":
+		value := new(OAuthClientCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		g.OAuthClient = value
+	case "o_auth_client_id":
+		var valueUnmarshaler struct {
+			OAuthClientId OAuthClientCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		g.OAuthClientId = valueUnmarshaler.OAuthClientId
+	}
+	return nil
+}
+
+func (g GoogleCredential) MarshalJSON() ([]byte, error) {
+	if g.OAuthClient != nil {
+		return core.MarshalJSONWithExtraProperty(g.OAuthClient, "type", "o_auth_client")
+	}
+	if g.OAuthClientId != "" {
+		var marshaler = struct {
+			Type          string                  `json:"type"`
+			OAuthClientId OAuthClientCredentialId `json:"value"`
+		}{
+			Type:          "o_auth_client_id",
+			OAuthClientId: g.OAuthClientId,
+		}
+		return json.Marshal(marshaler)
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", g)
+}
+
+type GoogleCredentialVisitor interface {
+	VisitOAuthClient(*OAuthClientCredential) error
+	VisitOAuthClientId(OAuthClientCredentialId) error
+}
+
+func (g *GoogleCredential) Accept(visitor GoogleCredentialVisitor) error {
+	if g.OAuthClient != nil {
+		return visitor.VisitOAuthClient(g.OAuthClient)
+	}
+	if g.OAuthClientId != "" {
+		return visitor.VisitOAuthClientId(g.OAuthClientId)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", g)
+}
+
 // Configuration for the Microsoft Entra ID Identity Provider
 type IdentityEntraId struct {
 	Credential *EntraIdCredential `json:"credential" url:"credential"`
@@ -7266,6 +7336,52 @@ func (i *IdentityEntraId) UnmarshalJSON(data []byte) error {
 }
 
 func (i *IdentityEntraId) String() string {
+	if len(i._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(i._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(i); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", i)
+}
+
+// Configuration for the Google Identity Provider
+type IdentityGoogle struct {
+	// The client email associated with the service account key. Typically this will be of the form `<service-account-name>@<project-id>.iam.gserviceaccount.com`.
+	ClientEmail string            `json:"client_email" url:"client_email"`
+	Credential  *GoogleCredential `json:"credential" url:"credential"`
+	// The email address of the user that the service account is impersonating for domain-wide delegation. For more information, see [this Google support article](https://support.google.com/a/answer/162106).
+	Delegate string `json:"delegate" url:"delegate"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (i *IdentityGoogle) GetExtraProperties() map[string]interface{} {
+	return i.extraProperties
+}
+
+func (i *IdentityGoogle) UnmarshalJSON(data []byte) error {
+	type unmarshaler IdentityGoogle
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*i = IdentityGoogle(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *i)
+	if err != nil {
+		return err
+	}
+	i.extraProperties = extraProperties
+
+	i._rawJSON = nil
+	return nil
+}
+
+func (i *IdentityGoogle) String() string {
 	if len(i._rawJSON) > 0 {
 		if value, err := core.StringifyJSON(i._rawJSON); err == nil {
 			return value
@@ -8025,6 +8141,7 @@ type ProviderConfig struct {
 	EdrSentinelone                    *EdrSentinelOne
 	EdrSophos                         *EdrSophos
 	IdentityEntraId                   *IdentityEntraId
+	IdentityGoogle                    *IdentityGoogle
 	IdentityOkta                      *IdentityOkta
 	IdentityPingone                   *IdentityPingOne
 	NotificationsJira                 *NotificationsJira
@@ -8120,6 +8237,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.IdentityEntraId = value
+	case "identity_google":
+		value := new(IdentityGoogle)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.IdentityGoogle = value
 	case "identity_okta":
 		value := new(IdentityOkta)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -8347,6 +8470,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.IdentityEntraId != nil {
 		return core.MarshalJSONWithExtraProperty(p.IdentityEntraId, "type", "identity_entra_id")
 	}
+	if p.IdentityGoogle != nil {
+		return core.MarshalJSONWithExtraProperty(p.IdentityGoogle, "type", "identity_google")
+	}
 	if p.IdentityOkta != nil {
 		return core.MarshalJSONWithExtraProperty(p.IdentityOkta, "type", "identity_okta")
 	}
@@ -8458,6 +8584,7 @@ type ProviderConfigVisitor interface {
 	VisitEdrSentinelone(*EdrSentinelOne) error
 	VisitEdrSophos(*EdrSophos) error
 	VisitIdentityEntraId(*IdentityEntraId) error
+	VisitIdentityGoogle(*IdentityGoogle) error
 	VisitIdentityOkta(*IdentityOkta) error
 	VisitIdentityPingone(*IdentityPingOne) error
 	VisitNotificationsJira(*NotificationsJira) error
@@ -8517,6 +8644,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.IdentityEntraId != nil {
 		return visitor.VisitIdentityEntraId(p.IdentityEntraId)
+	}
+	if p.IdentityGoogle != nil {
+		return visitor.VisitIdentityGoogle(p.IdentityGoogle)
 	}
 	if p.IdentityOkta != nil {
 		return visitor.VisitIdentityOkta(p.IdentityOkta)
@@ -8640,6 +8770,8 @@ const (
 	ProviderConfigIdEdrSophos ProviderConfigId = "edr_sophos"
 	// Microsoft Entra ID
 	ProviderConfigIdIdentityEntraId ProviderConfigId = "identity_entra_id"
+	// Google Workspace
+	ProviderConfigIdIdentityGoogle ProviderConfigId = "identity_google"
 	// Okta Identity
 	ProviderConfigIdIdentityOkta ProviderConfigId = "identity_okta"
 	// PingOne Cloud Platform
@@ -8728,6 +8860,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdEdrSophos, nil
 	case "identity_entra_id":
 		return ProviderConfigIdIdentityEntraId, nil
+	case "identity_google":
+		return ProviderConfigIdIdentityGoogle, nil
 	case "identity_okta":
 		return ProviderConfigIdIdentityOkta, nil
 	case "identity_pingone":

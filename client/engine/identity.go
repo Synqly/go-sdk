@@ -9,6 +9,13 @@ import (
 	latest "github.com/synqly/go-sdk/client/engine/ocsf/latest"
 )
 
+type GetGroupMembersRequest struct {
+	// Number of users to return. Defaults to 100.
+	Limit *int `json:"-" url:"limit,omitempty"`
+	// Start search from cursor position.
+	Cursor *string `json:"-" url:"cursor,omitempty"`
+}
+
 type QueryIdentityAuditLogRequest struct {
 	// Number of events to return. Defaults to 100.
 	Limit *int `json:"-" url:"limit,omitempty"`
@@ -54,6 +61,8 @@ type QueryUserRequest struct {
 type GetGroupMembersResponse struct {
 	// List of users wrapped in the OCSF Entity Management event of type Read that are members in the group referenced by ID.
 	Result []latest.EntityManagement `json:"result" url:"result"`
+	// Cursor to use to retrieve the next page of results
+	Cursor string `json:"cursor" url:"cursor"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
