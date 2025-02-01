@@ -1717,9 +1717,6 @@ func (t *Ticket) String() string {
 // Unique identifier for a value mapping
 type ValueMappingId = Id
 
-// Asset in a vulnerability scanning system. Represented by OCSF Device Inventory Info class (class_uid 5001).
-type Asset = *inventoryinfo.InventoryInfo
-
 type CreateAssetDevice struct {
 	// ID of the device.
 	Uid string `json:"uid" url:"uid"`

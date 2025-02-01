@@ -7,6 +7,7 @@ import (
 	fmt "fmt"
 	core "github.com/synqly/go-sdk/client/engine/core"
 	scanactivity "github.com/synqly/go-sdk/client/engine/ocsf/v110/scanactivity"
+	inventoryinfo "github.com/synqly/go-sdk/client/engine/ocsf/v130/inventoryinfo"
 )
 
 type QueryAssetsRequest struct {
@@ -35,6 +36,9 @@ type QueryScansRequest struct {
 	// Start search from cursor position.
 	Cursor *string `json:"-" url:"cursor,omitempty"`
 }
+
+// Asset in a vulnerability scanning system. Represented by OCSF Device Inventory Info class (class_uid 5001).
+type Asset = *inventoryinfo.InventoryInfo
 
 type CreateAssetRequest struct {
 	// Asset to create in the vulnerability scanning system.
