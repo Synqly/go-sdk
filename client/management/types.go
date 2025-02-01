@@ -8153,6 +8153,7 @@ type ProviderConfig struct {
 	SiemMockSiem                      *SiemMock
 	SiemQRadar                        *SiemQRadar
 	SiemRapid7Insightidr              *SiemRapid7InsightIdr
+	SiemSentinel                      *SiemSentinel
 	SiemSplunk                        *SiemSplunk
 	SiemSumoLogic                     *SiemSumoLogic
 	SinkAwsSecurityLake               *SinkAwsSecurityLake
@@ -8309,6 +8310,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.SiemRapid7Insightidr = value
+	case "siem_sentinel":
+		value := new(SiemSentinel)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.SiemSentinel = value
 	case "siem_splunk":
 		value := new(SiemSplunk)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -8506,6 +8513,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.SiemRapid7Insightidr != nil {
 		return core.MarshalJSONWithExtraProperty(p.SiemRapid7Insightidr, "type", "siem_rapid7_insightidr")
 	}
+	if p.SiemSentinel != nil {
+		return core.MarshalJSONWithExtraProperty(p.SiemSentinel, "type", "siem_sentinel")
+	}
 	if p.SiemSplunk != nil {
 		return core.MarshalJSONWithExtraProperty(p.SiemSplunk, "type", "siem_splunk")
 	}
@@ -8596,6 +8606,7 @@ type ProviderConfigVisitor interface {
 	VisitSiemMockSiem(*SiemMock) error
 	VisitSiemQRadar(*SiemQRadar) error
 	VisitSiemRapid7Insightidr(*SiemRapid7InsightIdr) error
+	VisitSiemSentinel(*SiemSentinel) error
 	VisitSiemSplunk(*SiemSplunk) error
 	VisitSiemSumoLogic(*SiemSumoLogic) error
 	VisitSinkAwsSecurityLake(*SinkAwsSecurityLake) error
@@ -8680,6 +8691,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.SiemRapid7Insightidr != nil {
 		return visitor.VisitSiemRapid7Insightidr(p.SiemRapid7Insightidr)
+	}
+	if p.SiemSentinel != nil {
+		return visitor.VisitSiemSentinel(p.SiemSentinel)
 	}
 	if p.SiemSplunk != nil {
 		return visitor.VisitSiemSplunk(p.SiemSplunk)
@@ -8794,6 +8808,8 @@ const (
 	ProviderConfigIdSiemQRadar ProviderConfigId = "siem_q_radar"
 	// Rapid7 InsightIDR
 	ProviderConfigIdSiemRapid7InsightIdr ProviderConfigId = "siem_rapid7_insightidr"
+	// Microsoft Sentinel
+	ProviderConfigIdSiemSentinel ProviderConfigId = "siem_sentinel"
 	// Splunk Enterprise Security
 	ProviderConfigIdSiemSplunk ProviderConfigId = "siem_splunk"
 	// Sumo Logic Cloud SIEM
@@ -8884,6 +8900,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdSiemQRadar, nil
 	case "siem_rapid7_insightidr":
 		return ProviderConfigIdSiemRapid7InsightIdr, nil
+	case "siem_sentinel":
+		return ProviderConfigIdSiemSentinel, nil
 	case "siem_splunk":
 		return ProviderConfigIdSiemSplunk, nil
 	case "siem_sumo_logic":
@@ -9383,6 +9401,62 @@ func (s *SiemRapid7InsightIdr) String() string {
 	return fmt.Sprintf("%#v", s)
 }
 
+// Configuration for Microsoft Sentinel SIEM Product.
+type SiemSentinel struct {
+	Credential *SentinelCredential `json:"credential" url:"credential"`
+	// The root URL for the Microsoft Azure Monitor Logs API. This is optional and should only be supplied if using an alternate Microsoft cloud, such as GovCloud.
+	LogsUrl *string `json:"logs_url,omitempty" url:"logs_url,omitempty"`
+	// The root URL for the Microsoft Azure Management API. This is optional and should only be supplied if using an alternate Microsoft cloud, such as GovCloud.
+	ManagementUrl *string `json:"management_url,omitempty" url:"management_url,omitempty"`
+	// The Azure resource group name that contains the Microsoft Sentinel workspace.
+	ResourceGroup string `json:"resource_group" url:"resource_group"`
+	// The Azure subscription ID that contains the Microsoft Sentinel workspace.
+	SubscriptionId string `json:"subscription_id" url:"subscription_id"`
+	// The Azure Active Directory tenant ID that contains the Microsoft Sentinel workspace.
+	TenantId string `json:"tenant_id" url:"tenant_id"`
+	// The ID of the Microsoft Sentinel Log Analytics workspace.
+	WorkspaceId string `json:"workspace_id" url:"workspace_id"`
+	// The name of the Microsoft Sentinel Log Analytics workspace.
+	WorkspaceName string `json:"workspace_name" url:"workspace_name"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (s *SiemSentinel) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
+}
+
+func (s *SiemSentinel) UnmarshalJSON(data []byte) error {
+	type unmarshaler SiemSentinel
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*s = SiemSentinel(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+
+	s._rawJSON = nil
+	return nil
+}
+
+func (s *SiemSentinel) String() string {
+	if len(s._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(s); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", s)
+}
+
 // Configuration for Splunk as a SIEM Provider. This integration allows sending data to Splunk using an HTTP Event Collector (HEC). Additionally, it can be used to query Splunk using the Splunk Search Service.
 type SiemSplunk struct {
 	HecCredential *SplunkHecToken `json:"hec_credential" url:"hec_credential"`
@@ -9487,6 +9561,80 @@ func (s *SiemSumoLogic) String() string {
 		return value
 	}
 	return fmt.Sprintf("%#v", s)
+}
+
+type SentinelCredential struct {
+	Type string
+	// OAuth 2.0 client credentials for authenticating with Microsoft Sentinel. The application registration must have
+	// appropriate permissions to read and write to Microsoft Sentinel. Required permissions include:
+	// - Microsoft.OperationalInsights/workspaces/read
+	// - Microsoft.OperationalInsights/workspaces/write
+	// - Microsoft.SecurityInsights/dataConnectors/*
+	OAuthClient *OAuthClientCredential
+	// ID of a credential that stores OAuth 2.0 client credentials for Microsoft Sentinel.
+	OAuthClientId OAuthClientCredentialId
+}
+
+func (s *SentinelCredential) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	s.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", s)
+	}
+	switch unmarshaler.Type {
+	case "o_auth_client":
+		value := new(OAuthClientCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		s.OAuthClient = value
+	case "o_auth_client_id":
+		var valueUnmarshaler struct {
+			OAuthClientId OAuthClientCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		s.OAuthClientId = valueUnmarshaler.OAuthClientId
+	}
+	return nil
+}
+
+func (s SentinelCredential) MarshalJSON() ([]byte, error) {
+	if s.OAuthClient != nil {
+		return core.MarshalJSONWithExtraProperty(s.OAuthClient, "type", "o_auth_client")
+	}
+	if s.OAuthClientId != "" {
+		var marshaler = struct {
+			Type          string                  `json:"type"`
+			OAuthClientId OAuthClientCredentialId `json:"value"`
+		}{
+			Type:          "o_auth_client_id",
+			OAuthClientId: s.OAuthClientId,
+		}
+		return json.Marshal(marshaler)
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", s)
+}
+
+type SentinelCredentialVisitor interface {
+	VisitOAuthClient(*OAuthClientCredential) error
+	VisitOAuthClientId(OAuthClientCredentialId) error
+}
+
+func (s *SentinelCredential) Accept(visitor SentinelCredentialVisitor) error {
+	if s.OAuthClient != nil {
+		return visitor.VisitOAuthClient(s.OAuthClient)
+	}
+	if s.OAuthClientId != "" {
+		return visitor.VisitOAuthClientId(s.OAuthClientId)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", s)
 }
 
 type SentinelOneCredential struct {
