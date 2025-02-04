@@ -1803,6 +1803,113 @@ func (c *CreateFindingsError) String() string {
 
 type EventId = Id
 
+type NucleusFindingState struct {
+	// Due date for the finding.
+	DueDate *time.Time `json:"due_date,omitempty" url:"due_date,omitempty"`
+	// Comment to add to the finding.
+	Comment *string `json:"comment,omitempty" url:"comment,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (n *NucleusFindingState) GetExtraProperties() map[string]interface{} {
+	return n.extraProperties
+}
+
+func (n *NucleusFindingState) UnmarshalJSON(data []byte) error {
+	type embed NucleusFindingState
+	var unmarshaler = struct {
+		embed
+		DueDate *core.DateTime `json:"due_date,omitempty"`
+	}{
+		embed: embed(*n),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*n = NucleusFindingState(unmarshaler.embed)
+	n.DueDate = unmarshaler.DueDate.TimePtr()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *n)
+	if err != nil {
+		return err
+	}
+	n.extraProperties = extraProperties
+
+	n._rawJSON = nil
+	return nil
+}
+
+func (n *NucleusFindingState) MarshalJSON() ([]byte, error) {
+	type embed NucleusFindingState
+	var marshaler = struct {
+		embed
+		DueDate *core.DateTime `json:"due_date,omitempty"`
+	}{
+		embed:   embed(*n),
+		DueDate: core.NewOptionalDateTime(n.DueDate),
+	}
+	return json.Marshal(marshaler)
+}
+
+func (n *NucleusFindingState) String() string {
+	if len(n._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(n._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(n); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", n)
+}
+
+type ProviderSpecificFindingState struct {
+	Type    string
+	Nucleus *NucleusFindingState
+}
+
+func (p *ProviderSpecificFindingState) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	p.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", p)
+	}
+	switch unmarshaler.Type {
+	case "nucleus":
+		value := new(NucleusFindingState)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.Nucleus = value
+	}
+	return nil
+}
+
+func (p ProviderSpecificFindingState) MarshalJSON() ([]byte, error) {
+	if p.Nucleus != nil {
+		return core.MarshalJSONWithExtraProperty(p.Nucleus, "type", "nucleus")
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", p)
+}
+
+type ProviderSpecificFindingStateVisitor interface {
+	VisitNucleus(*NucleusFindingState) error
+}
+
+func (p *ProviderSpecificFindingState) Accept(visitor ProviderSpecificFindingStateVisitor) error {
+	if p.Nucleus != nil {
+		return visitor.VisitNucleus(p.Nucleus)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", p)
+}
+
 // Configuration options of a scan.
 type ScanConfiguration struct {
 	// ID of the scan.
@@ -2052,5 +2159,37 @@ func NewVulnerabilitySeverityFilterValueFromString(s string) (VulnerabilitySever
 }
 
 func (v VulnerabilitySeverityFilterValue) Ptr() *VulnerabilitySeverityFilterValue {
+	return &v
+}
+
+// The normalized state identifier of a security finding
+type VulnerabilityStateFilterValue string
+
+const (
+	VulnerabilityStateFilterValueUnknown    VulnerabilityStateFilterValue = "Unknown"
+	VulnerabilityStateFilterValueNew        VulnerabilityStateFilterValue = "New"
+	VulnerabilityStateFilterValueInProgress VulnerabilityStateFilterValue = "InProgress"
+	VulnerabilityStateFilterValueResolved   VulnerabilityStateFilterValue = "Resolved"
+	VulnerabilityStateFilterValueOther      VulnerabilityStateFilterValue = "Other"
+)
+
+func NewVulnerabilityStateFilterValueFromString(s string) (VulnerabilityStateFilterValue, error) {
+	switch s {
+	case "Unknown":
+		return VulnerabilityStateFilterValueUnknown, nil
+	case "New":
+		return VulnerabilityStateFilterValueNew, nil
+	case "InProgress":
+		return VulnerabilityStateFilterValueInProgress, nil
+	case "Resolved":
+		return VulnerabilityStateFilterValueResolved, nil
+	case "Other":
+		return VulnerabilityStateFilterValueOther, nil
+	}
+	var t VulnerabilityStateFilterValue
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (v VulnerabilityStateFilterValue) Ptr() *VulnerabilityStateFilterValue {
 	return &v
 }

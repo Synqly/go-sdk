@@ -383,3 +383,48 @@ func (q *QueryScansResponse) String() string {
 	}
 	return fmt.Sprintf("%#v", q)
 }
+
+type UpdateFindingRequest struct {
+	// serverity of the finding
+	Severity *VulnerabilitySeverityFilterValue `json:"severity,omitempty" url:"severity,omitempty"`
+	// state of the finding
+	State    *VulnerabilityStateFilterValue `json:"state,omitempty" url:"state,omitempty"`
+	Unmapped *ProviderSpecificFindingState  `json:"unmapped,omitempty" url:"unmapped,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (u *UpdateFindingRequest) GetExtraProperties() map[string]interface{} {
+	return u.extraProperties
+}
+
+func (u *UpdateFindingRequest) UnmarshalJSON(data []byte) error {
+	type unmarshaler UpdateFindingRequest
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*u = UpdateFindingRequest(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *u)
+	if err != nil {
+		return err
+	}
+	u.extraProperties = extraProperties
+
+	u._rawJSON = nil
+	return nil
+}
+
+func (u *UpdateFindingRequest) String() string {
+	if len(u._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(u._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(u); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", u)
+}
