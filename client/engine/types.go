@@ -141,10 +141,11 @@ func (b *BaseResourceRequest) String() string {
 }
 
 type ErrorBody struct {
-	Status     int           `json:"status" url:"status"`
-	Message    *string       `json:"message,omitempty" url:"message,omitempty"`
-	Errors     []string      `json:"errors,omitempty" url:"errors,omitempty"`
-	Parameters []*ErrorParam `json:"parameters,omitempty" url:"parameters,omitempty"`
+	Status     int                    `json:"status" url:"status"`
+	Message    *string                `json:"message,omitempty" url:"message,omitempty"`
+	Errors     []string               `json:"errors,omitempty" url:"errors,omitempty"`
+	Parameters []*ErrorParam          `json:"parameters,omitempty" url:"parameters,omitempty"`
+	Context    map[string]interface{} `json:"context,omitempty" url:"context,omitempty"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
