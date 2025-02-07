@@ -10,6 +10,8 @@ import (
 	"strconv"
 	"time"
 
+	boff "github.com/cenkalti/backoff/v4"
+
 	engine "github.com/synqly/go-sdk/client/engine"
 	engineClient "github.com/synqly/go-sdk/client/engine/client"
 
@@ -30,6 +32,10 @@ var (
 	splunkURL = os.Getenv("SPLUNK_URL")
 	// SPLUNK_HEC_TOKEN: A Splunk HTTP Event Collector token for logging events
 	splunkToken = os.Getenv("SPLUNK_HEC_TOKEN")
+	// SPLUNK_SEARCH_URL: URL of a Splunk Search endpoint
+	splunkSearchURL = os.Getenv("SPLUNK_SEARCH_URL")
+	// SPLUNK_SEARCH_TOKEN: A Splunk Search token for querying events
+	splunkSearchToken = os.Getenv("SPLUNK_SEARCH_TOKEN")
 	// DURATION_SECONDS: (Optional) limits event generation to the provided duration
 	durationSeconds = os.Getenv("DURATION_SECONDS")
 )
@@ -59,9 +65,9 @@ type Tenant struct {
 	SynqlyAccountId string
 	// SynqlyClient: A cached management client, used to manage Integrations.
 	SynqlyClient *mgmtClient.Client
-	// EventLogger: A cached engine client, used to log events to a third-party
+	// SynqlyEngineClient: A cached engine client, used to log events to a third-party
 	// logging Provider by way of an Integration.
-	EventLogger *engineClient.Client
+	SynqlyEngineClient *engineClient.Client
 }
 
 // NewTenant initializes a Synqly Account for a given Tenant. This example
@@ -93,23 +99,25 @@ func (a *App) NewTenant(ctx context.Context, id string) error {
 
 	// Store the Tenant and associated Synqly objects in an in-memory cache.
 	a.Tenants = append(a.Tenants, &Tenant{
-		ID:              id,
-		SynqlyAccountId: account.Result.Account.Id,
-		SynqlyClient:    client,
-		EventLogger:     nil,
+		ID:                 id,
+		SynqlyAccountId:    account.Result.Account.Id,
+		SynqlyClient:       client,
+		SynqlyEngineClient: nil,
 	})
 	return nil
 }
 
-// configureEventLogging initializes event logging for a Tenant.
+// configureIntegration initializes event logging for a Tenant.
 // This example uses Splunk SIEM providers and mock SIEM provider as the event logging
 // providers; however, an Integration can be configured to target any supported provider type.
 // Stores the HEC_TOKEN as a secure Credential object, then creates a Splunk Integration
 // targeting SPLUNK_URL.
+// Stores the SEARCH_TOKEN as a secure Credential object, then creates a Splunk Integration
+// targeting SPLUNK_SEARCH_URL.
 //
 // Returns an error if the Tenant cannot be found, or if an Integration cannot
 // be created for the given Tenant.
-func (a *App) configureEventLogging(ctx context.Context, tenantID, siemProviderType string) error {
+func (a *App) configureIntegration(ctx context.Context, tenantID, siemProviderType string) error {
 	// Find the tenant
 	var tenant *Tenant
 	for _, t := range a.Tenants {
@@ -140,7 +148,7 @@ func (a *App) configureEventLogging(ctx context.Context, tenantID, siemProviderT
 			return err
 		}
 
-		providerConfig = a.splunkConfig(splunkURL, credential.Result.Id)
+		providerConfig = a.splunkConfig(splunkURL, splunkSearchURL, credential.Result.Id, splunkSearchToken)
 
 	case "inmem":
 		providerConfig = a.inmemConfig()
@@ -150,24 +158,66 @@ func (a *App) configureEventLogging(ctx context.Context, tenantID, siemProviderT
 	}
 
 	integration, err := tenant.SynqlyClient.Integrations.Create(ctx, tenant.SynqlyAccountId, &mgmt.CreateIntegrationRequest{
-		Fullname:       mgmt.String("Background Event Logger"),
+		Fullname:       mgmt.String("Event Logger and Query"),
 		ProviderConfig: providerConfig,
 	})
 	if err != nil {
 		return fmt.Errorf("unable to create integration: %w", err)
 	}
 
-	// Create an Event Logger for the tenant
-	// We will use this client to post events to the provider
-	tenant.EventLogger = engineClient.NewClient(
+	tenant.SynqlyEngineClient = engineClient.NewClient(
 		engineClient.WithToken(integration.Result.Token.Access.Secret),
 	)
 
 	return nil
 }
 
-func (a *App) splunkConfig(splunkURL, credentialId string) *mgmt.ProviderConfig {
-	return &mgmt.ProviderConfig{
+// query performs a query against the SIEM provider for each tenant.
+func (a *App) query(ctx context.Context) error {
+	req := &engine.QuerySiemEventsRequest{
+		Cursor:         nil,
+		IncludeRawData: engine.Bool(true),
+		Order:          []*string{engine.String("time[asc]")},
+		Limit:          engine.Int(10),
+	}
+
+	for _, tenant := range a.Tenants {
+		res, err := boff.RetryWithData(func() (*engine.QuerySiemEventsResponse, error) {
+			res, err := tenant.SynqlyEngineClient.Siem.QueryEvents(ctx, req)
+			if err != nil {
+				return res, boff.Permanent(err)
+			}
+			if res != nil && res.Status == engine.QueryStatusComplete {
+				return res, nil
+			}
+			if res.Status == engine.QueryStatusPending {
+				req.Cursor = &res.Cursor
+
+				return nil, fmt.Errorf("query is pending")
+			}
+			return res, boff.Permanent(fmt.Errorf("unexpected query status: %s", res.Status))
+		}, boff.WithMaxRetries(&boff.ZeroBackOff{}, 10))
+
+		if err != nil {
+			return fmt.Errorf("unable to query events: %w", err)
+		}
+
+		consoleLogger.Println("Printing some fields from results")
+		for _, event := range res.Result {
+			metadata := event["metadata"].(map[string]interface{})
+			job := event["job"].(map[string]interface{})
+			consoleLogger.Printf("job: %v\n", job["name"])
+			consoleLogger.Printf("log_name: %v\n", metadata["log_name"])
+			consoleLogger.Printf("class_name: %v\n", event["class_name"])
+			consoleLogger.Printf("type_uid: %v\n", event["type_uid"])
+		}
+		consoleLogger.Println()
+	}
+	return nil
+}
+
+func (a *App) splunkConfig(splunkURL, splunkSearchURL, credentialId string, splunkSearchToken string) *mgmt.ProviderConfig {
+	config := &mgmt.ProviderConfig{
 		SiemSplunk: &mgmt.SiemSplunk{
 			HecUrl: splunkURL,
 			HecCredential: &mgmt.SplunkHecToken{
@@ -179,6 +229,16 @@ func (a *App) splunkConfig(splunkURL, credentialId string) *mgmt.ProviderConfig 
 			// "SplunkServerDefaultCert" certificates by default.
 			SkipTlsVerify: true,
 		}}
+
+	if splunkSearchToken != "" {
+		config.SiemSplunk.SearchServiceUrl = &splunkSearchURL
+		config.SiemSplunk.SearchServiceCredential = &mgmt.SplunkSearchCredential{
+			Token: &mgmt.TokenCredential{
+				Secret: splunkSearchToken,
+			},
+		}
+	}
+	return config
 }
 
 func (a *App) inmemConfig() *mgmt.ProviderConfig {
@@ -214,9 +274,9 @@ func (app *App) backgroundJob(durationSeconds int) {
 
 			// If the EventLogger for the given Tenant has been initialized, use
 			// it to post data.
-			if tenant.EventLogger != nil {
+			if tenant.SynqlyEngineClient != nil {
 				// Log the result of the work to Synqly
-				err := tenant.EventLogger.Siem.PostEvents(
+				err := tenant.SynqlyEngineClient.Siem.PostEvents(
 					ctx,
 					[]*engine.Event{newEvent},
 				)
@@ -310,7 +370,7 @@ func main() {
 		if err := app.NewTenant(ctx, "Tenant ABC"); err != nil {
 			log.Fatal(err)
 		}
-		if err := app.configureEventLogging(ctx, "Tenant ABC", "splunk"); err != nil {
+		if err := app.configureIntegration(ctx, "Tenant ABC", "splunk"); err != nil {
 			log.Fatal(err)
 		}
 	}
@@ -320,8 +380,15 @@ func main() {
 	if err := app.NewTenant(ctx, "Tenant XYZ"); err != nil {
 		log.Fatal(err)
 	}
-	if err := app.configureEventLogging(ctx, "Tenant XYZ", "inmem"); err != nil {
+	if err := app.configureIntegration(ctx, "Tenant XYZ", "inmem"); err != nil {
 		log.Fatal(err)
+	}
+
+	// Query the SIEM provider for each tenant
+	if splunkSearchToken != "" && splunkSearchURL != "" {
+		if err := app.query(ctx); err != nil {
+			log.Fatal(err)
+		}
 	}
 
 	// Generate synthetic load for the tenants

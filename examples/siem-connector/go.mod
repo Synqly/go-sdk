@@ -4,4 +4,7 @@ go 1.23
 
 require github.com/synqly/go-sdk v0.3.45
 
-require github.com/google/uuid v1.6.0 // indirect
+require (
+	github.com/cenkalti/backoff/v4 v4.3.0
+	github.com/google/uuid v1.6.0 // indirect
+)
