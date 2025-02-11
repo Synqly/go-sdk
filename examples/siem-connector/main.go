@@ -59,9 +59,9 @@ type Tenant struct {
 //
 // Returns an error if a tenant with the same ID already exists or if a Synqly
 // Account cannot be created for the Tenant.
-func (a *App) NewTenant(ctx context.Context, id string) error {
+func (app *App) NewTenant(ctx context.Context, id string) error {
 	// Do not allow duplicate tenant names
-	for _, tenant := range a.Tenants {
+	for _, tenant := range app.Tenants {
 		if tenant.ID == id {
 			return fmt.Errorf("duplicate tenant name %v", id)
 		}
@@ -70,7 +70,7 @@ func (a *App) NewTenant(ctx context.Context, id string) error {
 	// Create a Synqly Client that can be used to interact with the tenant
 	// We will use this client to create an Account and set up an Integration with an event logging provider
 	client := mgmtClient.NewClient(
-		mgmtClient.WithToken(a.Config.SynqlyOrgToken),
+		mgmtClient.WithToken(app.Config.synqlyOrgToken),
 	)
 
 	// Create a Synqly Account for this tenant
@@ -82,7 +82,7 @@ func (a *App) NewTenant(ctx context.Context, id string) error {
 	}
 
 	// Store the Tenant and associated Synqly objects in an in-memory cache.
-	a.Tenants = append(a.Tenants, &Tenant{
+	app.Tenants = append(app.Tenants, &Tenant{
 		ID:                 id,
 		SynqlyAccountId:    account.Result.Account.Id,
 		SynqlyClient:       client,
@@ -101,10 +101,10 @@ func (a *App) NewTenant(ctx context.Context, id string) error {
 //
 // Returns an error if the Tenant cannot be found, or if an Integration cannot
 // be created for the given Tenant.
-func (a *App) configureIntegration(ctx context.Context, tenantID, siemProviderType string) error {
+func (app *App) configureIntegration(ctx context.Context, tenantID, siemProviderType string) error {
 	// Find the tenant
 	var tenant *Tenant
-	for _, t := range a.Tenants {
+	for _, t := range app.Tenants {
 		if t.ID == tenantID {
 			tenant = t
 			break
@@ -124,7 +124,7 @@ func (a *App) configureIntegration(ctx context.Context, tenantID, siemProviderTy
 			Fullname: mgmt.String(fmt.Sprintf("%s authentication token", siemProviderType)),
 			Config: &mgmt.CredentialConfig{
 				Token: &mgmt.TokenCredential{
-					Secret: a.Config.SplunkHecToken,
+					Secret: app.Config.splunkHecToken,
 				},
 			},
 		})
@@ -132,10 +132,10 @@ func (a *App) configureIntegration(ctx context.Context, tenantID, siemProviderTy
 			return err
 		}
 
-		providerConfig = a.splunkConfig(a.Config.SplunkHecUrl, a.Config.SplunkSearchUrl, credential.Result.Id, a.Config.SplunkSearchToken)
+		providerConfig = app.splunkConfig(app.Config.splunkHecUrl, app.Config.splunkSearchUrl, credential.Result.Id, app.Config.splunkSearchToken)
 
 	case "inmem":
-		providerConfig = a.inmemConfig()
+		providerConfig = app.inmemConfig()
 
 	default:
 		return fmt.Errorf("invalid siem provider type: %s", siemProviderType)
@@ -157,7 +157,7 @@ func (a *App) configureIntegration(ctx context.Context, tenantID, siemProviderTy
 }
 
 // query performs a query against the SIEM provider for each tenant.
-func (a *App) query(ctx context.Context) error {
+func (app *App) query(ctx context.Context) error {
 	req := &engine.QuerySiemEventsRequest{
 		Cursor:         nil,
 		IncludeRawData: engine.Bool(true),
@@ -165,7 +165,7 @@ func (a *App) query(ctx context.Context) error {
 		Limit:          engine.Int(10),
 	}
 
-	for _, tenant := range a.Tenants {
+	for _, tenant := range app.Tenants {
 		res, err := boff.RetryWithData(func() (*engine.QuerySiemEventsResponse, error) {
 			res, err := tenant.SynqlyEngineClient.Siem.QueryEvents(ctx, req)
 			if err != nil {
@@ -200,7 +200,7 @@ func (a *App) query(ctx context.Context) error {
 	return nil
 }
 
-func (a *App) splunkConfig(splunkHecURL, splunkSearchURL, splunkHecToken, splunkSearchToken string) *mgmt.ProviderConfig {
+func (app *App) splunkConfig(splunkHecURL, splunkSearchURL, splunkHecToken, splunkSearchToken string) *mgmt.ProviderConfig {
 	config := &mgmt.ProviderConfig{
 		SiemSplunk: &mgmt.SiemSplunk{
 			HecUrl: splunkHecURL,
@@ -225,7 +225,7 @@ func (a *App) splunkConfig(splunkHecURL, splunkSearchURL, splunkHecToken, splunk
 	return config
 }
 
-func (a *App) inmemConfig() *mgmt.ProviderConfig {
+func (app *App) inmemConfig() *mgmt.ProviderConfig {
 	return &mgmt.ProviderConfig{SiemMockSiem: &mgmt.SiemMock{}}
 }
 
@@ -324,26 +324,17 @@ func (app *App) cleanup() {
 func main() {
 	ctx := context.Background()
 
-	// Load config variables from the yaml file
-	configEnv, err := LoadConfig(".")
+	// Load config variables from the env file
+	config, err := LoadConfig(".")
 	if err != nil {
 		log.Fatal("cannot load config:", err)
 	}
 
-	config := Config{
-		SynqlyOrgToken:    configEnv.SynqlyOrgToken,
-		SplunkHecUrl:      configEnv.SplunkHecUrl,
-		SplunkHecToken:    configEnv.SplunkHecToken,
-		SplunkSearchUrl:   configEnv.SplunkSearchUrl,
-		SplunkSearchToken: configEnv.SplunkSearchToken,
-		DurationSeconds:   configEnv.DurationSeconds,
-	}
-
 	// Check for required environment variables
-	if config.SynqlyOrgToken == "" {
+	if config.synqlyOrgToken == "" {
 		log.Fatal("Must set following environment variable: SYNQLY_ORG_TOKEN")
 	}
-	if config.SplunkHecUrl == "" || config.SplunkHecToken == "" {
+	if config.splunkHecUrl == "" || config.splunkHecToken == "" {
 		consoleLogger.Print("WARNING: no Splunk credentials provided (SLUNK_URL, SPLUNK_HEC_TOKEN)\nUsing Mock as the SIEM  provider")
 	}
 
@@ -364,7 +355,7 @@ func main() {
 
 	// Create a couple of tenants
 
-	if app.Config.SplunkHecToken != "" && app.Config.SplunkHecUrl != "" {
+	if app.Config.splunkHecToken != "" && app.Config.splunkHecUrl != "" {
 		// Create and configure Tenant ABC to use splunk SIEM event logging provider
 		consoleLogger.Print("Creating Tenant ABC with splunk SIEM provider")
 		if err := app.NewTenant(ctx, "Tenant ABC"); err != nil {
@@ -385,19 +376,19 @@ func main() {
 	}
 
 	// Query the SIEM provider for each tenant
-	if app.Config.SplunkSearchToken != "" && app.Config.SplunkSearchUrl != "" {
+	if app.Config.splunkSearchToken != "" && app.Config.splunkSearchUrl != "" {
 		if err := app.query(ctx); err != nil {
 			log.Fatal(err)
 		}
 	}
 
 	// Generate synthetic load for the tenants
-	if app.Config.DurationSeconds == "" {
+	if app.Config.durationSeconds == "" {
 		// If no duration provided, run for 10m
 		app.backgroundJob(600)
 	} else {
 		// Otherwise, run for the provided duration
-		dur, err := strconv.Atoi(app.Config.DurationSeconds)
+		dur, err := strconv.Atoi(app.Config.durationSeconds)
 		if err != nil {
 			log.Fatal(err)
 		}

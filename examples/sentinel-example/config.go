@@ -4,11 +4,11 @@ import "github.com/spf13/viper"
 
 type Config struct {
 	synqlyOrgToken    string `mapstructure:"SYNQLY_ORG_TOKEN"`
-	splunkHecUrl      string `mapstructure:"SPLUNK_HEC_URL"`
-	splunkHecToken    string `mapstructure:"SPLUNK_HEC_TOKEN"`
-	splunkSearchUrl   string `mapstructure:"SPLUNK_SEARCH_URL"`
-	splunkSearchToken string `mapstructure:"SPLUNK_SEARCH_TOKEN"`
-	durationSeconds   string `mapstructure:"DURATION_SECONDS"`
+	azureTenantId     string `mapstructure:"AZURE_TENANT_ID"`
+	azureClientId     string `mapstructure:"AZURE_CLIENT_ID"`
+	azureClientSecret string `mapstructure:"AZURE_CLIENT_SECRET"`
+	dceURL            string `mapstructure:"AZURE_DCE_URL"`
+	dcrId             string `mapstructure:"AZURE_DCR_ID"`
 }
 
 // LoadConfig reads configuration from file or environment variables.
