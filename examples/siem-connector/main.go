@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	//"github.com/synqly/go-sdk/examples/util"
 	"log"
 	"math/rand"
 	"os"
@@ -12,7 +13,7 @@ import (
 
 	boff "github.com/cenkalti/backoff/v4"
 
-	engine "github.com/synqly/go-sdk/client/engine"
+	"github.com/synqly/go-sdk/client/engine"
 	engineClient "github.com/synqly/go-sdk/client/engine/client"
 
 	// Each OCSF event type has its own package. This is intended to make imports
@@ -23,23 +24,6 @@ import (
 	mgmtClient "github.com/synqly/go-sdk/client/management/client"
 )
 
-var (
-	// SYNQLY_ORG_TOKEN: A Synqly Organization Token, used to create Accounts and
-	// Integrations
-	synqlyOrgToken = os.Getenv("SYNQLY_ORG_TOKEN")
-	// SPLUNK_URL: URL of a Splunk HTTP event collector endpoint
-	// Example: "https://prd-p-icwnd.splunkcloud.com:8088/services/collector/event"
-	splunkURL = os.Getenv("SPLUNK_URL")
-	// SPLUNK_HEC_TOKEN: A Splunk HTTP Event Collector token for logging events
-	splunkToken = os.Getenv("SPLUNK_HEC_TOKEN")
-	// SPLUNK_SEARCH_URL: URL of a Splunk Search endpoint
-	splunkSearchURL = os.Getenv("SPLUNK_SEARCH_URL")
-	// SPLUNK_SEARCH_TOKEN: A Splunk Search token for querying events
-	splunkSearchToken = os.Getenv("SPLUNK_SEARCH_TOKEN")
-	// DURATION_SECONDS: (Optional) limits event generation to the provided duration
-	durationSeconds = os.Getenv("DURATION_SECONDS")
-)
-
 var consoleLogger = log.New(os.Stdout, "INFO: ", log.Ldate|log.Ltime)
 
 // App represents your application. We are not going to implement any app
@@ -47,11 +31,12 @@ var consoleLogger = log.New(os.Stdout, "INFO: ", log.Ldate|log.Ltime)
 // represents an end user of your product.
 type App struct {
 	Tenants []*Tenant
+	Config  *Config
 }
 
 // NewApp instantiates a new App
-func NewApp() *App {
-	return &App{}
+func NewApp(config *Config) *App {
+	return &App{Config: config}
 }
 
 // A Tenant object represents one of your customers, as well as the state you
@@ -86,7 +71,7 @@ func (a *App) NewTenant(ctx context.Context, id string) error {
 	// Create a Synqly Client that can be used to interact with the tenant
 	// We will use this client to create an Account and set up an Integration with an event logging provider
 	client := mgmtClient.NewClient(
-		mgmtClient.WithToken(synqlyOrgToken),
+		mgmtClient.WithToken(a.Config.SynqlyOrgToken),
 	)
 
 	// Create a Synqly Account for this tenant
@@ -140,7 +125,7 @@ func (a *App) configureIntegration(ctx context.Context, tenantID, siemProviderTy
 			Fullname: mgmt.String(fmt.Sprintf("%s authentication token", siemProviderType)),
 			Config: &mgmt.CredentialConfig{
 				Token: &mgmt.TokenCredential{
-					Secret: splunkToken,
+					Secret: a.Config.SplunkHecToken,
 				},
 			},
 		})
@@ -148,7 +133,7 @@ func (a *App) configureIntegration(ctx context.Context, tenantID, siemProviderTy
 			return err
 		}
 
-		providerConfig = a.splunkConfig(splunkURL, splunkSearchURL, credential.Result.Id, splunkSearchToken)
+		providerConfig = a.splunkConfig(a.Config.SplunkHecUrl, a.Config.SplunkSearchUrl, credential.Result.Id, a.Config.SplunkSearchToken)
 
 	case "inmem":
 		providerConfig = a.inmemConfig()
@@ -216,12 +201,12 @@ func (a *App) query(ctx context.Context) error {
 	return nil
 }
 
-func (a *App) splunkConfig(splunkURL, splunkSearchURL, credentialId string, splunkSearchToken string) *mgmt.ProviderConfig {
+func (a *App) splunkConfig(splunkHecURL, splunkSearchURL, splunkHecToken, splunkSearchToken string) *mgmt.ProviderConfig {
 	config := &mgmt.ProviderConfig{
 		SiemSplunk: &mgmt.SiemSplunk{
-			HecUrl: splunkURL,
+			HecUrl: splunkHecURL,
 			HecCredential: &mgmt.SplunkHecToken{
-				TokenId: credentialId,
+				TokenId: splunkHecToken,
 			},
 			// Do not verify the Splunk server's TLS certificate. This
 			// is not recommended for production use; however, it is set
@@ -264,7 +249,7 @@ func (app *App) backgroundJob(durationSeconds int) {
 		for _, tenant := range app.Tenants {
 			consoleLogger.Printf("Doing some work for tenant %s\n", tenant.ID)
 
-			// Call a helper function to generate a sample OCSF Event.
+			// Call a util function to generate a sample OCSF Event.
 			newEvent := createSampleEvent()
 
 			if time.Now().UTC().After(endTime) {
@@ -340,15 +325,31 @@ func (app *App) cleanup() {
 func main() {
 	ctx := context.Background()
 
-	if synqlyOrgToken == "" {
+	// Load config variables from the yaml file
+	configEnv, err := LoadConfig(".")
+	if err != nil {
+		log.Fatal("cannot load config:", err)
+	}
+
+	config := Config{
+		SynqlyOrgToken:    configEnv.SynqlyOrgToken,
+		SplunkHecUrl:      configEnv.SplunkHecUrl,
+		SplunkHecToken:    configEnv.SplunkHecToken,
+		SplunkSearchUrl:   configEnv.SplunkSearchUrl,
+		SplunkSearchToken: configEnv.SplunkSearchToken,
+		DurationSeconds:   configEnv.DurationSeconds,
+	}
+
+	// Check for required environment variables
+	if config.SynqlyOrgToken == "" {
 		log.Fatal("Must set following environment variable: SYNQLY_ORG_TOKEN")
 	}
-	if splunkURL == "" || splunkToken == "" {
+	if config.SplunkHecUrl == "" || config.SplunkHecToken == "" {
 		consoleLogger.Print("WARNING: no Splunk credentials provided (SLUNK_URL, SPLUNK_HEC_TOKEN)\nUsing Mock as the SIEM  provider")
 	}
 
 	// Instantiate App object
-	app := NewApp()
+	app := NewApp(&config)
 
 	// Create an interrupt handler to clean up tenants if the program is shut down
 	c := make(chan os.Signal, 1)
@@ -364,7 +365,7 @@ func main() {
 
 	// Create a couple of tenants
 
-	if splunkToken != "" && splunkURL != "" {
+	if app.Config.SplunkHecToken != "" && app.Config.SplunkHecUrl != "" {
 		// Create and configure Tenant ABC to use splunk SIEM event logging provider
 		consoleLogger.Print("Creating Tenant ABC with splunk SIEM provider")
 		if err := app.NewTenant(ctx, "Tenant ABC"); err != nil {
@@ -385,19 +386,19 @@ func main() {
 	}
 
 	// Query the SIEM provider for each tenant
-	if splunkSearchToken != "" && splunkSearchURL != "" {
+	if app.Config.SplunkSearchToken != "" && app.Config.SplunkSearchUrl != "" {
 		if err := app.query(ctx); err != nil {
 			log.Fatal(err)
 		}
 	}
 
 	// Generate synthetic load for the tenants
-	if durationSeconds == "" {
+	if app.Config.DurationSeconds == "" {
 		// If no duration provided, run for 10m
 		app.backgroundJob(600)
 	} else {
 		// Otherwise, run for the provided duration
-		dur, err := strconv.Atoi(durationSeconds)
+		dur, err := strconv.Atoi(app.Config.DurationSeconds)
 		if err != nil {
 			log.Fatal(err)
 		}
