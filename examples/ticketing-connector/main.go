@@ -116,7 +116,6 @@ func (app *App) cleanup() {
 }
 
 func (a *App) configureTicketing(ctx context.Context, ticketProviderType string) error {
-	// Configure an Integration in Synqly depending on this tenant's config
 	var integrationReq *mgmt.CreateIntegrationRequest
 	switch ticketProviderType {
 	case "jira":
@@ -179,6 +178,8 @@ func createAttachment(ctx context.Context, client *engineClient.Client, ticketID
 		return nil, err
 	}
 
+	consoleLogger.Println()
+
 	consoleLogger.Printf("Created attachment with id %s\n", attachmentResponse.Result.Id)
 
 	return attachmentResponse, nil
@@ -191,7 +192,10 @@ func createComment(ctx context.Context, client *engineClient.Client, ticketID, c
 	})
 	if err != nil {
 		return nil, err
+
+		consoleLogger.Println()
 	}
+
 	consoleLogger.Printf("Created a comment with id %s\n", res.Result.Id)
 
 	return res, nil
@@ -217,12 +221,14 @@ func createTicket(ctx context.Context, client *engineClient.Client, ticket *Tick
 		Description: engine.String(ticket.Description),
 		IssueType:   engine.String("Bug"),
 		Priority:    priority.Ptr(),
-		Project:     engine.String("SDK Examples"),
+		Project:     engine.String("Test"),
 		Tags:        tags,
 	})
 	if err != nil {
 		return nil, err
 	}
+
+	consoleLogger.Println()
 
 	consoleLogger.Printf("Created a ticket with id %s\n", newTicket.Result.Id)
 
@@ -235,6 +241,8 @@ func deleteAttachment(ctx context.Context, client *engineClient.Client, ticketID
 		return err
 	}
 
+	consoleLogger.Println()
+
 	consoleLogger.Printf("Deleted attachment with id %s\n", attachmentID)
 
 	return nil
@@ -245,6 +253,8 @@ func deleteComment(ctx context.Context, client *engineClient.Client, ticketID, c
 	if err := client.Ticketing.DeleteComment(ctx, ticketID, commentID); err != nil {
 		return err
 	}
+
+	consoleLogger.Println()
 
 	consoleLogger.Printf("Deleted comment with id %s\n", commentID)
 
@@ -258,6 +268,8 @@ func getAttachment(ctx context.Context, client *engineClient.Client, ticketID, a
 		return nil, err
 	}
 
+	consoleLogger.Println()
+
 	consoleLogger.Printf("Downloaded attachment %s with id %s\n", attachment.Result.FileName, attachmentID)
 
 	return attachment, nil
@@ -269,6 +281,8 @@ func getAttachmentsMetadata(ctx context.Context, client *engineClient.Client, ti
 	if err != nil {
 		return nil, err
 	}
+
+	consoleLogger.Println()
 
 	consoleLogger.Printf("Retrieved attachments metadata in the ticket with id %s\n", ticketID)
 
@@ -282,6 +296,8 @@ func getComments(ctx context.Context, client *engineClient.Client, ticketID stri
 		return nil, err
 	}
 
+	consoleLogger.Println()
+
 	consoleLogger.Printf("Retrieved comments in the ticket with id %s\n", ticketID)
 
 	return comments, nil
@@ -293,6 +309,8 @@ func getProjects(ctx context.Context, client *engineClient.Client) (*engine.List
 	if err != nil {
 		return nil, err
 	}
+
+	consoleLogger.Println()
 
 	consoleLogger.Printf("Retrieved list of projects\n")
 
@@ -306,6 +324,8 @@ func getRemoteFields(ctx context.Context, client *engineClient.Client) (*engine.
 		return nil, err
 	}
 
+	consoleLogger.Println()
+
 	consoleLogger.Printf("Retrieved list of remote fields\n")
 
 	return listRemoteFields, nil
@@ -317,6 +337,8 @@ func getTicket(ctx context.Context, client *engineClient.Client, ticketID string
 	if err != nil {
 		return nil, err
 	}
+
+	consoleLogger.Println()
 
 	consoleLogger.Printf("Retrieved ticket with id %s\n", ticket.Result.Id)
 
@@ -333,6 +355,8 @@ func searchTickets(ctx context.Context, client *engineClient.Client, tags []stri
 	if err != nil {
 		return nil, err
 	}
+
+	consoleLogger.Println()
 
 	consoleLogger.Printf("Found %d existing tickets\n", len(res.Result))
 
@@ -351,32 +375,11 @@ func updateTicket(ctx context.Context, client *engineClient.Client, ticketID str
 		return nil, err
 	}
 
+	consoleLogger.Println()
+
 	consoleLogger.Printf("Patched ticket with id %s\n", ticketPatched.Result.Id)
 
 	return ticketPatched, nil
-}
-
-func ticketingProviderConfig(jiraURL, jiraUser, jiraToken string) (*mgmt.CreateIntegrationRequest, error) {
-	if jiraUser == "" || jiraToken == "" {
-		return nil, fmt.Errorf("missing ticketing provider config")
-	}
-
-	integrationReq := &mgmt.CreateIntegrationRequest{
-		Fullname: engine.String("Ticketing Connector"),
-		ProviderConfig: &mgmt.ProviderConfig{
-			TicketingJira: &mgmt.TicketingJira{
-				Url: jiraURL,
-				Credential: &mgmt.JiraCredential{
-					Basic: &mgmt.BasicCredential{
-						Username: jiraUser,
-						Secret:   jiraToken,
-					},
-				},
-			},
-		},
-	}
-
-	return integrationReq, nil
 }
 
 func main() {
@@ -389,25 +392,18 @@ func main() {
 		}), nil)
 	}
 
-	synqlyOrgToken := "1::bdee0db6-7b0e-409f-b0b0-c83cc3e023ea::Rj3y0n_ca2pZJ83m5ghUMIa496VIryMh2upX_yiMTAU" //k.String("synqly.org.token")
-	jiraURL := k.String("synqly.jira.url")
-	jiraUser := k.String("synqly.jira.user")
-	jiraToken := k.String("synqly.jira.token")
-
-	/* t, err := common.NewTenant(ctx, "Zenith Systems", "tenant_store_qualys.yaml", synqlyOrgToken, map[mgmt.CategoryId]*mgmt.CreateIntegrationRequest{
-		mgmt.CategoryIdTicketing: ticketingProvider,
-	})
-	if err != nil {
-		log.Fatal(err)
-	} */
+	synqlyOrgToken = k.String("synqly.org.token")
+	jiraURL = k.String("synqly.jira.url")
+	jiraUser = k.String("synqly.jira.user")
+	jiraToken = k.String("synqly.jira.token")
 
 	ctx := context.Background()
 
 	if synqlyOrgToken == "" {
-		log.Fatal("Must set following environment variable: SYNQLY_ORG_TOKEN")
+		log.Fatal("Missing Synqly Org token")
 	}
 	if jiraToken == "" || jiraURL == "" || jiraUser == "" {
-		log.Fatal("Must set following environment variables: SYNQLY_JIRA_URL, SYNQLY_JIRA_USER, SYNQLY_JIRA_TOKEN")
+		log.Fatal("Must set Jira URL, Jira User, and Jira Token")
 	}
 
 	// Instantiate App object
@@ -444,16 +440,15 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// Get the ticketing client
 	ticketingClient := app.Tenant.TicketClient
-
-	//ticketingClient := t.Synqly.EngineClients[mgmt.CategoryIdTicketing]
 
 	// get the list of projects
 	listProjectsResponse, err := getProjects(ctx, ticketingClient)
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	consoleLogger.Println()
 
 	consoleLogger.Printf("List of projects:\n")
 	for _, project := range listProjectsResponse.Result {
@@ -474,9 +469,16 @@ func main() {
 		specsMap[spec.ProviderFieldName] = spec
 	}
 
-	consoleLogger.Printf("List of remote fields:\n")
+	consoleLogger.Println()
+
+	consoleLogger.Printf("List of 10 remote fields:\n")
+	i := 0
 	for key, spec := range specsMap {
 		consoleLogger.Printf("Field Name: %s, Field Id: %s\n", key, spec.FieldId)
+		if i == 10 {
+			break
+		}
+		i++
 	}
 
 	// create a new ticket
@@ -509,32 +511,30 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// delete the comment
-	err = deleteComment(ctx, ticketingClient, newTicket.Result.Id, createCommentResponse.Result.Id)
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	// get the comments in the ticket
 	comments, err := getComments(ctx, ticketingClient, newTicket.Result.Id)
 	if err != nil {
 		log.Fatal(err)
 	}
 
+	consoleLogger.Println()
+
 	consoleLogger.Printf("Comments in the ticket:\n")
 	for _, comment := range comments.Result {
 		consoleLogger.Printf("Comment: %s\n", comment.Content)
 	}
 
-	// update the ticket
-	ticket.Description = "Updated description of the vulnerability"
-	ticket.Summary = "Updated summary of the vulnerability"
-	patchedTicket, err := updateTicket(ctx, ticketingClient, newTicket.Result.Id, ticket)
+	// delete the comment
+	err = deleteComment(ctx, ticketingClient, newTicket.Result.Id, createCommentResponse.Result.Id)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	consoleLogger.Printf("Updated description %s\n", *patchedTicket.Result.Description)
-	consoleLogger.Printf("Updated summary %s\n", patchedTicket.Result.Summary)
-
+	// update the ticket
+	ticket.Description = "Updated description of the vulnerability"
+	ticket.Summary = "Updated summary of the vulnerability"
+	_, err = updateTicket(ctx, ticketingClient, newTicket.Result.Id, ticket)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
