@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	//"github.com/synqly/go-sdk/examples/util"
 	"log"
 	"math/rand"
 	"os"
