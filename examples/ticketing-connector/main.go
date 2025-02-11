@@ -5,10 +5,12 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"os/signal"
 	"strings"
 
-	"github.com/google/uuid"
 	koanfyaml "github.com/knadh/koanf/parsers/yaml"
+
+	"github.com/google/uuid"
 	"github.com/knadh/koanf/providers/env"
 	"github.com/knadh/koanf/providers/file"
 	"github.com/knadh/koanf/v2"
@@ -16,14 +18,143 @@ import (
 	"github.com/synqly/go-sdk/client/engine"
 	engineClient "github.com/synqly/go-sdk/client/engine/client"
 	mgmt "github.com/synqly/go-sdk/client/management"
-	"github.com/synqly/go-sdk/examples/common"
+	mgmtClient "github.com/synqly/go-sdk/client/management/client"
 )
 
 var (
-	k = koanf.New(".")
+	k              = koanf.New(".")
+	synqlyOrgToken = os.Getenv("SYNQLY_ORG_TOKEN")
+	jiraURL        = os.Getenv("SYNQLY_JIRA_URL")
+	jiraUser       = os.Getenv("SYNQLY_JIRA_USER")
+	jiraToken      = os.Getenv("SYNQLY_JIRA_TOKEN")
 )
 
 var consoleLogger = log.New(os.Stdout, "INFO: ", log.Ldate|log.Ltime)
+
+type App struct {
+	Tenant *Tenant
+}
+
+// NewApp instantiates a new App
+func NewApp() *App {
+	return &App{}
+}
+
+// A Tenant object represents one of your customers, as well as the state you
+// would maintain for them in your application.
+type Tenant struct {
+	// ID: A unique identifier for one of your customers.
+	ID string
+	// SynqlyAccountId: The ID of the Synqly Account in which Integrations for
+	// this tenant will be created. This example creates a new Account for every
+	// Tenant, but it would also be possible to use the same Account for all Tenants.
+	SynqlyAccountId string
+	// SynqlyClient: A cached management client, used to manage Integrations.
+	SynqlyClient *mgmtClient.Client
+	// TicketClient: A cached engine client, used to log events to a third-party
+	// logging Provider by way of an Integration.
+	TicketClient *engineClient.Client
+}
+
+// NewTenant initializes a Synqly Account for a given Tenant. This example
+// creates a new Account for every Tenant to keep their credentials isolated.
+//
+// Returns an error if a tenant with the same ID already exists or if a Synqly
+// Account cannot be created for the Tenant.
+func (a *App) NewTenant(ctx context.Context, id string) error {
+	// Do not allow duplicate tenant names
+
+	if a.Tenant != nil && a.Tenant.ID == id {
+		return fmt.Errorf("duplicate tenant name %v", id)
+	}
+
+	// Create a Synqly Client that can be used to interact with the tenant
+	// We will use this client to create an Account and set up an Integration with an event logging provider
+	client := mgmtClient.NewClient(
+		mgmtClient.WithToken(synqlyOrgToken),
+	)
+
+	// Create a Synqly Account for this tenant
+	account, err := client.Accounts.Create(ctx, &mgmt.CreateAccountRequest{
+		Fullname: &id,
+	})
+	if err != nil {
+		return fmt.Errorf("unable to create account: %w", err)
+	}
+
+	// Store the Tenant and associated Synqly objects in an in-memory cache.
+	a.Tenant = &Tenant{
+		ID:              id,
+		SynqlyAccountId: account.Result.Account.Id,
+		SynqlyClient:    client,
+		TicketClient:    nil,
+	}
+	return nil
+}
+
+func (a *App) inmemConfig() *mgmt.CreateIntegrationRequest {
+	return &mgmt.CreateIntegrationRequest{
+		Fullname:       engine.String("In-Memory Connector"),
+		ProviderConfig: &mgmt.ProviderConfig{SiemMockSiem: &mgmt.SiemMock{}},
+	}
+}
+
+func (app *App) cleanup() {
+	// Clean up the Accounts created in Synqly. In your application, you would
+	// persist the Synqly Account id and Integration tokens to handle process
+	// restarts. We are not doing that in this example, so we need to clean up
+	// the accounts we created in Synqly.
+	consoleLogger.Println("Cleaning up Synqly Account")
+	ctx := context.Background()
+
+	// Deleting the account will delete all credentials and integrations associated with the account.
+	if err := app.Tenant.SynqlyClient.Accounts.Delete(ctx, app.Tenant.SynqlyAccountId); err != nil {
+		consoleLogger.Printf("Error deleting account %s: %s\n", app.Tenant.SynqlyAccountId, err)
+	}
+
+	os.Exit(0)
+}
+
+func (a *App) configureTicketing(ctx context.Context, ticketProviderType string) error {
+	// Configure an Integration in Synqly depending on this tenant's config
+	var integrationReq *mgmt.CreateIntegrationRequest
+	switch ticketProviderType {
+	case "jira":
+		integrationReq = &mgmt.CreateIntegrationRequest{
+			Fullname: engine.String("Ticketing Connector"),
+			ProviderConfig: &mgmt.ProviderConfig{
+				TicketingJira: &mgmt.TicketingJira{
+					Url: jiraURL,
+					Credential: &mgmt.JiraCredential{
+						Basic: &mgmt.BasicCredential{
+							Username: jiraUser,
+							Secret:   jiraToken,
+						},
+					},
+				},
+			},
+		}
+
+	case "inmem":
+		integrationReq = a.inmemConfig()
+
+	default:
+		return fmt.Errorf("invalid siem provider type: %s", ticketProviderType)
+	}
+
+	integration, err := a.Tenant.SynqlyClient.Integrations.Create(ctx, a.Tenant.SynqlyAccountId, integrationReq)
+	if err != nil {
+		return fmt.Errorf("unable to create integration: %w", err)
+	}
+
+	// Create an Event Logger for the tenant
+	// We will use this client to post events to the provider
+	a.Tenant.TicketClient = engineClient.NewClient(
+		engineClient.WithToken(integration.Result.Token.Access.Secret),
+	)
+
+	return nil
+}
 
 type Ticket struct {
 	Uid         string `json:"uid"`
@@ -258,28 +389,41 @@ func main() {
 		}), nil)
 	}
 
-	synqlyOrgToken := k.String("synqly.org.token")
+	synqlyOrgToken := "1::bdee0db6-7b0e-409f-b0b0-c83cc3e023ea::Rj3y0n_ca2pZJ83m5ghUMIa496VIryMh2upX_yiMTAU" //k.String("synqly.org.token")
 	jiraURL := k.String("synqly.jira.url")
 	jiraUser := k.String("synqly.jira.user")
 	jiraToken := k.String("synqly.jira.token")
 
-	if synqlyOrgToken == "" {
-		log.Fatal("Missing Synqly Org token")
-	}
-
-	ticketingProvider, err := ticketingProviderConfig(jiraURL, jiraUser, jiraToken)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	ctx := context.Background()
-
-	t, err := common.NewTenant(ctx, "Zenith Systems", "tenant_store_qualys.yaml", synqlyOrgToken, map[mgmt.CategoryId]*mgmt.CreateIntegrationRequest{
+	/* t, err := common.NewTenant(ctx, "Zenith Systems", "tenant_store_qualys.yaml", synqlyOrgToken, map[mgmt.CategoryId]*mgmt.CreateIntegrationRequest{
 		mgmt.CategoryIdTicketing: ticketingProvider,
 	})
 	if err != nil {
 		log.Fatal(err)
+	} */
+
+	ctx := context.Background()
+
+	if synqlyOrgToken == "" {
+		log.Fatal("Must set following environment variable: SYNQLY_ORG_TOKEN")
 	}
+	if jiraToken == "" || jiraURL == "" || jiraUser == "" {
+		log.Fatal("Must set following environment variables: SYNQLY_JIRA_URL, SYNQLY_JIRA_USER, SYNQLY_JIRA_TOKEN")
+	}
+
+	// Instantiate App object
+	app := NewApp()
+
+	// Create an interrupt handler to clean up tenants if the program is shut down
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt)
+	go func() {
+		// Intercept all ^C
+		for range c {
+			app.cleanup()
+		}
+	}()
+	// Also be sure to run clean up if the program exits gracefully
+	defer app.cleanup()
 
 	uid := uuid.New().String()
 
@@ -290,7 +434,20 @@ func main() {
 		Description: "Description of the vulnerability",
 	}
 
-	ticketingClient := t.Synqly.EngineClients["ticketing"]
+	consoleLogger.Print("Creating Tenant ABC tenant\n")
+	if err := app.NewTenant(ctx, "Tenant ABC"); err != nil {
+		log.Fatal(err)
+	}
+
+	err := app.configureTicketing(ctx, "jira")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Get the ticketing client
+	ticketingClient := app.Tenant.TicketClient
+
+	//ticketingClient := t.Synqly.EngineClients[mgmt.CategoryIdTicketing]
 
 	// get the list of projects
 	listProjectsResponse, err := getProjects(ctx, ticketingClient)
