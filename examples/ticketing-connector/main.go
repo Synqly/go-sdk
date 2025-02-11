@@ -7,6 +7,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/google/uuid"
 	koanfyaml "github.com/knadh/koanf/parsers/yaml"
 	"github.com/knadh/koanf/providers/env"
 	"github.com/knadh/koanf/providers/file"
@@ -97,6 +98,17 @@ func createTicket(ctx context.Context, client *engineClient.Client, ticket *Tick
 	return newTicket, nil
 }
 
+// deleteAttachment deletes the attachment with the given ID in the ticket with the given ID
+func deleteAttachment(ctx context.Context, client *engineClient.Client, ticketID, attachmentID string) error {
+	if err := client.Ticketing.DeleteAttachment(ctx, ticketID, attachmentID); err != nil {
+		return err
+	}
+
+	consoleLogger.Printf("Deleted attachment with id %s\n", attachmentID)
+
+	return nil
+}
+
 // deleteComment deletes the comment with the given ID in the ticket with the given ID
 func deleteComment(ctx context.Context, client *engineClient.Client, ticketID, commentID string) error {
 	if err := client.Ticketing.DeleteComment(ctx, ticketID, commentID); err != nil {
@@ -106,6 +118,18 @@ func deleteComment(ctx context.Context, client *engineClient.Client, ticketID, c
 	consoleLogger.Printf("Deleted comment with id %s\n", commentID)
 
 	return nil
+}
+
+// getAttachment retrieves the attachment with the given ID in the ticket with the given ID
+func getAttachment(ctx context.Context, client *engineClient.Client, ticketID, attachmentID string) (*engine.DownloadAttachmentResponse, error) {
+	attachment, err := client.Ticketing.DownloadAttachment(ctx, ticketID, attachmentID)
+	if err != nil {
+		return nil, err
+	}
+
+	consoleLogger.Printf("Downloaded attachment %s with id %s\n", attachment.Result.FileName, attachmentID)
+
+	return attachment, nil
 }
 
 // getAttachmentsMetadata retrieves the attachments metadata in the ticket with the given ID
@@ -156,8 +180,20 @@ func getRemoteFields(ctx context.Context, client *engineClient.Client) (*engine.
 	return listRemoteFields, nil
 }
 
-// searchTicket searches for an existing ticket with the given tags
-func searchTicket(ctx context.Context, client *engineClient.Client, tags []string) (*engine.QueryTicketsResponse, error) {
+// getTicket retrieves the ticket with the given ID
+func getTicket(ctx context.Context, client *engineClient.Client, ticketID string) (*engine.GetTicketResponse, error) {
+	ticket, err := client.Ticketing.GetTicket(ctx, ticketID)
+	if err != nil {
+		return nil, err
+	}
+
+	consoleLogger.Printf("Retrieved ticket with id %s\n", ticket.Result.Id)
+
+	return ticket, nil
+}
+
+// searchTickets searches for an existing ticket with the given tags
+func searchTickets(ctx context.Context, client *engineClient.Client, tags []string) (*engine.QueryTicketsResponse, error) {
 	res, err := client.Ticketing.QueryTickets(ctx, &engine.QueryTicketsRequest{
 		Filter: []*string{
 			engine.String(fmt.Sprintf("tags[in]%s", strings.Join(tags, ","))),
@@ -172,20 +208,8 @@ func searchTicket(ctx context.Context, client *engineClient.Client, tags []strin
 	return res, nil
 }
 
-// getTicket retrieves the ticket with the given ID
-func getTicket(ctx context.Context, client *engineClient.Client, ticketID string) (*engine.GetTicketResponse, error) {
-	ticket, err := client.Ticketing.GetTicket(ctx, ticketID)
-	if err != nil {
-		return nil, err
-	}
-
-	consoleLogger.Printf("Retrieved ticket with id %s\n", ticket.Result.Id)
-
-	return ticket, nil
-}
-
-// patchTicket updates the ticket with the given ID
-func patchTicket(ctx context.Context, client *engineClient.Client, ticketID string, ticket *Ticket) (*engine.PatchTicketResponse, error) {
+// updateTicket updates the ticket with the given ID
+func updateTicket(ctx context.Context, client *engineClient.Client, ticketID string, ticket *Ticket) (*engine.PatchTicketResponse, error) {
 	patchRequest := []*engine.PatchOperation{
 		{Op: "replace", Path: "/description", Value: ticket.Description},
 		{Op: "replace", Path: "/summary", Value: ticket.Summary},
@@ -257,8 +281,10 @@ func main() {
 		log.Fatal(err)
 	}
 
+	uid := uuid.New().String()
+
 	ticket := &Ticket{
-		Uid:         "123",
+		Uid:         uid,
 		Title:       "Title of the vulnerability ticket",
 		Summary:     "Summary of the vulnerability",
 		Description: "Description of the vulnerability",
@@ -302,8 +328,35 @@ func main() {
 		log.Fatal(err)
 	}
 
+	// create an attachment in the ticket
+	createAttachmentResponse, err := createAttachment(ctx, ticketingClient, newTicket.Result.Id)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// get the attachment
+	_, err = getAttachment(ctx, ticketingClient, newTicket.Result.Id, createAttachmentResponse.Result.Id)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// delete the attachment
+	err = deleteAttachment(ctx, ticketingClient, newTicket.Result.Id, createAttachmentResponse.Result.Id)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	// create a comment in the ticket
-	createComment(ctx, ticketingClient, newTicket.Result.Id, "This is a comment")
+	createCommentResponse, err := createComment(ctx, ticketingClient, newTicket.Result.Id, "This is a comment")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// delete the comment
+	err = deleteComment(ctx, ticketingClient, newTicket.Result.Id, createCommentResponse.Result.Id)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	// get the comments in the ticket
 	comments, err := getComments(ctx, ticketingClient, newTicket.Result.Id)
@@ -319,7 +372,7 @@ func main() {
 	// update the ticket
 	ticket.Description = "Updated description of the vulnerability"
 	ticket.Summary = "Updated summary of the vulnerability"
-	patchedTicket, err := patchTicket(ctx, ticketingClient, newTicket.Result.Id, ticket)
+	patchedTicket, err := updateTicket(ctx, ticketingClient, newTicket.Result.Id, ticket)
 	if err != nil {
 		log.Fatal(err)
 	}
