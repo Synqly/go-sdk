@@ -30,7 +30,7 @@ The `siem-connector` example will:
    ```bash
    go mod tidy
    ```
-3. The example depends on environment variables to connect to Synqly and Splunk. To allow the sample program to connect to Synqly, set the following environment variables to your Organization ID and API Token values.
+3. The example depends on environment variables or a config.env file to connect to Synqly and Splunk. To allow the sample program to connect to Synqly, set the following environment variables to your Organization ID and API Token values or fill the config.env file with the values.
 
     ```bash
     export SYNQLY_ORG_TOKEN=your-api-token
