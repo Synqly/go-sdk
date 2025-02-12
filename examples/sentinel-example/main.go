@@ -35,8 +35,11 @@ func main() {
 	integrationName := "alerts"
 
 	defer func() {
-		client.Integrations.Delete(ctx, "acme-corp", integrationName)
-		log.Print("Integration deleted")
+		if err := client.Integrations.Delete(ctx, "acme-corp", integrationName); err != nil {
+			log.Printf("Failed to delete integration: %v", err)
+		} else {
+			log.Print("Integration deleted")
+		}
 	}()
 
 	integration, err := client.Integrations.Create(ctx, "acme-corp", &mgmt.CreateIntegrationRequest{
