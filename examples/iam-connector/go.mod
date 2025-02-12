@@ -3,8 +3,6 @@ module iam-connector
 go 1.23
 
 require (
-	github.com/knadh/koanf v1.5.0
-	github.com/knadh/koanf/v2 v2.0.1
 	github.com/spf13/viper v1.19.0
 	github.com/synqly/go-sdk v0.3.45
 )
@@ -14,9 +12,7 @@ require (
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
-	github.com/mitchellh/copystructure v1.2.0 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
-	github.com/mitchellh/reflectwalk v1.0.2 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.2 // indirect
 	github.com/sagikazarmark/locafero v0.4.0 // indirect
 	github.com/sagikazarmark/slog-shim v0.1.0 // indirect
