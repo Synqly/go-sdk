@@ -8,12 +8,7 @@ import (
 	"os/signal"
 	"strings"
 
-	koanfyaml "github.com/knadh/koanf/parsers/yaml"
-
 	"github.com/google/uuid"
-	"github.com/knadh/koanf/providers/env"
-	"github.com/knadh/koanf/providers/file"
-	"github.com/knadh/koanf/v2"
 
 	"github.com/synqly/go-sdk/client/engine"
 	engineClient "github.com/synqly/go-sdk/client/engine/client"
@@ -21,23 +16,18 @@ import (
 	mgmtClient "github.com/synqly/go-sdk/client/management/client"
 )
 
-var (
-	k              = koanf.New(".")
-	synqlyOrgToken = os.Getenv("SYNQLY_ORG_TOKEN")
-	jiraURL        = os.Getenv("SYNQLY_JIRA_URL")
-	jiraUser       = os.Getenv("SYNQLY_JIRA_USER")
-	jiraToken      = os.Getenv("SYNQLY_JIRA_TOKEN")
-)
-
 var consoleLogger = log.New(os.Stdout, "INFO: ", log.Ldate|log.Ltime)
 
 type App struct {
 	Tenant *Tenant
+	Config *Config
 }
 
 // NewApp instantiates a new App
-func NewApp() *App {
-	return &App{}
+func NewApp(config *Config) *App {
+	return &App{
+		Config: config,
+	}
 }
 
 // A Tenant object represents one of your customers, as well as the state you
@@ -71,7 +61,7 @@ func (a *App) NewTenant(ctx context.Context, id string) error {
 	// Create a Synqly Client that can be used to interact with the tenant
 	// We will use this client to create an Account and set up an Integration with an event logging provider
 	client := mgmtClient.NewClient(
-		mgmtClient.WithToken(synqlyOrgToken),
+		mgmtClient.WithToken(a.Config.SynqlyOrgToken),
 	)
 
 	// Create a Synqly Account for this tenant
@@ -123,11 +113,11 @@ func (a *App) configureTicketing(ctx context.Context, ticketProviderType string)
 			Fullname: engine.String("Ticketing Connector"),
 			ProviderConfig: &mgmt.ProviderConfig{
 				TicketingJira: &mgmt.TicketingJira{
-					Url: jiraURL,
+					Url: a.Config.JiraURL,
 					Credential: &mgmt.JiraCredential{
 						Basic: &mgmt.BasicCredential{
-							Username: jiraUser,
-							Secret:   jiraToken,
+							Username: a.Config.JiraUser,
+							Secret:   a.Config.JiraToken,
 						},
 					},
 				},
@@ -146,8 +136,6 @@ func (a *App) configureTicketing(ctx context.Context, ticketProviderType string)
 		return fmt.Errorf("unable to create integration: %w", err)
 	}
 
-	// Create an Event Logger for the tenant
-	// We will use this client to post events to the provider
 	a.Tenant.TicketClient = engineClient.NewClient(
 		engineClient.WithToken(integration.Result.Token.Access.Secret),
 	)
@@ -192,9 +180,9 @@ func createComment(ctx context.Context, client *engineClient.Client, ticketID, c
 	})
 	if err != nil {
 		return nil, err
-
-		consoleLogger.Println()
 	}
+
+	consoleLogger.Println()
 
 	consoleLogger.Printf("Created a comment with id %s\n", res.Result.Id)
 
@@ -384,30 +372,23 @@ func updateTicket(ctx context.Context, client *engineClient.Client, ticketID str
 
 func main() {
 	log.SetFlags(log.Llongfile | log.Ldate | log.Ltime)
-
-	parser := koanfyaml.Parser()
-	if err := k.Load(file.Provider("config.yaml"), parser); err != nil {
-		k.Load(env.Provider("SYNQLY_", "_", func(s string) string {
-			return strings.ToLower(s)
-		}), nil)
-	}
-
-	synqlyOrgToken = k.String("synqly.org.token")
-	jiraURL = k.String("synqly.jira.url")
-	jiraUser = k.String("synqly.jira.user")
-	jiraToken = k.String("synqly.jira.token")
-
 	ctx := context.Background()
 
-	if synqlyOrgToken == "" {
+	// Load config variables from the env file
+	config, err := LoadConfig(".")
+	if err != nil {
+		log.Fatal("cannot load config:", err)
+	}
+
+	if config.SynqlyOrgToken == "" {
 		log.Fatal("Missing Synqly Org token")
 	}
-	if jiraToken == "" || jiraURL == "" || jiraUser == "" {
+	if config.JiraToken == "" || config.JiraURL == "" || config.JiraUser == "" {
 		log.Fatal("Must set Jira URL, Jira User, and Jira Token")
 	}
 
 	// Instantiate App object
-	app := NewApp()
+	app := NewApp(&config)
 
 	// Create an interrupt handler to clean up tenants if the program is shut down
 	c := make(chan os.Signal, 1)
@@ -435,7 +416,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	err := app.configureTicketing(ctx, "jira")
+	err = app.configureTicketing(ctx, "jira")
 	if err != nil {
 		log.Fatal(err)
 	}
