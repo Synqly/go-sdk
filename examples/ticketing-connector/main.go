@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"regexp"
 	"strings"
 
 	"github.com/google/uuid"
@@ -35,38 +36,42 @@ func NewApp(config *Config) *App {
 type Tenant struct {
 	// ID: A unique identifier for one of your customers.
 	ID string
-	// SynqlyAccountId: The ID of the Synqly Account in which Integrations for
-	// this tenant will be created. This example creates a new Account for every
-	// Tenant, but it would also be possible to use the same Account for all Tenants.
-	SynqlyAccountId string
 	// SynqlyClient: A cached management client, used to manage Integrations.
 	SynqlyClient *mgmtClient.Client
-	// TicketClient: A cached engine client, used to log events to a third-party
-	// logging Provider by way of an Integration.
+	// TicketClient: A cached engine client, used to interact with the ticketing system
 	TicketClient *engineClient.Client
 }
 
-// NewTenant initializes a Synqly Account for a given Tenant. This example
-// creates a new Account for every Tenant to keep their credentials isolated.
+// NewTenant is used in a multi-tenant backend to create tenants. This would
+// normally contain the logic you need to add a customer. When using Synqly,
+// part of this logic should include creating an Account for them, and that is
+// what's done here.
 //
 // Returns an error if a tenant with the same ID already exists or if a Synqly
 // Account cannot be created for the Tenant.
 func (a *App) NewTenant(ctx context.Context, id string) error {
-	// Do not allow duplicate tenant names
+	matched, err := regexp.MatchString(`^[a-z_-]*[a-z][a-z_-]*$`, id)
+	if err != nil {
+		return fmt.Errorf("error validating tenant ID: %w", err)
+	}
+	if !matched {
+		return fmt.Errorf("invalid tenant ID: %v. Only letters, hyphens, and underscores are allowed", id)
+	}
 
+	// Do not allow duplicate tenant names
 	if a.Tenant != nil && a.Tenant.ID == id {
 		return fmt.Errorf("duplicate tenant name %v", id)
 	}
 
 	// Create a Synqly Client that can be used to interact with the tenant
-	// We will use this client to create an Account and set up an Integration with an event logging provider
+	// We will use this client to create an Account and set up an Integration with a Ticketing Provider.
 	client := mgmtClient.NewClient(
 		mgmtClient.WithToken(a.Config.SynqlyOrgToken),
 	)
 
 	// Create a Synqly Account for this tenant
-	account, err := client.Accounts.Create(ctx, &mgmt.CreateAccountRequest{
-		Fullname: &id,
+	_, err = client.Accounts.Create(ctx, &mgmt.CreateAccountRequest{
+		Name: &id,
 	})
 	if err != nil {
 		return fmt.Errorf("unable to create account: %w", err)
@@ -74,10 +79,9 @@ func (a *App) NewTenant(ctx context.Context, id string) error {
 
 	// Store the Tenant and associated Synqly objects in an in-memory cache.
 	a.Tenant = &Tenant{
-		ID:              id,
-		SynqlyAccountId: account.Result.Account.Id,
-		SynqlyClient:    client,
-		TicketClient:    nil,
+		ID:           id,
+		SynqlyClient: client,
+		TicketClient: nil,
 	}
 	return nil
 }
@@ -98,8 +102,8 @@ func (app *App) cleanup() {
 	ctx := context.Background()
 
 	// Deleting the account will delete all credentials and integrations associated with the account.
-	if err := app.Tenant.SynqlyClient.Accounts.Delete(ctx, app.Tenant.SynqlyAccountId); err != nil {
-		consoleLogger.Printf("Error deleting account %s: %s\n", app.Tenant.SynqlyAccountId, err)
+	if err := app.Tenant.SynqlyClient.Accounts.Delete(ctx, app.Tenant.ID); err != nil {
+		consoleLogger.Printf("Error deleting account %s: %s\n", app.Tenant.ID, err)
 	}
 
 	os.Exit(0)
@@ -131,7 +135,7 @@ func (a *App) configureTicketing(ctx context.Context, ticketProviderType string)
 		return fmt.Errorf("invalid siem provider type: %s", ticketProviderType)
 	}
 
-	integration, err := a.Tenant.SynqlyClient.Integrations.Create(ctx, a.Tenant.SynqlyAccountId, integrationReq)
+	integration, err := a.Tenant.SynqlyClient.Integrations.Create(ctx, a.Tenant.ID, integrationReq)
 	if err != nil {
 		return fmt.Errorf("unable to create integration: %w", err)
 	}
@@ -411,8 +415,9 @@ func main() {
 		Description: "Description of the vulnerability",
 	}
 
-	consoleLogger.Print("Creating Tenant ABC tenant\n")
-	if err := app.NewTenant(ctx, "Tenant ABC"); err != nil {
+	customerName := "ticketing_demo_customer"
+	consoleLogger.Printf("Creating %s tenant\n", customerName)
+	if err := app.NewTenant(ctx, customerName); err != nil {
 		log.Fatal(err)
 	}
 
