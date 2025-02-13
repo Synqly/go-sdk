@@ -2223,11 +2223,16 @@ func (u *User) String() string {
 type VulnerabilitySeverityFilterValue string
 
 const (
+	// Action is required immediately and the scope is broad.
 	VulnerabilitySeverityFilterValueCritical VulnerabilitySeverityFilterValue = "critical"
-	VulnerabilitySeverityFilterValueHigh     VulnerabilitySeverityFilterValue = "high"
-	VulnerabilitySeverityFilterValueMedium   VulnerabilitySeverityFilterValue = "medium"
-	VulnerabilitySeverityFilterValueLow      VulnerabilitySeverityFilterValue = "low"
-	VulnerabilitySeverityFilterValueInfo     VulnerabilitySeverityFilterValue = "info"
+	// Action is required immediately.
+	VulnerabilitySeverityFilterValueHigh VulnerabilitySeverityFilterValue = "high"
+	// Action is required but the situation is not serious at this time.
+	VulnerabilitySeverityFilterValueMedium VulnerabilitySeverityFilterValue = "medium"
+	// The user decides if action is needed.
+	VulnerabilitySeverityFilterValueLow VulnerabilitySeverityFilterValue = "low"
+	// Informational message. No action required.
+	VulnerabilitySeverityFilterValueInfo VulnerabilitySeverityFilterValue = "info"
 )
 
 func NewVulnerabilitySeverityFilterValueFromString(s string) (VulnerabilitySeverityFilterValue, error) {
