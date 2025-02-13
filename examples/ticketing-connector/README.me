@@ -1,36 +1,34 @@
 ## Ticketing Example
 
-The `ticketing-connector` example demonstrates how to use Synqly's Ticketing Connector to interact with a ticketing system. This example uses Jira, but could be adapted to use any of the ticketing systems supported by Synqly.
+This example showcases how to use Synqly's Ticketing Connector to interact with a ticketing system. We'll be using Jira, but the same code can be adapted to use any of the ticketing systems supported by Synqly.
 
-The `ticketing-connector` example performs the following actions (in order):
-
-- Creates an account in your Synqly Organization
-- Creates an `Integration` in this Account (using Jira as the target Ticketing Provider)
-- Retrieves the list of projects
-- Retrieves the list of remote fields
-- Creates a ticket
-- Creates an attachment in the ticket
-- Downloads an attachment
-- Deletes an attachment in the ticket
-- Creates a comment in the ticket
-- Retrieves all comments in the ticket
-- Deletes a comment in the ticket
-- Updates a ticket
-- Cleans up the created tenant
+Following this comprehensive example, you will have learned how to:
+1. Create an Account in your Synqly Organization 
+2. Create an Integration in the Account, using Jira as the Ticketing Provider
+3. Query the list of projects
+4. Query the list of remote fields
+5. Create a ticket
+6. Attach a file to the ticket
+7. Download the attachment
+8. Delete the attachment
+9. Comment on a ticket
+10. List all comments to a ticket
+11. Delete a comment from the ticket
+12. Updates the ticket
+13. Remove the test Account
 
 ## Setup
 
 You need the following to run this example:
 
-1. An API token for your Synqly Organization.
-2. A Jira account and API token. Follow [this guide to create a token](https://support.atlassian.com/atlassian-account/docs/manage-api-tokens-for-your-atlassian-account/).
+1. An API token for your Synqly Organization. [Auth Doc] (https://docs.synqly.com/reference/api-authentication) [API Keys] (https://app.synqly.com/prod/settings/secrets)
+2. A Jira account and API token. Follow [Jira configuration guide](https://docs.synqly.com/docs/jira-ticketing-setup).
 
 All of this information should be placed in a `config.env` file in this directory or set through environment variables.
 
 ## Running the Example
 
-
-To run the example, run the following command:
+To run the example:
 
 ```bash
 go run main.go

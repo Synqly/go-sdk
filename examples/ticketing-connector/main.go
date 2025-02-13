@@ -6,7 +6,6 @@ import (
 	"log"
 	"os"
 	"os/signal"
-	"regexp"
 	"strings"
 
 	"github.com/google/uuid"
@@ -34,8 +33,8 @@ func NewApp(config *Config) *App {
 // A Tenant object represents one of your customers, as well as the state you
 // would maintain for them in your application.
 type Tenant struct {
-	// ID: A unique identifier for one of your customers.
-	ID string
+	// Name: A unique identifier for one of your customers.
+	Name string
 	// SynqlyClient: A cached management client, used to manage Integrations.
 	SynqlyClient *mgmtClient.Client
 	// TicketClient: A cached engine client, used to interact with the ticketing system
@@ -47,20 +46,12 @@ type Tenant struct {
 // part of this logic should include creating an Account for them, and that is
 // what's done here.
 //
-// Returns an error if a tenant with the same ID already exists or if a Synqly
+// Returns an error if a tenant with the same Name already exists or if a Synqly
 // Account cannot be created for the Tenant.
-func (a *App) NewTenant(ctx context.Context, id string) error {
-	matched, err := regexp.MatchString(`^[a-z_-]*[a-z][a-z_-]*$`, id)
-	if err != nil {
-		return fmt.Errorf("error validating tenant ID: %w", err)
-	}
-	if !matched {
-		return fmt.Errorf("invalid tenant ID: %v. Only letters, hyphens, and underscores are allowed", id)
-	}
-
+func (a *App) NewTenant(ctx context.Context, name string) error {
 	// Do not allow duplicate tenant names
-	if a.Tenant != nil && a.Tenant.ID == id {
-		return fmt.Errorf("duplicate tenant name %v", id)
+	if a.Tenant != nil && a.Tenant.Name == name {
+		return fmt.Errorf("duplicate tenant name %v", name)
 	}
 
 	// Create a Synqly Client that can be used to interact with the tenant
@@ -70,8 +61,8 @@ func (a *App) NewTenant(ctx context.Context, id string) error {
 	)
 
 	// Create a Synqly Account for this tenant
-	_, err = client.Accounts.Create(ctx, &mgmt.CreateAccountRequest{
-		Name: &id,
+	_, err := client.Accounts.Create(ctx, &mgmt.CreateAccountRequest{
+		Name: &name,
 	})
 	if err != nil {
 		return fmt.Errorf("unable to create account: %w", err)
@@ -79,7 +70,7 @@ func (a *App) NewTenant(ctx context.Context, id string) error {
 
 	// Store the Tenant and associated Synqly objects in an in-memory cache.
 	a.Tenant = &Tenant{
-		ID:           id,
+		Name:         name,
 		SynqlyClient: client,
 		TicketClient: nil,
 	}
@@ -102,8 +93,8 @@ func (app *App) cleanup() {
 	ctx := context.Background()
 
 	// Deleting the account will delete all credentials and integrations associated with the account.
-	if err := app.Tenant.SynqlyClient.Accounts.Delete(ctx, app.Tenant.ID); err != nil {
-		consoleLogger.Printf("Error deleting account %s: %s\n", app.Tenant.ID, err)
+	if err := app.Tenant.SynqlyClient.Accounts.Delete(ctx, app.Tenant.Name); err != nil {
+		consoleLogger.Printf("Error deleting account %s: %s\n", app.Tenant.Name, err)
 	}
 
 	os.Exit(0)
@@ -135,7 +126,7 @@ func (a *App) configureTicketing(ctx context.Context, ticketProviderType string)
 		return fmt.Errorf("invalid siem provider type: %s", ticketProviderType)
 	}
 
-	integration, err := a.Tenant.SynqlyClient.Integrations.Create(ctx, a.Tenant.ID, integrationReq)
+	integration, err := a.Tenant.SynqlyClient.Integrations.Create(ctx, a.Tenant.Name, integrationReq)
 	if err != nil {
 		return fmt.Errorf("unable to create integration: %w", err)
 	}
