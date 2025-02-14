@@ -58,7 +58,7 @@ The `siem-connector` example will:
 5. Run the example:
 
     ```bash
-    go run . 
+    go run main.go
     ```
 
 Exit the example by pressing `Ctrl+C`.
