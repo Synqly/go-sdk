@@ -6,7 +6,6 @@ import (
 	"log"
 	"os"
 	"os/signal"
-	"regexp"
 
 	"github.com/synqly/go-sdk/client/engine"
 	engineClient "github.com/synqly/go-sdk/client/engine/client"
@@ -31,12 +30,12 @@ func NewApp(config *Config) *App {
 // A Tenant object represents one of your customers, as well as the state you
 // would maintain for them in your application.
 type Tenant struct {
-	// ID: A unique identifier for one of your customers.
-	ID string
+	// Name: A unique identifier for one of your customers.
+	Name string
 	// SynqlyClient: A cached management client, used to manage Integrations.
 	SynqlyClient *mgmtClient.Client
-	// AssetMgmtClient: A cached engine client, used to interact with the asset management system.
-	AssetMgmtClient *engineClient.Client
+	// AssetMgmtClients: A cached engine clients, used to interact with the asset management system.
+	AssetMgmtClients map[string]*engineClient.Client
 }
 
 // NewTenant is used in a multi-tenant backend to create tenants. This would
@@ -46,18 +45,10 @@ type Tenant struct {
 //
 // Returns an error if a tenant with the same ID already exists or if a Synqly
 // Account cannot be created for the Tenant.
-func (a *App) NewTenant(ctx context.Context, id string) error {
-	matched, err := regexp.MatchString(`^[a-z_-]*[a-z][a-z_-]*$`, id)
-	if err != nil {
-		return fmt.Errorf("error validating tenant ID: %w", err)
-	}
-	if !matched {
-		return fmt.Errorf("invalid tenant ID: %v. Only letters, hyphens, and underscores are allowed", id)
-	}
-
+func (a *App) NewTenant(ctx context.Context, name string) error {
 	// Do not allow duplicate tenant names
-	if a.Tenant != nil && a.Tenant.ID == id {
-		return fmt.Errorf("duplicate tenant name %v", id)
+	if a.Tenant != nil && a.Tenant.Name == name {
+		return fmt.Errorf("duplicate tenant name %v", name)
 	}
 
 	// Create a Synqly Client that can be used to interact with the tenant
@@ -67,8 +58,8 @@ func (a *App) NewTenant(ctx context.Context, id string) error {
 	)
 
 	// Create a Synqly Account for this tenant
-	_, err = client.Accounts.Create(ctx, &mgmt.CreateAccountRequest{
-		Name: &id,
+	_, err := client.Accounts.Create(ctx, &mgmt.CreateAccountRequest{
+		Name: &name,
 	})
 	if err != nil {
 		return fmt.Errorf("unable to create account: %w", err)
@@ -76,18 +67,11 @@ func (a *App) NewTenant(ctx context.Context, id string) error {
 
 	// Store the Tenant and associated Synqly objects in an in-memory cache.
 	a.Tenant = &Tenant{
-		ID:              id,
-		SynqlyClient:    client,
-		AssetMgmtClient: nil,
+		Name:             name,
+		SynqlyClient:     client,
+		AssetMgmtClients: make(map[string]*engineClient.Client),
 	}
 	return nil
-}
-
-func (a *App) inmemConfig() *mgmt.CreateIntegrationRequest {
-	return &mgmt.CreateIntegrationRequest{
-		Fullname:       engine.String("In-Memory Connector"),
-		ProviderConfig: &mgmt.ProviderConfig{SiemMockSiem: &mgmt.SiemMock{}},
-	}
 }
 
 func (app *App) cleanup() {
@@ -99,58 +83,35 @@ func (app *App) cleanup() {
 	ctx := context.Background()
 
 	// Deleting the account will delete all credentials and integrations associated with the account.
-	if err := app.Tenant.SynqlyClient.Accounts.Delete(ctx, app.Tenant.ID); err != nil {
-		consoleLogger.Printf("Error deleting account %s: %s\n", app.Tenant.ID, err)
+	if err := app.Tenant.SynqlyClient.Accounts.Delete(ctx, app.Tenant.Name); err != nil {
+		consoleLogger.Printf("Error deleting account %s: %s\n", app.Tenant.Name, err)
 	}
 
 	os.Exit(0)
 }
 
-func (a *App) configureAssetManagement(ctx context.Context, assetProvider string) error {
-	var integrationReq *mgmt.CreateIntegrationRequest
-	switch assetProvider {
-	case "service-now":
-		integrationReq = &mgmt.CreateIntegrationRequest{
-			Fullname: engine.String("Asset Management Connector"),
-			ProviderConfig: &mgmt.ProviderConfig{
-				AssetsServicenow: &mgmt.AssetsServiceNow{
-					Url: a.Config.ServiceNowURL,
-					Credential: &mgmt.ServiceNowCredential{
-						Token: &mgmt.TokenCredential{
-							Secret: a.Config.ServiceNowTokenID,
-						},
-					},
-				},
-			},
-		}
-	case "armis":
-		integrationReq = &mgmt.CreateIntegrationRequest{
-			Fullname: engine.String("Asset Management Connector"),
-			ProviderConfig: &mgmt.ProviderConfig{
-				AssetsArmisCentrix: &mgmt.AssetsArmisCentrix{
-					Url: a.Config.ArmisURL,
-					Credential: &mgmt.ArmisCredential{
-						TokenId: a.Config.ArmisTokenID,
-					},
-				},
-			},
-		}
-	case "inmem":
-		integrationReq = a.inmemConfig()
-	default:
-		return fmt.Errorf("invalid asset management provider: %v", assetProvider)
-	}
+func (a *App) configureAssetManagementProviders(ctx context.Context) error {
+	for _, provider := range a.Config.ProviderConfigs {
+		if provider.IsConfigured() {
+			integrationReq := &mgmt.CreateIntegrationRequest{
+				Fullname:       engine.String(fmt.Sprintf("%s Connector", provider.Name())),
+				ProviderConfig: provider.ProviderConfig(),
+			}
 
-	// Create an Integration in Synqly for the Asset Management system
-	integration, err := a.Tenant.SynqlyClient.Integrations.Create(ctx, a.Tenant.ID, integrationReq)
-	if err != nil {
-		return fmt.Errorf("unable to create integration: %w", err)
-	}
+			// Create an Integration in Synqly for the Asset Management system
+			integration, err := a.Tenant.SynqlyClient.Integrations.Create(ctx, a.Tenant.Name, integrationReq)
+			if err != nil {
+				return fmt.Errorf("unable to create integration for %s: %w", provider.Name(), err)
+			}
 
-	// Store the Asset Management client in the Tenant cache
-	a.Tenant.AssetMgmtClient = engineClient.NewClient(
-		engineClient.WithToken(integration.Result.Token.Access.Secret),
-	)
+			client := engineClient.NewClient(
+				engineClient.WithToken(integration.Result.Token.Access.Secret),
+			)
+
+			// Store the Asset Management client in the Tenant cache
+			a.Tenant.AssetMgmtClients[provider.Name()] = client
+		}
+	}
 
 	return nil
 }
@@ -200,9 +161,6 @@ func main() {
 	if err != nil {
 		log.Fatal("cannot load config:", err)
 	}
-	if config.ServiceNowURL == "" || config.ServiceNowTokenID == "" {
-		log.Fatal("service-now URL and token ID are required")
-	}
 
 	app := NewApp(&config)
 
@@ -224,26 +182,31 @@ func main() {
 		log.Fatal(err)
 	}
 
-	err = app.configureAssetManagement(ctx, "service-now")
+	err = app.configureAssetManagementProviders(ctx)
 	if err != nil {
+		app.cleanup()
 		log.Fatal(err)
 	}
 
-	// Query devices
-	devices, err := getDevices(ctx, app.Tenant.AssetMgmtClient)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	for _, device := range devices {
-		consoleLogger.Printf("Device: %v\n", device)
-	}
-
-	// Create a device
-	if len(devices) > 0 {
-		err = createDevice(ctx, app.Tenant.AssetMgmtClient, devices[0])
+	// run for each provider configured
+	for providerName, assetClient := range app.Tenant.AssetMgmtClients {
+		consoleLogger.Printf("*** Executing for %s ***\n", providerName)
+		// Query devices
+		devices, err := getDevices(ctx, assetClient)
 		if err != nil {
-			log.Fatal(err)
+			consoleLogger.Printf("Provider: %s - %v", providerName, err)
+		}
+
+		for _, device := range devices {
+			consoleLogger.Printf("Device: %v\n", device)
+		}
+
+		// Create a device
+		if len(devices) > 0 {
+			err = createDevice(ctx, assetClient, devices[0])
+			if err != nil {
+				consoleLogger.Printf("Provider: %s - %v", providerName, err)
+			}
 		}
 	}
 }
