@@ -28,11 +28,13 @@ type provider interface {
 	configureIntegration(ctx context.Context, tenantID string, app *App) error
 }
 
+// Config model of the application
 type synqlyConfig struct {
 	SynqlyOrgToken  string `mapstructure:"SYNQLY_ORG_TOKEN"`
 	DurationSeconds string `mapstructure:"DURATION_SECONDS"`
 }
 
+// Config model of the providers for the application
 type splunkConfig struct {
 	SplunkHecUrl      string `mapstructure:"SPLUNK_HEC_URL"`
 	SplunkHecToken    string `mapstructure:"SPLUNK_HEC_TOKEN"`
@@ -40,6 +42,7 @@ type splunkConfig struct {
 	SplunkSearchToken string `mapstructure:"SPLUNK_SEARCH_TOKEN"`
 }
 
+// Config model of the providers for the application
 type sumoConfig struct {
 	SumoLogicCollectionUrl string `mapstructure:"SUMO_LOGIC_COLLECTION_URL"`
 	SumoLogicAccessId      string `mapstructure:"SUMO_LOGIC_ACCESS_ID"`
@@ -47,6 +50,45 @@ type sumoConfig struct {
 	SumoLogicUrl           string `mapstructure:"SUMO_LOGIC_URL"`
 }
 
+type mockConfig struct {
+}
+
+func (c *mockConfig) ProviderConfig(credentialId string) *mgmt.ProviderConfig {
+	return &mgmt.ProviderConfig{SiemMockSiem: &mgmt.SiemMock{}}
+}
+
+func (c *mockConfig) Validate() error {
+	return nil
+}
+
+func (c *mockConfig) configureIntegration(ctx context.Context, tenantID string, app *App) error {
+	// Find the tenant
+	var tenant *Tenant
+	for _, t := range app.Tenants {
+		if t.ID == tenantID {
+			tenant = t
+			break
+		}
+	}
+	if tenant == nil {
+		return fmt.Errorf("tenant not found")
+	}
+
+	integration, err := tenant.SynqlyClient.Integrations.Create(ctx, tenant.SynqlyAccountId, &mgmt.CreateIntegrationRequest{
+		Fullname:       mgmt.String("Event Logger and Query"),
+		ProviderConfig: c.ProviderConfig(""),
+	})
+	if err != nil {
+		return fmt.Errorf("unable to create integration: %w", err)
+	}
+
+	tenant.SynqlyEngineClient = engineClient.NewClient(
+		engineClient.WithToken(integration.Result.Token.Access.Secret),
+	)
+	return nil
+}
+
+// ProviderConfig returns the ProviderConfig for the given provider
 func (c *splunkConfig) ProviderConfig(credentialId string) *mgmt.ProviderConfig {
 	config := &mgmt.ProviderConfig{
 		SiemSplunk: &mgmt.SiemSplunk{
@@ -70,6 +112,7 @@ func (c *splunkConfig) ProviderConfig(credentialId string) *mgmt.ProviderConfig 
 	return config
 }
 
+// Validate checks if the required fields are set in the config file for the provider
 func (c *splunkConfig) Validate() error {
 	if c.SplunkHecUrl == "" || c.SplunkHecToken == "" || c.SplunkSearchUrl == "" || c.SplunkSearchToken == "" {
 		return errors.New("missing required Splunk configuration")
@@ -77,6 +120,7 @@ func (c *splunkConfig) Validate() error {
 	return nil
 }
 
+// configureIntegration initializes event logging for a Tenant.
 func (c *splunkConfig) configureIntegration(ctx context.Context, tenantID string, app *App) error {
 	// Find the tenant
 	var tenant *Tenant
@@ -120,22 +164,24 @@ func (c *splunkConfig) configureIntegration(ctx context.Context, tenantID string
 	return nil
 }
 
+// ProviderConfig returns the ProviderConfig for the given provider
 func (c *sumoConfig) ProviderConfig(credentialId string) *mgmt.ProviderConfig {
-	config := &mgmt.ProviderConfig{
+	return &mgmt.ProviderConfig{
 		SiemSumoLogic: &mgmt.SiemSumoLogic{
-			Credential: &mgmt.SumoLogicCredential{BasicId: credentialId},
-			Url:        c.SumoLogicUrl,
+			Credential: &mgmt.SumoLogicCredential{
+				Type:    "basic",
+				BasicId: c.SumoLogicAccessKey,
+				Basic: &mgmt.BasicCredential{
+					Username: c.SumoLogicAccessId,
+					Secret:   c.SumoLogicAccessKey},
+			},
+			Url: c.SumoLogicUrl,
+			CollectionUrl: &mgmt.SumoLogicCollectionUrl{
+				Secret: &mgmt.SecretCredential{Secret: c.SumoLogicCollectionUrl},
+				Type:   "secret",
+			},
 		},
 	}
-
-	withHec := c.SumoLogicCollectionUrl != ""
-
-	if withHec {
-		config.SiemSumoLogic.CollectionUrl = &mgmt.SumoLogicCollectionUrl{
-			Secret: &mgmt.SecretCredential{Secret: c.SumoLogicCollectionUrl},
-		}
-	}
-	return config
 }
 
 func (c *sumoConfig) configureIntegration(ctx context.Context, tenantID string, app *App) error {
@@ -152,20 +198,7 @@ func (c *sumoConfig) configureIntegration(ctx context.Context, tenantID string, 
 		return fmt.Errorf("tenant not found")
 	}
 
-	// Configure an Integration in Synqly depending on this tenant's config
-	credential, err := tenant.SynqlyClient.Credentials.Create(ctx, tenant.SynqlyAccountId, &mgmt.CreateCredentialRequest{
-		Fullname: mgmt.String(fmt.Sprintf("%s authentication token", "sumo")),
-		Config: &mgmt.CredentialConfig{
-			Token: &mgmt.TokenCredential{
-				Secret: c.SumoLogicAccessKey,
-			},
-		},
-	})
-	if err != nil {
-		return err
-	}
-
-	providerConfig := c.ProviderConfig(credential.Result.Id)
+	providerConfig := c.ProviderConfig("")
 
 	integration, err := tenant.SynqlyClient.Integrations.Create(ctx, tenant.SynqlyAccountId, &mgmt.CreateIntegrationRequest{
 		Fullname:       mgmt.String("Event Logger and Query"),
@@ -253,71 +286,6 @@ func (app *App) NewTenant(ctx context.Context, id string, synqlyOrgToken string)
 	})
 	return nil
 }
-
-// configureIntegration initializes event logging for a Tenant.
-// This example uses Splunk SIEM providers and mock SIEM provider as the event logging
-// providers; however, an Integration can be configured to target any supported provider type.
-// Stores the HEC_TOKEN as a secure Credential object, then creates a Splunk Integration
-// targeting SPLUNK_URL.
-// Stores the SEARCH_TOKEN as a secure Credential object, then creates a Splunk Integration
-// targeting SPLUNK_SEARCH_URL.
-//
-// Returns an error if the Tenant cannot be found, or if an Integration cannot
-// be created for the given Tenant.
-//func (app *App) configureIntegration(ctx context.Context, tenantID, siemProviderType string, p provider) error {
-//	// Find the tenant
-//	var tenant *Tenant
-//	for _, t := range app.Tenants {
-//		if t.ID == tenantID {
-//			tenant = t
-//			break
-//		}
-//	}
-//	if tenant == nil {
-//		return fmt.Errorf("tenant not found")
-//	}
-//
-//	// Configure an Integration in Synqly depending on this tenant's config
-//	var providerConfig *mgmt.ProviderConfig
-//	switch siemProviderType {
-//	case "splunk":
-//		// We need to save the tenant's Splunk credentials in Synqly before configuring the Integration
-//		// We will use the Synqly Client we created for the tenant to do this
-//		credential, err := tenant.SynqlyClient.Credentials.Create(ctx, tenant.SynqlyAccountId, &mgmt.CreateCredentialRequest{
-//			Fullname: mgmt.String(fmt.Sprintf("%s authentication token", siemProviderType)),
-//			Config: &mgmt.CredentialConfig{
-//				Token: &mgmt.TokenCredential{
-//					//	Secret: app.Config.splunkHecToken,
-//				},
-//			},
-//		})
-//		if err != nil {
-//			return err
-//		}
-//
-//		//providerConfig = app.splunkConfig(app.Config.splunkHecUrl, app.Config.splunkSearchUrl, credential.Result.Id, app.Config.splunkSearchToken)
-//
-//	case "inmem":
-//		providerConfig = app.inmemConfig()
-//
-//	default:
-//		return fmt.Errorf("invalid siem provider type: %s", siemProviderType)
-//	}
-//
-//	integration, err := tenant.SynqlyClient.Integrations.Create(ctx, tenant.SynqlyAccountId, &mgmt.CreateIntegrationRequest{
-//		Fullname:       mgmt.String("Event Logger and Query"),
-//		ProviderConfig: providerConfig,
-//	})
-//	if err != nil {
-//		return fmt.Errorf("unable to create integration: %w", err)
-//	}
-//
-//	tenant.SynqlyEngineClient = engineClient.NewClient(
-//		engineClient.WithToken(integration.Result.Token.Access.Secret),
-//	)
-//
-//	return nil
-//}
 
 // query performs a query against the SIEM provider for each tenant.
 func (app *App) query(ctx context.Context) error {
@@ -496,6 +464,7 @@ func main() {
 	synqlyConfig := synqlyConfig{}
 	splunkConfig := splunkConfig{}
 	sumoConfig := sumoConfig{}
+	mockConfig := mockConfig{}
 
 	// Load config variables from the env file
 	viper.AddConfigPath(".")
@@ -565,31 +534,29 @@ func main() {
 	}
 
 	// Create and configure Tenant DEF to use sumo SIEM event logging provider
-	//consoleLogger.Print("Creating Tenant DEF with sumo SIEM provider")
-	//if err := app.NewTenant(ctx, "Tenant DEF", synqlyConfig.SynqlyOrgToken); err != nil {
-	//	log.Fatal(err)
-	//}
-	//
-	//if err := sumoConfig.configureIntegration(ctx, "Tenant DEF", app); err != nil {
-	//	log.Fatal(err)
-	//}
-	//
-	//if err := sumoConfig.configureIntegration(ctx, "Tenant DEF", app); err != nil {
-	//	log.Fatal(err)
-	//}
+	consoleLogger.Print("Creating Tenant DEF with sumo SIEM provider")
+	if err := app.NewTenant(ctx, "Tenant DEF", synqlyConfig.SynqlyOrgToken); err != nil {
+		log.Fatal(err)
+	}
+
+	if err := sumoConfig.configureIntegration(ctx, "Tenant DEF", app); err != nil {
+		fmt.Println(err)
+		app.cleanup()
+		log.Fatal(err)
+	}
 
 	// Create and configure Tenant XYZ to use mock SIEM event logging provider
-	//	consoleLogger.Print("Creating Tenant XYZ with mock SIEM provider")
-	//	if err := app.NewTenant(ctx, "Tenant XYZ", synqlyConfig.synqlyOrgToken); err != nil {
-	//		log.Fatal(err)
-	//	}
-	//	if err := app.configureIntegration(ctx, "Tenant XYZ", "inmem"); err != nil {
-	//		log.Fatal(err)
-	//	}
+	consoleLogger.Print("Creating Tenant XYZ with mock SIEM provider")
+	if err := app.NewTenant(ctx, "Tenant XYZ", synqlyConfig.SynqlyOrgToken); err != nil {
+		log.Fatal(err)
+	}
+	if err := mockConfig.configureIntegration(ctx, "Tenant XYZ", app); err != nil {
+		log.Fatal(err)
+	}
 
 	// Query the SIEM provider for each tenant
 	go func() {
-		ticker := time.NewTicker(30 * time.Second)
+		ticker := time.NewTicker(10 * time.Second)
 		defer ticker.Stop()
 		for {
 			select {
