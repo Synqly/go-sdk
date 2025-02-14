@@ -1,11 +1,11 @@
-# SIEM Connector Example
+# Sentinel Connector Example
 
-This section acts as supporting documentation for the sample program in `examples/siem-connector`. The `siem-connector` example demonstrates how to use the Synqly's SIEM Connector to send events to a SIEM Provider from within a multi-tenant application. 
+This section acts as supporting documentation for the sample program in `examples/sentinel-connector`. The `sentinel-connector` example demonstrates how to use the Synqly's Sentinel connector to send events to a Sentinel Provider from within a multi-tenant application. 
 
-The `siem-connector` example will:
+The `sentinel-connector` example will:
 
 - Define multiple tenants in a sample application
-- Define an `Integration` for each tenant (using Splunk as the target SIEM Provider)
+- Define an `Integration` for each tenant (using Azure as the target Sentinel Provider)
 - Run a background job to simulate load for each tenant
 - Send events from the background job to Synqly
 - Demonstrate that events are sent in OCSF format and transformed by Synqly before
@@ -16,14 +16,15 @@ The `siem-connector` example will:
 - A [Synqly](https://synqly.com) `Organization`
 - Your Synqly Organization ID and API Token
 - Go 1.20 or later
-- A Splunk account -- [sign up for a free trial](https://www.splunk.com/en_us/download.html)
-- A Splunk HTTP Event Collector (HEC) endpoint and API token -- [create a new HEC token](https://docs.splunk.com/Documentation/Splunk/8.1.3/Data/UsetheHTTPEventCollector#Create_an_Event_Collector_token)
+- An Azure account -- [sign up for a free trial](https://azure.microsoft.com/en-us/pricing/purchase-options/azure-account)
+- Create data collection rules (DCRs) in Azure Monitor -- [create a new DCR](https://learn.microsoft.com/en-us/azure/azure-monitor/essentials/data-collection-rule-create-edit?tabs=cli#create-or-edit-a-dcr-using-the-azure-portal)
 
 ## Setup and run the example
 
-1. Clone this repository and navigate to the `examples/siem-connector` directory.
+1. Clone this repository and navigate to the `examples/sentinel-example` directory.
     ```bash
-    cd examples/siem-connector
+    cd examples/sentinel-example
+   
     ```
 2. Initialize go modules (this will also verify access that `go` can pull from
    this repository). 
