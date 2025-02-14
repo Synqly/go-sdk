@@ -4,33 +4,44 @@ import (
 	"flag"
 	"log"
 
-	"vulnerabilities-connector/app"
+	appM "vulnerabilities-connector/app"
 )
 
 func main() {
-	var provider app.VulnerabilitiesConnectorProvider
-	strProvider := flag.String("provider", "", "Provider to use for the example")
+	strProvider := flag.String("provider", "ALL", "Provider to use for the example")
 	flag.Parse()
 
-	switch *strProvider {
-	case string(app.CROUD_STRIKE):
-		provider = app.CROUD_STRIKE
-	case string(app.NUCLEUS):
-		provider = app.NUCLEUS
-	case string(app.QUALYS):
-		provider = app.QUALYS
-	case string(app.RAPID7):
-		provider = app.RAPID7
-	case string(app.TANIUM):
-		provider = app.TANIUM
-	case string(app.TENABLE):
-		provider = app.TENABLE
-	default:
-		log.Fatalf("Please provide a valid provider: %s, %s, %s, %s or %s", app.CROUD_STRIKE, app.QUALYS, app.RAPID7, app.TANIUM, app.TENABLE)
+	var providers []appM.VulnerabilitiesConnectorProvider = []appM.VulnerabilitiesConnectorProvider{
+		appM.CROUD_STRIKE,
+		appM.NUCLEUS,
+		appM.QUALYS,
+		appM.RAPID7,
+		appM.TANIUM,
+		appM.TENABLE,
 	}
 
-	app := app.VulnerabilitiesConnector{}
-	app.Initialize(provider)
+	if *strProvider != "ALL" {
+		providers = []appM.VulnerabilitiesConnectorProvider{}
 
+		switch *strProvider {
+		case string(appM.CROUD_STRIKE):
+			providers = append(providers, appM.CROUD_STRIKE)
+		case string(appM.NUCLEUS):
+			providers = append(providers, appM.NUCLEUS)
+		case string(appM.QUALYS):
+			providers = append(providers, appM.QUALYS)
+		case string(appM.RAPID7):
+			providers = append(providers, appM.RAPID7)
+		case string(appM.TANIUM):
+			providers = append(providers, appM.TANIUM)
+		case string(appM.TENABLE):
+			providers = append(providers, appM.TENABLE)
+		default:
+			log.Fatalf("Please provide a valid provider: %s, %s, %s, %s, %s or %s", appM.CROUD_STRIKE, appM.NUCLEUS, appM.QUALYS, appM.RAPID7, appM.TANIUM, appM.TENABLE)
+		}
+	}
+
+	app := appM.VulnerabilitiesConnector{}
+	app.Initialize(providers)
 	app.Run()
 }
