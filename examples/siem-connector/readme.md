@@ -30,7 +30,7 @@ The `siem-connector` example will:
    ```bash
    go mod tidy
    ```
-3. The example could be setup it with environment variables or completing the config.env file to connect to Synqly and Splunk. To allow the sample program to connect to Synqly, set the following environment variables to your Organization ID and API Token values.
+3. The example depends on environment variables to connect to Synqly and Splunk. To allow the sample program to connect to Synqly, set the following environment variables to your Organization ID and API Token values.
 
     ```bash
     export SYNQLY_ORG_TOKEN=your-api-token
@@ -42,18 +42,6 @@ The `siem-connector` example will:
     export SPLUNK_URL=https://my-org.splunkcloud.com:8088/services/collector/event
     export SPLUNK_HEC_TOKEN=my-splunk-token
     ```
-
-   Alternatively, you can create a `config.env` file in the `examples/siem-connector` directory with the following content:
-
-    ```bash
-   SYNQLY_ORG_TOKEN=<synqly_org_token>
-   SPLUNK_HEC_URL=<splunk_hec_url>
-   SPLUNK_HEC_TOKEN=<splunk_hec_token>
-   SPLUNK_SEARCH_URL=<splunk_search_url>
-   SPLUNK_SEARCH_TOKEN=<splunk_search_token>
-   DURATION_SECONDS=600
-   ```
-
 
 5. Run the example:
 
