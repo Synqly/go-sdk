@@ -18,11 +18,15 @@ import (
 	scheduledjobactivity "github.com/synqly/go-sdk/client/engine/ocsf/v110/scheduledjobactivity"
 	securityfinding "github.com/synqly/go-sdk/client/engine/ocsf/v110/securityfinding"
 	webresourceaccessactivity "github.com/synqly/go-sdk/client/engine/ocsf/v110/webresourceaccessactivity"
+	authorizesession "github.com/synqly/go-sdk/client/engine/ocsf/v130/authorizesession"
+	baseevent "github.com/synqly/go-sdk/client/engine/ocsf/v130/baseevent"
 	configstate "github.com/synqly/go-sdk/client/engine/ocsf/v130/configstate"
 	detectionfinding "github.com/synqly/go-sdk/client/engine/ocsf/v130/detectionfinding"
 	incidentfinding "github.com/synqly/go-sdk/client/engine/ocsf/v130/incidentfinding"
 	inventoryinfo "github.com/synqly/go-sdk/client/engine/ocsf/v130/inventoryinfo"
+	scanactivity "github.com/synqly/go-sdk/client/engine/ocsf/v130/scanactivity"
 	softwareinfo "github.com/synqly/go-sdk/client/engine/ocsf/v130/softwareinfo"
+	useraccessmanagement "github.com/synqly/go-sdk/client/engine/ocsf/v130/useraccessmanagement"
 	vulnerabilityfinding "github.com/synqly/go-sdk/client/engine/ocsf/v130/vulnerabilityfinding"
 	time "time"
 )
@@ -141,10 +145,11 @@ func (b *BaseResourceRequest) String() string {
 }
 
 type ErrorBody struct {
-	Status     int           `json:"status" url:"status"`
-	Message    *string       `json:"message,omitempty" url:"message,omitempty"`
-	Errors     []string      `json:"errors,omitempty" url:"errors,omitempty"`
-	Parameters []*ErrorParam `json:"parameters,omitempty" url:"parameters,omitempty"`
+	Status     int                    `json:"status" url:"status"`
+	Message    *string                `json:"message,omitempty" url:"message,omitempty"`
+	Errors     []string               `json:"errors,omitempty" url:"errors,omitempty"`
+	Parameters []*ErrorParam          `json:"parameters,omitempty" url:"parameters,omitempty"`
+	Context    map[string]interface{} `json:"context,omitempty" url:"context,omitempty"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
@@ -557,17 +562,23 @@ type Event struct {
 	AccountChange             *accountchange.AccountChange
 	ApiActivity               *apiactivity.ApiActivity
 	Authentication            *authentication.Authentication
+	AuthorizeSession          *authorizesession.AuthorizeSession
+	BaseEvent                 *baseevent.BaseEvent
 	ComplianceFinding         *compliancefinding.ComplianceFinding
+	DeviceConfigState         *configstate.ConfigState
 	DetectionFinding          *detectionfinding.DetectionFinding
-	FileActivity              *fileactivity.FileActivity
+	FileSystemActivity        *fileactivity.FileActivity
 	GroupManagement           *groupmanagement.GroupManagement
 	IncidentFinding           *incidentfinding.IncidentFinding
-	InventoryInfo             *inventoryinfo.InventoryInfo
+	DeviceInventoryInfo       *inventoryinfo.InventoryInfo
 	ModuleActivity            *moduleactivity.ModuleActivity
 	NetworkActivity           *networkactivity.NetworkActivity
 	ProcessActivity           *processactivity.ProcessActivity
+	ScanActivity              *scanactivity.ScanActivity
 	ScheduledJobActivity      *scheduledjobactivity.ScheduledJobActivity
 	SecurityFinding           *securityfinding.SecurityFinding
+	SoftwareInfo              *softwareinfo.SoftwareInfo
+	UserAccessManagement      *useraccessmanagement.UserAccess
 	VulnerabilityFinding      *vulnerabilityfinding.VulnerabilityFinding
 	WebResourceAccessActivity *webresourceaccessactivity.WebResourceAccessActivity
 }
@@ -602,24 +613,42 @@ func (e *Event) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		e.Authentication = value
+	case "Authorize Session":
+		value := new(authorizesession.AuthorizeSession)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.AuthorizeSession = value
+	case "Base Event":
+		value := new(baseevent.BaseEvent)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.BaseEvent = value
 	case "Compliance Finding":
 		value := new(compliancefinding.ComplianceFinding)
 		if err := json.Unmarshal(data, &value); err != nil {
 			return err
 		}
 		e.ComplianceFinding = value
+	case "Device Config State":
+		value := new(configstate.ConfigState)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.DeviceConfigState = value
 	case "Detection Finding":
 		value := new(detectionfinding.DetectionFinding)
 		if err := json.Unmarshal(data, &value); err != nil {
 			return err
 		}
 		e.DetectionFinding = value
-	case "File Activity":
+	case "File System Activity":
 		value := new(fileactivity.FileActivity)
 		if err := json.Unmarshal(data, &value); err != nil {
 			return err
 		}
-		e.FileActivity = value
+		e.FileSystemActivity = value
 	case "Group Management":
 		value := new(groupmanagement.GroupManagement)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -632,12 +661,12 @@ func (e *Event) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		e.IncidentFinding = value
-	case "Inventory Info":
+	case "Device Inventory Info":
 		value := new(inventoryinfo.InventoryInfo)
 		if err := json.Unmarshal(data, &value); err != nil {
 			return err
 		}
-		e.InventoryInfo = value
+		e.DeviceInventoryInfo = value
 	case "Module Activity":
 		value := new(moduleactivity.ModuleActivity)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -656,6 +685,12 @@ func (e *Event) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		e.ProcessActivity = value
+	case "Scan Activity":
+		value := new(scanactivity.ScanActivity)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.ScanActivity = value
 	case "Scheduled Job Activity":
 		value := new(scheduledjobactivity.ScheduledJobActivity)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -668,6 +703,18 @@ func (e *Event) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		e.SecurityFinding = value
+	case "Software Info":
+		value := new(softwareinfo.SoftwareInfo)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.SoftwareInfo = value
+	case "User Access Management":
+		value := new(useraccessmanagement.UserAccess)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.UserAccessManagement = value
 	case "Vulnerability Finding":
 		value := new(vulnerabilityfinding.VulnerabilityFinding)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -694,14 +741,23 @@ func (e Event) MarshalJSON() ([]byte, error) {
 	if e.Authentication != nil {
 		return core.MarshalJSONWithExtraProperty(e.Authentication, "class_name", "Authentication")
 	}
+	if e.AuthorizeSession != nil {
+		return core.MarshalJSONWithExtraProperty(e.AuthorizeSession, "class_name", "Authorize Session")
+	}
+	if e.BaseEvent != nil {
+		return core.MarshalJSONWithExtraProperty(e.BaseEvent, "class_name", "Base Event")
+	}
 	if e.ComplianceFinding != nil {
 		return core.MarshalJSONWithExtraProperty(e.ComplianceFinding, "class_name", "Compliance Finding")
+	}
+	if e.DeviceConfigState != nil {
+		return core.MarshalJSONWithExtraProperty(e.DeviceConfigState, "class_name", "Device Config State")
 	}
 	if e.DetectionFinding != nil {
 		return core.MarshalJSONWithExtraProperty(e.DetectionFinding, "class_name", "Detection Finding")
 	}
-	if e.FileActivity != nil {
-		return core.MarshalJSONWithExtraProperty(e.FileActivity, "class_name", "File Activity")
+	if e.FileSystemActivity != nil {
+		return core.MarshalJSONWithExtraProperty(e.FileSystemActivity, "class_name", "File System Activity")
 	}
 	if e.GroupManagement != nil {
 		return core.MarshalJSONWithExtraProperty(e.GroupManagement, "class_name", "Group Management")
@@ -709,8 +765,8 @@ func (e Event) MarshalJSON() ([]byte, error) {
 	if e.IncidentFinding != nil {
 		return core.MarshalJSONWithExtraProperty(e.IncidentFinding, "class_name", "Incident Finding")
 	}
-	if e.InventoryInfo != nil {
-		return core.MarshalJSONWithExtraProperty(e.InventoryInfo, "class_name", "Inventory Info")
+	if e.DeviceInventoryInfo != nil {
+		return core.MarshalJSONWithExtraProperty(e.DeviceInventoryInfo, "class_name", "Device Inventory Info")
 	}
 	if e.ModuleActivity != nil {
 		return core.MarshalJSONWithExtraProperty(e.ModuleActivity, "class_name", "Module Activity")
@@ -721,11 +777,20 @@ func (e Event) MarshalJSON() ([]byte, error) {
 	if e.ProcessActivity != nil {
 		return core.MarshalJSONWithExtraProperty(e.ProcessActivity, "class_name", "Process Activity")
 	}
+	if e.ScanActivity != nil {
+		return core.MarshalJSONWithExtraProperty(e.ScanActivity, "class_name", "Scan Activity")
+	}
 	if e.ScheduledJobActivity != nil {
 		return core.MarshalJSONWithExtraProperty(e.ScheduledJobActivity, "class_name", "Scheduled Job Activity")
 	}
 	if e.SecurityFinding != nil {
 		return core.MarshalJSONWithExtraProperty(e.SecurityFinding, "class_name", "Security Finding")
+	}
+	if e.SoftwareInfo != nil {
+		return core.MarshalJSONWithExtraProperty(e.SoftwareInfo, "class_name", "Software Info")
+	}
+	if e.UserAccessManagement != nil {
+		return core.MarshalJSONWithExtraProperty(e.UserAccessManagement, "class_name", "User Access Management")
 	}
 	if e.VulnerabilityFinding != nil {
 		return core.MarshalJSONWithExtraProperty(e.VulnerabilityFinding, "class_name", "Vulnerability Finding")
@@ -740,17 +805,23 @@ type EventVisitor interface {
 	VisitAccountChange(*accountchange.AccountChange) error
 	VisitApiActivity(*apiactivity.ApiActivity) error
 	VisitAuthentication(*authentication.Authentication) error
+	VisitAuthorizeSession(*authorizesession.AuthorizeSession) error
+	VisitBaseEvent(*baseevent.BaseEvent) error
 	VisitComplianceFinding(*compliancefinding.ComplianceFinding) error
+	VisitDeviceConfigState(*configstate.ConfigState) error
 	VisitDetectionFinding(*detectionfinding.DetectionFinding) error
-	VisitFileActivity(*fileactivity.FileActivity) error
+	VisitFileSystemActivity(*fileactivity.FileActivity) error
 	VisitGroupManagement(*groupmanagement.GroupManagement) error
 	VisitIncidentFinding(*incidentfinding.IncidentFinding) error
-	VisitInventoryInfo(*inventoryinfo.InventoryInfo) error
+	VisitDeviceInventoryInfo(*inventoryinfo.InventoryInfo) error
 	VisitModuleActivity(*moduleactivity.ModuleActivity) error
 	VisitNetworkActivity(*networkactivity.NetworkActivity) error
 	VisitProcessActivity(*processactivity.ProcessActivity) error
+	VisitScanActivity(*scanactivity.ScanActivity) error
 	VisitScheduledJobActivity(*scheduledjobactivity.ScheduledJobActivity) error
 	VisitSecurityFinding(*securityfinding.SecurityFinding) error
+	VisitSoftwareInfo(*softwareinfo.SoftwareInfo) error
+	VisitUserAccessManagement(*useraccessmanagement.UserAccess) error
 	VisitVulnerabilityFinding(*vulnerabilityfinding.VulnerabilityFinding) error
 	VisitWebResourceAccessActivity(*webresourceaccessactivity.WebResourceAccessActivity) error
 }
@@ -765,14 +836,23 @@ func (e *Event) Accept(visitor EventVisitor) error {
 	if e.Authentication != nil {
 		return visitor.VisitAuthentication(e.Authentication)
 	}
+	if e.AuthorizeSession != nil {
+		return visitor.VisitAuthorizeSession(e.AuthorizeSession)
+	}
+	if e.BaseEvent != nil {
+		return visitor.VisitBaseEvent(e.BaseEvent)
+	}
 	if e.ComplianceFinding != nil {
 		return visitor.VisitComplianceFinding(e.ComplianceFinding)
+	}
+	if e.DeviceConfigState != nil {
+		return visitor.VisitDeviceConfigState(e.DeviceConfigState)
 	}
 	if e.DetectionFinding != nil {
 		return visitor.VisitDetectionFinding(e.DetectionFinding)
 	}
-	if e.FileActivity != nil {
-		return visitor.VisitFileActivity(e.FileActivity)
+	if e.FileSystemActivity != nil {
+		return visitor.VisitFileSystemActivity(e.FileSystemActivity)
 	}
 	if e.GroupManagement != nil {
 		return visitor.VisitGroupManagement(e.GroupManagement)
@@ -780,8 +860,8 @@ func (e *Event) Accept(visitor EventVisitor) error {
 	if e.IncidentFinding != nil {
 		return visitor.VisitIncidentFinding(e.IncidentFinding)
 	}
-	if e.InventoryInfo != nil {
-		return visitor.VisitInventoryInfo(e.InventoryInfo)
+	if e.DeviceInventoryInfo != nil {
+		return visitor.VisitDeviceInventoryInfo(e.DeviceInventoryInfo)
 	}
 	if e.ModuleActivity != nil {
 		return visitor.VisitModuleActivity(e.ModuleActivity)
@@ -792,11 +872,20 @@ func (e *Event) Accept(visitor EventVisitor) error {
 	if e.ProcessActivity != nil {
 		return visitor.VisitProcessActivity(e.ProcessActivity)
 	}
+	if e.ScanActivity != nil {
+		return visitor.VisitScanActivity(e.ScanActivity)
+	}
 	if e.ScheduledJobActivity != nil {
 		return visitor.VisitScheduledJobActivity(e.ScheduledJobActivity)
 	}
 	if e.SecurityFinding != nil {
 		return visitor.VisitSecurityFinding(e.SecurityFinding)
+	}
+	if e.SoftwareInfo != nil {
+		return visitor.VisitSoftwareInfo(e.SoftwareInfo)
+	}
+	if e.UserAccessManagement != nil {
+		return visitor.VisitUserAccessManagement(e.UserAccessManagement)
 	}
 	if e.VulnerabilityFinding != nil {
 		return visitor.VisitVulnerabilityFinding(e.VulnerabilityFinding)
@@ -2134,11 +2223,16 @@ func (u *User) String() string {
 type VulnerabilitySeverityFilterValue string
 
 const (
+	// Action is required immediately and the scope is broad.
 	VulnerabilitySeverityFilterValueCritical VulnerabilitySeverityFilterValue = "critical"
-	VulnerabilitySeverityFilterValueHigh     VulnerabilitySeverityFilterValue = "high"
-	VulnerabilitySeverityFilterValueMedium   VulnerabilitySeverityFilterValue = "medium"
-	VulnerabilitySeverityFilterValueLow      VulnerabilitySeverityFilterValue = "low"
-	VulnerabilitySeverityFilterValueInfo     VulnerabilitySeverityFilterValue = "info"
+	// Action is required immediately.
+	VulnerabilitySeverityFilterValueHigh VulnerabilitySeverityFilterValue = "high"
+	// Action is required but the situation is not serious at this time.
+	VulnerabilitySeverityFilterValueMedium VulnerabilitySeverityFilterValue = "medium"
+	// The user decides if action is needed.
+	VulnerabilitySeverityFilterValueLow VulnerabilitySeverityFilterValue = "low"
+	// Informational message. No action required.
+	VulnerabilitySeverityFilterValueInfo VulnerabilitySeverityFilterValue = "info"
 )
 
 func NewVulnerabilitySeverityFilterValueFromString(s string) (VulnerabilitySeverityFilterValue, error) {

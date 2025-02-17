@@ -7,6 +7,7 @@ import (
 	fmt "fmt"
 	core "github.com/synqly/go-sdk/client/engine/core"
 	scanactivity "github.com/synqly/go-sdk/client/engine/ocsf/v110/scanactivity"
+	securityfinding "github.com/synqly/go-sdk/client/engine/ocsf/v110/securityfinding"
 	inventoryinfo "github.com/synqly/go-sdk/client/engine/ocsf/v130/inventoryinfo"
 )
 
@@ -385,6 +386,7 @@ func (q *QueryScansResponse) String() string {
 }
 
 type UpdateFindingRequest struct {
+	SeverityId securityfinding.SeverityId `json:"severity_id" url:"severity_id"`
 	// serverity of the finding
 	Severity *VulnerabilitySeverityFilterValue `json:"severity,omitempty" url:"severity,omitempty"`
 	// state of the finding
