@@ -34,7 +34,7 @@ type synqlyConfig struct {
 	DurationSeconds string `mapstructure:"DURATION_SECONDS"`
 }
 
-// Config model of the providers for the application
+// Config splunk model of the providers for the application
 type splunkConfig struct {
 	SplunkHecUrl      string `mapstructure:"SPLUNK_HEC_URL"`
 	SplunkHecToken    string `mapstructure:"SPLUNK_HEC_TOKEN"`
@@ -42,7 +42,7 @@ type splunkConfig struct {
 	SplunkSearchToken string `mapstructure:"SPLUNK_SEARCH_TOKEN"`
 }
 
-// Config model of the providers for the application
+// Config Sumo Logic model of the providers for the application
 type sumoConfig struct {
 	SumoLogicCollectionUrl string `mapstructure:"SUMO_LOGIC_COLLECTION_URL"`
 	SumoLogicAccessId      string `mapstructure:"SUMO_LOGIC_ACCESS_ID"`
