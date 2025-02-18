@@ -4,93 +4,124 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io/fs"
 	"log"
 	"os"
 
 	"github.com/synqly/go-sdk/client/engine"
-	"github.com/synqly/go-sdk/examples/common"
 
 	engineClient "github.com/synqly/go-sdk/client/engine/client"
 	mgmt "github.com/synqly/go-sdk/client/management"
+	mgmtClient "github.com/synqly/go-sdk/client/management/client"
 )
 
 type VulnerabilitiesConnector struct {
-	Config                  *Configuration
-	Logger                  *log.Logger
-	Providers               []VulnerabilitiesConnectorProvider
-	Tenants                 map[VulnerabilitiesConnectorProvider]*common.Tenant
-	VulnerabilitiesProvider map[VulnerabilitiesConnectorProvider]*mgmt.CreateIntegrationRequest
+	Config    *Configuration
+	Logger    *log.Logger
+	Providers []ProviderConfiguration
 }
 
-func (v *VulnerabilitiesConnector) Run() {
-	v.Logger.Printf("Using %+v as vulnerability provider\n", v.Providers)
+func NewVulnerabilitiesConnector() *VulnerabilitiesConnector {
+	vulnerabilitiesConnector := VulnerabilitiesConnector{}
+	vulnerabilitiesConnector.Initialize()
 
-	ctx := context.Background()
+	return &vulnerabilitiesConnector
+}
 
-	for _, provider := range v.Providers {
-		if tenant, ok := v.Tenants[provider]; ok {
-			client := tenant.Synqly.EngineClients["vulnerabilities"]
+func (v *VulnerabilitiesConnector) CleanUp() {
+	/*ctx := context.Background()
+	client := mgmtClient.NewClient(mgmtClient.WithToken(v.Config.SynqlyOrgToken))
+	allAccounts, err := client.Accounts.List(ctx, &mgmt.ListAccountsRequest{
+		Filter: []*string{engine.String("name[like]zenith-systems - *")},
+	})
+	if err != nil {
+		v.Logger.Printf("Error checking account IDs: %s\n", err.Error())
+	}
 
-			if vulnerabilityProvider, ok := v.VulnerabilitiesProvider[provider]; ok {
-				v.QueryAssets(ctx, client, vulnerabilityProvider)
-				v.QueryFindings(ctx, client, vulnerabilityProvider)
-				v.QueryScans(ctx, client, vulnerabilityProvider)
+	for _, a := range allAccounts.Result {
+		err := client.Accounts.Delete(ctx, a.Id)
+		if err != nil {
+			v.Logger.Printf("Error deleting '%s' account, please do it manually: %s\n", a.Name, err.Error())
+		}
+	}*/
+
+	v.Logger.Println("CleanUp started...")
+
+	client := mgmtClient.NewClient(mgmtClient.WithToken(v.Config.SynqlyOrgToken))
+
+	if client != nil {
+		ctx := context.Background()
+
+		allAccounts, err := client.Accounts.List(ctx, &mgmt.ListAccountsRequest{
+			Filter: []*string{engine.String("name[like]zenith-systems - *")},
+		})
+		if err != nil {
+			v.Logger.Printf("Error checking account IDs: %s\n", err.Error())
+		}
+
+		getAccountId := func(fullName string) (string, error) {
+			for _, account := range allAccounts.Result {
+				if account.Fullname == fullName {
+					return account.Id, nil
+				}
 			}
+
+			return "", fmt.Errorf("account ID for '%s' not found", fullName)
+		}
+
+		for _, p := range v.Providers {
+			accountID, err := getAccountId(p.AccountName)
+			if err != nil {
+				v.Logger.Printf("Error getting account '%s' ID, please delete account manually: %s\n", p.AccountName, err.Error())
+				continue
+			}
+
+			err = client.Accounts.Delete(ctx, accountID)
+			if err != nil {
+				v.Logger.Printf("Error deleting '%s' account, please do it manually: %s\n", p.AccountName, err.Error())
+				continue
+			}
+
+			v.Logger.Printf("Accound '%s' deleted...\n", p.AccountName)
+		}
+
+		err = os.RemoveAll("./tenant_config_files")
+		if err != nil {
+			v.Logger.Printf("Error deleting 'tenant_config_files' folder, please do it manually: %s\n", err.Error())
 		}
 	}
+
+	v.Logger.Println("CleanUp finished successfully")
 }
 
-func (v *VulnerabilitiesConnector) Initialize(providers []VulnerabilitiesConnectorProvider) {
-	// Config
-	v.Config = InitConfig()
-	v.Tenants = map[VulnerabilitiesConnectorProvider]*common.Tenant{}
-	v.VulnerabilitiesProvider = map[VulnerabilitiesConnectorProvider]*mgmt.CreateIntegrationRequest{}
+func (v *VulnerabilitiesConnector) Initialize() {
+	// Tenants Config Folder
+	_, err := os.Stat("./tenant_config_files")
+	if err != nil && errors.Is(err, fs.ErrNotExist) {
+		os.Mkdir("./tenant_config_files", 0700)
+	}
 
-	// Logger
+	// Init
+	v.Config = InitConfig()
+	v.Providers = []ProviderConfiguration{}
+
 	log.SetFlags(log.Llongfile | log.Ldate | log.Ltime)
 	v.Logger = log.New(os.Stdout, "INFO: ", log.Ldate|log.Ltime)
 
-	// Vulnerabilities Provider
-	v.Providers = providers
+	// Providers
+	v.Providers = v.buildVulnerabilityProvidersConfig()
 
-	for _, provider := range v.Providers {
-		vulnProvider, err := v.buildVulnerabilityProviderConfig(provider)
-		if err != nil {
-			log.Printf("Error building %s config: %s", provider, err.Error())
-			continue
-		}
-
-		tenantId := fmt.Sprintf("Zenith Systems - %s", provider)
-		configFilePath := fmt.Sprintf("tenant_store_%s.yaml", provider)
-
-		ctx := context.Background()
-		t, err := common.NewTenant(ctx, tenantId, configFilePath, v.Config.SynqlyOrgToken, map[mgmt.CategoryId]*mgmt.CreateIntegrationRequest{
-			mgmt.CategoryIdVulnerabilities: vulnProvider,
-		})
-		if err != nil {
-			log.Printf("Error creating the Tenant for %s: %s", provider, err.Error())
-			continue
-		}
-
-		v.VulnerabilitiesProvider[provider] = vulnProvider
-		v.Tenants[provider] = t
-	}
-
-	v.Logger.Printf("Example initialized successfully")
+	v.Logger.Println("Example initialized...")
 }
 
 func (v *VulnerabilitiesConnector) QueryAssets(ctx context.Context, client *engineClient.Client, provider *mgmt.CreateIntegrationRequest) {
 	filter := []*string{}
 
-	if provider.ProviderConfig.Type != string(NUCLEUS) {
-		filter = append(filter, engine.String("device.last_seen_time[gte]2024-09-01T00:00:00Z"))
-	}
-
 	assets, err := client.Vulnerabilities.QueryAssets(ctx, &engine.QueryAssetsRequest{
 		Filter: filter,
 	})
 	if err != nil {
-		log.Printf("Error executing QueryAssets for %s provider: %s", provider, err.Error())
+		v.Logger.Printf("Error executing QueryAssets for %s provider: %s\n", provider, err.Error())
 		return
 	}
 	v.Logger.Printf("Found %d security assets from %s\n", len(assets.Result), provider.ProviderConfig.Type)
@@ -101,19 +132,11 @@ func (v *VulnerabilitiesConnector) QueryFindings(ctx context.Context, client *en
 		engine.String("severity[in]Critical"),
 	}
 
-	if provider.ProviderConfig.Type != string(NUCLEUS) {
-		filter = append(filter, engine.String("finding.last_seen_time[gte]2024-09-01T00:00:00Z"))
-	}
-
-	if provider.ProviderConfig.Type == string(TENABLE) {
-		filter = append(filter, engine.String("state[in]New"))
-	}
-
 	findings, err := client.Vulnerabilities.QueryFindings(ctx, &engine.QueryFindingsRequest{
 		Filter: filter,
 	})
 	if err != nil {
-		log.Printf("Error executing QueryFindings for %s provider: %s", provider, err.Error())
+		v.Logger.Printf("Error executing QueryFindings for %s provider: %s\n", provider, err.Error())
 		return
 	}
 	v.Logger.Printf("Found %d security findings from %s\n", len(findings.Result), provider.ProviderConfig.Type)
@@ -124,153 +147,174 @@ func (v *VulnerabilitiesConnector) QueryScans(ctx context.Context, client *engin
 
 	assets, err := client.Vulnerabilities.QueryScans(ctx, &engine.QueryScansRequest{})
 	if err != nil && !errors.As(err, &e) {
-		log.Printf("Error executing QueryScans for %s provider: %s", provider, err.Error())
+		v.Logger.Printf("Error executing QueryScans for %s provider: %s\n", provider, err.Error())
+		return
+	} else if errors.As(err, &e) {
+		// not all providers support the QueryScans operation. If an operation is not supported, the API will return
+		// a NotImplementedError so we can check for that error and handle it specifically
+
+		v.Logger.Printf("Query scans not implemented for %s\n", provider.ProviderConfig.Type)
 		return
 	}
 
-	if errors.As(err, &e) {
-		v.Logger.Printf("Query scans not implemented for %s\n", provider.ProviderConfig.Type)
-	} else {
-		v.Logger.Printf("Found %d scans from %s\n", len(assets.Result), provider.ProviderConfig.Type)
+	v.Logger.Printf("Found %d scans from %s\n", len(assets.Result), provider.ProviderConfig.Type)
+}
+
+func (v *VulnerabilitiesConnector) Start(cleanUp bool) {
+	v.Logger.Printf("Using %d vulnerability providers\n", len(v.Providers))
+
+	/*ctx := context.Background()
+
+	for _, provider := range v.Providers {
+		client := provider.Tenant.Synqly.EngineClients["vulnerabilities"]
+
+		v.QueryAssets(ctx, client, provider.IntegrationRequest)
+		v.QueryFindings(ctx, client, provider.IntegrationRequest)
+		v.QueryScans(ctx, client, provider.IntegrationRequest)
+	}*/
+
+	if cleanUp {
+		defer v.CleanUp()
 	}
 }
 
-func (v *VulnerabilitiesConnector) buildVulnerabilityProviderConfig(provider VulnerabilitiesConnectorProvider) (*mgmt.CreateIntegrationRequest, error) {
+func (v *VulnerabilitiesConnector) buildVulnerabilityProvidersConfig() []ProviderConfiguration {
+	providers := []ProviderConfiguration{}
+
 	// CroudStrike
-	if provider == CROUD_STRIKE {
-		if v.Config.CroudStrikeClientID != "" && v.Config.CroudStrikeClientSecret != "" && v.Config.CroudStrikeUrl != "" {
-			return &mgmt.CreateIntegrationRequest{
-				Fullname: engine.String(fmt.Sprintf("Vulnerability %s Scanner", provider)),
-				ProviderConfig: &mgmt.ProviderConfig{
-					Type: string(provider),
-					VulnerabilitiesCrowdstrike: &mgmt.VulnerabilitiesCrowdStrike{
-						Credential: &mgmt.CrowdStrikeCredential{
-							OAuthClient: &mgmt.OAuthClientCredential{
-								ClientId:     v.Config.CroudStrikeClientID,
-								ClientSecret: v.Config.CroudStrikeClientSecret,
-							},
-						},
-						Url: &v.Config.CroudStrikeUrl,
+	if v.Config.CroudStrikeClientID != "" && v.Config.CroudStrikeClientSecret != "" && v.Config.CroudStrikeUrl != "" {
+		croudStrikeConfig := ProviderConfiguration{}
+		if err := croudStrikeConfig.New(*v.Config, mgmt.ProviderConfig{
+			Type: "CroudStrike",
+			VulnerabilitiesCrowdstrike: &mgmt.VulnerabilitiesCrowdStrike{
+				Credential: &mgmt.CrowdStrikeCredential{
+					OAuthClient: &mgmt.OAuthClientCredential{
+						ClientId:     v.Config.CroudStrikeClientID,
+						ClientSecret: v.Config.CroudStrikeClientSecret,
 					},
 				},
-			}, nil
+				Url: &v.Config.CroudStrikeUrl,
+			},
+		}, "CroudStrike"); err != nil {
+			v.Logger.Printf("There was an error initializing CroudStrike configuration: %s\n", err.Error())
 		} else {
-			return nil, fmt.Errorf("missing %s provider config", provider)
+			providers = append(providers, croudStrikeConfig)
 		}
+	} else {
+		v.Logger.Println("Ignoring CroudStrike provider, missing configuration variables...")
 	}
 
 	// Nucleus
-	if provider == NUCLEUS {
-		if v.Config.NucleusProjectID != "" && v.Config.NucleusToken != "" && v.Config.NucleusUrl != "" {
-			return &mgmt.CreateIntegrationRequest{
-				Fullname: engine.String(fmt.Sprintf("Vulnerability %s Scanner", provider)),
-				ProviderConfig: &mgmt.ProviderConfig{
-					Type: string(provider),
-					VulnerabilitiesNucleus: &mgmt.VulnerabilitiesNucleus{
-						Credential: &mgmt.NucleusCredential{
-							Token: &mgmt.TokenCredential{
-								Secret: v.Config.NucleusToken,
-							},
-						},
-						ProjectId: v.Config.NucleusProjectID,
-						Url:       v.Config.NucleusUrl,
+	if v.Config.NucleusProjectID != "" && v.Config.NucleusToken != "" && v.Config.NucleusUrl != "" {
+		nucleusConfig := ProviderConfiguration{}
+		if err := nucleusConfig.New(*v.Config, mgmt.ProviderConfig{
+			Type: "Nucleus",
+			VulnerabilitiesNucleus: &mgmt.VulnerabilitiesNucleus{
+				Credential: &mgmt.NucleusCredential{
+					Token: &mgmt.TokenCredential{
+						Secret: v.Config.NucleusToken,
 					},
 				},
-			}, nil
+				ProjectId: v.Config.NucleusProjectID,
+				Url:       v.Config.NucleusUrl,
+			},
+		}, "Nucleus"); err != nil {
+			v.Logger.Printf("There was an error initializing Nucleus configuration: %s\n", err.Error())
 		} else {
-			return nil, fmt.Errorf("missing %s provider config", provider)
+			providers = append(providers, nucleusConfig)
 		}
+	} else {
+		v.Logger.Println("Ignoring Nucleus provider, missing configuration variables...")
 	}
 
 	// Qualys
-	if provider == QUALYS {
-		if v.Config.QualysSecret != "" && v.Config.QualysUrl != "" && v.Config.QualysUser != "" {
-			return &mgmt.CreateIntegrationRequest{
-				Fullname: engine.String(fmt.Sprintf("Vulnerability %s Scanner", provider)),
-				ProviderConfig: &mgmt.ProviderConfig{
-					Type: string(provider),
-					VulnerabilitiesQualysCloud: &mgmt.VulnerabilitiesQualysCloud{
-						Credential: &mgmt.QualysCloudCredential{
-							Basic: &mgmt.BasicCredential{
-								Username: v.Config.QualysUser,
-								Secret:   v.Config.QualysSecret,
-							},
-						},
-						Url: v.Config.QualysUrl,
+	if v.Config.QualysSecret != "" && v.Config.QualysUrl != "" && v.Config.QualysUser != "" {
+		qualysConfig := ProviderConfiguration{}
+		if err := qualysConfig.New(*v.Config, mgmt.ProviderConfig{
+			Type: "Qualys",
+			VulnerabilitiesQualysCloud: &mgmt.VulnerabilitiesQualysCloud{
+				Credential: &mgmt.QualysCloudCredential{
+					Basic: &mgmt.BasicCredential{
+						Username: v.Config.QualysUser,
+						Secret:   v.Config.QualysSecret,
 					},
 				},
-			}, nil
+				Url: v.Config.QualysUrl,
+			},
+		}, "Qualys"); err != nil {
+			v.Logger.Printf("There was an error initializing Qualys configuration: %s\n", err.Error())
 		} else {
-			return nil, fmt.Errorf("missing %s provider config", provider)
+			providers = append(providers, qualysConfig)
 		}
+	} else {
+		v.Logger.Println("Ignoring Qualys provider, missing configuration variables...")
 	}
 
 	// Rapid7
-	if provider == RAPID7 {
-		if v.Config.Rapid7Token != "" && v.Config.Rapid7Url != "" {
-			return &mgmt.CreateIntegrationRequest{
-				Fullname: engine.String(fmt.Sprintf("Vulnerability %s Scanner", provider)),
-				ProviderConfig: &mgmt.ProviderConfig{
-					Type: string(provider),
-					VulnerabilitiesRapid7InsightCloud: &mgmt.VulnerabilitiesRapid7InsightCloud{
-						Url: v.Config.Rapid7Url,
-						Credential: &mgmt.Rapid7InsightCloudCredential{
-							Token: &mgmt.TokenCredential{
-								Secret: v.Config.Rapid7Token,
-							},
-						},
+	if v.Config.Rapid7Token != "" && v.Config.Rapid7Url != "" {
+		rapid7Config := ProviderConfiguration{}
+		if err := rapid7Config.New(*v.Config, mgmt.ProviderConfig{
+			Type: "Rapid7",
+			VulnerabilitiesRapid7InsightCloud: &mgmt.VulnerabilitiesRapid7InsightCloud{
+				Url: v.Config.Rapid7Url,
+				Credential: &mgmt.Rapid7InsightCloudCredential{
+					Token: &mgmt.TokenCredential{
+						Secret: v.Config.Rapid7Token,
 					},
 				},
-			}, nil
+			},
+		}, "Rapid7"); err != nil {
+			v.Logger.Printf("There was an error initializing Rapid7 configuration: %s\n", err.Error())
 		} else {
-			return nil, fmt.Errorf("missing %s provider config", provider)
+			providers = append(providers, rapid7Config)
 		}
-
+	} else {
+		v.Logger.Println("Ignoring Rapid7 provider, missing configuration variables...")
 	}
 
 	// Tanium
-	if provider == TANIUM {
-		if v.Config.TaniumSecret != "" && v.Config.TaniumUrl != "" {
-			return &mgmt.CreateIntegrationRequest{
-				Fullname: engine.String(fmt.Sprintf("Vulnerability %s Scanner", provider)),
-				ProviderConfig: &mgmt.ProviderConfig{
-					Type: string(provider),
-					VulnerabilitiesTaniumCloud: &mgmt.VulnerabilitiesTaniumCloud{
-						Credential: &mgmt.TaniumCloudCredential{
-							Token: &mgmt.TokenCredential{
-								Secret: v.Config.TaniumSecret,
-							},
-						},
-						Url: v.Config.TaniumUrl,
+	if v.Config.TaniumSecret != "" && v.Config.TaniumUrl != "" {
+		taniumConfig := ProviderConfiguration{}
+		if err := taniumConfig.New(*v.Config, mgmt.ProviderConfig{
+			Type: "Tanium",
+			VulnerabilitiesTaniumCloud: &mgmt.VulnerabilitiesTaniumCloud{
+				Credential: &mgmt.TaniumCloudCredential{
+					Token: &mgmt.TokenCredential{
+						Secret: v.Config.TaniumSecret,
 					},
 				},
-			}, nil
+				Url: v.Config.TaniumUrl,
+			},
+		}, "Tanium"); err != nil {
+			v.Logger.Printf("There was an error initializing Tanium configuration: %s\n", err.Error())
 		} else {
-			return nil, fmt.Errorf("missing %s provider config", provider)
+			providers = append(providers, taniumConfig)
 		}
+	} else {
+		v.Logger.Println("Ignoring Tanium provider, missing configuration variables...")
 	}
 
 	// Tenable
-	if provider == TENABLE {
-		if v.Config.TenableToken != "" && v.Config.TenableUrl != "" {
-			return &mgmt.CreateIntegrationRequest{
-				Fullname: engine.String("Vulnerability Tenable Scanner"),
-				ProviderConfig: &mgmt.ProviderConfig{
-					Type: string(provider),
-					VulnerabilitiesTenableCloud: &mgmt.VulnerabilitiesTenableCloud{
-						Credential: &mgmt.TenableCloudCredential{
-							Token: &mgmt.TokenCredential{
-								Secret: v.Config.TenableToken,
-							},
-						},
-						Url: &v.Config.TenableUrl,
+	if v.Config.TenableToken != "" && v.Config.TenableUrl != "" {
+		tenableConfig := ProviderConfiguration{}
+		if err := tenableConfig.New(*v.Config, mgmt.ProviderConfig{
+			Type: "Tenable",
+			VulnerabilitiesTenableCloud: &mgmt.VulnerabilitiesTenableCloud{
+				Credential: &mgmt.TenableCloudCredential{
+					Token: &mgmt.TokenCredential{
+						Secret: v.Config.TenableToken,
 					},
 				},
-			}, nil
+				Url: &v.Config.TenableUrl,
+			},
+		}, "Tenable"); err != nil {
+			v.Logger.Printf("There was an error initializing Tenable configuration: %s\n", err.Error())
 		} else {
-			return nil, fmt.Errorf("missing %s provider config", provider)
+			providers = append(providers, tenableConfig)
 		}
+	} else {
+		v.Logger.Println("Ignoring Tenable provider, missing configuration variables...")
 	}
 
-	return nil, fmt.Errorf("configuration for %s not supported", provider)
+	return providers
 }

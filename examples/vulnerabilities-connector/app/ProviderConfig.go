@@ -1,0 +1,45 @@
+package app
+
+import (
+	"context"
+	"fmt"
+	"log"
+
+	"github.com/synqly/go-sdk/client/engine"
+	"github.com/synqly/go-sdk/examples/common"
+
+	mgmt "github.com/synqly/go-sdk/client/management"
+)
+
+type ProviderConfiguration struct {
+	AccountName        string
+	IntegrationRequest *mgmt.CreateIntegrationRequest
+	Name               string
+	Tenant             *common.Tenant
+}
+
+func (p *ProviderConfiguration) New(config Configuration, providerConfig mgmt.ProviderConfig, providerName string) error {
+	p.AccountName = fmt.Sprintf("Zenith Systems - %s", providerName)
+	p.IntegrationRequest = &mgmt.CreateIntegrationRequest{
+		Fullname:       engine.String(fmt.Sprintf("Vulnerability %s Scanner", providerName)),
+		ProviderConfig: &providerConfig,
+	}
+
+	p.Name = providerName
+
+	// Tenant
+	configFilePath := fmt.Sprintf("./tenant_config_files/tenant_store_%s.yaml", p.Name)
+
+	ctx := context.Background()
+	t, err := common.NewTenant(ctx, p.AccountName, configFilePath, config.SynqlyOrgToken, map[mgmt.CategoryId]*mgmt.CreateIntegrationRequest{
+		mgmt.CategoryIdVulnerabilities: p.IntegrationRequest,
+	})
+	if err != nil {
+		log.Printf("Error creating the Tenant for %s: %s", p.Name, err.Error())
+		return err
+	}
+
+	p.Tenant = t
+
+	return nil
+}

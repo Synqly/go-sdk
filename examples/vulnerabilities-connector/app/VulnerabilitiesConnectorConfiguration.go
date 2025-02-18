@@ -27,7 +27,7 @@ type Configuration struct {
 	TaniumSecret string `mapstructure:"SYNQLY_TANIUM_SECRET"`
 	TaniumUrl    string `mapstructure:"SYNQLY_TANIUM_URL"`
 
-	TenableToken string `mapstructure:"SYNQLY_TENABLE_URL"`
+	TenableToken string `mapstructure:"SYNQLY_TENABLE_TOKEN"`
 	TenableUrl   string `mapstructure:"SYNQLY_TENABLE_URL"`
 }
 
