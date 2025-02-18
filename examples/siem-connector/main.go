@@ -4,19 +4,21 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	boff "github.com/cenkalti/backoff/v4"
-	"github.com/spf13/viper"
-	"github.com/synqly/go-sdk/client/engine"
-	engineClient "github.com/synqly/go-sdk/client/engine/client"
-	scheduledJobActivity "github.com/synqly/go-sdk/client/engine/ocsf/v110/scheduledjobactivity"
-	mgmt "github.com/synqly/go-sdk/client/management"
-	mgmtClient "github.com/synqly/go-sdk/client/management/client"
 	"log"
 	"math/rand"
 	"os"
 	"os/signal"
 	"strconv"
 	"time"
+
+	boff "github.com/cenkalti/backoff/v4"
+	"github.com/spf13/viper"
+
+	"github.com/synqly/go-sdk/client/engine"
+	engineClient "github.com/synqly/go-sdk/client/engine/client"
+	scheduledJobActivity "github.com/synqly/go-sdk/client/engine/ocsf/v110/scheduledjobactivity"
+	mgmt "github.com/synqly/go-sdk/client/management"
+	mgmtClient "github.com/synqly/go-sdk/client/management/client"
 )
 
 var consoleLogger = log.New(os.Stdout, "INFO: ", log.Ldate|log.Ltime)

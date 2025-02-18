@@ -4,12 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/synqly/go-sdk/client/engine"
-	"github.com/synqly/go-sdk/examples/common"
 	"log"
 	"os"
 
+	"github.com/synqly/go-sdk/client/engine"
 	mgmt "github.com/synqly/go-sdk/client/management"
+	"github.com/synqly/go-sdk/examples/common"
 )
 
 var consoleLogger = log.New(os.Stdout, "INFO: ", log.Ldate|log.Ltime)
