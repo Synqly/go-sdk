@@ -9405,6 +9405,8 @@ func (s *SiemRapid7InsightIdr) String() string {
 // Configuration for Microsoft Sentinel SIEM Product.
 type SiemSentinel struct {
 	Credential *SentinelCredential `json:"credential" url:"credential"`
+	// The default tables to use for queries. Supply this value if you would like to a subset of the default tables or non-ASIM data tables with Sentinel/Log Analytics queries. If more than one table is specified, a union operator will join them to query all of the tables at once. Supply a single value with "_" if you would like to query all tables without the normalizing ASIM transformations. **Note** that a single "_" entry will map to a 'union \*' query. Relying heavily on these queries is generally discouraged by Sentinel because they are slower and more resource intensive.
+	DefaultTables []string `json:"default_tables,omitempty" url:"default_tables,omitempty"`
 	// The root URL for the Microsoft Azure Monitor Logs API. This is optional and should only be supplied if using an alternate Microsoft cloud, such as GovCloud.
 	LogsUrl *string `json:"logs_url,omitempty" url:"logs_url,omitempty"`
 	// The root URL for the Microsoft Azure Management API. This is optional and should only be supplied if using an alternate Microsoft cloud, such as GovCloud.
