@@ -11,6 +11,10 @@ import (
 	mgmt "github.com/synqly/go-sdk/client/management"
 )
 
+const (
+	TENANT_CONFIG_NAME_PREFIX string = "Zenith Systems - "
+)
+
 type ProviderConfiguration struct {
 	AccountName        string
 	IntegrationRequest *mgmt.CreateIntegrationRequest
@@ -19,7 +23,7 @@ type ProviderConfiguration struct {
 }
 
 func (p *ProviderConfiguration) New(config Configuration, providerConfig mgmt.ProviderConfig, providerName string) error {
-	p.AccountName = fmt.Sprintf("Zenith Systems - %s", providerName)
+	p.AccountName = fmt.Sprintf("%s%s", TENANT_CONFIG_NAME_PREFIX, providerName)
 	p.IntegrationRequest = &mgmt.CreateIntegrationRequest{
 		Fullname:       engine.String(fmt.Sprintf("Vulnerability %s Scanner", providerName)),
 		ProviderConfig: &providerConfig,

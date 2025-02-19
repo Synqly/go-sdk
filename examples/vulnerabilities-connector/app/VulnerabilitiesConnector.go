@@ -28,9 +28,21 @@ func NewVulnerabilitiesConnector() *VulnerabilitiesConnector {
 	return &vulnerabilitiesConnector
 }
 
-func (v *VulnerabilitiesConnector) CleanUp() {
-	/*ctx := context.Background()
+func (v *VulnerabilitiesConnector) CleanUp(cleanUp bool) {
+	if !cleanUp {
+		return
+	}
+
+	v.Logger.Println("CleanUp started...")
+
 	client := mgmtClient.NewClient(mgmtClient.WithToken(v.Config.SynqlyOrgToken))
+
+	if client == nil {
+		return
+	}
+
+	ctx := context.Background()
+
 	allAccounts, err := client.Accounts.List(ctx, &mgmt.ListAccountsRequest{
 		Filter: []*string{engine.String("name[like]zenith-systems - *")},
 	})
@@ -38,57 +50,35 @@ func (v *VulnerabilitiesConnector) CleanUp() {
 		v.Logger.Printf("Error checking account IDs: %s\n", err.Error())
 	}
 
-	for _, a := range allAccounts.Result {
-		err := client.Accounts.Delete(ctx, a.Id)
-		if err != nil {
-			v.Logger.Printf("Error deleting '%s' account, please do it manually: %s\n", a.Name, err.Error())
-		}
-	}*/
-
-	v.Logger.Println("CleanUp started...")
-
-	client := mgmtClient.NewClient(mgmtClient.WithToken(v.Config.SynqlyOrgToken))
-
-	if client != nil {
-		ctx := context.Background()
-
-		allAccounts, err := client.Accounts.List(ctx, &mgmt.ListAccountsRequest{
-			Filter: []*string{engine.String("name[like]zenith-systems - *")},
-		})
-		if err != nil {
-			v.Logger.Printf("Error checking account IDs: %s\n", err.Error())
-		}
-
-		getAccountId := func(fullName string) (string, error) {
-			for _, account := range allAccounts.Result {
-				if account.Fullname == fullName {
-					return account.Id, nil
-				}
+	getAccountId := func(fullName string) (string, error) {
+		for _, account := range allAccounts.Result {
+			if account.Fullname == fullName {
+				return account.Id, nil
 			}
-
-			return "", fmt.Errorf("account ID for '%s' not found", fullName)
 		}
 
-		for _, p := range v.Providers {
-			accountID, err := getAccountId(p.AccountName)
-			if err != nil {
-				v.Logger.Printf("Error getting account '%s' ID, please delete account manually: %s\n", p.AccountName, err.Error())
-				continue
-			}
+		return "", fmt.Errorf("account ID for '%s' not found", fullName)
+	}
 
-			err = client.Accounts.Delete(ctx, accountID)
-			if err != nil {
-				v.Logger.Printf("Error deleting '%s' account, please do it manually: %s\n", p.AccountName, err.Error())
-				continue
-			}
-
-			v.Logger.Printf("Accound '%s' deleted...\n", p.AccountName)
-		}
-
-		err = os.RemoveAll("./tenant_config_files")
+	for _, p := range v.Providers {
+		accountID, err := getAccountId(p.AccountName)
 		if err != nil {
-			v.Logger.Printf("Error deleting 'tenant_config_files' folder, please do it manually: %s\n", err.Error())
+			v.Logger.Printf("Error getting account '%s' ID, please delete account manually: %s\n", p.AccountName, err.Error())
+			continue
 		}
+
+		err = client.Accounts.Delete(ctx, accountID)
+		if err != nil {
+			v.Logger.Printf("Error deleting '%s' account, please do it manually: %s\n", p.AccountName, err.Error())
+			continue
+		}
+
+		v.Logger.Printf("Accound '%s' deleted...\n", p.AccountName)
+	}
+
+	err = os.RemoveAll("./tenant_config_files")
+	if err != nil {
+		v.Logger.Printf("Error deleting 'tenant_config_files' folder, please do it manually: %s\n", err.Error())
 	}
 
 	v.Logger.Println("CleanUp finished successfully")
@@ -161,9 +151,11 @@ func (v *VulnerabilitiesConnector) QueryScans(ctx context.Context, client *engin
 }
 
 func (v *VulnerabilitiesConnector) Start(cleanUp bool) {
+	defer v.CleanUp(cleanUp)
+
 	v.Logger.Printf("Using %d vulnerability providers\n", len(v.Providers))
 
-	/*ctx := context.Background()
+	ctx := context.Background()
 
 	for _, provider := range v.Providers {
 		client := provider.Tenant.Synqly.EngineClients["vulnerabilities"]
@@ -171,10 +163,6 @@ func (v *VulnerabilitiesConnector) Start(cleanUp bool) {
 		v.QueryAssets(ctx, client, provider.IntegrationRequest)
 		v.QueryFindings(ctx, client, provider.IntegrationRequest)
 		v.QueryScans(ctx, client, provider.IntegrationRequest)
-	}*/
-
-	if cleanUp {
-		defer v.CleanUp()
 	}
 }
 
