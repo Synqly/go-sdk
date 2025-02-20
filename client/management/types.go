@@ -3659,6 +3659,7 @@ const (
 	WebhookFilterIntegrationCreate WebhookFilter = "integration_create"
 	WebhookFilterIntegrationDelete WebhookFilter = "integration_delete"
 	WebhookFilterIntegrationUpdate WebhookFilter = "integration_update"
+	WebhookFilterOperationComplete WebhookFilter = "operation_complete"
 )
 
 func NewWebhookFilterFromString(s string) (WebhookFilter, error) {
@@ -3677,6 +3678,8 @@ func NewWebhookFilterFromString(s string) (WebhookFilter, error) {
 		return WebhookFilterIntegrationDelete, nil
 	case "integration_update":
 		return WebhookFilterIntegrationUpdate, nil
+	case "operation_complete":
+		return WebhookFilterOperationComplete, nil
 	}
 	var t WebhookFilter
 	return "", fmt.Errorf("%s is not a valid %T", s, t)
@@ -4170,6 +4173,7 @@ type ApiPermissionMap struct {
 	Credentials       *CredentialsPermissions       `json:"credentials,omitempty" url:"credentials,omitempty"`
 	Integrations      *IntegrationsPermissions      `json:"integrations,omitempty" url:"integrations,omitempty"`
 	IntegrationPoints *IntegrationPointsPermissions `json:"integration_points,omitempty" url:"integration_points,omitempty"`
+	Operations        *OperationsPermissions        `json:"operations,omitempty" url:"operations,omitempty"`
 	Members           *MembersPermissions           `json:"members,omitempty" url:"members,omitempty"`
 	Organizations     *OrganizationPermissions      `json:"organizations,omitempty" url:"organizations,omitempty"`
 	PermissionSet     *PermissionSetPermissions     `json:"permission_set,omitempty" url:"permission_set,omitempty"`
@@ -4757,6 +4761,70 @@ func (m *MembersPermissions) String() string {
 		return value
 	}
 	return fmt.Sprintf("%#v", m)
+}
+
+type OperationsActions string
+
+const (
+	OperationsActionsList OperationsActions = "list"
+	OperationsActionsAll  OperationsActions = "*"
+)
+
+func NewOperationsActionsFromString(s string) (OperationsActions, error) {
+	switch s {
+	case "list":
+		return OperationsActionsList, nil
+	case "*":
+		return OperationsActionsAll, nil
+	}
+	var t OperationsActions
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (o OperationsActions) Ptr() *OperationsActions {
+	return &o
+}
+
+// Permissions for the operations API
+type OperationsPermissions struct {
+	Actions []OperationsActions `json:"actions" url:"actions"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (o *OperationsPermissions) GetExtraProperties() map[string]interface{} {
+	return o.extraProperties
+}
+
+func (o *OperationsPermissions) UnmarshalJSON(data []byte) error {
+	type unmarshaler OperationsPermissions
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*o = OperationsPermissions(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *o)
+	if err != nil {
+		return err
+	}
+	o.extraProperties = extraProperties
+
+	o._rawJSON = nil
+	return nil
+}
+
+func (o *OperationsPermissions) String() string {
+	if len(o._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(o._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(o); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", o)
 }
 
 type OrganizationActions string

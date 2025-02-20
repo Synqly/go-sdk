@@ -9,6 +9,7 @@ import (
 	hooks "github.com/synqly/go-sdk/client/engine/hooks"
 	identity "github.com/synqly/go-sdk/client/engine/identity"
 	notifications "github.com/synqly/go-sdk/client/engine/notifications"
+	operations "github.com/synqly/go-sdk/client/engine/operations"
 	option "github.com/synqly/go-sdk/client/engine/option"
 	siem "github.com/synqly/go-sdk/client/engine/siem"
 	sink "github.com/synqly/go-sdk/client/engine/sink"
@@ -28,6 +29,7 @@ type Client struct {
 	Hooks           *hooks.Client
 	Identity        *identity.Client
 	Notifications   *notifications.Client
+	Operations      *operations.Client
 	Siem            *siem.Client
 	Sink            *sink.Client
 	Storage         *storage.Client
@@ -51,6 +53,7 @@ func NewClient(opts ...option.RequestOption) *Client {
 		Hooks:           hooks.NewClient(opts...),
 		Identity:        identity.NewClient(opts...),
 		Notifications:   notifications.NewClient(opts...),
+		Operations:      operations.NewClient(opts...),
 		Siem:            siem.NewClient(opts...),
 		Sink:            sink.NewClient(opts...),
 		Storage:         storage.NewClient(opts...),

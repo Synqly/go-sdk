@@ -1060,6 +1060,438 @@ func (n NotificationStatus) Ptr() *NotificationStatus {
 	return &n
 }
 
+type Operation struct {
+	// ID of the operation
+	Id OperationId `json:"id" url:"id"`
+	// Time object was originally created
+	CreatedAt time.Time `json:"created_at" url:"created_at"`
+	// Last time object was updated
+	UpdatedAt time.Time `json:"updated_at" url:"updated_at"`
+	// Account ID containing the integration.
+	AccountId Id `json:"account_id" url:"account_id"`
+	// Integration ID to use for the operation.
+	IntegrationId Id `json:"integration_id" url:"integration_id"`
+	// Run now or on the specified schedule.
+	Schedule *OperationSchedule `json:"schedule,omitempty" url:"schedule,omitempty"`
+	// Name of the operation that will be run for this operation.
+	Operation string `json:"operation" url:"operation"`
+	// Parameters for the operation that will be run for this operation.
+	Input *OperationInput `json:"input" url:"input"`
+	// Status of the operation
+	Status OperationStatus `json:"status" url:"status"`
+	// Errors that occurred during the operation
+	Errors []*OperationError `json:"errors,omitempty" url:"errors,omitempty"`
+	// Cpu time in microseconds
+	CpuTime int64 `json:"cpu_time" url:"cpu_time"`
+	// Number of bytes sent to sink integration
+	InBytes int64 `json:"in_bytes" url:"in_bytes"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (o *Operation) GetExtraProperties() map[string]interface{} {
+	return o.extraProperties
+}
+
+func (o *Operation) UnmarshalJSON(data []byte) error {
+	type embed Operation
+	var unmarshaler = struct {
+		embed
+		CreatedAt *core.DateTime `json:"created_at"`
+		UpdatedAt *core.DateTime `json:"updated_at"`
+	}{
+		embed: embed(*o),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*o = Operation(unmarshaler.embed)
+	o.CreatedAt = unmarshaler.CreatedAt.Time()
+	o.UpdatedAt = unmarshaler.UpdatedAt.Time()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *o)
+	if err != nil {
+		return err
+	}
+	o.extraProperties = extraProperties
+
+	o._rawJSON = nil
+	return nil
+}
+
+func (o *Operation) MarshalJSON() ([]byte, error) {
+	type embed Operation
+	var marshaler = struct {
+		embed
+		CreatedAt *core.DateTime `json:"created_at"`
+		UpdatedAt *core.DateTime `json:"updated_at"`
+	}{
+		embed:     embed(*o),
+		CreatedAt: core.NewDateTime(o.CreatedAt),
+		UpdatedAt: core.NewDateTime(o.UpdatedAt),
+	}
+	return json.Marshal(marshaler)
+}
+
+func (o *Operation) String() string {
+	if len(o._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(o._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(o); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", o)
+}
+
+type OperationError struct {
+	// Error message
+	Message string `json:"message" url:"message"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (o *OperationError) GetExtraProperties() map[string]interface{} {
+	return o.extraProperties
+}
+
+func (o *OperationError) UnmarshalJSON(data []byte) error {
+	type unmarshaler OperationError
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*o = OperationError(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *o)
+	if err != nil {
+		return err
+	}
+	o.extraProperties = extraProperties
+
+	o._rawJSON = nil
+	return nil
+}
+
+func (o *OperationError) String() string {
+	if len(o._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(o._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(o); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", o)
+}
+
+type OperationInput struct {
+	// Limit the number of results returned by the operation. If not specified, the operation will return all results.
+	Filters []string `json:"filters,omitempty" url:"filters,omitempty"`
+	// Limit query results by these filters.
+	Limit *int `json:"limit,omitempty" url:"limit,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (o *OperationInput) GetExtraProperties() map[string]interface{} {
+	return o.extraProperties
+}
+
+func (o *OperationInput) UnmarshalJSON(data []byte) error {
+	type unmarshaler OperationInput
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*o = OperationInput(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *o)
+	if err != nil {
+		return err
+	}
+	o.extraProperties = extraProperties
+
+	o._rawJSON = nil
+	return nil
+}
+
+func (o *OperationInput) String() string {
+	if len(o._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(o._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(o); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", o)
+}
+
+type OperationSchedule struct {
+	// Run now or on the specified time.
+	RunAt *time.Time `json:"run_at,omitempty" url:"run_at,omitempty"`
+	// Set the interval duration for recuring operations. (minimum 1h)
+	Interval *string `json:"interval,omitempty" url:"interval,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (o *OperationSchedule) GetExtraProperties() map[string]interface{} {
+	return o.extraProperties
+}
+
+func (o *OperationSchedule) UnmarshalJSON(data []byte) error {
+	type embed OperationSchedule
+	var unmarshaler = struct {
+		embed
+		RunAt *core.DateTime `json:"run_at,omitempty"`
+	}{
+		embed: embed(*o),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*o = OperationSchedule(unmarshaler.embed)
+	o.RunAt = unmarshaler.RunAt.TimePtr()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *o)
+	if err != nil {
+		return err
+	}
+	o.extraProperties = extraProperties
+
+	o._rawJSON = nil
+	return nil
+}
+
+func (o *OperationSchedule) MarshalJSON() ([]byte, error) {
+	type embed OperationSchedule
+	var marshaler = struct {
+		embed
+		RunAt *core.DateTime `json:"run_at,omitempty"`
+	}{
+		embed: embed(*o),
+		RunAt: core.NewOptionalDateTime(o.RunAt),
+	}
+	return json.Marshal(marshaler)
+}
+
+func (o *OperationSchedule) String() string {
+	if len(o._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(o._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(o); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", o)
+}
+
+type OperationStatus string
+
+const (
+	OperationStatusScheduled  OperationStatus = "SCHEDULED"
+	OperationStatusProcessing OperationStatus = "PROCESSING"
+	OperationStatusCancelled  OperationStatus = "CANCELLED"
+	OperationStatusComplete   OperationStatus = "COMPLETE"
+)
+
+func NewOperationStatusFromString(s string) (OperationStatus, error) {
+	switch s {
+	case "SCHEDULED":
+		return OperationStatusScheduled, nil
+	case "PROCESSING":
+		return OperationStatusProcessing, nil
+	case "CANCELLED":
+		return OperationStatusCancelled, nil
+	case "COMPLETE":
+		return OperationStatusComplete, nil
+	}
+	var t OperationStatus
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (o OperationStatus) Ptr() *OperationStatus {
+	return &o
+}
+
+type CreateOperationResponseResult struct {
+	Operation *Operation `json:"operation" url:"operation"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *CreateOperationResponseResult) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
+}
+
+func (c *CreateOperationResponseResult) UnmarshalJSON(data []byte) error {
+	type unmarshaler CreateOperationResponseResult
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = CreateOperationResponseResult(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
+	c._rawJSON = nil
+	return nil
+}
+
+func (c *CreateOperationResponseResult) String() string {
+	if len(c._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
+type OperationWebhookPayload struct {
+	// The event that triggered the webhook
+	Event WebhookFilter `json:"event" url:"event"`
+	// A unique identifier for this webhook event
+	Nonce string `json:"nonce" url:"nonce"`
+	// ID of the operation
+	Id OperationId `json:"id" url:"id"`
+	// Time object was originally created
+	CreatedAt time.Time `json:"created_at" url:"created_at"`
+	// Last time object was updated
+	UpdatedAt time.Time `json:"updated_at" url:"updated_at"`
+	// Run now or on the specified schedule.
+	Schedule *OperationSchedule `json:"schedule,omitempty" url:"schedule,omitempty"`
+	// Name of the operation that will be run for this operation.
+	Operation string `json:"operation" url:"operation"`
+	// Account ID containing the integration.
+	AccountId Id `json:"account_id" url:"account_id"`
+	// Integration ID to use for the operation.
+	IntegrationId Id `json:"integration_id" url:"integration_id"`
+	// Input parameters for the operation that will be run for this operation.
+	Input *OperationInput `json:"input" url:"input"`
+	// Status of the operation
+	Status OperationStatus `json:"status" url:"status"`
+	// Errors that occurred during the operation
+	Errors []*OperationError `json:"errors,omitempty" url:"errors,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (o *OperationWebhookPayload) GetExtraProperties() map[string]interface{} {
+	return o.extraProperties
+}
+
+func (o *OperationWebhookPayload) UnmarshalJSON(data []byte) error {
+	type embed OperationWebhookPayload
+	var unmarshaler = struct {
+		embed
+		CreatedAt *core.DateTime `json:"created_at"`
+		UpdatedAt *core.DateTime `json:"updated_at"`
+	}{
+		embed: embed(*o),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*o = OperationWebhookPayload(unmarshaler.embed)
+	o.CreatedAt = unmarshaler.CreatedAt.Time()
+	o.UpdatedAt = unmarshaler.UpdatedAt.Time()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *o)
+	if err != nil {
+		return err
+	}
+	o.extraProperties = extraProperties
+
+	o._rawJSON = nil
+	return nil
+}
+
+func (o *OperationWebhookPayload) MarshalJSON() ([]byte, error) {
+	type embed OperationWebhookPayload
+	var marshaler = struct {
+		embed
+		CreatedAt *core.DateTime `json:"created_at"`
+		UpdatedAt *core.DateTime `json:"updated_at"`
+	}{
+		embed:     embed(*o),
+		CreatedAt: core.NewDateTime(o.CreatedAt),
+		UpdatedAt: core.NewDateTime(o.UpdatedAt),
+	}
+	return json.Marshal(marshaler)
+}
+
+func (o *OperationWebhookPayload) String() string {
+	if len(o._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(o._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(o); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", o)
+}
+
+type WebhookFilter string
+
+const (
+	WebhookFilterAll               WebhookFilter = "all"
+	WebhookFilterAccountCreate     WebhookFilter = "account_create"
+	WebhookFilterAccountDelete     WebhookFilter = "account_delete"
+	WebhookFilterAccountUpdate     WebhookFilter = "account_update"
+	WebhookFilterIntegrationCreate WebhookFilter = "integration_create"
+	WebhookFilterIntegrationDelete WebhookFilter = "integration_delete"
+	WebhookFilterIntegrationUpdate WebhookFilter = "integration_update"
+	WebhookFilterOperationComplete WebhookFilter = "operation_complete"
+)
+
+func NewWebhookFilterFromString(s string) (WebhookFilter, error) {
+	switch s {
+	case "all":
+		return WebhookFilterAll, nil
+	case "account_create":
+		return WebhookFilterAccountCreate, nil
+	case "account_delete":
+		return WebhookFilterAccountDelete, nil
+	case "account_update":
+		return WebhookFilterAccountUpdate, nil
+	case "integration_create":
+		return WebhookFilterIntegrationCreate, nil
+	case "integration_delete":
+		return WebhookFilterIntegrationDelete, nil
+	case "integration_update":
+		return WebhookFilterIntegrationUpdate, nil
+	case "operation_complete":
+		return WebhookFilterOperationComplete, nil
+	}
+	var t WebhookFilter
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (w WebhookFilter) Ptr() *WebhookFilter {
+	return &w
+}
+
+// Unique identifier for a Webhook
+type WebhookId = Id
+
 type Evidence struct {
 	// Unique identifier for the investigation associated with the evidence
 	InvestigationId string `json:"investigation_id" url:"investigation_id"`
