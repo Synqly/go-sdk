@@ -8,20 +8,11 @@ import (
 	"os"
 	"strings"
 
-	koanfyaml "github.com/knadh/koanf/parsers/yaml"
-	"github.com/knadh/koanf/providers/env"
-	"github.com/knadh/koanf/providers/file"
-	"github.com/knadh/koanf/v2"
-
 	"github.com/synqly/go-sdk/client/engine"
 	engineClient "github.com/synqly/go-sdk/client/engine/client"
 	"github.com/synqly/go-sdk/client/engine/ocsf/v110/securityfinding"
 	mgmt "github.com/synqly/go-sdk/client/management"
 	"github.com/synqly/go-sdk/examples/common"
-)
-
-var (
-	k = koanf.New(".")
 )
 
 var consoleLogger = log.New(os.Stdout, "INFO: ", log.Ldate|log.Ltime)
@@ -181,39 +172,29 @@ func vulnerabilityProviderConfig(tenableToken, qualysEndpoint, qualysUser, qualy
 func main() {
 	log.SetFlags(log.Llongfile | log.Ldate | log.Ltime)
 
-	parser := koanfyaml.Parser()
-	if err := k.Load(file.Provider("config.yaml"), parser); err != nil {
-		k.Load(env.Provider("SYNQLY_", "_", func(s string) string {
-			return strings.ToLower(s)
-		}), nil)
+	// Load config variables from the env file
+	config, err := LoadConfig(".")
+	if err != nil {
+		log.Fatal("cannot load config:", err)
 	}
 
-	synqlyOrgToken := k.String("synqly.org.token")
-	jiraURL := k.String("synqly.jira.url")
-	jiraUser := k.String("synqly.jira.user")
-	jiraToken := k.String("synqly.jira.token")
-	tenableToken := k.String("synqly.tenable.token")
-	qualysEndpoint := k.String("synqly.qualys.endpoint")
-	qualysUser := k.String("synqly.qualys.user")
-	qualysSecret := k.String("synqly.qualys.secret")
-
-	if synqlyOrgToken == "" {
+	if config.synqlyOrgToken == "" {
 		log.Fatal("Missing Synqly Org token")
 	}
 
-	ticketingProvider, err := ticketingProviderConfig(jiraURL, jiraUser, jiraToken)
+	ticketingProvider, err := ticketingProviderConfig(config.jiraUrl, config.jiraUser, config.jiraToken)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	vulnProvider, err := vulnerabilityProviderConfig(tenableToken, qualysEndpoint, qualysUser, qualysSecret)
+	vulnProvider, err := vulnerabilityProviderConfig(config.tenableToken, config.qualysEndpoint, config.qualysUser, config.qualysSecret)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	ctx := context.Background()
 
-	t, err := common.NewTenant(ctx, "Zenith Systems", "tenant_store_qualys.yaml", synqlyOrgToken, map[mgmt.CategoryId]*mgmt.CreateIntegrationRequest{
+	t, err := common.NewTenant(ctx, "Zenith Systems", "tenant_store_qualys.yaml", config.synqlyOrgToken, map[mgmt.CategoryId]*mgmt.CreateIntegrationRequest{
 		mgmt.CategoryIdTicketing:       ticketingProvider,
 		mgmt.CategoryIdVulnerabilities: vulnProvider,
 	})

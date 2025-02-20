@@ -7,13 +7,7 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"strings"
 	"time"
-
-	koanfyaml "github.com/knadh/koanf/parsers/yaml"
-	"github.com/knadh/koanf/providers/env"
-	"github.com/knadh/koanf/providers/file"
-	"github.com/knadh/koanf/v2"
 
 	"github.com/synqly/go-sdk/client/engine"
 	engineClient "github.com/synqly/go-sdk/client/engine/client"
@@ -21,64 +15,16 @@ import (
 	"github.com/synqly/go-sdk/examples/common"
 )
 
-var (
-	k        = koanf.New(".")
-	oktaConf = oktaConfig{}
-)
-
 var consoleLogger = log.New(os.Stdout, "INFO: ", log.Ldate|log.Ltime)
 
-type provider interface {
-	ProviderConfig() *mgmt.ProviderConfig
-}
-
-type oktaConfig struct {
-	URL      string `koanf:"url"`
-	Token    string `koanf:"token"`
-	ClientId string `koanf:"clientid"`
-}
-
-func (c *oktaConfig) ProviderConfig() *mgmt.ProviderConfig {
+func ProviderConfig(c Config) *mgmt.ProviderConfig {
 	return &mgmt.ProviderConfig{
 		IdentityOkta: &mgmt.IdentityOkta{
-			Url: c.URL,
+			Url: c.url,
 			Credential: &mgmt.OktaCredential{
 				OAuthClient: &mgmt.OAuthClientCredential{
-					ClientId:     c.ClientId,
-					ClientSecret: c.Token,
-				},
-			},
-		},
-	}
-}
-
-func (c *oktaConfig) Validate() error {
-	if c.URL == "" {
-		return errors.New("okta.url is required")
-	}
-	if c.Token == "" {
-		return errors.New("okta.token is required")
-	}
-	if c.ClientId == "" {
-		return errors.New("okta.client.id is required")
-	}
-	return nil
-}
-
-type entraConfig struct {
-	TenantId     string `koanf:"tenant_id"`
-	ClientId     string `koanf:"client_id"`
-	ClientSecret string `koanf:"client_secret"`
-}
-
-func (c *entraConfig) ProviderConfig() *mgmt.ProviderConfig {
-	return &mgmt.ProviderConfig{
-		IdentityEntraId: &mgmt.IdentityEntraId{
-			TenantId: c.TenantId,
-			Credential: &mgmt.EntraIdCredential{
-				OAuthClient: &mgmt.OAuthClientCredential{
-					ClientId:     c.ClientId,
-					ClientSecret: c.ClientSecret,
+					ClientId:     c.clientId,
+					ClientSecret: c.token,
 				},
 			},
 		},
@@ -87,6 +33,7 @@ func (c *entraConfig) ProviderConfig() *mgmt.ProviderConfig {
 
 func waitForAuditLogResult(ctx context.Context, client *engineClient.Client, req *engine.QueryIdentityAuditLogRequest) (*engine.QueryIdentityAuditLogResponse, error) {
 	var resp *engine.QueryIdentityAuditLogResponse = nil
+	var err error
 	fmt.Print("Waiting for the audit log to update ")
 	for attempt := 1; attempt < 60 && resp == nil; attempt++ {
 		fmt.Print(".")
@@ -95,7 +42,7 @@ func waitForAuditLogResult(ctx context.Context, client *engineClient.Client, req
 			continue
 		}
 
-		resp, err := client.Identity.QueryAuditLog(ctx, req)
+		resp, err = client.Identity.QueryAuditLog(ctx, req)
 		if err != nil {
 			return nil, err
 		}
@@ -114,31 +61,31 @@ func waitForAuditLogResult(ctx context.Context, client *engineClient.Client, req
 // Next, it forces a password reset for the user, and waits for the audit log to update with the
 // result of this action. Then, it disables the user, and again waits for the audit log to update.
 // Finally, it re-enables the user, and waits for the audit log to update.
-func demoActions(userEmail, orgToken string, p provider) error {
+func demoActions(config Config) error {
 	ctx := context.Background()
 
-	t, err := common.NewTenant(ctx, "Secure Identities Corp", "tenant_store-okta.yaml", orgToken, map[mgmt.CategoryId]*mgmt.CreateIntegrationRequest{
+	t, err := common.NewTenant(ctx, "Secure Identities Corp", "tenant_store-okta.yaml", config.synqlyOrgToken, map[mgmt.CategoryId]*mgmt.CreateIntegrationRequest{
 		mgmt.CategoryIdIdentity: {
 			Name:           engine.String("iam"),
-			ProviderConfig: p.ProviderConfig(),
+			ProviderConfig: ProviderConfig(config),
 		},
 	})
 	if err != nil {
 		return fmt.Errorf("unable to create tenant: %w", err)
 	}
 
-	consoleLogger.Printf("Looking up user ID for email %s", userEmail)
+	consoleLogger.Printf("Looking up user ID for email %s", config.userEmail)
 
 	user, err := t.Synqly.EngineClients["identity"].Identity.QueryUsers(ctx, &engine.QueryUserRequest{
 		Filter: []*string{
-			engine.String("entity.user.name[eq]" + userEmail),
+			engine.String("entity.user.name[eq]" + config.userEmail),
 		},
 	})
 	if err != nil {
 		return err
 	}
 	if len(user.Result) == 0 {
-		return fmt.Errorf("user with email %s not found", userEmail)
+		return fmt.Errorf("user with email %s not found", config.userEmail)
 	}
 
 	b, _ := json.MarshalIndent(user.Result, "", "  ")
@@ -162,7 +109,7 @@ func demoActions(userEmail, orgToken string, p provider) error {
 	now := time.Now().Add(-1 * time.Second).UTC().Format(time.RFC3339)
 
 	fmt.Printf("\n\n\n\n")
-	consoleLogger.Printf("Forcing password reset for user %s", userEmail)
+	consoleLogger.Printf("Forcing password reset for user %s", config.userEmail)
 
 	err = t.Synqly.EngineClients["identity"].Identity.ForceUserPasswordReset(ctx, userID)
 	if err != nil {
@@ -173,7 +120,7 @@ func demoActions(userEmail, orgToken string, p provider) error {
 
 	resp, err := waitForAuditLogResult(ctx, t.Synqly.EngineClients["identity"], &engine.QueryIdentityAuditLogRequest{
 		Filter: []*string{
-			engine.String("user.email_addr[eq]" + userEmail),
+			engine.String("user.email_addr[eq]" + config.userEmail),
 			engine.String("time[gte]" + now),
 		},
 		Order: []*string{
@@ -186,14 +133,14 @@ func demoActions(userEmail, orgToken string, p provider) error {
 
 	logs, _ := json.MarshalIndent(resp.Result, "", "  ")
 	fmt.Println()
-	consoleLogger.Printf("Audit logs for user %s:\n%s\n", userEmail, logs)
+	consoleLogger.Printf("Audit logs for user %s:\n%s\n", config.userEmail, logs)
 
 	// Disable user
 
 	now = time.Now().Add(-1 * time.Second).UTC().Format(time.RFC3339)
 
 	fmt.Printf("\n\n\n\n")
-	consoleLogger.Printf("Disabling user %s", userEmail)
+	consoleLogger.Printf("Disabling user %s", config.userEmail)
 
 	err = t.Synqly.EngineClients["identity"].Identity.DisableUser(ctx, userID)
 	if err != nil {
@@ -204,7 +151,7 @@ func demoActions(userEmail, orgToken string, p provider) error {
 
 	resp, err = waitForAuditLogResult(ctx, t.Synqly.EngineClients["identity"], &engine.QueryIdentityAuditLogRequest{
 		Filter: []*string{
-			engine.String("user.email_addr[eq]" + userEmail),
+			engine.String("user.email_addr[eq]" + config.userEmail),
 			engine.String("time[gte]" + now),
 		},
 		Order: []*string{
@@ -218,14 +165,14 @@ func demoActions(userEmail, orgToken string, p provider) error {
 
 	logs, _ = json.MarshalIndent(resp.Result, "", "  ")
 	fmt.Println()
-	consoleLogger.Printf("Audit logs for user %s:\n%s\n", userEmail, logs)
+	consoleLogger.Printf("Audit logs for user %s:\n%s\n", config.userEmail, logs)
 
 	time.Sleep(1 * time.Second)
 
 	// Re-enable user
 
 	fmt.Printf("\n\n\n\n")
-	consoleLogger.Printf("Enabling user %s", userEmail)
+	consoleLogger.Printf("Enabling user %s", config.userEmail)
 
 	now = time.Now().Add(-1 * time.Second).UTC().Format(time.RFC3339)
 
@@ -238,7 +185,7 @@ func demoActions(userEmail, orgToken string, p provider) error {
 
 	resp, err = waitForAuditLogResult(ctx, t.Synqly.EngineClients["identity"], &engine.QueryIdentityAuditLogRequest{
 		Filter: []*string{
-			engine.String("user.email_addr[eq]" + userEmail),
+			engine.String("user.email_addr[eq]" + config.userEmail),
 			engine.String("time[gte]" + now),
 		},
 		Order: []*string{
@@ -252,7 +199,7 @@ func demoActions(userEmail, orgToken string, p provider) error {
 
 	logs, _ = json.MarshalIndent(resp.Result, "", "  ")
 	fmt.Println()
-	consoleLogger.Printf("Audit logs for user %s:\n%s\n", userEmail, logs)
+	consoleLogger.Printf("Audit logs for user %s:\n%s\n", config.userEmail, logs)
 
 	return nil
 }
@@ -260,41 +207,17 @@ func demoActions(userEmail, orgToken string, p provider) error {
 func main() {
 	log.SetFlags(log.Llongfile | log.Ldate | log.Ltime)
 
-	// load config -- try from a config file, and if that is not present, then try env vars
-	parser := koanfyaml.Parser()
-	if err := k.Load(file.Provider("config-okta.yaml"), parser); err != nil {
-		k.Load(env.Provider("SYNQLY_", "_", func(s string) string {
-			return strings.ToLower(s)
-		}), nil)
-	}
-
-	orgToken := k.String("synqly.org.token")
-	if orgToken == "" {
-		log.Fatal("synqly.org.token is required. Set SYNQLY_ORG_TOKEN or add it to config.yaml.")
-	}
-
-	oktaConf := oktaConfig{}
-
-	err := k.Unmarshal("synqly.okta", &oktaConf)
+	// Load config variables from the env file
+	config, err := LoadConfig(".")
 	if err != nil {
-		log.Fatal(err)
-	}
-	if err := oktaConf.Validate(); err != nil {
-		log.Fatalf("invalid okta config: %s. Set Okta configuration through env vars or add it to config.yaml", err)
+		log.Fatal("cannot load config:", err)
 	}
 
-	// entraConf := entraConfig{}
-	// err := k.Unmarshal("synqly.entra_id", &entraConf)
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-
-	userEmail := k.String("synqly.user.email")
-	if userEmail == "" {
-		log.Fatal("synqly.okta.user.email is required. Set SYNQLY_OKTA_USER_EMAIL or add it to config.yaml.")
+	if config.synqlyOrgToken == "" || config.clientId == "" || config.token == "" || config.userEmail == "" || config.url == "" {
+		log.Fatal("Must set following environment variables: SYNQLY_ORG_TOKEN CLIENT_ID TOKEN USER_EMAIL URL")
 	}
 
-	if err := demoActions(userEmail, orgToken, &oktaConf); err != nil {
+	if err := demoActions(config); err != nil {
 		log.Fatal(err)
 	}
 }

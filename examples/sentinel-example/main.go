@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"os"
 	"time"
 
 	"github.com/brianvoe/gofakeit"
@@ -16,46 +15,46 @@ import (
 	mgmtClient "github.com/synqly/go-sdk/client/management/client"
 )
 
-var (
-	synqlyOrgToken    = os.Getenv("SYNQLY_ORG_TOKEN")
-	azureTenantId     = os.Getenv("AZURE_TENANT_ID")
-	azureClientId     = os.Getenv("AZURE_CLIENT_ID")
-	azureClientSecret = os.Getenv("AZURE_CLIENT_SECRET")
-	dceURL            = os.Getenv("AZURE_DCE_URL")
-	dcrId             = os.Getenv("AZURE_DCR_ID")
-)
-
 func main() {
 	ctx := context.Background()
 
-	if synqlyOrgToken == "" || azureClientId == "" || azureClientSecret == "" {
+	// Load config variables from the env file
+	config, err := LoadConfig(".")
+	if err != nil {
+		log.Fatal("cannot load config:", err)
+	}
+
+	if config.synqlyOrgToken == "" || config.azureClientId == "" || config.azureClientSecret == "" {
 		log.Fatal("Must set following environment variables: SYNQLY_ORG_TOKEN AZURE_CLIENT_ID AZURE_CLIENT_SECRET")
 	}
 
 	client := mgmtClient.NewClient(
-		mgmtClient.WithToken(synqlyOrgToken),
+		mgmtClient.WithToken(config.synqlyOrgToken),
 	)
 
 	integrationName := "alerts"
 
 	defer func() {
-		client.Integrations.Delete(ctx, "acme-corp", integrationName)
-		log.Print("Integration deleted")
+		if err := client.Integrations.Delete(ctx, "acme-corp", integrationName); err != nil {
+			log.Printf("Failed to delete integration: %v", err)
+		} else {
+			log.Print("Integration deleted")
+		}
 	}()
 
 	integration, err := client.Integrations.Create(ctx, "acme-corp", &mgmt.CreateIntegrationRequest{
 		Name: mgmt.String(integrationName),
 		ProviderConfig: &mgmt.ProviderConfig{
 			SinkAzureMonitorLogs: &mgmt.SinkAzureMonitorLogs{
-				Url: dceURL,
+				Url: config.dceURL,
 				Credential: &mgmt.AzureMonitorLogsCredential{
 					Token: &mgmt.TokenCredential{
-						Secret: azureClientSecret,
+						Secret: config.azureClientSecret,
 					},
 				},
-				ClientId:   azureClientId,
-				TenantId:   azureTenantId,
-				RuleId:     dcrId,
+				ClientId:   config.azureClientId,
+				TenantId:   config.azureTenantId,
+				RuleId:     config.dcrId,
 				StreamName: "Custom-CommonSecurityLog",
 			},
 		},
