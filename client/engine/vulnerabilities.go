@@ -6,9 +6,9 @@ import (
 	json "encoding/json"
 	fmt "fmt"
 	core "github.com/synqly/go-sdk/client/engine/core"
-	scanactivity "github.com/synqly/go-sdk/client/engine/ocsf/v110/scanactivity"
-	securityfinding "github.com/synqly/go-sdk/client/engine/ocsf/v110/securityfinding"
 	inventoryinfo "github.com/synqly/go-sdk/client/engine/ocsf/v130/inventoryinfo"
+	scanactivity "github.com/synqly/go-sdk/client/engine/ocsf/v130/scanactivity"
+	securityfinding "github.com/synqly/go-sdk/client/engine/ocsf/v130/securityfinding"
 )
 
 type QueryAssetsRequest struct {

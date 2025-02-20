@@ -25,6 +25,7 @@ import (
 	incidentfinding "github.com/synqly/go-sdk/client/engine/ocsf/v130/incidentfinding"
 	inventoryinfo "github.com/synqly/go-sdk/client/engine/ocsf/v130/inventoryinfo"
 	scanactivity "github.com/synqly/go-sdk/client/engine/ocsf/v130/scanactivity"
+	v130securityfinding "github.com/synqly/go-sdk/client/engine/ocsf/v130/securityfinding"
 	softwareinfo "github.com/synqly/go-sdk/client/engine/ocsf/v130/softwareinfo"
 	useraccessmanagement "github.com/synqly/go-sdk/client/engine/ocsf/v130/useraccessmanagement"
 	vulnerabilityfinding "github.com/synqly/go-sdk/client/engine/ocsf/v130/vulnerabilityfinding"
@@ -2606,7 +2607,7 @@ func (s *ScanSchedule) String() string {
 }
 
 // Result of a vulnerability scan. Represented by OCSF Security Finding class (class_uid 2001).
-type SecurityFinding = *securityfinding.SecurityFinding
+type SecurityFinding = *v130securityfinding.SecurityFinding
 
 type User struct {
 	// ID of the user.
