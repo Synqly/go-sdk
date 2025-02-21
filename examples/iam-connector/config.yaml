@@ -1,0 +1,11 @@
+synqly:
+  org:
+    token:
+
+  user:
+    email:
+
+  okta:
+    url:
+    token:
+    clientid:
