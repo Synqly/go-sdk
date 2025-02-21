@@ -7626,6 +7626,49 @@ func (j *JiraCredential) Accept(visitor JiraCredentialVisitor) error {
 	return fmt.Errorf("type %T does not define a non-empty union type", j)
 }
 
+// [Mock] Configuration for ServiceNow as an Assets Provider
+type MockAssetsServiceNow struct {
+	// Enabled mock provider configuration.
+	Mock bool `json:"mock" url:"mock"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (m *MockAssetsServiceNow) GetExtraProperties() map[string]interface{} {
+	return m.extraProperties
+}
+
+func (m *MockAssetsServiceNow) UnmarshalJSON(data []byte) error {
+	type unmarshaler MockAssetsServiceNow
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*m = MockAssetsServiceNow(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *m)
+	if err != nil {
+		return err
+	}
+	m.extraProperties = extraProperties
+
+	m._rawJSON = nil
+	return nil
+}
+
+func (m *MockAssetsServiceNow) String() string {
+	if len(m._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(m._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(m); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", m)
+}
+
 // Configuration for Jira as a Notification Provider
 type NotificationsJira struct {
 	Credential *JiraCredential `json:"credential" url:"credential"`
@@ -8213,6 +8256,7 @@ type ProviderConfig struct {
 	IdentityGoogle                    *IdentityGoogle
 	IdentityOkta                      *IdentityOkta
 	IdentityPingone                   *IdentityPingOne
+	MockAssetsServicenow              *MockAssetsServiceNow
 	NotificationsJira                 *NotificationsJira
 	NotificationsMockNotifications    *NotificationsMock
 	NotificationsSlack                *NotificationsSlack
@@ -8325,6 +8369,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.IdentityPingone = value
+	case "mock_assets_servicenow":
+		value := new(MockAssetsServiceNow)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.MockAssetsServicenow = value
 	case "notifications_jira":
 		value := new(NotificationsJira)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -8555,6 +8605,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.IdentityPingone != nil {
 		return core.MarshalJSONWithExtraProperty(p.IdentityPingone, "type", "identity_pingone")
 	}
+	if p.MockAssetsServicenow != nil {
+		return core.MarshalJSONWithExtraProperty(p.MockAssetsServicenow, "type", "mock_assets_servicenow")
+	}
 	if p.NotificationsJira != nil {
 		return core.MarshalJSONWithExtraProperty(p.NotificationsJira, "type", "notifications_jira")
 	}
@@ -8666,6 +8719,7 @@ type ProviderConfigVisitor interface {
 	VisitIdentityGoogle(*IdentityGoogle) error
 	VisitIdentityOkta(*IdentityOkta) error
 	VisitIdentityPingone(*IdentityPingOne) error
+	VisitMockAssetsServicenow(*MockAssetsServiceNow) error
 	VisitNotificationsJira(*NotificationsJira) error
 	VisitNotificationsMockNotifications(*NotificationsMock) error
 	VisitNotificationsSlack(*NotificationsSlack) error
@@ -8733,6 +8787,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.IdentityPingone != nil {
 		return visitor.VisitIdentityPingone(p.IdentityPingone)
+	}
+	if p.MockAssetsServicenow != nil {
+		return visitor.VisitMockAssetsServicenow(p.MockAssetsServicenow)
 	}
 	if p.NotificationsJira != nil {
 		return visitor.VisitNotificationsJira(p.NotificationsJira)
@@ -8843,6 +8900,8 @@ const (
 	ProviderConfigIdAssetsNozomiVantage ProviderConfigId = "assets_nozomi_vantage"
 	// ServiceNow Configuration Management Database (CMDB)
 	ProviderConfigIdAssetsServiceNow ProviderConfigId = "assets_servicenow"
+	// [MOCK] ServiceNow Configuration Management Database (CMDB)
+	ProviderConfigIdMockAssetsServiceNow ProviderConfigId = "mock_assets_servicenow"
 	// CrowdStrike Falcon® Insight EDR
 	ProviderConfigIdEdrCrowdStrike ProviderConfigId = "edr_crowdstrike"
 	// Microsoft Defender for Endpoint
@@ -8935,6 +8994,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdAssetsNozomiVantage, nil
 	case "assets_servicenow":
 		return ProviderConfigIdAssetsServiceNow, nil
+	case "mock_assets_servicenow":
+		return ProviderConfigIdMockAssetsServiceNow, nil
 	case "edr_crowdstrike":
 		return ProviderConfigIdEdrCrowdStrike, nil
 	case "edr_defender":
