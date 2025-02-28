@@ -178,6 +178,7 @@ func (c *Client) ListRemoteFields(
 // Tickets must be created and retrieved within the context of a specific Project.
 func (c *Client) ListProjects(
 	ctx context.Context,
+	request *engine.ListProjectsRequest,
 	opts ...option.RequestOption,
 ) (*engine.ListProjectsResponse, error) {
 	options := core.NewRequestOptions(opts...)
@@ -190,6 +191,14 @@ func (c *Client) ListProjects(
 		baseURL = options.BaseURL
 	}
 	endpointURL := baseURL + "/v1/ticketing/projects"
+
+	queryParams, err := core.QueryValues(request)
+	if err != nil {
+		return nil, err
+	}
+	if len(queryParams) > 0 {
+		endpointURL += "?" + queryParams.Encode()
+	}
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 

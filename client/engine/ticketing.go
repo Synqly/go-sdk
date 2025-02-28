@@ -9,6 +9,13 @@ import (
 	time "time"
 )
 
+type ListProjectsRequest struct {
+	// Cursor to use to retrieve the next page of results.
+	Cursor *string `json:"-" url:"cursor,omitempty"`
+	// Number of `Projects` objects to return in this page. Defaults to 50.
+	Limit *int `json:"-" url:"limit,omitempty"`
+}
+
 type QueryTicketsRequest struct {
 	// Cursor to use to retrieve the next page of results.
 	Cursor *string `json:"-" url:"cursor,omitempty"`
@@ -546,6 +553,8 @@ func (l *ListCommentsResponse) String() string {
 
 type ListProjectsResponse struct {
 	Result []*Project `json:"result" url:"result"`
+	// Cursor to use to retrieve the next page of results
+	Cursor string `json:"cursor" url:"cursor"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
