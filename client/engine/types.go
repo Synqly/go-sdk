@@ -6,29 +6,28 @@ import (
 	json "encoding/json"
 	fmt "fmt"
 	core "github.com/synqly/go-sdk/client/engine/core"
-	accountchange "github.com/synqly/go-sdk/client/engine/ocsf/v110/accountchange"
-	apiactivity "github.com/synqly/go-sdk/client/engine/ocsf/v110/apiactivity"
-	authentication "github.com/synqly/go-sdk/client/engine/ocsf/v110/authentication"
-	compliancefinding "github.com/synqly/go-sdk/client/engine/ocsf/v110/compliancefinding"
-	fileactivity "github.com/synqly/go-sdk/client/engine/ocsf/v110/fileactivity"
-	groupmanagement "github.com/synqly/go-sdk/client/engine/ocsf/v110/groupmanagement"
-	moduleactivity "github.com/synqly/go-sdk/client/engine/ocsf/v110/moduleactivity"
-	networkactivity "github.com/synqly/go-sdk/client/engine/ocsf/v110/networkactivity"
-	processactivity "github.com/synqly/go-sdk/client/engine/ocsf/v110/processactivity"
-	scheduledjobactivity "github.com/synqly/go-sdk/client/engine/ocsf/v110/scheduledjobactivity"
-	securityfinding "github.com/synqly/go-sdk/client/engine/ocsf/v110/securityfinding"
-	webresourceaccessactivity "github.com/synqly/go-sdk/client/engine/ocsf/v110/webresourceaccessactivity"
+	accountchange "github.com/synqly/go-sdk/client/engine/ocsf/v130/accountchange"
+	apiactivity "github.com/synqly/go-sdk/client/engine/ocsf/v130/apiactivity"
+	authentication "github.com/synqly/go-sdk/client/engine/ocsf/v130/authentication"
 	authorizesession "github.com/synqly/go-sdk/client/engine/ocsf/v130/authorizesession"
 	baseevent "github.com/synqly/go-sdk/client/engine/ocsf/v130/baseevent"
+	compliancefinding "github.com/synqly/go-sdk/client/engine/ocsf/v130/compliancefinding"
 	configstate "github.com/synqly/go-sdk/client/engine/ocsf/v130/configstate"
 	detectionfinding "github.com/synqly/go-sdk/client/engine/ocsf/v130/detectionfinding"
+	fileactivity "github.com/synqly/go-sdk/client/engine/ocsf/v130/fileactivity"
+	groupmanagement "github.com/synqly/go-sdk/client/engine/ocsf/v130/groupmanagement"
 	incidentfinding "github.com/synqly/go-sdk/client/engine/ocsf/v130/incidentfinding"
 	inventoryinfo "github.com/synqly/go-sdk/client/engine/ocsf/v130/inventoryinfo"
+	moduleactivity "github.com/synqly/go-sdk/client/engine/ocsf/v130/moduleactivity"
+	networkactivity "github.com/synqly/go-sdk/client/engine/ocsf/v130/networkactivity"
+	processactivity "github.com/synqly/go-sdk/client/engine/ocsf/v130/processactivity"
 	scanactivity "github.com/synqly/go-sdk/client/engine/ocsf/v130/scanactivity"
-	v130securityfinding "github.com/synqly/go-sdk/client/engine/ocsf/v130/securityfinding"
+	scheduledjobactivity "github.com/synqly/go-sdk/client/engine/ocsf/v130/scheduledjobactivity"
+	securityfinding "github.com/synqly/go-sdk/client/engine/ocsf/v130/securityfinding"
 	softwareinfo "github.com/synqly/go-sdk/client/engine/ocsf/v130/softwareinfo"
 	useraccessmanagement "github.com/synqly/go-sdk/client/engine/ocsf/v130/useraccessmanagement"
 	vulnerabilityfinding "github.com/synqly/go-sdk/client/engine/ocsf/v130/vulnerabilityfinding"
+	webresourceaccessactivity "github.com/synqly/go-sdk/client/engine/ocsf/v130/webresourceaccessactivity"
 	time "time"
 )
 
@@ -2607,7 +2606,7 @@ func (s *ScanSchedule) String() string {
 }
 
 // Result of a vulnerability scan. Represented by OCSF Security Finding class (class_uid 2001).
-type SecurityFinding = *v130securityfinding.SecurityFinding
+type SecurityFinding = *securityfinding.SecurityFinding
 
 type User struct {
 	// ID of the user.

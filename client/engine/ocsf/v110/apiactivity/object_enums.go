@@ -28,6 +28,16 @@ const Account_Type_AWSAccount AccountTypeId = 10
 // Other. The account type is not mapped.
 const Account_Type_Other AccountTypeId = 99
 
+// DeviceNetworkStatusId Values
+// . The network isolation status ID.
+
+// NotIsolated. Device is not isolated from the network.
+const Device_NetworkStatus_NotIsolated DeviceNetworkStatusId = 1
+// Isolated. Device is isolated from the network.
+const Device_NetworkStatus_Isolated DeviceNetworkStatusId = 2
+// Unknown. The network isolation status is unknown.
+const Device_NetworkStatus_Unknown DeviceNetworkStatusId = 99
+
 // DeviceRiskLevelId Values
 // Risk Level ID. The normalized risk level id.
 

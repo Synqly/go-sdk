@@ -10,42 +10,55 @@ import (
 )
 
 // Email address. For example: <code>john_doe@example.com</code>.
+// Deprecated: Use OCSF v130 package instead.
 type EmailAddress = string
 
 // File name. For example: <code>text-file.txt</code>.
+// Deprecated: Use OCSF v130 package instead.
 type FileName = string
 
 // Hash. A unique value that corresponds to the content of the file, image, ja3_hash or hassh found in the schema. For example MD5: <code>3172ac7e2b55cbb81f04a6e65855a628</code>.
+// Deprecated: Use OCSF v130 package instead.
 type Hash = string
 
 // Unique name assigned to a device connected to a computer network. A domain name in general is an Internet address that can be resolved through the Domain Name System (DNS). For example: <code>r2-d2.example.com</code>.
+// Deprecated: Use OCSF v130 package instead.
 type Hostname = string
 
 // Internet Protocol address (IP address), in either IPv4 or IPv6 format. For example, <code>192.168.200.24</code> or <code>2001:0db8:85a3:0000:0000:8a2e:0370:7334</code>.
+// Deprecated: Use OCSF v130 package instead.
 type IpAddress = string
 
 // Media Access Control (MAC) address. For example: <code>18:36:F3:98:4F:9A</code>.
+// Deprecated: Use OCSF v130 package instead.
 type MacAddress = string
 
 // The TCP/UDP port number. For example: <code>80</code> or <code>22</code>.
+// Deprecated: Use OCSF v130 package instead.
 type Port = int
 
 // Process name. For example: <code>Notepad</code>.
+// Deprecated: Use OCSF v130 package instead.
 type ProcessName = string
 
 // Resource unique identifier. For example, S3 Bucket name or EC2 Instance ID.
+// Deprecated: Use OCSF v130 package instead.
 type ResourceUid = string
 
 // The subnet represented in a CIDR notation, using the format network_address/prefix_length. The network_address can be in either IPv4 or IPv6 format. The prefix length indicates the number of bits used for the network portion, and the remaining bits are available for host addresses within that subnet. <div>For example:<ul><li>192.168.1.0/24</li><li>2001:0db8:85a3:0000::/64</li></ul></div>
+// Deprecated: Use OCSF v130 package instead.
 type Subnet = string
 
 // The timestamp format is the number of milliseconds since the Epoch 01/01/1970 00:00:00 UTC. For example <code>1618524549901</code>.
+// Deprecated: Use OCSF v130 package instead.
 type Timestamp = int
 
 // Uniform Resource Locator (URL) string. For example: <code>http://www.example.com/download/trouble.exe</code>.
+// Deprecated: Use OCSF v130 package instead.
 type UrlString = string
 
 // User name. For example: <code>john_doe</code>.
+// Deprecated: Use OCSF v130 package instead.
 type UserName = string
 
 // ActivityId is an enum, and the following values are allowed.
@@ -54,14 +67,17 @@ type UserName = string
 // 2 - Update: Reports updates to an Incident.
 // 3 - Close: Reports closure of an Incident .
 // 99 - Other: The event activity is not mapped. See the <code>activity_name</code> attribute, which contains a data source specific value.
+// Deprecated: Use OCSF v130 package instead.
 type ActivityId = int
 
 // CategoryUid is an enum, and the following values are allowed.
 // 2 - Findings: Findings events report findings, detections, and possible resolutions of malware, anomalies, or other actions performed by security products.
+// Deprecated: Use OCSF v130 package instead.
 type CategoryUid = int
 
 // ClassUid is an enum, and the following values are allowed.
 // 2005 - IncidentFinding: An Incident Finding reports the creation, update, or closure of security incidents as a result of detections and/or analytics.
+// Deprecated: Use OCSF v130 package instead.
 type ClassUid = int
 
 // ConfidenceId is an enum, and the following values are allowed.
@@ -70,6 +86,7 @@ type ClassUid = int
 // 2 - Medium
 // 3 - High
 // 99 - Other: The confidence is not mapped to the defined enum values. See the <code>confidence</code> attribute, which contains a data source specific value.
+// Deprecated: Use OCSF v130 package instead.
 type ConfidenceId = int
 
 // ImpactId is an enum, and the following values are allowed.
@@ -79,9 +96,11 @@ type ConfidenceId = int
 // 3 - High
 // 4 - Critical
 // 99 - Other: The impact is not mapped. See the <code>impact</code> attribute, which contains a data source specific value.
+// Deprecated: Use OCSF v130 package instead.
 type ImpactId = int
 
 // An Incident Finding reports the creation, update, or closure of security incidents as a result of detections and/or analytics.
+// Deprecated: Use OCSF v130 package instead.
 type IncidentFinding struct {
 	// The normalized identifier of the Incident activity.
 	ActivityId ActivityId `json:"activity_id" url:"activity_id"`
@@ -253,6 +272,7 @@ func (i *IncidentFinding) String() string {
 // 3 - High: Critical functionality or network access is interrupted, degraded or unusable, having a severe impact on services availability. No acceptable alternative is possible.
 // 4 - Critical: Interruption making a critical functionality inaccessible or a complete network interruption causing a severe impact on services availability. There is no possible alternative.
 // 99 - Other: The priority is not normalized.
+// Deprecated: Use OCSF v130 package instead.
 type PriorityId = int
 
 // SeverityId is an enum, and the following values are allowed.
@@ -264,6 +284,7 @@ type PriorityId = int
 // 5 - Critical: Action is required immediately and the scope is broad.
 // 6 - Fatal: An error occurred but it is too late to take remedial action.
 // 99 - Other: The event/finding severity is not mapped. See the <code>severity</code> attribute, which contains a data source specific value.
+// Deprecated: Use OCSF v130 package instead.
 type SeverityId = int
 
 // StatusId is an enum, and the following values are allowed.
@@ -274,6 +295,7 @@ type SeverityId = int
 // 4 - Resolved: The service desk has confirmed that the incident is resolved.
 // 5 - Closed: The incident is resolved and no further action is necessary.
 // 99 - Other: The event status is not mapped. See the <code>status</code> attribute, which contains a data source specific value.
+// Deprecated: Use OCSF v130 package instead.
 type StatusId = int
 
 // TypeUid is an enum, and the following values are allowed.
@@ -282,6 +304,7 @@ type StatusId = int
 // 200502 - Update: Reports updates to an Incident.
 // 200503 - Close: Reports closure of an Incident .
 // 200599 - Other
+// Deprecated: Use OCSF v130 package instead.
 type TypeUid = int
 
 // VerdictId is an enum, and the following values are allowed.
@@ -297,9 +320,11 @@ type TypeUid = int
 // 9 - ManagedExternally: The incident remediation or required actions are managed externally.
 // 10 - Duplicate: The incident is a duplicate.
 // 99 - Other: The type is not mapped. See the <code>type</code> attribute, which contains a data source specific value.
+// Deprecated: Use OCSF v130 package instead.
 type VerdictId = int
 
 // The Account object contains details about the account that initiated or performed a specific activity within a system or application.
+// Deprecated: Use OCSF v130 package instead.
 type Account struct {
 	// The name of the account (e.g. GCP Account Name).
 	Name *string `json:"name,omitempty" url:"name,omitempty"`
@@ -361,9 +386,11 @@ func (a *Account) String() string {
 // 9 - LinuxAccount
 // 10 - AWSAccount
 // 99 - Other: The account type is not mapped.
+// Deprecated: Use OCSF v130 package instead.
 type AccountTypeId = int
 
 // The Analytic object contains details about the analytic technique used to analyze and derive insights from the data or information that led to the creation of a finding or conclusion.
+// Deprecated: Use OCSF v130 package instead.
 type Analytic struct {
 	// The analytic category.
 	Category *string `json:"category,omitempty" url:"category,omitempty"`
@@ -427,9 +454,11 @@ func (a *Analytic) String() string {
 // 3 - Statistical
 // 4 - ML*DL*
 // 99 - Other: The type is not mapped. See the <code>type</code> attribute, which contains a data source specific value.
+// Deprecated: Use OCSF v130 package instead.
 type AnalyticTypeId = int
 
 // The API, or Application Programming Interface, object represents information pertaining to an API request and response.
+// Deprecated: Use OCSF v130 package instead.
 type Api struct {
 	// The information pertaining to the API group.
 	Group *Group `json:"group,omitempty" url:"group,omitempty"`
@@ -483,6 +512,7 @@ func (a *Api) String() string {
 }
 
 // The <a target='_blank' href='https://attack.mitre.org'>MITRE ATT&CK®</a> object describes the tactic, technique & sub-technique associated to an attack as defined in <a target='_blank' href='https://attack.mitre.org/wiki/ATT&CK_Matrix'>ATT&CK Matrix<sup>TM</sup></a>.
+// Deprecated: Use OCSF v130 package instead.
 type Attack struct {
 	// The Sub Technique object describes the sub technique ID and/or name associated to an attack, as defined by <a target='_blank' href='https://attack.mitre.org/wiki/ATT&CK_Matrix'>ATT&CK Matrix<sup>TM</sup></a>.
 	SubTechnique *SubTechnique `json:"sub_technique,omitempty" url:"sub_technique,omitempty"`
@@ -534,6 +564,7 @@ func (a *Attack) String() string {
 }
 
 // The Cloud object contains information about a cloud account such as AWS Account ID, regions, etc.
+// Deprecated: Use OCSF v130 package instead.
 type Cloud struct {
 	// The account object describes details about the account that was the source or target of the activity.
 	Account *Account `json:"account,omitempty" url:"account,omitempty"`
@@ -587,6 +618,7 @@ func (c *Cloud) String() string {
 }
 
 // The Container object describes an instance of a specific container. A container is a prepackaged, portable system image that runs isolated on an existing system using a container runtime like containerd.
+// Deprecated: Use OCSF v130 package instead.
 type Container struct {
 	// Commit hash of image created for docker or the SHA256 hash of the container. For example: <code>13550340a8681c84c861aac2e5b440161c2b33a3e4f302ac680ca5b686de48de</code>.
 	Hash *Fingerprint `json:"hash,omitempty" url:"hash,omitempty"`
@@ -648,6 +680,7 @@ func (c *Container) String() string {
 }
 
 // The Device object represents an addressable computer system or host, which is typically connected to a computer network and participates in the transmission or processing of data within the computer network. Defined by D3FEND <a target='_blank' href='https://d3fend.mitre.org/dao/artifact/d3f:Host/'>d3f:Host</a>.
+// Deprecated: Use OCSF v130 package instead.
 type Device struct {
 	// The unique identifier of the cloud autoscale configuration.
 	AutoscaleUid *string `json:"autoscale_uid,omitempty" url:"autoscale_uid,omitempty"`
@@ -717,6 +750,10 @@ type Device struct {
 	NetbiosNames []string `json:"netbios_names,omitempty" url:"netbios_names,omitempty"`
 	// The network interfaces that are associated with the device, one for each unique MAC address/IP address/hostname/name combination.<p><b>Note:</b> The first element of the array is the network information that pertains to the event.</p>
 	NetworkInterfaces []*NetworkInterface `json:"network_interfaces,omitempty" url:"network_interfaces,omitempty"`
+	// The network isolation status of the endpoiint
+	NetworkStatus *string `json:"network_status,omitempty" url:"network_status,omitempty"`
+	// The network isolation status ID.
+	NetworkStatusId *DeviceNetworkStatusId `json:"network_status_id,omitempty" url:"network_status_id,omitempty"`
 	// Organization and org unit related to the device.
 	Org *Organization `json:"org,omitempty" url:"org,omitempty"`
 	// The endpoint operating system.
@@ -821,6 +858,7 @@ func (d *Device) String() string {
 }
 
 // The Device Hardware Information object contains details and specifications of the physical components that make up a device. This information provides an overview of the hardware capabilities, configuration, and characteristics of the device.
+// Deprecated: Use OCSF v130 package instead.
 type DeviceHwInfo struct {
 	// The BIOS date. For example: <code>03/31/16</code>.
 	BiosDate *string `json:"bios_date,omitempty" url:"bios_date,omitempty"`
@@ -889,12 +927,20 @@ func (d *DeviceHwInfo) String() string {
 	return fmt.Sprintf("%#v", d)
 }
 
+// DeviceNetworkStatusId is an enum, and the following values are allowed.
+// 1 - NotIsolated: Device is not isolated from the network.
+// 2 - Isolated: Device is isolated from the network.
+// 99 - Unknown: The network isolation status is unknown.
+// Deprecated: Use OCSF v130 package instead.
+type DeviceNetworkStatusId = int
+
 // DeviceRiskLevelId is an enum, and the following values are allowed.
 // 0 - Info
 // 1 - Low
 // 2 - Medium
 // 3 - High
 // 4 - Critical
+// Deprecated: Use OCSF v130 package instead.
 type DeviceRiskLevelId = int
 
 // DeviceTypeId is an enum, and the following values are allowed.
@@ -921,9 +967,11 @@ type DeviceRiskLevelId = int
 // 97 - EnergyMonitoringSystem: An energy monitoring, security or safety system.
 // 98 - TransportationDevice: A transportation device or transportation supporting device.
 // 99 - Other: The type is not mapped. See the <code>type</code> attribute, which contains a data source specific value.
+// Deprecated: Use OCSF v130 package instead.
 type DeviceTypeId = int
 
 // The Display object contains information about the physical or virtual display connected to a computer system.
+// Deprecated: Use OCSF v130 package instead.
 type Display struct {
 	// The numeric color depth.
 	ColorDepth *int `json:"color_depth,omitempty" url:"color_depth,omitempty"`
@@ -975,6 +1023,7 @@ func (d *Display) String() string {
 }
 
 // The Enrichment object provides inline enrichment data for specific attributes of interest within an event. It serves as a mechanism to enhance or supplement the information associated with the event by adding additional relevant details or context.
+// Deprecated: Use OCSF v130 package instead.
 type Enrichment struct {
 	// The enrichment data associated with the attribute and value. The meaning of this data depends on the type the enrichment record.
 	Data interface{} `json:"data" url:"data"`
@@ -1026,6 +1075,7 @@ func (e *Enrichment) String() string {
 }
 
 // The OCSF Schema Extension object provides detailed information about the schema extension used to construct the event. The schema extensions are registered in the <a target='_blank' href='https://github.com/ocsf/ocsf-schema/blob/main/extensions.md'>extensions.md</a> file.
+// Deprecated: Use OCSF v130 package instead.
 type Extension struct {
 	// The schema extension name. For example: <code>dev</code>.
 	Name string `json:"name" url:"name"`
@@ -1073,6 +1123,7 @@ func (e *Extension) String() string {
 }
 
 // The Feature object provides information about the software product feature that generated a specific event. It encompasses details related to the capabilities, components, user interface (UI) design, and performance upgrades associated with the feature.
+// Deprecated: Use OCSF v130 package instead.
 type Feature struct {
 	// The name of the feature.
 	Name *string `json:"name,omitempty" url:"name,omitempty"`
@@ -1120,6 +1171,7 @@ func (f *Feature) String() string {
 }
 
 // The Finding Information object describes metadata related to a security finding generated by a security tool or system.
+// Deprecated: Use OCSF v130 package instead.
 type FindingInfo struct {
 	// The analytic technique used to analyze and derive insights from the data or information that led to the finding or conclusion.
 	Analytic *Analytic `json:"analytic,omitempty" url:"analytic,omitempty"`
@@ -1231,6 +1283,7 @@ func (f *FindingInfo) String() string {
 }
 
 // The Fingerprint object provides detailed information about a digital fingerprint, which is a compact representation of data used to identify a longer piece of information, such as a public key or file content. It contains the algorithm and value of the fingerprint, enabling efficient and reliable identification of the associated data.
+// Deprecated: Use OCSF v130 package instead.
 type Fingerprint struct {
 	// The hash algorithm used to create the digital fingerprint, normalized to the caption of 'algorithm_id'. In the case of 'Other', it is defined by the event source.
 	Algorithm *string `json:"algorithm,omitempty" url:"algorithm,omitempty"`
@@ -1287,9 +1340,11 @@ func (f *Fingerprint) String() string {
 // 6 - TLSH: The TLSH fuzzy hashing algorithm.
 // 7 - quickXorHash: Microsoft simple non-cryptographic hash algorithm that works by XORing the bytes in a circular-shifting fashion.
 // 99 - Other: The algorithm is not mapped. See the <code>algorithm</code> attribute, which contains a data source specific value.
+// Deprecated: Use OCSF v130 package instead.
 type FingerprintAlgorithmId = int
 
 // The Group object represents a collection or association of entities, such as users, policies, or devices. It serves as a logical grouping mechanism to organize and manage entities with similar characteristics or permissions within a system or organization.
+// Deprecated: Use OCSF v130 package instead.
 type Group struct {
 	// The group description.
 	Desc *string `json:"desc,omitempty" url:"desc,omitempty"`
@@ -1343,6 +1398,7 @@ func (g *Group) String() string {
 }
 
 // The Image object provides a description of a specific Virtual Machine (VM) or Container image. Defined by D3FEND <a target='_blank' href='https://d3fend.mitre.org/dao/artifact/d3f:ContainerImage/'>d3f:ContainerImage</a>.
+// Deprecated: Use OCSF v130 package instead.
 type Image struct {
 	// The image labels.
 	Labels []string `json:"labels,omitempty" url:"labels,omitempty"`
@@ -1394,6 +1450,7 @@ func (i *Image) String() string {
 }
 
 // The Keyboard Information object contains details and attributes related to a computer or device keyboard. It encompasses information that describes the characteristics, capabilities, and configuration of the keyboard.
+// Deprecated: Use OCSF v130 package instead.
 type KeyboardInfo struct {
 	// The number of function keys on client keyboard.
 	FunctionKeys *int `json:"function_keys,omitempty" url:"function_keys,omitempty"`
@@ -1445,6 +1502,7 @@ func (k *KeyboardInfo) String() string {
 }
 
 // The Kill Chain Phase object represents a single phase of a cyber attack, including the initial reconnaissance and planning stages up to the final objective of the attacker. It provides a detailed description of each phase and its associated activities within the broader context of a cyber attack. See <a target='_blank' href='https://www.lockheedmartin.com/en-us/capabilities/cyber/cyber-kill-chain.html'>Cyber Kill Chain®</a>.
+// Deprecated: Use OCSF v130 package instead.
 type KillChainPhase struct {
 	// The cyber kill chain phase.
 	Phase *string `json:"phase,omitempty" url:"phase,omitempty"`
@@ -1499,9 +1557,11 @@ func (k *KillChainPhase) String() string {
 // 6 - Control: Malware opens a command channel to enable the intruders to remotely manipulate the victim's system.
 // 7 - ActionsonObjectives: With hands-on keyboard access, intruders accomplish the mission’s goal.
 // 99 - Other: The kill chain phase is not mapped. See the <code>phase</code> attribute, which contains a data source specific value.
+// Deprecated: Use OCSF v130 package instead.
 type KillChainPhasePhaseId = int
 
 // The additional LDAP attributes that describe a person.
+// Deprecated: Use OCSF v130 package instead.
 type LdapPerson struct {
 	// The cost center associated with the user.
 	CostCenter *string `json:"cost_center,omitempty" url:"cost_center,omitempty"`
@@ -1629,6 +1689,7 @@ func (l *LdapPerson) String() string {
 }
 
 // The Geo Location object describes a geographical location, usually associated with an IP address. Defined by D3FEND <a target='_blank' href='https://d3fend.mitre.org/dao/artifact/d3f:PhysicalLocation/'>d3f:PhysicalLocation</a>.
+// Deprecated: Use OCSF v130 package instead.
 type Location struct {
 	// The name of the city.
 	City *string `json:"city,omitempty" url:"city,omitempty"`
@@ -1690,6 +1751,7 @@ func (l *Location) String() string {
 }
 
 // The Logger object represents the device and product where events are stored with times for receipt and transmission. This may be at the source device where the event occurred, a remote scanning device, intermediate hops, or the ultimate destination.
+// Deprecated: Use OCSF v130 package instead.
 type Logger struct {
 	// The device where the events are logged.
 	Device *Device `json:"device,omitempty" url:"device,omitempty"`
@@ -1779,6 +1841,7 @@ func (l *Logger) String() string {
 }
 
 // The Metadata object describes the metadata associated with the event. Defined by D3FEND <a target='_blank' href='https://d3fend.mitre.org/dao/artifact/d3f:Metadata/'>d3f:Metadata</a>.
+// Deprecated: Use OCSF v130 package instead.
 type Metadata struct {
 	// The unique identifier used to correlate events.
 	CorrelationUid *string `json:"correlation_uid,omitempty" url:"correlation_uid,omitempty"`
@@ -1892,6 +1955,7 @@ func (m *Metadata) String() string {
 }
 
 // The Network Interface object describes the type and associated attributes of a network interface.
+// Deprecated: Use OCSF v130 package instead.
 type NetworkInterface struct {
 	// The hostname associated with the network interface.
 	Hostname *Hostname `json:"hostname,omitempty" url:"hostname,omitempty"`
@@ -1961,12 +2025,15 @@ func (n *NetworkInterface) String() string {
 // 3 - Mobile
 // 4 - Tunnel
 // 99 - Other: The type is not mapped. See the <code>type</code> attribute, which contains a data source specific value.
+// Deprecated: Use OCSF v130 package instead.
 type NetworkInterfaceTypeId = int
 
 // An unordered collection of attributes. It defines a set of attributes available in all objects. It can be also used as a generic object to log objects that are not otherwise defined by the schema.
+// Deprecated: Use OCSF v130 package instead.
 type Object = map[string]interface{}
 
 // The observable object is a pivot element that contains related information found in many places in the event.
+// Deprecated: Use OCSF v130 package instead.
 type Observable struct {
 	// The full name of the observable attribute. The <code>name</code> is a pointer/reference to an attribute within the event data. For example: <code>file.name</code>.
 	Name string `json:"name" url:"name"`
@@ -2039,9 +2106,11 @@ func (o *Observable) String() string {
 // 27 - Container: The Container object describes an instance of a specific container. A container is a prepackaged, portable system image that runs isolated on an existing system using a container runtime like containerd.
 // 30 - Fingerprint: The Fingerprint object provides detailed information about a digital fingerprint, which is a compact representation of data used to identify a longer piece of information, such as a public key or file content. It contains the algorithm and value of the fingerprint, enabling efficient and reliable identification of the associated data.
 // 99 - Other: The observable data type is not mapped. See the <code>type</code> attribute, which may contain data source specific value.
+// Deprecated: Use OCSF v130 package instead.
 type ObservableTypeId = int
 
 // The Organization object describes characteristics of an organization or company and its division if any.
+// Deprecated: Use OCSF v130 package instead.
 type Organization struct {
 	// The name of the organization. For example, Widget, Inc.
 	Name *string `json:"name,omitempty" url:"name,omitempty"`
@@ -2091,6 +2160,7 @@ func (o *Organization) String() string {
 }
 
 // The Operating System (OS) object describes characteristics of an OS, such as Linux or Windows. Defined by D3FEND <a target='_blank' href='https://d3fend.mitre.org/dao/artifact/d3f:OperatingSystem/'>d3f:OperatingSystem</a>.
+// Deprecated: Use OCSF v130 package instead.
 type Os struct {
 	// The operating system build number.
 	Build *string `json:"build,omitempty" url:"build,omitempty"`
@@ -2168,9 +2238,11 @@ func (o *Os) String() string {
 // 400 - Solaris
 // 401 - AIX
 // 402 - UX
+// Deprecated: Use OCSF v130 package instead.
 type OsTypeId = int
 
 // The Product object describes characteristics of a software product.
+// Deprecated: Use OCSF v130 package instead.
 type Product struct {
 	// The Common Platform Enumeration (CPE) name as described by (<a target='_blank' href='https://nvd.nist.gov/products/cpe'>NIST</a>) For example: <code>cpe:/a:apple:safari:16.2</code>.
 	CpeName *string `json:"cpe_name,omitempty" url:"cpe_name,omitempty"`
@@ -2230,6 +2302,7 @@ func (p *Product) String() string {
 }
 
 // The Related Event object describes an event related to a finding or detection as identified by the security product.
+// Deprecated: Use OCSF v130 package instead.
 type RelatedEvent struct {
 	// An array of <a target='_blank' href='https://attack.mitre.org'>MITRE ATT&CK®</a> objects describing the tactics, techniques & sub-techniques identified by a security control or finding.
 	Attacks []*Attack `json:"attacks,omitempty" url:"attacks,omitempty"`
@@ -2285,6 +2358,7 @@ func (r *RelatedEvent) String() string {
 }
 
 // The Reputation object describes the reputation/risk score of an entity (e.g. device, user, domain).
+// Deprecated: Use OCSF v130 package instead.
 type Reputation struct {
 	// The reputation score as reported by the event source.
 	BaseScore float64 `json:"base_score" url:"base_score"`
@@ -2346,9 +2420,11 @@ func (r *Reputation) String() string {
 // 9 - ProbablyMalicious: Indicators of maliciousness.
 // 10 - Malicious: Proven evidence of maliciousness.
 // 99 - Other: The reputation score is not mapped. See the <code>rep_score</code> attribute, which contains a data source specific value.
+// Deprecated: Use OCSF v130 package instead.
 type ReputationScoreId = int
 
 // The Request Elements object describes characteristics of an API request.
+// Deprecated: Use OCSF v130 package instead.
 type Request struct {
 	// When working with containerized applications, the set of containers which write to the standard the output of a particular logging driver. For example, this may be the set of containers involved in handling api requests and responses for a containerized application.
 	Containers []*Container `json:"containers,omitempty" url:"containers,omitempty"`
@@ -2398,6 +2474,7 @@ func (r *Request) String() string {
 }
 
 // The Response Elements object describes characteristics of an API response.
+// Deprecated: Use OCSF v130 package instead.
 type Response struct {
 	// The numeric response sent to a request.
 	Code *int `json:"code,omitempty" url:"code,omitempty"`
@@ -2453,6 +2530,7 @@ func (r *Response) String() string {
 }
 
 // The Service object describes characteristics of a service, <code> e.g. AWS EC2. </code>
+// Deprecated: Use OCSF v130 package instead.
 type Service struct {
 	// The list of labels associated with the service.
 	Labels []string `json:"labels,omitempty" url:"labels,omitempty"`
@@ -2502,6 +2580,7 @@ func (s *Service) String() string {
 }
 
 // The Sub Technique object describes the sub technique ID and/or name associated to an attack, as defined by <a target='_blank' href='https://attack.mitre.org/wiki/ATT&CK_Matrix'>ATT&CK Matrix<sup>TM</sup></a>.
+// Deprecated: Use OCSF v130 package instead.
 type SubTechnique struct {
 	// The name of the attack sub technique, as defined by <a target='_blank' href='https://attack.mitre.org/wiki/ATT&CK_Matrix'>ATT&CK Matrix<sup>TM</sup></a>. For example: <code>Scanning IP Blocks</code>.
 	Name *string `json:"name,omitempty" url:"name,omitempty"`
@@ -2549,6 +2628,7 @@ func (s *SubTechnique) String() string {
 }
 
 // The Tactic object describes the tactic ID and/or name that is associated to an attack, as defined by <a target='_blank' href='https://attack.mitre.org/wiki/ATT&CK_Matrix'>ATT&CK Matrix<sup>TM</sup></a>.
+// Deprecated: Use OCSF v130 package instead.
 type Tactic struct {
 	// The tactic name that is associated with the attack technique, as defined by <a target='_blank' href='https://attack.mitre.org/wiki/ATT&CK_Matrix'>ATT&CK Matrix<sup>TM</sup></a>. For example: <code>Reconnaissance</code>.
 	Name *string `json:"name,omitempty" url:"name,omitempty"`
@@ -2596,6 +2676,7 @@ func (t *Tactic) String() string {
 }
 
 // The Technique object describes the technique ID and/or name associated to an attack, as defined by <a target='_blank' href='https://attack.mitre.org/wiki/ATT&CK_Matrix'>ATT&CK Matrix<sup>TM</sup></a>.
+// Deprecated: Use OCSF v130 package instead.
 type Technique struct {
 	// The name of the attack technique, as defined by <a target='_blank' href='https://attack.mitre.org/wiki/ATT&CK_Matrix'>ATT&CK Matrix<sup>TM</sup></a>. For example: <code>Active Scanning</code>.
 	Name *string `json:"name,omitempty" url:"name,omitempty"`
@@ -2643,6 +2724,7 @@ func (t *Technique) String() string {
 }
 
 // The User object describes the characteristics of a user/person or a security principal. Defined by D3FEND <a target='_blank' href='https://d3fend.mitre.org/dao/artifact/d3f:UserAccount/'>d3f:UserAccount</a>.
+// Deprecated: Use OCSF v130 package instead.
 type User struct {
 	// The user's account or the account associated with the user.
 	Account *Account `json:"account,omitempty" url:"account,omitempty"`
@@ -2724,6 +2806,7 @@ func (u *User) String() string {
 // 1 - Enabled: Multi-factor authentication is on for this user.
 // 2 - NotEnabled: TMulti-factor authentication is off for this user.
 // 99 - Other: The event status is not mapped. See the <code>user_status</code> attribute, which contains a data source specific value.
+// Deprecated: Use OCSF v130 package instead.
 type UserMfaStatusId = int
 
 // UserTypeId is an enum, and the following values are allowed.
@@ -2732,6 +2815,7 @@ type UserMfaStatusId = int
 // 2 - Admin: Admin/root user account.
 // 3 - System: System account. For example, Windows computer accounts with a trailing dollar sign ($).
 // 99 - Other: The type is not mapped. See the <code>type</code> attribute, which contains a data source specific value.
+// Deprecated: Use OCSF v130 package instead.
 type UserTypeId = int
 
 // UserUserStatusId is an enum, and the following values are allowed.
@@ -2742,4 +2826,5 @@ type UserTypeId = int
 // 4 - Suspended: The user account is suspended.
 // 5 - Deprovisioned: The user account has been deprovisioned and is pending removal.
 // 99 - Other: The event status is not mapped. See the <code>user_status</code> attribute, which contains a data source specific value.
+// Deprecated: Use OCSF v130 package instead.
 type UserUserStatusId = int
