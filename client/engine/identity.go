@@ -10,6 +10,8 @@ import (
 )
 
 type GetGroupMembersRequest struct {
+	// Add metadata to the response by invoking meta functions. Documentation for meta functions is available at https://docs.synqly.com/api-reference/meta-functions. Not all meta function are available at every endpoint.
+	Meta []*string `json:"-" url:"meta,omitempty"`
 	// Number of users to return. Defaults to 100.
 	Limit *int `json:"-" url:"limit,omitempty"`
 	// Start search from cursor position.
@@ -17,6 +19,8 @@ type GetGroupMembersRequest struct {
 }
 
 type QueryIdentityAuditLogRequest struct {
+	// Add metadata to the response by invoking meta functions. Documentation for meta functions is available at https://docs.synqly.com/api-reference/meta-functions. Not all meta function are available at every endpoint.
+	Meta []*string `json:"-" url:"meta,omitempty"`
 	// Number of events to return. Defaults to 100.
 	Limit *int `json:"-" url:"limit,omitempty"`
 	// Start search from cursor position.
@@ -31,6 +35,8 @@ type QueryIdentityAuditLogRequest struct {
 }
 
 type QueryGroupRequest struct {
+	// Add metadata to the response by invoking meta functions. Documentation for meta functions is available at https://docs.synqly.com/api-reference/meta-functions. Not all meta function are available at every endpoint.
+	Meta []*string `json:"-" url:"meta,omitempty"`
 	// Number of users to return. Defaults to 100.
 	Limit *int `json:"-" url:"limit,omitempty"`
 	// Start search from cursor position.
@@ -45,6 +51,8 @@ type QueryGroupRequest struct {
 }
 
 type QueryUserRequest struct {
+	// Add metadata to the response by invoking meta functions. Documentation for meta functions is available at https://docs.synqly.com/api-reference/meta-functions. Not all meta function are available at every endpoint.
+	Meta []*string `json:"-" url:"meta,omitempty"`
 	// Number of users to return. Defaults to 100.
 	Limit *int `json:"-" url:"limit,omitempty"`
 	// Start search from cursor position.
@@ -59,10 +67,12 @@ type QueryUserRequest struct {
 }
 
 type GetGroupMembersResponse struct {
-	// List of users wrapped in the OCSF Entity Management event of type Read that are members in the group referenced by ID.
-	Result []latest.EntityManagement `json:"result" url:"result"`
+	// Various metadata about the results organized by group, then type, then field.
+	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
 	// Cursor to use to retrieve the next page of results
 	Cursor string `json:"cursor" url:"cursor"`
+	// List of users wrapped in the OCSF Entity Management event of type Read that are members in the group referenced by ID.
+	Result []latest.EntityManagement `json:"result" url:"result"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
@@ -103,6 +113,8 @@ func (g *GetGroupMembersResponse) String() string {
 }
 
 type GetGroupResponse struct {
+	// Various metadata about the results organized by group, then type, then field.
+	Meta   *MetaResponse           `json:"meta,omitempty" url:"meta,omitempty"`
 	Result latest.EntityManagement `json:"result" url:"result"`
 
 	extraProperties map[string]interface{}
@@ -144,6 +156,8 @@ func (g *GetGroupResponse) String() string {
 }
 
 type GetUserResponse struct {
+	// Various metadata about the results organized by group, then type, then field.
+	Meta   *MetaResponse           `json:"meta,omitempty" url:"meta,omitempty"`
 	Result latest.EntityManagement `json:"result" url:"result"`
 
 	extraProperties map[string]interface{}
@@ -188,10 +202,12 @@ func (g *GetUserResponse) String() string {
 type GroupId = string
 
 type QueryGroupsResponse struct {
-	// List groups wrapped in the OCSF Entity Management event of type Read.
-	Result []latest.EntityManagement `json:"result" url:"result"`
+	// Various metadata about the results organized by group, then type, then field.
+	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
 	// Cursor to use to retrieve the next page of results
 	Cursor string `json:"cursor" url:"cursor"`
+	// List groups wrapped in the OCSF Entity Management event of type Read.
+	Result []latest.EntityManagement `json:"result" url:"result"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
@@ -232,10 +248,12 @@ func (q *QueryGroupsResponse) String() string {
 }
 
 type QueryIdentityAuditLogResponse struct {
-	// List of events from the audit log. Each event will be one of the OCSF Types Account Change, Authentication, or Group Management.
-	Result []*Event `json:"result" url:"result"`
+	// Various metadata about the results organized by group, then type, then field.
+	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
 	// Cursor to use to retrieve the next page of results
 	Cursor string `json:"cursor" url:"cursor"`
+	// List of events from the audit log. Each event will be one of the OCSF Types Account Change, Authentication, or Group Management.
+	Result []*Event `json:"result" url:"result"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
@@ -276,10 +294,12 @@ func (q *QueryIdentityAuditLogResponse) String() string {
 }
 
 type QueryUsersResponse struct {
-	// List users wrapped in the OCSF Entity Management event of type Read.
-	Result []latest.EntityManagement `json:"result" url:"result"`
+	// Various metadata about the results organized by group, then type, then field.
+	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
 	// Cursor to use to retrieve the next page of results
 	Cursor string `json:"cursor" url:"cursor"`
+	// List users wrapped in the OCSF Entity Management event of type Read.
+	Result []latest.EntityManagement `json:"result" url:"result"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage

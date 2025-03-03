@@ -9,11 +9,15 @@ import (
 )
 
 type GetInvestigationEvidenceRequest struct {
+	// Add metadata to the response by invoking meta functions. Documentation for meta functions is available at https://docs.synqly.com/api-reference/meta-functions. Not all meta function are available at every endpoint.
+	Meta []*string `json:"-" url:"meta,omitempty"`
 	// Include the raw data from the SIEM in the response. Defaults to `false`.
 	IncludeRawData *bool `json:"-" url:"include_raw_data,omitempty"`
 }
 
 type GetInvestigationRequest struct {
+	// Add metadata to the response by invoking meta functions. Documentation for meta functions is available at https://docs.synqly.com/api-reference/meta-functions. Not all meta function are available at every endpoint.
+	Meta []*string `json:"-" url:"meta,omitempty"`
 	// Include the raw data from the SIEM in the response. Defaults to `false`.
 	IncludeRawData *bool `json:"-" url:"include_raw_data,omitempty"`
 }
@@ -31,7 +35,7 @@ type QuerySiemEventsRequest struct {
 	// Filter results by this query. For more information on filtering, refer to our Filtering Guide. Defaults to no filter.
 	// If used more than once, the queries are ANDed together.
 	Filter []*string `json:"-" url:"filter,omitempty"`
-	// Add metadata to the response by invoking meta functions.
+	// Add metadata to the response by invoking meta functions. Documentation for meta functions is available at https://docs.synqly.com/api-reference/meta-functions. Not all meta function are available at every endpoint.
 	Meta []*string `json:"-" url:"meta,omitempty"`
 	// Provider-specific query to pass through to the SIEM. This is useful for advanced queries that are not
 	// supported by the API. The keys and values are provider-specific. For example, to perform a specific query in
@@ -43,6 +47,8 @@ type QuerySiemEventsRequest struct {
 }
 
 type QueryInvestigationsRequest struct {
+	// Add metadata to the response by invoking meta functions. Documentation for meta functions is available at https://docs.synqly.com/api-reference/meta-functions. Not all meta function are available at every endpoint.
+	Meta []*string `json:"-" url:"meta,omitempty"`
 	// Cursor to use to retrieve the next page of results.
 	Cursor *string `json:"-" url:"cursor,omitempty"`
 	// Number of `Investigation` objects to return in this page. Defaults to 100.
@@ -56,6 +62,8 @@ type QueryInvestigationsRequest struct {
 }
 
 type QueryLogProvidersRequest struct {
+	// Add metadata to the response by invoking meta functions. Documentation for meta functions is available at https://docs.synqly.com/api-reference/meta-functions. Not all meta function are available at every endpoint.
+	Meta []*string `json:"-" url:"meta,omitempty"`
 	// Cursor to use to retrieve the next page of results.
 	Cursor *string `json:"-" url:"cursor,omitempty"`
 	// Number of log provider objects to return in this page. Defaults to 100.
@@ -63,6 +71,8 @@ type QueryLogProvidersRequest struct {
 }
 
 type GetEvidenceResponse struct {
+	// Various metadata about the results organized by group, then type, then field.
+	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
 	// List of evidence associated with an investigation
 	Result *Evidence `json:"result" url:"result"`
 
@@ -105,6 +115,8 @@ func (g *GetEvidenceResponse) String() string {
 }
 
 type GetInvestigationResponse struct {
+	// Various metadata about the results organized by group, then type, then field.
+	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
 	// The investigation object
 	Result *Investigation `json:"result" url:"result"`
 
@@ -150,10 +162,12 @@ func (g *GetInvestigationResponse) String() string {
 type PatchInvestigationRequest = []*PatchOperation
 
 type QueryInvestigationResponse struct {
-	// List of investigations
-	Result []*Investigation `json:"result" url:"result"`
+	// Various metadata about the results organized by group, then type, then field.
+	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
 	// Cursor to use to retrieve the next page of results
 	Cursor string `json:"cursor" url:"cursor"`
+	// List of investigations
+	Result []*Investigation `json:"result" url:"result"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
@@ -194,12 +208,14 @@ func (q *QueryInvestigationResponse) String() string {
 }
 
 type QueryLogProvidersResponse struct {
-	// List of available metadata.log_provider values available for querying events
-	Result []*LogProvider `json:"result" url:"result"`
+	// Various metadata about the results organized by group, then type, then field.
+	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
 	// Cursor to use to retrieve the next page of results
 	Cursor string `json:"cursor" url:"cursor"`
-	// If the provider supports asynchronous queries and the query is still running, this will be PENDING. There will be a value in the `cursor` field allowing you to continue polling for results.
+	// If the provider supports asynchronous queries and the query is still running, this field will be `PENDING` until the query is complete. In this case, the client should retry using the provided cursor.
 	Status QueryStatus `json:"status" url:"status"`
+	// List of available metadata.log_provider values available for querying events
+	Result []*LogProvider `json:"result" url:"result"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
@@ -240,14 +256,14 @@ func (q *QueryLogProvidersResponse) String() string {
 }
 
 type QuerySiemEventsResponse struct {
-	// List of events
-	Result []map[string]interface{} `json:"result" url:"result"`
-	// Metadata about the query results organized by group, then type, then field.
+	// Various metadata about the results organized by group, then type, then field.
 	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
 	// Cursor to use to retrieve the next page of results
 	Cursor string `json:"cursor" url:"cursor"`
-	// If the provider supports asynchronous queries and the query is still running, this will be PENDING. There will be a value in the `cursor` field allowing you to continue polling for results.
+	// If the provider supports asynchronous queries and the query is still running, this field will be `PENDING` until the query is complete. In this case, the client should retry using the provided cursor.
 	Status QueryStatus `json:"status" url:"status"`
+	// List of events
+	Result []map[string]interface{} `json:"result" url:"result"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage

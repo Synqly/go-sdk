@@ -72,6 +72,8 @@ func (c *CreateNotificationRequest) String() string {
 }
 
 type CreateNotificationResponse struct {
+	// Various metadata about the results organized by group, then type, then field.
+	Meta   *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
 	Result *Notification `json:"result" url:"result"`
 
 	extraProperties map[string]interface{}
@@ -113,6 +115,8 @@ func (c *CreateNotificationResponse) String() string {
 }
 
 type GetNotificationResponse struct {
+	// Various metadata about the results organized by group, then type, then field.
+	Meta   *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
 	Result *Notification `json:"result" url:"result"`
 
 	extraProperties map[string]interface{}

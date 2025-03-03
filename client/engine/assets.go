@@ -9,6 +9,8 @@ import (
 )
 
 type QueryDevicesRequest struct {
+	// Add metadata to the response by invoking meta functions. Documentation for meta functions is available at https://docs.synqly.com/api-reference/meta-functions. Not all meta function are available at every endpoint.
+	Meta []*string `json:"-" url:"meta,omitempty"`
 	// Number of finding reports to return. Defaults to 50.
 	Limit *int `json:"-" url:"limit,omitempty"`
 	// Start search from cursor position.
@@ -64,7 +66,9 @@ func (c *CreateDeviceRequest) String() string {
 }
 
 type CreateDeviceResponse struct {
-	Device Device `json:"device" url:"device"`
+	// Various metadata about the results organized by group, then type, then field.
+	Meta   *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
+	Device Device        `json:"device" url:"device"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
@@ -105,8 +109,11 @@ func (c *CreateDeviceResponse) String() string {
 }
 
 type QueryDevicesResponse struct {
-	Result []Device `json:"result" url:"result"`
+	// Various metadata about the results organized by group, then type, then field.
+	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
+	// Cursor to use to retrieve the next page of results
 	Cursor string   `json:"cursor" url:"cursor"`
+	Result []Device `json:"result" url:"result"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage

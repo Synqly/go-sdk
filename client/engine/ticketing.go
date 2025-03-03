@@ -17,6 +17,8 @@ type ListProjectsRequest struct {
 }
 
 type QueryTicketsRequest struct {
+	// Add metadata to the response by invoking meta functions. Documentation for meta functions is available at https://docs.synqly.com/api-reference/meta-functions. Not all meta function are available at every endpoint.
+	Meta []*string `json:"-" url:"meta,omitempty"`
 	// Cursor to use to retrieve the next page of results.
 	Cursor *string `json:"-" url:"cursor,omitempty"`
 	// Number of `Account` objects to return in this page. Defaults to 100.
@@ -131,6 +133,8 @@ func (c *CreateAttachmentRequest) String() string {
 }
 
 type CreateAttachmentResponse struct {
+	// Various metadata about the results organized by group, then type, then field.
+	Meta   *MetaResponse       `json:"meta,omitempty" url:"meta,omitempty"`
 	Result *AttachmentMetadata `json:"result" url:"result"`
 
 	extraProperties map[string]interface{}
@@ -216,7 +220,9 @@ func (c *CreateCommentRequest) String() string {
 }
 
 type CreateCommentResponse struct {
-	Result *Comment `json:"result" url:"result"`
+	// Various metadata about the results organized by group, then type, then field.
+	Meta   *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
+	Result *Comment      `json:"result" url:"result"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
@@ -347,7 +353,9 @@ func (c *CreateTicketRequest) String() string {
 }
 
 type CreateTicketResponse struct {
-	Result *Ticket `json:"result" url:"result"`
+	// Various metadata about the results organized by group, then type, then field.
+	Meta   *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
+	Result *Ticket       `json:"result" url:"result"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
@@ -388,7 +396,9 @@ func (c *CreateTicketResponse) String() string {
 }
 
 type DownloadAttachmentResponse struct {
-	Result *Attachment `json:"result" url:"result"`
+	// Various metadata about the results organized by group, then type, then field.
+	Meta   *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
+	Result *Attachment   `json:"result" url:"result"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
@@ -429,7 +439,9 @@ func (d *DownloadAttachmentResponse) String() string {
 }
 
 type GetTicketResponse struct {
-	Result *Ticket `json:"result" url:"result"`
+	// Various metadata about the results organized by group, then type, then field.
+	Meta   *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
+	Result *Ticket       `json:"result" url:"result"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
@@ -470,6 +482,10 @@ func (g *GetTicketResponse) String() string {
 }
 
 type ListAttachmentsMetadataResponse struct {
+	// Various metadata about the results organized by group, then type, then field.
+	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
+	// Cursor to use to retrieve the next page of results
+	Cursor string                `json:"cursor" url:"cursor"`
 	Result []*AttachmentMetadata `json:"result" url:"result"`
 
 	extraProperties map[string]interface{}
@@ -511,6 +527,10 @@ func (l *ListAttachmentsMetadataResponse) String() string {
 }
 
 type ListCommentsResponse struct {
+	// Various metadata about the results organized by group, then type, then field.
+	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
+	// Cursor to use to retrieve the next page of results
+	Cursor string     `json:"cursor" url:"cursor"`
 	Result []*Comment `json:"result" url:"result"`
 
 	extraProperties map[string]interface{}
@@ -552,9 +572,11 @@ func (l *ListCommentsResponse) String() string {
 }
 
 type ListProjectsResponse struct {
-	Result []*Project `json:"result" url:"result"`
+	// Various metadata about the results organized by group, then type, then field.
+	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
 	// Cursor to use to retrieve the next page of results
-	Cursor string `json:"cursor" url:"cursor"`
+	Cursor string     `json:"cursor" url:"cursor"`
+	Result []*Project `json:"result" url:"result"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
@@ -595,6 +617,10 @@ func (l *ListProjectsResponse) String() string {
 }
 
 type ListRemoteFieldsResponse struct {
+	// Various metadata about the results organized by group, then type, then field.
+	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
+	// Cursor to use to retrieve the next page of results
+	Cursor string         `json:"cursor" url:"cursor"`
 	Result []*RemoteField `json:"result" url:"result"`
 
 	extraProperties map[string]interface{}
@@ -636,7 +662,9 @@ func (l *ListRemoteFieldsResponse) String() string {
 }
 
 type PatchTicketResponse struct {
-	Result *Ticket `json:"result" url:"result"`
+	// Various metadata about the results organized by group, then type, then field.
+	Meta   *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
+	Result *Ticket       `json:"result" url:"result"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
@@ -677,10 +705,12 @@ func (p *PatchTicketResponse) String() string {
 }
 
 type QueryTicketsResponse struct {
+	// Various metadata about the results organized by group, then type, then field.
+	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
+	// Cursor to use to retrieve the next page of results
+	Cursor string `json:"cursor" url:"cursor"`
 	// list of results
 	Result []*Ticket `json:"result" url:"result"`
-	// Cursor position for subsequent searches
-	Cursor string `json:"cursor" url:"cursor"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage

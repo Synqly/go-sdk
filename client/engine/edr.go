@@ -10,11 +10,15 @@ import (
 )
 
 type DeleteIocsRequest struct {
+	// Add metadata to the response by invoking meta functions. Documentation for meta functions is available at https://docs.synqly.com/api-reference/meta-functions. Not all meta function are available at every endpoint.
+	Meta []*string `json:"-" url:"meta,omitempty"`
 	// list of ids to delete
 	Ids *string `json:"-" url:"ids,omitempty"`
 }
 
 type QueryAlertsRequest struct {
+	// Add metadata to the response by invoking meta functions. Documentation for meta functions is available at https://docs.synqly.com/api-reference/meta-functions. Not all meta function are available at every endpoint.
+	Meta []*string `json:"-" url:"meta,omitempty"`
 	// Number of threats to return. Defaults to 50.
 	Limit *int `json:"-" url:"limit,omitempty"`
 	// Start search from cursor position.
@@ -31,6 +35,8 @@ type QueryAlertsRequest struct {
 }
 
 type QueryApplicationsRequest struct {
+	// Add metadata to the response by invoking meta functions. Documentation for meta functions is available at https://docs.synqly.com/api-reference/meta-functions. Not all meta function are available at every endpoint.
+	Meta []*string `json:"-" url:"meta,omitempty"`
 	// Number of applications to return. Defaults to 50.
 	Limit *int `json:"-" url:"limit,omitempty"`
 	// Start search from cursor position.
@@ -45,6 +51,8 @@ type QueryApplicationsRequest struct {
 }
 
 type QueryEndpointsRequest struct {
+	// Add metadata to the response by invoking meta functions. Documentation for meta functions is available at https://docs.synqly.com/api-reference/meta-functions. Not all meta function are available at every endpoint.
+	Meta []*string `json:"-" url:"meta,omitempty"`
 	// Number of endpoint assets to return. Defaults to 50.
 	Limit *int `json:"-" url:"limit,omitempty"`
 	// Start search from cursor position.
@@ -59,6 +67,8 @@ type QueryEndpointsRequest struct {
 }
 
 type QueryIocsRequest struct {
+	// Add metadata to the response by invoking meta functions. Documentation for meta functions is available at https://docs.synqly.com/api-reference/meta-functions. Not all meta function are available at every endpoint.
+	Meta []*string `json:"-" url:"meta,omitempty"`
 	// Number of threats to return. Defaults to 50.
 	Limit *int `json:"-" url:"limit,omitempty"`
 	// Start search from cursor position.
@@ -75,6 +85,8 @@ type QueryIocsRequest struct {
 }
 
 type QueryPostureScoreRequest struct {
+	// Add metadata to the response by invoking meta functions. Documentation for meta functions is available at https://docs.synqly.com/api-reference/meta-functions. Not all meta function are available at every endpoint.
+	Meta []*string `json:"-" url:"meta,omitempty"`
 	// Number of scores for endpoints to return. Defaults to 50.
 	Limit *int `json:"-" url:"limit,omitempty"`
 	// Start search from cursor position.
@@ -91,6 +103,8 @@ type QueryPostureScoreRequest struct {
 }
 
 type QueryThreatsRequest struct {
+	// Add metadata to the response by invoking meta functions. Documentation for meta functions is available at https://docs.synqly.com/api-reference/meta-functions. Not all meta function are available at every endpoint.
+	Meta []*string `json:"-" url:"meta,omitempty"`
 	// Number of threats to return. Defaults to 50.
 	Limit *int `json:"-" url:"limit,omitempty"`
 	// Start search from cursor position.
@@ -151,6 +165,8 @@ func (c *CreateIocsRequest) String() string {
 }
 
 type CreateIocsResponse struct {
+	// Various metadata about the results organized by group, then type, then field.
+	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
 	// A list of the indicators that were created
 	Result []*stix.Indicator `json:"result" url:"result"`
 
@@ -193,6 +209,8 @@ func (c *CreateIocsResponse) String() string {
 }
 
 type DeleteIocsResponse struct {
+	// Various metadata about the results organized by group, then type, then field.
+	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
 	// A list of ids of the iocs that were deleted.
 	Result []string `json:"result" url:"result"`
 
@@ -235,6 +253,8 @@ func (d *DeleteIocsResponse) String() string {
 }
 
 type GetEndpointResponse struct {
+	// Various metadata about the results organized by group, then type, then field.
+	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
 	// A single endpoint assets that match the Id.
 	Result Device `json:"result" url:"result"`
 
@@ -321,6 +341,8 @@ func (n *NetworkQuarantineRequest) String() string {
 }
 
 type NetworkQuarantineResponse struct {
+	// Various metadata about the results organized by group, then type, then field.
+	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
 	// The list of endpoint IDs or action IDs that were successfully quarantined or unquarantined.
 	Result []string `json:"result" url:"result"`
 
@@ -363,10 +385,12 @@ func (n *NetworkQuarantineResponse) String() string {
 }
 
 type QueryAlertsResponse struct {
+	// Various metadata about the results organized by group, then type, then field.
+	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
+	// Cursor to use to retrieve the next page of results
+	Cursor string `json:"cursor" url:"cursor"`
 	// List of alerts that match the query.
 	Result []*Event `json:"result" url:"result"`
-	// Cursor to use to retrieve the next page of results.
-	Cursor string `json:"cursor" url:"cursor"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
@@ -407,10 +431,12 @@ func (q *QueryAlertsResponse) String() string {
 }
 
 type QueryApplicationsResponse struct {
+	// Various metadata about the results organized by group, then type, then field.
+	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
+	// Cursor to use to retrieve the next page of results
+	Cursor string `json:"cursor" url:"cursor"`
 	// List of applications that match the query.
 	Result []Application `json:"result" url:"result"`
-	// Cursor to use to retrieve the next page of results.
-	Cursor string `json:"cursor" url:"cursor"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
@@ -451,10 +477,12 @@ func (q *QueryApplicationsResponse) String() string {
 }
 
 type QueryEndpointsResponse struct {
+	// Various metadata about the results organized by group, then type, then field.
+	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
+	// Cursor to use to retrieve the next page of results
+	Cursor string `json:"cursor" url:"cursor"`
 	// List of endpoint assets that match the query.
 	Result []Device `json:"result" url:"result"`
-	// Cursor to use to retrieve the next page of results.
-	Cursor string `json:"cursor" url:"cursor"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
@@ -495,10 +523,12 @@ func (q *QueryEndpointsResponse) String() string {
 }
 
 type QueryIocsResponse struct {
+	// Various metadata about the results organized by group, then type, then field.
+	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
+	// Cursor to use to retrieve the next page of results
+	Cursor string `json:"cursor" url:"cursor"`
 	// List of iocs that match the query.
 	Result []*stix.Indicator `json:"result" url:"result"`
-	// Cursor to use to retrieve the next page of results.
-	Cursor string `json:"cursor" url:"cursor"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
@@ -539,10 +569,12 @@ func (q *QueryIocsResponse) String() string {
 }
 
 type QueryPostureScoreResponse struct {
+	// Various metadata about the results organized by group, then type, then field.
+	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
+	// Cursor to use to retrieve the next page of results
+	Cursor string `json:"cursor" url:"cursor"`
 	// List of posture scores that match the query.
 	Result []PostureScore `json:"result" url:"result"`
-	// Cursor to use to retrieve the next page of results.
-	Cursor string `json:"cursor" url:"cursor"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
@@ -583,10 +615,12 @@ func (q *QueryPostureScoreResponse) String() string {
 }
 
 type QueryThreatsResponse struct {
+	// Various metadata about the results organized by group, then type, then field.
+	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
+	// Cursor to use to retrieve the next page of results
+	Cursor string `json:"cursor" url:"cursor"`
 	// List of threats that match the query.
 	Result []ThreatEvent `json:"result" url:"result"`
-	// Cursor to use to retrieve the next page of results.
-	Cursor string `json:"cursor" url:"cursor"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage

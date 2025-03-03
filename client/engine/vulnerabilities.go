@@ -12,6 +12,8 @@ import (
 )
 
 type QueryAssetsRequest struct {
+	// Add metadata to the response by invoking meta functions. Documentation for meta functions is available at https://docs.synqly.com/api-reference/meta-functions. Not all meta function are available at every endpoint.
+	Meta []*string `json:"-" url:"meta,omitempty"`
 	// Number of assets to return. Defaults to 50.
 	Limit *int `json:"-" url:"limit,omitempty"`
 	// Start search from cursor position.
@@ -22,6 +24,8 @@ type QueryAssetsRequest struct {
 }
 
 type QueryFindingsRequest struct {
+	// Add metadata to the response by invoking meta functions. Documentation for meta functions is available at https://docs.synqly.com/api-reference/meta-functions. Not all meta function are available at every endpoint.
+	Meta []*string `json:"-" url:"meta,omitempty"`
 	// Number of finding reports to return. Defaults to 50.
 	Limit *int `json:"-" url:"limit,omitempty"`
 	// Start search from cursor position.
@@ -32,6 +36,8 @@ type QueryFindingsRequest struct {
 }
 
 type QueryScansRequest struct {
+	// Add metadata to the response by invoking meta functions. Documentation for meta functions is available at https://docs.synqly.com/api-reference/meta-functions. Not all meta function are available at every endpoint.
+	Meta []*string `json:"-" url:"meta,omitempty"`
 	// Number of scans to return. Defaults to 50.
 	Limit *int `json:"-" url:"limit,omitempty"`
 	// Start search from cursor position.
@@ -86,6 +92,8 @@ func (c *CreateAssetRequest) String() string {
 }
 
 type CreateAssetResponse struct {
+	// Various metadata about the results organized by group, then type, then field.
+	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
 	// Created device.
 	Device *CreateAssetDevice `json:"device" url:"device"`
 
@@ -169,6 +177,8 @@ func (c *CreateFindingsRequest) String() string {
 }
 
 type CreateFindingsResponse struct {
+	// Various metadata about the results organized by group, then type, then field.
+	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
 	// Specifies the status of the create/import findings job, which can be COMPLETE or PENDING.
 	Status QueryStatus `json:"status" url:"status"`
 	// Provides additional details about any errors encountered during the create/import operation.
@@ -213,6 +223,8 @@ func (c *CreateFindingsResponse) String() string {
 }
 
 type GetScanActivityResponse struct {
+	// Various metadata about the results organized by group, then type, then field.
+	Meta   *MetaResponse              `json:"meta,omitempty" url:"meta,omitempty"`
 	Result *scanactivity.ScanActivity `json:"result" url:"result"`
 
 	extraProperties map[string]interface{}
@@ -254,11 +266,13 @@ func (g *GetScanActivityResponse) String() string {
 }
 
 type QueryAssetsResponse struct {
-	Result []Asset `json:"result" url:"result"`
-	// Cursor to use to retrieve the next page of results.
+	// Various metadata about the results organized by group, then type, then field.
+	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
+	// Cursor to use to retrieve the next page of results
 	Cursor string `json:"cursor" url:"cursor"`
 	// If the provider supports asynchronous queries and the query is still running, this field will be `PENDING` until the query is complete. In this case, the client should retry using the provided cursor.
 	Status QueryStatus `json:"status" url:"status"`
+	Result []Asset     `json:"result" url:"result"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
@@ -299,11 +313,13 @@ func (q *QueryAssetsResponse) String() string {
 }
 
 type QueryFindingsResponse struct {
-	Result []SecurityFinding `json:"result" url:"result"`
-	// Cursor to use to retrieve the next page of results.
+	// Various metadata about the results organized by group, then type, then field.
+	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
+	// Cursor to use to retrieve the next page of results
 	Cursor string `json:"cursor" url:"cursor"`
 	// If the provider supports asynchronous queries and the query is still running, this field will be `PENDING` until the query is complete. In this case, the client should retry using the provided cursor.
-	Status QueryStatus `json:"status" url:"status"`
+	Status QueryStatus       `json:"status" url:"status"`
+	Result []SecurityFinding `json:"result" url:"result"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
@@ -344,8 +360,11 @@ func (q *QueryFindingsResponse) String() string {
 }
 
 type QueryScansResponse struct {
-	Result []*ScanConfiguration `json:"result" url:"result"`
+	// Various metadata about the results organized by group, then type, then field.
+	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
+	// Cursor to use to retrieve the next page of results
 	Cursor string               `json:"cursor" url:"cursor"`
+	Result []*ScanConfiguration `json:"result" url:"result"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage

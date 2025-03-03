@@ -9,6 +9,10 @@ import (
 )
 
 type ListStorageResponse struct {
+	// Various metadata about the results organized by group, then type, then field.
+	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
+	// Cursor to use to retrieve the next page of results
+	Cursor string         `json:"cursor" url:"cursor"`
 	Result []*StoragePath `json:"result" url:"result"`
 
 	extraProperties map[string]interface{}
