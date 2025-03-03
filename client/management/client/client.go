@@ -14,6 +14,7 @@ import (
 	integrations "github.com/synqly/go-sdk/client/management/integrations"
 	members "github.com/synqly/go-sdk/client/management/members"
 	meta "github.com/synqly/go-sdk/client/management/meta"
+	operations "github.com/synqly/go-sdk/client/management/operations"
 	option "github.com/synqly/go-sdk/client/management/option"
 	organization "github.com/synqly/go-sdk/client/management/organization"
 	organizationwebhooks "github.com/synqly/go-sdk/client/management/organizationwebhooks"
@@ -41,6 +42,7 @@ type Client struct {
 	Integrations         *integrations.Client
 	Members              *members.Client
 	Meta                 *meta.Client
+	Operations           *operations.Client
 	OrganizationWebhooks *organizationwebhooks.Client
 	Organization         *organization.Client
 	Permissionset        *permissionset.Client
@@ -72,6 +74,7 @@ func NewClient(opts ...option.RequestOption) *Client {
 		Integrations:         integrations.NewClient(opts...),
 		Members:              members.NewClient(opts...),
 		Meta:                 meta.NewClient(opts...),
+		Operations:           operations.NewClient(opts...),
 		OrganizationWebhooks: organizationwebhooks.NewClient(opts...),
 		Organization:         organization.NewClient(opts...),
 		Permissionset:        permissionset.NewClient(opts...),
