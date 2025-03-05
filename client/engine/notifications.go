@@ -10,8 +10,8 @@ import (
 
 // Notification object
 type CreateNotificationRequest struct {
-	// Human-readable name for this resource
-	Name string `json:"name" url:"name"`
+	// This field is deprecated and no longer used.
+	Name *string `json:"name,omitempty" url:"name,omitempty"`
 	// Notification summary.
 	Summary string `json:"summary" url:"summary"`
 	// Notification priority
