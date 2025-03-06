@@ -576,6 +576,49 @@ func (m *MetaStats) String() string {
 // The Object type is used to represent an object with arbitrary fields. The keys are strings and the values are any type.
 type Object = map[string]interface{}
 
+// Represents a possible option from a set of choices, such as an enum value. The choices may have separate display names and IDs.
+type OptionValue struct {
+	Id   Id     `json:"id" url:"id"`
+	Name string `json:"name" url:"name"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (o *OptionValue) GetExtraProperties() map[string]interface{} {
+	return o.extraProperties
+}
+
+func (o *OptionValue) UnmarshalJSON(data []byte) error {
+	type unmarshaler OptionValue
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*o = OptionValue(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *o)
+	if err != nil {
+		return err
+	}
+	o.extraProperties = extraProperties
+
+	o._rawJSON = nil
+	return nil
+}
+
+func (o *OptionValue) String() string {
+	if len(o._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(o._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(o); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", o)
+}
+
 type OrderOptions string
 
 const (
@@ -2156,7 +2199,10 @@ func (r *RemoteField) String() string {
 type RemoteFieldSchema struct {
 	FieldTypeId RemoteFieldTypeId `json:"field_type_id" url:"field_type_id"`
 	FieldType   *string           `json:"field_Type,omitempty" url:"field_Type,omitempty"`
-	EnumValues  []string          `json:"enum_values,omitempty" url:"enum_values,omitempty"`
+	// Display names for possible values the enum can take on.
+	EnumValues []string `json:"enum_values,omitempty" url:"enum_values,omitempty"`
+	// Possible values the enum can take on. For providers which don't distinguish between ID and display name, the ID and display name should be set to the same value.
+	EnumOptionValues []*OptionValue `json:"enum_option_values,omitempty" url:"enum_option_values,omitempty"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
