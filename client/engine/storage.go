@@ -8,6 +8,13 @@ import (
 	core "github.com/synqly/go-sdk/client/engine/core"
 )
 
+type ListStorageRequest struct {
+	// Cursor to fetch the next set of results.
+	Cursor *string `json:"-" url:"cursor,omitempty"`
+	// Number of results to return. Default is 50.
+	Limit *int `json:"-" url:"limit,omitempty"`
+}
+
 type ListStorageResponse struct {
 	// Various metadata about the results organized by group, then type, then field.
 	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`

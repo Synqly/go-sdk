@@ -39,6 +39,7 @@ func NewClient(opts ...option.RequestOption) *Client {
 func (c *Client) ListFiles(
 	ctx context.Context,
 	path string,
+	request *engine.ListStorageRequest,
 	opts ...option.RequestOption,
 ) (*engine.ListStorageResponse, error) {
 	options := core.NewRequestOptions(opts...)
@@ -51,6 +52,14 @@ func (c *Client) ListFiles(
 		baseURL = options.BaseURL
 	}
 	endpointURL := core.EncodeURL(baseURL+"/v1/storage/folders/%v", path)
+
+	queryParams, err := core.QueryValues(request)
+	if err != nil {
+		return nil, err
+	}
+	if len(queryParams) > 0 {
+		endpointURL += "?" + queryParams.Encode()
+	}
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
