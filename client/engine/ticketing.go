@@ -262,6 +262,91 @@ func (c *CreateCommentResponse) String() string {
 	return fmt.Sprintf("%#v", c)
 }
 
+type CreateNoteRequest struct {
+	// The content of the note formatted as markdown.
+	Content string `json:"content" url:"content"`
+	// The title of the note.
+	Title string `json:"title" url:"title"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *CreateNoteRequest) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
+}
+
+func (c *CreateNoteRequest) UnmarshalJSON(data []byte) error {
+	type unmarshaler CreateNoteRequest
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = CreateNoteRequest(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
+	c._rawJSON = nil
+	return nil
+}
+
+func (c *CreateNoteRequest) String() string {
+	if len(c._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
+type CreateNoteResponse struct {
+	Result *Note `json:"result" url:"result"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *CreateNoteResponse) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
+}
+
+func (c *CreateNoteResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler CreateNoteResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = CreateNoteResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
+	c._rawJSON = nil
+	return nil
+}
+
+func (c *CreateNoteResponse) String() string {
+	if len(c._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
 type CreateTicketRequest struct {
 	// Human-readable name for this resource
 	Name string `json:"name" url:"name"`
@@ -571,6 +656,47 @@ func (l *ListCommentsResponse) String() string {
 	return fmt.Sprintf("%#v", l)
 }
 
+type ListNotesResponse struct {
+	Result []*Note `json:"result" url:"result"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (l *ListNotesResponse) GetExtraProperties() map[string]interface{} {
+	return l.extraProperties
+}
+
+func (l *ListNotesResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler ListNotesResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*l = ListNotesResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *l)
+	if err != nil {
+		return err
+	}
+	l.extraProperties = extraProperties
+
+	l._rawJSON = nil
+	return nil
+}
+
+func (l *ListNotesResponse) String() string {
+	if len(l._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(l._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(l); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", l)
+}
+
 type ListProjectsResponse struct {
 	// Various metadata about the results organized by group, then type, then field.
 	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
@@ -660,6 +786,9 @@ func (l *ListRemoteFieldsResponse) String() string {
 	}
 	return fmt.Sprintf("%#v", l)
 }
+
+// Unique identifier for a note
+type NoteId = Id
 
 type PatchTicketResponse struct {
 	// Various metadata about the results organized by group, then type, then field.

@@ -2066,6 +2066,83 @@ type FieldMappingId = Id
 // Unique identifier for an issue type
 type IssueTypeId = string
 
+// Note on a ticket
+type Note struct {
+	Id       NoteId   `json:"id" url:"id"`
+	TicketId TicketId `json:"ticket_id" url:"ticket_id"`
+	// The content of the note formatted as markdown.
+	Content string `json:"content" url:"content"`
+	// The user who created the note.
+	Creator string `json:"creator" url:"creator"`
+	// The title of the note.
+	Title string `json:"title" url:"title"`
+	// The date the comment was created.
+	CreatedAt time.Time `json:"created_at" url:"created_at"`
+	// The date the comment was last updated.
+	UpdatedAt *time.Time `json:"updated_at,omitempty" url:"updated_at,omitempty"`
+	// The attributes that are not mapped to the comment schema. The names and values of those attributes are specific to the provider.
+	Unmapped *Object `json:"unmapped,omitempty" url:"unmapped,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (n *Note) GetExtraProperties() map[string]interface{} {
+	return n.extraProperties
+}
+
+func (n *Note) UnmarshalJSON(data []byte) error {
+	type embed Note
+	var unmarshaler = struct {
+		embed
+		CreatedAt *core.DateTime `json:"created_at"`
+		UpdatedAt *core.DateTime `json:"updated_at,omitempty"`
+	}{
+		embed: embed(*n),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*n = Note(unmarshaler.embed)
+	n.CreatedAt = unmarshaler.CreatedAt.Time()
+	n.UpdatedAt = unmarshaler.UpdatedAt.TimePtr()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *n)
+	if err != nil {
+		return err
+	}
+	n.extraProperties = extraProperties
+
+	n._rawJSON = nil
+	return nil
+}
+
+func (n *Note) MarshalJSON() ([]byte, error) {
+	type embed Note
+	var marshaler = struct {
+		embed
+		CreatedAt *core.DateTime `json:"created_at"`
+		UpdatedAt *core.DateTime `json:"updated_at,omitempty"`
+	}{
+		embed:     embed(*n),
+		CreatedAt: core.NewDateTime(n.CreatedAt),
+		UpdatedAt: core.NewOptionalDateTime(n.UpdatedAt),
+	}
+	return json.Marshal(marshaler)
+}
+
+func (n *Note) String() string {
+	if len(n._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(n._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(n); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", n)
+}
+
 type Priority string
 
 const (
