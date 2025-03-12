@@ -8538,7 +8538,9 @@ type ProviderConfig struct {
 	SinkAwsSqs                        *SinkAwsSqs
 	SinkAzureMonitorLogs              *SinkAzureMonitorLogs
 	SinkCrowdstrikeHec                *SinkCrowdstrikeHec
+	SinkElasticsearch                 *SinkElasticsearch
 	SinkMockSink                      *SinkMock
+	SinkSplunk                        *SinkSplunk
 	StorageAwsS3                      *StorageAwsS3
 	StorageAzureBlob                  *StorageAzureBlob
 	StorageGcs                        *StorageGcs
@@ -8736,12 +8738,24 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.SinkCrowdstrikeHec = value
+	case "sink_elasticsearch":
+		value := new(SinkElasticsearch)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.SinkElasticsearch = value
 	case "sink_mock_sink":
 		value := new(SinkMock)
 		if err := json.Unmarshal(data, &value); err != nil {
 			return err
 		}
 		p.SinkMockSink = value
+	case "sink_splunk":
+		value := new(SinkSplunk)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.SinkSplunk = value
 	case "storage_aws_s3":
 		value := new(StorageAwsS3)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -8921,8 +8935,14 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.SinkCrowdstrikeHec != nil {
 		return core.MarshalJSONWithExtraProperty(p.SinkCrowdstrikeHec, "type", "sink_crowdstrike_hec")
 	}
+	if p.SinkElasticsearch != nil {
+		return core.MarshalJSONWithExtraProperty(p.SinkElasticsearch, "type", "sink_elasticsearch")
+	}
 	if p.SinkMockSink != nil {
 		return core.MarshalJSONWithExtraProperty(p.SinkMockSink, "type", "sink_mock_sink")
+	}
+	if p.SinkSplunk != nil {
+		return core.MarshalJSONWithExtraProperty(p.SinkSplunk, "type", "sink_splunk")
 	}
 	if p.StorageAwsS3 != nil {
 		return core.MarshalJSONWithExtraProperty(p.StorageAwsS3, "type", "storage_aws_s3")
@@ -9001,7 +9021,9 @@ type ProviderConfigVisitor interface {
 	VisitSinkAwsSqs(*SinkAwsSqs) error
 	VisitSinkAzureMonitorLogs(*SinkAzureMonitorLogs) error
 	VisitSinkCrowdstrikeHec(*SinkCrowdstrikeHec) error
+	VisitSinkElasticsearch(*SinkElasticsearch) error
 	VisitSinkMockSink(*SinkMock) error
+	VisitSinkSplunk(*SinkSplunk) error
 	VisitStorageAwsS3(*StorageAwsS3) error
 	VisitStorageAzureBlob(*StorageAzureBlob) error
 	VisitStorageGcs(*StorageGcs) error
@@ -9104,8 +9126,14 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	if p.SinkCrowdstrikeHec != nil {
 		return visitor.VisitSinkCrowdstrikeHec(p.SinkCrowdstrikeHec)
 	}
+	if p.SinkElasticsearch != nil {
+		return visitor.VisitSinkElasticsearch(p.SinkElasticsearch)
+	}
 	if p.SinkMockSink != nil {
 		return visitor.VisitSinkMockSink(p.SinkMockSink)
+	}
+	if p.SinkSplunk != nil {
+		return visitor.VisitSinkSplunk(p.SinkSplunk)
 	}
 	if p.StorageAwsS3 != nil {
 		return visitor.VisitStorageAwsS3(p.StorageAwsS3)
@@ -9215,8 +9243,12 @@ const (
 	ProviderConfigIdSinkAzureMonitorLogs ProviderConfigId = "sink_azure_monitor_logs"
 	// Crowdstrike HEC
 	ProviderConfigIdSinkCrowdstrikeHec ProviderConfigId = "sink_crowdstrike_hec"
+	// Elastic
+	ProviderConfigIdSinkElasticsearch ProviderConfigId = "sink_elasticsearch"
 	// Sink Test
 	ProviderConfigIdSinkMock ProviderConfigId = "sink_mock_sink"
+	// Splunk Enterprise Security
+	ProviderConfigIdSinkSplunk ProviderConfigId = "sink_splunk"
 	// AWS S3
 	ProviderConfigIdStorageAwsS3 ProviderConfigId = "storage_aws_s3"
 	// Microsoft Azure Blob Storage
@@ -9309,8 +9341,12 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdSinkAzureMonitorLogs, nil
 	case "sink_crowdstrike_hec":
 		return ProviderConfigIdSinkCrowdstrikeHec, nil
+	case "sink_elasticsearch":
+		return ProviderConfigIdSinkElasticsearch, nil
 	case "sink_mock_sink":
 		return ProviderConfigIdSinkMock, nil
+	case "sink_splunk":
+		return ProviderConfigIdSinkSplunk, nil
 	case "storage_aws_s3":
 		return ProviderConfigIdStorageAwsS3, nil
 	case "storage_azure_blob":
@@ -10402,6 +10438,55 @@ func (s *SinkCrowdstrikeHec) String() string {
 	return fmt.Sprintf("%#v", s)
 }
 
+// Configuration for Elasticsearch search and analytics engine. Supports both managed and self-hosted Elasticsearch deployments
+type SinkElasticsearch struct {
+	AuthOptions *ElasticsearchAuthOptions `json:"auth_options,omitempty" url:"auth_options,omitempty"`
+	// The index or data stream to use when writing events.
+	CreateIndex string                   `json:"create_index" url:"create_index"`
+	Credential  *ElasticsearchCredential `json:"credential" url:"credential"`
+	// If true, skips verification of the Elasticsearch server's TLS certificate.
+	SkipTlsVerify *bool `json:"skip_tls_verify,omitempty" url:"skip_tls_verify,omitempty"`
+	// URL for the Elasticsearch API. This should be the base URL for the API, without any path components and must be HTTPS. For example, "https://tenant.elastic.com".
+	Url string `json:"url" url:"url"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (s *SinkElasticsearch) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
+}
+
+func (s *SinkElasticsearch) UnmarshalJSON(data []byte) error {
+	type unmarshaler SinkElasticsearch
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*s = SinkElasticsearch(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+
+	s._rawJSON = nil
+	return nil
+}
+
+func (s *SinkElasticsearch) String() string {
+	if len(s._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(s); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", s)
+}
+
 // Configuration for the Synqly mock in-memory sink handler. This provider is for testing purposes only and does not retain events pushed to it.
 type SinkMock struct {
 	// Name of the destination where events are stored. This property is unused.
@@ -10434,6 +10519,58 @@ func (s *SinkMock) UnmarshalJSON(data []byte) error {
 }
 
 func (s *SinkMock) String() string {
+	if len(s._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(s); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", s)
+}
+
+// Configuration for Splunk as a Sink provider. This integration allows sending data to Splunk using an HTTP Event Collector (HEC).
+type SinkSplunk struct {
+	HecCredential *SplunkHecToken `json:"hec_credential" url:"hec_credential"`
+	// URL for the Splunk HEC endpoint. This must include the full path to the HEC endpoint. For example, "https://tenant.cloud.splunk.com:8088/services_collector_event".
+	HecUrl string `json:"hec_url" url:"hec_url"`
+	// Splunk index to send events to. If not provided, will use the default index for the Splunk collector.
+	Index *string `json:"index,omitempty" url:"index,omitempty"`
+	// If true, skips verification of the Splunk server's TLS certificate.
+	SkipTlsVerify bool `json:"skip_tls_verify" url:"skip_tls_verify"`
+	// Splunk source to send events to. If not provided, will use the default source for the Splunk collector.
+	Source *string `json:"source,omitempty" url:"source,omitempty"`
+	// Splunk source type to send events to. If not provided, will use the default source type for the Splunk collector.
+	SourceType *string `json:"source_type,omitempty" url:"source_type,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (s *SinkSplunk) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
+}
+
+func (s *SinkSplunk) UnmarshalJSON(data []byte) error {
+	type unmarshaler SinkSplunk
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*s = SinkSplunk(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+
+	s._rawJSON = nil
+	return nil
+}
+
+func (s *SinkSplunk) String() string {
 	if len(s._rawJSON) > 0 {
 		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
 			return value
