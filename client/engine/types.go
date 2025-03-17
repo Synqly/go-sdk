@@ -162,6 +162,40 @@ func (a *ApiResponse) String() string {
 	return fmt.Sprintf("%#v", a)
 }
 
+type ActionId string
+
+const (
+	ActionIdQuery  ActionId = "query"
+	ActionIdRead   ActionId = "read"
+	ActionIdCreate ActionId = "create"
+	ActionIdUpdate ActionId = "update"
+	ActionIdDelete ActionId = "delete"
+	ActionIdPatch  ActionId = "patch"
+)
+
+func NewActionIdFromString(s string) (ActionId, error) {
+	switch s {
+	case "query":
+		return ActionIdQuery, nil
+	case "read":
+		return ActionIdRead, nil
+	case "create":
+		return ActionIdCreate, nil
+	case "update":
+		return ActionIdUpdate, nil
+	case "delete":
+		return ActionIdDelete, nil
+	case "patch":
+		return ActionIdPatch, nil
+	}
+	var t ActionId
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (a ActionId) Ptr() *ActionId {
+	return &a
+}
+
 type Base struct {
 	// Human-readable name for this resource
 	Name string `json:"name" url:"name"`
@@ -695,6 +729,37 @@ func NewQueryStatusFromString(s string) (QueryStatus, error) {
 
 func (q QueryStatus) Ptr() *QueryStatus {
 	return &q
+}
+
+type ResourceId string
+
+const (
+	ResourceIdDevices        ResourceId = "devices"
+	ResourceIdEvents         ResourceId = "events"
+	ResourceIdInvestigations ResourceId = "investigations"
+	ResourceIdLogProviders   ResourceId = "log_providers"
+	ResourceIdEvidence       ResourceId = "evidence"
+)
+
+func NewResourceIdFromString(s string) (ResourceId, error) {
+	switch s {
+	case "devices":
+		return ResourceIdDevices, nil
+	case "events":
+		return ResourceIdEvents, nil
+	case "investigations":
+		return ResourceIdInvestigations, nil
+	case "log_providers":
+		return ResourceIdLogProviders, nil
+	case "evidence":
+		return ResourceIdEvidence, nil
+	}
+	var t ResourceId
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (r ResourceId) Ptr() *ResourceId {
+	return &r
 }
 
 // Application information represented by the extended OCSF Software Info event. The Product object describes characteristics of a software product.
