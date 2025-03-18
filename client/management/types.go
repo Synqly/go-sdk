@@ -1123,244 +1123,92 @@ func (c CategoryId) Ptr() *CategoryId {
 
 type ProviderId = string
 
-type Base struct {
-	// Human-readable name for this resource
-	Name string `json:"name" url:"name"`
-	// Time object was originally created
-	CreatedAt time.Time `json:"created_at" url:"created_at"`
-	// Last time object was updated
-	UpdatedAt time.Time `json:"updated_at" url:"updated_at"`
+type AdditionalMapping struct {
+	// The resources that this mapping applies to.
+	Resource ResourceId `json:"resource" url:"resource"`
+	// The actions that this mapping applies to. At least one action must be specified.
+	Actions []ActionId `json:"actions" url:"actions"`
+	// The dot-separated path to the field in the source data coming from the provider. Use `\.` to escape literal dots in the field name.
+	Source string `json:"source" url:"source"`
+	// The dot-separated path to where the data should reside in the custom fields object when data is returned from the provider.
+	Destination string `json:"destination" url:"destination"`
+	// When true, the value in 'source' is treated as a literal value rather than a mapping. This allows adding static values to custom fields. Default: false
+	Literal *bool `json:"literal,omitempty" url:"literal,omitempty"`
+	// The data type of the field. This ensures the data is processed to the correct type when mapping. Fields set to 'any' will not get validated
+	// or processed. Other types are cast depending as defined by each provider. For example, a field with 'datetime' is parsed based on the date
+	// format used by the provider, and normalized to a unix timestamp with millisecond precision.
+	DataType MappingDataType `json:"data_type" url:"data_type"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
 }
 
-func (b *Base) GetExtraProperties() map[string]interface{} {
-	return b.extraProperties
+func (a *AdditionalMapping) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
 }
 
-func (b *Base) UnmarshalJSON(data []byte) error {
-	type embed Base
-	var unmarshaler = struct {
-		embed
-		CreatedAt *core.DateTime `json:"created_at"`
-		UpdatedAt *core.DateTime `json:"updated_at"`
-	}{
-		embed: embed(*b),
-	}
-	if err := json.Unmarshal(data, &unmarshaler); err != nil {
-		return err
-	}
-	*b = Base(unmarshaler.embed)
-	b.CreatedAt = unmarshaler.CreatedAt.Time()
-	b.UpdatedAt = unmarshaler.UpdatedAt.Time()
-
-	extraProperties, err := core.ExtractExtraProperties(data, *b)
-	if err != nil {
-		return err
-	}
-	b.extraProperties = extraProperties
-
-	b._rawJSON = nil
-	return nil
-}
-
-func (b *Base) MarshalJSON() ([]byte, error) {
-	type embed Base
-	var marshaler = struct {
-		embed
-		CreatedAt *core.DateTime `json:"created_at"`
-		UpdatedAt *core.DateTime `json:"updated_at"`
-	}{
-		embed:     embed(*b),
-		CreatedAt: core.NewDateTime(b.CreatedAt),
-		UpdatedAt: core.NewDateTime(b.UpdatedAt),
-	}
-	return json.Marshal(marshaler)
-}
-
-func (b *Base) String() string {
-	if len(b._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(b._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(b); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", b)
-}
-
-type ErrorBody struct {
-	Status     int                    `json:"status" url:"status"`
-	Message    *string                `json:"message,omitempty" url:"message,omitempty"`
-	Errors     []string               `json:"errors,omitempty" url:"errors,omitempty"`
-	Parameters []*ErrorParam          `json:"parameters,omitempty" url:"parameters,omitempty"`
-	Context    map[string]interface{} `json:"context,omitempty" url:"context,omitempty"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (e *ErrorBody) GetExtraProperties() map[string]interface{} {
-	return e.extraProperties
-}
-
-func (e *ErrorBody) UnmarshalJSON(data []byte) error {
-	type unmarshaler ErrorBody
+func (a *AdditionalMapping) UnmarshalJSON(data []byte) error {
+	type unmarshaler AdditionalMapping
 	var value unmarshaler
 	if err := json.Unmarshal(data, &value); err != nil {
 		return err
 	}
-	*e = ErrorBody(value)
+	*a = AdditionalMapping(value)
 
-	extraProperties, err := core.ExtractExtraProperties(data, *e)
+	extraProperties, err := core.ExtractExtraProperties(data, *a)
 	if err != nil {
 		return err
 	}
-	e.extraProperties = extraProperties
+	a.extraProperties = extraProperties
 
-	e._rawJSON = nil
+	a._rawJSON = nil
 	return nil
 }
 
-func (e *ErrorBody) String() string {
-	if len(e._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(e._rawJSON); err == nil {
+func (a *AdditionalMapping) String() string {
+	if len(a._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(e); err == nil {
+	if value, err := core.StringifyJSON(a); err == nil {
 		return value
 	}
-	return fmt.Sprintf("%#v", e)
+	return fmt.Sprintf("%#v", a)
 }
 
-type ErrorParam struct {
-	Name  string `json:"name" url:"name"`
-	Value string `json:"value" url:"value"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (e *ErrorParam) GetExtraProperties() map[string]interface{} {
-	return e.extraProperties
-}
-
-func (e *ErrorParam) UnmarshalJSON(data []byte) error {
-	type unmarshaler ErrorParam
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*e = ErrorParam(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *e)
-	if err != nil {
-		return err
-	}
-	e.extraProperties = extraProperties
-
-	e._rawJSON = nil
-	return nil
-}
-
-func (e *ErrorParam) String() string {
-	if len(e._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(e._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(e); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", e)
-}
-
-type Id = string
-
-type PatchOp string
+type MappingDataType string
 
 const (
-	PatchOpAdd     PatchOp = "add"
-	PatchOpCopy    PatchOp = "copy"
-	PatchOpMove    PatchOp = "move"
-	PatchOpRemove  PatchOp = "remove"
-	PatchOpReplace PatchOp = "replace"
-	PatchOpTest    PatchOp = "test"
+	MappingDataTypeString   MappingDataType = "string"
+	MappingDataTypeNumber   MappingDataType = "number"
+	MappingDataTypeDatetime MappingDataType = "datetime"
+	MappingDataTypeBoolean  MappingDataType = "boolean"
+	MappingDataTypeArray    MappingDataType = "array"
+	MappingDataTypeAny      MappingDataType = "any"
 )
 
-func NewPatchOpFromString(s string) (PatchOp, error) {
+func NewMappingDataTypeFromString(s string) (MappingDataType, error) {
 	switch s {
-	case "add":
-		return PatchOpAdd, nil
-	case "copy":
-		return PatchOpCopy, nil
-	case "move":
-		return PatchOpMove, nil
-	case "remove":
-		return PatchOpRemove, nil
-	case "replace":
-		return PatchOpReplace, nil
-	case "test":
-		return PatchOpTest, nil
+	case "string":
+		return MappingDataTypeString, nil
+	case "number":
+		return MappingDataTypeNumber, nil
+	case "datetime":
+		return MappingDataTypeDatetime, nil
+	case "boolean":
+		return MappingDataTypeBoolean, nil
+	case "array":
+		return MappingDataTypeArray, nil
+	case "any":
+		return MappingDataTypeAny, nil
 	}
-	var t PatchOp
+	var t MappingDataType
 	return "", fmt.Errorf("%s is not a valid %T", s, t)
 }
 
-func (p PatchOp) Ptr() *PatchOp {
-	return &p
-}
-
-// JSON patch to apply. A JSON patch is a list of patch operations. (see https://jsonpatch.com/)
-type PatchOperation struct {
-	// The operation to perform. Supported values are `add`, `copy`, `move`, `replace`, `remove`, and `test`.
-	Op PatchOp `json:"op" url:"op"`
-	// The path to the field to update. The path is a JSON Pointer.
-	Path string `json:"path" url:"path"`
-	// The path to the field to copy from. This is required for `copy` and `move` operations.
-	From *string `json:"from,omitempty" url:"from,omitempty"`
-	// The value to set the field to. This is required for `add`, `replace` and `test` operations.
-	Value interface{} `json:"value,omitempty" url:"value,omitempty"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (p *PatchOperation) GetExtraProperties() map[string]interface{} {
-	return p.extraProperties
-}
-
-func (p *PatchOperation) UnmarshalJSON(data []byte) error {
-	type unmarshaler PatchOperation
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*p = PatchOperation(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *p)
-	if err != nil {
-		return err
-	}
-	p.extraProperties = extraProperties
-
-	p._rawJSON = nil
-	return nil
-}
-
-func (p *PatchOperation) String() string {
-	if len(p._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(p._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(p); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", p)
+func (m MappingDataType) Ptr() *MappingDataType {
+	return &m
 }
 
 // AWS access key to authenticate with AWS. Access keys are long-term credentials for an IAM user and consist of an ID and secret. Follow [this guide to generate access and secret keys](https://docs.aws.amazon.com/general/latest/gr/aws-sec-cred-types.html#access-keys-and-secret-access-keys). You may optionally provide a session token if you are using temporary credentials.
@@ -2687,8 +2535,399 @@ func (v *VaultCredential) String() string {
 	return fmt.Sprintf("%#v", v)
 }
 
+type ActionId string
+
+const (
+	ActionIdQuery  ActionId = "query"
+	ActionIdRead   ActionId = "read"
+	ActionIdCreate ActionId = "create"
+	ActionIdUpdate ActionId = "update"
+	ActionIdDelete ActionId = "delete"
+	ActionIdPatch  ActionId = "patch"
+)
+
+func NewActionIdFromString(s string) (ActionId, error) {
+	switch s {
+	case "query":
+		return ActionIdQuery, nil
+	case "read":
+		return ActionIdRead, nil
+	case "create":
+		return ActionIdCreate, nil
+	case "update":
+		return ActionIdUpdate, nil
+	case "delete":
+		return ActionIdDelete, nil
+	case "patch":
+		return ActionIdPatch, nil
+	}
+	var t ActionId
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (a ActionId) Ptr() *ActionId {
+	return &a
+}
+
+type Base struct {
+	// Human-readable name for this resource
+	Name string `json:"name" url:"name"`
+	// Time object was originally created
+	CreatedAt time.Time `json:"created_at" url:"created_at"`
+	// Last time object was updated
+	UpdatedAt time.Time `json:"updated_at" url:"updated_at"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (b *Base) GetExtraProperties() map[string]interface{} {
+	return b.extraProperties
+}
+
+func (b *Base) UnmarshalJSON(data []byte) error {
+	type embed Base
+	var unmarshaler = struct {
+		embed
+		CreatedAt *core.DateTime `json:"created_at"`
+		UpdatedAt *core.DateTime `json:"updated_at"`
+	}{
+		embed: embed(*b),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*b = Base(unmarshaler.embed)
+	b.CreatedAt = unmarshaler.CreatedAt.Time()
+	b.UpdatedAt = unmarshaler.UpdatedAt.Time()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *b)
+	if err != nil {
+		return err
+	}
+	b.extraProperties = extraProperties
+
+	b._rawJSON = nil
+	return nil
+}
+
+func (b *Base) MarshalJSON() ([]byte, error) {
+	type embed Base
+	var marshaler = struct {
+		embed
+		CreatedAt *core.DateTime `json:"created_at"`
+		UpdatedAt *core.DateTime `json:"updated_at"`
+	}{
+		embed:     embed(*b),
+		CreatedAt: core.NewDateTime(b.CreatedAt),
+		UpdatedAt: core.NewDateTime(b.UpdatedAt),
+	}
+	return json.Marshal(marshaler)
+}
+
+func (b *Base) String() string {
+	if len(b._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(b._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(b); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", b)
+}
+
+type ErrorBody struct {
+	Status     int                    `json:"status" url:"status"`
+	Message    *string                `json:"message,omitempty" url:"message,omitempty"`
+	Errors     []string               `json:"errors,omitempty" url:"errors,omitempty"`
+	Parameters []*ErrorParam          `json:"parameters,omitempty" url:"parameters,omitempty"`
+	Context    map[string]interface{} `json:"context,omitempty" url:"context,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (e *ErrorBody) GetExtraProperties() map[string]interface{} {
+	return e.extraProperties
+}
+
+func (e *ErrorBody) UnmarshalJSON(data []byte) error {
+	type unmarshaler ErrorBody
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*e = ErrorBody(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *e)
+	if err != nil {
+		return err
+	}
+	e.extraProperties = extraProperties
+
+	e._rawJSON = nil
+	return nil
+}
+
+func (e *ErrorBody) String() string {
+	if len(e._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(e._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(e); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", e)
+}
+
+type ErrorParam struct {
+	Name  string `json:"name" url:"name"`
+	Value string `json:"value" url:"value"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (e *ErrorParam) GetExtraProperties() map[string]interface{} {
+	return e.extraProperties
+}
+
+func (e *ErrorParam) UnmarshalJSON(data []byte) error {
+	type unmarshaler ErrorParam
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*e = ErrorParam(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *e)
+	if err != nil {
+		return err
+	}
+	e.extraProperties = extraProperties
+
+	e._rawJSON = nil
+	return nil
+}
+
+func (e *ErrorParam) String() string {
+	if len(e._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(e._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(e); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", e)
+}
+
+type Id = string
+
+type PatchOp string
+
+const (
+	PatchOpAdd     PatchOp = "add"
+	PatchOpCopy    PatchOp = "copy"
+	PatchOpMove    PatchOp = "move"
+	PatchOpRemove  PatchOp = "remove"
+	PatchOpReplace PatchOp = "replace"
+	PatchOpTest    PatchOp = "test"
+)
+
+func NewPatchOpFromString(s string) (PatchOp, error) {
+	switch s {
+	case "add":
+		return PatchOpAdd, nil
+	case "copy":
+		return PatchOpCopy, nil
+	case "move":
+		return PatchOpMove, nil
+	case "remove":
+		return PatchOpRemove, nil
+	case "replace":
+		return PatchOpReplace, nil
+	case "test":
+		return PatchOpTest, nil
+	}
+	var t PatchOp
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (p PatchOp) Ptr() *PatchOp {
+	return &p
+}
+
+// JSON patch to apply. A JSON patch is a list of patch operations. (see https://jsonpatch.com/)
+type PatchOperation struct {
+	// The operation to perform. Supported values are `add`, `copy`, `move`, `replace`, `remove`, and `test`.
+	Op PatchOp `json:"op" url:"op"`
+	// The path to the field to update. The path is a JSON Pointer.
+	Path string `json:"path" url:"path"`
+	// The path to the field to copy from. This is required for `copy` and `move` operations.
+	From *string `json:"from,omitempty" url:"from,omitempty"`
+	// The value to set the field to. This is required for `add`, `replace` and `test` operations.
+	Value interface{} `json:"value,omitempty" url:"value,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (p *PatchOperation) GetExtraProperties() map[string]interface{} {
+	return p.extraProperties
+}
+
+func (p *PatchOperation) UnmarshalJSON(data []byte) error {
+	type unmarshaler PatchOperation
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*p = PatchOperation(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *p)
+	if err != nil {
+		return err
+	}
+	p.extraProperties = extraProperties
+
+	p._rawJSON = nil
+	return nil
+}
+
+func (p *PatchOperation) String() string {
+	if len(p._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(p._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(p); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", p)
+}
+
+type ResourceId string
+
+const (
+	ResourceIdDevices        ResourceId = "devices"
+	ResourceIdEvents         ResourceId = "events"
+	ResourceIdInvestigations ResourceId = "investigations"
+	ResourceIdLogProviders   ResourceId = "log_providers"
+	ResourceIdEvidence       ResourceId = "evidence"
+)
+
+func NewResourceIdFromString(s string) (ResourceId, error) {
+	switch s {
+	case "devices":
+		return ResourceIdDevices, nil
+	case "events":
+		return ResourceIdEvents, nil
+	case "investigations":
+		return ResourceIdInvestigations, nil
+	case "log_providers":
+		return ResourceIdLogProviders, nil
+	case "evidence":
+		return ResourceIdEvidence, nil
+	}
+	var t ResourceId
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (r ResourceId) Ptr() *ResourceId {
+	return &r
+}
+
 // Unique identifier for this Integration
 type IntegrationId = Id
+
+type AdditionalMappingTemplate struct {
+	// The resources that this mapping applies to.
+	Resource ResourceId `json:"resource" url:"resource"`
+	// The actions that this mapping applies to. At least one action must be specified.
+	Actions []ActionId `json:"actions" url:"actions"`
+	// The dot-separated path to the field in the source data coming from the provider. Use `\.` to escape literal dots in the field name.
+	Source string `json:"source" url:"source"`
+	// The dot-separated path to where the data should reside in the custom fields object when data is returned from the provider.
+	Destination string `json:"destination" url:"destination"`
+	// When true, the value in 'source' is treated as a literal value rather than a mapping. This allows adding static values to custom fields. Default: false
+	Literal *bool `json:"literal,omitempty" url:"literal,omitempty"`
+	// The data type of the field. This ensures the data is processed to the correct type when mapping. Fields set to 'any' will not get validated
+	// or processed. Other types are cast depending as defined by each provider. For example, a field with 'datetime' is parsed based on the date
+	// format used by the provider, and normalized to a unix timestamp with millisecond precision.
+	DataType MappingDataType `json:"data_type" url:"data_type"`
+	// A list of provider ID strings that this mapping applies to. Mapping templates must have at least one provider.
+	Providers []ProviderConfigId `json:"providers" url:"providers"`
+	// This controls the end-user's responsibility for this mapping when creating an integration in this integration point. Default: 'optional'.
+	// When set to 'fixed' the mapping is always included and can not be overridden by the end-user.
+	// When 'optional', the end-user can choose to override the mapping.
+	// When 'recommended', the provider will enter a warning state if the mapping is missing.
+	MappingType *AdditionalMappingType `json:"mapping_type,omitempty" url:"mapping_type,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (a *AdditionalMappingTemplate) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
+}
+
+func (a *AdditionalMappingTemplate) UnmarshalJSON(data []byte) error {
+	type unmarshaler AdditionalMappingTemplate
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*a = AdditionalMappingTemplate(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+
+	a._rawJSON = nil
+	return nil
+}
+
+func (a *AdditionalMappingTemplate) String() string {
+	if len(a._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(a); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", a)
+}
+
+type AdditionalMappingType string
+
+const (
+	AdditionalMappingTypeRecommended AdditionalMappingType = "recommended"
+	AdditionalMappingTypeOptional    AdditionalMappingType = "optional"
+	AdditionalMappingTypeFixed       AdditionalMappingType = "fixed"
+)
+
+func NewAdditionalMappingTypeFromString(s string) (AdditionalMappingType, error) {
+	switch s {
+	case "recommended":
+		return AdditionalMappingTypeRecommended, nil
+	case "optional":
+		return AdditionalMappingTypeOptional, nil
+	case "fixed":
+		return AdditionalMappingTypeFixed, nil
+	}
+	var t AdditionalMappingType
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (a AdditionalMappingType) Ptr() *AdditionalMappingType {
+	return &a
+}
 
 type IntegrationEnvironments struct {
 	// List of allowed providers for test environment.
@@ -2751,6 +2990,8 @@ type IntegrationPoint struct {
 	Connector CategoryId `json:"connector" url:"connector"`
 	// Selects providers to use for account environments.
 	Environments *IntegrationEnvironments `json:"environments" url:"environments"`
+	// Additional data mappings for integrations added to this integration point. This allows for custom data to be mapped to the custom_fields portion of the response.
+	AdditionalMappings []*AdditionalMappingTemplate `json:"additional_mappings,omitempty" url:"additional_mappings,omitempty"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
@@ -2967,6 +3208,8 @@ type Integration struct {
 	BridgeSelector *BridgeSelector `json:"bridge_selector,omitempty" url:"bridge_selector,omitempty"`
 	// Webhook configuration for this integration. Some providers support webhooks, and will allow end users providers to send events to a server for new or updated data.
 	WebhookConfig *WebhookConfig `json:"webhook_config,omitempty" url:"webhook_config,omitempty"`
+	// Additional data mappings for this integration. This allows for custom data to be mapped to the custom_fields portion of the response.
+	AdditionalMappings []*AdditionalMapping `json:"additional_mappings,omitempty" url:"additional_mappings,omitempty"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage

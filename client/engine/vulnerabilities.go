@@ -406,7 +406,7 @@ func (q *QueryScansResponse) String() string {
 
 type UpdateFindingRequest struct {
 	SeverityId securityfinding.SeverityId `json:"severity_id" url:"severity_id"`
-	// serverity of the finding
+	// severity of the finding
 	Severity *VulnerabilitySeverityFilterValue `json:"severity,omitempty" url:"severity,omitempty"`
 	// state of the finding
 	State    *VulnerabilityStateFilterValue `json:"state,omitempty" url:"state,omitempty"`

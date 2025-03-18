@@ -36,6 +36,8 @@ type CreateIntegrationPointRequest struct {
 	Connector CategoryId `json:"connector" url:"connector"`
 	// Selects providers to use for account environments.
 	Environments *IntegrationEnvironments `json:"environments" url:"environments"`
+	// Additional data mappings for integrations added to this integration point. This allows for custom data to be mapped to the custom_fields portion of the response.
+	AdditionalMappings []*AdditionalMappingTemplate `json:"additional_mappings,omitempty" url:"additional_mappings,omitempty"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
