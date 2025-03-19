@@ -146,6 +146,7 @@ type Audit struct {
 	MemberId      *MemberId      `json:"member_id,omitempty" url:"member_id,omitempty"`
 	AccountId     *AccountId     `json:"account_id,omitempty" url:"account_id,omitempty"`
 	IntegrationId *IntegrationId `json:"integration_id,omitempty" url:"integration_id,omitempty"`
+	BridgeGroupId *BridgeGroupId `json:"bridge_group_id,omitempty" url:"bridge_group_id,omitempty"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
@@ -12843,7 +12844,7 @@ type Status struct {
 	AccountId AccountId `json:"account_id" url:"account_id"`
 	// When using the expand option on the List API, the full account object is included in the response
 	Account *Account `json:"account,omitempty" url:"account,omitempty"`
-	// Integration associated with this status. Use the expand=integrations parameter with the List API to expand the Account to the full object
+	// Integration associated with this status. Use the expand=integrations parameter with the List API to expand the Integration to the full object
 	IntegrationId IntegrationId `json:"integration_id" url:"integration_id"`
 	// When using the expand option on the List API, the full integration object is included in the response
 	Integration *Integration `json:"integration,omitempty" url:"integration,omitempty"`
@@ -12930,6 +12931,8 @@ type StatusEvent struct {
 	IntegrationId IntegrationId `json:"integration_id" url:"integration_id"`
 	// Time created
 	CreatedAt time.Time `json:"created_at" url:"created_at"`
+	// The current status of the notification.
+	Status string `json:"status" url:"status"`
 	// Error message
 	Error *string `json:"error,omitempty" url:"error,omitempty"`
 	// Request number
