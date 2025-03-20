@@ -120,7 +120,7 @@ func (s *sentinelOneProvider) demoActions(orgToken string, sentinelOneConf *sent
 
 		for _, app := range resp.Result {
 			apps, _ := json.MarshalIndent(app, "", "  ")
-			fmt.Println()
+			consoleLogger.Println()
 			consoleLogger.Printf("apps %s:\n", apps)
 		}
 
@@ -137,7 +137,7 @@ func (s *sentinelOneProvider) demoActions(orgToken string, sentinelOneConf *sent
 	}
 	for _, app := range endpointRes.Result {
 		apps, _ := json.MarshalIndent(app, "", "  ")
-		fmt.Println()
+		consoleLogger.Println()
 		consoleLogger.Printf("agents %s:\n", apps)
 	}
 

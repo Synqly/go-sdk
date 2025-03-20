@@ -15,7 +15,7 @@ import (
 
 	// Each OCSF event type has its own package. This is intended to make imports
 	// more granular, allowing the end-user to import only the types they need.
-	scheduledJobActivity "github.com/synqly/go-sdk/client/engine/ocsf/v110/scheduledjobactivity"
+	scheduledJobActivity "github.com/synqly/go-sdk/client/engine/ocsf/v130/scheduledjobactivity"
 
 	mgmt "github.com/synqly/go-sdk/client/management"
 	mgmtClient "github.com/synqly/go-sdk/client/management/client"
@@ -227,7 +227,7 @@ func (app *App) backgroundJob(durationSeconds int) {
 			}
 		}
 		time.Sleep(1*time.Second + time.Duration(rand.Intn(1000))*time.Millisecond) //nolint: gosec
-		fmt.Println()
+		consoleLogger.Println()
 	}
 }
 

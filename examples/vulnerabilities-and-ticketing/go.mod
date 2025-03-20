@@ -5,7 +5,7 @@ go 1.23
 require (
 	github.com/knadh/koanf v1.5.0
 	github.com/knadh/koanf/v2 v2.1.1
-	github.com/synqly/go-sdk v0.3.45
+	github.com/synqly/go-sdk v0.3.78
 )
 
 require (

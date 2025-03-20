@@ -2,6 +2,6 @@ module siem-connector
 
 go 1.23
 
-require github.com/synqly/go-sdk v0.3.45
+require github.com/synqly/go-sdk v0.3.78
 
 require github.com/google/uuid v1.6.0 // indirect

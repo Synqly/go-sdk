@@ -87,9 +87,9 @@ func (c *entraConfig) ProviderConfig() *mgmt.ProviderConfig {
 
 func waitForAuditLogResult(ctx context.Context, client *engineClient.Client, req *engine.QueryIdentityAuditLogRequest) (*engine.QueryIdentityAuditLogResponse, error) {
 	var resp *engine.QueryIdentityAuditLogResponse = nil
-	fmt.Print("Waiting for the audit log to update ")
+	consoleLogger.Println("Waiting for the audit log to update ")
 	for attempt := 1; attempt < 60 && resp == nil; attempt++ {
-		fmt.Print(".")
+		consoleLogger.Print(".")
 		time.Sleep(1 * time.Second)
 		if attempt%10 != 0 {
 			continue
@@ -101,7 +101,7 @@ func waitForAuditLogResult(ctx context.Context, client *engineClient.Client, req
 		}
 
 		if len(resp.Result) > 0 {
-			fmt.Println()
+			consoleLogger.Println()
 			return resp, nil
 		}
 	}
@@ -161,7 +161,7 @@ func demoActions(userEmail, orgToken string, p provider) error {
 
 	now := time.Now().Add(-1 * time.Second).UTC().Format(time.RFC3339)
 
-	fmt.Printf("\n\n\n\n")
+	consoleLogger.Printf("\n\n\n\n")
 	consoleLogger.Printf("Forcing password reset for user %s", userEmail)
 
 	err = t.Synqly.EngineClients["identity"].Identity.ForceUserPasswordReset(ctx, userID)
@@ -185,14 +185,14 @@ func demoActions(userEmail, orgToken string, p provider) error {
 	}
 
 	logs, _ := json.MarshalIndent(resp.Result, "", "  ")
-	fmt.Println()
+	consoleLogger.Println()
 	consoleLogger.Printf("Audit logs for user %s:\n%s\n", userEmail, logs)
 
 	// Disable user
 
 	now = time.Now().Add(-1 * time.Second).UTC().Format(time.RFC3339)
 
-	fmt.Printf("\n\n\n\n")
+	consoleLogger.Printf("\n\n\n\n")
 	consoleLogger.Printf("Disabling user %s", userEmail)
 
 	err = t.Synqly.EngineClients["identity"].Identity.DisableUser(ctx, userID)
@@ -217,14 +217,14 @@ func demoActions(userEmail, orgToken string, p provider) error {
 	}
 
 	logs, _ = json.MarshalIndent(resp.Result, "", "  ")
-	fmt.Println()
+	consoleLogger.Println()
 	consoleLogger.Printf("Audit logs for user %s:\n%s\n", userEmail, logs)
 
 	time.Sleep(1 * time.Second)
 
 	// Re-enable user
 
-	fmt.Printf("\n\n\n\n")
+	consoleLogger.Printf("\n\n\n\n")
 	consoleLogger.Printf("Enabling user %s", userEmail)
 
 	now = time.Now().Add(-1 * time.Second).UTC().Format(time.RFC3339)
@@ -251,7 +251,7 @@ func demoActions(userEmail, orgToken string, p provider) error {
 	}
 
 	logs, _ = json.MarshalIndent(resp.Result, "", "  ")
-	fmt.Println()
+	consoleLogger.Println()
 	consoleLogger.Printf("Audit logs for user %s:\n%s\n", userEmail, logs)
 
 	return nil
