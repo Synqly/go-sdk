@@ -120,6 +120,8 @@ type QueryThreatsRequest struct {
 	IncludeRawData *bool `json:"-" url:"include_raw_data,omitempty"`
 }
 
+type Id = string
+
 type CreateIocsRequest struct {
 	// The list of iocs to create
 	Indicators []*stix.Indicator `json:"indicators" url:"indicators"`

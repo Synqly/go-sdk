@@ -34,6 +34,291 @@ import (
 // Device inventory information. Represented by OCSF Device Inventory Info class (class_uid 5001).
 type Device = *inventoryinfo.InventoryInfo
 
+type ActionId string
+
+const (
+	ActionIdQuery  ActionId = "query"
+	ActionIdRead   ActionId = "read"
+	ActionIdCreate ActionId = "create"
+	ActionIdUpdate ActionId = "update"
+	ActionIdDelete ActionId = "delete"
+	ActionIdPatch  ActionId = "patch"
+)
+
+func NewActionIdFromString(s string) (ActionId, error) {
+	switch s {
+	case "query":
+		return ActionIdQuery, nil
+	case "read":
+		return ActionIdRead, nil
+	case "create":
+		return ActionIdCreate, nil
+	case "update":
+		return ActionIdUpdate, nil
+	case "delete":
+		return ActionIdDelete, nil
+	case "patch":
+		return ActionIdPatch, nil
+	}
+	var t ActionId
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (a ActionId) Ptr() *ActionId {
+	return &a
+}
+
+type Base struct {
+	// Human-readable name for this resource
+	Name string `json:"name" url:"name"`
+	// Time object was originally created
+	CreatedAt time.Time `json:"created_at" url:"created_at"`
+	// Last time object was updated
+	UpdatedAt time.Time `json:"updated_at" url:"updated_at"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (b *Base) GetExtraProperties() map[string]interface{} {
+	return b.extraProperties
+}
+
+func (b *Base) UnmarshalJSON(data []byte) error {
+	type embed Base
+	var unmarshaler = struct {
+		embed
+		CreatedAt *core.DateTime `json:"created_at"`
+		UpdatedAt *core.DateTime `json:"updated_at"`
+	}{
+		embed: embed(*b),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*b = Base(unmarshaler.embed)
+	b.CreatedAt = unmarshaler.CreatedAt.Time()
+	b.UpdatedAt = unmarshaler.UpdatedAt.Time()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *b)
+	if err != nil {
+		return err
+	}
+	b.extraProperties = extraProperties
+
+	b._rawJSON = nil
+	return nil
+}
+
+func (b *Base) MarshalJSON() ([]byte, error) {
+	type embed Base
+	var marshaler = struct {
+		embed
+		CreatedAt *core.DateTime `json:"created_at"`
+		UpdatedAt *core.DateTime `json:"updated_at"`
+	}{
+		embed:     embed(*b),
+		CreatedAt: core.NewDateTime(b.CreatedAt),
+		UpdatedAt: core.NewDateTime(b.UpdatedAt),
+	}
+	return json.Marshal(marshaler)
+}
+
+func (b *Base) String() string {
+	if len(b._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(b._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(b); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", b)
+}
+
+type ErrorBody struct {
+	Status     int                    `json:"status" url:"status"`
+	Message    *string                `json:"message,omitempty" url:"message,omitempty"`
+	Errors     []string               `json:"errors,omitempty" url:"errors,omitempty"`
+	Parameters []*ErrorParam          `json:"parameters,omitempty" url:"parameters,omitempty"`
+	Context    map[string]interface{} `json:"context,omitempty" url:"context,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (e *ErrorBody) GetExtraProperties() map[string]interface{} {
+	return e.extraProperties
+}
+
+func (e *ErrorBody) UnmarshalJSON(data []byte) error {
+	type unmarshaler ErrorBody
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*e = ErrorBody(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *e)
+	if err != nil {
+		return err
+	}
+	e.extraProperties = extraProperties
+
+	e._rawJSON = nil
+	return nil
+}
+
+func (e *ErrorBody) String() string {
+	if len(e._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(e._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(e); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", e)
+}
+
+type ErrorParam struct {
+	Name  string `json:"name" url:"name"`
+	Value string `json:"value" url:"value"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (e *ErrorParam) GetExtraProperties() map[string]interface{} {
+	return e.extraProperties
+}
+
+func (e *ErrorParam) UnmarshalJSON(data []byte) error {
+	type unmarshaler ErrorParam
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*e = ErrorParam(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *e)
+	if err != nil {
+		return err
+	}
+	e.extraProperties = extraProperties
+
+	e._rawJSON = nil
+	return nil
+}
+
+func (e *ErrorParam) String() string {
+	if len(e._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(e._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(e); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", e)
+}
+
+type PatchOp string
+
+const (
+	PatchOpAdd     PatchOp = "add"
+	PatchOpCopy    PatchOp = "copy"
+	PatchOpMove    PatchOp = "move"
+	PatchOpRemove  PatchOp = "remove"
+	PatchOpReplace PatchOp = "replace"
+	PatchOpTest    PatchOp = "test"
+)
+
+func NewPatchOpFromString(s string) (PatchOp, error) {
+	switch s {
+	case "add":
+		return PatchOpAdd, nil
+	case "copy":
+		return PatchOpCopy, nil
+	case "move":
+		return PatchOpMove, nil
+	case "remove":
+		return PatchOpRemove, nil
+	case "replace":
+		return PatchOpReplace, nil
+	case "test":
+		return PatchOpTest, nil
+	}
+	var t PatchOp
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (p PatchOp) Ptr() *PatchOp {
+	return &p
+}
+
+type ResourceId string
+
+const (
+	ResourceIdDevices        ResourceId = "devices"
+	ResourceIdEvents         ResourceId = "events"
+	ResourceIdInvestigations ResourceId = "investigations"
+	ResourceIdLogProviders   ResourceId = "log_providers"
+	ResourceIdEvidence       ResourceId = "evidence"
+)
+
+func NewResourceIdFromString(s string) (ResourceId, error) {
+	switch s {
+	case "devices":
+		return ResourceIdDevices, nil
+	case "events":
+		return ResourceIdEvents, nil
+	case "investigations":
+		return ResourceIdInvestigations, nil
+	case "log_providers":
+		return ResourceIdLogProviders, nil
+	case "evidence":
+		return ResourceIdEvidence, nil
+	}
+	var t ResourceId
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (r ResourceId) Ptr() *ResourceId {
+	return &r
+}
+
+// Application information represented by the extended OCSF Software Info event. The Product object describes characteristics of a software product.
+type Application = *softwareinfo.SoftwareInfo
+
+type ConnectionState string
+
+const (
+	ConnectionStateConnect    ConnectionState = "Connect"
+	ConnectionStateDisconnect ConnectionState = "Disconnect"
+)
+
+func NewConnectionStateFromString(s string) (ConnectionState, error) {
+	switch s {
+	case "Connect":
+		return ConnectionStateConnect, nil
+	case "Disconnect":
+		return ConnectionStateDisconnect, nil
+	}
+	var t ConnectionState
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (c ConnectionState) Ptr() *ConnectionState {
+	return &c
+}
+
+// The posture score of an endpoint asset.
+type PostureScore = *configstate.ConfigState
+
+// Threat event information represented by OCSF Threat object. The Threat object describes characteristics of a threat event.
+type ThreatEvent = *detectionfinding.DetectionFinding
+
 type ApiHasStatus struct {
 	// If the provider supports asynchronous queries and the query is still running, this field will be `PENDING` until the query is complete. In this case, the client should retry using the provided cursor.
 	Status QueryStatus `json:"status" url:"status"`
@@ -508,37 +793,6 @@ func (q QueryStatus) Ptr() *QueryStatus {
 	return &q
 }
 
-// Application information represented by the extended OCSF Software Info event. The Product object describes characteristics of a software product.
-type Application = *softwareinfo.SoftwareInfo
-
-type ConnectionState string
-
-const (
-	ConnectionStateConnect    ConnectionState = "Connect"
-	ConnectionStateDisconnect ConnectionState = "Disconnect"
-)
-
-func NewConnectionStateFromString(s string) (ConnectionState, error) {
-	switch s {
-	case "Connect":
-		return ConnectionStateConnect, nil
-	case "Disconnect":
-		return ConnectionStateDisconnect, nil
-	}
-	var t ConnectionState
-	return "", fmt.Errorf("%s is not a valid %T", s, t)
-}
-
-func (c ConnectionState) Ptr() *ConnectionState {
-	return &c
-}
-
-// The posture score of an endpoint asset.
-type PostureScore = *configstate.ConfigState
-
-// Threat event information represented by OCSF Threat object. The Threat object describes characteristics of a threat event.
-type ThreatEvent = *detectionfinding.DetectionFinding
-
 type Event struct {
 	ClassName                 string
 	AccountChange             *accountchange.AccountChange
@@ -876,262 +1130,6 @@ func (e *Event) Accept(visitor EventVisitor) error {
 		return visitor.VisitWebResourceAccessActivity(e.WebResourceAccessActivity)
 	}
 	return fmt.Errorf("type %T does not define a non-empty union type", e)
-}
-
-type ActionId string
-
-const (
-	ActionIdQuery  ActionId = "query"
-	ActionIdRead   ActionId = "read"
-	ActionIdCreate ActionId = "create"
-	ActionIdUpdate ActionId = "update"
-	ActionIdDelete ActionId = "delete"
-	ActionIdPatch  ActionId = "patch"
-)
-
-func NewActionIdFromString(s string) (ActionId, error) {
-	switch s {
-	case "query":
-		return ActionIdQuery, nil
-	case "read":
-		return ActionIdRead, nil
-	case "create":
-		return ActionIdCreate, nil
-	case "update":
-		return ActionIdUpdate, nil
-	case "delete":
-		return ActionIdDelete, nil
-	case "patch":
-		return ActionIdPatch, nil
-	}
-	var t ActionId
-	return "", fmt.Errorf("%s is not a valid %T", s, t)
-}
-
-func (a ActionId) Ptr() *ActionId {
-	return &a
-}
-
-type Base struct {
-	// Human-readable name for this resource
-	Name string `json:"name" url:"name"`
-	// Time object was originally created
-	CreatedAt time.Time `json:"created_at" url:"created_at"`
-	// Last time object was updated
-	UpdatedAt time.Time `json:"updated_at" url:"updated_at"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (b *Base) GetExtraProperties() map[string]interface{} {
-	return b.extraProperties
-}
-
-func (b *Base) UnmarshalJSON(data []byte) error {
-	type embed Base
-	var unmarshaler = struct {
-		embed
-		CreatedAt *core.DateTime `json:"created_at"`
-		UpdatedAt *core.DateTime `json:"updated_at"`
-	}{
-		embed: embed(*b),
-	}
-	if err := json.Unmarshal(data, &unmarshaler); err != nil {
-		return err
-	}
-	*b = Base(unmarshaler.embed)
-	b.CreatedAt = unmarshaler.CreatedAt.Time()
-	b.UpdatedAt = unmarshaler.UpdatedAt.Time()
-
-	extraProperties, err := core.ExtractExtraProperties(data, *b)
-	if err != nil {
-		return err
-	}
-	b.extraProperties = extraProperties
-
-	b._rawJSON = nil
-	return nil
-}
-
-func (b *Base) MarshalJSON() ([]byte, error) {
-	type embed Base
-	var marshaler = struct {
-		embed
-		CreatedAt *core.DateTime `json:"created_at"`
-		UpdatedAt *core.DateTime `json:"updated_at"`
-	}{
-		embed:     embed(*b),
-		CreatedAt: core.NewDateTime(b.CreatedAt),
-		UpdatedAt: core.NewDateTime(b.UpdatedAt),
-	}
-	return json.Marshal(marshaler)
-}
-
-func (b *Base) String() string {
-	if len(b._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(b._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(b); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", b)
-}
-
-type ErrorBody struct {
-	Status     int                    `json:"status" url:"status"`
-	Message    *string                `json:"message,omitempty" url:"message,omitempty"`
-	Errors     []string               `json:"errors,omitempty" url:"errors,omitempty"`
-	Parameters []*ErrorParam          `json:"parameters,omitempty" url:"parameters,omitempty"`
-	Context    map[string]interface{} `json:"context,omitempty" url:"context,omitempty"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (e *ErrorBody) GetExtraProperties() map[string]interface{} {
-	return e.extraProperties
-}
-
-func (e *ErrorBody) UnmarshalJSON(data []byte) error {
-	type unmarshaler ErrorBody
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*e = ErrorBody(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *e)
-	if err != nil {
-		return err
-	}
-	e.extraProperties = extraProperties
-
-	e._rawJSON = nil
-	return nil
-}
-
-func (e *ErrorBody) String() string {
-	if len(e._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(e._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(e); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", e)
-}
-
-type ErrorParam struct {
-	Name  string `json:"name" url:"name"`
-	Value string `json:"value" url:"value"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (e *ErrorParam) GetExtraProperties() map[string]interface{} {
-	return e.extraProperties
-}
-
-func (e *ErrorParam) UnmarshalJSON(data []byte) error {
-	type unmarshaler ErrorParam
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*e = ErrorParam(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *e)
-	if err != nil {
-		return err
-	}
-	e.extraProperties = extraProperties
-
-	e._rawJSON = nil
-	return nil
-}
-
-func (e *ErrorParam) String() string {
-	if len(e._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(e._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(e); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", e)
-}
-
-type Id = string
-
-type PatchOp string
-
-const (
-	PatchOpAdd     PatchOp = "add"
-	PatchOpCopy    PatchOp = "copy"
-	PatchOpMove    PatchOp = "move"
-	PatchOpRemove  PatchOp = "remove"
-	PatchOpReplace PatchOp = "replace"
-	PatchOpTest    PatchOp = "test"
-)
-
-func NewPatchOpFromString(s string) (PatchOp, error) {
-	switch s {
-	case "add":
-		return PatchOpAdd, nil
-	case "copy":
-		return PatchOpCopy, nil
-	case "move":
-		return PatchOpMove, nil
-	case "remove":
-		return PatchOpRemove, nil
-	case "replace":
-		return PatchOpReplace, nil
-	case "test":
-		return PatchOpTest, nil
-	}
-	var t PatchOp
-	return "", fmt.Errorf("%s is not a valid %T", s, t)
-}
-
-func (p PatchOp) Ptr() *PatchOp {
-	return &p
-}
-
-type ResourceId string
-
-const (
-	ResourceIdDevices        ResourceId = "devices"
-	ResourceIdEvents         ResourceId = "events"
-	ResourceIdInvestigations ResourceId = "investigations"
-	ResourceIdLogProviders   ResourceId = "log_providers"
-	ResourceIdEvidence       ResourceId = "evidence"
-)
-
-func NewResourceIdFromString(s string) (ResourceId, error) {
-	switch s {
-	case "devices":
-		return ResourceIdDevices, nil
-	case "events":
-		return ResourceIdEvents, nil
-	case "investigations":
-		return ResourceIdInvestigations, nil
-	case "log_providers":
-		return ResourceIdLogProviders, nil
-	case "evidence":
-		return ResourceIdEvidence, nil
-	}
-	var t ResourceId
-	return "", fmt.Errorf("%s is not a valid %T", s, t)
-}
-
-func (r ResourceId) Ptr() *ResourceId {
-	return &r
 }
 
 type TicketingWebhookResponse struct {
