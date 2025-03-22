@@ -9,11 +9,11 @@ import (
 
 type BadGatewayError struct {
 	*core.APIError
-	Body *ErrorBody
+	Body *Problem
 }
 
 func (b *BadGatewayError) UnmarshalJSON(data []byte) error {
-	var body *ErrorBody
+	var body *Problem
 	if err := json.Unmarshal(data, &body); err != nil {
 		return err
 	}
@@ -32,11 +32,11 @@ func (b *BadGatewayError) Unwrap() error {
 
 type BadRequestError struct {
 	*core.APIError
-	Body *ErrorBody
+	Body *Problem
 }
 
 func (b *BadRequestError) UnmarshalJSON(data []byte) error {
-	var body *ErrorBody
+	var body *Problem
 	if err := json.Unmarshal(data, &body); err != nil {
 		return err
 	}
@@ -55,11 +55,11 @@ func (b *BadRequestError) Unwrap() error {
 
 type ConflictError struct {
 	*core.APIError
-	Body *ErrorBody
+	Body *Problem
 }
 
 func (c *ConflictError) UnmarshalJSON(data []byte) error {
-	var body *ErrorBody
+	var body *Problem
 	if err := json.Unmarshal(data, &body); err != nil {
 		return err
 	}
@@ -78,11 +78,11 @@ func (c *ConflictError) Unwrap() error {
 
 type ForbiddenError struct {
 	*core.APIError
-	Body *ErrorBody
+	Body *Problem
 }
 
 func (f *ForbiddenError) UnmarshalJSON(data []byte) error {
-	var body *ErrorBody
+	var body *Problem
 	if err := json.Unmarshal(data, &body); err != nil {
 		return err
 	}
@@ -101,11 +101,11 @@ func (f *ForbiddenError) Unwrap() error {
 
 type GatewayTimeoutError struct {
 	*core.APIError
-	Body *ErrorBody
+	Body *Problem
 }
 
 func (g *GatewayTimeoutError) UnmarshalJSON(data []byte) error {
-	var body *ErrorBody
+	var body *Problem
 	if err := json.Unmarshal(data, &body); err != nil {
 		return err
 	}
@@ -124,11 +124,11 @@ func (g *GatewayTimeoutError) Unwrap() error {
 
 type InternalServerError struct {
 	*core.APIError
-	Body *ErrorBody
+	Body *Problem
 }
 
 func (i *InternalServerError) UnmarshalJSON(data []byte) error {
-	var body *ErrorBody
+	var body *Problem
 	if err := json.Unmarshal(data, &body); err != nil {
 		return err
 	}
@@ -147,11 +147,11 @@ func (i *InternalServerError) Unwrap() error {
 
 type MethodNotAllowedError struct {
 	*core.APIError
-	Body *ErrorBody
+	Body *Problem
 }
 
 func (m *MethodNotAllowedError) UnmarshalJSON(data []byte) error {
-	var body *ErrorBody
+	var body *Problem
 	if err := json.Unmarshal(data, &body); err != nil {
 		return err
 	}
@@ -170,11 +170,11 @@ func (m *MethodNotAllowedError) Unwrap() error {
 
 type NotFoundError struct {
 	*core.APIError
-	Body *ErrorBody
+	Body *Problem
 }
 
 func (n *NotFoundError) UnmarshalJSON(data []byte) error {
-	var body *ErrorBody
+	var body *Problem
 	if err := json.Unmarshal(data, &body); err != nil {
 		return err
 	}
@@ -193,11 +193,11 @@ func (n *NotFoundError) Unwrap() error {
 
 type NotImplementedError struct {
 	*core.APIError
-	Body *ErrorBody
+	Body *Problem
 }
 
 func (n *NotImplementedError) UnmarshalJSON(data []byte) error {
-	var body *ErrorBody
+	var body *Problem
 	if err := json.Unmarshal(data, &body); err != nil {
 		return err
 	}
@@ -216,11 +216,11 @@ func (n *NotImplementedError) Unwrap() error {
 
 type ServiceUnavailableError struct {
 	*core.APIError
-	Body *ErrorBody
+	Body *Problem
 }
 
 func (s *ServiceUnavailableError) UnmarshalJSON(data []byte) error {
-	var body *ErrorBody
+	var body *Problem
 	if err := json.Unmarshal(data, &body); err != nil {
 		return err
 	}
@@ -239,11 +239,11 @@ func (s *ServiceUnavailableError) Unwrap() error {
 
 type TooManyRequestsError struct {
 	*core.APIError
-	Body *ErrorBody
+	Body *Problem
 }
 
 func (t *TooManyRequestsError) UnmarshalJSON(data []byte) error {
-	var body *ErrorBody
+	var body *Problem
 	if err := json.Unmarshal(data, &body); err != nil {
 		return err
 	}
@@ -262,11 +262,11 @@ func (t *TooManyRequestsError) Unwrap() error {
 
 type UnauthorizedError struct {
 	*core.APIError
-	Body *ErrorBody
+	Body *Problem
 }
 
 func (u *UnauthorizedError) UnmarshalJSON(data []byte) error {
-	var body *ErrorBody
+	var body *Problem
 	if err := json.Unmarshal(data, &body); err != nil {
 		return err
 	}
@@ -285,11 +285,11 @@ func (u *UnauthorizedError) Unwrap() error {
 
 type UnsupportedMediaTypeError struct {
 	*core.APIError
-	Body *ErrorBody
+	Body *Problem
 }
 
 func (u *UnsupportedMediaTypeError) UnmarshalJSON(data []byte) error {
-	var body *ErrorBody
+	var body *Problem
 	if err := json.Unmarshal(data, &body); err != nil {
 		return err
 	}

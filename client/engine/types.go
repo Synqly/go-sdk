@@ -136,91 +136,32 @@ func (b *Base) String() string {
 	return fmt.Sprintf("%#v", b)
 }
 
-type ErrorBody struct {
-	Status     int                    `json:"status" url:"status"`
-	Message    *string                `json:"message,omitempty" url:"message,omitempty"`
-	Errors     []string               `json:"errors,omitempty" url:"errors,omitempty"`
-	Parameters []*ErrorParam          `json:"parameters,omitempty" url:"parameters,omitempty"`
-	Context    map[string]interface{} `json:"context,omitempty" url:"context,omitempty"`
+type ParameterLocation string
 
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+const (
+	ParameterLocationHeader ParameterLocation = "header"
+	ParameterLocationPath   ParameterLocation = "path"
+	ParameterLocationQuery  ParameterLocation = "query"
+	ParameterLocationBody   ParameterLocation = "body"
+)
+
+func NewParameterLocationFromString(s string) (ParameterLocation, error) {
+	switch s {
+	case "header":
+		return ParameterLocationHeader, nil
+	case "path":
+		return ParameterLocationPath, nil
+	case "query":
+		return ParameterLocationQuery, nil
+	case "body":
+		return ParameterLocationBody, nil
+	}
+	var t ParameterLocation
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
 }
 
-func (e *ErrorBody) GetExtraProperties() map[string]interface{} {
-	return e.extraProperties
-}
-
-func (e *ErrorBody) UnmarshalJSON(data []byte) error {
-	type unmarshaler ErrorBody
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*e = ErrorBody(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *e)
-	if err != nil {
-		return err
-	}
-	e.extraProperties = extraProperties
-
-	e._rawJSON = nil
-	return nil
-}
-
-func (e *ErrorBody) String() string {
-	if len(e._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(e._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(e); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", e)
-}
-
-type ErrorParam struct {
-	Name  string `json:"name" url:"name"`
-	Value string `json:"value" url:"value"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (e *ErrorParam) GetExtraProperties() map[string]interface{} {
-	return e.extraProperties
-}
-
-func (e *ErrorParam) UnmarshalJSON(data []byte) error {
-	type unmarshaler ErrorParam
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*e = ErrorParam(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *e)
-	if err != nil {
-		return err
-	}
-	e.extraProperties = extraProperties
-
-	e._rawJSON = nil
-	return nil
-}
-
-func (e *ErrorParam) String() string {
-	if len(e._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(e._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(e); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", e)
+func (p ParameterLocation) Ptr() *ParameterLocation {
+	return &p
 }
 
 type PatchOp string
@@ -257,6 +198,295 @@ func (p PatchOp) Ptr() *PatchOp {
 	return &p
 }
 
+// Generic base type for problems in Synqly. This object carries both machine-readable data as well as information intended for display purposes.
+type Problem struct {
+	// A short, display-friendly summary of the problem.
+	Message string `json:"message" url:"message"`
+	// A display-friendly and more detailed explanation of the problem. It may offer additional contextual detail, but may also be just a generic description of the problem.
+	Detail *string `json:"detail,omitempty" url:"detail,omitempty"`
+	// A display-friendly explanation for how to remediate the problem. This field may be omitted in case there are multiple problems, each with its own remediation, or if no remediation is possible.
+	Remediation *string `json:"remediation,omitempty" url:"remediation,omitempty"`
+	// Additional context providing further detail about the problem, such as a problematic input parameter and/or a list of related resources.
+	Context *ProblemContext `json:"context,omitempty" url:"context,omitempty"`
+	Type    *ProblemType    `json:"type,omitempty" url:"type,omitempty"`
+	// The date and time the problem occurred.
+	OccurredAt time.Time `json:"occurred_at" url:"occurred_at"`
+	// The HTTP status code of the problem. Matches the HTTP response code sent by the server.
+	Status int `json:"status" url:"status"`
+	// A URI reference that identifies the specific occurrence of the problem. It may or may not yield further information if dereferenced.
+	Instance string `json:"instance" url:"instance"`
+	// A list of the root cause(s) for this problem occurrence. Includes at minimum one root cause, and is otherwise an unordered list of causes.
+	Cause []*ProblemCause `json:"cause,omitempty" url:"cause,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (p *Problem) GetExtraProperties() map[string]interface{} {
+	return p.extraProperties
+}
+
+func (p *Problem) UnmarshalJSON(data []byte) error {
+	type embed Problem
+	var unmarshaler = struct {
+		embed
+		OccurredAt *core.DateTime `json:"occurred_at"`
+	}{
+		embed: embed(*p),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*p = Problem(unmarshaler.embed)
+	p.OccurredAt = unmarshaler.OccurredAt.Time()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *p)
+	if err != nil {
+		return err
+	}
+	p.extraProperties = extraProperties
+
+	p._rawJSON = nil
+	return nil
+}
+
+func (p *Problem) MarshalJSON() ([]byte, error) {
+	type embed Problem
+	var marshaler = struct {
+		embed
+		OccurredAt *core.DateTime `json:"occurred_at"`
+	}{
+		embed:      embed(*p),
+		OccurredAt: core.NewDateTime(p.OccurredAt),
+	}
+	return json.Marshal(marshaler)
+}
+
+func (p *Problem) String() string {
+	if len(p._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(p._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(p); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", p)
+}
+
+type ProblemCause struct {
+	// A short, display-friendly summary of the problem.
+	Message string `json:"message" url:"message"`
+	// A display-friendly and more detailed explanation of the problem. It may offer additional contextual detail, but may also be just a generic description of the problem.
+	Detail *string `json:"detail,omitempty" url:"detail,omitempty"`
+	// A display-friendly explanation for how to remediate the problem. This field may be omitted in case there are multiple problems, each with its own remediation, or if no remediation is possible.
+	Remediation *string `json:"remediation,omitempty" url:"remediation,omitempty"`
+	// Additional context providing further detail about the problem, such as a problematic input parameter and/or a list of related resources.
+	Context *ProblemContext `json:"context,omitempty" url:"context,omitempty"`
+	Type    ProblemType     `json:"type" url:"type"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (p *ProblemCause) GetExtraProperties() map[string]interface{} {
+	return p.extraProperties
+}
+
+func (p *ProblemCause) UnmarshalJSON(data []byte) error {
+	type unmarshaler ProblemCause
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*p = ProblemCause(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *p)
+	if err != nil {
+		return err
+	}
+	p.extraProperties = extraProperties
+
+	p._rawJSON = nil
+	return nil
+}
+
+func (p *ProblemCause) String() string {
+	if len(p._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(p._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(p); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", p)
+}
+
+type ProblemContext struct {
+	// If the problem is related to a `query`, `header`, `path` or `body` parameter, this field will describe the problematic parameter and where to find it.
+	Parameter *ProblematicParameter `json:"parameter,omitempty" url:"parameter,omitempty"`
+	Resources []*ResourceReference  `json:"resources,omitempty" url:"resources,omitempty"`
+	// If available this represents the underlying raw error, for example an error response from a Provider.
+	RawError *string `json:"raw_error,omitempty" url:"raw_error,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (p *ProblemContext) GetExtraProperties() map[string]interface{} {
+	return p.extraProperties
+}
+
+func (p *ProblemContext) UnmarshalJSON(data []byte) error {
+	type unmarshaler ProblemContext
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*p = ProblemContext(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *p)
+	if err != nil {
+		return err
+	}
+	p.extraProperties = extraProperties
+
+	p._rawJSON = nil
+	return nil
+}
+
+func (p *ProblemContext) String() string {
+	if len(p._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(p._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(p); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", p)
+}
+
+type ProblemDetails struct {
+	// A short, display-friendly summary of the problem.
+	Message string `json:"message" url:"message"`
+	// A display-friendly and more detailed explanation of the problem. It may offer additional contextual detail, but may also be just a generic description of the problem.
+	Detail *string `json:"detail,omitempty" url:"detail,omitempty"`
+	// A display-friendly explanation for how to remediate the problem. This field may be omitted in case there are multiple problems, each with its own remediation, or if no remediation is possible.
+	Remediation *string `json:"remediation,omitempty" url:"remediation,omitempty"`
+	// Additional context providing further detail about the problem, such as a problematic input parameter and/or a list of related resources.
+	Context *ProblemContext `json:"context,omitempty" url:"context,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (p *ProblemDetails) GetExtraProperties() map[string]interface{} {
+	return p.extraProperties
+}
+
+func (p *ProblemDetails) UnmarshalJSON(data []byte) error {
+	type unmarshaler ProblemDetails
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*p = ProblemDetails(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *p)
+	if err != nil {
+		return err
+	}
+	p.extraProperties = extraProperties
+
+	p._rawJSON = nil
+	return nil
+}
+
+func (p *ProblemDetails) String() string {
+	if len(p._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(p._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(p); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", p)
+}
+
+type ProblemRelation string
+
+const (
+	ProblemRelationAffected ProblemRelation = "affected"
+	ProblemRelationCause    ProblemRelation = "cause"
+)
+
+func NewProblemRelationFromString(s string) (ProblemRelation, error) {
+	switch s {
+	case "affected":
+		return ProblemRelationAffected, nil
+	case "cause":
+		return ProblemRelationCause, nil
+	}
+	var t ProblemRelation
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (p ProblemRelation) Ptr() *ProblemRelation {
+	return &p
+}
+
+// A URI reference that identifies the type of problem that occurred. When the URI scheme is HTTP(s), it may or may not be possible to deference the URL to a display-friendly description of the problem type.
+type ProblemType = string
+
+type ProblematicParameter struct {
+	// If the `location` of the parameter is `body`, this value is always a JSON Pointer, otherwise it's the name of the parameter.
+	Id string `json:"id" url:"id"`
+	// The location of the parameter. Possible values are `query`, `header`, `path` or `body`.
+	Location ParameterLocation `json:"location" url:"location"`
+	// The given value of the parameter.
+	Value interface{} `json:"value,omitempty" url:"value,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (p *ProblematicParameter) GetExtraProperties() map[string]interface{} {
+	return p.extraProperties
+}
+
+func (p *ProblematicParameter) UnmarshalJSON(data []byte) error {
+	type unmarshaler ProblematicParameter
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*p = ProblematicParameter(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *p)
+	if err != nil {
+		return err
+	}
+	p.extraProperties = extraProperties
+
+	p._rawJSON = nil
+	return nil
+}
+
+func (p *ProblematicParameter) String() string {
+	if len(p._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(p._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(p); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", p)
+}
+
 type ResourceId string
 
 const (
@@ -285,6 +515,104 @@ func NewResourceIdFromString(s string) (ResourceId, error) {
 }
 
 func (r ResourceId) Ptr() *ResourceId {
+	return &r
+}
+
+type ResourceReference struct {
+	// Type of the related resource.
+	Type ResourceType `json:"type" url:"type"`
+	// ID of the related resource.
+	Id string `json:"id" url:"id"`
+	// The way in which the resource relates to the problem.
+	Rel ProblemRelation `json:"rel" url:"rel"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (r *ResourceReference) GetExtraProperties() map[string]interface{} {
+	return r.extraProperties
+}
+
+func (r *ResourceReference) UnmarshalJSON(data []byte) error {
+	type unmarshaler ResourceReference
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*r = ResourceReference(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *r)
+	if err != nil {
+		return err
+	}
+	r.extraProperties = extraProperties
+
+	r._rawJSON = nil
+	return nil
+}
+
+func (r *ResourceReference) String() string {
+	if len(r._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(r._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(r); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", r)
+}
+
+type ResourceType string
+
+const (
+	ResourceTypeAccount             ResourceType = "account"
+	ResourceTypeBridge              ResourceType = "bridge"
+	ResourceTypeCredential          ResourceType = "credential"
+	ResourceTypeIntegrationPoint    ResourceType = "integration_point"
+	ResourceTypeIntegration         ResourceType = "integration"
+	ResourceTypeMember              ResourceType = "member"
+	ResourceTypeOperation           ResourceType = "operation"
+	ResourceTypeOrganizationWebhook ResourceType = "organization_webhook"
+	ResourceTypeRole                ResourceType = "role"
+	ResourceTypeSubOrg              ResourceType = "sub_org"
+	ResourceTypeToken               ResourceType = "token"
+	ResourceTypeTransform           ResourceType = "transform"
+)
+
+func NewResourceTypeFromString(s string) (ResourceType, error) {
+	switch s {
+	case "account":
+		return ResourceTypeAccount, nil
+	case "bridge":
+		return ResourceTypeBridge, nil
+	case "credential":
+		return ResourceTypeCredential, nil
+	case "integration_point":
+		return ResourceTypeIntegrationPoint, nil
+	case "integration":
+		return ResourceTypeIntegration, nil
+	case "member":
+		return ResourceTypeMember, nil
+	case "operation":
+		return ResourceTypeOperation, nil
+	case "organization_webhook":
+		return ResourceTypeOrganizationWebhook, nil
+	case "role":
+		return ResourceTypeRole, nil
+	case "sub_org":
+		return ResourceTypeSubOrg, nil
+	case "token":
+		return ResourceTypeToken, nil
+	case "transform":
+		return ResourceTypeTransform, nil
+	}
+	var t ResourceType
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (r ResourceType) Ptr() *ResourceType {
 	return &r
 }
 
