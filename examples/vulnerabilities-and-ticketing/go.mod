@@ -1,6 +1,6 @@
 module vulnerabilities-and-ticketing
 
-go 1.23
+go 1.23.0
 
 require (
 	github.com/knadh/koanf v1.5.0
