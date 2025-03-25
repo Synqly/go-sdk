@@ -850,6 +850,38 @@ func (f FilterType) Ptr() *FilterType {
 	return &f
 }
 
+type ProviderAvailability string
+
+const (
+	// Currently in active development.
+	ProviderAvailabilityInDevelopment ProviderAvailability = "in-development"
+	// Available for use, but not ready for production.
+	ProviderAvailabilityPreRelease ProviderAvailability = "pre-release"
+	// Will be removed in the future.
+	ProviderAvailabilityDeprecated ProviderAvailability = "deprecated"
+	// Stable and available for production use.
+	ProviderAvailabilityGenerallyAvailable ProviderAvailability = "generally-available"
+)
+
+func NewProviderAvailabilityFromString(s string) (ProviderAvailability, error) {
+	switch s {
+	case "in-development":
+		return ProviderAvailabilityInDevelopment, nil
+	case "pre-release":
+		return ProviderAvailabilityPreRelease, nil
+	case "deprecated":
+		return ProviderAvailabilityDeprecated, nil
+	case "generally-available":
+		return ProviderAvailabilityGenerallyAvailable, nil
+	}
+	var t ProviderAvailability
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (p ProviderAvailability) Ptr() *ProviderAvailability {
+	return &p
+}
+
 type ProviderCapabilities struct {
 	// Unique identifier for the Provider.
 	Id ProviderId `json:"id" url:"id"`
@@ -874,6 +906,8 @@ type ProviderCapabilities struct {
 	Operations []*ProviderOperations `json:"operations,omitempty" url:"operations,omitempty"`
 	// Details on the specific configuration options for the Provider.
 	ProviderConfig interface{} `json:"provider_config,omitempty" url:"provider_config,omitempty"`
+	// Provider availability inforamtion.
+	Release *ProviderRelease `json:"release,omitempty" url:"release,omitempty"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
@@ -911,6 +945,30 @@ func (p *ProviderCapabilities) String() string {
 		return value
 	}
 	return fmt.Sprintf("%#v", p)
+}
+
+type ProviderEnvironment string
+
+const (
+	// Provider may be used with production accounts.
+	ProviderEnvironmentProduction ProviderEnvironment = "prod"
+	// Provider may be used with test accounts.
+	ProviderEnvironmentTest ProviderEnvironment = "test"
+)
+
+func NewProviderEnvironmentFromString(s string) (ProviderEnvironment, error) {
+	switch s {
+	case "prod":
+		return ProviderEnvironmentProduction, nil
+	case "test":
+		return ProviderEnvironmentTest, nil
+	}
+	var t ProviderEnvironment
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (p ProviderEnvironment) Ptr() *ProviderEnvironment {
+	return &p
 }
 
 type ProviderFilter struct {
@@ -1018,6 +1076,50 @@ func (p *ProviderOperations) UnmarshalJSON(data []byte) error {
 }
 
 func (p *ProviderOperations) String() string {
+	if len(p._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(p._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(p); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", p)
+}
+
+type ProviderRelease struct {
+	// Availability status.
+	Availability ProviderAvailability `json:"availability" url:"availability"`
+	// Environments the Provider is available to.
+	Environments []ProviderEnvironment `json:"environments" url:"environments"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (p *ProviderRelease) GetExtraProperties() map[string]interface{} {
+	return p.extraProperties
+}
+
+func (p *ProviderRelease) UnmarshalJSON(data []byte) error {
+	type unmarshaler ProviderRelease
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*p = ProviderRelease(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *p)
+	if err != nil {
+		return err
+	}
+	p.extraProperties = extraProperties
+
+	p._rawJSON = nil
+	return nil
+}
+
+func (p *ProviderRelease) String() string {
 	if len(p._rawJSON) > 0 {
 		if value, err := core.StringifyJSON(p._rawJSON); err == nil {
 			return value
@@ -6481,6 +6583,25 @@ func (a *ArmisCredential) Accept(visitor ArmisCredentialVisitor) error {
 	return fmt.Errorf("type %T does not define a non-empty union type", a)
 }
 
+type AssetsServiceNowDataset string
+
+const (
+	AssetsServiceNowDatasetBasicVer0 AssetsServiceNowDataset = "basic_v0"
+)
+
+func NewAssetsServiceNowDatasetFromString(s string) (AssetsServiceNowDataset, error) {
+	switch s {
+	case "basic_v0":
+		return AssetsServiceNowDatasetBasicVer0, nil
+	}
+	var t AssetsServiceNowDataset
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (a AssetsServiceNowDataset) Ptr() *AssetsServiceNowDataset {
+	return &a
+}
+
 // Configuration for the Armis Centrix Assets Provider
 type AssetsArmisCentrix struct {
 	Credential *ArmisCredential `json:"credential" url:"credential"`
@@ -6613,10 +6734,9 @@ func (a *AssetsServiceNow) String() string {
 	return fmt.Sprintf("%#v", a)
 }
 
-// [Mock] Configuration for ServiceNow as an Assets Provider
+// Configuration for a mocked ServiceNow as an Assets Provider
 type AssetsServiceNowMock struct {
-	// Enabled mock provider configuration.
-	Mock bool `json:"mock" url:"mock"`
+	Dataset AssetsServiceNowDataset `json:"dataset" url:"dataset"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
