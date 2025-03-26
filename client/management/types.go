@@ -6776,6 +6776,146 @@ func (a *AssetsServiceNowMock) String() string {
 	return fmt.Sprintf("%#v", a)
 }
 
+type AutotaskApiIntegrationCodeCredential struct {
+	Type string
+	// API Integration Code for the Autotask API.
+	Secret *SecretCredential
+	// API Integration Code ID for the Autotask API.
+	SecretId SecretCredentialId
+}
+
+func (a *AutotaskApiIntegrationCodeCredential) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	a.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", a)
+	}
+	switch unmarshaler.Type {
+	case "secret":
+		value := new(SecretCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		a.Secret = value
+	case "secret_id":
+		var valueUnmarshaler struct {
+			SecretId SecretCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		a.SecretId = valueUnmarshaler.SecretId
+	}
+	return nil
+}
+
+func (a AutotaskApiIntegrationCodeCredential) MarshalJSON() ([]byte, error) {
+	if a.Secret != nil {
+		return core.MarshalJSONWithExtraProperty(a.Secret, "type", "secret")
+	}
+	if a.SecretId != "" {
+		var marshaler = struct {
+			Type     string             `json:"type"`
+			SecretId SecretCredentialId `json:"value"`
+		}{
+			Type:     "secret_id",
+			SecretId: a.SecretId,
+		}
+		return json.Marshal(marshaler)
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", a)
+}
+
+type AutotaskApiIntegrationCodeCredentialVisitor interface {
+	VisitSecret(*SecretCredential) error
+	VisitSecretId(SecretCredentialId) error
+}
+
+func (a *AutotaskApiIntegrationCodeCredential) Accept(visitor AutotaskApiIntegrationCodeCredentialVisitor) error {
+	if a.Secret != nil {
+		return visitor.VisitSecret(a.Secret)
+	}
+	if a.SecretId != "" {
+		return visitor.VisitSecretId(a.SecretId)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", a)
+}
+
+type AutotaskSecretCredential struct {
+	Type string
+	// Secret for the Autotask API.
+	Secret *SecretCredential
+	// Secret ID for the Autotask API.
+	SecretId SecretCredentialId
+}
+
+func (a *AutotaskSecretCredential) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	a.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", a)
+	}
+	switch unmarshaler.Type {
+	case "secret":
+		value := new(SecretCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		a.Secret = value
+	case "secret_id":
+		var valueUnmarshaler struct {
+			SecretId SecretCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		a.SecretId = valueUnmarshaler.SecretId
+	}
+	return nil
+}
+
+func (a AutotaskSecretCredential) MarshalJSON() ([]byte, error) {
+	if a.Secret != nil {
+		return core.MarshalJSONWithExtraProperty(a.Secret, "type", "secret")
+	}
+	if a.SecretId != "" {
+		var marshaler = struct {
+			Type     string             `json:"type"`
+			SecretId SecretCredentialId `json:"value"`
+		}{
+			Type:     "secret_id",
+			SecretId: a.SecretId,
+		}
+		return json.Marshal(marshaler)
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", a)
+}
+
+type AutotaskSecretCredentialVisitor interface {
+	VisitSecret(*SecretCredential) error
+	VisitSecretId(SecretCredentialId) error
+}
+
+func (a *AutotaskSecretCredential) Accept(visitor AutotaskSecretCredentialVisitor) error {
+	if a.Secret != nil {
+		return visitor.VisitSecret(a.Secret)
+	}
+	if a.SecretId != "" {
+		return visitor.VisitSecretId(a.SecretId)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", a)
+}
+
 type AwsS3Credential struct {
 	Type string
 	// AWS access key to authenticate with AWS. Access keys are long-term credentials for an IAM user and consist of an ID and secret. This token pair must have read and write access to the configured AWS S3 bucket. You may optionally provide a session token if you are using temporary credentials.
@@ -9237,6 +9377,7 @@ type ProviderConfig struct {
 	StorageAzureBlob                  *StorageAzureBlob
 	StorageGcs                        *StorageGcs
 	StorageMockStorage                *StorageMock
+	TicketingAutotask                 *TicketingAutotask
 	TicketingJira                     *TicketingJira
 	TicketingMockTicketing            *TicketingMock
 	TicketingPagerduty                *TicketingPagerDuty
@@ -9472,6 +9613,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.StorageMockStorage = value
+	case "ticketing_autotask":
+		value := new(TicketingAutotask)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.TicketingAutotask = value
 	case "ticketing_jira":
 		value := new(TicketingJira)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -9648,6 +9795,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.StorageMockStorage != nil {
 		return core.MarshalJSONWithExtraProperty(p.StorageMockStorage, "type", "storage_mock_storage")
 	}
+	if p.TicketingAutotask != nil {
+		return core.MarshalJSONWithExtraProperty(p.TicketingAutotask, "type", "ticketing_autotask")
+	}
 	if p.TicketingJira != nil {
 		return core.MarshalJSONWithExtraProperty(p.TicketingJira, "type", "ticketing_jira")
 	}
@@ -9720,6 +9870,7 @@ type ProviderConfigVisitor interface {
 	VisitStorageAzureBlob(*StorageAzureBlob) error
 	VisitStorageGcs(*StorageGcs) error
 	VisitStorageMockStorage(*StorageMock) error
+	VisitTicketingAutotask(*TicketingAutotask) error
 	VisitTicketingJira(*TicketingJira) error
 	VisitTicketingMockTicketing(*TicketingMock) error
 	VisitTicketingPagerduty(*TicketingPagerDuty) error
@@ -9839,6 +9990,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	if p.StorageMockStorage != nil {
 		return visitor.VisitStorageMockStorage(p.StorageMockStorage)
 	}
+	if p.TicketingAutotask != nil {
+		return visitor.VisitTicketingAutotask(p.TicketingAutotask)
+	}
 	if p.TicketingJira != nil {
 		return visitor.VisitTicketingJira(p.TicketingJira)
 	}
@@ -9949,6 +10103,8 @@ const (
 	ProviderConfigIdStorageGcs ProviderConfigId = "storage_gcs"
 	// Storage Test
 	ProviderConfigIdStorageMock ProviderConfigId = "storage_mock_storage"
+	// Autotask Operations Cloud
+	ProviderConfigIdTicketingAutotask ProviderConfigId = "ticketing_autotask"
 	// Atlassian Jira
 	ProviderConfigIdTicketingJira ProviderConfigId = "ticketing_jira"
 	// Ticketing Test
@@ -10047,6 +10203,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdStorageGcs, nil
 	case "storage_mock_storage":
 		return ProviderConfigIdStorageMock, nil
+	case "ticketing_autotask":
+		return ProviderConfigIdTicketingAutotask, nil
 	case "ticketing_jira":
 		return ProviderConfigIdTicketingJira, nil
 	case "ticketing_mock_ticketing":
@@ -12318,6 +12476,53 @@ func (t *TenableCloudCredential) Accept(visitor TenableCloudCredentialVisitor) e
 		return visitor.VisitTokenId(t.TokenId)
 	}
 	return fmt.Errorf("type %T does not define a non-empty union type", t)
+}
+
+// Configuration for Autotask as a Ticketing Provider
+type TicketingAutotask struct {
+	ApiIntegrationCodeCredential *AutotaskApiIntegrationCodeCredential `json:"api_integration_code_credential" url:"api_integration_code_credential"`
+	SecretCredential             *AutotaskSecretCredential             `json:"secret_credential" url:"secret_credential"`
+	// User name for the Autotask API.
+	UserName string `json:"user_name" url:"user_name"`
+	// Zone path for the Autotask API.
+	ZonePath string `json:"zone_path" url:"zone_path"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (t *TicketingAutotask) GetExtraProperties() map[string]interface{} {
+	return t.extraProperties
+}
+
+func (t *TicketingAutotask) UnmarshalJSON(data []byte) error {
+	type unmarshaler TicketingAutotask
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*t = TicketingAutotask(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *t)
+	if err != nil {
+		return err
+	}
+	t.extraProperties = extraProperties
+
+	t._rawJSON = nil
+	return nil
+}
+
+func (t *TicketingAutotask) String() string {
+	if len(t._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(t._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(t); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", t)
 }
 
 // Configuration for Jira as a Ticketing Provider
