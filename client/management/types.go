@@ -9382,6 +9382,7 @@ type ProviderConfig struct {
 	TicketingMockTicketing            *TicketingMock
 	TicketingPagerduty                *TicketingPagerDuty
 	TicketingServicenow               *TicketingServiceNow
+	TicketingServicenowSir            *TicketingServiceNowSir
 	TicketingTorq                     *TicketingTorq
 	VulnerabilitiesCrowdstrike        *VulnerabilitiesCrowdStrike
 	VulnerabilitiesNucleus            *VulnerabilitiesNucleus
@@ -9643,6 +9644,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.TicketingServicenow = value
+	case "ticketing_servicenow_sir":
+		value := new(TicketingServiceNowSir)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.TicketingServicenowSir = value
 	case "ticketing_torq":
 		value := new(TicketingTorq)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -9810,6 +9817,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.TicketingServicenow != nil {
 		return core.MarshalJSONWithExtraProperty(p.TicketingServicenow, "type", "ticketing_servicenow")
 	}
+	if p.TicketingServicenowSir != nil {
+		return core.MarshalJSONWithExtraProperty(p.TicketingServicenowSir, "type", "ticketing_servicenow_sir")
+	}
 	if p.TicketingTorq != nil {
 		return core.MarshalJSONWithExtraProperty(p.TicketingTorq, "type", "ticketing_torq")
 	}
@@ -9875,6 +9885,7 @@ type ProviderConfigVisitor interface {
 	VisitTicketingMockTicketing(*TicketingMock) error
 	VisitTicketingPagerduty(*TicketingPagerDuty) error
 	VisitTicketingServicenow(*TicketingServiceNow) error
+	VisitTicketingServicenowSir(*TicketingServiceNowSir) error
 	VisitTicketingTorq(*TicketingTorq) error
 	VisitVulnerabilitiesCrowdstrike(*VulnerabilitiesCrowdStrike) error
 	VisitVulnerabilitiesNucleus(*VulnerabilitiesNucleus) error
@@ -10005,6 +10016,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	if p.TicketingServicenow != nil {
 		return visitor.VisitTicketingServicenow(p.TicketingServicenow)
 	}
+	if p.TicketingServicenowSir != nil {
+		return visitor.VisitTicketingServicenowSir(p.TicketingServicenowSir)
+	}
 	if p.TicketingTorq != nil {
 		return visitor.VisitTicketingTorq(p.TicketingTorq)
 	}
@@ -10113,6 +10127,8 @@ const (
 	ProviderConfigIdTicketingPagerDuty ProviderConfigId = "ticketing_pagerduty"
 	// ServiceNow IT Service Management (ITSM)
 	ProviderConfigIdTicketingServiceNow ProviderConfigId = "ticketing_servicenow"
+	// ServiceNow Security Incident Response (SIR)
+	ProviderConfigIdTicketingServiceNowSir ProviderConfigId = "ticketing_servicenow_sir"
 	// Torq
 	ProviderConfigIdTicketingTorq ProviderConfigId = "ticketing_torq"
 	// CrowdStrike Falcon Spotlight
@@ -10213,6 +10229,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdTicketingPagerDuty, nil
 	case "ticketing_servicenow":
 		return ProviderConfigIdTicketingServiceNow, nil
+	case "ticketing_servicenow_sir":
+		return ProviderConfigIdTicketingServiceNowSir, nil
 	case "ticketing_torq":
 		return ProviderConfigIdTicketingTorq, nil
 	case "vulnerabilities_crowdstrike":
@@ -12699,6 +12717,50 @@ func (t *TicketingServiceNow) UnmarshalJSON(data []byte) error {
 }
 
 func (t *TicketingServiceNow) String() string {
+	if len(t._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(t._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(t); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", t)
+}
+
+// Configuration for ServiceNow Security Incident Response as a Ticketing Provider
+type TicketingServiceNowSir struct {
+	Credential *ServiceNowCredential `json:"credential" url:"credential"`
+	// URL for the ServiceNow API. This should be the base URL for the API, without any path components and must be HTTPS. For example, "https://tenant.service-now.com".
+	Url string `json:"url" url:"url"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (t *TicketingServiceNowSir) GetExtraProperties() map[string]interface{} {
+	return t.extraProperties
+}
+
+func (t *TicketingServiceNowSir) UnmarshalJSON(data []byte) error {
+	type unmarshaler TicketingServiceNowSir
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*t = TicketingServiceNowSir(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *t)
+	if err != nil {
+		return err
+	}
+	t.extraProperties = extraProperties
+
+	t._rawJSON = nil
+	return nil
+}
+
+func (t *TicketingServiceNowSir) String() string {
 	if len(t._rawJSON) > 0 {
 		if value, err := core.StringifyJSON(t._rawJSON); err == nil {
 			return value

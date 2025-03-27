@@ -2539,22 +2539,31 @@ func (n *Note) String() string {
 type Priority string
 
 const (
-	PriorityUrgent Priority = "URGENT"
-	PriorityHigh   Priority = "HIGH"
-	PriorityMedium Priority = "MEDIUM"
-	PriorityLow    Priority = "LOW"
+	PriorityUrgent   Priority = "URGENT"
+	PriorityCritical Priority = "CRITICAL"
+	PriorityHigh     Priority = "HIGH"
+	PriorityMedium   Priority = "MEDIUM"
+	PriorityModerate Priority = "MODERATE"
+	PriorityLow      Priority = "LOW"
+	PriorityPlanning Priority = "PLANNING"
 )
 
 func NewPriorityFromString(s string) (Priority, error) {
 	switch s {
 	case "URGENT":
 		return PriorityUrgent, nil
+	case "CRITICAL":
+		return PriorityCritical, nil
 	case "HIGH":
 		return PriorityHigh, nil
 	case "MEDIUM":
 		return PriorityMedium, nil
+	case "MODERATE":
+		return PriorityModerate, nil
 	case "LOW":
 		return PriorityLow, nil
+	case "PLANNING":
+		return PriorityPlanning, nil
 	}
 	var t Priority
 	return "", fmt.Errorf("%s is not a valid %T", s, t)
