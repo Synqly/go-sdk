@@ -13577,6 +13577,8 @@ type Status struct {
 	ApiOps int64 `json:"api_ops" url:"api_ops"`
 	// API input byte count
 	InBytes int64 `json:"in_bytes" url:"in_bytes"`
+	// API output byte count
+	OutBytes int64 `json:"out_bytes" url:"out_bytes"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
@@ -13740,6 +13742,8 @@ type TimeseriesResult struct {
 	CpuTime int64 `json:"cpu_time" url:"cpu_time"`
 	// API input byte count
 	InBytes int64 `json:"in_bytes" url:"in_bytes"`
+	// API output byte count
+	OutBytes int64 `json:"out_bytes" url:"out_bytes"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
