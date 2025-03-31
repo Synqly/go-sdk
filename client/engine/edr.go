@@ -301,6 +301,8 @@ type NetworkQuarantineRequest struct {
 	State ConnectionState `json:"state" url:"state"`
 	// The list of endpoint IDs to enforce the connection state on.
 	EndpointIds []string `json:"endpoint_ids" url:"endpoint_ids"`
+	// A comment to include with the quarantine action.
+	Comment *string `json:"comment,omitempty" url:"comment,omitempty"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
