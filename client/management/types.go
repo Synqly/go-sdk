@@ -7613,6 +7613,52 @@ func (e *EdrDefender) String() string {
 	return fmt.Sprintf("%#v", e)
 }
 
+// Configuration for the Malwarebytes EDR Provider
+type EdrMalwarebytes struct {
+	// Account identifier for the Malwarebytes EDR Provider. Can be either the account ID directly (e.g. xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx) or the full tenant URL (e.g. https://cloud.malwarebytes.com/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/dashboard)
+	AccountIdentifier string                  `json:"account_identifier" url:"account_identifier"`
+	Credential        *MalwarebytesCredential `json:"credential" url:"credential"`
+	// URL for the Malwarebytes EDR Provider
+	Url *string `json:"url,omitempty" url:"url,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (e *EdrMalwarebytes) GetExtraProperties() map[string]interface{} {
+	return e.extraProperties
+}
+
+func (e *EdrMalwarebytes) UnmarshalJSON(data []byte) error {
+	type unmarshaler EdrMalwarebytes
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*e = EdrMalwarebytes(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *e)
+	if err != nil {
+		return err
+	}
+	e.extraProperties = extraProperties
+
+	e._rawJSON = nil
+	return nil
+}
+
+func (e *EdrMalwarebytes) String() string {
+	if len(e._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(e._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(e); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", e)
+}
+
 // Configuration for the SentinelOne EDR Provider
 type EdrSentinelOne struct {
 	Credential *SentinelOneCredential `json:"credential" url:"credential"`
@@ -8766,6 +8812,76 @@ func (j *JiraCredential) Accept(visitor JiraCredentialVisitor) error {
 	return fmt.Errorf("type %T does not define a non-empty union type", j)
 }
 
+type MalwarebytesCredential struct {
+	Type string
+	// Malwarebytes oAuth client credentials. For more information see [Malwarebytes' documentation on setting up oAuth.](https://api.malwarebytes.com/nebula/v1/docs#section/Authentication)
+	OAuthClient *OAuthClientCredential
+	// ID of a credential that stores a Malwarebytes oAuth client ID.
+	OAuthClientId OAuthClientCredentialId
+}
+
+func (m *MalwarebytesCredential) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	m.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", m)
+	}
+	switch unmarshaler.Type {
+	case "o_auth_client":
+		value := new(OAuthClientCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		m.OAuthClient = value
+	case "o_auth_client_id":
+		var valueUnmarshaler struct {
+			OAuthClientId OAuthClientCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		m.OAuthClientId = valueUnmarshaler.OAuthClientId
+	}
+	return nil
+}
+
+func (m MalwarebytesCredential) MarshalJSON() ([]byte, error) {
+	if m.OAuthClient != nil {
+		return core.MarshalJSONWithExtraProperty(m.OAuthClient, "type", "o_auth_client")
+	}
+	if m.OAuthClientId != "" {
+		var marshaler = struct {
+			Type          string                  `json:"type"`
+			OAuthClientId OAuthClientCredentialId `json:"value"`
+		}{
+			Type:          "o_auth_client_id",
+			OAuthClientId: m.OAuthClientId,
+		}
+		return json.Marshal(marshaler)
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", m)
+}
+
+type MalwarebytesCredentialVisitor interface {
+	VisitOAuthClient(*OAuthClientCredential) error
+	VisitOAuthClientId(OAuthClientCredentialId) error
+}
+
+func (m *MalwarebytesCredential) Accept(visitor MalwarebytesCredentialVisitor) error {
+	if m.OAuthClient != nil {
+		return visitor.VisitOAuthClient(m.OAuthClient)
+	}
+	if m.OAuthClientId != "" {
+		return visitor.VisitOAuthClientId(m.OAuthClientId)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", m)
+}
+
 // Configuration for Jira as a Notification Provider
 type NotificationsJira struct {
 	Credential *JiraCredential `json:"credential" url:"credential"`
@@ -9348,6 +9464,7 @@ type ProviderConfig struct {
 	AssetsServicenowMock              *AssetsServiceNowMock
 	EdrCrowdstrike                    *EdrCrowdStrike
 	EdrDefender                       *EdrDefender
+	EdrMalwarebytes                   *EdrMalwarebytes
 	EdrSentinelone                    *EdrSentinelOne
 	EdrSophos                         *EdrSophos
 	IdentityEntraId                   *IdentityEntraId
@@ -9440,6 +9557,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.EdrDefender = value
+	case "edr_malwarebytes":
+		value := new(EdrMalwarebytes)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.EdrMalwarebytes = value
 	case "edr_sentinelone":
 		value := new(EdrSentinelOne)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -9715,6 +9838,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.EdrDefender != nil {
 		return core.MarshalJSONWithExtraProperty(p.EdrDefender, "type", "edr_defender")
 	}
+	if p.EdrMalwarebytes != nil {
+		return core.MarshalJSONWithExtraProperty(p.EdrMalwarebytes, "type", "edr_malwarebytes")
+	}
 	if p.EdrSentinelone != nil {
 		return core.MarshalJSONWithExtraProperty(p.EdrSentinelone, "type", "edr_sentinelone")
 	}
@@ -9851,6 +9977,7 @@ type ProviderConfigVisitor interface {
 	VisitAssetsServicenowMock(*AssetsServiceNowMock) error
 	VisitEdrCrowdstrike(*EdrCrowdStrike) error
 	VisitEdrDefender(*EdrDefender) error
+	VisitEdrMalwarebytes(*EdrMalwarebytes) error
 	VisitEdrSentinelone(*EdrSentinelOne) error
 	VisitEdrSophos(*EdrSophos) error
 	VisitIdentityEntraId(*IdentityEntraId) error
@@ -9913,6 +10040,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.EdrDefender != nil {
 		return visitor.VisitEdrDefender(p.EdrDefender)
+	}
+	if p.EdrMalwarebytes != nil {
+		return visitor.VisitEdrMalwarebytes(p.EdrMalwarebytes)
 	}
 	if p.EdrSentinelone != nil {
 		return visitor.VisitEdrSentinelone(p.EdrSentinelone)
@@ -10059,6 +10189,8 @@ const (
 	ProviderConfigIdEdrCrowdStrike ProviderConfigId = "edr_crowdstrike"
 	// Microsoft Defender for Endpoint
 	ProviderConfigIdEdrDefender ProviderConfigId = "edr_defender"
+	// Malwarebytes EDR
+	ProviderConfigIdEdrMalwarebytes ProviderConfigId = "edr_malwarebytes"
 	// SentinelOne Singularity™ Endpoint
 	ProviderConfigIdEdrSentinelOne ProviderConfigId = "edr_sentinelone"
 	// Sophos EDR
@@ -10161,6 +10293,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdEdrCrowdStrike, nil
 	case "edr_defender":
 		return ProviderConfigIdEdrDefender, nil
+	case "edr_malwarebytes":
+		return ProviderConfigIdEdrMalwarebytes, nil
 	case "edr_sentinelone":
 		return ProviderConfigIdEdrSentinelOne, nil
 	case "edr_sophos":
