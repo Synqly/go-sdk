@@ -10748,7 +10748,7 @@ type SiemQRadar struct {
 	CollectionPort int               `json:"collection_port" url:"collection_port"`
 	Credential     *QRadarCredential `json:"credential" url:"credential"`
 	// If true, skips verification of the QRadar server's TLS certificate.
-	SkipTlsVerify bool `json:"skip_tls_verify" url:"skip_tls_verify"`
+	SkipTlsVerify *bool `json:"skip_tls_verify,omitempty" url:"skip_tls_verify,omitempty"`
 	// URL for the QRadar instance. This should be the base URL instance, without any path components and must be HTTPS. For example, "https://qradar.westus2.cloudapp.azure.com".
 	Url string `json:"url" url:"url"`
 
@@ -10904,7 +10904,7 @@ type SiemSplunk struct {
 	// Optional URL used for connecting to the Splunk search service. If not provided, querying is disabled.
 	SearchServiceUrl *string `json:"search_service_url,omitempty" url:"search_service_url,omitempty"`
 	// If true, skips verification of the Splunk server's TLS certificate.
-	SkipTlsVerify bool `json:"skip_tls_verify" url:"skip_tls_verify"`
+	SkipTlsVerify *bool `json:"skip_tls_verify,omitempty" url:"skip_tls_verify,omitempty"`
 	// Splunk source to send events to. If not provided, will use the default source for the Splunk collector.
 	Source *string `json:"source,omitempty" url:"source,omitempty"`
 	// Splunk source type to send events to. If not provided, will use the default source type for the Splunk collector.
@@ -11540,7 +11540,7 @@ type SinkSplunk struct {
 	// Splunk index to send events to. If not provided, will use the default index for the Splunk collector.
 	Index *string `json:"index,omitempty" url:"index,omitempty"`
 	// If true, skips verification of the Splunk server's TLS certificate.
-	SkipTlsVerify bool `json:"skip_tls_verify" url:"skip_tls_verify"`
+	SkipTlsVerify *bool `json:"skip_tls_verify,omitempty" url:"skip_tls_verify,omitempty"`
 	// Splunk source to send events to. If not provided, will use the default source for the Splunk collector.
 	Source *string `json:"source,omitempty" url:"source,omitempty"`
 	// Splunk source type to send events to. If not provided, will use the default source type for the Splunk collector.
