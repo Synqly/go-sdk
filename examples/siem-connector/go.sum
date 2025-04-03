@@ -6,7 +6,7 @@ github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZb
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/stretchr/testify v1.8.4 h1:CcVxjf3Q8PM0mHUKJCdn+eZZtm5yQwehR5yeSVQQcUk=
 github.com/stretchr/testify v1.8.4/go.mod h1:sz/lmYIOXD/1dqDmKjjqLyZ2RngseejIcXlSw2iwfAo=
-github.com/synqly/go-sdk v0.3.78 h1:DLO56fGZhQ4hUblA3x7z0/Dwhfmoa1Rv3NlS3Vn/kuo=
-github.com/synqly/go-sdk v0.3.78/go.mod h1:kMCFPgdAgDu1z9wFaBoR2iP38MpaJxIwef4g3wJgxYU=
+github.com/synqly/go-sdk v0.3.86 h1:t60CYpMufJGSd4thHKHCVwTIMgvv0gXo3N6Fv84VNDA=
+github.com/synqly/go-sdk v0.3.86/go.mod h1:kMCFPgdAgDu1z9wFaBoR2iP38MpaJxIwef4g3wJgxYU=
 gopkg.in/yaml.v3 v3.0.1 h1:fxVm/GzAzEWqLHuvctI91KS9hhNmmWOoWu0XTYJS7CA=
 gopkg.in/yaml.v3 v3.0.1/go.mod h1:K4uyk7z7BCEPqu6E+C64Yfv1cQ7kz7rIZviUmN+EgEM=

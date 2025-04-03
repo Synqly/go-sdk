@@ -167,6 +167,7 @@ func (a *App) configureEventLogging(ctx context.Context, tenantID, siemProviderT
 }
 
 func (a *App) splunkConfig(splunkURL, credentialId string) *mgmt.ProviderConfig {
+	skip := true
 	return &mgmt.ProviderConfig{
 		SiemSplunk: &mgmt.SiemSplunk{
 			HecUrl: splunkURL,
@@ -177,7 +178,7 @@ func (a *App) splunkConfig(splunkURL, credentialId string) *mgmt.ProviderConfig 
 			// is not recommended for production use; however, it is set
 			// here because Splunk Cloud HEC endpoints use self-signed
 			// "SplunkServerDefaultCert" certificates by default.
-			SkipTlsVerify: true,
+			SkipTlsVerify: &skip,
 		}}
 }
 
