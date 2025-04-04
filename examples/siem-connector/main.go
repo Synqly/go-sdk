@@ -12,11 +12,9 @@ import (
 
 	engine "github.com/synqly/go-sdk/client/engine"
 	engineClient "github.com/synqly/go-sdk/client/engine/client"
-
 	// Each OCSF event type has its own package. This is intended to make imports
 	// more granular, allowing the end-user to import only the types they need.
 	scheduledJobActivity "github.com/synqly/go-sdk/client/engine/ocsf/v130/scheduledjobactivity"
-
 	mgmt "github.com/synqly/go-sdk/client/management"
 	mgmtClient "github.com/synqly/go-sdk/client/management/client"
 )
