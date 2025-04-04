@@ -1460,6 +1460,117 @@ func (e *Event) Accept(visitor EventVisitor) error {
 	return fmt.Errorf("type %T does not define a non-empty union type", e)
 }
 
+type IntegrationTicketWhen string
+
+const (
+	IntegrationTicketWhenAfter   IntegrationTicketWhen = "after"
+	IntegrationTicketWhenAsync   IntegrationTicketWhen = "async"
+	IntegrationTicketWhenBefore  IntegrationTicketWhen = "before"
+	IntegrationTicketWhenDisplay IntegrationTicketWhen = "display"
+)
+
+func NewIntegrationTicketWhenFromString(s string) (IntegrationTicketWhen, error) {
+	switch s {
+	case "after":
+		return IntegrationTicketWhenAfter, nil
+	case "async":
+		return IntegrationTicketWhenAsync, nil
+	case "before":
+		return IntegrationTicketWhenBefore, nil
+	case "display":
+		return IntegrationTicketWhenDisplay, nil
+	}
+	var t IntegrationTicketWhen
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (i IntegrationTicketWhen) Ptr() *IntegrationTicketWhen {
+	return &i
+}
+
+// Integration webhook
+type IntegrationWebHook struct {
+	Id IntegrationWebHookId `json:"id" url:"id"`
+	// The user who created the webHook.
+	Creator string `json:"creator" url:"creator"`
+	// Status of the WebHook.
+	Enabled bool `json:"enabled" url:"enabled"`
+	// List of events that trigger the WebHook.
+	Events []string `json:"events" url:"events"`
+	// A name for the WebHook.
+	Name string `json:"name" url:"name"`
+	// The content of the webHook, this can be a URL or a specific code, it depends on the provider.
+	Value string `json:"value" url:"value"`
+	// The date the WebHook was created.
+	CreatedAt time.Time `json:"created_at" url:"created_at"`
+	// The date the WebHook was last updated.
+	UpdatedAt *time.Time `json:"updated_at,omitempty" url:"updated_at,omitempty"`
+	// The attributes that are not mapped to the WebHook schema. The names and values of those attributes are specific to the provider.
+	Unmapped *Object `json:"unmapped,omitempty" url:"unmapped,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (i *IntegrationWebHook) GetExtraProperties() map[string]interface{} {
+	return i.extraProperties
+}
+
+func (i *IntegrationWebHook) UnmarshalJSON(data []byte) error {
+	type embed IntegrationWebHook
+	var unmarshaler = struct {
+		embed
+		CreatedAt *core.DateTime `json:"created_at"`
+		UpdatedAt *core.DateTime `json:"updated_at,omitempty"`
+	}{
+		embed: embed(*i),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*i = IntegrationWebHook(unmarshaler.embed)
+	i.CreatedAt = unmarshaler.CreatedAt.Time()
+	i.UpdatedAt = unmarshaler.UpdatedAt.TimePtr()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *i)
+	if err != nil {
+		return err
+	}
+	i.extraProperties = extraProperties
+
+	i._rawJSON = nil
+	return nil
+}
+
+func (i *IntegrationWebHook) MarshalJSON() ([]byte, error) {
+	type embed IntegrationWebHook
+	var marshaler = struct {
+		embed
+		CreatedAt *core.DateTime `json:"created_at"`
+		UpdatedAt *core.DateTime `json:"updated_at,omitempty"`
+	}{
+		embed:     embed(*i),
+		CreatedAt: core.NewDateTime(i.CreatedAt),
+		UpdatedAt: core.NewOptionalDateTime(i.UpdatedAt),
+	}
+	return json.Marshal(marshaler)
+}
+
+func (i *IntegrationWebHook) String() string {
+	if len(i._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(i._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(i); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", i)
+}
+
+// Unique identifier for a integration webHook
+type IntegrationWebHookId = Id
+
 type TicketingWebhookResponse struct {
 	// Various metadata about the results organized by group, then type, then field.
 	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
