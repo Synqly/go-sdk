@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 
-	app "vulnerabilities-connector/app"
+	app "examples/vulnerabilities-connector/app"
 )
 
 func main() {
