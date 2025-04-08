@@ -8,6 +8,7 @@ import (
 	edr "github.com/synqly/go-sdk/client/engine/edr"
 	hooks "github.com/synqly/go-sdk/client/engine/hooks"
 	identity "github.com/synqly/go-sdk/client/engine/identity"
+	integrationwebhooks "github.com/synqly/go-sdk/client/engine/integrationwebhooks"
 	notifications "github.com/synqly/go-sdk/client/engine/notifications"
 	operations "github.com/synqly/go-sdk/client/engine/operations"
 	option "github.com/synqly/go-sdk/client/engine/option"
@@ -24,17 +25,18 @@ type Client struct {
 	caller  *core.Caller
 	header  http.Header
 
-	Assets          *assets.Client
-	Edr             *edr.Client
-	Hooks           *hooks.Client
-	Identity        *identity.Client
-	Notifications   *notifications.Client
-	Operations      *operations.Client
-	Siem            *siem.Client
-	Sink            *sink.Client
-	Storage         *storage.Client
-	Ticketing       *ticketing.Client
-	Vulnerabilities *vulnerabilities.Client
+	Assets              *assets.Client
+	Edr                 *edr.Client
+	Hooks               *hooks.Client
+	Identity            *identity.Client
+	IntegrationWebhooks *integrationwebhooks.Client
+	Notifications       *notifications.Client
+	Operations          *operations.Client
+	Siem                *siem.Client
+	Sink                *sink.Client
+	Storage             *storage.Client
+	Ticketing           *ticketing.Client
+	Vulnerabilities     *vulnerabilities.Client
 }
 
 func NewClient(opts ...option.RequestOption) *Client {
@@ -47,17 +49,18 @@ func NewClient(opts ...option.RequestOption) *Client {
 				MaxAttempts: options.MaxAttempts,
 			},
 		),
-		header:          options.ToHeader(),
-		Assets:          assets.NewClient(opts...),
-		Edr:             edr.NewClient(opts...),
-		Hooks:           hooks.NewClient(opts...),
-		Identity:        identity.NewClient(opts...),
-		Notifications:   notifications.NewClient(opts...),
-		Operations:      operations.NewClient(opts...),
-		Siem:            siem.NewClient(opts...),
-		Sink:            sink.NewClient(opts...),
-		Storage:         storage.NewClient(opts...),
-		Ticketing:       ticketing.NewClient(opts...),
-		Vulnerabilities: vulnerabilities.NewClient(opts...),
+		header:              options.ToHeader(),
+		Assets:              assets.NewClient(opts...),
+		Edr:                 edr.NewClient(opts...),
+		Hooks:               hooks.NewClient(opts...),
+		Identity:            identity.NewClient(opts...),
+		IntegrationWebhooks: integrationwebhooks.NewClient(opts...),
+		Notifications:       notifications.NewClient(opts...),
+		Operations:          operations.NewClient(opts...),
+		Siem:                siem.NewClient(opts...),
+		Sink:                sink.NewClient(opts...),
+		Storage:             storage.NewClient(opts...),
+		Ticketing:           ticketing.NewClient(opts...),
+		Vulnerabilities:     vulnerabilities.NewClient(opts...),
 	}
 }

@@ -1488,6 +1488,58 @@ func (i IntegrationTicketWhen) Ptr() *IntegrationTicketWhen {
 	return &i
 }
 
+type TicketingWebhookResponse struct {
+	// Various metadata about the results organized by group, then type, then field.
+	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
+	// The ID of the ticket in the ticketing system.
+	TicketId *string `json:"ticket_id,omitempty" url:"ticket_id,omitempty"`
+	// Date pertiment to webhook operation e.g. if its TicketCreated would be creation date. This comes directly from the ticketing system without any date formatting changes.
+	EntityDate *string `json:"entity_date,omitempty" url:"entity_date,omitempty"`
+	// The priority of the ticket.
+	Priority *Priority `json:"priority,omitempty" url:"priority,omitempty"`
+	// Short Description of the ticket in the ticketing system.
+	ShortDescription *string `json:"short_description,omitempty" url:"short_description,omitempty"`
+	// The Raw JSON that was sent by the ticketing system for this webhook event.
+	RawPayload string `json:"raw_payload" url:"raw_payload"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (t *TicketingWebhookResponse) GetExtraProperties() map[string]interface{} {
+	return t.extraProperties
+}
+
+func (t *TicketingWebhookResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler TicketingWebhookResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*t = TicketingWebhookResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *t)
+	if err != nil {
+		return err
+	}
+	t.extraProperties = extraProperties
+
+	t._rawJSON = nil
+	return nil
+}
+
+func (t *TicketingWebhookResponse) String() string {
+	if len(t._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(t._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(t); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", t)
+}
+
 // Integration webhook
 type IntegrationWebHook struct {
 	Id IntegrationWebHookId `json:"id" url:"id"`
@@ -1570,58 +1622,6 @@ func (i *IntegrationWebHook) String() string {
 
 // Unique identifier for a integration webHook
 type IntegrationWebHookId = Id
-
-type TicketingWebhookResponse struct {
-	// Various metadata about the results organized by group, then type, then field.
-	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
-	// The ID of the ticket in the ticketing system.
-	TicketId *string `json:"ticket_id,omitempty" url:"ticket_id,omitempty"`
-	// Date pertiment to webhook operation e.g. if its TicketCreated would be creation date. This comes directly from the ticketing system without any date formatting changes.
-	EntityDate *string `json:"entity_date,omitempty" url:"entity_date,omitempty"`
-	// The priority of the ticket.
-	Priority *Priority `json:"priority,omitempty" url:"priority,omitempty"`
-	// Short Description of the ticket in the ticketing system.
-	ShortDescription *string `json:"short_description,omitempty" url:"short_description,omitempty"`
-	// The Raw JSON that was sent by the ticketing system for this webhook event.
-	RawPayload string `json:"raw_payload" url:"raw_payload"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (t *TicketingWebhookResponse) GetExtraProperties() map[string]interface{} {
-	return t.extraProperties
-}
-
-func (t *TicketingWebhookResponse) UnmarshalJSON(data []byte) error {
-	type unmarshaler TicketingWebhookResponse
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*t = TicketingWebhookResponse(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *t)
-	if err != nil {
-		return err
-	}
-	t.extraProperties = extraProperties
-
-	t._rawJSON = nil
-	return nil
-}
-
-func (t *TicketingWebhookResponse) String() string {
-	if len(t._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(t._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(t); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", t)
-}
 
 // Notification object
 type Notification struct {
