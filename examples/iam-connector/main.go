@@ -17,7 +17,8 @@ import (
 	"github.com/synqly/go-sdk/client/engine"
 	engineClient "github.com/synqly/go-sdk/client/engine/client"
 	mgmt "github.com/synqly/go-sdk/client/management"
-	"github.com/synqly/go-sdk/examples/common"
+
+	"examples/common"
 )
 
 var (

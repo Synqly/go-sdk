@@ -9,13 +9,14 @@ import (
 	"os"
 	"strings"
 
-	"github.com/knadh/koanf"
 	koanfyaml "github.com/knadh/koanf/parsers/yaml"
 	"github.com/knadh/koanf/providers/env"
 	"github.com/knadh/koanf/providers/file"
+	"github.com/knadh/koanf/v2"
 	"github.com/synqly/go-sdk/client/engine"
 	mgmt "github.com/synqly/go-sdk/client/management"
-	"github.com/synqly/go-sdk/examples/common"
+
+	"examples/common"
 )
 
 var (

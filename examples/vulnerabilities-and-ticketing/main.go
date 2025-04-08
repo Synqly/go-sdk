@@ -16,7 +16,8 @@ import (
 	engineClient "github.com/synqly/go-sdk/client/engine/client"
 	"github.com/synqly/go-sdk/client/engine/ocsf/v130/securityfinding"
 	mgmt "github.com/synqly/go-sdk/client/management"
-	"github.com/synqly/go-sdk/examples/common"
+
+	"examples/common"
 )
 
 var (
