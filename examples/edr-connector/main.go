@@ -32,10 +32,10 @@ type sentinelOneConfig struct {
 
 func (c *sentinelOneConfig) Validate() error {
 	if c.URL == "" {
-		return errors.New("sentielone.url is required")
+		return errors.New("sentinelone.url is required")
 	}
 	if c.Token == "" {
-		return errors.New("sentielone.token is required")
+		return errors.New("sentinelone.token is required")
 	}
 	return nil
 }
@@ -49,27 +49,27 @@ func main() {
 
 	// load config -- try from a config file, and if that is not present, then try env vars
 	parser := koanfyaml.Parser()
-	if err := k.Load(file.Provider("config.yaml"), parser); err != nil {
+	if err := k.Load(file.Provider("config-edr.yaml"), parser); err != nil {
 		err := k.Load(env.Provider("SYNQLY_", "_", func(s string) string {
 			return strings.ToLower(s)
 		}), nil)
 		if err != nil {
-			log.Fatalf("unable to load config.yaml or env vars: %v", err)
+			log.Fatalf("unable to load config-edr.yaml or env vars: %v", err)
 		}
 	}
 
-	orgToken := k.String("synqly.token")
+	orgToken := k.String("synqly.org.token")
 	if orgToken == "" {
-		log.Fatal("synqly.token is required. Set SYNQLY_ORG_TOKEN or add it to config.yaml.")
+		log.Fatal("synqly.org.token is required. Set SYNQLY_ORG_TOKEN or add it to config-edr.yaml.")
 	}
 
-	err := k.Unmarshal("sentinelone", &sentinelOneConf)
+	err := k.Unmarshal("synqly.sentinelone", &sentinelOneConf)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	if err := sentinelOneConf.Validate(); err != nil {
-		log.Fatalf("invalid sentinelone config: %s. Set SentinelOne configuration through env vars or add it to config.yaml", err)
+		log.Fatalf("invalid sentinelone config: %s. Set SentinelOne configuration through env vars or add it to config-edr.yaml", err)
 	}
 
 	sentinelOneProvider := &sentinelOneProvider{config: &sentinelOneConf}

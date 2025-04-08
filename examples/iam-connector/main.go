@@ -64,6 +64,7 @@ func (c *oktaConfig) Validate() error {
 	return nil
 }
 
+/*
 type entraConfig struct {
 	TenantId     string `koanf:"tenant_id"`
 	ClientId     string `koanf:"client_id"`
@@ -83,6 +84,7 @@ func (c *entraConfig) ProviderConfig() *mgmt.ProviderConfig {
 		},
 	}
 }
+*/
 
 func waitForAuditLogResult(ctx context.Context, client *engineClient.Client, req *engine.QueryIdentityAuditLogRequest) (*engine.QueryIdentityAuditLogResponse, error) {
 	var resp *engine.QueryIdentityAuditLogResponse = nil

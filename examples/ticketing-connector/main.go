@@ -288,7 +288,7 @@ func getComments(ctx context.Context, client *engineClient.Client, ticketID stri
 
 // getProject retrieves all the projects in the tenant's ticketing integreation
 func getProjects(ctx context.Context, client *engineClient.Client) (*engine.ListProjectsResponse, error) {
-	projects, err := client.Ticketing.ListProjects(ctx)
+	projects, err := client.Ticketing.ListProjects(ctx, &engine.ListProjectsRequest{})
 	if err != nil {
 		return nil, err
 	}

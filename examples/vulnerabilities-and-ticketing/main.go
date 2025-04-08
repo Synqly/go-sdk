@@ -119,7 +119,7 @@ See also:
 
 func ticketingProviderConfig(jiraURL, jiraUser, jiraToken string) (*mgmt.CreateIntegrationRequest, error) {
 	if jiraUser == "" || jiraToken == "" {
-		return nil, fmt.Errorf("missing ticketing provider config")
+		return nil, fmt.Errorf("missing ticketing provider config: update config-vulnerabilities.conf or set equivalent SYNQLY_JIRA_URL, SYNQLY_JIRA_USER and SYNQLY_JIRA_TOKEN environment variables")
 	}
 
 	integrationReq := &mgmt.CreateIntegrationRequest{
@@ -174,14 +174,14 @@ func vulnerabilityProviderConfig(tenableToken, qualysEndpoint, qualysUser, qualy
 		}, nil
 	}
 
-	return nil, fmt.Errorf("missing vulnerability provider config")
+	return nil, fmt.Errorf("missing vulnerability provider config: update config-vulnerabilities.yaml file or set SYNQLY_TENABLE_TOKEN, and/or SYNQLY_QUALYS_ENDPOINT, SYNQLY_QUALYS_USER, and SYNQLY_QUALYS_SECRET")
 }
 
 func main() {
 	log.SetFlags(log.Llongfile | log.Ldate | log.Ltime)
 
 	parser := koanfyaml.Parser()
-	if err := k.Load(file.Provider("config.yaml"), parser); err != nil {
+	if err := k.Load(file.Provider("config-vulnerabilities.yaml"), parser); err != nil {
 		k.Load(env.Provider("SYNQLY_", "_", func(s string) string {
 			return strings.ToLower(s)
 		}), nil)
@@ -197,7 +197,7 @@ func main() {
 	qualysSecret := k.String("synqly.qualys.secret")
 
 	if synqlyOrgToken == "" {
-		log.Fatal("Missing Synqly Org token")
+		log.Fatal("Missing Synqly Org token; update config-vulnerabilities.yaml or add SYNQLY_ORG_TOKEN environment variable")
 	}
 
 	ticketingProvider, err := ticketingProviderConfig(jiraURL, jiraUser, jiraToken)

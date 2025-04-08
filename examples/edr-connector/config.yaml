@@ -1,6 +1,7 @@
 synqly:
-  token:
+  org:
+    token:
 
-sentinelone:
-  url:
-  token:
+  sentinelone:
+    url:
+    token:
