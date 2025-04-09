@@ -6,9 +6,9 @@ import (
 	"log"
 
 	"github.com/synqly/go-sdk/client/engine"
-	"github.com/synqly/go-sdk/examples/common"
-
 	mgmt "github.com/synqly/go-sdk/client/management"
+
+	"examples/common"
 )
 
 const (
