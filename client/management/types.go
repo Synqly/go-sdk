@@ -9475,6 +9475,7 @@ type ProviderConfig struct {
 	NotificationsMockNotifications    *NotificationsMock
 	NotificationsSlack                *NotificationsSlack
 	NotificationsTeams                *NotificationsTeams
+	SiemCrowdstrike                   *SiemCrowdstrike
 	SiemElasticsearch                 *SiemElasticsearch
 	SiemGoogleChronicle               *SiemGoogleChronicle
 	SiemMockSiem                      *SiemMock
@@ -9623,6 +9624,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.NotificationsTeams = value
+	case "siem_crowdstrike":
+		value := new(SiemCrowdstrike)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.SiemCrowdstrike = value
 	case "siem_elasticsearch":
 		value := new(SiemElasticsearch)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -9871,6 +9878,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.NotificationsTeams != nil {
 		return core.MarshalJSONWithExtraProperty(p.NotificationsTeams, "type", "notifications_teams")
 	}
+	if p.SiemCrowdstrike != nil {
+		return core.MarshalJSONWithExtraProperty(p.SiemCrowdstrike, "type", "siem_crowdstrike")
+	}
 	if p.SiemElasticsearch != nil {
 		return core.MarshalJSONWithExtraProperty(p.SiemElasticsearch, "type", "siem_elasticsearch")
 	}
@@ -9988,6 +9998,7 @@ type ProviderConfigVisitor interface {
 	VisitNotificationsMockNotifications(*NotificationsMock) error
 	VisitNotificationsSlack(*NotificationsSlack) error
 	VisitNotificationsTeams(*NotificationsTeams) error
+	VisitSiemCrowdstrike(*SiemCrowdstrike) error
 	VisitSiemElasticsearch(*SiemElasticsearch) error
 	VisitSiemGoogleChronicle(*SiemGoogleChronicle) error
 	VisitSiemMockSiem(*SiemMock) error
@@ -10073,6 +10084,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.NotificationsTeams != nil {
 		return visitor.VisitNotificationsTeams(p.NotificationsTeams)
+	}
+	if p.SiemCrowdstrike != nil {
+		return visitor.VisitSiemCrowdstrike(p.SiemCrowdstrike)
 	}
 	if p.SiemElasticsearch != nil {
 		return visitor.VisitSiemElasticsearch(p.SiemElasticsearch)
@@ -10211,6 +10225,8 @@ const (
 	ProviderConfigIdNotificationsSlack ProviderConfigId = "notifications_slack"
 	// Microsoft Teams
 	ProviderConfigIdNotificationsTeams ProviderConfigId = "notifications_teams"
+	// CrowdStrike Falcon Next-Gen SIEM
+	ProviderConfigIdSiemCrowdstrike ProviderConfigId = "siem_crowdstrike"
 	// Elastic SIEM
 	ProviderConfigIdSiemElasticsearch ProviderConfigId = "siem_elasticsearch"
 	// Google Chronicle
@@ -10315,6 +10331,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdNotificationsSlack, nil
 	case "notifications_teams":
 		return ProviderConfigIdNotificationsTeams, nil
+	case "siem_crowdstrike":
+		return ProviderConfigIdSiemCrowdstrike, nil
 	case "siem_elasticsearch":
 		return ProviderConfigIdSiemElasticsearch, nil
 	case "siem_google_chronicle":
@@ -10598,6 +10616,50 @@ func (r *Rapid7InsightCloudCredential) Accept(visitor Rapid7InsightCloudCredenti
 		return visitor.VisitTokenId(r.TokenId)
 	}
 	return fmt.Errorf("type %T does not define a non-empty union type", r)
+}
+
+// Configuration for CrowdStrike Falcon NextGen SIEM
+type SiemCrowdstrike struct {
+	Credential *CrowdStrikeCredential `json:"credential" url:"credential"`
+	// The root domain where your CrowdStrike Falcon NextGen SIEM tenant is located.
+	Url *string `json:"url,omitempty" url:"url,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (s *SiemCrowdstrike) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
+}
+
+func (s *SiemCrowdstrike) UnmarshalJSON(data []byte) error {
+	type unmarshaler SiemCrowdstrike
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*s = SiemCrowdstrike(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+
+	s._rawJSON = nil
+	return nil
+}
+
+func (s *SiemCrowdstrike) String() string {
+	if len(s._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(s); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", s)
 }
 
 // Configuration for Elasticsearch search and analytics engine. Supports both managed and self-hosted Elasticsearch deployments
