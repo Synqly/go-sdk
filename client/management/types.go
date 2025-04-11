@@ -6583,6 +6583,44 @@ func (a *ArmisCredential) Accept(visitor ArmisCredentialVisitor) error {
 	return fmt.Errorf("type %T does not define a non-empty union type", a)
 }
 
+type AssetsArmisDataset string
+
+const (
+	AssetsArmisDatasetBasicVer0 AssetsArmisDataset = "basic_v0"
+)
+
+func NewAssetsArmisDatasetFromString(s string) (AssetsArmisDataset, error) {
+	switch s {
+	case "basic_v0":
+		return AssetsArmisDatasetBasicVer0, nil
+	}
+	var t AssetsArmisDataset
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (a AssetsArmisDataset) Ptr() *AssetsArmisDataset {
+	return &a
+}
+
+type AssetsNozomiVantageDataset string
+
+const (
+	AssetsNozomiVantageDatasetBasicVer0 AssetsNozomiVantageDataset = "basic_v0"
+)
+
+func NewAssetsNozomiVantageDatasetFromString(s string) (AssetsNozomiVantageDataset, error) {
+	switch s {
+	case "basic_v0":
+		return AssetsNozomiVantageDatasetBasicVer0, nil
+	}
+	var t AssetsNozomiVantageDataset
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (a AssetsNozomiVantageDataset) Ptr() *AssetsNozomiVantageDataset {
+	return &a
+}
+
 type AssetsServiceNowDataset string
 
 const (
@@ -6646,6 +6684,48 @@ func (a *AssetsArmisCentrix) String() string {
 	return fmt.Sprintf("%#v", a)
 }
 
+// Configuration for a mocked Armis Centrix Assets Provider
+type AssetsArmisCentrixMock struct {
+	Dataset AssetsArmisDataset `json:"dataset" url:"dataset"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (a *AssetsArmisCentrixMock) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
+}
+
+func (a *AssetsArmisCentrixMock) UnmarshalJSON(data []byte) error {
+	type unmarshaler AssetsArmisCentrixMock
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*a = AssetsArmisCentrixMock(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+
+	a._rawJSON = nil
+	return nil
+}
+
+func (a *AssetsArmisCentrixMock) String() string {
+	if len(a._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(a); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", a)
+}
+
 // Configuration for the Nozomi Vantage provider
 type AssetsNozomiVantage struct {
 	Credential *NozomiVantageCredential `json:"credential" url:"credential"`
@@ -6679,6 +6759,48 @@ func (a *AssetsNozomiVantage) UnmarshalJSON(data []byte) error {
 }
 
 func (a *AssetsNozomiVantage) String() string {
+	if len(a._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(a); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", a)
+}
+
+// Configuration for a mocked Nozomi Vantage provider
+type AssetsNozomiVantageMock struct {
+	Dataset AssetsNozomiVantageDataset `json:"dataset" url:"dataset"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (a *AssetsNozomiVantageMock) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
+}
+
+func (a *AssetsNozomiVantageMock) UnmarshalJSON(data []byte) error {
+	type unmarshaler AssetsNozomiVantageMock
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*a = AssetsNozomiVantageMock(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+
+	a._rawJSON = nil
+	return nil
+}
+
+func (a *AssetsNozomiVantageMock) String() string {
 	if len(a._rawJSON) > 0 {
 		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
 			return value
@@ -9459,7 +9581,9 @@ func (p *PingOneCredential) Accept(visitor PingOneCredentialVisitor) error {
 type ProviderConfig struct {
 	Type                              string
 	AssetsArmisCentrix                *AssetsArmisCentrix
+	AssetsArmisCentrixMock            *AssetsArmisCentrixMock
 	AssetsNozomiVantage               *AssetsNozomiVantage
+	AssetsNozomiVantageMock           *AssetsNozomiVantageMock
 	AssetsServicenow                  *AssetsServiceNow
 	AssetsServicenowMock              *AssetsServiceNowMock
 	EdrCrowdstrike                    *EdrCrowdStrike
@@ -9528,12 +9652,24 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.AssetsArmisCentrix = value
+	case "assets_armis_centrix_mock":
+		value := new(AssetsArmisCentrixMock)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.AssetsArmisCentrixMock = value
 	case "assets_nozomi_vantage":
 		value := new(AssetsNozomiVantage)
 		if err := json.Unmarshal(data, &value); err != nil {
 			return err
 		}
 		p.AssetsNozomiVantage = value
+	case "assets_nozomi_vantage_mock":
+		value := new(AssetsNozomiVantageMock)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.AssetsNozomiVantageMock = value
 	case "assets_servicenow":
 		value := new(AssetsServiceNow)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -9830,8 +9966,14 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.AssetsArmisCentrix != nil {
 		return core.MarshalJSONWithExtraProperty(p.AssetsArmisCentrix, "type", "assets_armis_centrix")
 	}
+	if p.AssetsArmisCentrixMock != nil {
+		return core.MarshalJSONWithExtraProperty(p.AssetsArmisCentrixMock, "type", "assets_armis_centrix_mock")
+	}
 	if p.AssetsNozomiVantage != nil {
 		return core.MarshalJSONWithExtraProperty(p.AssetsNozomiVantage, "type", "assets_nozomi_vantage")
+	}
+	if p.AssetsNozomiVantageMock != nil {
+		return core.MarshalJSONWithExtraProperty(p.AssetsNozomiVantageMock, "type", "assets_nozomi_vantage_mock")
 	}
 	if p.AssetsServicenow != nil {
 		return core.MarshalJSONWithExtraProperty(p.AssetsServicenow, "type", "assets_servicenow")
@@ -9982,7 +10124,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 
 type ProviderConfigVisitor interface {
 	VisitAssetsArmisCentrix(*AssetsArmisCentrix) error
+	VisitAssetsArmisCentrixMock(*AssetsArmisCentrixMock) error
 	VisitAssetsNozomiVantage(*AssetsNozomiVantage) error
+	VisitAssetsNozomiVantageMock(*AssetsNozomiVantageMock) error
 	VisitAssetsServicenow(*AssetsServiceNow) error
 	VisitAssetsServicenowMock(*AssetsServiceNowMock) error
 	VisitEdrCrowdstrike(*EdrCrowdStrike) error
@@ -10037,8 +10181,14 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	if p.AssetsArmisCentrix != nil {
 		return visitor.VisitAssetsArmisCentrix(p.AssetsArmisCentrix)
 	}
+	if p.AssetsArmisCentrixMock != nil {
+		return visitor.VisitAssetsArmisCentrixMock(p.AssetsArmisCentrixMock)
+	}
 	if p.AssetsNozomiVantage != nil {
 		return visitor.VisitAssetsNozomiVantage(p.AssetsNozomiVantage)
+	}
+	if p.AssetsNozomiVantageMock != nil {
+		return visitor.VisitAssetsNozomiVantageMock(p.AssetsNozomiVantageMock)
 	}
 	if p.AssetsServicenow != nil {
 		return visitor.VisitAssetsServicenow(p.AssetsServicenow)
@@ -10193,8 +10343,12 @@ type ProviderConfigId string
 const (
 	// Armis Centrix™ for Asset Management and Security
 	ProviderConfigIdAssetsArmisCentrix ProviderConfigId = "assets_armis_centrix"
+	// [MOCK] Armis Centrix™ for Asset Management and Security
+	ProviderConfigIdAssetsArmisCentrixMock ProviderConfigId = "assets_armis_centrix_mock"
 	// Nozomi Vantage
 	ProviderConfigIdAssetsNozomiVantage ProviderConfigId = "assets_nozomi_vantage"
+	// [MOCK] Nozomi Vantage
+	ProviderConfigIdAssetsNozomiVantageMock ProviderConfigId = "assets_nozomi_vantage_mock"
 	// ServiceNow Configuration Management Database (CMDB)
 	ProviderConfigIdAssetsServiceNow ProviderConfigId = "assets_servicenow"
 	// [MOCK] ServiceNow Configuration Management Database (CMDB)
@@ -10299,8 +10453,12 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 	switch s {
 	case "assets_armis_centrix":
 		return ProviderConfigIdAssetsArmisCentrix, nil
+	case "assets_armis_centrix_mock":
+		return ProviderConfigIdAssetsArmisCentrixMock, nil
 	case "assets_nozomi_vantage":
 		return ProviderConfigIdAssetsNozomiVantage, nil
+	case "assets_nozomi_vantage_mock":
+		return ProviderConfigIdAssetsNozomiVantageMock, nil
 	case "assets_servicenow":
 		return ProviderConfigIdAssetsServiceNow, nil
 	case "assets_servicenow_mock":
