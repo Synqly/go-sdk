@@ -147,6 +147,10 @@ const Databucket_Type_Other DatabucketTypeId = 99
 const Device_NetworkStatus_NotIsolated DeviceNetworkStatusId = 1
 // Isolated. Device is isolated from the network.
 const Device_NetworkStatus_Isolated DeviceNetworkStatusId = 2
+// PendingIsolation. Device is pending isolation from the network.
+const Device_NetworkStatus_PendingIsolation DeviceNetworkStatusId = 3
+// PendingRestore. Device is pending restoration from isolation.
+const Device_NetworkStatus_PendingRestore DeviceNetworkStatusId = 4
 // Unknown. The network isolation status is unknown.
 const Device_NetworkStatus_Unknown DeviceNetworkStatusId = 99
 
