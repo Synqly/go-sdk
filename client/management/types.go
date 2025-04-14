@@ -10383,7 +10383,7 @@ const (
 	ProviderConfigIdSiemCrowdstrike ProviderConfigId = "siem_crowdstrike"
 	// Elastic SIEM
 	ProviderConfigIdSiemElasticsearch ProviderConfigId = "siem_elasticsearch"
-	// Google Chronicle
+	// Google Security Operations
 	ProviderConfigIdSiemGoogleChronicle ProviderConfigId = "siem_google_chronicle"
 	// SIEM Test
 	ProviderConfigIdSiemMock ProviderConfigId = "siem_mock_siem"
@@ -10871,14 +10871,14 @@ func (s *SiemElasticsearch) String() string {
 	return fmt.Sprintf("%#v", s)
 }
 
-// Configuration for Google Chronicle as a SIEM Provider.
+// Configuration for Google Security Operations (formerly Google Chronicle) as a SIEM Provider.
 type SiemGoogleChronicle struct {
 	// Optional ingestion credential. Without this credential the provider will not be able to ingest events.
 	IngestionCredential *GoogleChronicleCredential `json:"ingestion_credential,omitempty" url:"ingestion_credential,omitempty"`
-	// (Optional) Ingestion URL for the Google Chronicle instance. This should be the base event ingestion URL, without any path components. Default "https://malachiteingestion-pa.googleapis.com"
+	// (Optional) Ingestion URL for the Google SecOps instance. This should be the base event ingestion URL, without any path components. Default "https://malachiteingestion-pa.googleapis.com"
 	IngestionUrl     *string                    `json:"ingestion_url,omitempty" url:"ingestion_url,omitempty"`
 	SearchCredential *GoogleChronicleCredential `json:"search_credential" url:"search_credential"`
-	// Search URL for the Google Chronicle instance. This should be the base event search URL, without any path components. Default "https://backstory.googleapis.com".
+	// Search URL for the Google SecOps instance. This should be the base event search URL, without any path components. Default "https://backstory.googleapis.com".
 	SearchUrl *string `json:"search_url,omitempty" url:"search_url,omitempty"`
 
 	extraProperties map[string]interface{}
