@@ -1733,25 +1733,64 @@ func (p *ProblematicParameter) String() string {
 type ResourceId string
 
 const (
+	ResourceIdAlerts         ResourceId = "alerts"
+	ResourceIdApplications   ResourceId = "applications"
+	ResourceIdAuditLogs      ResourceId = "audit_logs"
+	ResourceIdComments       ResourceId = "comments"
 	ResourceIdDevices        ResourceId = "devices"
 	ResourceIdEvents         ResourceId = "events"
-	ResourceIdInvestigations ResourceId = "investigations"
-	ResourceIdLogProviders   ResourceId = "log_providers"
 	ResourceIdEvidence       ResourceId = "evidence"
+	ResourceIdFindings       ResourceId = "findings"
+	ResourceIdGroups         ResourceId = "groups"
+	ResourceIdInvestigations ResourceId = "investigations"
+	ResourceIdIocs           ResourceId = "iocs"
+	ResourceIdLogProviders   ResourceId = "log_providers"
+	ResourceIdPostureScores  ResourceId = "posture_scores"
+	ResourceIdProjects       ResourceId = "projects"
+	ResourceIdScans          ResourceId = "scans"
+	ResourceIdThreats        ResourceId = "threats"
+	ResourceIdTickets        ResourceId = "tickets"
+	ResourceIdUsers          ResourceId = "users"
 )
 
 func NewResourceIdFromString(s string) (ResourceId, error) {
 	switch s {
+	case "alerts":
+		return ResourceIdAlerts, nil
+	case "applications":
+		return ResourceIdApplications, nil
+	case "audit_logs":
+		return ResourceIdAuditLogs, nil
+	case "comments":
+		return ResourceIdComments, nil
 	case "devices":
 		return ResourceIdDevices, nil
 	case "events":
 		return ResourceIdEvents, nil
-	case "investigations":
-		return ResourceIdInvestigations, nil
-	case "log_providers":
-		return ResourceIdLogProviders, nil
 	case "evidence":
 		return ResourceIdEvidence, nil
+	case "findings":
+		return ResourceIdFindings, nil
+	case "groups":
+		return ResourceIdGroups, nil
+	case "investigations":
+		return ResourceIdInvestigations, nil
+	case "iocs":
+		return ResourceIdIocs, nil
+	case "log_providers":
+		return ResourceIdLogProviders, nil
+	case "posture_scores":
+		return ResourceIdPostureScores, nil
+	case "projects":
+		return ResourceIdProjects, nil
+	case "scans":
+		return ResourceIdScans, nil
+	case "threats":
+		return ResourceIdThreats, nil
+	case "tickets":
+		return ResourceIdTickets, nil
+	case "users":
+		return ResourceIdUsers, nil
 	}
 	var t ResourceId
 	return "", fmt.Errorf("%s is not a valid %T", s, t)
