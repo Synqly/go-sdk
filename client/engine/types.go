@@ -2255,6 +2255,8 @@ func (e *Evidence) String() string {
 type Investigation struct {
 	// Unique identifier for the investigation
 	Id string `json:"id" url:"id"`
+	// Custom mapped fields from the investigation
+	CustomFields map[string]interface{} `json:"custom_fields,omitempty" url:"custom_fields,omitempty"`
 	// Original response from the SIEM
 	RawData string `json:"raw_data" url:"raw_data"`
 
