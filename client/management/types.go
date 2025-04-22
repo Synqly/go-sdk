@@ -10251,12 +10251,13 @@ func (s *SiemSentinel) String() string {
 
 // Configuration for Splunk as a SIEM Provider. This integration allows sending data to Splunk using an HTTP Event Collector (HEC). Additionally, it can be used to query Splunk using the Splunk Search Service.
 type SiemSplunk struct {
-	HecCredential *SplunkHecToken `json:"hec_credential" url:"hec_credential"`
+	// Optional token credential to use for connecting to the Splunk HEC service. If not provided, sending events to Splunk is disabled.
+	HecCredential *SplunkHecToken `json:"hec_credential,omitempty" url:"hec_credential,omitempty"`
 	// URL for the Splunk HEC endpoint. This must include the full path to the HEC endpoint. For example, "https://tenant.cloud.splunk.com:8088/services_collector_event".
-	HecUrl string `json:"hec_url" url:"hec_url"`
+	HecUrl *string `json:"hec_url,omitempty" url:"hec_url,omitempty"`
 	// Splunk index to send events to. If not provided, will use the default index for the Splunk collector.
 	Index *string `json:"index,omitempty" url:"index,omitempty"`
-	// Optional id of a credential used for connecting to the Splunk search service. If not provided, querying is disabled.
+	// Optional token credential used for connecting to the Splunk search service. If not provided, querying is disabled.
 	SearchServiceCredential *SplunkSearchCredential `json:"search_service_credential,omitempty" url:"search_service_credential,omitempty"`
 	// Optional URL used for connecting to the Splunk search service. If not provided, querying is disabled.
 	SearchServiceUrl *string `json:"search_service_url,omitempty" url:"search_service_url,omitempty"`
@@ -10891,6 +10892,7 @@ func (s *SinkMock) String() string {
 
 // Configuration for Splunk as a Sink provider. This integration allows sending data to Splunk using an HTTP Event Collector (HEC).
 type SinkSplunk struct {
+	// Token credential to use for connecting to the Splunk HEC service.
 	HecCredential *SplunkHecToken `json:"hec_credential" url:"hec_credential"`
 	// URL for the Splunk HEC endpoint. This must include the full path to the HEC endpoint. For example, "https://tenant.cloud.splunk.com:8088/services_collector_event".
 	HecUrl string `json:"hec_url" url:"hec_url"`
