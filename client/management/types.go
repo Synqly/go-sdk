@@ -1996,549 +1996,6 @@ func (b *BasicCredential) String() string {
 // Unique identifier for a basic auth Credential
 type BasicCredentialId = CredentialId
 
-// AWS access key to authenticate with AWS. Access keys are long-term credentials for an IAM user and consist of an ID and secret. Follow [this guide to generate access and secret keys](https://docs.aws.amazon.com/general/latest/gr/aws-sec-cred-types.html#access-keys-and-secret-access-keys). You may optionally provide a session token if you are using temporary credentials.
-type BridgeAwsCredential struct {
-	// ID portion of the AWS access key pair.
-	AccessKeyId *BridgeLocalCredential `json:"access_key_id" url:"access_key_id"`
-	// Secret portion of the AWS access key pair.
-	SecretAccessKey *BridgeLocalCredential `json:"secret_access_key" url:"secret_access_key"`
-	// A temporary session token. Session tokens are optional and are only necessary if you are using temporary credentials.
-	Session *BridgeLocalCredential `json:"session,omitempty" url:"session,omitempty"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (b *BridgeAwsCredential) GetExtraProperties() map[string]interface{} {
-	return b.extraProperties
-}
-
-func (b *BridgeAwsCredential) UnmarshalJSON(data []byte) error {
-	type unmarshaler BridgeAwsCredential
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*b = BridgeAwsCredential(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *b)
-	if err != nil {
-		return err
-	}
-	b.extraProperties = extraProperties
-
-	b._rawJSON = nil
-	return nil
-}
-
-func (b *BridgeAwsCredential) String() string {
-	if len(b._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(b._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(b); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", b)
-}
-
-// Username and secret used to authenticate with an external service. These fields contain the keys to the local credential store.
-type BridgeBasicCredential struct {
-	// Username value for authentication
-	Username *BridgeLocalCredential `json:"username" url:"username"`
-	// Secret value for authentication
-	Secret *BridgeLocalCredential `json:"secret" url:"secret"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (b *BridgeBasicCredential) GetExtraProperties() map[string]interface{} {
-	return b.extraProperties
-}
-
-func (b *BridgeBasicCredential) UnmarshalJSON(data []byte) error {
-	type unmarshaler BridgeBasicCredential
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*b = BridgeBasicCredential(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *b)
-	if err != nil {
-		return err
-	}
-	b.extraProperties = extraProperties
-
-	b._rawJSON = nil
-	return nil
-}
-
-func (b *BridgeBasicCredential) String() string {
-	if len(b._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(b._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(b); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", b)
-}
-
-// Unique identifier for a bridge basic auth Credential
-type BridgeBasicCredentialId = CredentialId
-
-type BridgeCredential struct {
-	Type              string
-	BridgeAws         *BridgeAwsCredential
-	BridgeToken       *BridgeTokenCredential
-	BridgeBasic       *BridgeBasicCredential
-	BridgeSecret      *BridgeSecretCredential
-	BridgeOAuthClient *BridgeOAuthClientCredential
-}
-
-func (b *BridgeCredential) UnmarshalJSON(data []byte) error {
-	var unmarshaler struct {
-		Type string `json:"type"`
-	}
-	if err := json.Unmarshal(data, &unmarshaler); err != nil {
-		return err
-	}
-	b.Type = unmarshaler.Type
-	if unmarshaler.Type == "" {
-		return fmt.Errorf("%T did not include discriminant type", b)
-	}
-	switch unmarshaler.Type {
-	case "bridge_aws":
-		value := new(BridgeAwsCredential)
-		if err := json.Unmarshal(data, &value); err != nil {
-			return err
-		}
-		b.BridgeAws = value
-	case "bridge_token":
-		value := new(BridgeTokenCredential)
-		if err := json.Unmarshal(data, &value); err != nil {
-			return err
-		}
-		b.BridgeToken = value
-	case "bridge_basic":
-		value := new(BridgeBasicCredential)
-		if err := json.Unmarshal(data, &value); err != nil {
-			return err
-		}
-		b.BridgeBasic = value
-	case "bridge_secret":
-		value := new(BridgeSecretCredential)
-		if err := json.Unmarshal(data, &value); err != nil {
-			return err
-		}
-		b.BridgeSecret = value
-	case "bridge_o_auth_client":
-		value := new(BridgeOAuthClientCredential)
-		if err := json.Unmarshal(data, &value); err != nil {
-			return err
-		}
-		b.BridgeOAuthClient = value
-	}
-	return nil
-}
-
-func (b BridgeCredential) MarshalJSON() ([]byte, error) {
-	if b.BridgeAws != nil {
-		return core.MarshalJSONWithExtraProperty(b.BridgeAws, "type", "bridge_aws")
-	}
-	if b.BridgeToken != nil {
-		return core.MarshalJSONWithExtraProperty(b.BridgeToken, "type", "bridge_token")
-	}
-	if b.BridgeBasic != nil {
-		return core.MarshalJSONWithExtraProperty(b.BridgeBasic, "type", "bridge_basic")
-	}
-	if b.BridgeSecret != nil {
-		return core.MarshalJSONWithExtraProperty(b.BridgeSecret, "type", "bridge_secret")
-	}
-	if b.BridgeOAuthClient != nil {
-		return core.MarshalJSONWithExtraProperty(b.BridgeOAuthClient, "type", "bridge_o_auth_client")
-	}
-	return nil, fmt.Errorf("type %T does not define a non-empty union type", b)
-}
-
-type BridgeCredentialVisitor interface {
-	VisitBridgeAws(*BridgeAwsCredential) error
-	VisitBridgeToken(*BridgeTokenCredential) error
-	VisitBridgeBasic(*BridgeBasicCredential) error
-	VisitBridgeSecret(*BridgeSecretCredential) error
-	VisitBridgeOAuthClient(*BridgeOAuthClientCredential) error
-}
-
-func (b *BridgeCredential) Accept(visitor BridgeCredentialVisitor) error {
-	if b.BridgeAws != nil {
-		return visitor.VisitBridgeAws(b.BridgeAws)
-	}
-	if b.BridgeToken != nil {
-		return visitor.VisitBridgeToken(b.BridgeToken)
-	}
-	if b.BridgeBasic != nil {
-		return visitor.VisitBridgeBasic(b.BridgeBasic)
-	}
-	if b.BridgeSecret != nil {
-		return visitor.VisitBridgeSecret(b.BridgeSecret)
-	}
-	if b.BridgeOAuthClient != nil {
-		return visitor.VisitBridgeOAuthClient(b.BridgeOAuthClient)
-	}
-	return fmt.Errorf("type %T does not define a non-empty union type", b)
-}
-
-type BridgeEnvironment struct {
-	// system environment variable to retrieve value from.
-	Key string `json:"key" url:"key"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (b *BridgeEnvironment) GetExtraProperties() map[string]interface{} {
-	return b.extraProperties
-}
-
-func (b *BridgeEnvironment) UnmarshalJSON(data []byte) error {
-	type unmarshaler BridgeEnvironment
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*b = BridgeEnvironment(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *b)
-	if err != nil {
-		return err
-	}
-	b.extraProperties = extraProperties
-
-	b._rawJSON = nil
-	return nil
-}
-
-func (b *BridgeEnvironment) String() string {
-	if len(b._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(b._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(b); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", b)
-}
-
-type BridgeLiteral struct {
-	// literal value to use
-	Value string `json:"value" url:"value"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (b *BridgeLiteral) GetExtraProperties() map[string]interface{} {
-	return b.extraProperties
-}
-
-func (b *BridgeLiteral) UnmarshalJSON(data []byte) error {
-	type unmarshaler BridgeLiteral
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*b = BridgeLiteral(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *b)
-	if err != nil {
-		return err
-	}
-	b.extraProperties = extraProperties
-
-	b._rawJSON = nil
-	return nil
-}
-
-func (b *BridgeLiteral) String() string {
-	if len(b._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(b._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(b); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", b)
-}
-
-type BridgeLocalCredential struct {
-	Type        string
-	Literal     *BridgeLiteral
-	Environment *BridgeEnvironment
-	Vault       *VaultCredential
-}
-
-func (b *BridgeLocalCredential) UnmarshalJSON(data []byte) error {
-	var unmarshaler struct {
-		Type string `json:"type"`
-	}
-	if err := json.Unmarshal(data, &unmarshaler); err != nil {
-		return err
-	}
-	b.Type = unmarshaler.Type
-	if unmarshaler.Type == "" {
-		return fmt.Errorf("%T did not include discriminant type", b)
-	}
-	switch unmarshaler.Type {
-	case "literal":
-		value := new(BridgeLiteral)
-		if err := json.Unmarshal(data, &value); err != nil {
-			return err
-		}
-		b.Literal = value
-	case "environment":
-		value := new(BridgeEnvironment)
-		if err := json.Unmarshal(data, &value); err != nil {
-			return err
-		}
-		b.Environment = value
-	case "vault":
-		value := new(VaultCredential)
-		if err := json.Unmarshal(data, &value); err != nil {
-			return err
-		}
-		b.Vault = value
-	}
-	return nil
-}
-
-func (b BridgeLocalCredential) MarshalJSON() ([]byte, error) {
-	if b.Literal != nil {
-		return core.MarshalJSONWithExtraProperty(b.Literal, "type", "literal")
-	}
-	if b.Environment != nil {
-		return core.MarshalJSONWithExtraProperty(b.Environment, "type", "environment")
-	}
-	if b.Vault != nil {
-		return core.MarshalJSONWithExtraProperty(b.Vault, "type", "vault")
-	}
-	return nil, fmt.Errorf("type %T does not define a non-empty union type", b)
-}
-
-type BridgeLocalCredentialVisitor interface {
-	VisitLiteral(*BridgeLiteral) error
-	VisitEnvironment(*BridgeEnvironment) error
-	VisitVault(*VaultCredential) error
-}
-
-func (b *BridgeLocalCredential) Accept(visitor BridgeLocalCredentialVisitor) error {
-	if b.Literal != nil {
-		return visitor.VisitLiteral(b.Literal)
-	}
-	if b.Environment != nil {
-		return visitor.VisitEnvironment(b.Environment)
-	}
-	if b.Vault != nil {
-		return visitor.VisitVault(b.Vault)
-	}
-	return fmt.Errorf("type %T does not define a non-empty union type", b)
-}
-
-// A Client ID and secret used for authenticating with OAuth 2.0 compatible service using the client credentials grant. ClientId and ClientSecret contain the keys to the local credential store.
-type BridgeOAuthClientCredential struct {
-	// Optional URL for the OAuth 2.0 token exchange if it can not be constructed based on provider configuration
-	TokenUrl *BridgeLocalCredential `json:"token_url,omitempty" url:"token_url,omitempty"`
-	// The ID of the client application defined at the service provider
-	ClientId *BridgeLocalCredential `json:"client_id" url:"client_id"`
-	// Secret value for authentication
-	ClientSecret *BridgeLocalCredential `json:"client_secret" url:"client_secret"`
-	// Optional connection specific meta data such as a signing key ID or organization ID
-	Extra *BridgeLocalCredential `json:"extra,omitempty" url:"extra,omitempty"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (b *BridgeOAuthClientCredential) GetExtraProperties() map[string]interface{} {
-	return b.extraProperties
-}
-
-func (b *BridgeOAuthClientCredential) UnmarshalJSON(data []byte) error {
-	type unmarshaler BridgeOAuthClientCredential
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*b = BridgeOAuthClientCredential(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *b)
-	if err != nil {
-		return err
-	}
-	b.extraProperties = extraProperties
-
-	b._rawJSON = nil
-	return nil
-}
-
-func (b *BridgeOAuthClientCredential) String() string {
-	if len(b._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(b._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(b); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", b)
-}
-
-// Unique identifier for an bridge OAuth client Credential
-type BridgeOAuthClientCredentialId = CredentialId
-
-// Secret value such as password or webhook url. Secret contain the key to the local credential store.
-type BridgeSecretCredential struct {
-	// Secret value
-	Secret *BridgeLocalCredential `json:"secret" url:"secret"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (b *BridgeSecretCredential) GetExtraProperties() map[string]interface{} {
-	return b.extraProperties
-}
-
-func (b *BridgeSecretCredential) UnmarshalJSON(data []byte) error {
-	type unmarshaler BridgeSecretCredential
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*b = BridgeSecretCredential(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *b)
-	if err != nil {
-		return err
-	}
-	b.extraProperties = extraProperties
-
-	b._rawJSON = nil
-	return nil
-}
-
-func (b *BridgeSecretCredential) String() string {
-	if len(b._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(b._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(b); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", b)
-}
-
-// Unique identifier for an bridge secret Credential
-type BridgeSecretCredentialId = CredentialId
-
-// Token used to authenticate with an external service. Secret contain the key to the local credential store.
-type BridgeTokenCredential struct {
-	// Secret value of the token.
-	Secret *BridgeLocalCredential `json:"secret" url:"secret"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (b *BridgeTokenCredential) GetExtraProperties() map[string]interface{} {
-	return b.extraProperties
-}
-
-func (b *BridgeTokenCredential) UnmarshalJSON(data []byte) error {
-	type unmarshaler BridgeTokenCredential
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*b = BridgeTokenCredential(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *b)
-	if err != nil {
-		return err
-	}
-	b.extraProperties = extraProperties
-
-	b._rawJSON = nil
-	return nil
-}
-
-func (b *BridgeTokenCredential) String() string {
-	if len(b._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(b._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(b); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", b)
-}
-
-// Unique identifier for a bridge token Credential
-type BridgeTokenCredentialId = CredentialId
-
-type BridgeType string
-
-const (
-	BridgeTypeBridgeAws           BridgeType = "bridge_aws"
-	BridgeTypeBridgeAwsId         BridgeType = "bridge_aws_id"
-	BridgeTypeBridgeToken         BridgeType = "bridge_token"
-	BridgeTypeBridgeTokenId       BridgeType = "bridge_token_id"
-	BridgeTypeBridgeBasic         BridgeType = "bridge_basic"
-	BridgeTypeBridgeBasicId       BridgeType = "bridge_basic_id"
-	BridgeTypeBridgeSecret        BridgeType = "bridge_secret"
-	BridgeTypeBridgeSecretId      BridgeType = "bridge_secret_id"
-	BridgeTypeBridgeOAuthClient   BridgeType = "bridge_o_auth_client"
-	BridgeTypeBridgeOAuthClientId BridgeType = "bridge_o_auth_client_id"
-)
-
-func NewBridgeTypeFromString(s string) (BridgeType, error) {
-	switch s {
-	case "bridge_aws":
-		return BridgeTypeBridgeAws, nil
-	case "bridge_aws_id":
-		return BridgeTypeBridgeAwsId, nil
-	case "bridge_token":
-		return BridgeTypeBridgeToken, nil
-	case "bridge_token_id":
-		return BridgeTypeBridgeTokenId, nil
-	case "bridge_basic":
-		return BridgeTypeBridgeBasic, nil
-	case "bridge_basic_id":
-		return BridgeTypeBridgeBasicId, nil
-	case "bridge_secret":
-		return BridgeTypeBridgeSecret, nil
-	case "bridge_secret_id":
-		return BridgeTypeBridgeSecretId, nil
-	case "bridge_o_auth_client":
-		return BridgeTypeBridgeOAuthClient, nil
-	case "bridge_o_auth_client_id":
-		return BridgeTypeBridgeOAuthClientId, nil
-	}
-	var t BridgeType
-	return "", fmt.Errorf("%s is not a valid %T", s, t)
-}
-
-func (b BridgeType) Ptr() *BridgeType {
-	return &b
-}
-
 // Credential to access an integration. Each credential is owned by an Account, Integration, IntegrationPoint or OrganizationWebhook.
 type Credential struct {
 	// Human-readable name for this resource
@@ -2678,7 +2135,6 @@ type CredentialConfig struct {
 	Basic       *BasicCredential
 	Secret      *SecretCredential
 	OAuthClient *OAuthClientCredential
-	Bridge      *BridgeCredential
 }
 
 func (c *CredentialConfig) UnmarshalJSON(data []byte) error {
@@ -2723,14 +2179,6 @@ func (c *CredentialConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		c.OAuthClient = value
-	case "bridge":
-		var valueUnmarshaler struct {
-			Bridge *BridgeCredential `json:"value"`
-		}
-		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
-			return err
-		}
-		c.Bridge = valueUnmarshaler.Bridge
 	}
 	return nil
 }
@@ -2751,16 +2199,6 @@ func (c CredentialConfig) MarshalJSON() ([]byte, error) {
 	if c.OAuthClient != nil {
 		return core.MarshalJSONWithExtraProperty(c.OAuthClient, "type", "o_auth_client")
 	}
-	if c.Bridge != nil {
-		var marshaler = struct {
-			Type   string            `json:"type"`
-			Bridge *BridgeCredential `json:"value"`
-		}{
-			Type:   "bridge",
-			Bridge: c.Bridge,
-		}
-		return json.Marshal(marshaler)
-	}
 	return nil, fmt.Errorf("type %T does not define a non-empty union type", c)
 }
 
@@ -2770,7 +2208,6 @@ type CredentialConfigVisitor interface {
 	VisitBasic(*BasicCredential) error
 	VisitSecret(*SecretCredential) error
 	VisitOAuthClient(*OAuthClientCredential) error
-	VisitBridge(*BridgeCredential) error
 }
 
 func (c *CredentialConfig) Accept(visitor CredentialConfigVisitor) error {
@@ -2788,9 +2225,6 @@ func (c *CredentialConfig) Accept(visitor CredentialConfigVisitor) error {
 	}
 	if c.OAuthClient != nil {
 		return visitor.VisitOAuthClient(c.OAuthClient)
-	}
-	if c.Bridge != nil {
-		return visitor.VisitBridge(c.Bridge)
 	}
 	return fmt.Errorf("type %T does not define a non-empty union type", c)
 }
@@ -2935,7 +2369,6 @@ const (
 	CredentialTypeBasic       CredentialType = "basic"
 	CredentialTypeSecret      CredentialType = "secret"
 	CredentialTypeOAuthClient CredentialType = "o_auth_client"
-	CredentialTypeBridge      CredentialType = "bridge"
 )
 
 func NewCredentialTypeFromString(s string) (CredentialType, error) {
@@ -2950,8 +2383,6 @@ func NewCredentialTypeFromString(s string) (CredentialType, error) {
 		return CredentialTypeSecret, nil
 	case "o_auth_client":
 		return CredentialTypeOAuthClient, nil
-	case "bridge":
-		return CredentialTypeBridge, nil
 	}
 	var t CredentialType
 	return "", fmt.Errorf("%s is not a valid %T", s, t)
@@ -2959,31 +2390,6 @@ func NewCredentialTypeFromString(s string) (CredentialType, error) {
 
 func (c CredentialType) Ptr() *CredentialType {
 	return &c
-}
-
-type LocalType string
-
-const (
-	LocalTypeLiteral     LocalType = "literal"
-	LocalTypeEnvironment LocalType = "environment"
-	LocalTypeVault       LocalType = "vault"
-)
-
-func NewLocalTypeFromString(s string) (LocalType, error) {
-	switch s {
-	case "literal":
-		return LocalTypeLiteral, nil
-	case "environment":
-		return LocalTypeEnvironment, nil
-	case "vault":
-		return LocalTypeVault, nil
-	}
-	var t LocalType
-	return "", fmt.Errorf("%s is not a valid %T", s, t)
-}
-
-func (l LocalType) Ptr() *LocalType {
-	return &l
 }
 
 type ManagedType string
@@ -3179,48 +2585,6 @@ func (t *TokenCredential) String() string {
 
 // Unique identifier for a token Credential
 type TokenCredentialId = CredentialId
-
-type VaultCredential struct {
-	// path (including item) to secret store in vault secret storage.
-	Path string `json:"path" url:"path"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (v *VaultCredential) GetExtraProperties() map[string]interface{} {
-	return v.extraProperties
-}
-
-func (v *VaultCredential) UnmarshalJSON(data []byte) error {
-	type unmarshaler VaultCredential
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*v = VaultCredential(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *v)
-	if err != nil {
-		return err
-	}
-	v.extraProperties = extraProperties
-
-	v._rawJSON = nil
-	return nil
-}
-
-func (v *VaultCredential) String() string {
-	if len(v._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(v._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(v); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", v)
-}
 
 // Unique identifier for this Integration
 type IntegrationId = Id
@@ -7953,232 +7317,12 @@ func (e *ElasticsearchAuthOptions) String() string {
 	return fmt.Sprintf("%#v", e)
 }
 
-type ElasticsearchBridgeCredentials struct {
-	Type string
-	// Optional basic auth credential used for connecting to the Elasticsearch service through a synqly bridge agent with local credentials.
-	BridgeBasic *BridgeBasicCredential
-	// Optional id of a basic auth credential used for connecting to the Elasticsearch service through a synqly bridge agent with local credentials.
-	BridgeBasicId BridgeBasicCredentialId
-	// "Optional OAuth JWT credential used for connecting to the Elasticsearch service through a synqly bridge agent with local credentails."
-	BridgeOAuthClient *BridgeOAuthClientCredential
-	// "Optional ID of a OAuth JWT credential used for connecting to the Elasticsearch service through a synqly bridge agent with local credentails."
-	BridgeOAuthClientId BridgeOAuthClientCredentialId
-	// Optional credential used for connecting to the Elasticsearch service through a synqly bridge agent with local credentials.
-	BridgeToken *BridgeTokenCredential
-	// Optional id of a credential used for connecting to the Elasticsearch service through a synqly bridge agent with local credentials.
-	BridgeTokenId BridgeTokenCredentialId
-}
-
-func (e *ElasticsearchBridgeCredentials) UnmarshalJSON(data []byte) error {
-	var unmarshaler struct {
-		Type string `json:"type"`
-	}
-	if err := json.Unmarshal(data, &unmarshaler); err != nil {
-		return err
-	}
-	e.Type = unmarshaler.Type
-	if unmarshaler.Type == "" {
-		return fmt.Errorf("%T did not include discriminant type", e)
-	}
-	switch unmarshaler.Type {
-	case "bridge_basic":
-		value := new(BridgeBasicCredential)
-		if err := json.Unmarshal(data, &value); err != nil {
-			return err
-		}
-		e.BridgeBasic = value
-	case "bridge_basic_id":
-		var valueUnmarshaler struct {
-			BridgeBasicId BridgeBasicCredentialId `json:"value"`
-		}
-		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
-			return err
-		}
-		e.BridgeBasicId = valueUnmarshaler.BridgeBasicId
-	case "bridge_o_auth_client":
-		value := new(BridgeOAuthClientCredential)
-		if err := json.Unmarshal(data, &value); err != nil {
-			return err
-		}
-		e.BridgeOAuthClient = value
-	case "bridge_o_auth_client_id":
-		var valueUnmarshaler struct {
-			BridgeOAuthClientId BridgeOAuthClientCredentialId `json:"value"`
-		}
-		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
-			return err
-		}
-		e.BridgeOAuthClientId = valueUnmarshaler.BridgeOAuthClientId
-	case "bridge_token":
-		value := new(BridgeTokenCredential)
-		if err := json.Unmarshal(data, &value); err != nil {
-			return err
-		}
-		e.BridgeToken = value
-	case "bridge_token_id":
-		var valueUnmarshaler struct {
-			BridgeTokenId BridgeTokenCredentialId `json:"value"`
-		}
-		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
-			return err
-		}
-		e.BridgeTokenId = valueUnmarshaler.BridgeTokenId
-	}
-	return nil
-}
-
-func (e ElasticsearchBridgeCredentials) MarshalJSON() ([]byte, error) {
-	if e.BridgeBasic != nil {
-		return core.MarshalJSONWithExtraProperty(e.BridgeBasic, "type", "bridge_basic")
-	}
-	if e.BridgeBasicId != "" {
-		var marshaler = struct {
-			Type          string                  `json:"type"`
-			BridgeBasicId BridgeBasicCredentialId `json:"value"`
-		}{
-			Type:          "bridge_basic_id",
-			BridgeBasicId: e.BridgeBasicId,
-		}
-		return json.Marshal(marshaler)
-	}
-	if e.BridgeOAuthClient != nil {
-		return core.MarshalJSONWithExtraProperty(e.BridgeOAuthClient, "type", "bridge_o_auth_client")
-	}
-	if e.BridgeOAuthClientId != "" {
-		var marshaler = struct {
-			Type                string                        `json:"type"`
-			BridgeOAuthClientId BridgeOAuthClientCredentialId `json:"value"`
-		}{
-			Type:                "bridge_o_auth_client_id",
-			BridgeOAuthClientId: e.BridgeOAuthClientId,
-		}
-		return json.Marshal(marshaler)
-	}
-	if e.BridgeToken != nil {
-		return core.MarshalJSONWithExtraProperty(e.BridgeToken, "type", "bridge_token")
-	}
-	if e.BridgeTokenId != "" {
-		var marshaler = struct {
-			Type          string                  `json:"type"`
-			BridgeTokenId BridgeTokenCredentialId `json:"value"`
-		}{
-			Type:          "bridge_token_id",
-			BridgeTokenId: e.BridgeTokenId,
-		}
-		return json.Marshal(marshaler)
-	}
-	return nil, fmt.Errorf("type %T does not define a non-empty union type", e)
-}
-
-type ElasticsearchBridgeCredentialsVisitor interface {
-	VisitBridgeBasic(*BridgeBasicCredential) error
-	VisitBridgeBasicId(BridgeBasicCredentialId) error
-	VisitBridgeOAuthClient(*BridgeOAuthClientCredential) error
-	VisitBridgeOAuthClientId(BridgeOAuthClientCredentialId) error
-	VisitBridgeToken(*BridgeTokenCredential) error
-	VisitBridgeTokenId(BridgeTokenCredentialId) error
-}
-
-func (e *ElasticsearchBridgeCredentials) Accept(visitor ElasticsearchBridgeCredentialsVisitor) error {
-	if e.BridgeBasic != nil {
-		return visitor.VisitBridgeBasic(e.BridgeBasic)
-	}
-	if e.BridgeBasicId != "" {
-		return visitor.VisitBridgeBasicId(e.BridgeBasicId)
-	}
-	if e.BridgeOAuthClient != nil {
-		return visitor.VisitBridgeOAuthClient(e.BridgeOAuthClient)
-	}
-	if e.BridgeOAuthClientId != "" {
-		return visitor.VisitBridgeOAuthClientId(e.BridgeOAuthClientId)
-	}
-	if e.BridgeToken != nil {
-		return visitor.VisitBridgeToken(e.BridgeToken)
-	}
-	if e.BridgeTokenId != "" {
-		return visitor.VisitBridgeTokenId(e.BridgeTokenId)
-	}
-	return fmt.Errorf("type %T does not define a non-empty union type", e)
-}
-
-type ElasticsearchBridgeSharedSecret struct {
-	Type string
-	// Optional credential used for connecting to the Elasticsearch service through a synqly bridge agent with local credentials.
-	BridgeSecret *BridgeSecretCredential
-	// Optional id of a credential used for connecting to the Elasticsearch service through a synqly bridge agent with local credentials.
-	BridgeSecretId BridgeSecretCredentialId
-}
-
-func (e *ElasticsearchBridgeSharedSecret) UnmarshalJSON(data []byte) error {
-	var unmarshaler struct {
-		Type string `json:"type"`
-	}
-	if err := json.Unmarshal(data, &unmarshaler); err != nil {
-		return err
-	}
-	e.Type = unmarshaler.Type
-	if unmarshaler.Type == "" {
-		return fmt.Errorf("%T did not include discriminant type", e)
-	}
-	switch unmarshaler.Type {
-	case "bridge_secret":
-		value := new(BridgeSecretCredential)
-		if err := json.Unmarshal(data, &value); err != nil {
-			return err
-		}
-		e.BridgeSecret = value
-	case "bridge_secret_id":
-		var valueUnmarshaler struct {
-			BridgeSecretId BridgeSecretCredentialId `json:"value"`
-		}
-		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
-			return err
-		}
-		e.BridgeSecretId = valueUnmarshaler.BridgeSecretId
-	}
-	return nil
-}
-
-func (e ElasticsearchBridgeSharedSecret) MarshalJSON() ([]byte, error) {
-	if e.BridgeSecret != nil {
-		return core.MarshalJSONWithExtraProperty(e.BridgeSecret, "type", "bridge_secret")
-	}
-	if e.BridgeSecretId != "" {
-		var marshaler = struct {
-			Type           string                   `json:"type"`
-			BridgeSecretId BridgeSecretCredentialId `json:"value"`
-		}{
-			Type:           "bridge_secret_id",
-			BridgeSecretId: e.BridgeSecretId,
-		}
-		return json.Marshal(marshaler)
-	}
-	return nil, fmt.Errorf("type %T does not define a non-empty union type", e)
-}
-
-type ElasticsearchBridgeSharedSecretVisitor interface {
-	VisitBridgeSecret(*BridgeSecretCredential) error
-	VisitBridgeSecretId(BridgeSecretCredentialId) error
-}
-
-func (e *ElasticsearchBridgeSharedSecret) Accept(visitor ElasticsearchBridgeSharedSecretVisitor) error {
-	if e.BridgeSecret != nil {
-		return visitor.VisitBridgeSecret(e.BridgeSecret)
-	}
-	if e.BridgeSecretId != "" {
-		return visitor.VisitBridgeSecretId(e.BridgeSecretId)
-	}
-	return fmt.Errorf("type %T does not define a non-empty union type", e)
-}
-
 type ElasticsearchCredential struct {
 	Type string
 	// Basic authentication credentials for Elasticsearch. When possible use an API key or oAuth credentials instead
 	Basic *BasicCredential
 	// ID of a credential that stores basic authentication credentials for Elasticsearch.
 	BasicId BasicCredentialId
-	// Bridge Agent local credentials
-	Bridge *ElasticsearchBridgeCredentials
 	// Configuration with credentials and connection data for an IdP that has been configured for use as a [JWT realm in Elasticsearch](https://www.elastic.co/guide/en/elasticsearch/reference/8.15/jwt-auth-realm.html). There are also [specific instructions for Elastic Cloud](https://www.elastic.co/guide/en/cloud/current/ec-securing-clusters-JWT.html). This configuration requires a token URL for the 3rd party identity provider. If you need to send specific scopes during the client credentials OAuth flow, specify them in the 'extra' configuration as a list of strings under the 'scopes' key.
 	OAuthClient *OAuthClientCredential
 	// The ID of a credential that stores the secrets and connection data for an IdP that has been configured for use as a JWT realm in Elasticsearch.
@@ -8215,14 +7359,6 @@ func (e *ElasticsearchCredential) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		e.BasicId = valueUnmarshaler.BasicId
-	case "bridge":
-		var valueUnmarshaler struct {
-			Bridge *ElasticsearchBridgeCredentials `json:"value"`
-		}
-		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
-			return err
-		}
-		e.Bridge = valueUnmarshaler.Bridge
 	case "o_auth_client":
 		value := new(OAuthClientCredential)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -8269,16 +7405,6 @@ func (e ElasticsearchCredential) MarshalJSON() ([]byte, error) {
 		}
 		return json.Marshal(marshaler)
 	}
-	if e.Bridge != nil {
-		var marshaler = struct {
-			Type   string                          `json:"type"`
-			Bridge *ElasticsearchBridgeCredentials `json:"value"`
-		}{
-			Type:   "bridge",
-			Bridge: e.Bridge,
-		}
-		return json.Marshal(marshaler)
-	}
 	if e.OAuthClient != nil {
 		return core.MarshalJSONWithExtraProperty(e.OAuthClient, "type", "o_auth_client")
 	}
@@ -8311,7 +7437,6 @@ func (e ElasticsearchCredential) MarshalJSON() ([]byte, error) {
 type ElasticsearchCredentialVisitor interface {
 	VisitBasic(*BasicCredential) error
 	VisitBasicId(BasicCredentialId) error
-	VisitBridge(*ElasticsearchBridgeCredentials) error
 	VisitOAuthClient(*OAuthClientCredential) error
 	VisitOAuthClientId(OAuthClientCredentialId) error
 	VisitToken(*TokenCredential) error
@@ -8324,9 +7449,6 @@ func (e *ElasticsearchCredential) Accept(visitor ElasticsearchCredentialVisitor)
 	}
 	if e.BasicId != "" {
 		return visitor.VisitBasicId(e.BasicId)
-	}
-	if e.Bridge != nil {
-		return visitor.VisitBridge(e.Bridge)
 	}
 	if e.OAuthClient != nil {
 		return visitor.VisitOAuthClient(e.OAuthClient)
@@ -8345,8 +7467,6 @@ func (e *ElasticsearchCredential) Accept(visitor ElasticsearchCredentialVisitor)
 
 type ElasticsearchSharedSecret struct {
 	Type string
-	// Bridge Agent shared secret local credentials
-	Bridge *ElasticsearchBridgeSharedSecret
 	// Shared secret used to populate the `ES-Client-Authentication` header during Elasticsearch requests.
 	Secret *SecretCredential
 	// ID of a credential that stores a shared secret.
@@ -8365,14 +7485,6 @@ func (e *ElasticsearchSharedSecret) UnmarshalJSON(data []byte) error {
 		return fmt.Errorf("%T did not include discriminant type", e)
 	}
 	switch unmarshaler.Type {
-	case "bridge":
-		var valueUnmarshaler struct {
-			Bridge *ElasticsearchBridgeSharedSecret `json:"value"`
-		}
-		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
-			return err
-		}
-		e.Bridge = valueUnmarshaler.Bridge
 	case "secret":
 		value := new(SecretCredential)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -8392,16 +7504,6 @@ func (e *ElasticsearchSharedSecret) UnmarshalJSON(data []byte) error {
 }
 
 func (e ElasticsearchSharedSecret) MarshalJSON() ([]byte, error) {
-	if e.Bridge != nil {
-		var marshaler = struct {
-			Type   string                           `json:"type"`
-			Bridge *ElasticsearchBridgeSharedSecret `json:"value"`
-		}{
-			Type:   "bridge",
-			Bridge: e.Bridge,
-		}
-		return json.Marshal(marshaler)
-	}
 	if e.Secret != nil {
 		return core.MarshalJSONWithExtraProperty(e.Secret, "type", "secret")
 	}
@@ -8419,15 +7521,11 @@ func (e ElasticsearchSharedSecret) MarshalJSON() ([]byte, error) {
 }
 
 type ElasticsearchSharedSecretVisitor interface {
-	VisitBridge(*ElasticsearchBridgeSharedSecret) error
 	VisitSecret(*SecretCredential) error
 	VisitSecretId(SecretCredentialId) error
 }
 
 func (e *ElasticsearchSharedSecret) Accept(visitor ElasticsearchSharedSecretVisitor) error {
-	if e.Bridge != nil {
-		return visitor.VisitBridge(e.Bridge)
-	}
 	if e.Secret != nil {
 		return visitor.VisitSecret(e.Secret)
 	}
@@ -11983,150 +11081,8 @@ func (s *SophosCredential) Accept(visitor SophosCredentialVisitor) error {
 	return fmt.Errorf("type %T does not define a non-empty union type", s)
 }
 
-type SplunkBridgeHecToken struct {
-	Type string
-	// Credential ID that stores a Splunk HTTP endpoint collector synqly bridge agent local token definition. Follow [this guide to generate an API token](https://docs.splunk.com/Documentation/Splunk/8.1.3/Data/UsetheHTTPEventCollector#Authentication). The token must have access to the configured data collection endpoint.
-	BridgeToken *BridgeTokenCredential
-	// ID of a credential that stores a Splunk HTTP endpoint collector (HEC) synqly bridge agent local token definition.
-	BridgeTokenId BridgeTokenCredentialId
-}
-
-func (s *SplunkBridgeHecToken) UnmarshalJSON(data []byte) error {
-	var unmarshaler struct {
-		Type string `json:"type"`
-	}
-	if err := json.Unmarshal(data, &unmarshaler); err != nil {
-		return err
-	}
-	s.Type = unmarshaler.Type
-	if unmarshaler.Type == "" {
-		return fmt.Errorf("%T did not include discriminant type", s)
-	}
-	switch unmarshaler.Type {
-	case "bridge_token":
-		value := new(BridgeTokenCredential)
-		if err := json.Unmarshal(data, &value); err != nil {
-			return err
-		}
-		s.BridgeToken = value
-	case "bridge_token_id":
-		var valueUnmarshaler struct {
-			BridgeTokenId BridgeTokenCredentialId `json:"value"`
-		}
-		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
-			return err
-		}
-		s.BridgeTokenId = valueUnmarshaler.BridgeTokenId
-	}
-	return nil
-}
-
-func (s SplunkBridgeHecToken) MarshalJSON() ([]byte, error) {
-	if s.BridgeToken != nil {
-		return core.MarshalJSONWithExtraProperty(s.BridgeToken, "type", "bridge_token")
-	}
-	if s.BridgeTokenId != "" {
-		var marshaler = struct {
-			Type          string                  `json:"type"`
-			BridgeTokenId BridgeTokenCredentialId `json:"value"`
-		}{
-			Type:          "bridge_token_id",
-			BridgeTokenId: s.BridgeTokenId,
-		}
-		return json.Marshal(marshaler)
-	}
-	return nil, fmt.Errorf("type %T does not define a non-empty union type", s)
-}
-
-type SplunkBridgeHecTokenVisitor interface {
-	VisitBridgeToken(*BridgeTokenCredential) error
-	VisitBridgeTokenId(BridgeTokenCredentialId) error
-}
-
-func (s *SplunkBridgeHecToken) Accept(visitor SplunkBridgeHecTokenVisitor) error {
-	if s.BridgeToken != nil {
-		return visitor.VisitBridgeToken(s.BridgeToken)
-	}
-	if s.BridgeTokenId != "" {
-		return visitor.VisitBridgeTokenId(s.BridgeTokenId)
-	}
-	return fmt.Errorf("type %T does not define a non-empty union type", s)
-}
-
-type SplunkBridgeSearchCredential struct {
-	Type string
-	// Optional URL used for connecting to the Splunk search service through a synqly bridge agent with local credentials. If not provided, querying is disabled.
-	BridgeToken *BridgeTokenCredential
-	// Optional id of a credential used for connecting to the Splunk search service through a synqly bridge agent with local credentials.
-	BridgeTokenId BridgeTokenCredentialId
-}
-
-func (s *SplunkBridgeSearchCredential) UnmarshalJSON(data []byte) error {
-	var unmarshaler struct {
-		Type string `json:"type"`
-	}
-	if err := json.Unmarshal(data, &unmarshaler); err != nil {
-		return err
-	}
-	s.Type = unmarshaler.Type
-	if unmarshaler.Type == "" {
-		return fmt.Errorf("%T did not include discriminant type", s)
-	}
-	switch unmarshaler.Type {
-	case "bridge_token":
-		value := new(BridgeTokenCredential)
-		if err := json.Unmarshal(data, &value); err != nil {
-			return err
-		}
-		s.BridgeToken = value
-	case "bridge_token_id":
-		var valueUnmarshaler struct {
-			BridgeTokenId BridgeTokenCredentialId `json:"value"`
-		}
-		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
-			return err
-		}
-		s.BridgeTokenId = valueUnmarshaler.BridgeTokenId
-	}
-	return nil
-}
-
-func (s SplunkBridgeSearchCredential) MarshalJSON() ([]byte, error) {
-	if s.BridgeToken != nil {
-		return core.MarshalJSONWithExtraProperty(s.BridgeToken, "type", "bridge_token")
-	}
-	if s.BridgeTokenId != "" {
-		var marshaler = struct {
-			Type          string                  `json:"type"`
-			BridgeTokenId BridgeTokenCredentialId `json:"value"`
-		}{
-			Type:          "bridge_token_id",
-			BridgeTokenId: s.BridgeTokenId,
-		}
-		return json.Marshal(marshaler)
-	}
-	return nil, fmt.Errorf("type %T does not define a non-empty union type", s)
-}
-
-type SplunkBridgeSearchCredentialVisitor interface {
-	VisitBridgeToken(*BridgeTokenCredential) error
-	VisitBridgeTokenId(BridgeTokenCredentialId) error
-}
-
-func (s *SplunkBridgeSearchCredential) Accept(visitor SplunkBridgeSearchCredentialVisitor) error {
-	if s.BridgeToken != nil {
-		return visitor.VisitBridgeToken(s.BridgeToken)
-	}
-	if s.BridgeTokenId != "" {
-		return visitor.VisitBridgeTokenId(s.BridgeTokenId)
-	}
-	return fmt.Errorf("type %T does not define a non-empty union type", s)
-}
-
 type SplunkHecToken struct {
 	Type string
-	// Bridge Agent HEC local credentials
-	Bridge *SplunkBridgeHecToken
 	// Credential ID that stores a Splunk HTTP endpoint collector token. Follow [this guide to generate an API token](https://docs.splunk.com/Documentation/Splunk/8.1.3/Data/UsetheHTTPEventCollector#Authentication). The token must have access to the configured data collection endpoint.
 	Token *TokenCredential
 	// ID of a credential that stores a Splunk HTTP endpoint collector (HEC) token.
@@ -12145,14 +11101,6 @@ func (s *SplunkHecToken) UnmarshalJSON(data []byte) error {
 		return fmt.Errorf("%T did not include discriminant type", s)
 	}
 	switch unmarshaler.Type {
-	case "bridge":
-		var valueUnmarshaler struct {
-			Bridge *SplunkBridgeHecToken `json:"value"`
-		}
-		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
-			return err
-		}
-		s.Bridge = valueUnmarshaler.Bridge
 	case "token":
 		value := new(TokenCredential)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -12172,16 +11120,6 @@ func (s *SplunkHecToken) UnmarshalJSON(data []byte) error {
 }
 
 func (s SplunkHecToken) MarshalJSON() ([]byte, error) {
-	if s.Bridge != nil {
-		var marshaler = struct {
-			Type   string                `json:"type"`
-			Bridge *SplunkBridgeHecToken `json:"value"`
-		}{
-			Type:   "bridge",
-			Bridge: s.Bridge,
-		}
-		return json.Marshal(marshaler)
-	}
 	if s.Token != nil {
 		return core.MarshalJSONWithExtraProperty(s.Token, "type", "token")
 	}
@@ -12199,15 +11137,11 @@ func (s SplunkHecToken) MarshalJSON() ([]byte, error) {
 }
 
 type SplunkHecTokenVisitor interface {
-	VisitBridge(*SplunkBridgeHecToken) error
 	VisitToken(*TokenCredential) error
 	VisitTokenId(TokenCredentialId) error
 }
 
 func (s *SplunkHecToken) Accept(visitor SplunkHecTokenVisitor) error {
-	if s.Bridge != nil {
-		return visitor.VisitBridge(s.Bridge)
-	}
 	if s.Token != nil {
 		return visitor.VisitToken(s.Token)
 	}
@@ -12219,8 +11153,6 @@ func (s *SplunkHecToken) Accept(visitor SplunkHecTokenVisitor) error {
 
 type SplunkSearchCredential struct {
 	Type string
-	// Bridge Agent search local credentials
-	Bridge *SplunkBridgeSearchCredential
 	// Optional URL used for connecting to the Splunk search service. If not provided, querying is disabled.
 	Token *TokenCredential
 	// Optional id of a credential used for connecting to the Splunk search service.
@@ -12239,14 +11171,6 @@ func (s *SplunkSearchCredential) UnmarshalJSON(data []byte) error {
 		return fmt.Errorf("%T did not include discriminant type", s)
 	}
 	switch unmarshaler.Type {
-	case "bridge":
-		var valueUnmarshaler struct {
-			Bridge *SplunkBridgeSearchCredential `json:"value"`
-		}
-		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
-			return err
-		}
-		s.Bridge = valueUnmarshaler.Bridge
 	case "token":
 		value := new(TokenCredential)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -12266,16 +11190,6 @@ func (s *SplunkSearchCredential) UnmarshalJSON(data []byte) error {
 }
 
 func (s SplunkSearchCredential) MarshalJSON() ([]byte, error) {
-	if s.Bridge != nil {
-		var marshaler = struct {
-			Type   string                        `json:"type"`
-			Bridge *SplunkBridgeSearchCredential `json:"value"`
-		}{
-			Type:   "bridge",
-			Bridge: s.Bridge,
-		}
-		return json.Marshal(marshaler)
-	}
 	if s.Token != nil {
 		return core.MarshalJSONWithExtraProperty(s.Token, "type", "token")
 	}
@@ -12293,15 +11207,11 @@ func (s SplunkSearchCredential) MarshalJSON() ([]byte, error) {
 }
 
 type SplunkSearchCredentialVisitor interface {
-	VisitBridge(*SplunkBridgeSearchCredential) error
 	VisitToken(*TokenCredential) error
 	VisitTokenId(TokenCredentialId) error
 }
 
 func (s *SplunkSearchCredential) Accept(visitor SplunkSearchCredentialVisitor) error {
-	if s.Bridge != nil {
-		return visitor.VisitBridge(s.Bridge)
-	}
 	if s.Token != nil {
 		return visitor.VisitToken(s.Token)
 	}
