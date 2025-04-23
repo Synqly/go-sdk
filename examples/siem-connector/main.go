@@ -168,7 +168,7 @@ func (a *App) splunkConfig(splunkURL, credentialId string) *mgmt.ProviderConfig 
 	skip := true
 	return &mgmt.ProviderConfig{
 		SiemSplunk: &mgmt.SiemSplunk{
-			HecUrl: splunkURL,
+			HecUrl: &splunkURL,
 			HecCredential: &mgmt.SplunkHecToken{
 				TokenId: credentialId,
 			},
