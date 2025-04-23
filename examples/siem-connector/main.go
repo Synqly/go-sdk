@@ -172,6 +172,11 @@ func (a *App) splunkConfig(splunkURL, credentialId string) *mgmt.ProviderConfig 
 			HecCredential: &mgmt.SplunkHecToken{
 				TokenId: credentialId,
 			},
+
+			// fill in required dummy/unused SearchServiceCredential
+			SearchServiceUrl: splunkURL,
+			SearchServiceCredential: &mgmt.SplunkSearchCredential{Token: &mgmt.TokenCredential{Secret: "def"}},
+
 			// Do not verify the Splunk server's TLS certificate. This
 			// is not recommended for production use; however, it is set
 			// here because Splunk Cloud HEC endpoints use self-signed
