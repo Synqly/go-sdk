@@ -8750,6 +8750,7 @@ type ProviderConfig struct {
 	SinkAzureMonitorLogs              *SinkAzureMonitorLogs
 	SinkCrowdstrikeHec                *SinkCrowdstrikeHec
 	SinkElasticsearch                 *SinkElasticsearch
+	SinkGoogleSecOps                  *SinkGoogleSecOps
 	SinkMockSink                      *SinkMock
 	SinkSplunk                        *SinkSplunk
 	StorageAwsS3                      *StorageAwsS3
@@ -8981,6 +8982,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.SinkElasticsearch = value
+	case "sink_google_sec_ops":
+		value := new(SinkGoogleSecOps)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.SinkGoogleSecOps = value
 	case "sink_mock_sink":
 		value := new(SinkMock)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -9199,6 +9206,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.SinkElasticsearch != nil {
 		return core.MarshalJSONWithExtraProperty(p.SinkElasticsearch, "type", "sink_elasticsearch")
 	}
+	if p.SinkGoogleSecOps != nil {
+		return core.MarshalJSONWithExtraProperty(p.SinkGoogleSecOps, "type", "sink_google_sec_ops")
+	}
 	if p.SinkMockSink != nil {
 		return core.MarshalJSONWithExtraProperty(p.SinkMockSink, "type", "sink_mock_sink")
 	}
@@ -9293,6 +9303,7 @@ type ProviderConfigVisitor interface {
 	VisitSinkAzureMonitorLogs(*SinkAzureMonitorLogs) error
 	VisitSinkCrowdstrikeHec(*SinkCrowdstrikeHec) error
 	VisitSinkElasticsearch(*SinkElasticsearch) error
+	VisitSinkGoogleSecOps(*SinkGoogleSecOps) error
 	VisitSinkMockSink(*SinkMock) error
 	VisitSinkSplunk(*SinkSplunk) error
 	VisitStorageAwsS3(*StorageAwsS3) error
@@ -9413,6 +9424,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.SinkElasticsearch != nil {
 		return visitor.VisitSinkElasticsearch(p.SinkElasticsearch)
+	}
+	if p.SinkGoogleSecOps != nil {
+		return visitor.VisitSinkGoogleSecOps(p.SinkGoogleSecOps)
 	}
 	if p.SinkMockSink != nil {
 		return visitor.VisitSinkMockSink(p.SinkMockSink)
@@ -9544,6 +9558,8 @@ const (
 	ProviderConfigIdSinkCrowdstrikeHec ProviderConfigId = "sink_crowdstrike_hec"
 	// Elastic
 	ProviderConfigIdSinkElasticsearch ProviderConfigId = "sink_elasticsearch"
+	// Google Security Operations
+	ProviderConfigIdSinkGoogleSecOps ProviderConfigId = "sink_google_sec_ops"
 	// Sink Test
 	ProviderConfigIdSinkMock ProviderConfigId = "sink_mock_sink"
 	// Splunk Enterprise Security
@@ -9654,6 +9670,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdSinkCrowdstrikeHec, nil
 	case "sink_elasticsearch":
 		return ProviderConfigIdSinkElasticsearch, nil
+	case "sink_google_sec_ops":
+		return ProviderConfigIdSinkGoogleSecOps, nil
 	case "sink_mock_sink":
 		return ProviderConfigIdSinkMock, nil
 	case "sink_splunk":
@@ -10010,12 +10028,15 @@ func (s *SiemElasticsearch) String() string {
 
 // Configuration for Google Security Operations (formerly Google Chronicle) as a SIEM Provider.
 type SiemGoogleChronicle struct {
-	// Optional ingestion credential. Without this credential the provider will not be able to ingest events.
+	// Optional. The customer ID reported when writing events. This is required for ingestion.
+	CustomerId *string `json:"customer_id,omitempty" url:"customer_id,omitempty"`
+	// Optional. Google OAuth 2.0 credentials with an email address. Without this credential the provider will not be able to ingest events.
 	IngestionCredential *GoogleChronicleCredential `json:"ingestion_credential,omitempty" url:"ingestion_credential,omitempty"`
-	// (Optional) Ingestion URL for the Google SecOps instance. This should be the base event ingestion URL, without any path components. Default "https://malachiteingestion-pa.googleapis.com"
-	IngestionUrl     *string                    `json:"ingestion_url,omitempty" url:"ingestion_url,omitempty"`
+	// Optional. Ingestion URL for the Google SecOps instance. This should be the base event ingestion URL, without any path components.
+	IngestionUrl *string `json:"ingestion_url,omitempty" url:"ingestion_url,omitempty"`
+	// Google OAuth 2.0 credentials with an email address.
 	SearchCredential *GoogleChronicleCredential `json:"search_credential" url:"search_credential"`
-	// Search URL for the Google SecOps instance. This should be the base event search URL, without any path components. Default "https://backstory.googleapis.com".
+	// Search URL for the Google SecOps instance. This should be the base event search URL, without any path components.
 	SearchUrl *string `json:"search_url,omitempty" url:"search_url,omitempty"`
 
 	extraProperties map[string]interface{}
@@ -10836,6 +10857,53 @@ func (s *SinkElasticsearch) UnmarshalJSON(data []byte) error {
 }
 
 func (s *SinkElasticsearch) String() string {
+	if len(s._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(s); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", s)
+}
+
+// Configuration for Google Security Operations (formerly Google Chronicle) as a Sink Provider.
+type SinkGoogleSecOps struct {
+	// The credential set used to write events to Google SecOps.
+	Credential *GoogleChronicleCredential `json:"credential" url:"credential"`
+	// The customer ID reported when writing events.
+	CustomerId string `json:"customer_id" url:"customer_id"`
+	// (Optional) Ingestion URL for the Google SecOps instance. This should be the base event ingestion URL, without any path components.
+	Url *string `json:"url,omitempty" url:"url,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (s *SinkGoogleSecOps) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
+}
+
+func (s *SinkGoogleSecOps) UnmarshalJSON(data []byte) error {
+	type unmarshaler SinkGoogleSecOps
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*s = SinkGoogleSecOps(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+
+	s._rawJSON = nil
+	return nil
+}
+
+func (s *SinkGoogleSecOps) String() string {
 	if len(s._rawJSON) > 0 {
 		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
 			return value
