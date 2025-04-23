@@ -10257,10 +10257,10 @@ type SiemSplunk struct {
 	HecUrl *string `json:"hec_url,omitempty" url:"hec_url,omitempty"`
 	// Splunk index to send events to. If not provided, will use the default index for the Splunk collector.
 	Index *string `json:"index,omitempty" url:"index,omitempty"`
-	// Optional token credential used for connecting to the Splunk search service. If not provided, querying is disabled.
-	SearchServiceCredential *SplunkSearchCredential `json:"search_service_credential,omitempty" url:"search_service_credential,omitempty"`
-	// Optional URL used for connecting to the Splunk search service. If not provided, querying is disabled.
-	SearchServiceUrl *string `json:"search_service_url,omitempty" url:"search_service_url,omitempty"`
+	// Token credential used for connecting to the Splunk search service.
+	SearchServiceCredential *SplunkSearchCredential `json:"search_service_credential" url:"search_service_credential"`
+	// URL used for connecting to the Splunk search service.
+	SearchServiceUrl string `json:"search_service_url" url:"search_service_url"`
 	// If true, skips verification of the Splunk server's TLS certificate.
 	SkipTlsVerify *bool `json:"skip_tls_verify,omitempty" url:"skip_tls_verify,omitempty"`
 	// Splunk source to send events to. If not provided, will use the default source for the Splunk collector.
