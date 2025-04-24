@@ -1748,6 +1748,7 @@ const (
 	ResourceIdPostureScores  ResourceId = "posture_scores"
 	ResourceIdProjects       ResourceId = "projects"
 	ResourceIdScans          ResourceId = "scans"
+	ResourceIdScanActivities ResourceId = "scan_activities"
 	ResourceIdThreats        ResourceId = "threats"
 	ResourceIdTickets        ResourceId = "tickets"
 	ResourceIdUsers          ResourceId = "users"
@@ -1785,6 +1786,8 @@ func NewResourceIdFromString(s string) (ResourceId, error) {
 		return ResourceIdProjects, nil
 	case "scans":
 		return ResourceIdScans, nil
+	case "scan_activities":
+		return ResourceIdScanActivities, nil
 	case "threats":
 		return ResourceIdThreats, nil
 	case "tickets":
