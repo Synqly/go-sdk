@@ -20,6 +20,7 @@ import (
 	securityfinding "github.com/synqly/go-sdk/client/engine/ocsf/v130/securityfinding"
 	vulnerabilityfinding "github.com/synqly/go-sdk/client/engine/ocsf/v130/vulnerabilityfinding"
 	webresourceaccessactivity "github.com/synqly/go-sdk/client/engine/ocsf/v130/webresourceaccessactivity"
+	cloudresourcesinventoryinfo "github.com/synqly/go-sdk/client/engine/ocsf/v140/cloudresourcesinventoryinfo"
 )
 
 type AccountChange = *accountchange.AccountChange
@@ -27,6 +28,8 @@ type AccountChange = *accountchange.AccountChange
 type ApiActivity = *apiactivity.ApiActivity
 
 type Authentication = *authentication.Authentication
+
+type CloudResourcesInventoryInfo = *cloudresourcesinventoryinfo.CloudResourcesInventoryInfo
 
 type ComplianceFinding = *compliancefinding.ComplianceFinding
 

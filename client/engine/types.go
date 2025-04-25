@@ -490,25 +490,27 @@ func (p *ProblematicParameter) String() string {
 type ResourceId string
 
 const (
-	ResourceIdAlerts         ResourceId = "alerts"
-	ResourceIdApplications   ResourceId = "applications"
-	ResourceIdAuditLogs      ResourceId = "audit_logs"
-	ResourceIdComments       ResourceId = "comments"
-	ResourceIdDevices        ResourceId = "devices"
-	ResourceIdEvents         ResourceId = "events"
-	ResourceIdEvidence       ResourceId = "evidence"
-	ResourceIdFindings       ResourceId = "findings"
-	ResourceIdGroups         ResourceId = "groups"
-	ResourceIdInvestigations ResourceId = "investigations"
-	ResourceIdIocs           ResourceId = "iocs"
-	ResourceIdLogProviders   ResourceId = "log_providers"
-	ResourceIdPostureScores  ResourceId = "posture_scores"
-	ResourceIdProjects       ResourceId = "projects"
-	ResourceIdScans          ResourceId = "scans"
-	ResourceIdScanActivities ResourceId = "scan_activities"
-	ResourceIdThreats        ResourceId = "threats"
-	ResourceIdTickets        ResourceId = "tickets"
-	ResourceIdUsers          ResourceId = "users"
+	ResourceIdAlerts                 ResourceId = "alerts"
+	ResourceIdApplications           ResourceId = "applications"
+	ResourceIdAuditLogs              ResourceId = "audit_logs"
+	ResourceIdComments               ResourceId = "comments"
+	ResourceIdDevices                ResourceId = "devices"
+	ResourceIdEvents                 ResourceId = "events"
+	ResourceIdEvidence               ResourceId = "evidence"
+	ResourceIdFindings               ResourceId = "findings"
+	ResourceIdGroups                 ResourceId = "groups"
+	ResourceIdInvestigations         ResourceId = "investigations"
+	ResourceIdIocs                   ResourceId = "iocs"
+	ResourceIdLogProviders           ResourceId = "log_providers"
+	ResourceIdPostureScores          ResourceId = "posture_scores"
+	ResourceIdProjects               ResourceId = "projects"
+	ResourceIdScans                  ResourceId = "scans"
+	ResourceIdScanActivities         ResourceId = "scan_activities"
+	ResourceIdThreats                ResourceId = "threats"
+	ResourceIdTickets                ResourceId = "tickets"
+	ResourceIdUsers                  ResourceId = "users"
+	ResourceIdCompliance             ResourceId = "compliance"
+	ResourceIdCloudresourceinventory ResourceId = "cloudresourceinventory"
 )
 
 func NewResourceIdFromString(s string) (ResourceId, error) {
@@ -551,6 +553,10 @@ func NewResourceIdFromString(s string) (ResourceId, error) {
 		return ResourceIdTickets, nil
 	case "users":
 		return ResourceIdUsers, nil
+	case "compliance":
+		return ResourceIdCompliance, nil
+	case "cloudresourceinventory":
+		return ResourceIdCloudresourceinventory, nil
 	}
 	var t ResourceId
 	return "", fmt.Errorf("%s is not a valid %T", s, t)

@@ -4,6 +4,7 @@ package client
 
 import (
 	assets "github.com/synqly/go-sdk/client/engine/assets"
+	cloudsecurity "github.com/synqly/go-sdk/client/engine/cloudsecurity"
 	core "github.com/synqly/go-sdk/client/engine/core"
 	edr "github.com/synqly/go-sdk/client/engine/edr"
 	hooks "github.com/synqly/go-sdk/client/engine/hooks"
@@ -26,6 +27,7 @@ type Client struct {
 	header  http.Header
 
 	Assets              *assets.Client
+	Cloudsecurity       *cloudsecurity.Client
 	Edr                 *edr.Client
 	Hooks               *hooks.Client
 	Identity            *identity.Client
@@ -51,6 +53,7 @@ func NewClient(opts ...option.RequestOption) *Client {
 		),
 		header:              options.ToHeader(),
 		Assets:              assets.NewClient(opts...),
+		Cloudsecurity:       cloudsecurity.NewClient(opts...),
 		Edr:                 edr.NewClient(opts...),
 		Hooks:               hooks.NewClient(opts...),
 		Identity:            identity.NewClient(opts...),

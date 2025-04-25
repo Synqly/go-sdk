@@ -1185,6 +1185,7 @@ type CategoryId string
 
 const (
 	CategoryIdAssets          CategoryId = "assets"
+	CategoryIdCloudsecurity   CategoryId = "cloudsecurity"
 	CategoryIdEdr             CategoryId = "edr"
 	CategoryIdIdentity        CategoryId = "identity"
 	CategoryIdNotifications   CategoryId = "notifications"
@@ -1199,6 +1200,8 @@ func NewCategoryIdFromString(s string) (CategoryId, error) {
 	switch s {
 	case "assets":
 		return CategoryIdAssets, nil
+	case "cloudsecurity":
+		return CategoryIdCloudsecurity, nil
 	case "edr":
 		return CategoryIdEdr, nil
 	case "identity":
@@ -1733,25 +1736,27 @@ func (p *ProblematicParameter) String() string {
 type ResourceId string
 
 const (
-	ResourceIdAlerts         ResourceId = "alerts"
-	ResourceIdApplications   ResourceId = "applications"
-	ResourceIdAuditLogs      ResourceId = "audit_logs"
-	ResourceIdComments       ResourceId = "comments"
-	ResourceIdDevices        ResourceId = "devices"
-	ResourceIdEvents         ResourceId = "events"
-	ResourceIdEvidence       ResourceId = "evidence"
-	ResourceIdFindings       ResourceId = "findings"
-	ResourceIdGroups         ResourceId = "groups"
-	ResourceIdInvestigations ResourceId = "investigations"
-	ResourceIdIocs           ResourceId = "iocs"
-	ResourceIdLogProviders   ResourceId = "log_providers"
-	ResourceIdPostureScores  ResourceId = "posture_scores"
-	ResourceIdProjects       ResourceId = "projects"
-	ResourceIdScans          ResourceId = "scans"
-	ResourceIdScanActivities ResourceId = "scan_activities"
-	ResourceIdThreats        ResourceId = "threats"
-	ResourceIdTickets        ResourceId = "tickets"
-	ResourceIdUsers          ResourceId = "users"
+	ResourceIdAlerts                 ResourceId = "alerts"
+	ResourceIdApplications           ResourceId = "applications"
+	ResourceIdAuditLogs              ResourceId = "audit_logs"
+	ResourceIdComments               ResourceId = "comments"
+	ResourceIdDevices                ResourceId = "devices"
+	ResourceIdEvents                 ResourceId = "events"
+	ResourceIdEvidence               ResourceId = "evidence"
+	ResourceIdFindings               ResourceId = "findings"
+	ResourceIdGroups                 ResourceId = "groups"
+	ResourceIdInvestigations         ResourceId = "investigations"
+	ResourceIdIocs                   ResourceId = "iocs"
+	ResourceIdLogProviders           ResourceId = "log_providers"
+	ResourceIdPostureScores          ResourceId = "posture_scores"
+	ResourceIdProjects               ResourceId = "projects"
+	ResourceIdScans                  ResourceId = "scans"
+	ResourceIdScanActivities         ResourceId = "scan_activities"
+	ResourceIdThreats                ResourceId = "threats"
+	ResourceIdTickets                ResourceId = "tickets"
+	ResourceIdUsers                  ResourceId = "users"
+	ResourceIdCompliance             ResourceId = "compliance"
+	ResourceIdCloudresourceinventory ResourceId = "cloudresourceinventory"
 )
 
 func NewResourceIdFromString(s string) (ResourceId, error) {
@@ -1794,6 +1799,10 @@ func NewResourceIdFromString(s string) (ResourceId, error) {
 		return ResourceIdTickets, nil
 	case "users":
 		return ResourceIdUsers, nil
+	case "compliance":
+		return ResourceIdCompliance, nil
+	case "cloudresourceinventory":
+		return ResourceIdCloudresourceinventory, nil
 	}
 	var t ResourceId
 	return "", fmt.Errorf("%s is not a valid %T", s, t)
@@ -6794,6 +6803,50 @@ func (a *AzureMonitorLogsCredential) Accept(visitor AzureMonitorLogsCredentialVi
 	return fmt.Errorf("type %T does not define a non-empty union type", a)
 }
 
+// Configuration for the CrowdStrike Cloud Security Provider
+type CloudSecurityCrowdStrike struct {
+	Credential *CrowdStrikeCredential `json:"credential" url:"credential"`
+	// The root domain where your CrowdStrike Falcon tenant is located.
+	Url *string `json:"url,omitempty" url:"url,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *CloudSecurityCrowdStrike) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
+}
+
+func (c *CloudSecurityCrowdStrike) UnmarshalJSON(data []byte) error {
+	type unmarshaler CloudSecurityCrowdStrike
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = CloudSecurityCrowdStrike(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
+	c._rawJSON = nil
+	return nil
+}
+
+func (c *CloudSecurityCrowdStrike) String() string {
+	if len(c._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
 type CrowdStrikeCredential struct {
 	Type string
 	// Docs for setting up oAuth
@@ -8726,6 +8779,7 @@ type ProviderConfig struct {
 	AssetsNozomiVantageMock           *AssetsNozomiVantageMock
 	AssetsServicenow                  *AssetsServiceNow
 	AssetsServicenowMock              *AssetsServiceNowMock
+	CloudsecurityCrowdstrike          *CloudSecurityCrowdStrike
 	EdrCrowdstrike                    *EdrCrowdStrike
 	EdrDefender                       *EdrDefender
 	EdrMalwarebytes                   *EdrMalwarebytes
@@ -8823,6 +8877,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.AssetsServicenowMock = value
+	case "cloudsecurity_crowdstrike":
+		value := new(CloudSecurityCrowdStrike)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.CloudsecurityCrowdstrike = value
 	case "edr_crowdstrike":
 		value := new(EdrCrowdStrike)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -9128,6 +9188,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.AssetsServicenowMock != nil {
 		return core.MarshalJSONWithExtraProperty(p.AssetsServicenowMock, "type", "assets_servicenow_mock")
 	}
+	if p.CloudsecurityCrowdstrike != nil {
+		return core.MarshalJSONWithExtraProperty(p.CloudsecurityCrowdstrike, "type", "cloudsecurity_crowdstrike")
+	}
 	if p.EdrCrowdstrike != nil {
 		return core.MarshalJSONWithExtraProperty(p.EdrCrowdstrike, "type", "edr_crowdstrike")
 	}
@@ -9279,6 +9342,7 @@ type ProviderConfigVisitor interface {
 	VisitAssetsNozomiVantageMock(*AssetsNozomiVantageMock) error
 	VisitAssetsServicenow(*AssetsServiceNow) error
 	VisitAssetsServicenowMock(*AssetsServiceNowMock) error
+	VisitCloudsecurityCrowdstrike(*CloudSecurityCrowdStrike) error
 	VisitEdrCrowdstrike(*EdrCrowdStrike) error
 	VisitEdrDefender(*EdrDefender) error
 	VisitEdrMalwarebytes(*EdrMalwarebytes) error
@@ -9346,6 +9410,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.AssetsServicenowMock != nil {
 		return visitor.VisitAssetsServicenowMock(p.AssetsServicenowMock)
+	}
+	if p.CloudsecurityCrowdstrike != nil {
+		return visitor.VisitCloudsecurityCrowdstrike(p.CloudsecurityCrowdstrike)
 	}
 	if p.EdrCrowdstrike != nil {
 		return visitor.VisitEdrCrowdstrike(p.EdrCrowdstrike)
@@ -9508,6 +9575,8 @@ const (
 	// [MOCK] ServiceNow Configuration Management Database (CMDB)
 	ProviderConfigIdAssetsServiceNowMock ProviderConfigId = "assets_servicenow_mock"
 	// CrowdStrike Falcon® Insight EDR
+	ProviderConfigIdCloudSecurityCrowdStrike ProviderConfigId = "cloudsecurity_crowdstrike"
+	// CrowdStrike Falcon® Insight EDR
 	ProviderConfigIdEdrCrowdStrike ProviderConfigId = "edr_crowdstrike"
 	// Microsoft Defender for Endpoint
 	ProviderConfigIdEdrDefender ProviderConfigId = "edr_defender"
@@ -9619,6 +9688,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdAssetsServiceNow, nil
 	case "assets_servicenow_mock":
 		return ProviderConfigIdAssetsServiceNowMock, nil
+	case "cloudsecurity_crowdstrike":
+		return ProviderConfigIdCloudSecurityCrowdStrike, nil
 	case "edr_crowdstrike":
 		return ProviderConfigIdEdrCrowdStrike, nil
 	case "edr_defender":
