@@ -8824,6 +8824,7 @@ type ProviderConfig struct {
 	VulnerabilitiesCrowdstrike        *VulnerabilitiesCrowdStrike
 	VulnerabilitiesNucleus            *VulnerabilitiesNucleus
 	VulnerabilitiesQualysCloud        *VulnerabilitiesQualysCloud
+	VulnerabilitiesQualysCloudMock    *VulnerabilitiesQualysCloudMock
 	VulnerabilitiesRapid7InsightCloud *VulnerabilitiesRapid7InsightCloud
 	VulnerabilitiesTaniumCloud        *VulnerabilitiesTaniumCloud
 	VulnerabilitiesTenableCloud       *VulnerabilitiesTenableCloud
@@ -9147,6 +9148,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.VulnerabilitiesQualysCloud = value
+	case "vulnerabilities_qualys_cloud_mock":
+		value := new(VulnerabilitiesQualysCloudMock)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.VulnerabilitiesQualysCloudMock = value
 	case "vulnerabilities_rapid7_insight_cloud":
 		value := new(VulnerabilitiesRapid7InsightCloud)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -9323,6 +9330,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.VulnerabilitiesQualysCloud != nil {
 		return core.MarshalJSONWithExtraProperty(p.VulnerabilitiesQualysCloud, "type", "vulnerabilities_qualys_cloud")
 	}
+	if p.VulnerabilitiesQualysCloudMock != nil {
+		return core.MarshalJSONWithExtraProperty(p.VulnerabilitiesQualysCloudMock, "type", "vulnerabilities_qualys_cloud_mock")
+	}
 	if p.VulnerabilitiesRapid7InsightCloud != nil {
 		return core.MarshalJSONWithExtraProperty(p.VulnerabilitiesRapid7InsightCloud, "type", "vulnerabilities_rapid7_insight_cloud")
 	}
@@ -9387,6 +9397,7 @@ type ProviderConfigVisitor interface {
 	VisitVulnerabilitiesCrowdstrike(*VulnerabilitiesCrowdStrike) error
 	VisitVulnerabilitiesNucleus(*VulnerabilitiesNucleus) error
 	VisitVulnerabilitiesQualysCloud(*VulnerabilitiesQualysCloud) error
+	VisitVulnerabilitiesQualysCloudMock(*VulnerabilitiesQualysCloudMock) error
 	VisitVulnerabilitiesRapid7InsightCloud(*VulnerabilitiesRapid7InsightCloud) error
 	VisitVulnerabilitiesTaniumCloud(*VulnerabilitiesTaniumCloud) error
 	VisitVulnerabilitiesTenableCloud(*VulnerabilitiesTenableCloud) error
@@ -9546,6 +9557,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	if p.VulnerabilitiesQualysCloud != nil {
 		return visitor.VisitVulnerabilitiesQualysCloud(p.VulnerabilitiesQualysCloud)
 	}
+	if p.VulnerabilitiesQualysCloudMock != nil {
+		return visitor.VisitVulnerabilitiesQualysCloudMock(p.VulnerabilitiesQualysCloudMock)
+	}
 	if p.VulnerabilitiesRapid7InsightCloud != nil {
 		return visitor.VisitVulnerabilitiesRapid7InsightCloud(p.VulnerabilitiesRapid7InsightCloud)
 	}
@@ -9664,6 +9678,8 @@ const (
 	ProviderConfigIdVulnerabilitiesNucleus ProviderConfigId = "vulnerabilities_nucleus"
 	// Qualys Vulnerability Management, Detection & Response (VMDR)
 	ProviderConfigIdVulnerabilitiesQualysCloud ProviderConfigId = "vulnerabilities_qualys_cloud"
+	// [MOCK] Qualys Vulnerability Management, Detection & Response (VMDR)
+	ProviderConfigIdVulnerabilitiesQualysCloudMock ProviderConfigId = "vulnerabilities_qualys_cloud_mock"
 	// Rapid7 Insight Vulnerability Management Cloud
 	ProviderConfigIdVulnerabilitiesRapid7InsightCloud ProviderConfigId = "vulnerabilities_rapid7_insight_cloud"
 	// Tanium Vulnerability Management
@@ -9778,6 +9794,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdVulnerabilitiesNucleus, nil
 	case "vulnerabilities_qualys_cloud":
 		return ProviderConfigIdVulnerabilitiesQualysCloud, nil
+	case "vulnerabilities_qualys_cloud_mock":
+		return ProviderConfigIdVulnerabilitiesQualysCloudMock, nil
 	case "vulnerabilities_rapid7_insight_cloud":
 		return ProviderConfigIdVulnerabilitiesRapid7InsightCloud, nil
 	case "vulnerabilities_tanium_cloud":
@@ -12333,6 +12351,25 @@ func (t *TorqCredential) Accept(visitor TorqCredentialVisitor) error {
 	return fmt.Errorf("type %T does not define a non-empty union type", t)
 }
 
+type VulnerabilitiesQualysCloudDataset string
+
+const (
+	VulnerabilitiesQualysCloudDatasetBasicVer0 VulnerabilitiesQualysCloudDataset = "basic_v0"
+)
+
+func NewVulnerabilitiesQualysCloudDatasetFromString(s string) (VulnerabilitiesQualysCloudDataset, error) {
+	switch s {
+	case "basic_v0":
+		return VulnerabilitiesQualysCloudDatasetBasicVer0, nil
+	}
+	var t VulnerabilitiesQualysCloudDataset
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (v VulnerabilitiesQualysCloudDataset) Ptr() *VulnerabilitiesQualysCloudDataset {
+	return &v
+}
+
 // Configuration for CrowdStrike Falcon as a Vulnerabilities Provider
 type VulnerabilitiesCrowdStrike struct {
 	Credential *CrowdStrikeCredential `json:"credential" url:"credential"`
@@ -12456,6 +12493,48 @@ func (v *VulnerabilitiesQualysCloud) UnmarshalJSON(data []byte) error {
 }
 
 func (v *VulnerabilitiesQualysCloud) String() string {
+	if len(v._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(v._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(v); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", v)
+}
+
+// Configuration for a mocked Qualys Cloud Platform as a Vulnerabilities Provider
+type VulnerabilitiesQualysCloudMock struct {
+	Dataset VulnerabilitiesQualysCloudDataset `json:"dataset" url:"dataset"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (v *VulnerabilitiesQualysCloudMock) GetExtraProperties() map[string]interface{} {
+	return v.extraProperties
+}
+
+func (v *VulnerabilitiesQualysCloudMock) UnmarshalJSON(data []byte) error {
+	type unmarshaler VulnerabilitiesQualysCloudMock
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*v = VulnerabilitiesQualysCloudMock(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *v)
+	if err != nil {
+		return err
+	}
+	v.extraProperties = extraProperties
+
+	v._rawJSON = nil
+	return nil
+}
+
+func (v *VulnerabilitiesQualysCloudMock) String() string {
 	if len(v._rawJSON) > 0 {
 		if value, err := core.StringifyJSON(v._rawJSON); err == nil {
 			return value
