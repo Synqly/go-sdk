@@ -8289,7 +8289,7 @@ type NotificationsSlack struct {
 	// The channel to send notifications to. Should be the ID of the desired channel.
 	Channel    string           `json:"channel" url:"channel"`
 	Credential *SlackCredential `json:"credential" url:"credential"`
-	// Optional URL override for the Slack API. This should include the full path to the API endpoint.
+	// Base URL for the Slack API.
 	Url *string `json:"url,omitempty" url:"url,omitempty"`
 
 	extraProperties map[string]interface{}
@@ -8319,6 +8319,49 @@ func (n *NotificationsSlack) UnmarshalJSON(data []byte) error {
 }
 
 func (n *NotificationsSlack) String() string {
+	if len(n._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(n._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(n); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", n)
+}
+
+// Configuration for the Slack Notification Provider using Incoming Webhooks.
+// Incoming Webhooks are a way to post messages from apps into Slack. The can not be used for any other actions, such as reading or deleting messages.
+type NotificationsSlackWebhook struct {
+	WebhookUrl *SlackWebhookCredential `json:"webhook_url" url:"webhook_url"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (n *NotificationsSlackWebhook) GetExtraProperties() map[string]interface{} {
+	return n.extraProperties
+}
+
+func (n *NotificationsSlackWebhook) UnmarshalJSON(data []byte) error {
+	type unmarshaler NotificationsSlackWebhook
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*n = NotificationsSlackWebhook(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *n)
+	if err != nil {
+		return err
+	}
+	n.extraProperties = extraProperties
+
+	n._rawJSON = nil
+	return nil
+}
+
+func (n *NotificationsSlackWebhook) String() string {
 	if len(n._rawJSON) > 0 {
 		if value, err := core.StringifyJSON(n._rawJSON); err == nil {
 			return value
@@ -8792,6 +8835,7 @@ type ProviderConfig struct {
 	NotificationsJira                 *NotificationsJira
 	NotificationsMockNotifications    *NotificationsMock
 	NotificationsSlack                *NotificationsSlack
+	NotificationsSlackWebhook         *NotificationsSlackWebhook
 	NotificationsTeams                *NotificationsTeams
 	SiemCrowdstrike                   *SiemCrowdstrike
 	SiemElasticsearch                 *SiemElasticsearch
@@ -8956,6 +9000,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.NotificationsSlack = value
+	case "notifications_slack_webhook":
+		value := new(NotificationsSlackWebhook)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.NotificationsSlackWebhook = value
 	case "notifications_teams":
 		value := new(NotificationsTeams)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -9234,6 +9284,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.NotificationsSlack != nil {
 		return core.MarshalJSONWithExtraProperty(p.NotificationsSlack, "type", "notifications_slack")
 	}
+	if p.NotificationsSlackWebhook != nil {
+		return core.MarshalJSONWithExtraProperty(p.NotificationsSlackWebhook, "type", "notifications_slack_webhook")
+	}
 	if p.NotificationsTeams != nil {
 		return core.MarshalJSONWithExtraProperty(p.NotificationsTeams, "type", "notifications_teams")
 	}
@@ -9365,6 +9418,7 @@ type ProviderConfigVisitor interface {
 	VisitNotificationsJira(*NotificationsJira) error
 	VisitNotificationsMockNotifications(*NotificationsMock) error
 	VisitNotificationsSlack(*NotificationsSlack) error
+	VisitNotificationsSlackWebhook(*NotificationsSlackWebhook) error
 	VisitNotificationsTeams(*NotificationsTeams) error
 	VisitSiemCrowdstrike(*SiemCrowdstrike) error
 	VisitSiemElasticsearch(*SiemElasticsearch) error
@@ -9460,6 +9514,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.NotificationsSlack != nil {
 		return visitor.VisitNotificationsSlack(p.NotificationsSlack)
+	}
+	if p.NotificationsSlackWebhook != nil {
+		return visitor.VisitNotificationsSlackWebhook(p.NotificationsSlackWebhook)
 	}
 	if p.NotificationsTeams != nil {
 		return visitor.VisitNotificationsTeams(p.NotificationsTeams)
@@ -9612,6 +9669,8 @@ const (
 	ProviderConfigIdNotificationsJira ProviderConfigId = "notifications_jira"
 	// Notifications Test
 	ProviderConfigIdNotificationsMock ProviderConfigId = "notifications_mock_notifications"
+	// Slack Incoming Webhook
+	ProviderConfigIdNotificationsSlackWebhook ProviderConfigId = "notifications_slack_webhook"
 	// Slack
 	ProviderConfigIdNotificationsSlack ProviderConfigId = "notifications_slack"
 	// Microsoft Teams
@@ -9728,6 +9787,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdNotificationsJira, nil
 	case "notifications_mock_notifications":
 		return ProviderConfigIdNotificationsMock, nil
+	case "notifications_slack_webhook":
+		return ProviderConfigIdNotificationsSlackWebhook, nil
 	case "notifications_slack":
 		return ProviderConfigIdNotificationsSlack, nil
 	case "notifications_teams":
@@ -11169,6 +11230,76 @@ func (s *SlackCredential) Accept(visitor SlackCredentialVisitor) error {
 	}
 	if s.TokenId != "" {
 		return visitor.VisitTokenId(s.TokenId)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", s)
+}
+
+type SlackWebhookCredential struct {
+	Type string
+	// Slack Incoming Webhook URL. Use a Slack app with Incoming Webhooks enabled to generate the URL. See [configuration guide on Incoming Webhooks](https://api.slack.com/messaging/webhooks) for more detail.
+	Secret *SecretCredential
+	// ID of a credential that stores a secret Incoming Webhook URL used to authenticate with Slack.
+	SecretId SecretCredentialId
+}
+
+func (s *SlackWebhookCredential) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	s.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", s)
+	}
+	switch unmarshaler.Type {
+	case "secret":
+		value := new(SecretCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		s.Secret = value
+	case "secret_id":
+		var valueUnmarshaler struct {
+			SecretId SecretCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		s.SecretId = valueUnmarshaler.SecretId
+	}
+	return nil
+}
+
+func (s SlackWebhookCredential) MarshalJSON() ([]byte, error) {
+	if s.Secret != nil {
+		return core.MarshalJSONWithExtraProperty(s.Secret, "type", "secret")
+	}
+	if s.SecretId != "" {
+		var marshaler = struct {
+			Type     string             `json:"type"`
+			SecretId SecretCredentialId `json:"value"`
+		}{
+			Type:     "secret_id",
+			SecretId: s.SecretId,
+		}
+		return json.Marshal(marshaler)
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", s)
+}
+
+type SlackWebhookCredentialVisitor interface {
+	VisitSecret(*SecretCredential) error
+	VisitSecretId(SecretCredentialId) error
+}
+
+func (s *SlackWebhookCredential) Accept(visitor SlackWebhookCredentialVisitor) error {
+	if s.Secret != nil {
+		return visitor.VisitSecret(s.Secret)
+	}
+	if s.SecretId != "" {
+		return visitor.VisitSecretId(s.SecretId)
 	}
 	return fmt.Errorf("type %T does not define a non-empty union type", s)
 }
