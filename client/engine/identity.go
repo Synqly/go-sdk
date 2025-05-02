@@ -32,6 +32,8 @@ type QueryIdentityAuditLogRequest struct {
 	// Filter results by this query. For more information on filtering, refer to our Filtering Guide. Defaults to no filter.
 	// If used more than once, the queries are ANDed together.
 	Filter []*string `json:"-" url:"filter,omitempty"`
+	// Include the raw data from the SIEM in the response. Defaults to `false`.
+	IncludeRawData *bool `json:"-" url:"include_raw_data,omitempty"`
 }
 
 type QueryGroupRequest struct {
