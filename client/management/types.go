@@ -6227,6 +6227,50 @@ func (a *AssetsNozomiVantageMock) String() string {
 	return fmt.Sprintf("%#v", a)
 }
 
+// Configuration for Qualys Cloud Platform as an Assets Provider
+type AssetsQualysCloud struct {
+	Credential *QualysCloudCredential `json:"credential" url:"credential"`
+	// URL for the Qualys Cloud API. This should be the base URL for the API, without any path components. For example, "https://qualys.com".
+	Url string `json:"url" url:"url"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (a *AssetsQualysCloud) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
+}
+
+func (a *AssetsQualysCloud) UnmarshalJSON(data []byte) error {
+	type unmarshaler AssetsQualysCloud
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*a = AssetsQualysCloud(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+
+	a._rawJSON = nil
+	return nil
+}
+
+func (a *AssetsQualysCloud) String() string {
+	if len(a._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(a); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", a)
+}
+
 // Configuration for ServiceNow as an Assets Provider
 type AssetsServiceNow struct {
 	Credential *ServiceNowCredential `json:"credential" url:"credential"`
@@ -8820,6 +8864,7 @@ type ProviderConfig struct {
 	AssetsArmisCentrixMock            *AssetsArmisCentrixMock
 	AssetsNozomiVantage               *AssetsNozomiVantage
 	AssetsNozomiVantageMock           *AssetsNozomiVantageMock
+	AssetsQualysCloud                 *AssetsQualysCloud
 	AssetsServicenow                  *AssetsServiceNow
 	AssetsServicenowMock              *AssetsServiceNowMock
 	CloudsecurityCrowdstrike          *CloudSecurityCrowdStrike
@@ -8910,6 +8955,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.AssetsNozomiVantageMock = value
+	case "assets_qualys_cloud":
+		value := new(AssetsQualysCloud)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.AssetsQualysCloud = value
 	case "assets_servicenow":
 		value := new(AssetsServiceNow)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -9239,6 +9290,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.AssetsNozomiVantageMock != nil {
 		return core.MarshalJSONWithExtraProperty(p.AssetsNozomiVantageMock, "type", "assets_nozomi_vantage_mock")
 	}
+	if p.AssetsQualysCloud != nil {
+		return core.MarshalJSONWithExtraProperty(p.AssetsQualysCloud, "type", "assets_qualys_cloud")
+	}
 	if p.AssetsServicenow != nil {
 		return core.MarshalJSONWithExtraProperty(p.AssetsServicenow, "type", "assets_servicenow")
 	}
@@ -9403,6 +9457,7 @@ type ProviderConfigVisitor interface {
 	VisitAssetsArmisCentrixMock(*AssetsArmisCentrixMock) error
 	VisitAssetsNozomiVantage(*AssetsNozomiVantage) error
 	VisitAssetsNozomiVantageMock(*AssetsNozomiVantageMock) error
+	VisitAssetsQualysCloud(*AssetsQualysCloud) error
 	VisitAssetsServicenow(*AssetsServiceNow) error
 	VisitAssetsServicenowMock(*AssetsServiceNowMock) error
 	VisitCloudsecurityCrowdstrike(*CloudSecurityCrowdStrike) error
@@ -9469,6 +9524,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.AssetsNozomiVantageMock != nil {
 		return visitor.VisitAssetsNozomiVantageMock(p.AssetsNozomiVantageMock)
+	}
+	if p.AssetsQualysCloud != nil {
+		return visitor.VisitAssetsQualysCloud(p.AssetsQualysCloud)
 	}
 	if p.AssetsServicenow != nil {
 		return visitor.VisitAssetsServicenow(p.AssetsServicenow)
@@ -9641,6 +9699,8 @@ const (
 	ProviderConfigIdAssetsNozomiVantage ProviderConfigId = "assets_nozomi_vantage"
 	// [MOCK] Nozomi Vantage
 	ProviderConfigIdAssetsNozomiVantageMock ProviderConfigId = "assets_nozomi_vantage_mock"
+	// Qualys Vulnerability Management, Detection & Response (VMDR)
+	ProviderConfigIdAssetsQualysCloud ProviderConfigId = "assets_qualys_cloud"
 	// ServiceNow Configuration Management Database (CMDB)
 	ProviderConfigIdAssetsServiceNow ProviderConfigId = "assets_servicenow"
 	// [MOCK] ServiceNow Configuration Management Database (CMDB)
@@ -9759,6 +9819,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdAssetsNozomiVantage, nil
 	case "assets_nozomi_vantage_mock":
 		return ProviderConfigIdAssetsNozomiVantageMock, nil
+	case "assets_qualys_cloud":
+		return ProviderConfigIdAssetsQualysCloud, nil
 	case "assets_servicenow":
 		return ProviderConfigIdAssetsServiceNow, nil
 	case "assets_servicenow_mock":
@@ -9946,9 +10008,9 @@ func (q *QRadarCredential) Accept(visitor QRadarCredentialVisitor) error {
 
 type QualysCloudCredential struct {
 	Type string
-	// Qualys Cloud username and password used to authenticate with Qualys Cloud.
+	// Username and password used to authenticate with Qualys Cloud.
 	Basic *BasicCredential
-	// ID of a credential that stores a Qualys Cloud username and password.
+	// ID of a basic credential that stores a Qualys Cloud username and password.
 	BasicId BasicCredentialId
 }
 
