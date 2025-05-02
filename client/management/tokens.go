@@ -111,6 +111,89 @@ func (c *CreateIntegrationTokenResponse) String() string {
 	return fmt.Sprintf("%#v", c)
 }
 
+type CreateSynqlyIntegrationsTokenRequest struct {
+	// Token time-to-live. If not provided, defaults to the TTL of the token used to call this API. Use the format "1h", "1m", "1s" for hours, minutes, and seconds respectively.
+	TokenTtl *string `json:"token_ttl,omitempty" url:"token_ttl,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *CreateSynqlyIntegrationsTokenRequest) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
+}
+
+func (c *CreateSynqlyIntegrationsTokenRequest) UnmarshalJSON(data []byte) error {
+	type unmarshaler CreateSynqlyIntegrationsTokenRequest
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = CreateSynqlyIntegrationsTokenRequest(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
+	c._rawJSON = nil
+	return nil
+}
+
+func (c *CreateSynqlyIntegrationsTokenRequest) String() string {
+	if len(c._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
+type CreateSynqlyIntegrationsTokenResponse struct {
+	Result *SynqlyIntegrationsTokenResponse `json:"result" url:"result"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *CreateSynqlyIntegrationsTokenResponse) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
+}
+
+func (c *CreateSynqlyIntegrationsTokenResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler CreateSynqlyIntegrationsTokenResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = CreateSynqlyIntegrationsTokenResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
+	c._rawJSON = nil
+	return nil
+}
+
+func (c *CreateSynqlyIntegrationsTokenResponse) String() string {
+	if len(c._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
 type CreateTokenRequest struct {
 	// Unique name token. If not provided, defaults to generated newly created refresh token id.
 	Name *string `json:"name,omitempty" url:"name,omitempty"`

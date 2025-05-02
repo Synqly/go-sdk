@@ -13737,6 +13737,48 @@ func (r *RefreshToken) String() string {
 	return fmt.Sprintf("%#v", r)
 }
 
+type SynqlyIntegrationsTokenResponse struct {
+	AccountId AccountId     `json:"account_id" url:"account_id"`
+	Token     *RefreshToken `json:"token" url:"token"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (s *SynqlyIntegrationsTokenResponse) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
+}
+
+func (s *SynqlyIntegrationsTokenResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler SynqlyIntegrationsTokenResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*s = SynqlyIntegrationsTokenResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+
+	s._rawJSON = nil
+	return nil
+}
+
+func (s *SynqlyIntegrationsTokenResponse) String() string {
+	if len(s._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(s); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", s)
+}
+
 // Transforms data collected before it is sent to the target Integration.
 type Transform struct {
 	// Human-readable name for this resource
