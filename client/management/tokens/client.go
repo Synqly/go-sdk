@@ -500,7 +500,7 @@ func (c *Client) Delete(
 
 // Returns a list of all `RefreshToken` objects belonging to the Authorization Bearer
 // token. For more infromation on Tokens, refer to
-// [Authentication](https://docs.synqly.com/reference/authentication).
+// [Authentication](/api-reference/authentication).
 func (c *Client) List(
 	ctx context.Context,
 	request *management.ListTokensRequest,
@@ -622,7 +622,7 @@ func (c *Client) List(
 
 // Returns the `RefreshToken` object matching `{tokenId}`. For more information on
 // Tokens, refer to
-// [Authentication](https://docs.synqly.com/reference/authentication).
+// [Authentication](/api-reference/authentication).
 func (c *Client) Get(
 	ctx context.Context,
 	refreshTokenId management.TokenId,

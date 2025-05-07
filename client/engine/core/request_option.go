@@ -29,7 +29,7 @@ type RequestOptions struct {
 // to be used directly; use RequestOption instead.
 func NewRequestOptions(opts ...RequestOption) *RequestOptions {
 	options := &RequestOptions{
-		HTTPHeader: http.Header{"User-Agent": []string{"Synqly-Go-SDK/0.3.109"}},
+		HTTPHeader: http.Header{"User-Agent": []string{"Synqly-Go-SDK/0.3.110"}},
 	}
 	for _, opt := range opts {
 		opt.applyRequestOptions(options)
