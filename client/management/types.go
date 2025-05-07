@@ -8910,6 +8910,7 @@ type ProviderConfig struct {
 	TicketingServicenow               *TicketingServiceNow
 	TicketingServicenowSir            *TicketingServiceNowSir
 	TicketingTorq                     *TicketingTorq
+	TicketingZendesk                  *TicketingZendesk
 	VulnerabilitiesCrowdstrike        *VulnerabilitiesCrowdStrike
 	VulnerabilitiesNucleus            *VulnerabilitiesNucleus
 	VulnerabilitiesQualysCloud        *VulnerabilitiesQualysCloud
@@ -9231,6 +9232,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.TicketingTorq = value
+	case "ticketing_zendesk":
+		value := new(TicketingZendesk)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.TicketingZendesk = value
 	case "vulnerabilities_crowdstrike":
 		value := new(VulnerabilitiesCrowdStrike)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -9428,6 +9435,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.TicketingTorq != nil {
 		return core.MarshalJSONWithExtraProperty(p.TicketingTorq, "type", "ticketing_torq")
 	}
+	if p.TicketingZendesk != nil {
+		return core.MarshalJSONWithExtraProperty(p.TicketingZendesk, "type", "ticketing_zendesk")
+	}
 	if p.VulnerabilitiesCrowdstrike != nil {
 		return core.MarshalJSONWithExtraProperty(p.VulnerabilitiesCrowdstrike, "type", "vulnerabilities_crowdstrike")
 	}
@@ -9503,6 +9513,7 @@ type ProviderConfigVisitor interface {
 	VisitTicketingServicenow(*TicketingServiceNow) error
 	VisitTicketingServicenowSir(*TicketingServiceNowSir) error
 	VisitTicketingTorq(*TicketingTorq) error
+	VisitTicketingZendesk(*TicketingZendesk) error
 	VisitVulnerabilitiesCrowdstrike(*VulnerabilitiesCrowdStrike) error
 	VisitVulnerabilitiesNucleus(*VulnerabilitiesNucleus) error
 	VisitVulnerabilitiesQualysCloud(*VulnerabilitiesQualysCloud) error
@@ -9663,6 +9674,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	if p.TicketingTorq != nil {
 		return visitor.VisitTicketingTorq(p.TicketingTorq)
 	}
+	if p.TicketingZendesk != nil {
+		return visitor.VisitTicketingZendesk(p.TicketingZendesk)
+	}
 	if p.VulnerabilitiesCrowdstrike != nil {
 		return visitor.VisitVulnerabilitiesCrowdstrike(p.VulnerabilitiesCrowdstrike)
 	}
@@ -9791,6 +9805,8 @@ const (
 	ProviderConfigIdTicketingServiceNowSir ProviderConfigId = "ticketing_servicenow_sir"
 	// Torq
 	ProviderConfigIdTicketingTorq ProviderConfigId = "ticketing_torq"
+	// Zendesk
+	ProviderConfigIdTicketingZendesk ProviderConfigId = "ticketing_zendesk"
 	// CrowdStrike Falcon Spotlight
 	ProviderConfigIdVulnerabilitiesCrowdStrike ProviderConfigId = "vulnerabilities_crowdstrike"
 	// Nucleus Vulnerability Management
@@ -9911,6 +9927,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdTicketingServiceNowSir, nil
 	case "ticketing_torq":
 		return ProviderConfigIdTicketingTorq, nil
+	case "ticketing_zendesk":
+		return ProviderConfigIdTicketingZendesk, nil
 	case "vulnerabilities_crowdstrike":
 		return ProviderConfigIdVulnerabilitiesCrowdStrike, nil
 	case "vulnerabilities_nucleus":
@@ -12474,6 +12492,50 @@ func (t *TicketingTorq) String() string {
 	return fmt.Sprintf("%#v", t)
 }
 
+// Configuration for Zendesk as a Ticketing Provider
+type TicketingZendesk struct {
+	Credential *ZendeskCredential `json:"credential" url:"credential"`
+	// Base URL for your Zendesk tenant.
+	Url string `json:"url" url:"url"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (t *TicketingZendesk) GetExtraProperties() map[string]interface{} {
+	return t.extraProperties
+}
+
+func (t *TicketingZendesk) UnmarshalJSON(data []byte) error {
+	type unmarshaler TicketingZendesk
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*t = TicketingZendesk(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *t)
+	if err != nil {
+		return err
+	}
+	t.extraProperties = extraProperties
+
+	t._rawJSON = nil
+	return nil
+}
+
+func (t *TicketingZendesk) String() string {
+	if len(t._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(t._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(t); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", t)
+}
+
 type TorqCredential struct {
 	Type string
 	// Client ID for the Torq REST API. [Torq API key generation documentation](https://learn.torq.io/apidocs/authentication).
@@ -12869,6 +12931,77 @@ func (v *VulnerabilitiesTenableCloud) String() string {
 		return value
 	}
 	return fmt.Sprintf("%#v", v)
+}
+
+type ZendeskCredential struct {
+	Type string
+	// E-mail address and API Token for use with the Zendesk API. Use the e-mail address for the `username` field and API Token for the `secret` field.
+	// See [Zendesk API token generation documentation](https://developer.zendesk.com/api-reference/introduction/security-and-auth/#api-token) for more detail.
+	Basic *BasicCredential
+	// ID of an existing Synqly credential that stores the Zendesk API basic credential.
+	BasicId BasicCredentialId
+}
+
+func (z *ZendeskCredential) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	z.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", z)
+	}
+	switch unmarshaler.Type {
+	case "basic":
+		value := new(BasicCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		z.Basic = value
+	case "basic_id":
+		var valueUnmarshaler struct {
+			BasicId BasicCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		z.BasicId = valueUnmarshaler.BasicId
+	}
+	return nil
+}
+
+func (z ZendeskCredential) MarshalJSON() ([]byte, error) {
+	if z.Basic != nil {
+		return core.MarshalJSONWithExtraProperty(z.Basic, "type", "basic")
+	}
+	if z.BasicId != "" {
+		var marshaler = struct {
+			Type    string            `json:"type"`
+			BasicId BasicCredentialId `json:"value"`
+		}{
+			Type:    "basic_id",
+			BasicId: z.BasicId,
+		}
+		return json.Marshal(marshaler)
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", z)
+}
+
+type ZendeskCredentialVisitor interface {
+	VisitBasic(*BasicCredential) error
+	VisitBasicId(BasicCredentialId) error
+}
+
+func (z *ZendeskCredential) Accept(visitor ZendeskCredentialVisitor) error {
+	if z.Basic != nil {
+		return visitor.VisitBasic(z.Basic)
+	}
+	if z.BasicId != "" {
+		return visitor.VisitBasicId(z.BasicId)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", z)
 }
 
 type AdhocRole struct {
