@@ -10450,12 +10450,18 @@ type SiemSentinel struct {
 	Credential *SentinelCredential `json:"credential" url:"credential"`
 	// The default tables to use for queries. Supply this value if you would like to a subset of the default tables or non-ASIM data tables with Sentinel/Log Analytics queries. If more than one table is specified, a union operator will join them to query all of the tables at once. Supply a single value with "_" if you would like to query all tables without the normalizing ASIM transformations. **Note** that a single "_" entry will map to a 'union \*' query. Relying heavily on these queries is generally discouraged by Sentinel because they are slower and more resource intensive.
 	DefaultTables []string `json:"default_tables,omitempty" url:"default_tables,omitempty"`
+	// Either the logs ingestion API url for you Data Collection Rule or your Data Collection Endpoint URL. This value must be supplied to ingest data into Microsoft Sentinel. This should look something like https://mydcr-xxx-westus2.logs.z1.ingest.monitor.azure.com
+	IngestUrl *string `json:"ingest_url,omitempty" url:"ingest_url,omitempty"`
 	// The root URL for the Microsoft Azure Monitor Logs API. This is optional and should only be supplied if using an alternate Microsoft cloud, such as GovCloud.
 	LogsUrl *string `json:"logs_url,omitempty" url:"logs_url,omitempty"`
 	// The root URL for the Microsoft Azure Management API. This is optional and should only be supplied if using an alternate Microsoft cloud, such as GovCloud.
 	ManagementUrl *string `json:"management_url,omitempty" url:"management_url,omitempty"`
 	// The Azure resource group name that contains the Microsoft Sentinel workspace.
 	ResourceGroup string `json:"resource_group" url:"resource_group"`
+	// Your Data Collection Rule immutable ID. This value must be supplied to ingest data into Microsoft Sentinel.
+	RuleId *string `json:"rule_id,omitempty" url:"rule_id,omitempty"`
+	// The name of the Data Collection Rule stream. This value must be supplied to ingest data into Microsoft Sentinel.
+	StreamName *string `json:"stream_name,omitempty" url:"stream_name,omitempty"`
 	// The Azure subscription ID that contains the Microsoft Sentinel workspace.
 	SubscriptionId string `json:"subscription_id" url:"subscription_id"`
 	// The Azure Active Directory tenant ID that contains the Microsoft Sentinel workspace.
