@@ -2748,6 +2748,8 @@ type IntegrationPoint struct {
 	Connector CategoryId `json:"connector" url:"connector"`
 	// Selects providers to use for account environments.
 	Environments *IntegrationEnvironments `json:"environments" url:"environments"`
+	// A list of mapping chains to apply to integrations using this integration point. Each mapping chain is a list of mappings to apply to the integration in the order they should be applied. Mappings are applied by operation ID. If an integration is created that declares its own mappings for an operation, they will override this list of mappings. Leave this empty to use the default default mappings.
+	Mappings []*MappingChainTemplate `json:"mappings,omitempty" url:"mappings,omitempty"`
 	// Additional data mappings for integrations added to this integration point. This allows for custom data to be mapped to the custom_fields portion of the response.
 	AdditionalMappings []*AdditionalMappingTemplate `json:"additional_mappings,omitempty" url:"additional_mappings,omitempty"`
 
@@ -2809,6 +2811,52 @@ func (i *IntegrationPoint) String() string {
 		return value
 	}
 	return fmt.Sprintf("%#v", i)
+}
+
+type MappingChainTemplate struct {
+	// A list of mapping IDs to apply in the format `{mapping_id}:{version}`.
+	Mappings []string `json:"mappings" url:"mappings"`
+	// The operation IDs to apply the mappings to.
+	OperationIds []string `json:"operation_ids" url:"operation_ids"`
+	// A list of provider ID strings that this mapping applies to. Mapping templates must have at least one provider.
+	Providers []ProviderConfigId `json:"providers" url:"providers"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (m *MappingChainTemplate) GetExtraProperties() map[string]interface{} {
+	return m.extraProperties
+}
+
+func (m *MappingChainTemplate) UnmarshalJSON(data []byte) error {
+	type unmarshaler MappingChainTemplate
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*m = MappingChainTemplate(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *m)
+	if err != nil {
+		return err
+	}
+	m.extraProperties = extraProperties
+
+	m._rawJSON = nil
+	return nil
+}
+
+func (m *MappingChainTemplate) String() string {
+	if len(m._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(m._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(m); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", m)
 }
 
 type BridgeSelector struct {
@@ -2966,6 +3014,8 @@ type Integration struct {
 	BridgeSelector *BridgeSelector `json:"bridge_selector,omitempty" url:"bridge_selector,omitempty"`
 	// Webhook configuration for this integration. Some providers support webhooks, and will allow end users providers to send events to a server for new or updated data.
 	WebhookConfig *WebhookConfig `json:"webhook_config,omitempty" url:"webhook_config,omitempty"`
+	// A list of mapping chains to apply to the integration. Each mapping chain is a list of mappings to apply to the integration in the order they should be applied. Mappings are applied by operation ID. Leave this empty to use the default default mappings.
+	Mappings []*MappingChain `json:"mappings,omitempty" url:"mappings,omitempty"`
 	// Additional data mappings for this integration. This allows for custom data to be mapped to the custom_fields portion of the response.
 	AdditionalMappings []*AdditionalMapping `json:"additional_mappings,omitempty" url:"additional_mappings,omitempty"`
 
@@ -3198,6 +3248,50 @@ func (a *AdditionalMapping) String() string {
 		return value
 	}
 	return fmt.Sprintf("%#v", a)
+}
+
+type MappingChain struct {
+	// A list of mapping IDs to apply in the format `{mapping_id}:{version}`.
+	Mappings []string `json:"mappings" url:"mappings"`
+	// The operation IDs to apply the mappings to.
+	OperationIds []string `json:"operation_ids" url:"operation_ids"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (m *MappingChain) GetExtraProperties() map[string]interface{} {
+	return m.extraProperties
+}
+
+func (m *MappingChain) UnmarshalJSON(data []byte) error {
+	type unmarshaler MappingChain
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*m = MappingChain(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *m)
+	if err != nil {
+		return err
+	}
+	m.extraProperties = extraProperties
+
+	m._rawJSON = nil
+	return nil
+}
+
+func (m *MappingChain) String() string {
+	if len(m._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(m._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(m); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", m)
 }
 
 type MappingDataType string

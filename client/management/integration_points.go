@@ -36,6 +36,8 @@ type CreateIntegrationPointRequest struct {
 	Connector CategoryId `json:"connector" url:"connector"`
 	// Selects providers to use for account environments.
 	Environments *IntegrationEnvironments `json:"environments" url:"environments"`
+	// A list of mapping chains to apply to integrations using this integration point. Each mapping chain is a list of mappings to apply to the integration in the order they should be applied. Mappings are applied by operation ID. If an integration is created that declares its own mappings for an operation, they will override this list of mappings. Leave this empty to use the default default mappings.
+	Mappings []*MappingChainTemplate `json:"mappings,omitempty" url:"mappings,omitempty"`
 	// Additional data mappings for integrations added to this integration point. This allows for custom data to be mapped to the custom_fields portion of the response.
 	AdditionalMappings []*AdditionalMappingTemplate `json:"additional_mappings,omitempty" url:"additional_mappings,omitempty"`
 

@@ -59,6 +59,8 @@ type CreateIntegrationRequest struct {
 	BridgeSelector *BridgeSelector `json:"bridge_selector,omitempty" url:"bridge_selector,omitempty"`
 	// Web hook config for this integration
 	WebhookConfig *WebhookConfig `json:"webhook_config,omitempty" url:"webhook_config,omitempty"`
+	// A list of mapping chains to apply to the integration. Each mapping chain is a list of mappings to apply to the integration in the order they should be applied. Mappings are applied by operation ID. Leave this empty to use the default default mappings.
+	Mappings []*MappingChain `json:"mappings,omitempty" url:"mappings,omitempty"`
 	// Additional data mappings for this integration. This allows for custom data to be mapped to the custom_fields portion of the response.
 	AdditionalMappings []*AdditionalMapping `json:"additional_mappings,omitempty" url:"additional_mappings,omitempty"`
 
