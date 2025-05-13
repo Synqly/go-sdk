@@ -1575,6 +1575,8 @@ type ProblemContext struct {
 	Resources []*ResourceReference  `json:"resources,omitempty" url:"resources,omitempty"`
 	// If available this represents the underlying raw error, for example an error response from a Provider.
 	RawError *string `json:"raw_error,omitempty" url:"raw_error,omitempty"`
+	// If available this represents the underlying details from the provider. May include the error message, status code, and other details.
+	ProviderDetails map[string]string `json:"provider_details,omitempty" url:"provider_details,omitempty"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
