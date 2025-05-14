@@ -8919,6 +8919,76 @@ func (o *OktaCredential) Accept(visitor OktaCredentialVisitor) error {
 	return fmt.Errorf("type %T does not define a non-empty union type", o)
 }
 
+type OpenSearchCredential struct {
+	Type string
+	// Basic authentication credentials for OpenSearch.
+	Basic *BasicCredential
+	// ID of a credential that stores basic authentication credentials for OpenSearch.
+	BasicId BasicCredentialId
+}
+
+func (o *OpenSearchCredential) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	o.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", o)
+	}
+	switch unmarshaler.Type {
+	case "basic":
+		value := new(BasicCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		o.Basic = value
+	case "basic_id":
+		var valueUnmarshaler struct {
+			BasicId BasicCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		o.BasicId = valueUnmarshaler.BasicId
+	}
+	return nil
+}
+
+func (o OpenSearchCredential) MarshalJSON() ([]byte, error) {
+	if o.Basic != nil {
+		return core.MarshalJSONWithExtraProperty(o.Basic, "type", "basic")
+	}
+	if o.BasicId != "" {
+		var marshaler = struct {
+			Type    string            `json:"type"`
+			BasicId BasicCredentialId `json:"value"`
+		}{
+			Type:    "basic_id",
+			BasicId: o.BasicId,
+		}
+		return json.Marshal(marshaler)
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", o)
+}
+
+type OpenSearchCredentialVisitor interface {
+	VisitBasic(*BasicCredential) error
+	VisitBasicId(BasicCredentialId) error
+}
+
+func (o *OpenSearchCredential) Accept(visitor OpenSearchCredentialVisitor) error {
+	if o.Basic != nil {
+		return visitor.VisitBasic(o.Basic)
+	}
+	if o.BasicId != "" {
+		return visitor.VisitBasicId(o.BasicId)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", o)
+}
+
 type PagerDutyCredential struct {
 	Type string
 	// PagerDuty authentication token. Follow [this guide to generate an REST API token](https://support.pagerduty.com/docs/api-access-keys#rest-api-keys).
@@ -9089,6 +9159,7 @@ type ProviderConfig struct {
 	SiemElasticsearch                 *SiemElasticsearch
 	SiemGoogleChronicle               *SiemGoogleChronicle
 	SiemMockSiem                      *SiemMock
+	SiemOpensearch                    *SiemOpenSearch
 	SiemQRadar                        *SiemQRadar
 	SiemRapid7Insightidr              *SiemRapid7InsightIdr
 	SiemSentinel                      *SiemSentinel
@@ -9101,6 +9172,7 @@ type ProviderConfig struct {
 	SinkElasticsearch                 *SinkElasticsearch
 	SinkGoogleSecOps                  *SinkGoogleSecOps
 	SinkMockSink                      *SinkMock
+	SinkOpensearch                    *SinkOpenSearch
 	SinkSplunk                        *SinkSplunk
 	StorageAwsS3                      *StorageAwsS3
 	StorageAzureBlob                  *StorageAzureBlob
@@ -9303,6 +9375,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.SiemMockSiem = value
+	case "siem_opensearch":
+		value := new(SiemOpenSearch)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.SiemOpensearch = value
 	case "siem_q_radar":
 		value := new(SiemQRadar)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -9375,6 +9453,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.SinkMockSink = value
+	case "sink_opensearch":
+		value := new(SinkOpenSearch)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.SinkOpensearch = value
 	case "sink_splunk":
 		value := new(SinkSplunk)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -9584,6 +9668,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.SiemMockSiem != nil {
 		return core.MarshalJSONWithExtraProperty(p.SiemMockSiem, "type", "siem_mock_siem")
 	}
+	if p.SiemOpensearch != nil {
+		return core.MarshalJSONWithExtraProperty(p.SiemOpensearch, "type", "siem_opensearch")
+	}
 	if p.SiemQRadar != nil {
 		return core.MarshalJSONWithExtraProperty(p.SiemQRadar, "type", "siem_q_radar")
 	}
@@ -9619,6 +9706,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	}
 	if p.SinkMockSink != nil {
 		return core.MarshalJSONWithExtraProperty(p.SinkMockSink, "type", "sink_mock_sink")
+	}
+	if p.SinkOpensearch != nil {
+		return core.MarshalJSONWithExtraProperty(p.SinkOpensearch, "type", "sink_opensearch")
 	}
 	if p.SinkSplunk != nil {
 		return core.MarshalJSONWithExtraProperty(p.SinkSplunk, "type", "sink_splunk")
@@ -9712,6 +9802,7 @@ type ProviderConfigVisitor interface {
 	VisitSiemElasticsearch(*SiemElasticsearch) error
 	VisitSiemGoogleChronicle(*SiemGoogleChronicle) error
 	VisitSiemMockSiem(*SiemMock) error
+	VisitSiemOpensearch(*SiemOpenSearch) error
 	VisitSiemQRadar(*SiemQRadar) error
 	VisitSiemRapid7Insightidr(*SiemRapid7InsightIdr) error
 	VisitSiemSentinel(*SiemSentinel) error
@@ -9724,6 +9815,7 @@ type ProviderConfigVisitor interface {
 	VisitSinkElasticsearch(*SinkElasticsearch) error
 	VisitSinkGoogleSecOps(*SinkGoogleSecOps) error
 	VisitSinkMockSink(*SinkMock) error
+	VisitSinkOpensearch(*SinkOpenSearch) error
 	VisitSinkSplunk(*SinkSplunk) error
 	VisitStorageAwsS3(*StorageAwsS3) error
 	VisitStorageAzureBlob(*StorageAzureBlob) error
@@ -9831,6 +9923,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	if p.SiemMockSiem != nil {
 		return visitor.VisitSiemMockSiem(p.SiemMockSiem)
 	}
+	if p.SiemOpensearch != nil {
+		return visitor.VisitSiemOpensearch(p.SiemOpensearch)
+	}
 	if p.SiemQRadar != nil {
 		return visitor.VisitSiemQRadar(p.SiemQRadar)
 	}
@@ -9866,6 +9961,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.SinkMockSink != nil {
 		return visitor.VisitSinkMockSink(p.SinkMockSink)
+	}
+	if p.SinkOpensearch != nil {
+		return visitor.VisitSinkOpensearch(p.SinkOpensearch)
 	}
 	if p.SinkSplunk != nil {
 		return visitor.VisitSinkSplunk(p.SinkSplunk)
@@ -9990,6 +10088,8 @@ const (
 	ProviderConfigIdSiemGoogleChronicle ProviderConfigId = "siem_google_chronicle"
 	// SIEM Test
 	ProviderConfigIdSiemMock ProviderConfigId = "siem_mock_siem"
+	// OpenSearch SIEM
+	ProviderConfigIdSiemOpenSearch ProviderConfigId = "siem_opensearch"
 	// QRadar
 	ProviderConfigIdSiemQRadar ProviderConfigId = "siem_q_radar"
 	// Rapid7 InsightIDR
@@ -10014,6 +10114,8 @@ const (
 	ProviderConfigIdSinkGoogleSecOps ProviderConfigId = "sink_google_sec_ops"
 	// Sink Test
 	ProviderConfigIdSinkMock ProviderConfigId = "sink_mock_sink"
+	// OpenSearch
+	ProviderConfigIdSinkOpenSearch ProviderConfigId = "sink_opensearch"
 	// Splunk Enterprise Security
 	ProviderConfigIdSinkSplunk ProviderConfigId = "sink_splunk"
 	// AWS S3
@@ -10116,6 +10218,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdSiemGoogleChronicle, nil
 	case "siem_mock_siem":
 		return ProviderConfigIdSiemMock, nil
+	case "siem_opensearch":
+		return ProviderConfigIdSiemOpenSearch, nil
 	case "siem_q_radar":
 		return ProviderConfigIdSiemQRadar, nil
 	case "siem_rapid7_insightidr":
@@ -10140,6 +10244,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdSinkGoogleSecOps, nil
 	case "sink_mock_sink":
 		return ProviderConfigIdSinkMock, nil
+	case "sink_opensearch":
+		return ProviderConfigIdSinkOpenSearch, nil
 	case "sink_splunk":
 		return ProviderConfigIdSinkSplunk, nil
 	case "storage_aws_s3":
@@ -10579,6 +10685,56 @@ func (s *SiemMock) UnmarshalJSON(data []byte) error {
 }
 
 func (s *SiemMock) String() string {
+	if len(s._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(s); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", s)
+}
+
+// Configuration for OpenSearch search and analytics engine. Supports both managed and self-hosted OpenSearch deployments
+type SiemOpenSearch struct {
+	// The index or data stream to use when writing events. Defaults to the 'index' setting if not set.
+	CreateIndex *string               `json:"create_index,omitempty" url:"create_index,omitempty"`
+	Credential  *OpenSearchCredential `json:"credential" url:"credential"`
+	// The index, data stream, or index alias to read events from.
+	Index *string `json:"index,omitempty" url:"index,omitempty"`
+	// If true, skips verification of the OpenSearch server's TLS certificate.
+	SkipTlsVerify *bool `json:"skip_tls_verify,omitempty" url:"skip_tls_verify,omitempty"`
+	// URL for the OpenSearch API. This should be the base URL for the API, without any path components and must be HTTPS.
+	Url string `json:"url" url:"url"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (s *SiemOpenSearch) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
+}
+
+func (s *SiemOpenSearch) UnmarshalJSON(data []byte) error {
+	type unmarshaler SiemOpenSearch
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*s = SiemOpenSearch(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+
+	s._rawJSON = nil
+	return nil
+}
+
+func (s *SiemOpenSearch) String() string {
 	if len(s._rawJSON) > 0 {
 		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
 			return value
@@ -11423,6 +11579,54 @@ func (s *SinkMock) UnmarshalJSON(data []byte) error {
 }
 
 func (s *SinkMock) String() string {
+	if len(s._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(s); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", s)
+}
+
+// Configuration for OpenSearch search and analytics engine. Supports both managed and self-hosted OpenSearch deployments
+type SinkOpenSearch struct {
+	// The index or data stream to use when writing events.
+	CreateIndex string                `json:"create_index" url:"create_index"`
+	Credential  *OpenSearchCredential `json:"credential" url:"credential"`
+	// If true, skips verification of the OpenSearch server's TLS certificate.
+	SkipTlsVerify *bool `json:"skip_tls_verify,omitempty" url:"skip_tls_verify,omitempty"`
+	// URL for the OpenSearch API. This should be the base URL for the API, without any path components and must be HTTPS.
+	Url string `json:"url" url:"url"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (s *SinkOpenSearch) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
+}
+
+func (s *SinkOpenSearch) UnmarshalJSON(data []byte) error {
+	type unmarshaler SinkOpenSearch
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*s = SinkOpenSearch(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+
+	s._rawJSON = nil
+	return nil
+}
+
+func (s *SinkOpenSearch) String() string {
 	if len(s._rawJSON) > 0 {
 		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
 			return value
