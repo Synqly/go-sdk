@@ -9192,6 +9192,7 @@ type ProviderConfig struct {
 	VulnerabilitiesQualysCloudMock    *VulnerabilitiesQualysCloudMock
 	VulnerabilitiesRapid7InsightCloud *VulnerabilitiesRapid7InsightCloud
 	VulnerabilitiesTaniumCloud        *VulnerabilitiesTaniumCloud
+	VulnerabilitiesTaniumCloudMock    *VulnerabilitiesTaniumCloudMock
 	VulnerabilitiesTenableCloud       *VulnerabilitiesTenableCloud
 }
 
@@ -9573,6 +9574,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.VulnerabilitiesTaniumCloud = value
+	case "vulnerabilities_tanium_cloud_mock":
+		value := new(VulnerabilitiesTaniumCloudMock)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.VulnerabilitiesTaniumCloudMock = value
 	case "vulnerabilities_tenable_cloud":
 		value := new(VulnerabilitiesTenableCloud)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -9767,6 +9774,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.VulnerabilitiesTaniumCloud != nil {
 		return core.MarshalJSONWithExtraProperty(p.VulnerabilitiesTaniumCloud, "type", "vulnerabilities_tanium_cloud")
 	}
+	if p.VulnerabilitiesTaniumCloudMock != nil {
+		return core.MarshalJSONWithExtraProperty(p.VulnerabilitiesTaniumCloudMock, "type", "vulnerabilities_tanium_cloud_mock")
+	}
 	if p.VulnerabilitiesTenableCloud != nil {
 		return core.MarshalJSONWithExtraProperty(p.VulnerabilitiesTenableCloud, "type", "vulnerabilities_tenable_cloud")
 	}
@@ -9835,6 +9845,7 @@ type ProviderConfigVisitor interface {
 	VisitVulnerabilitiesQualysCloudMock(*VulnerabilitiesQualysCloudMock) error
 	VisitVulnerabilitiesRapid7InsightCloud(*VulnerabilitiesRapid7InsightCloud) error
 	VisitVulnerabilitiesTaniumCloud(*VulnerabilitiesTaniumCloud) error
+	VisitVulnerabilitiesTaniumCloudMock(*VulnerabilitiesTaniumCloudMock) error
 	VisitVulnerabilitiesTenableCloud(*VulnerabilitiesTenableCloud) error
 }
 
@@ -10022,6 +10033,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	if p.VulnerabilitiesTaniumCloud != nil {
 		return visitor.VisitVulnerabilitiesTaniumCloud(p.VulnerabilitiesTaniumCloud)
 	}
+	if p.VulnerabilitiesTaniumCloudMock != nil {
+		return visitor.VisitVulnerabilitiesTaniumCloudMock(p.VulnerabilitiesTaniumCloudMock)
+	}
 	if p.VulnerabilitiesTenableCloud != nil {
 		return visitor.VisitVulnerabilitiesTenableCloud(p.VulnerabilitiesTenableCloud)
 	}
@@ -10154,6 +10168,8 @@ const (
 	ProviderConfigIdVulnerabilitiesRapid7InsightCloud ProviderConfigId = "vulnerabilities_rapid7_insight_cloud"
 	// Tanium Vulnerability Management
 	ProviderConfigIdVulnerabilitiesTaniumCloud ProviderConfigId = "vulnerabilities_tanium_cloud"
+	// [MOCK] Tsanium Vulnerability Management
+	ProviderConfigIdVulnerabilitiesTaniumCloudMock ProviderConfigId = "vulnerabilities_tanium_cloud_mock"
 	// Tenable Vulnerability Management
 	ProviderConfigIdVulnerabilitiesTenableCloud ProviderConfigId = "vulnerabilities_tenable_cloud"
 	// Any provider config type.
@@ -10284,6 +10300,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdVulnerabilitiesRapid7InsightCloud, nil
 	case "vulnerabilities_tanium_cloud":
 		return ProviderConfigIdVulnerabilitiesTaniumCloud, nil
+	case "vulnerabilities_tanium_cloud_mock":
+		return ProviderConfigIdVulnerabilitiesTaniumCloudMock, nil
 	case "vulnerabilities_tenable_cloud":
 		return ProviderConfigIdVulnerabilitiesTenableCloud, nil
 	case "*":
@@ -13072,6 +13090,25 @@ func (v VulnerabilitiesQualysCloudDataset) Ptr() *VulnerabilitiesQualysCloudData
 	return &v
 }
 
+type VulnerabilitiesTaniumCloudDataset string
+
+const (
+	VulnerabilitiesTaniumCloudDatasetBasicVer0 VulnerabilitiesTaniumCloudDataset = "basic_v0"
+)
+
+func NewVulnerabilitiesTaniumCloudDatasetFromString(s string) (VulnerabilitiesTaniumCloudDataset, error) {
+	switch s {
+	case "basic_v0":
+		return VulnerabilitiesTaniumCloudDatasetBasicVer0, nil
+	}
+	var t VulnerabilitiesTaniumCloudDataset
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (v VulnerabilitiesTaniumCloudDataset) Ptr() *VulnerabilitiesTaniumCloudDataset {
+	return &v
+}
+
 // Configuration for CrowdStrike Falcon as a Vulnerabilities Provider
 type VulnerabilitiesCrowdStrike struct {
 	Credential *CrowdStrikeCredential `json:"credential" url:"credential"`
@@ -13325,6 +13362,48 @@ func (v *VulnerabilitiesTaniumCloud) UnmarshalJSON(data []byte) error {
 }
 
 func (v *VulnerabilitiesTaniumCloud) String() string {
+	if len(v._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(v._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(v); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", v)
+}
+
+// Configuration for a mock Tanium Cloud as a Vulnerabilities Provider
+type VulnerabilitiesTaniumCloudMock struct {
+	Dataset VulnerabilitiesTaniumCloudDataset `json:"dataset" url:"dataset"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (v *VulnerabilitiesTaniumCloudMock) GetExtraProperties() map[string]interface{} {
+	return v.extraProperties
+}
+
+func (v *VulnerabilitiesTaniumCloudMock) UnmarshalJSON(data []byte) error {
+	type unmarshaler VulnerabilitiesTaniumCloudMock
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*v = VulnerabilitiesTaniumCloudMock(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *v)
+	if err != nil {
+		return err
+	}
+	v.extraProperties = extraProperties
+
+	v._rawJSON = nil
+	return nil
+}
+
+func (v *VulnerabilitiesTaniumCloudMock) String() string {
 	if len(v._rawJSON) > 0 {
 		if value, err := core.StringifyJSON(v._rawJSON); err == nil {
 			return value
