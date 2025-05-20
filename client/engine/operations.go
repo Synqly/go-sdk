@@ -8,8 +8,8 @@ import (
 	core "github.com/synqly/go-sdk/client/engine/core"
 )
 
-// Unique identifier for this Asynchronous Operation
-type OperationId = Id
+// Unique request identifier for this Asynchronous Operation.
+type AsyncOperationRequestId = Id
 
 type CreateOperationRequest struct {
 	// Run now or on the specified schedule.

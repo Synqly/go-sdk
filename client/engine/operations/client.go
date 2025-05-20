@@ -37,7 +37,7 @@ func NewClient(opts ...option.RequestOption) *Client {
 // Returns the `Asynchronous Operation` object matching `{operationId}`.
 func (c *Client) Get(
 	ctx context.Context,
-	operationId engine.OperationId,
+	operationId engine.AsyncOperationRequestId,
 	opts ...option.RequestOption,
 ) (*engine.GetOperationResponse, error) {
 	options := core.NewRequestOptions(opts...)
@@ -262,7 +262,7 @@ func (c *Client) Create(
 // Cancels the `Asynchronous Operation` matching `{operationId}`.
 func (c *Client) Cancel(
 	ctx context.Context,
-	operationId engine.OperationId,
+	operationId engine.AsyncOperationRequestId,
 	opts ...option.RequestOption,
 ) error {
 	options := core.NewRequestOptions(opts...)

@@ -1789,7 +1789,7 @@ func (n NotificationStatus) Ptr() *NotificationStatus {
 
 type Operation struct {
 	// ID of the operation
-	Id OperationId `json:"id" url:"id"`
+	Id AsyncOperationRequestId `json:"id" url:"id"`
 	// Time object was originally created
 	CreatedAt time.Time `json:"created_at" url:"created_at"`
 	// Last time object was updated
@@ -2049,6 +2049,214 @@ func (o OperationStatus) Ptr() *OperationStatus {
 	return &o
 }
 
+type OperationId string
+
+const (
+	OperationIdAssetsCreateAsset                        OperationId = "assets_create_asset"
+	OperationIdAssetsQueryDevices                       OperationId = "assets_query_devices"
+	OperationIdCloudsecurityQueryCloudResourceInventory OperationId = "cloudsecurity_query_cloud_resource_inventory"
+	OperationIdCloudsecurityQueryComplianceFindings     OperationId = "cloudsecurity_query_compliance_findings"
+	OperationIdEdrCreateIocs                            OperationId = "edr_create_iocs"
+	OperationIdEdrDeleteIocs                            OperationId = "edr_delete_iocs"
+	OperationIdEdrGetEndpoint                           OperationId = "edr_get_endpoint"
+	OperationIdEdrNetworkQuarantine                     OperationId = "edr_network_quarantine"
+	OperationIdEdrQueryAlerts                           OperationId = "edr_query_alerts"
+	OperationIdEdrQueryApplications                     OperationId = "edr_query_applications"
+	OperationIdEdrQueryEndpoints                        OperationId = "edr_query_endpoints"
+	OperationIdEdrQueryIocs                             OperationId = "edr_query_iocs"
+	OperationIdEdrQueryPostureScore                     OperationId = "edr_query_posture_score"
+	OperationIdEdrQueryThreatevents                     OperationId = "edr_query_threatevents"
+	OperationIdIdentityDisableUser                      OperationId = "identity_disable_user"
+	OperationIdIdentityEnableUser                       OperationId = "identity_enable_user"
+	OperationIdIdentityExpireAllUserSessions            OperationId = "identity_expire_all_user_sessions"
+	OperationIdIdentityForceUserPasswordReset           OperationId = "identity_force_user_password_reset"
+	OperationIdIdentityGetGroup                         OperationId = "identity_get_group"
+	OperationIdIdentityGetGroupMembers                  OperationId = "identity_get_group_members"
+	OperationIdIdentityGetUser                          OperationId = "identity_get_user"
+	OperationIdIdentityQueryAuditLog                    OperationId = "identity_query_audit_log"
+	OperationIdIdentityQueryGroups                      OperationId = "identity_query_groups"
+	OperationIdIdentityQueryUsers                       OperationId = "identity_query_users"
+	OperationIdNotificationsClearMessage                OperationId = "notifications_clear_message"
+	OperationIdNotificationsCreateMessage               OperationId = "notifications_create_message"
+	OperationIdNotificationsGetMessage                  OperationId = "notifications_get_message"
+	OperationIdSiemGetEvidence                          OperationId = "siem_get_evidence"
+	OperationIdSiemGetInvestigation                     OperationId = "siem_get_investigation"
+	OperationIdSiemPatchInvestigation                   OperationId = "siem_patch_investigation"
+	OperationIdSiemPostEvents                           OperationId = "siem_post_events"
+	OperationIdSiemQueryEvents                          OperationId = "siem_query_events"
+	OperationIdSiemQueryInvestigations                  OperationId = "siem_query_investigations"
+	OperationIdSiemQueryLogProviders                    OperationId = "siem_query_log_providers"
+	OperationIdSinkPostEvents                           OperationId = "sink_post_events"
+	OperationIdStorageDeleteFile                        OperationId = "storage_delete_file"
+	OperationIdStorageDownloadFile                      OperationId = "storage_download_file"
+	OperationIdStorageListFiles                         OperationId = "storage_list_files"
+	OperationIdStorageUploadFile                        OperationId = "storage_upload_file"
+	OperationIdTicketingCreateAttachment                OperationId = "ticketing_create_attachment"
+	OperationIdTicketingCreateComment                   OperationId = "ticketing_create_comment"
+	OperationIdTicketingCreateNote                      OperationId = "ticketing_create_note"
+	OperationIdTicketingCreateTicket                    OperationId = "ticketing_create_ticket"
+	OperationIdTicketingDeleteAttachment                OperationId = "ticketing_delete_attachment"
+	OperationIdTicketingDeleteComment                   OperationId = "ticketing_delete_comment"
+	OperationIdTicketingDeleteNote                      OperationId = "ticketing_delete_note"
+	OperationIdTicketingDownloadAttachment              OperationId = "ticketing_download_attachment"
+	OperationIdTicketingGetTicket                       OperationId = "ticketing_get_ticket"
+	OperationIdTicketingListAttachmentsMetadata         OperationId = "ticketing_list_attachments_metadata"
+	OperationIdTicketingListComments                    OperationId = "ticketing_list_comments"
+	OperationIdTicketingListNotes                       OperationId = "ticketing_list_notes"
+	OperationIdTicketingListProjects                    OperationId = "ticketing_list_projects"
+	OperationIdTicketingListRemoteFields                OperationId = "ticketing_list_remote_fields"
+	OperationIdTicketingPatchNote                       OperationId = "ticketing_patch_note"
+	OperationIdTicketingPatchTicket                     OperationId = "ticketing_patch_ticket"
+	OperationIdTicketingQueryTickets                    OperationId = "ticketing_query_tickets"
+	OperationIdVulnerabilitiesCreateAsset               OperationId = "vulnerabilities_create_asset"
+	OperationIdVulnerabilitiesCreateFindings            OperationId = "vulnerabilities_create_findings"
+	OperationIdVulnerabilitiesGetScanActivity           OperationId = "vulnerabilities_get_scan_activity"
+	OperationIdVulnerabilitiesQueryAssets               OperationId = "vulnerabilities_query_assets"
+	OperationIdVulnerabilitiesQueryFindings             OperationId = "vulnerabilities_query_findings"
+	OperationIdVulnerabilitiesQueryScans                OperationId = "vulnerabilities_query_scans"
+	OperationIdVulnerabilitiesUpdateAsset               OperationId = "vulnerabilities_update_asset"
+	OperationIdVulnerabilitiesUpdateFinding             OperationId = "vulnerabilities_update_finding"
+)
+
+func NewOperationIdFromString(s string) (OperationId, error) {
+	switch s {
+	case "assets_create_asset":
+		return OperationIdAssetsCreateAsset, nil
+	case "assets_query_devices":
+		return OperationIdAssetsQueryDevices, nil
+	case "cloudsecurity_query_cloud_resource_inventory":
+		return OperationIdCloudsecurityQueryCloudResourceInventory, nil
+	case "cloudsecurity_query_compliance_findings":
+		return OperationIdCloudsecurityQueryComplianceFindings, nil
+	case "edr_create_iocs":
+		return OperationIdEdrCreateIocs, nil
+	case "edr_delete_iocs":
+		return OperationIdEdrDeleteIocs, nil
+	case "edr_get_endpoint":
+		return OperationIdEdrGetEndpoint, nil
+	case "edr_network_quarantine":
+		return OperationIdEdrNetworkQuarantine, nil
+	case "edr_query_alerts":
+		return OperationIdEdrQueryAlerts, nil
+	case "edr_query_applications":
+		return OperationIdEdrQueryApplications, nil
+	case "edr_query_endpoints":
+		return OperationIdEdrQueryEndpoints, nil
+	case "edr_query_iocs":
+		return OperationIdEdrQueryIocs, nil
+	case "edr_query_posture_score":
+		return OperationIdEdrQueryPostureScore, nil
+	case "edr_query_threatevents":
+		return OperationIdEdrQueryThreatevents, nil
+	case "identity_disable_user":
+		return OperationIdIdentityDisableUser, nil
+	case "identity_enable_user":
+		return OperationIdIdentityEnableUser, nil
+	case "identity_expire_all_user_sessions":
+		return OperationIdIdentityExpireAllUserSessions, nil
+	case "identity_force_user_password_reset":
+		return OperationIdIdentityForceUserPasswordReset, nil
+	case "identity_get_group":
+		return OperationIdIdentityGetGroup, nil
+	case "identity_get_group_members":
+		return OperationIdIdentityGetGroupMembers, nil
+	case "identity_get_user":
+		return OperationIdIdentityGetUser, nil
+	case "identity_query_audit_log":
+		return OperationIdIdentityQueryAuditLog, nil
+	case "identity_query_groups":
+		return OperationIdIdentityQueryGroups, nil
+	case "identity_query_users":
+		return OperationIdIdentityQueryUsers, nil
+	case "notifications_clear_message":
+		return OperationIdNotificationsClearMessage, nil
+	case "notifications_create_message":
+		return OperationIdNotificationsCreateMessage, nil
+	case "notifications_get_message":
+		return OperationIdNotificationsGetMessage, nil
+	case "siem_get_evidence":
+		return OperationIdSiemGetEvidence, nil
+	case "siem_get_investigation":
+		return OperationIdSiemGetInvestigation, nil
+	case "siem_patch_investigation":
+		return OperationIdSiemPatchInvestigation, nil
+	case "siem_post_events":
+		return OperationIdSiemPostEvents, nil
+	case "siem_query_events":
+		return OperationIdSiemQueryEvents, nil
+	case "siem_query_investigations":
+		return OperationIdSiemQueryInvestigations, nil
+	case "siem_query_log_providers":
+		return OperationIdSiemQueryLogProviders, nil
+	case "sink_post_events":
+		return OperationIdSinkPostEvents, nil
+	case "storage_delete_file":
+		return OperationIdStorageDeleteFile, nil
+	case "storage_download_file":
+		return OperationIdStorageDownloadFile, nil
+	case "storage_list_files":
+		return OperationIdStorageListFiles, nil
+	case "storage_upload_file":
+		return OperationIdStorageUploadFile, nil
+	case "ticketing_create_attachment":
+		return OperationIdTicketingCreateAttachment, nil
+	case "ticketing_create_comment":
+		return OperationIdTicketingCreateComment, nil
+	case "ticketing_create_note":
+		return OperationIdTicketingCreateNote, nil
+	case "ticketing_create_ticket":
+		return OperationIdTicketingCreateTicket, nil
+	case "ticketing_delete_attachment":
+		return OperationIdTicketingDeleteAttachment, nil
+	case "ticketing_delete_comment":
+		return OperationIdTicketingDeleteComment, nil
+	case "ticketing_delete_note":
+		return OperationIdTicketingDeleteNote, nil
+	case "ticketing_download_attachment":
+		return OperationIdTicketingDownloadAttachment, nil
+	case "ticketing_get_ticket":
+		return OperationIdTicketingGetTicket, nil
+	case "ticketing_list_attachments_metadata":
+		return OperationIdTicketingListAttachmentsMetadata, nil
+	case "ticketing_list_comments":
+		return OperationIdTicketingListComments, nil
+	case "ticketing_list_notes":
+		return OperationIdTicketingListNotes, nil
+	case "ticketing_list_projects":
+		return OperationIdTicketingListProjects, nil
+	case "ticketing_list_remote_fields":
+		return OperationIdTicketingListRemoteFields, nil
+	case "ticketing_patch_note":
+		return OperationIdTicketingPatchNote, nil
+	case "ticketing_patch_ticket":
+		return OperationIdTicketingPatchTicket, nil
+	case "ticketing_query_tickets":
+		return OperationIdTicketingQueryTickets, nil
+	case "vulnerabilities_create_asset":
+		return OperationIdVulnerabilitiesCreateAsset, nil
+	case "vulnerabilities_create_findings":
+		return OperationIdVulnerabilitiesCreateFindings, nil
+	case "vulnerabilities_get_scan_activity":
+		return OperationIdVulnerabilitiesGetScanActivity, nil
+	case "vulnerabilities_query_assets":
+		return OperationIdVulnerabilitiesQueryAssets, nil
+	case "vulnerabilities_query_findings":
+		return OperationIdVulnerabilitiesQueryFindings, nil
+	case "vulnerabilities_query_scans":
+		return OperationIdVulnerabilitiesQueryScans, nil
+	case "vulnerabilities_update_asset":
+		return OperationIdVulnerabilitiesUpdateAsset, nil
+	case "vulnerabilities_update_finding":
+		return OperationIdVulnerabilitiesUpdateFinding, nil
+	}
+	var t OperationId
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (o OperationId) Ptr() *OperationId {
+	return &o
+}
+
 type CreateOperationResponseResult struct {
 	Operation *Operation `json:"operation" url:"operation"`
 
@@ -2096,7 +2304,7 @@ type OperationWebhookPayload struct {
 	// A unique identifier for this webhook event
 	Nonce string `json:"nonce" url:"nonce"`
 	// ID of the operation
-	Id OperationId `json:"id" url:"id"`
+	Id AsyncOperationRequestId `json:"id" url:"id"`
 	// Time object was originally created
 	CreatedAt time.Time `json:"created_at" url:"created_at"`
 	// Last time object was updated
