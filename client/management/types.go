@@ -6464,6 +6464,51 @@ func (a *AssetsArmisCentrixMock) String() string {
 	return fmt.Sprintf("%#v", a)
 }
 
+// Configuration for CrowdStrike Falcon as an Assets Provider
+type AssetsCrowdStrike struct {
+	// The credential to use for the CrowdStrike Falcon tenant.
+	Credential *CrowdStrikeCredential `json:"credential" url:"credential"`
+	// The root domain where your CrowdStrike Falcon tenant is located.
+	Url *string `json:"url,omitempty" url:"url,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (a *AssetsCrowdStrike) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
+}
+
+func (a *AssetsCrowdStrike) UnmarshalJSON(data []byte) error {
+	type unmarshaler AssetsCrowdStrike
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*a = AssetsCrowdStrike(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+
+	a._rawJSON = nil
+	return nil
+}
+
+func (a *AssetsCrowdStrike) String() string {
+	if len(a._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(a); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", a)
+}
+
 // Configuration for the Nozomi Vantage provider
 type AssetsNozomiVantage struct {
 	Credential *NozomiVantageCredential `json:"credential" url:"credential"`
@@ -7559,6 +7604,7 @@ func (d *DefenderCredential) Accept(visitor DefenderCredentialVisitor) error {
 
 // Configuration for the CrowdStrike EDR Provider
 type EdrCrowdStrike struct {
+	// The credential to use for the CrowdStrike EDR Provider
 	Credential *CrowdStrikeCredential `json:"credential" url:"credential"`
 	// The root domain where your CrowdStrike Falcon tenant is located.
 	Url *string `json:"url,omitempty" url:"url,omitempty"`
@@ -9341,6 +9387,7 @@ type ProviderConfig struct {
 	Type                              string
 	AssetsArmisCentrix                *AssetsArmisCentrix
 	AssetsArmisCentrixMock            *AssetsArmisCentrixMock
+	AssetsCrowdstrike                 *AssetsCrowdStrike
 	AssetsNozomiVantage               *AssetsNozomiVantage
 	AssetsNozomiVantageMock           *AssetsNozomiVantageMock
 	AssetsQualysCloud                 *AssetsQualysCloud
@@ -9428,6 +9475,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.AssetsArmisCentrixMock = value
+	case "assets_crowdstrike":
+		value := new(AssetsCrowdStrike)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.AssetsCrowdstrike = value
 	case "assets_nozomi_vantage":
 		value := new(AssetsNozomiVantage)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -9805,6 +9858,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.AssetsArmisCentrixMock != nil {
 		return core.MarshalJSONWithExtraProperty(p.AssetsArmisCentrixMock, "type", "assets_armis_centrix_mock")
 	}
+	if p.AssetsCrowdstrike != nil {
+		return core.MarshalJSONWithExtraProperty(p.AssetsCrowdstrike, "type", "assets_crowdstrike")
+	}
 	if p.AssetsNozomiVantage != nil {
 		return core.MarshalJSONWithExtraProperty(p.AssetsNozomiVantage, "type", "assets_nozomi_vantage")
 	}
@@ -9994,6 +10050,7 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 type ProviderConfigVisitor interface {
 	VisitAssetsArmisCentrix(*AssetsArmisCentrix) error
 	VisitAssetsArmisCentrixMock(*AssetsArmisCentrixMock) error
+	VisitAssetsCrowdstrike(*AssetsCrowdStrike) error
 	VisitAssetsNozomiVantage(*AssetsNozomiVantage) error
 	VisitAssetsNozomiVantageMock(*AssetsNozomiVantageMock) error
 	VisitAssetsQualysCloud(*AssetsQualysCloud) error
@@ -10063,6 +10120,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.AssetsArmisCentrixMock != nil {
 		return visitor.VisitAssetsArmisCentrixMock(p.AssetsArmisCentrixMock)
+	}
+	if p.AssetsCrowdstrike != nil {
+		return visitor.VisitAssetsCrowdstrike(p.AssetsCrowdstrike)
 	}
 	if p.AssetsNozomiVantage != nil {
 		return visitor.VisitAssetsNozomiVantage(p.AssetsNozomiVantage)
@@ -10258,6 +10318,8 @@ const (
 	ProviderConfigIdAssetsArmisCentrix ProviderConfigId = "assets_armis_centrix"
 	// [MOCK] Armis Centrix™ for Asset Management and Security
 	ProviderConfigIdAssetsArmisCentrixMock ProviderConfigId = "assets_armis_centrix_mock"
+	// CrowdStrike Falcon Spotlight
+	ProviderConfigIdAssetsCrowdStrike ProviderConfigId = "assets_crowdstrike"
 	// Nozomi Vantage
 	ProviderConfigIdAssetsNozomiVantage ProviderConfigId = "assets_nozomi_vantage"
 	// [MOCK] Nozomi Vantage
@@ -10390,6 +10452,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdAssetsArmisCentrix, nil
 	case "assets_armis_centrix_mock":
 		return ProviderConfigIdAssetsArmisCentrixMock, nil
+	case "assets_crowdstrike":
+		return ProviderConfigIdAssetsCrowdStrike, nil
 	case "assets_nozomi_vantage":
 		return ProviderConfigIdAssetsNozomiVantage, nil
 	case "assets_nozomi_vantage_mock":
@@ -10735,6 +10799,7 @@ func (r *Rapid7InsightCloudCredential) Accept(visitor Rapid7InsightCloudCredenti
 
 // Configuration for CrowdStrike Falcon NextGen SIEM
 type SiemCrowdstrike struct {
+	// The credential to use for the CrowdStrike Falcon NextGen SIEM tenant.
 	Credential *CrowdStrikeCredential `json:"credential" url:"credential"`
 	// The root domain where your CrowdStrike Falcon NextGen SIEM tenant is located.
 	Url *string `json:"url,omitempty" url:"url,omitempty"`
@@ -13319,6 +13384,7 @@ func (v VulnerabilitiesTaniumCloudDataset) Ptr() *VulnerabilitiesTaniumCloudData
 
 // Configuration for CrowdStrike Falcon as a Vulnerabilities Provider
 type VulnerabilitiesCrowdStrike struct {
+	// The credential to use for the CrowdStrike Falcon tenant.
 	Credential *CrowdStrikeCredential `json:"credential" url:"credential"`
 	// The root domain where your CrowdStrike Falcon tenant is located.
 	Url *string `json:"url,omitempty" url:"url,omitempty"`
