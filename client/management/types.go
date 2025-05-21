@@ -7345,6 +7345,54 @@ func (c *CloudSecurityCrowdStrike) String() string {
 	return fmt.Sprintf("%#v", c)
 }
 
+// Configuration for the Microsoft Defender for Cloud Provider
+type CloudSecurityDefender struct {
+	Credential *DefenderCredential `json:"credential" url:"credential"`
+	// The Azure subscription ID that contains the Microsoft Defender for Cloud workspace.
+	SubscriptionId string `json:"subscription_id" url:"subscription_id"`
+	// The Azure Active Directory tenant ID that contains the Microsoft Defender for Cloud workspace.
+	TenantId string `json:"tenant_id" url:"tenant_id"`
+	// The root domain where your Microsoft Defender for Cloud workspace is located.
+	Url *string `json:"url,omitempty" url:"url,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *CloudSecurityDefender) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
+}
+
+func (c *CloudSecurityDefender) UnmarshalJSON(data []byte) error {
+	type unmarshaler CloudSecurityDefender
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = CloudSecurityDefender(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
+	c._rawJSON = nil
+	return nil
+}
+
+func (c *CloudSecurityDefender) String() string {
+	if len(c._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
 type CrowdStrikeCredential struct {
 	Type string
 	// Docs for setting up oAuth
@@ -9396,6 +9444,7 @@ type ProviderConfig struct {
 	AssetsServicenowMock              *AssetsServiceNowMock
 	AssetsTaniumCloud                 *AssetsTaniumCloud
 	CloudsecurityCrowdstrike          *CloudSecurityCrowdStrike
+	CloudsecurityDefender             *CloudSecurityDefender
 	EdrCrowdstrike                    *EdrCrowdStrike
 	EdrDefender                       *EdrDefender
 	EdrMalwarebytes                   *EdrMalwarebytes
@@ -9529,6 +9578,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.CloudsecurityCrowdstrike = value
+	case "cloudsecurity_defender":
+		value := new(CloudSecurityDefender)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.CloudsecurityDefender = value
 	case "edr_crowdstrike":
 		value := new(EdrCrowdStrike)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -9885,6 +9940,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.CloudsecurityCrowdstrike != nil {
 		return core.MarshalJSONWithExtraProperty(p.CloudsecurityCrowdstrike, "type", "cloudsecurity_crowdstrike")
 	}
+	if p.CloudsecurityDefender != nil {
+		return core.MarshalJSONWithExtraProperty(p.CloudsecurityDefender, "type", "cloudsecurity_defender")
+	}
 	if p.EdrCrowdstrike != nil {
 		return core.MarshalJSONWithExtraProperty(p.EdrCrowdstrike, "type", "edr_crowdstrike")
 	}
@@ -10059,6 +10117,7 @@ type ProviderConfigVisitor interface {
 	VisitAssetsServicenowMock(*AssetsServiceNowMock) error
 	VisitAssetsTaniumCloud(*AssetsTaniumCloud) error
 	VisitCloudsecurityCrowdstrike(*CloudSecurityCrowdStrike) error
+	VisitCloudsecurityDefender(*CloudSecurityDefender) error
 	VisitEdrCrowdstrike(*EdrCrowdStrike) error
 	VisitEdrDefender(*EdrDefender) error
 	VisitEdrMalwarebytes(*EdrMalwarebytes) error
@@ -10147,6 +10206,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.CloudsecurityCrowdstrike != nil {
 		return visitor.VisitCloudsecurityCrowdstrike(p.CloudsecurityCrowdstrike)
+	}
+	if p.CloudsecurityDefender != nil {
+		return visitor.VisitCloudsecurityDefender(p.CloudsecurityDefender)
 	}
 	if p.EdrCrowdstrike != nil {
 		return visitor.VisitEdrCrowdstrike(p.EdrCrowdstrike)
@@ -10336,6 +10398,8 @@ const (
 	ProviderConfigIdAssetsTaniumCloud ProviderConfigId = "assets_tanium_cloud"
 	// CrowdStrike Falcon® Insight EDR
 	ProviderConfigIdCloudSecurityCrowdStrike ProviderConfigId = "cloudsecurity_crowdstrike"
+	// Microsoft Defender for Cloud
+	ProviderConfigIdCloudSecurityDefender ProviderConfigId = "cloudsecurity_defender"
 	// CrowdStrike Falcon® Insight EDR
 	ProviderConfigIdEdrCrowdStrike ProviderConfigId = "edr_crowdstrike"
 	// Microsoft Defender for Endpoint
@@ -10470,6 +10534,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdAssetsTaniumCloud, nil
 	case "cloudsecurity_crowdstrike":
 		return ProviderConfigIdCloudSecurityCrowdStrike, nil
+	case "cloudsecurity_defender":
+		return ProviderConfigIdCloudSecurityDefender, nil
 	case "edr_crowdstrike":
 		return ProviderConfigIdEdrCrowdStrike, nil
 	case "edr_defender":
