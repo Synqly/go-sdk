@@ -93,6 +93,8 @@ func (c *CreateIntegrationWebHookResponse) String() string {
 
 type ListIntegrationWebHooksResponse struct {
 	Result []*IntegrationWebHook `json:"result" url:"result"`
+	// Unique URL for this webhook. This is the URL that the end-user can use to manually create the webhook in the provider.
+	Url string `json:"url" url:"url"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
