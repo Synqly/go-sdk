@@ -141,6 +141,3 @@ func (l *ListOrganizationResponse) String() string {
 	}
 	return fmt.Sprintf("%#v", l)
 }
-
-// Unique identifier for this Organization
-type OrganizationId = Id

@@ -4237,6 +4237,9 @@ func (o *Organization) String() string {
 	return fmt.Sprintf("%#v", o)
 }
 
+// Unique identifier for this Organization
+type OrganizationId = Id
+
 type OrganizationOptions struct {
 	// Duration new member invitations will be valid. Default: 168h (7 days), minimum 24h, maximum 168h (7 days).
 	InviteDuration *string `json:"invite_duration,omitempty" url:"invite_duration,omitempty"`
@@ -4827,6 +4830,7 @@ type ApiPermissionMap struct {
 	AlarmPolicies     *AlarmPoliciesPermissions     `json:"alarm_policies,omitempty" url:"alarm_policies,omitempty"`
 	Audit             *AuditPermissions             `json:"audit,omitempty" url:"audit,omitempty"`
 	Auth              *AuthPermissions              `json:"auth,omitempty" url:"auth,omitempty"`
+	Billing           *BillingPermissions           `json:"billing,omitempty" url:"billing,omitempty"`
 	Bridges           *BridgesPermissions           `json:"bridges,omitempty" url:"bridges,omitempty"`
 	Credentials       *CredentialsPermissions       `json:"credentials,omitempty" url:"credentials,omitempty"`
 	Integrations      *IntegrationsPermissions      `json:"integrations,omitempty" url:"integrations,omitempty"`
@@ -5012,6 +5016,73 @@ func (a *AuthPermissions) String() string {
 		return value
 	}
 	return fmt.Sprintf("%#v", a)
+}
+
+type BillingActions string
+
+const (
+	BillingActionsList BillingActions = "list"
+	BillingActionsGet  BillingActions = "get"
+	BillingActionsAll  BillingActions = "*"
+)
+
+func NewBillingActionsFromString(s string) (BillingActions, error) {
+	switch s {
+	case "list":
+		return BillingActionsList, nil
+	case "get":
+		return BillingActionsGet, nil
+	case "*":
+		return BillingActionsAll, nil
+	}
+	var t BillingActions
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (b BillingActions) Ptr() *BillingActions {
+	return &b
+}
+
+// Permissions for the billing API
+type BillingPermissions struct {
+	Actions []BillingActions `json:"actions" url:"actions"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (b *BillingPermissions) GetExtraProperties() map[string]interface{} {
+	return b.extraProperties
+}
+
+func (b *BillingPermissions) UnmarshalJSON(data []byte) error {
+	type unmarshaler BillingPermissions
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*b = BillingPermissions(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *b)
+	if err != nil {
+		return err
+	}
+	b.extraProperties = extraProperties
+
+	b._rawJSON = nil
+	return nil
+}
+
+func (b *BillingPermissions) String() string {
+	if len(b._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(b._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(b); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", b)
 }
 
 type BridgesActions string
