@@ -10867,6 +10867,10 @@ func (r *Rapid7InsightCloudCredential) Accept(visitor Rapid7InsightCloudCredenti
 type SiemCrowdstrike struct {
 	// The credential to use for the CrowdStrike Falcon NextGen SIEM tenant.
 	Credential *CrowdStrikeCredential `json:"credential" url:"credential"`
+	// Token credential to use for connecting to the CrowdStrike HEC service. If not provided, sending events to CrowdStrike is disabled.
+	HecCredential *CrowdstrikeHecCredential `json:"hec_credential,omitempty" url:"hec_credential,omitempty"`
+	// The generated CrowdStrike HEC URL provided with your token. This must be an HTTPS URL.
+	HecUrl *string `json:"hec_url,omitempty" url:"hec_url,omitempty"`
 	// The root domain where your CrowdStrike Falcon NextGen SIEM tenant is located.
 	Url *string `json:"url,omitempty" url:"url,omitempty"`
 
