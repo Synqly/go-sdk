@@ -18,6 +18,11 @@ type GetGroupMembersRequest struct {
 	Cursor *string `json:"-" url:"cursor,omitempty"`
 }
 
+type GetUserRequest struct {
+	// Add metadata to the response by invoking meta functions. Documentation for meta functions is available at https://docs.synqly.com/api-reference/meta-functions. Not all meta function are available at every endpoint.
+	Meta []*string `json:"-" url:"meta,omitempty"`
+}
+
 type QueryIdentityAuditLogRequest struct {
 	// Add metadata to the response by invoking meta functions. Documentation for meta functions is available at https://docs.synqly.com/api-reference/meta-functions. Not all meta function are available at every endpoint.
 	Meta []*string `json:"-" url:"meta,omitempty"`
