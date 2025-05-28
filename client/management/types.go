@@ -8279,6 +8279,78 @@ func (e *EntraIdCredential) Accept(visitor EntraIdCredentialVisitor) error {
 	return fmt.Errorf("type %T does not define a non-empty union type", e)
 }
 
+type FreshdeskCredential struct {
+	Type string
+	// You can use your personal API key to authenticate the request. If you use the API key,
+	// there is no need for a password. The token is supplied as "Your API Key".
+	// [Freshdesk API token generation documentation](https://developer.freshdesk.com/api/#authentication)
+	Token *TokenCredential
+	// ID of an existing Synqly credential that stores the Freshdesk API token.
+	TokenId TokenCredentialId
+}
+
+func (f *FreshdeskCredential) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	f.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", f)
+	}
+	switch unmarshaler.Type {
+	case "token":
+		value := new(TokenCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		f.Token = value
+	case "token_id":
+		var valueUnmarshaler struct {
+			TokenId TokenCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		f.TokenId = valueUnmarshaler.TokenId
+	}
+	return nil
+}
+
+func (f FreshdeskCredential) MarshalJSON() ([]byte, error) {
+	if f.Token != nil {
+		return core.MarshalJSONWithExtraProperty(f.Token, "type", "token")
+	}
+	if f.TokenId != "" {
+		var marshaler = struct {
+			Type    string            `json:"type"`
+			TokenId TokenCredentialId `json:"value"`
+		}{
+			Type:    "token_id",
+			TokenId: f.TokenId,
+		}
+		return json.Marshal(marshaler)
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", f)
+}
+
+type FreshdeskCredentialVisitor interface {
+	VisitToken(*TokenCredential) error
+	VisitTokenId(TokenCredentialId) error
+}
+
+func (f *FreshdeskCredential) Accept(visitor FreshdeskCredentialVisitor) error {
+	if f.Token != nil {
+		return visitor.VisitToken(f.Token)
+	}
+	if f.TokenId != "" {
+		return visitor.VisitTokenId(f.TokenId)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", f)
+}
+
 type GcsCredential struct {
 	Type string
 	// AWS-type credential that stores [Hash-based message authentication code (HMAC) keys](https://cloud.google.com/storage/docs/authentication/hmackeys) with write access to the GCS bucket.
@@ -9554,6 +9626,7 @@ type ProviderConfig struct {
 	StorageGcs                        *StorageGcs
 	StorageMockStorage                *StorageMock
 	TicketingAutotask                 *TicketingAutotask
+	TicketingFreshdesk                *TicketingFreshdesk
 	TicketingJira                     *TicketingJira
 	TicketingMockTicketing            *TicketingMock
 	TicketingPagerduty                *TicketingPagerDuty
@@ -9883,6 +9956,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.TicketingAutotask = value
+	case "ticketing_freshdesk":
+		value := new(TicketingFreshdesk)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.TicketingFreshdesk = value
 	case "ticketing_jira":
 		value := new(TicketingJira)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -10128,6 +10207,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.TicketingAutotask != nil {
 		return core.MarshalJSONWithExtraProperty(p.TicketingAutotask, "type", "ticketing_autotask")
 	}
+	if p.TicketingFreshdesk != nil {
+		return core.MarshalJSONWithExtraProperty(p.TicketingFreshdesk, "type", "ticketing_freshdesk")
+	}
 	if p.TicketingJira != nil {
 		return core.MarshalJSONWithExtraProperty(p.TicketingJira, "type", "ticketing_jira")
 	}
@@ -10227,6 +10309,7 @@ type ProviderConfigVisitor interface {
 	VisitStorageGcs(*StorageGcs) error
 	VisitStorageMockStorage(*StorageMock) error
 	VisitTicketingAutotask(*TicketingAutotask) error
+	VisitTicketingFreshdesk(*TicketingFreshdesk) error
 	VisitTicketingJira(*TicketingJira) error
 	VisitTicketingMockTicketing(*TicketingMock) error
 	VisitTicketingPagerduty(*TicketingPagerDuty) error
@@ -10395,6 +10478,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	if p.TicketingAutotask != nil {
 		return visitor.VisitTicketingAutotask(p.TicketingAutotask)
 	}
+	if p.TicketingFreshdesk != nil {
+		return visitor.VisitTicketingFreshdesk(p.TicketingFreshdesk)
+	}
 	if p.TicketingJira != nil {
 		return visitor.VisitTicketingJira(p.TicketingJira)
 	}
@@ -10547,6 +10633,8 @@ const (
 	ProviderConfigIdStorageMock ProviderConfigId = "storage_mock_storage"
 	// Autotask Operations Cloud
 	ProviderConfigIdTicketingAutotask ProviderConfigId = "ticketing_autotask"
+	// Freshdesk
+	ProviderConfigIdTicketingFreshdesk ProviderConfigId = "ticketing_freshdesk"
 	// Atlassian Jira
 	ProviderConfigIdTicketingJira ProviderConfigId = "ticketing_jira"
 	// Ticketing Test
@@ -10683,6 +10771,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdStorageMock, nil
 	case "ticketing_autotask":
 		return ProviderConfigIdTicketingAutotask, nil
+	case "ticketing_freshdesk":
+		return ProviderConfigIdTicketingFreshdesk, nil
 	case "ticketing_jira":
 		return ProviderConfigIdTicketingJira, nil
 	case "ticketing_mock_ticketing":
@@ -13087,6 +13177,50 @@ func (t *TicketingAutotask) UnmarshalJSON(data []byte) error {
 }
 
 func (t *TicketingAutotask) String() string {
+	if len(t._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(t._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(t); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", t)
+}
+
+// Configuration for Freshdesk as a Ticketing Provider
+type TicketingFreshdesk struct {
+	Credential *FreshdeskCredential `json:"credential" url:"credential"`
+	// Base URL to your Freshdesk tenant.
+	Url string `json:"url" url:"url"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (t *TicketingFreshdesk) GetExtraProperties() map[string]interface{} {
+	return t.extraProperties
+}
+
+func (t *TicketingFreshdesk) UnmarshalJSON(data []byte) error {
+	type unmarshaler TicketingFreshdesk
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*t = TicketingFreshdesk(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *t)
+	if err != nil {
+		return err
+	}
+	t.extraProperties = extraProperties
+
+	t._rawJSON = nil
+	return nil
+}
+
+func (t *TicketingFreshdesk) String() string {
 	if len(t._rawJSON) > 0 {
 		if value, err := core.StringifyJSON(t._rawJSON); err == nil {
 			return value
