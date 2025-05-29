@@ -14,6 +14,7 @@ import (
 	compliancefinding "github.com/synqly/go-sdk/client/engine/ocsf/v130/compliancefinding"
 	configstate "github.com/synqly/go-sdk/client/engine/ocsf/v130/configstate"
 	detectionfinding "github.com/synqly/go-sdk/client/engine/ocsf/v130/detectionfinding"
+	dnsactivity "github.com/synqly/go-sdk/client/engine/ocsf/v130/dnsactivity"
 	fileactivity "github.com/synqly/go-sdk/client/engine/ocsf/v130/fileactivity"
 	groupmanagement "github.com/synqly/go-sdk/client/engine/ocsf/v130/groupmanagement"
 	incidentfinding "github.com/synqly/go-sdk/client/engine/ocsf/v130/incidentfinding"
@@ -1181,6 +1182,7 @@ type Event struct {
 	ComplianceFinding         *compliancefinding.ComplianceFinding
 	DeviceConfigState         *configstate.ConfigState
 	DetectionFinding          *detectionfinding.DetectionFinding
+	DnsActivity               *dnsactivity.DnsActivity
 	FileSystemActivity        *fileactivity.FileActivity
 	GroupManagement           *groupmanagement.GroupManagement
 	IncidentFinding           *incidentfinding.IncidentFinding
@@ -1257,6 +1259,12 @@ func (e *Event) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		e.DetectionFinding = value
+	case "DNS Activity":
+		value := new(dnsactivity.DnsActivity)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.DnsActivity = value
 	case "File System Activity":
 		value := new(fileactivity.FileActivity)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -1370,6 +1378,9 @@ func (e Event) MarshalJSON() ([]byte, error) {
 	if e.DetectionFinding != nil {
 		return core.MarshalJSONWithExtraProperty(e.DetectionFinding, "class_name", "Detection Finding")
 	}
+	if e.DnsActivity != nil {
+		return core.MarshalJSONWithExtraProperty(e.DnsActivity, "class_name", "DNS Activity")
+	}
 	if e.FileSystemActivity != nil {
 		return core.MarshalJSONWithExtraProperty(e.FileSystemActivity, "class_name", "File System Activity")
 	}
@@ -1424,6 +1435,7 @@ type EventVisitor interface {
 	VisitComplianceFinding(*compliancefinding.ComplianceFinding) error
 	VisitDeviceConfigState(*configstate.ConfigState) error
 	VisitDetectionFinding(*detectionfinding.DetectionFinding) error
+	VisitDnsActivity(*dnsactivity.DnsActivity) error
 	VisitFileSystemActivity(*fileactivity.FileActivity) error
 	VisitGroupManagement(*groupmanagement.GroupManagement) error
 	VisitIncidentFinding(*incidentfinding.IncidentFinding) error
@@ -1464,6 +1476,9 @@ func (e *Event) Accept(visitor EventVisitor) error {
 	}
 	if e.DetectionFinding != nil {
 		return visitor.VisitDetectionFinding(e.DetectionFinding)
+	}
+	if e.DnsActivity != nil {
+		return visitor.VisitDnsActivity(e.DnsActivity)
 	}
 	if e.FileSystemActivity != nil {
 		return visitor.VisitFileSystemActivity(e.FileSystemActivity)
@@ -2062,6 +2077,7 @@ const (
 	OperationIdEdrNetworkQuarantine                     OperationId = "edr_network_quarantine"
 	OperationIdEdrQueryAlerts                           OperationId = "edr_query_alerts"
 	OperationIdEdrQueryApplications                     OperationId = "edr_query_applications"
+	OperationIdEdrQueryEdrEvents                        OperationId = "edr_query_edr_events"
 	OperationIdEdrQueryEndpoints                        OperationId = "edr_query_endpoints"
 	OperationIdEdrQueryIocs                             OperationId = "edr_query_iocs"
 	OperationIdEdrQueryPostureScore                     OperationId = "edr_query_posture_score"
@@ -2140,6 +2156,8 @@ func NewOperationIdFromString(s string) (OperationId, error) {
 		return OperationIdEdrQueryAlerts, nil
 	case "edr_query_applications":
 		return OperationIdEdrQueryApplications, nil
+	case "edr_query_edr_events":
+		return OperationIdEdrQueryEdrEvents, nil
 	case "edr_query_endpoints":
 		return OperationIdEdrQueryEndpoints, nil
 	case "edr_query_iocs":

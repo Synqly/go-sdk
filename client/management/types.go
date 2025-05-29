@@ -3853,6 +3853,7 @@ const (
 	OperationIdEdrNetworkQuarantine                     OperationId = "edr_network_quarantine"
 	OperationIdEdrQueryAlerts                           OperationId = "edr_query_alerts"
 	OperationIdEdrQueryApplications                     OperationId = "edr_query_applications"
+	OperationIdEdrQueryEdrEvents                        OperationId = "edr_query_edr_events"
 	OperationIdEdrQueryEndpoints                        OperationId = "edr_query_endpoints"
 	OperationIdEdrQueryIocs                             OperationId = "edr_query_iocs"
 	OperationIdEdrQueryPostureScore                     OperationId = "edr_query_posture_score"
@@ -3931,6 +3932,8 @@ func NewOperationIdFromString(s string) (OperationId, error) {
 		return OperationIdEdrQueryAlerts, nil
 	case "edr_query_applications":
 		return OperationIdEdrQueryApplications, nil
+	case "edr_query_edr_events":
+		return OperationIdEdrQueryEdrEvents, nil
 	case "edr_query_endpoints":
 		return OperationIdEdrQueryEndpoints, nil
 	case "edr_query_iocs":
@@ -7860,7 +7863,10 @@ func (e *EdrMalwarebytes) String() string {
 
 // Configuration for the SentinelOne EDR Provider
 type EdrSentinelOne struct {
-	Credential *SentinelOneCredential `json:"credential" url:"credential"`
+	Credential          *SentinelOneCredential          `json:"credential" url:"credential"`
+	EdrEventsCredential *SentinelOneEdrEventsCredential `json:"edr_events_credential,omitempty" url:"edr_events_credential,omitempty"`
+	// Base URL for the SentinelOne Singularity Data Lake API. This URL is required if you plan to use the EDR Events API.
+	EdrEventsUrl *string `json:"edr_events_url,omitempty" url:"edr_events_url,omitempty"`
 	// URL for the SentinelOne Management API. This should be the base URL for the API, without any path components. For example, "https://your_management_url".
 	Url string `json:"url" url:"url"`
 
@@ -11666,6 +11672,76 @@ type SentinelOneCredentialVisitor interface {
 }
 
 func (s *SentinelOneCredential) Accept(visitor SentinelOneCredentialVisitor) error {
+	if s.Token != nil {
+		return visitor.VisitToken(s.Token)
+	}
+	if s.TokenId != "" {
+		return visitor.VisitTokenId(s.TokenId)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", s)
+}
+
+type SentinelOneEdrEventsCredential struct {
+	Type string
+	// SentinelOne Singularity Data Lake API used for Edr Events. For example, "https://xdr.{region}.sentinelone.net"
+	Token *TokenCredential
+	// ID of an existing credential that stores a SentinelOne API token.
+	TokenId TokenCredentialId
+}
+
+func (s *SentinelOneEdrEventsCredential) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	s.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", s)
+	}
+	switch unmarshaler.Type {
+	case "token":
+		value := new(TokenCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		s.Token = value
+	case "token_id":
+		var valueUnmarshaler struct {
+			TokenId TokenCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		s.TokenId = valueUnmarshaler.TokenId
+	}
+	return nil
+}
+
+func (s SentinelOneEdrEventsCredential) MarshalJSON() ([]byte, error) {
+	if s.Token != nil {
+		return core.MarshalJSONWithExtraProperty(s.Token, "type", "token")
+	}
+	if s.TokenId != "" {
+		var marshaler = struct {
+			Type    string            `json:"type"`
+			TokenId TokenCredentialId `json:"value"`
+		}{
+			Type:    "token_id",
+			TokenId: s.TokenId,
+		}
+		return json.Marshal(marshaler)
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", s)
+}
+
+type SentinelOneEdrEventsCredentialVisitor interface {
+	VisitToken(*TokenCredential) error
+	VisitTokenId(TokenCredentialId) error
+}
+
+func (s *SentinelOneEdrEventsCredential) Accept(visitor SentinelOneEdrEventsCredentialVisitor) error {
 	if s.Token != nil {
 		return visitor.VisitToken(s.Token)
 	}

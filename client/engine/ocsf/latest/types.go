@@ -8,6 +8,7 @@ import (
 	authentication "github.com/synqly/go-sdk/client/engine/ocsf/v130/authentication"
 	compliancefinding "github.com/synqly/go-sdk/client/engine/ocsf/v130/compliancefinding"
 	detectionfinding "github.com/synqly/go-sdk/client/engine/ocsf/v130/detectionfinding"
+	dnsactivity "github.com/synqly/go-sdk/client/engine/ocsf/v130/dnsactivity"
 	entitymanagement "github.com/synqly/go-sdk/client/engine/ocsf/v130/entitymanagement"
 	fileactivity "github.com/synqly/go-sdk/client/engine/ocsf/v130/fileactivity"
 	groupmanagement "github.com/synqly/go-sdk/client/engine/ocsf/v130/groupmanagement"
@@ -34,6 +35,8 @@ type CloudResourcesInventoryInfo = *cloudresourcesinventoryinfo.CloudResourcesIn
 type ComplianceFinding = *compliancefinding.ComplianceFinding
 
 type DetectionFinding = *detectionfinding.DetectionFinding
+
+type DnsActivity = *dnsactivity.DnsActivity
 
 type EntityManagement = *entitymanagement.EntityManagement
 

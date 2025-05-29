@@ -50,6 +50,23 @@ type QueryApplicationsRequest struct {
 	Filter []*string `json:"-" url:"filter,omitempty"`
 }
 
+type QueryEdrEventsRequest struct {
+	// Add metadata to the response by invoking meta functions. Documentation for meta functions is available at https://docs.synqly.com/api-reference/meta-functions. Not all meta function are available at every endpoint.
+	Meta []*string `json:"-" url:"meta,omitempty"`
+	// Filter events. Multiple filters can be provided.
+	Filter []*string `json:"-" url:"filter,omitempty"`
+	// Include the raw data from the EDR in the response. Defaults to `false`.
+	IncludeRawData *bool `json:"-" url:"include_raw_data,omitempty"`
+	// Number of events to return. Defaults to 50.
+	Limit *int `json:"-" url:"limit,omitempty"`
+	// Select a field to order the results by. To control the direction of the sorting, append
+	// `[asc]` or `[desc]` to the field name. For example, `timestamp[asc]` will sort the results by `timestamp` in ascending order.
+	// The ordering defaults to `asc` if not specified.
+	Order []*string `json:"-" url:"order,omitempty"`
+	// Start search from cursor position.
+	Cursor *string `json:"-" url:"cursor,omitempty"`
+}
+
 type QueryEndpointsRequest struct {
 	// Add metadata to the response by invoking meta functions. Documentation for meta functions is available at https://docs.synqly.com/api-reference/meta-functions. Not all meta function are available at every endpoint.
 	Meta []*string `json:"-" url:"meta,omitempty"`
@@ -467,6 +484,52 @@ func (q *QueryApplicationsResponse) UnmarshalJSON(data []byte) error {
 }
 
 func (q *QueryApplicationsResponse) String() string {
+	if len(q._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(q._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(q); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", q)
+}
+
+type QueryEdrEventsResponse struct {
+	// Various metadata about the results organized by group, then type, then field.
+	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
+	// Cursor to use to retrieve the next page of results
+	Cursor string `json:"cursor" url:"cursor"`
+	// List of EDR events that match the query.
+	Result []*Event `json:"result" url:"result"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (q *QueryEdrEventsResponse) GetExtraProperties() map[string]interface{} {
+	return q.extraProperties
+}
+
+func (q *QueryEdrEventsResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler QueryEdrEventsResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*q = QueryEdrEventsResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *q)
+	if err != nil {
+		return err
+	}
+	q.extraProperties = extraProperties
+
+	q._rawJSON = nil
+	return nil
+}
+
+func (q *QueryEdrEventsResponse) String() string {
 	if len(q._rawJSON) > 0 {
 		if value, err := core.StringifyJSON(q._rawJSON); err == nil {
 			return value
