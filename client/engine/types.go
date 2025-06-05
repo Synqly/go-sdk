@@ -2913,6 +2913,8 @@ type Comment struct {
 	CreatedAt time.Time `json:"created_at" url:"created_at"`
 	// The date the comment was last updated.
 	UpdatedAt *time.Time `json:"updated_at,omitempty" url:"updated_at,omitempty"`
+	// Custom mapped fields for this project.
+	CustomFields map[string]interface{} `json:"custom_fields,omitempty" url:"custom_fields,omitempty"`
 	// The attributes that are not mapped to the comment schema. The names and values of those attributes are specific to the provider.
 	Unmapped *Object `json:"unmapped,omitempty" url:"unmapped,omitempty"`
 
@@ -2996,6 +2998,8 @@ type Note struct {
 	CreatedAt time.Time `json:"created_at" url:"created_at"`
 	// The date the comment was last updated.
 	UpdatedAt *time.Time `json:"updated_at,omitempty" url:"updated_at,omitempty"`
+	// Custom mapped fields for this note.
+	CustomFields map[string]interface{} `json:"custom_fields,omitempty" url:"custom_fields,omitempty"`
 	// The attributes that are not mapped to the comment schema. The names and values of those attributes are specific to the provider.
 	Unmapped *Object `json:"unmapped,omitempty" url:"unmapped,omitempty"`
 
@@ -3102,6 +3106,8 @@ type Project struct {
 	Id string `json:"id" url:"id"`
 	// Name of the project
 	Name string `json:"name" url:"name"`
+	// Custom mapped fields for this project.
+	CustomFields map[string]interface{} `json:"custom_fields,omitempty" url:"custom_fields,omitempty"`
 	// The attributes that are not mapped to the project schema. The names and values of those attributes are specific to the provider.
 	Unmapped *Object `json:"unmapped,omitempty" url:"unmapped,omitempty"`
 
