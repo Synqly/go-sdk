@@ -8567,6 +8567,76 @@ func (g *GoogleCredential) Accept(visitor GoogleCredentialVisitor) error {
 	return fmt.Errorf("type %T does not define a non-empty union type", g)
 }
 
+type GoogleServiceAccountCredential struct {
+	Type string
+	// OAuth 2.0 Token URL, Client ID, and Client Secret for a Google Cloud Service Account with permissions for Google Security Operations.
+	OAuthClient *OAuthClientCredential
+	// The ID of a credential that stores the OAuth 2.0 values for a Google Cloud Service Account with permissions for Google Security Operations.
+	OAuthClientId OAuthClientCredentialId
+}
+
+func (g *GoogleServiceAccountCredential) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	g.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", g)
+	}
+	switch unmarshaler.Type {
+	case "o_auth_client":
+		value := new(OAuthClientCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		g.OAuthClient = value
+	case "o_auth_client_id":
+		var valueUnmarshaler struct {
+			OAuthClientId OAuthClientCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		g.OAuthClientId = valueUnmarshaler.OAuthClientId
+	}
+	return nil
+}
+
+func (g GoogleServiceAccountCredential) MarshalJSON() ([]byte, error) {
+	if g.OAuthClient != nil {
+		return core.MarshalJSONWithExtraProperty(g.OAuthClient, "type", "o_auth_client")
+	}
+	if g.OAuthClientId != "" {
+		var marshaler = struct {
+			Type          string                  `json:"type"`
+			OAuthClientId OAuthClientCredentialId `json:"value"`
+		}{
+			Type:          "o_auth_client_id",
+			OAuthClientId: g.OAuthClientId,
+		}
+		return json.Marshal(marshaler)
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", g)
+}
+
+type GoogleServiceAccountCredentialVisitor interface {
+	VisitOAuthClient(*OAuthClientCredential) error
+	VisitOAuthClientId(OAuthClientCredentialId) error
+}
+
+func (g *GoogleServiceAccountCredential) Accept(visitor GoogleServiceAccountCredentialVisitor) error {
+	if g.OAuthClient != nil {
+		return visitor.VisitOAuthClient(g.OAuthClient)
+	}
+	if g.OAuthClientId != "" {
+		return visitor.VisitOAuthClientId(g.OAuthClientId)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", g)
+}
+
 // Configuration for the Microsoft Entra ID Identity Provider
 type IdentityEntraId struct {
 	Credential *EntraIdCredential `json:"credential" url:"credential"`
@@ -9611,6 +9681,7 @@ type ProviderConfig struct {
 	SiemCrowdstrike                   *SiemCrowdstrike
 	SiemElasticsearch                 *SiemElasticsearch
 	SiemGoogleChronicle               *SiemGoogleChronicle
+	SiemGoogleSecurityOperations      *SiemGoogleSecurityOperations
 	SiemMockSiem                      *SiemMock
 	SiemOpensearch                    *SiemOpenSearch
 	SiemQRadar                        *SiemQRadar
@@ -9624,6 +9695,7 @@ type ProviderConfig struct {
 	SinkCrowdstrikeHec                *SinkCrowdstrikeHec
 	SinkElasticsearch                 *SinkElasticsearch
 	SinkGoogleSecOps                  *SinkGoogleSecOps
+	SinkGoogleSecurityOperations      *SinkGoogleSecurityOperations
 	SinkMockSink                      *SinkMock
 	SinkOpensearch                    *SinkOpenSearch
 	SinkSplunk                        *SinkSplunk
@@ -9836,6 +9908,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.SiemGoogleChronicle = value
+	case "siem_google_security_operations":
+		value := new(SiemGoogleSecurityOperations)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.SiemGoogleSecurityOperations = value
 	case "siem_mock_siem":
 		value := new(SiemMock)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -9914,6 +9992,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.SinkGoogleSecOps = value
+	case "sink_google_security_operations":
+		value := new(SinkGoogleSecurityOperations)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.SinkGoogleSecurityOperations = value
 	case "sink_mock_sink":
 		value := new(SinkMock)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -10150,6 +10234,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.SiemGoogleChronicle != nil {
 		return core.MarshalJSONWithExtraProperty(p.SiemGoogleChronicle, "type", "siem_google_chronicle")
 	}
+	if p.SiemGoogleSecurityOperations != nil {
+		return core.MarshalJSONWithExtraProperty(p.SiemGoogleSecurityOperations, "type", "siem_google_security_operations")
+	}
 	if p.SiemMockSiem != nil {
 		return core.MarshalJSONWithExtraProperty(p.SiemMockSiem, "type", "siem_mock_siem")
 	}
@@ -10188,6 +10275,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	}
 	if p.SinkGoogleSecOps != nil {
 		return core.MarshalJSONWithExtraProperty(p.SinkGoogleSecOps, "type", "sink_google_sec_ops")
+	}
+	if p.SinkGoogleSecurityOperations != nil {
+		return core.MarshalJSONWithExtraProperty(p.SinkGoogleSecurityOperations, "type", "sink_google_security_operations")
 	}
 	if p.SinkMockSink != nil {
 		return core.MarshalJSONWithExtraProperty(p.SinkMockSink, "type", "sink_mock_sink")
@@ -10294,6 +10384,7 @@ type ProviderConfigVisitor interface {
 	VisitSiemCrowdstrike(*SiemCrowdstrike) error
 	VisitSiemElasticsearch(*SiemElasticsearch) error
 	VisitSiemGoogleChronicle(*SiemGoogleChronicle) error
+	VisitSiemGoogleSecurityOperations(*SiemGoogleSecurityOperations) error
 	VisitSiemMockSiem(*SiemMock) error
 	VisitSiemOpensearch(*SiemOpenSearch) error
 	VisitSiemQRadar(*SiemQRadar) error
@@ -10307,6 +10398,7 @@ type ProviderConfigVisitor interface {
 	VisitSinkCrowdstrikeHec(*SinkCrowdstrikeHec) error
 	VisitSinkElasticsearch(*SinkElasticsearch) error
 	VisitSinkGoogleSecOps(*SinkGoogleSecOps) error
+	VisitSinkGoogleSecurityOperations(*SinkGoogleSecurityOperations) error
 	VisitSinkMockSink(*SinkMock) error
 	VisitSinkOpensearch(*SinkOpenSearch) error
 	VisitSinkSplunk(*SinkSplunk) error
@@ -10421,6 +10513,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	if p.SiemGoogleChronicle != nil {
 		return visitor.VisitSiemGoogleChronicle(p.SiemGoogleChronicle)
 	}
+	if p.SiemGoogleSecurityOperations != nil {
+		return visitor.VisitSiemGoogleSecurityOperations(p.SiemGoogleSecurityOperations)
+	}
 	if p.SiemMockSiem != nil {
 		return visitor.VisitSiemMockSiem(p.SiemMockSiem)
 	}
@@ -10459,6 +10554,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.SinkGoogleSecOps != nil {
 		return visitor.VisitSinkGoogleSecOps(p.SinkGoogleSecOps)
+	}
+	if p.SinkGoogleSecurityOperations != nil {
+		return visitor.VisitSinkGoogleSecurityOperations(p.SinkGoogleSecurityOperations)
 	}
 	if p.SinkMockSink != nil {
 		return visitor.VisitSinkMockSink(p.SinkMockSink)
@@ -10595,8 +10693,10 @@ const (
 	ProviderConfigIdSiemCrowdstrike ProviderConfigId = "siem_crowdstrike"
 	// Elastic SIEM
 	ProviderConfigIdSiemElasticsearch ProviderConfigId = "siem_elasticsearch"
-	// Google Security Operations
+	// Google Security Operations (Chronicle Compatibility)
 	ProviderConfigIdSiemGoogleChronicle ProviderConfigId = "siem_google_chronicle"
+	// Google Security Operations
+	ProviderConfigIdSiemGoogleSecurityOperations ProviderConfigId = "siem_google_security_operations"
 	// SIEM Test
 	ProviderConfigIdSiemMock ProviderConfigId = "siem_mock_siem"
 	// OpenSearch SIEM
@@ -10621,8 +10721,10 @@ const (
 	ProviderConfigIdSinkCrowdstrikeHec ProviderConfigId = "sink_crowdstrike_hec"
 	// Elastic
 	ProviderConfigIdSinkElasticsearch ProviderConfigId = "sink_elasticsearch"
-	// Google Security Operations
+	// Google Security Operations (Chronicle Compatibility)
 	ProviderConfigIdSinkGoogleSecOps ProviderConfigId = "sink_google_sec_ops"
+	// Google Security Operations
+	ProviderConfigIdSinkGoogleSecurityOperations ProviderConfigId = "sink_google_security_operations"
 	// Sink Test
 	ProviderConfigIdSinkMock ProviderConfigId = "sink_mock_sink"
 	// OpenSearch
@@ -10735,6 +10837,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdSiemElasticsearch, nil
 	case "siem_google_chronicle":
 		return ProviderConfigIdSiemGoogleChronicle, nil
+	case "siem_google_security_operations":
+		return ProviderConfigIdSiemGoogleSecurityOperations, nil
 	case "siem_mock_siem":
 		return ProviderConfigIdSiemMock, nil
 	case "siem_opensearch":
@@ -10761,6 +10865,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdSinkElasticsearch, nil
 	case "sink_google_sec_ops":
 		return ProviderConfigIdSinkGoogleSecOps, nil
+	case "sink_google_security_operations":
+		return ProviderConfigIdSinkGoogleSecurityOperations, nil
 	case "sink_mock_sink":
 		return ProviderConfigIdSinkMock, nil
 	case "sink_opensearch":
@@ -11130,7 +11236,7 @@ func (s *SiemElasticsearch) String() string {
 	return fmt.Sprintf("%#v", s)
 }
 
-// Configuration for Google Security Operations (formerly Google Chronicle) as a SIEM Provider.
+// Configuration for Google Security Operations (formerly Google Chronicle) as a SIEM Provider connecting via the older Backstory and Malachite APIs.
 type SiemGoogleChronicle struct {
 	// Optional. The customer ID reported when writing events. This is required for ingestion.
 	CustomerId *string `json:"customer_id,omitempty" url:"customer_id,omitempty"`
@@ -11170,6 +11276,57 @@ func (s *SiemGoogleChronicle) UnmarshalJSON(data []byte) error {
 }
 
 func (s *SiemGoogleChronicle) String() string {
+	if len(s._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(s); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", s)
+}
+
+// Configuration for Google Security Operations (formerly Google Chronicle) as a SIEM Provider.
+type SiemGoogleSecurityOperations struct {
+	// Google OAuth 2.0 credentials with an email address.
+	Credential *GoogleServiceAccountCredential `json:"credential" url:"credential"`
+	// The customer ID of the Google SecOps instance.
+	CustomerId string `json:"customer_id" url:"customer_id"`
+	// The project ID of the Google SecOps instance.
+	ProjectId string `json:"project_id" url:"project_id"`
+	// The region of the Google SecOps instance. Usually 'us' or 'eu'.
+	Region *string `json:"region,omitempty" url:"region,omitempty"`
+	// The base API URL for posting event, without any path components.
+	Url *string `json:"url,omitempty" url:"url,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (s *SiemGoogleSecurityOperations) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
+}
+
+func (s *SiemGoogleSecurityOperations) UnmarshalJSON(data []byte) error {
+	type unmarshaler SiemGoogleSecurityOperations
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*s = SiemGoogleSecurityOperations(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+
+	s._rawJSON = nil
+	return nil
+}
+
+func (s *SiemGoogleSecurityOperations) String() string {
 	if len(s._rawJSON) > 0 {
 		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
 			return value
@@ -12098,7 +12255,7 @@ func (s *SinkElasticsearch) String() string {
 	return fmt.Sprintf("%#v", s)
 }
 
-// Configuration for Google Security Operations (formerly Google Chronicle) as a Sink Provider.
+// Configuration for Google Security Operations (formerly Google Chronicle) as a Sink Provider connecting via the older Malachite API.
 type SinkGoogleSecOps struct {
 	// The credential set used to write events to Google SecOps.
 	Credential *GoogleChronicleCredential `json:"credential" url:"credential"`
@@ -12134,6 +12291,57 @@ func (s *SinkGoogleSecOps) UnmarshalJSON(data []byte) error {
 }
 
 func (s *SinkGoogleSecOps) String() string {
+	if len(s._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(s); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", s)
+}
+
+// Configuration for Google Security Operations (formerly Google Chronicle) as a Sink Provider.
+type SinkGoogleSecurityOperations struct {
+	// Google OAuth 2.0 credentials with an email address.
+	Credential *GoogleServiceAccountCredential `json:"credential" url:"credential"`
+	// The customer ID of the Google SecOps instance
+	CustomerId string `json:"customer_id" url:"customer_id"`
+	// The project ID of the Google SecOps instance.
+	ProjectId string `json:"project_id" url:"project_id"`
+	// The region of the Google SecOps instance. Usually 'us' or 'eu'.
+	Region *string `json:"region,omitempty" url:"region,omitempty"`
+	// The base API URL for posting event, without any path components.
+	Url *string `json:"url,omitempty" url:"url,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (s *SinkGoogleSecurityOperations) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
+}
+
+func (s *SinkGoogleSecurityOperations) UnmarshalJSON(data []byte) error {
+	type unmarshaler SinkGoogleSecurityOperations
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*s = SinkGoogleSecurityOperations(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+
+	s._rawJSON = nil
+	return nil
+}
+
+func (s *SinkGoogleSecurityOperations) String() string {
 	if len(s._rawJSON) > 0 {
 		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
 			return value
