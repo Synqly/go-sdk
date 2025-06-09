@@ -6452,6 +6452,25 @@ func (a AssetsServiceNowDataset) Ptr() *AssetsServiceNowDataset {
 	return &a
 }
 
+type AssetsTaniumCloudDataset string
+
+const (
+	AssetsTaniumCloudDatasetBasicVer0 AssetsTaniumCloudDataset = "basic_v0"
+)
+
+func NewAssetsTaniumCloudDatasetFromString(s string) (AssetsTaniumCloudDataset, error) {
+	switch s {
+	case "basic_v0":
+		return AssetsTaniumCloudDatasetBasicVer0, nil
+	}
+	var t AssetsTaniumCloudDataset
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (a AssetsTaniumCloudDataset) Ptr() *AssetsTaniumCloudDataset {
+	return &a
+}
+
 // Configuration for the Armis Centrix Assets Provider
 type AssetsArmisCentrix struct {
 	Credential *ArmisCredential `json:"credential" url:"credential"`
@@ -6874,6 +6893,48 @@ func (a *AssetsTaniumCloud) UnmarshalJSON(data []byte) error {
 }
 
 func (a *AssetsTaniumCloud) String() string {
+	if len(a._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(a); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", a)
+}
+
+// Configuration for a mocked Tanium Cloud as an Assets Provider
+type AssetsTaniumCloudMock struct {
+	Dataset AssetsTaniumCloudDataset `json:"dataset" url:"dataset"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (a *AssetsTaniumCloudMock) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
+}
+
+func (a *AssetsTaniumCloudMock) UnmarshalJSON(data []byte) error {
+	type unmarshaler AssetsTaniumCloudMock
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*a = AssetsTaniumCloudMock(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+
+	a._rawJSON = nil
+	return nil
+}
+
+func (a *AssetsTaniumCloudMock) String() string {
 	if len(a._rawJSON) > 0 {
 		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
 			return value
@@ -9662,6 +9723,7 @@ type ProviderConfig struct {
 	AssetsServicenow                  *AssetsServiceNow
 	AssetsServicenowMock              *AssetsServiceNowMock
 	AssetsTaniumCloud                 *AssetsTaniumCloud
+	AssetsTaniumCloudMock             *AssetsTaniumCloudMock
 	CloudsecurityCrowdstrike          *CloudSecurityCrowdStrike
 	CloudsecurityDefender             *CloudSecurityDefender
 	EdrCrowdstrike                    *EdrCrowdStrike
@@ -9794,6 +9856,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.AssetsTaniumCloud = value
+	case "assets_tanium_cloud_mock":
+		value := new(AssetsTaniumCloudMock)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.AssetsTaniumCloudMock = value
 	case "cloudsecurity_crowdstrike":
 		value := new(CloudSecurityCrowdStrike)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -10177,6 +10245,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.AssetsTaniumCloud != nil {
 		return core.MarshalJSONWithExtraProperty(p.AssetsTaniumCloud, "type", "assets_tanium_cloud")
 	}
+	if p.AssetsTaniumCloudMock != nil {
+		return core.MarshalJSONWithExtraProperty(p.AssetsTaniumCloudMock, "type", "assets_tanium_cloud_mock")
+	}
 	if p.CloudsecurityCrowdstrike != nil {
 		return core.MarshalJSONWithExtraProperty(p.CloudsecurityCrowdstrike, "type", "cloudsecurity_crowdstrike")
 	}
@@ -10365,6 +10436,7 @@ type ProviderConfigVisitor interface {
 	VisitAssetsServicenow(*AssetsServiceNow) error
 	VisitAssetsServicenowMock(*AssetsServiceNowMock) error
 	VisitAssetsTaniumCloud(*AssetsTaniumCloud) error
+	VisitAssetsTaniumCloudMock(*AssetsTaniumCloudMock) error
 	VisitCloudsecurityCrowdstrike(*CloudSecurityCrowdStrike) error
 	VisitCloudsecurityDefender(*CloudSecurityDefender) error
 	VisitEdrCrowdstrike(*EdrCrowdStrike) error
@@ -10455,6 +10527,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.AssetsTaniumCloud != nil {
 		return visitor.VisitAssetsTaniumCloud(p.AssetsTaniumCloud)
+	}
+	if p.AssetsTaniumCloudMock != nil {
+		return visitor.VisitAssetsTaniumCloudMock(p.AssetsTaniumCloudMock)
 	}
 	if p.CloudsecurityCrowdstrike != nil {
 		return visitor.VisitCloudsecurityCrowdstrike(p.CloudsecurityCrowdstrike)
@@ -10657,6 +10732,8 @@ const (
 	ProviderConfigIdAssetsServiceNowMock ProviderConfigId = "assets_servicenow_mock"
 	// Tanium Vulnerability Management
 	ProviderConfigIdAssetsTaniumCloud ProviderConfigId = "assets_tanium_cloud"
+	// [MOCK] Tanium Vulnerability Management
+	ProviderConfigIdAssetsTaniumCloudMock ProviderConfigId = "assets_tanium_cloud_mock"
 	// CrowdStrike Falcon® Insight EDR
 	ProviderConfigIdCloudSecurityCrowdStrike ProviderConfigId = "cloudsecurity_crowdstrike"
 	// Microsoft Defender for Cloud
@@ -10799,6 +10876,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdAssetsServiceNowMock, nil
 	case "assets_tanium_cloud":
 		return ProviderConfigIdAssetsTaniumCloud, nil
+	case "assets_tanium_cloud_mock":
+		return ProviderConfigIdAssetsTaniumCloudMock, nil
 	case "cloudsecurity_crowdstrike":
 		return ProviderConfigIdCloudSecurityCrowdStrike, nil
 	case "cloudsecurity_defender":
