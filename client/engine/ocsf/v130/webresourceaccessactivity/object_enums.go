@@ -955,10 +955,12 @@ const Url_CategoryIds_Marijuana UrlCategoryIds = 121
 
 // Unknown. The status is unknown.
 const User_MfaStatus_Unknown UserMfaStatusId = 0
-// Enabled. Multi-factor authentication is on for this user.
+// Enabled. Multi-factor authentication is enabled for this user.
 const User_MfaStatus_Enabled UserMfaStatusId = 1
 // NotEnabled. TMulti-factor authentication is off for this user.
 const User_MfaStatus_NotEnabled UserMfaStatusId = 2
+// Enforced. Multi-factor authentication is enabled and there is a policy that requires it for this user.
+const User_MfaStatus_Enforced UserMfaStatusId = 3
 // Other. The event status is not mapped. See the <code>user_status</code> attribute, which contains a data source specific value.
 const User_MfaStatus_Other UserMfaStatusId = 99
 

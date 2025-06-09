@@ -3971,6 +3971,8 @@ type User struct {
 	FullName *string `json:"full_name,omitempty" url:"full_name,omitempty"`
 	// The administrative groups to which the user belongs.
 	Groups []*Group `json:"groups,omitempty" url:"groups,omitempty"`
+	// The user has a multi-factor or secondary-factor device assigned.
+	HasMfa *bool `json:"has_mfa,omitempty" url:"has_mfa,omitempty"`
 	// The additional LDAP attributes that describe a person.
 	LdapPerson *LdapPerson `json:"ldap_person,omitempty" url:"ldap_person,omitempty"`
 	// The multi-factor authentication status, normalized to the caption of the mfa_status_id value. In the case of 'Other', it is defined by the data source.
@@ -4042,8 +4044,9 @@ func (u *User) String() string {
 
 // UserMfaStatusId is an enum, and the following values are allowed.
 // 0 - Unknown: The status is unknown.
-// 1 - Enabled: Multi-factor authentication is on for this user.
+// 1 - Enabled: Multi-factor authentication is enabled for this user.
 // 2 - NotEnabled: TMulti-factor authentication is off for this user.
+// 3 - Enforced: Multi-factor authentication is enabled and there is a policy that requires it for this user.
 // 99 - Other: The event status is not mapped. See the <code>user_status</code> attribute, which contains a data source specific value.
 type UserMfaStatusId = int
 

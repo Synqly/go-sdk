@@ -6366,8 +6366,9 @@ func (u *User) String() string {
 
 // UserMfaStatusId is an enum, and the following values are allowed.
 // 0 - Unknown: The status is unknown.
-// 1 - Enabled: Multi-factor authentication is on for this user.
+// 1 - Enabled: Multi-factor authentication is enabled for this user.
 // 2 - NotEnabled: TMulti-factor authentication is off for this user.
+// 3 - Enforced: Multi-factor authentication is enabled and there is a policy that requires it for this user.
 // 99 - Other: The event status is not mapped. See the <code>user_status</code> attribute, which contains a data source specific value.
 type UserMfaStatusId = int
 
