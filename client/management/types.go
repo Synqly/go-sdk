@@ -6557,6 +6557,50 @@ func (a *AssetsArmisCentrixMock) String() string {
 	return fmt.Sprintf("%#v", a)
 }
 
+// Configuration for the Axonius Assets Provider
+type AssetsAxonius struct {
+	Credential *AxoniusCredential `json:"credential" url:"credential"`
+	// URL for the Axonius API. This should be the base URL for the API, without any path components.
+	Url string `json:"url" url:"url"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (a *AssetsAxonius) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
+}
+
+func (a *AssetsAxonius) UnmarshalJSON(data []byte) error {
+	type unmarshaler AssetsAxonius
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*a = AssetsAxonius(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+
+	a._rawJSON = nil
+	return nil
+}
+
+func (a *AssetsAxonius) String() string {
+	if len(a._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(a); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", a)
+}
+
 // Configuration for CrowdStrike Falcon as an Assets Provider
 type AssetsCrowdStrike struct {
 	// The credential to use for the CrowdStrike Falcon tenant.
@@ -7292,6 +7336,76 @@ func (a *AwsSecurityLakeCredential) Accept(visitor AwsSecurityLakeCredentialVisi
 	}
 	if a.AwsId != "" {
 		return visitor.VisitAwsId(a.AwsId)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", a)
+}
+
+type AxoniusCredential struct {
+	Type string
+	// This credential must be an API Key and API Secret. For more details, see the [Getting an API Key and API Secret](https://docs.axonius.com/docs/axonius-rest-api#getting-an-api-key-and-api-secret).
+	Basic *BasicCredential
+	// ID of an existing credential that stores a Axonius API Key.
+	BasicId BasicCredentialId
+}
+
+func (a *AxoniusCredential) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	a.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", a)
+	}
+	switch unmarshaler.Type {
+	case "basic":
+		value := new(BasicCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		a.Basic = value
+	case "basic_id":
+		var valueUnmarshaler struct {
+			BasicId BasicCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		a.BasicId = valueUnmarshaler.BasicId
+	}
+	return nil
+}
+
+func (a AxoniusCredential) MarshalJSON() ([]byte, error) {
+	if a.Basic != nil {
+		return core.MarshalJSONWithExtraProperty(a.Basic, "type", "basic")
+	}
+	if a.BasicId != "" {
+		var marshaler = struct {
+			Type    string            `json:"type"`
+			BasicId BasicCredentialId `json:"value"`
+		}{
+			Type:    "basic_id",
+			BasicId: a.BasicId,
+		}
+		return json.Marshal(marshaler)
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", a)
+}
+
+type AxoniusCredentialVisitor interface {
+	VisitBasic(*BasicCredential) error
+	VisitBasicId(BasicCredentialId) error
+}
+
+func (a *AxoniusCredential) Accept(visitor AxoniusCredentialVisitor) error {
+	if a.Basic != nil {
+		return visitor.VisitBasic(a.Basic)
+	}
+	if a.BasicId != "" {
+		return visitor.VisitBasicId(a.BasicId)
 	}
 	return fmt.Errorf("type %T does not define a non-empty union type", a)
 }
@@ -9715,6 +9829,7 @@ type ProviderConfig struct {
 	Type                              string
 	AssetsArmisCentrix                *AssetsArmisCentrix
 	AssetsArmisCentrixMock            *AssetsArmisCentrixMock
+	AssetsAxonius                     *AssetsAxonius
 	AssetsCrowdstrike                 *AssetsCrowdStrike
 	AssetsNozomiVantage               *AssetsNozomiVantage
 	AssetsNozomiVantageMock           *AssetsNozomiVantageMock
@@ -9808,6 +9923,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.AssetsArmisCentrixMock = value
+	case "assets_axonius":
+		value := new(AssetsAxonius)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.AssetsAxonius = value
 	case "assets_crowdstrike":
 		value := new(AssetsCrowdStrike)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -10221,6 +10342,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.AssetsArmisCentrixMock != nil {
 		return core.MarshalJSONWithExtraProperty(p.AssetsArmisCentrixMock, "type", "assets_armis_centrix_mock")
 	}
+	if p.AssetsAxonius != nil {
+		return core.MarshalJSONWithExtraProperty(p.AssetsAxonius, "type", "assets_axonius")
+	}
 	if p.AssetsCrowdstrike != nil {
 		return core.MarshalJSONWithExtraProperty(p.AssetsCrowdstrike, "type", "assets_crowdstrike")
 	}
@@ -10428,6 +10552,7 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 type ProviderConfigVisitor interface {
 	VisitAssetsArmisCentrix(*AssetsArmisCentrix) error
 	VisitAssetsArmisCentrixMock(*AssetsArmisCentrixMock) error
+	VisitAssetsAxonius(*AssetsAxonius) error
 	VisitAssetsCrowdstrike(*AssetsCrowdStrike) error
 	VisitAssetsNozomiVantage(*AssetsNozomiVantage) error
 	VisitAssetsNozomiVantageMock(*AssetsNozomiVantageMock) error
@@ -10503,6 +10628,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.AssetsArmisCentrixMock != nil {
 		return visitor.VisitAssetsArmisCentrixMock(p.AssetsArmisCentrixMock)
+	}
+	if p.AssetsAxonius != nil {
+		return visitor.VisitAssetsAxonius(p.AssetsAxonius)
 	}
 	if p.AssetsCrowdstrike != nil {
 		return visitor.VisitAssetsCrowdstrike(p.AssetsCrowdstrike)
@@ -10716,6 +10844,8 @@ const (
 	ProviderConfigIdAssetsArmisCentrix ProviderConfigId = "assets_armis_centrix"
 	// [MOCK] Armis Centrix™ for Asset Management and Security
 	ProviderConfigIdAssetsArmisCentrixMock ProviderConfigId = "assets_armis_centrix_mock"
+	// Axonius Asset Cloud
+	ProviderConfigIdAssetsAxonius ProviderConfigId = "assets_axonius"
 	// CrowdStrike Falcon Spotlight
 	ProviderConfigIdAssetsCrowdStrike ProviderConfigId = "assets_crowdstrike"
 	// Nozomi Vantage
@@ -10860,6 +10990,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdAssetsArmisCentrix, nil
 	case "assets_armis_centrix_mock":
 		return ProviderConfigIdAssetsArmisCentrixMock, nil
+	case "assets_axonius":
+		return ProviderConfigIdAssetsAxonius, nil
 	case "assets_crowdstrike":
 		return ProviderConfigIdAssetsCrowdStrike, nil
 	case "assets_nozomi_vantage":
