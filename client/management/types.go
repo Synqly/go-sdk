@@ -13067,8 +13067,6 @@ type StorageAwsS3 struct {
 	Endpoint *string `json:"endpoint,omitempty" url:"endpoint,omitempty"`
 	// AWS region where the S3 bucket is located.
 	Region string `json:"region" url:"region"`
-	// Optional list of transformations used to modify requests before they are sent to the external service.
-	Transforms []TransformId `json:"transforms,omitempty" url:"transforms,omitempty"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
@@ -13113,8 +13111,6 @@ type StorageAzureBlob struct {
 	// Name of the blob container where files are stored.
 	Bucket     string               `json:"bucket" url:"bucket"`
 	Credential *AzureBlobCredential `json:"credential" url:"credential"`
-	// Optional list of transformations used to modify requests before they are sent to the external service.
-	Transforms []TransformId `json:"transforms,omitempty" url:"transforms,omitempty"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
@@ -13161,8 +13157,6 @@ type StorageGcs struct {
 	Credential *GcsCredential `json:"credential" url:"credential"`
 	// Google Cloud region where the bucket is located.
 	Region string `json:"region" url:"region"`
-	// Optional list of transformations used to modify requests before they are sent to the external service.
-	Transforms []TransformId `json:"transforms,omitempty" url:"transforms,omitempty"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
@@ -15480,82 +15474,6 @@ func (s *SynqlyIntegrationsTokenResponse) String() string {
 		return value
 	}
 	return fmt.Sprintf("%#v", s)
-}
-
-// Transforms data collected before it is sent to the target Integration.
-type Transform struct {
-	// Human-readable name for this resource
-	Name string `json:"name" url:"name"`
-	// Time object was originally created
-	CreatedAt time.Time `json:"created_at" url:"created_at"`
-	// Last time object was updated
-	UpdatedAt time.Time   `json:"updated_at" url:"updated_at"`
-	Id        TransformId `json:"id" url:"id"`
-	// Account that manages this Transform.
-	AccountId AccountId `json:"account_id" url:"account_id"`
-	// Human friendly display name for this Transform.
-	Fullname string `json:"fullname" url:"fullname"`
-	// JSON Patch transform to apply (rfc6902).
-	Patch []byte `json:"patch" url:"patch"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (t *Transform) GetExtraProperties() map[string]interface{} {
-	return t.extraProperties
-}
-
-func (t *Transform) UnmarshalJSON(data []byte) error {
-	type embed Transform
-	var unmarshaler = struct {
-		embed
-		CreatedAt *core.DateTime `json:"created_at"`
-		UpdatedAt *core.DateTime `json:"updated_at"`
-	}{
-		embed: embed(*t),
-	}
-	if err := json.Unmarshal(data, &unmarshaler); err != nil {
-		return err
-	}
-	*t = Transform(unmarshaler.embed)
-	t.CreatedAt = unmarshaler.CreatedAt.Time()
-	t.UpdatedAt = unmarshaler.UpdatedAt.Time()
-
-	extraProperties, err := core.ExtractExtraProperties(data, *t)
-	if err != nil {
-		return err
-	}
-	t.extraProperties = extraProperties
-
-	t._rawJSON = nil
-	return nil
-}
-
-func (t *Transform) MarshalJSON() ([]byte, error) {
-	type embed Transform
-	var marshaler = struct {
-		embed
-		CreatedAt *core.DateTime `json:"created_at"`
-		UpdatedAt *core.DateTime `json:"updated_at"`
-	}{
-		embed:     embed(*t),
-		CreatedAt: core.NewDateTime(t.CreatedAt),
-		UpdatedAt: core.NewDateTime(t.UpdatedAt),
-	}
-	return json.Marshal(marshaler)
-}
-
-func (t *Transform) String() string {
-	if len(t._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(t._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(t); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", t)
 }
 
 type Usage struct {

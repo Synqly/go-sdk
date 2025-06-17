@@ -23,7 +23,6 @@ import (
 	status "github.com/synqly/go-sdk/client/management/status"
 	suborgs "github.com/synqly/go-sdk/client/management/suborgs"
 	tokens "github.com/synqly/go-sdk/client/management/tokens"
-	transforms "github.com/synqly/go-sdk/client/management/transforms"
 	http "net/http"
 )
 
@@ -50,7 +49,6 @@ type Client struct {
 	Status               *status.Client
 	SubOrgs              *suborgs.Client
 	Tokens               *tokens.Client
-	Transforms           *transforms.Client
 }
 
 func NewClient(opts ...option.RequestOption) *Client {
@@ -82,6 +80,5 @@ func NewClient(opts ...option.RequestOption) *Client {
 		Status:               status.NewClient(opts...),
 		SubOrgs:              suborgs.NewClient(opts...),
 		Tokens:               tokens.NewClient(opts...),
-		Transforms:           transforms.NewClient(opts...),
 	}
 }
