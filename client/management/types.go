@@ -3330,6 +3330,237 @@ func (m MappingDataType) Ptr() *MappingDataType {
 	return &m
 }
 
+type ApplyMappingResponseResult struct {
+	// The JSON object resulting from applying the mapping chain defined by the request over the input data.
+	Mapping map[string]interface{} `json:"mapping" url:"mapping"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (a *ApplyMappingResponseResult) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
+}
+
+func (a *ApplyMappingResponseResult) UnmarshalJSON(data []byte) error {
+	type unmarshaler ApplyMappingResponseResult
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*a = ApplyMappingResponseResult(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+
+	a._rawJSON = nil
+	return nil
+}
+
+func (a *ApplyMappingResponseResult) String() string {
+	if len(a._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(a); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", a)
+}
+
+type CreateMappingResponseResult struct {
+	Mapping *Mapping `json:"mapping" url:"mapping"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *CreateMappingResponseResult) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
+}
+
+func (c *CreateMappingResponseResult) UnmarshalJSON(data []byte) error {
+	type unmarshaler CreateMappingResponseResult
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = CreateMappingResponseResult(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
+	c._rawJSON = nil
+	return nil
+}
+
+func (c *CreateMappingResponseResult) String() string {
+	if len(c._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
+type Mapping struct {
+	// Human-readable name for this resource
+	Name string `json:"name" url:"name"`
+	// Time object was originally created
+	CreatedAt time.Time `json:"created_at" url:"created_at"`
+	// Last time object was updated
+	UpdatedAt time.Time `json:"updated_at" url:"updated_at"`
+	Id        MappingId `json:"id" url:"id"`
+	// Human friendly display name for this mapping.
+	Fullname string `json:"fullname" url:"fullname"`
+	// Organization that manages this Mapping.
+	OrganizationId OrganizationId `json:"organization_id" url:"organization_id"`
+	// transform to apply.
+	Data string `json:"data" url:"data"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (m *Mapping) GetExtraProperties() map[string]interface{} {
+	return m.extraProperties
+}
+
+func (m *Mapping) UnmarshalJSON(data []byte) error {
+	type embed Mapping
+	var unmarshaler = struct {
+		embed
+		CreatedAt *core.DateTime `json:"created_at"`
+		UpdatedAt *core.DateTime `json:"updated_at"`
+	}{
+		embed: embed(*m),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*m = Mapping(unmarshaler.embed)
+	m.CreatedAt = unmarshaler.CreatedAt.Time()
+	m.UpdatedAt = unmarshaler.UpdatedAt.Time()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *m)
+	if err != nil {
+		return err
+	}
+	m.extraProperties = extraProperties
+
+	m._rawJSON = nil
+	return nil
+}
+
+func (m *Mapping) MarshalJSON() ([]byte, error) {
+	type embed Mapping
+	var marshaler = struct {
+		embed
+		CreatedAt *core.DateTime `json:"created_at"`
+		UpdatedAt *core.DateTime `json:"updated_at"`
+	}{
+		embed:     embed(*m),
+		CreatedAt: core.NewDateTime(m.CreatedAt),
+		UpdatedAt: core.NewDateTime(m.UpdatedAt),
+	}
+	return json.Marshal(marshaler)
+}
+
+func (m *Mapping) String() string {
+	if len(m._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(m._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(m); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", m)
+}
+
+type MappingBase struct {
+	// Human-readable name for this resource
+	Name string `json:"name" url:"name"`
+	// Time object was originally created
+	CreatedAt time.Time `json:"created_at" url:"created_at"`
+	// Last time object was updated
+	UpdatedAt time.Time `json:"updated_at" url:"updated_at"`
+	Id        MappingId `json:"id" url:"id"`
+	// Human friendly display name for this mapping.
+	Fullname string `json:"fullname" url:"fullname"`
+	// Organization that manages this Mapping.
+	OrganizationId OrganizationId `json:"organization_id" url:"organization_id"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (m *MappingBase) GetExtraProperties() map[string]interface{} {
+	return m.extraProperties
+}
+
+func (m *MappingBase) UnmarshalJSON(data []byte) error {
+	type embed MappingBase
+	var unmarshaler = struct {
+		embed
+		CreatedAt *core.DateTime `json:"created_at"`
+		UpdatedAt *core.DateTime `json:"updated_at"`
+	}{
+		embed: embed(*m),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*m = MappingBase(unmarshaler.embed)
+	m.CreatedAt = unmarshaler.CreatedAt.Time()
+	m.UpdatedAt = unmarshaler.UpdatedAt.Time()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *m)
+	if err != nil {
+		return err
+	}
+	m.extraProperties = extraProperties
+
+	m._rawJSON = nil
+	return nil
+}
+
+func (m *MappingBase) MarshalJSON() ([]byte, error) {
+	type embed MappingBase
+	var marshaler = struct {
+		embed
+		CreatedAt *core.DateTime `json:"created_at"`
+		UpdatedAt *core.DateTime `json:"updated_at"`
+	}{
+		embed:     embed(*m),
+		CreatedAt: core.NewDateTime(m.CreatedAt),
+		UpdatedAt: core.NewDateTime(m.UpdatedAt),
+	}
+	return json.Marshal(marshaler)
+}
+
+func (m *MappingBase) String() string {
+	if len(m._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(m._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(m); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", m)
+}
+
 type CreateMemberResponseResult struct {
 	Member *Member `json:"member" url:"member"`
 
@@ -4839,6 +5070,7 @@ type ApiPermissionMap struct {
 	Integrations      *IntegrationsPermissions      `json:"integrations,omitempty" url:"integrations,omitempty"`
 	IntegrationPoints *IntegrationPointsPermissions `json:"integration_points,omitempty" url:"integration_points,omitempty"`
 	Operations        *OperationsPermissions        `json:"operations,omitempty" url:"operations,omitempty"`
+	Mappings          *MappingsPermissions          `json:"mappings,omitempty" url:"mappings,omitempty"`
 	Members           *MembersPermissions           `json:"members,omitempty" url:"members,omitempty"`
 	Organizations     *OrganizationPermissions      `json:"organizations,omitempty" url:"organizations,omitempty"`
 	PermissionSet     *PermissionSetPermissions     `json:"permission_set,omitempty" url:"permission_set,omitempty"`
@@ -5414,6 +5646,88 @@ func (i *IntegrationsPermissions) String() string {
 		return value
 	}
 	return fmt.Sprintf("%#v", i)
+}
+
+type MappingsActions string
+
+const (
+	MappingsActionsList   MappingsActions = "list"
+	MappingsActionsCreate MappingsActions = "create"
+	MappingsActionsGet    MappingsActions = "get"
+	MappingsActionsUpdate MappingsActions = "update"
+	MappingsActionsPatch  MappingsActions = "patch"
+	MappingsActionsDelete MappingsActions = "delete"
+	MappingsActionsApply  MappingsActions = "apply"
+	MappingsActionsAll    MappingsActions = "*"
+)
+
+func NewMappingsActionsFromString(s string) (MappingsActions, error) {
+	switch s {
+	case "list":
+		return MappingsActionsList, nil
+	case "create":
+		return MappingsActionsCreate, nil
+	case "get":
+		return MappingsActionsGet, nil
+	case "update":
+		return MappingsActionsUpdate, nil
+	case "patch":
+		return MappingsActionsPatch, nil
+	case "delete":
+		return MappingsActionsDelete, nil
+	case "apply":
+		return MappingsActionsApply, nil
+	case "*":
+		return MappingsActionsAll, nil
+	}
+	var t MappingsActions
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (m MappingsActions) Ptr() *MappingsActions {
+	return &m
+}
+
+// Permissions for the mappings API
+type MappingsPermissions struct {
+	Actions []MappingsActions `json:"actions" url:"actions"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (m *MappingsPermissions) GetExtraProperties() map[string]interface{} {
+	return m.extraProperties
+}
+
+func (m *MappingsPermissions) UnmarshalJSON(data []byte) error {
+	type unmarshaler MappingsPermissions
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*m = MappingsPermissions(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *m)
+	if err != nil {
+		return err
+	}
+	m.extraProperties = extraProperties
+
+	m._rawJSON = nil
+	return nil
+}
+
+func (m *MappingsPermissions) String() string {
+	if len(m._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(m._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(m); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", m)
 }
 
 type MembersActions string
