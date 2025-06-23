@@ -10140,77 +10140,78 @@ func (p *PingOneCredential) Accept(visitor PingOneCredentialVisitor) error {
 }
 
 type ProviderConfig struct {
-	Type                              string
-	AssetsArmisCentrix                *AssetsArmisCentrix
-	AssetsArmisCentrixMock            *AssetsArmisCentrixMock
-	AssetsAxonius                     *AssetsAxonius
-	AssetsCrowdstrike                 *AssetsCrowdStrike
-	AssetsNozomiVantage               *AssetsNozomiVantage
-	AssetsNozomiVantageMock           *AssetsNozomiVantageMock
-	AssetsQualysCloud                 *AssetsQualysCloud
-	AssetsQualysCloudMock             *AssetsQualysCloudMock
-	AssetsServicenow                  *AssetsServiceNow
-	AssetsServicenowMock              *AssetsServiceNowMock
-	AssetsTaniumCloud                 *AssetsTaniumCloud
-	AssetsTaniumCloudMock             *AssetsTaniumCloudMock
-	CloudsecurityCrowdstrike          *CloudSecurityCrowdStrike
-	CloudsecurityDefender             *CloudSecurityDefender
-	EdrCrowdstrike                    *EdrCrowdStrike
-	EdrDefender                       *EdrDefender
-	EdrMalwarebytes                   *EdrMalwarebytes
-	EdrSentinelone                    *EdrSentinelOne
-	EdrSophos                         *EdrSophos
-	IdentityEntraId                   *IdentityEntraId
-	IdentityGoogle                    *IdentityGoogle
-	IdentityOkta                      *IdentityOkta
-	IdentityPingone                   *IdentityPingOne
-	NotificationsJira                 *NotificationsJira
-	NotificationsMockNotifications    *NotificationsMock
-	NotificationsSlack                *NotificationsSlack
-	NotificationsSlackWebhook         *NotificationsSlackWebhook
-	NotificationsTeams                *NotificationsTeams
-	SiemCrowdstrike                   *SiemCrowdstrike
-	SiemElasticsearch                 *SiemElasticsearch
-	SiemGoogleChronicle               *SiemGoogleChronicle
-	SiemGoogleSecurityOperations      *SiemGoogleSecurityOperations
-	SiemMockSiem                      *SiemMock
-	SiemOpensearch                    *SiemOpenSearch
-	SiemQRadar                        *SiemQRadar
-	SiemRapid7Insightidr              *SiemRapid7InsightIdr
-	SiemSentinel                      *SiemSentinel
-	SiemSplunk                        *SiemSplunk
-	SiemSumoLogic                     *SiemSumoLogic
-	SinkAwsSecurityLake               *SinkAwsSecurityLake
-	SinkAwsSqs                        *SinkAwsSqs
-	SinkAzureMonitorLogs              *SinkAzureMonitorLogs
-	SinkCrowdstrikeHec                *SinkCrowdstrikeHec
-	SinkElasticsearch                 *SinkElasticsearch
-	SinkGoogleSecOps                  *SinkGoogleSecOps
-	SinkGoogleSecurityOperations      *SinkGoogleSecurityOperations
-	SinkMockSink                      *SinkMock
-	SinkOpensearch                    *SinkOpenSearch
-	SinkSplunk                        *SinkSplunk
-	StorageAwsS3                      *StorageAwsS3
-	StorageAzureBlob                  *StorageAzureBlob
-	StorageGcs                        *StorageGcs
-	StorageMockStorage                *StorageMock
-	TicketingAutotask                 *TicketingAutotask
-	TicketingFreshdesk                *TicketingFreshdesk
-	TicketingJira                     *TicketingJira
-	TicketingMockTicketing            *TicketingMock
-	TicketingPagerduty                *TicketingPagerDuty
-	TicketingServicenow               *TicketingServiceNow
-	TicketingServicenowSir            *TicketingServiceNowSir
-	TicketingTorq                     *TicketingTorq
-	TicketingZendesk                  *TicketingZendesk
-	VulnerabilitiesCrowdstrike        *VulnerabilitiesCrowdStrike
-	VulnerabilitiesNucleus            *VulnerabilitiesNucleus
-	VulnerabilitiesQualysCloud        *VulnerabilitiesQualysCloud
-	VulnerabilitiesQualysCloudMock    *VulnerabilitiesQualysCloudMock
-	VulnerabilitiesRapid7InsightCloud *VulnerabilitiesRapid7InsightCloud
-	VulnerabilitiesTaniumCloud        *VulnerabilitiesTaniumCloud
-	VulnerabilitiesTaniumCloudMock    *VulnerabilitiesTaniumCloudMock
-	VulnerabilitiesTenableCloud       *VulnerabilitiesTenableCloud
+	Type                                  string
+	AssetsArmisCentrix                    *AssetsArmisCentrix
+	AssetsArmisCentrixMock                *AssetsArmisCentrixMock
+	AssetsAxonius                         *AssetsAxonius
+	AssetsCrowdstrike                     *AssetsCrowdStrike
+	AssetsNozomiVantage                   *AssetsNozomiVantage
+	AssetsNozomiVantageMock               *AssetsNozomiVantageMock
+	AssetsQualysCloud                     *AssetsQualysCloud
+	AssetsQualysCloudMock                 *AssetsQualysCloudMock
+	AssetsServicenow                      *AssetsServiceNow
+	AssetsServicenowMock                  *AssetsServiceNowMock
+	AssetsTaniumCloud                     *AssetsTaniumCloud
+	AssetsTaniumCloudMock                 *AssetsTaniumCloudMock
+	CloudsecurityCrowdstrike              *CloudSecurityCrowdStrike
+	CloudsecurityDefender                 *CloudSecurityDefender
+	EdrCrowdstrike                        *EdrCrowdStrike
+	EdrDefender                           *EdrDefender
+	EdrMalwarebytes                       *EdrMalwarebytes
+	EdrSentinelone                        *EdrSentinelOne
+	EdrSophos                             *EdrSophos
+	IdentityEntraId                       *IdentityEntraId
+	IdentityGoogle                        *IdentityGoogle
+	IdentityOkta                          *IdentityOkta
+	IdentityPingone                       *IdentityPingOne
+	NotificationsJira                     *NotificationsJira
+	NotificationsMockNotifications        *NotificationsMock
+	NotificationsSlack                    *NotificationsSlack
+	NotificationsSlackWebhook             *NotificationsSlackWebhook
+	NotificationsTeams                    *NotificationsTeams
+	SiemCrowdstrike                       *SiemCrowdstrike
+	SiemElasticsearch                     *SiemElasticsearch
+	SiemGoogleChronicle                   *SiemGoogleChronicle
+	SiemGoogleSecurityOperations          *SiemGoogleSecurityOperations
+	SiemMockSiem                          *SiemMock
+	SiemOpensearch                        *SiemOpenSearch
+	SiemQRadar                            *SiemQRadar
+	SiemRapid7Insightidr                  *SiemRapid7InsightIdr
+	SiemSentinel                          *SiemSentinel
+	SiemSplunk                            *SiemSplunk
+	SiemSumoLogic                         *SiemSumoLogic
+	SinkAwsSecurityLake                   *SinkAwsSecurityLake
+	SinkAwsSqs                            *SinkAwsSqs
+	SinkAzureMonitorLogs                  *SinkAzureMonitorLogs
+	SinkCrowdstrikeHec                    *SinkCrowdstrikeHec
+	SinkElasticsearch                     *SinkElasticsearch
+	SinkGoogleSecOps                      *SinkGoogleSecOps
+	SinkGoogleSecurityOperations          *SinkGoogleSecurityOperations
+	SinkMockSink                          *SinkMock
+	SinkOpensearch                        *SinkOpenSearch
+	SinkSplunk                            *SinkSplunk
+	StorageAwsS3                          *StorageAwsS3
+	StorageAzureBlob                      *StorageAzureBlob
+	StorageGcs                            *StorageGcs
+	StorageMockStorage                    *StorageMock
+	TicketingAutotask                     *TicketingAutotask
+	TicketingFreshdesk                    *TicketingFreshdesk
+	TicketingJira                         *TicketingJira
+	TicketingMockTicketing                *TicketingMock
+	TicketingPagerduty                    *TicketingPagerDuty
+	TicketingServicenow                   *TicketingServiceNow
+	TicketingServicenowSir                *TicketingServiceNowSir
+	TicketingTorq                         *TicketingTorq
+	TicketingZendesk                      *TicketingZendesk
+	VulnerabilitiesCrowdstrike            *VulnerabilitiesCrowdStrike
+	VulnerabilitiesNucleus                *VulnerabilitiesNucleus
+	VulnerabilitiesQualysCloud            *VulnerabilitiesQualysCloud
+	VulnerabilitiesQualysCloudMock        *VulnerabilitiesQualysCloudMock
+	VulnerabilitiesRapid7InsightCloud     *VulnerabilitiesRapid7InsightCloud
+	VulnerabilitiesRapid7InsightCloudMock *VulnerabilitiesRapid7InsightCloudMock
+	VulnerabilitiesTaniumCloud            *VulnerabilitiesTaniumCloud
+	VulnerabilitiesTaniumCloudMock        *VulnerabilitiesTaniumCloudMock
+	VulnerabilitiesTenableCloud           *VulnerabilitiesTenableCloud
 }
 
 func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
@@ -10627,6 +10628,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.VulnerabilitiesRapid7InsightCloud = value
+	case "vulnerabilities_rapid7_insight_cloud_mock":
+		value := new(VulnerabilitiesRapid7InsightCloudMock)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.VulnerabilitiesRapid7InsightCloudMock = value
 	case "vulnerabilities_tanium_cloud":
 		value := new(VulnerabilitiesTaniumCloud)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -10851,6 +10858,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.VulnerabilitiesRapid7InsightCloud != nil {
 		return core.MarshalJSONWithExtraProperty(p.VulnerabilitiesRapid7InsightCloud, "type", "vulnerabilities_rapid7_insight_cloud")
 	}
+	if p.VulnerabilitiesRapid7InsightCloudMock != nil {
+		return core.MarshalJSONWithExtraProperty(p.VulnerabilitiesRapid7InsightCloudMock, "type", "vulnerabilities_rapid7_insight_cloud_mock")
+	}
 	if p.VulnerabilitiesTaniumCloud != nil {
 		return core.MarshalJSONWithExtraProperty(p.VulnerabilitiesTaniumCloud, "type", "vulnerabilities_tanium_cloud")
 	}
@@ -10931,6 +10941,7 @@ type ProviderConfigVisitor interface {
 	VisitVulnerabilitiesQualysCloud(*VulnerabilitiesQualysCloud) error
 	VisitVulnerabilitiesQualysCloudMock(*VulnerabilitiesQualysCloudMock) error
 	VisitVulnerabilitiesRapid7InsightCloud(*VulnerabilitiesRapid7InsightCloud) error
+	VisitVulnerabilitiesRapid7InsightCloudMock(*VulnerabilitiesRapid7InsightCloudMock) error
 	VisitVulnerabilitiesTaniumCloud(*VulnerabilitiesTaniumCloud) error
 	VisitVulnerabilitiesTaniumCloudMock(*VulnerabilitiesTaniumCloudMock) error
 	VisitVulnerabilitiesTenableCloud(*VulnerabilitiesTenableCloud) error
@@ -11138,6 +11149,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	if p.VulnerabilitiesRapid7InsightCloud != nil {
 		return visitor.VisitVulnerabilitiesRapid7InsightCloud(p.VulnerabilitiesRapid7InsightCloud)
 	}
+	if p.VulnerabilitiesRapid7InsightCloudMock != nil {
+		return visitor.VisitVulnerabilitiesRapid7InsightCloudMock(p.VulnerabilitiesRapid7InsightCloudMock)
+	}
 	if p.VulnerabilitiesTaniumCloud != nil {
 		return visitor.VisitVulnerabilitiesTaniumCloud(p.VulnerabilitiesTaniumCloud)
 	}
@@ -11288,6 +11302,8 @@ const (
 	ProviderConfigIdVulnerabilitiesQualysCloudMock ProviderConfigId = "vulnerabilities_qualys_cloud_mock"
 	// Rapid7 Insight Vulnerability Management Cloud
 	ProviderConfigIdVulnerabilitiesRapid7InsightCloud ProviderConfigId = "vulnerabilities_rapid7_insight_cloud"
+	// [MOCK] Rapid7 Insight Vulnerability Management Cloud
+	ProviderConfigIdVulnerabilitiesRapid7InsightCloudMock ProviderConfigId = "vulnerabilities_rapid7_insight_cloud_mock"
 	// Tanium Vulnerability Management
 	ProviderConfigIdVulnerabilitiesTaniumCloud ProviderConfigId = "vulnerabilities_tanium_cloud"
 	// [MOCK] Tsanium Vulnerability Management
@@ -11434,6 +11450,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdVulnerabilitiesQualysCloudMock, nil
 	case "vulnerabilities_rapid7_insight_cloud":
 		return ProviderConfigIdVulnerabilitiesRapid7InsightCloud, nil
+	case "vulnerabilities_rapid7_insight_cloud_mock":
+		return ProviderConfigIdVulnerabilitiesRapid7InsightCloudMock, nil
 	case "vulnerabilities_tanium_cloud":
 		return ProviderConfigIdVulnerabilitiesTaniumCloud, nil
 	case "vulnerabilities_tanium_cloud_mock":
@@ -14441,6 +14459,25 @@ func (v VulnerabilitiesQualysCloudDataset) Ptr() *VulnerabilitiesQualysCloudData
 	return &v
 }
 
+type VulnerabilitiesRapid7InsightCloudDataset string
+
+const (
+	VulnerabilitiesRapid7InsightCloudDatasetBasicVer0 VulnerabilitiesRapid7InsightCloudDataset = "basic_v0"
+)
+
+func NewVulnerabilitiesRapid7InsightCloudDatasetFromString(s string) (VulnerabilitiesRapid7InsightCloudDataset, error) {
+	switch s {
+	case "basic_v0":
+		return VulnerabilitiesRapid7InsightCloudDatasetBasicVer0, nil
+	}
+	var t VulnerabilitiesRapid7InsightCloudDataset
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (v VulnerabilitiesRapid7InsightCloudDataset) Ptr() *VulnerabilitiesRapid7InsightCloudDataset {
+	return &v
+}
+
 type VulnerabilitiesTaniumCloudDataset string
 
 const (
@@ -14670,6 +14707,48 @@ func (v *VulnerabilitiesRapid7InsightCloud) UnmarshalJSON(data []byte) error {
 }
 
 func (v *VulnerabilitiesRapid7InsightCloud) String() string {
+	if len(v._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(v._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(v); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", v)
+}
+
+// Configuration for a mocked Rapid7 Insight Cloud as a Vulnerabilities Provider
+type VulnerabilitiesRapid7InsightCloudMock struct {
+	Dataset VulnerabilitiesRapid7InsightCloudDataset `json:"dataset" url:"dataset"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (v *VulnerabilitiesRapid7InsightCloudMock) GetExtraProperties() map[string]interface{} {
+	return v.extraProperties
+}
+
+func (v *VulnerabilitiesRapid7InsightCloudMock) UnmarshalJSON(data []byte) error {
+	type unmarshaler VulnerabilitiesRapid7InsightCloudMock
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*v = VulnerabilitiesRapid7InsightCloudMock(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *v)
+	if err != nil {
+		return err
+	}
+	v.extraProperties = extraProperties
+
+	v._rawJSON = nil
+	return nil
+}
+
+func (v *VulnerabilitiesRapid7InsightCloudMock) String() string {
 	if len(v._rawJSON) > 0 {
 		if value, err := core.StringifyJSON(v._rawJSON); err == nil {
 			return value
