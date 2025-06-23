@@ -1912,9 +1912,10 @@ func (r ResourceType) Ptr() *ResourceType {
 	return &r
 }
 
-// AWS access key to authenticate with AWS. Access keys are long-term credentials for an IAM user and consist of an ID and secret. Follow [this guide to generate access and secret keys](https://docs.aws.amazon.com/general/latest/gr/aws-sec-cred-types.html#access-keys-and-secret-access-keys). You may optionally provide a session token if you are using temporary credentials.
+// Access key to authenticate with AWS. Access keys are long-term credentials for an IAM user and consist of an Access Key ID and a Secret Access Key. Follow [this guide to generate credentials](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html).
+// You may optionally provide a session token if you are using temporary credentials.
 type AwsCredential struct {
-	// ID portion of the AWS access key pair.
+	// Access Key ID portion of the AWS access key pair.
 	AccessKeyId string `json:"access_key_id" url:"access_key_id"`
 	// Secret portion of the AWS access key pair.
 	SecretAccessKey string `json:"secret_access_key" url:"secret_access_key"`
@@ -2007,7 +2008,7 @@ func (b *BasicCredential) String() string {
 	return fmt.Sprintf("%#v", b)
 }
 
-// Unique identifier for a basic auth Credential
+// Unique identifier for a Basic Credential
 type BasicCredentialId = CredentialId
 
 // Credential to access an integration. Each credential is owned by an Account, Integration, IntegrationPoint or OrganizationWebhook.
@@ -2477,7 +2478,7 @@ func (o *OAuthClientCredential) String() string {
 	return fmt.Sprintf("%#v", o)
 }
 
-// Unique identifier for an OAuth client Credential
+// Unique identifier for an OAuth Client Credential
 type OAuthClientCredentialId = CredentialId
 
 type OwnerType string
@@ -2551,7 +2552,7 @@ func (s *SecretCredential) String() string {
 	return fmt.Sprintf("%#v", s)
 }
 
-// Unique identifier for a secret Credential
+// Unique identifier for a Secret Credential
 type SecretCredentialId = CredentialId
 
 // Token used to authenticate with an external service.
@@ -2597,7 +2598,7 @@ func (t *TokenCredential) String() string {
 	return fmt.Sprintf("%#v", t)
 }
 
-// Unique identifier for a token Credential
+// Unique identifier for a Token Credential
 type TokenCredentialId = CredentialId
 
 // Unique identifier for this Integration
@@ -6622,9 +6623,9 @@ func (w *WebhooksPermissions) String() string {
 
 type ArmisCredential struct {
 	Type string
-	// This credential must be an API Secret Key. Generate this key in the UI console by navigating to "Settings", then "API Management".
+	// Configuration when creating new API Key.
 	Token *TokenCredential
-	// ID of an existing credential that stores an Armis Centrix API Secret Key.
+	// Reference to existing API Key.
 	TokenId TokenCredentialId
 }
 
@@ -6785,10 +6786,12 @@ func (a AssetsTaniumCloudDataset) Ptr() *AssetsTaniumCloudDataset {
 	return &a
 }
 
-// Configuration for the Armis Centrix Assets Provider
+// Configuration for Armis Centrix™ for Asset Management and Security.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/armis-centrix-setup)
 type AssetsArmisCentrix struct {
 	Credential *ArmisCredential `json:"credential" url:"credential"`
-	// URL for the Armis Centrix API. This should be the base URL for the API, without any path components. For example, "https://tenant.armis.com".
+	// Base URL for the Armis Centrix™ API.
 	Url string `json:"url" url:"url"`
 
 	extraProperties map[string]interface{}
@@ -6872,9 +6875,11 @@ func (a *AssetsArmisCentrixMock) String() string {
 }
 
 // Configuration for the Axonius Assets Provider
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/axonius-asset-setup)
 type AssetsAxonius struct {
 	Credential *AxoniusCredential `json:"credential" url:"credential"`
-	// URL for the Axonius API. This should be the base URL for the API, without any path components.
+	// Base URL for the Axonius API.
 	Url string `json:"url" url:"url"`
 
 	extraProperties map[string]interface{}
@@ -6919,7 +6924,7 @@ func (a *AssetsAxonius) String() string {
 type AssetsCrowdStrike struct {
 	// The credential to use for the CrowdStrike Falcon tenant.
 	Credential *CrowdStrikeCredential `json:"credential" url:"credential"`
-	// The root domain where your CrowdStrike Falcon tenant is located.
+	// Base URL for the CrowdStrike Falcon Spotlight API.
 	Url *string `json:"url,omitempty" url:"url,omitempty"`
 
 	extraProperties map[string]interface{}
@@ -6960,10 +6965,13 @@ func (a *AssetsCrowdStrike) String() string {
 	return fmt.Sprintf("%#v", a)
 }
 
-// Configuration for the Nozomi Vantage provider
+// Configuration for Nozomi Vantage.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/nozomi-vantage-setup)
 type AssetsNozomiVantage struct {
+	// Credentials used to authenticate with Nozomi Vantage.
 	Credential *NozomiVantageCredential `json:"credential" url:"credential"`
-	// URL for the Nozomi Vantage API. This should be the base URL for the API, without any path components. For example, "https://tenant.us1.vantage.nozominetworks.io".
+	// Base URL for the Nozomi Vantage API.
 	Url string `json:"url" url:"url"`
 
 	extraProperties map[string]interface{}
@@ -7049,7 +7057,7 @@ func (a *AssetsNozomiVantageMock) String() string {
 // Configuration for Qualys Cloud Platform as an Assets Provider
 type AssetsQualysCloud struct {
 	Credential *QualysCloudCredential `json:"credential" url:"credential"`
-	// URL for the Qualys Cloud API. This should be the base URL for the API, without any path components. For example, "https://qualys.com".
+	// URL for the Qualys Cloud API. This should be the base URL for the API, without any path components.
 	Url string `json:"url" url:"url"`
 
 	extraProperties map[string]interface{}
@@ -7132,10 +7140,12 @@ func (a *AssetsQualysCloudMock) String() string {
 	return fmt.Sprintf("%#v", a)
 }
 
-// Configuration for ServiceNow as an Assets Provider
+// Configuration for ServiceNow Configuration Management Database (CMDB).
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/servicenow-assets-setup)
 type AssetsServiceNow struct {
 	Credential *ServiceNowCredential `json:"credential" url:"credential"`
-	// URL for the ServiceNow API. This should be the base URL for the API, without any path components and must be HTTPS. For example, "https://tenant.service-now.com".
+	// Base URL for the ServiceNow API.
 	Url string `json:"url" url:"url"`
 
 	extraProperties map[string]interface{}
@@ -7219,9 +7229,11 @@ func (a *AssetsServiceNowMock) String() string {
 }
 
 // Configuration for Tanium Cloud as an Assets Provider
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/tanium-setup)
 type AssetsTaniumCloud struct {
 	Credential *TaniumCloudCredential `json:"credential" url:"credential"`
-	// URL for the Tanium Cloud API. This should be the base URL for the API, without any path components and must be HTTPS, e.g. "https://<customername>-api.cloud.tanium.com" or "https://<customername>-api.titankube.com".
+	// Base URL for the Tanium Cloud API
 	Url string `json:"url" url:"url"`
 
 	extraProperties map[string]interface{}
@@ -7306,9 +7318,9 @@ func (a *AssetsTaniumCloudMock) String() string {
 
 type AutotaskApiIntegrationCodeCredential struct {
 	Type string
-	// API Integration Code for the Autotask API.
+	// Identifier used for individual tracking and management of API calls.
 	Secret *SecretCredential
-	// API Integration Code ID for the Autotask API.
+	// Reference to existing API Tracking ID.
 	SecretId SecretCredentialId
 }
 
@@ -7376,9 +7388,9 @@ func (a *AutotaskApiIntegrationCodeCredential) Accept(visitor AutotaskApiIntegra
 
 type AutotaskSecretCredential struct {
 	Type string
-	// Secret for the Autotask API.
+	// Configuration when creating new Secret.
 	Secret *SecretCredential
-	// Secret ID for the Autotask API.
+	// Reference to existing Secret.
 	SecretId SecretCredentialId
 }
 
@@ -7446,9 +7458,9 @@ func (a *AutotaskSecretCredential) Accept(visitor AutotaskSecretCredentialVisito
 
 type AwsS3Credential struct {
 	Type string
-	// AWS access key to authenticate with AWS. Access keys are long-term credentials for an IAM user and consist of an ID and secret. This token pair must have read and write access to the configured AWS S3 bucket. You may optionally provide a session token if you are using temporary credentials.
+	// Configuration when creating new AWS Access Keys.
 	Aws *AwsCredential
-	// ID of a credential that stores an AWS access key for the AWS S3 bucket.
+	// Reference to existing AWS Access Keys.
 	AwsId AwsCredentialId
 }
 
@@ -7516,9 +7528,9 @@ func (a *AwsS3Credential) Accept(visitor AwsS3CredentialVisitor) error {
 
 type AwsSqsCredential struct {
 	Type string
-	// AWS access key to authenticate with AWS. Access keys are long-term credentials for an IAM user and consist of an ID and secret. This token pair must have write access to the configured SQS queue. You may optionally provide a session token if you are using temporary credentials.
+	// Configuration when creating new AWS Access Keys.
 	Aws *AwsCredential
-	// ID of a credential that stores an AWS access key for the SQS queue.
+	// Reference to existing AWS Access Keys.
 	AwsId AwsCredentialId
 }
 
@@ -7586,9 +7598,9 @@ func (a *AwsSqsCredential) Accept(visitor AwsSqsCredentialVisitor) error {
 
 type AwsSecurityLakeCredential struct {
 	Type string
-	// AWS access key to authenticate with AWS. Access keys are long-term credentials for an IAM user and consist of an ID and secret. This token pair must have write access to the configured S3 bucket. You may optionally provide a session token if you are using temporary credentials.
+	// Configuration when creating new AWS Access Keys.
 	Aws *AwsCredential
-	// ID of a credential that stores an AWS access key for the AWS Security Lake S3 bucket.
+	// Reference to existing AWS Access Keys.
 	AwsId AwsCredentialId
 }
 
@@ -7658,7 +7670,7 @@ type AxoniusCredential struct {
 	Type string
 	// This credential must be an API Key and API Secret. For more details, see the [Getting an API Key and API Secret](https://docs.axonius.com/docs/axonius-rest-api#getting-an-api-key-and-api-secret).
 	Basic *BasicCredential
-	// ID of an existing credential that stores a Axonius API Key.
+	// Reference to existing Basic Credentials.
 	BasicId BasicCredentialId
 }
 
@@ -7726,9 +7738,9 @@ func (a *AxoniusCredential) Accept(visitor AxoniusCredentialVisitor) error {
 
 type AzureBlobCredential struct {
 	Type string
-	// Azure token for authentication. Follow [this guide to generate an API token](https://learn.microsoft.com/en-us/entra/identity-platform/howto-create-service-principal-portal). The token must have access to the configured blob container.
+	// Configuration when creating new Client Secret.
 	Token *TokenCredential
-	// ID of a credential that stores an Azure token for authentication.
+	// Reference to existing Client Secret.
 	TokenId TokenCredentialId
 }
 
@@ -7796,9 +7808,9 @@ func (a *AzureBlobCredential) Accept(visitor AzureBlobCredentialVisitor) error {
 
 type AzureMonitorLogsCredential struct {
 	Type string
-	// Azure token for authentication. Follow [this guide to generate an API token](https://docs.microsoft.com/en-us/azure/active-directory/develop/howto-create-service-principal-portal). The token must have access to the configured data collection endpoint.
+	// Configuration when creating new Client Secret.
 	Token *TokenCredential
-	// ID of a credential that stores an Azure token for authentication.
+	// Reference to existing Client Secret.
 	TokenId TokenCredentialId
 }
 
@@ -7915,7 +7927,7 @@ type CloudSecurityDefender struct {
 	SubscriptionId string `json:"subscription_id" url:"subscription_id"`
 	// The Azure Active Directory tenant ID that contains the Microsoft Defender for Cloud workspace.
 	TenantId string `json:"tenant_id" url:"tenant_id"`
-	// The root domain where your Microsoft Defender for Cloud workspace is located.
+	// Base URL to your Microsoft Defender for Cloud workspace.
 	Url *string `json:"url,omitempty" url:"url,omitempty"`
 
 	extraProperties map[string]interface{}
@@ -7958,9 +7970,9 @@ func (c *CloudSecurityDefender) String() string {
 
 type CrowdStrikeCredential struct {
 	Type string
-	// Docs for setting up oAuth
+	// Configuration when creating new Client Credentials.
 	OAuthClient *OAuthClientCredential
-	// ID of a credential that stores a CrowdStrike oAuth client ID.
+	// Reference to existing Client Credentials.
 	OAuthClientId OAuthClientCredentialId
 }
 
@@ -8026,12 +8038,11 @@ func (c *CrowdStrikeCredential) Accept(visitor CrowdStrikeCredentialVisitor) err
 	return fmt.Errorf("type %T does not define a non-empty union type", c)
 }
 
-// Supported credential types for Crowdstrike HEC
 type CrowdstrikeHecCredential struct {
 	Type string
-	// Crowdstrike HEC api-key
+	// Configuration when creating new API Key.
 	Token *TokenCredential
-	// ID of a credential that stores a Crowdstrike HEC authentication api-key.
+	// Reference to existing API Key.
 	TokenId TokenCredentialId
 }
 
@@ -8098,7 +8109,7 @@ func (c *CrowdstrikeHecCredential) Accept(visitor CrowdstrikeHecCredentialVisito
 }
 
 type CustomFieldMapping struct {
-	// Name for the custom field that you will use in the `custom_fields` field in ticket objects within Synqly.
+	// Name for the custom field that you will use in the `custom_fields` field in the returned ticket objects.
 	Name string `json:"name" url:"name"`
 	// ID of the project this field mapping is associated with. ID of "\*" is used to apply to all projects.
 	ProjectId string `json:"project_id" url:"project_id"`
@@ -8145,9 +8156,9 @@ func (c *CustomFieldMapping) String() string {
 
 type DefenderCredential struct {
 	Type string
-	// Docs for setting up oAuth
+	// Microsoft Defender OAuth client credentials.
 	OAuthClient *OAuthClientCredential
-	// ID of a credential that stores a Defender oAuth client ID.
+	// Reference to existing Client Credentials.
 	OAuthClientId OAuthClientCredentialId
 }
 
@@ -8213,11 +8224,12 @@ func (d *DefenderCredential) Accept(visitor DefenderCredentialVisitor) error {
 	return fmt.Errorf("type %T does not define a non-empty union type", d)
 }
 
-// Configuration for the CrowdStrike EDR Provider
+// Configuration for CrowdStrike Falcon® Insight EDR.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/crowdstrike-edr-setup)
 type EdrCrowdStrike struct {
-	// The credential to use for the CrowdStrike EDR Provider
 	Credential *CrowdStrikeCredential `json:"credential" url:"credential"`
-	// The root domain where your CrowdStrike Falcon tenant is located.
+	// Base URL for the CrowdStrike Falcon® API.
 	Url *string `json:"url,omitempty" url:"url,omitempty"`
 
 	extraProperties map[string]interface{}
@@ -8258,12 +8270,14 @@ func (e *EdrCrowdStrike) String() string {
 	return fmt.Sprintf("%#v", e)
 }
 
-// Configuration for the Microsoft Defender EDR Provider
+// Configuration for Microsoft Defender for Endpoint.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/defender-setup)
 type EdrDefender struct {
 	Credential *DefenderCredential `json:"credential" url:"credential"`
-	// TenantId for the Microsoft Defender Management Console.
+	// Tenant ID for the Microsoft Defender Management Console.
 	TenantId string `json:"tenant_id" url:"tenant_id"`
-	// URL for the Microsoft Defender Management Console.
+	// Base URL for the Microsoft Defender API.
 	Url string `json:"url" url:"url"`
 
 	extraProperties map[string]interface{}
@@ -8304,12 +8318,14 @@ func (e *EdrDefender) String() string {
 	return fmt.Sprintf("%#v", e)
 }
 
-// Configuration for the Malwarebytes EDR Provider
+// Configuration for ThreatDown Endpoint Detection & Response.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/malwarebytes-setup)
 type EdrMalwarebytes struct {
-	// Account identifier for the Malwarebytes EDR Provider. Can be either the account ID directly (e.g. xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx) or the full tenant URL (e.g. https://cloud.malwarebytes.com/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/dashboard)
+	// Account identifier for the ThreatDown EDR tenant.
 	AccountIdentifier string                  `json:"account_identifier" url:"account_identifier"`
 	Credential        *MalwarebytesCredential `json:"credential" url:"credential"`
-	// URL for the Malwarebytes EDR Provider
+	// Base URL for the ThreatDown EDR API.
 	Url *string `json:"url,omitempty" url:"url,omitempty"`
 
 	extraProperties map[string]interface{}
@@ -8350,13 +8366,16 @@ func (e *EdrMalwarebytes) String() string {
 	return fmt.Sprintf("%#v", e)
 }
 
-// Configuration for the SentinelOne EDR Provider
+// Configuration for SentinelOne Singularity™ Endpoint.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/sentinelone-setup)
 type EdrSentinelOne struct {
-	Credential          *SentinelOneCredential          `json:"credential" url:"credential"`
+	Credential *SentinelOneCredential `json:"credential" url:"credential"`
+	// Credential used for the SentinelOne Singularity Data Lake API. This credential is required when querying EDR events.
 	EdrEventsCredential *SentinelOneEdrEventsCredential `json:"edr_events_credential,omitempty" url:"edr_events_credential,omitempty"`
-	// Base URL for the SentinelOne Singularity Data Lake API. This URL is required if you plan to use the EDR Events API.
+	// Base URL for the SentinelOne Singularity Data Lake API. This URL is required is required when querying EDR events.
 	EdrEventsUrl *string `json:"edr_events_url,omitempty" url:"edr_events_url,omitempty"`
-	// URL for the SentinelOne Management API. This should be the base URL for the API, without any path components. For example, "https://your_management_url".
+	// Base URL for the SentinelOne Management API.
 	Url string `json:"url" url:"url"`
 
 	extraProperties map[string]interface{}
@@ -8397,10 +8416,12 @@ func (e *EdrSentinelOne) String() string {
 	return fmt.Sprintf("%#v", e)
 }
 
-// Configuration for the Sophos EDR Provider
+// Configuration for Sophos Endpoint.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/sophos-setup)
 type EdrSophos struct {
 	Credential *SophosCredential `json:"credential" url:"credential"`
-	// Optional root domain where your Sophos tenant is located.
+	// Base URL for the Sophos Endpoint API.
 	Url *string `json:"url,omitempty" url:"url,omitempty"`
 
 	extraProperties map[string]interface{}
@@ -8441,11 +8462,11 @@ func (e *EdrSophos) String() string {
 	return fmt.Sprintf("%#v", e)
 }
 
-// Options used to control how requests are made to elasticsearch when different authentication types are used.
+// Options used to control how requests are made to Elasticsearch when different authentication types are used.
 type ElasticsearchAuthOptions struct {
-	// When you have the correct permissions, this allows API requests to get made as a specific user, with all of their roles and permissions. When populated, this option will send the 'es-security-runas-user' header with every request made to the Elasticsearch API.
+	// Submit API requests as a specific user, with all of their roles and permissions. When populated, this option will send the `es-security-runas-user` header with every request made to the Elasticsearch API.
 	RunAs *string `json:"run_as,omitempty" url:"run_as,omitempty"`
-	// Some auth cases, notably JWT auth can be configured to require sending a shared secret in the `ES-Client-Authentication` header. When this secret is populated, it will get added as the shared secret for every request made to Elasticsearch.
+	// Some auth cases, notably JWT auth, can be configured to require sending a shared secret in the `ES-Client-Authentication` header. When this secret is populated it will get added as the shared secret for every request made to Elasticsearch.
 	SharedSecret *ElasticsearchSharedSecret `json:"shared_secret,omitempty" url:"shared_secret,omitempty"`
 
 	extraProperties map[string]interface{}
@@ -8488,17 +8509,18 @@ func (e *ElasticsearchAuthOptions) String() string {
 
 type ElasticsearchCredential struct {
 	Type string
-	// Basic authentication credentials for Elasticsearch. When possible use an API key or oAuth credentials instead
+	// Basic authentication credentials for Elasticsearch. It is recommended to use API keys or OAuth client credentials whenever possible.
 	Basic *BasicCredential
-	// ID of a credential that stores basic authentication credentials for Elasticsearch.
+	// Reference to existing Basic Credentials.
 	BasicId BasicCredentialId
-	// Configuration with credentials and connection data for an IdP that has been configured for use as a [JWT realm in Elasticsearch](https://www.elastic.co/guide/en/elasticsearch/reference/8.15/jwt-auth-realm.html). There are also [specific instructions for Elastic Cloud](https://www.elastic.co/guide/en/cloud/current/ec-securing-clusters-JWT.html). This configuration requires a token URL for the 3rd party identity provider. If you need to send specific scopes during the client credentials OAuth flow, specify them in the 'extra' configuration as a list of strings under the 'scopes' key.
+	// Client credentials and connection data for an identity provider (IdP) that has been configured for use as a [JWT realm](https://www.elastic.co/guide/en/elasticsearch/reference/8.15/jwt-auth-realm.html) in Elasticsearch. *([Instructions for Elastic Cloud](https://www.elastic.co/guide/en/cloud/current/ec-securing-clusters-JWT.html).)*
+	// Requires a Token URL for the third party identity provider. To send specific scopes during the client credentials OAuth flow, specify them in `extra.scopes` as a list of strings.
 	OAuthClient *OAuthClientCredential
-	// The ID of a credential that stores the secrets and connection data for an IdP that has been configured for use as a JWT realm in Elasticsearch.
+	// Reference to existing Client Credentials.
 	OAuthClientId OAuthClientCredentialId
 	// Elasticsearch API Key. Follow [this guide to generate an API Key](https://www.elastic.co/guide/en/kibana/current/api-keys.html). The API Key must have sufficient permissions to the target index.
 	Token *TokenCredential
-	// ID of a credential that stores an Elasticsearch API Key.
+	// Reference to existing API Key.
 	TokenId TokenCredentialId
 }
 
@@ -8638,7 +8660,7 @@ type ElasticsearchSharedSecret struct {
 	Type string
 	// Shared secret used to populate the `ES-Client-Authentication` header during Elasticsearch requests.
 	Secret *SecretCredential
-	// ID of a credential that stores a shared secret.
+	// Reference to existing Shared Secret.
 	SecretId SecretCredentialId
 }
 
@@ -8706,9 +8728,9 @@ func (e *ElasticsearchSharedSecret) Accept(visitor ElasticsearchSharedSecretVisi
 
 type EntraIdCredential struct {
 	Type string
-	// Azure OAuth 2.0 Client ID and Client Secret for a Synqly Identity Connector API service principal. Follow [this guide to generate an API token](https://docs.microsoft.com/en-us/azure/active-directory/develop/howto-create-service-principal-portal). The application must be configured with permissions to access the user, group, and audit log graph APIs.
+	// Azure Client ID and Client Secret for a service principal. The application must be configured with permissions to access the user, group, and audit log graph APIs.
 	OAuthClient *OAuthClientCredential
-	// The ID of a credential that stores the Azure OAuth 2.0 values for a Synqly Identity Connector API service principal.
+	// Reference to existing Client Credentials.
 	OAuthClientId OAuthClientCredentialId
 }
 
@@ -8776,11 +8798,9 @@ func (e *EntraIdCredential) Accept(visitor EntraIdCredentialVisitor) error {
 
 type FreshdeskCredential struct {
 	Type string
-	// You can use your personal API key to authenticate the request. If you use the API key,
-	// there is no need for a password. The token is supplied as "Your API Key".
-	// [Freshdesk API token generation documentation](https://developer.freshdesk.com/api/#authentication)
+	// You can use your personal API key to authenticate the request. If you use the API key, there is no need for a password. The token is supplied as "Your API Key". [Freshdesk API token generation documentation](https://developer.freshdesk.com/api/#authentication)
 	Token *TokenCredential
-	// ID of an existing Synqly credential that stores the Freshdesk API token.
+	// Reference to existing Token.
 	TokenId TokenCredentialId
 }
 
@@ -8848,9 +8868,9 @@ func (f *FreshdeskCredential) Accept(visitor FreshdeskCredentialVisitor) error {
 
 type GcsCredential struct {
 	Type string
-	// AWS-type credential that stores [Hash-based message authentication code (HMAC) keys](https://cloud.google.com/storage/docs/authentication/hmackeys) with write access to the GCS bucket.
+	// AWS like credential that stores [hash-based message authentication code (HMAC) keys](https://cloud.google.com/storage/docs/authentication/hmackeys) with write access to the GCS bucket.
 	Aws *AwsCredential
-	// ID of a credential that stores HMAC access keys for the GCS bucket.
+	// Reference to existing AWS Access Keys.
 	AwsId AwsCredentialId
 }
 
@@ -8918,9 +8938,9 @@ func (g *GcsCredential) Accept(visitor GcsCredentialVisitor) error {
 
 type GoogleChronicleCredential struct {
 	Type string
-	// OAuth 2.0 Token URL, Client ID, and Client Secret for a Synqly Siem Connector API service application.
+	// OAuth client credentials for a Google Cloud Service Account with permissions for Google Security Operations (formerly Google Chronicle).
 	OAuthClient *OAuthClientCredential
-	// The ID of a credential that stores the OAuth 2.0 values for a Synqly Siem Connector API service application.
+	// Reference to existing Client Credentials.
 	OAuthClientId OAuthClientCredentialId
 }
 
@@ -8988,9 +9008,9 @@ func (g *GoogleChronicleCredential) Accept(visitor GoogleChronicleCredentialVisi
 
 type GoogleCredential struct {
 	Type string
-	// OAuth 2.0 Token URL, Client ID, and Client Secret for a Synqly Identity Connector API service application.
+	// Configuration when creating new Client Credentials.
 	OAuthClient *OAuthClientCredential
-	// The ID of a credential that stores the OAuth 2.0 values for a Synqly Identity Connector API service application.
+	// Reference to existing Client Credentials.
 	OAuthClientId OAuthClientCredentialId
 }
 
@@ -9058,9 +9078,9 @@ func (g *GoogleCredential) Accept(visitor GoogleCredentialVisitor) error {
 
 type GoogleServiceAccountCredential struct {
 	Type string
-	// OAuth 2.0 Token URL, Client ID, and Client Secret for a Google Cloud Service Account with permissions for Google Security Operations.
+	// OAuth client credentials for a Google Cloud Service Account with permissions for Google Security Operations.
 	OAuthClient *OAuthClientCredential
-	// The ID of a credential that stores the OAuth 2.0 values for a Google Cloud Service Account with permissions for Google Security Operations.
+	// Reference to existing Client Credentials.
 	OAuthClientId OAuthClientCredentialId
 }
 
@@ -9126,12 +9146,14 @@ func (g *GoogleServiceAccountCredential) Accept(visitor GoogleServiceAccountCred
 	return fmt.Errorf("type %T does not define a non-empty union type", g)
 }
 
-// Configuration for the Microsoft Entra ID Identity Provider
+// Configuration for Microsoft Entra ID.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/entra-id-setup)
 type IdentityEntraId struct {
 	Credential *EntraIdCredential `json:"credential" url:"credential"`
-	// Azure Directory (tenant) ID.
+	// Azure Directory (tenant) identifier.
 	TenantId string `json:"tenant_id" url:"tenant_id"`
-	// Optional URL override for the Microsoft Graph API. This should be the base URL for the API without any path components.
+	// Base URL for the the Microsoft Graph API.
 	Url *string `json:"url,omitempty" url:"url,omitempty"`
 
 	extraProperties map[string]interface{}
@@ -9172,12 +9194,14 @@ func (i *IdentityEntraId) String() string {
 	return fmt.Sprintf("%#v", i)
 }
 
-// Configuration for the Google Identity Provider
+// Configuration for Google Workspace.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/google-workspace-setup)
 type IdentityGoogle struct {
-	// The client email associated with the service account key. Typically this will be of the form `<service-account-name>@<project-id>.iam.gserviceaccount.com`.
+	// Client email associated with the service account key.
 	ClientEmail string            `json:"client_email" url:"client_email"`
 	Credential  *GoogleCredential `json:"credential" url:"credential"`
-	// The email address of the user that the service account is impersonating for domain-wide delegation. For more information, see [this Google support article](https://support.google.com/a/answer/162106).
+	// Email address of the user that the service account is impersonating for domain-wide delegation. For more information, see [this Google support article](https://support.google.com/a/answer/162106).
 	Delegate string `json:"delegate" url:"delegate"`
 
 	extraProperties map[string]interface{}
@@ -9218,10 +9242,12 @@ func (i *IdentityGoogle) String() string {
 	return fmt.Sprintf("%#v", i)
 }
 
-// Configuration for the Okta Identity Provider
+// Configuration for Okta Identity.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/okta-identity-setup)
 type IdentityOkta struct {
 	Credential *OktaCredential `json:"credential" url:"credential"`
-	// URL for the Okta API. This should be the base URL for the API, without any path components and must be HTTPS. For example, "https://tenant.okta.com".
+	// Base URL for the Okta API.
 	Url string `json:"url" url:"url"`
 
 	extraProperties map[string]interface{}
@@ -9262,16 +9288,18 @@ func (i *IdentityOkta) String() string {
 	return fmt.Sprintf("%#v", i)
 }
 
-// Configuration for the PingOne Identity Platform
+// Configuration for PingOne Cloud Platform.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/ping-identity-setup)
 type IdentityPingOne struct {
-	// The URL base for making authentication requests to PingOne.
+	// Base URL for making authentication requests to PingOne.
 	AuthUrl string `json:"auth_url" url:"auth_url"`
-	// The client ID for the application set up as a worker.
+	// Client ID for the application set up as a worker.
 	ClientId   string             `json:"client_id" url:"client_id"`
 	Credential *PingOneCredential `json:"credential" url:"credential"`
 	// The organization ID that the client app is a part of.
 	OrganizationId string `json:"organization_id" url:"organization_id"`
-	// URL for the PingOne API. This should be the base URL for the API, without any path components.
+	// Base URL for the PingOne API.
 	Url string `json:"url" url:"url"`
 
 	extraProperties map[string]interface{}
@@ -9314,9 +9342,9 @@ func (i *IdentityPingOne) String() string {
 
 type JiraCredential struct {
 	Type string
-	// Username and password used to authenticate with Jira. The password can be a token that is generated following [this guide to generate an API token](https://support.atlassian.com/atlassian-account/docs/manage-api-tokens-for-your-atlassian-account/). The token receives the same permissions as the user that generates it, so must have access to the projects you want to use.
+	// Configuration when creating new Basic Credentials.
 	Basic *BasicCredential
-	// ID of a credential that stores a username and password used to authenticate with Jira.
+	// Reference to existing Basic Credentials.
 	BasicId BasicCredentialId
 }
 
@@ -9384,9 +9412,9 @@ func (j *JiraCredential) Accept(visitor JiraCredentialVisitor) error {
 
 type MalwarebytesCredential struct {
 	Type string
-	// Malwarebytes oAuth client credentials. For more information see [Malwarebytes' documentation on setting up oAuth.](https://api.malwarebytes.com/nebula/v1/docs#section/Authentication)
+	// Configuration when creating new Client Credentials.
 	OAuthClient *OAuthClientCredential
-	// ID of a credential that stores a Malwarebytes oAuth client ID.
+	// Reference to existing Client Credentials.
 	OAuthClientId OAuthClientCredentialId
 }
 
@@ -9452,10 +9480,12 @@ func (m *MalwarebytesCredential) Accept(visitor MalwarebytesCredentialVisitor) e
 	return fmt.Errorf("type %T does not define a non-empty union type", m)
 }
 
-// Configuration for Jira as a Notification Provider
+// Configuration for Atlassian Jira.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/jira-notification-setup)
 type NotificationsJira struct {
 	Credential *JiraCredential `json:"credential" url:"credential"`
-	// URL for the Jira API. This should be the base URL for the API, without any path components and must be HTTPS. For example, "https://tenant.atlassian.net".
+	// Base URL for the Jira API.
 	Url string `json:"url" url:"url"`
 
 	extraProperties map[string]interface{}
@@ -9496,7 +9526,7 @@ func (n *NotificationsJira) String() string {
 	return fmt.Sprintf("%#v", n)
 }
 
-// Configuration for the Mock in-memory notification handler. This provider is for testing purposes only.
+// Configuration for the Synqly mock in-memory SIEM Provider. This provider is for testing purposes only and does not retain noficiations pushed to it.
 type NotificationsMock struct {
 	// The channel to send notifications to.
 	Channel *string `json:"channel,omitempty" url:"channel,omitempty"`
@@ -9539,9 +9569,11 @@ func (n *NotificationsMock) String() string {
 	return fmt.Sprintf("%#v", n)
 }
 
-// Configuration for the Slack Notification Provider
+// Configuration for Slack.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/slack-notification-setup)
 type NotificationsSlack struct {
-	// The channel to send notifications to. Should be the ID of the desired channel.
+	// Channel to send notifications to. Must be a valid existing channel.
 	Channel    string           `json:"channel" url:"channel"`
 	Credential *SlackCredential `json:"credential" url:"credential"`
 	// Base URL for the Slack API.
@@ -9628,16 +9660,18 @@ func (n *NotificationsSlackWebhook) String() string {
 	return fmt.Sprintf("%#v", n)
 }
 
-// Configuration for sending messages to Microsoft Teams. This provider can be configured as a public webhook or with OAuth.
+// Configuration for Microsoft Teams.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/teams-notification-setup)
 type NotificationsTeams struct {
-	// The ID of the channel to send messages to.
+	// Identifier of the channel to send messages to.
 	ChannelId  string           `json:"channel_id" url:"channel_id"`
 	Credential *TeamsCredential `json:"credential" url:"credential"`
-	// The URL of the endpoint to send messages to. Only specified here if OAuth. For public, please refer to TeamsCredential.
+	// URL of the endpoint to send messages to. Only required if OAuth Client Credentials are used for authentication.
 	Endpoint *string `json:"endpoint,omitempty" url:"endpoint,omitempty"`
-	// The ID of the team to send messages to.
+	// Identifier of the team to send messages to.
 	TeamId string `json:"team_id" url:"team_id"`
-	// Azure Directory (tenant) ID. Only if OAuth is used.
+	// Azure Directory (tenant) ID. Only required if OAuth Client Credentials are used for authentication.
 	TenantId *string `json:"tenant_id,omitempty" url:"tenant_id,omitempty"`
 
 	extraProperties map[string]interface{}
@@ -9680,10 +9714,9 @@ func (n *NotificationsTeams) String() string {
 
 type NozomiVantageCredential struct {
 	Type string
-	// This is your API key name and secret value of your Nozomi Vantage API token. The token name
-	// is supplied as the 'username' while the token secret value is supplied as the 'secret'.
+	// API key name and secret value of your Nozomi Vantage API token.
 	Basic *BasicCredential
-	// ID of an existing Synqly credential that stores an Nozomi Vantage API token name and secret.
+	// Reference to existing API Token.
 	BasicId BasicCredentialId
 }
 
@@ -9749,12 +9782,11 @@ func (n *NozomiVantageCredential) Accept(visitor NozomiVantageCredentialVisitor)
 	return fmt.Errorf("type %T does not define a non-empty union type", n)
 }
 
-// Supported credential types for Nucleus
 type NucleusCredential struct {
 	Type string
-	// The Nucleus API key can be generated and copied from the **User Profile** settings, accessible via the avatar in the top-right corner.
+	// Configuration when creating new API Key.
 	Token *TokenCredential
-	// ID of a credential that stores a Nucleus authentication token.
+	// Reference to existing API Key.
 	TokenId TokenCredentialId
 }
 
@@ -9824,11 +9856,11 @@ type OktaCredential struct {
 	Type string
 	// OAuth 2.0 Token URL, Client ID, and Client Secret for a Synqly Identity Connector API service application.
 	OAuthClient *OAuthClientCredential
-	// The ID of a credential that stores the OAuth 2.0 values for a Synqly Identity Connector API service application.
+	// Reference to existing Client Credentials.
 	OAuthClientId OAuthClientCredentialId
 	// Token to authenticate with Okta. Follow [this guide to generate an API token](https://developer.okta.com/docs/guides/create-an-api-token). The token must have access to list records in the system audit log. (Not for production use. Use `o_auth_client` instead)
 	Token *TokenCredential
-	// ID of a credential that stores a token used to authenticate with Okta. (Not for production use. Use `o_auth_client` instead)
+	// Reference to existing Token.
 	TokenId TokenCredentialId
 }
 
@@ -9933,7 +9965,7 @@ type OpenSearchCredential struct {
 	Type string
 	// Basic authentication credentials for OpenSearch.
 	Basic *BasicCredential
-	// ID of a credential that stores basic authentication credentials for OpenSearch.
+	// Reference to existing Basic Credentials.
 	BasicId BasicCredentialId
 }
 
@@ -10001,9 +10033,9 @@ func (o *OpenSearchCredential) Accept(visitor OpenSearchCredentialVisitor) error
 
 type PagerDutyCredential struct {
 	Type string
-	// PagerDuty authentication token. Follow [this guide to generate an REST API token](https://support.pagerduty.com/docs/api-access-keys#rest-api-keys).
+	// Configuration when creating new API Key.
 	Token *TokenCredential
-	// ID of a credential that stores a PagerDuty authentication token.
+	// Reference to existing API Key.
 	TokenId TokenCredentialId
 }
 
@@ -10071,9 +10103,9 @@ func (p *PagerDutyCredential) Accept(visitor PagerDutyCredentialVisitor) error {
 
 type PingOneCredential struct {
 	Type string
-	// Client application secret for a worker app. See [these instructions](https://apidocs.pingidentity.com/pingone/tutorial/v1/api/#create-an-admin-worker-app-connection) for help creating a worker application.
+	// Configuration when creating new Token.
 	Token *TokenCredential
-	// ID of an existing credential that stores a PingOne client application secret.
+	// Reference to existing Token.
 	TokenId TokenCredentialId
 }
 
@@ -10140,78 +10172,248 @@ func (p *PingOneCredential) Accept(visitor PingOneCredentialVisitor) error {
 }
 
 type ProviderConfig struct {
-	Type                                  string
-	AssetsArmisCentrix                    *AssetsArmisCentrix
-	AssetsArmisCentrixMock                *AssetsArmisCentrixMock
-	AssetsAxonius                         *AssetsAxonius
-	AssetsCrowdstrike                     *AssetsCrowdStrike
-	AssetsNozomiVantage                   *AssetsNozomiVantage
-	AssetsNozomiVantageMock               *AssetsNozomiVantageMock
-	AssetsQualysCloud                     *AssetsQualysCloud
-	AssetsQualysCloudMock                 *AssetsQualysCloudMock
-	AssetsServicenow                      *AssetsServiceNow
-	AssetsServicenowMock                  *AssetsServiceNowMock
-	AssetsTaniumCloud                     *AssetsTaniumCloud
-	AssetsTaniumCloudMock                 *AssetsTaniumCloudMock
-	CloudsecurityCrowdstrike              *CloudSecurityCrowdStrike
-	CloudsecurityDefender                 *CloudSecurityDefender
-	EdrCrowdstrike                        *EdrCrowdStrike
-	EdrDefender                           *EdrDefender
-	EdrMalwarebytes                       *EdrMalwarebytes
-	EdrSentinelone                        *EdrSentinelOne
-	EdrSophos                             *EdrSophos
-	IdentityEntraId                       *IdentityEntraId
-	IdentityGoogle                        *IdentityGoogle
-	IdentityOkta                          *IdentityOkta
-	IdentityPingone                       *IdentityPingOne
-	NotificationsJira                     *NotificationsJira
-	NotificationsMockNotifications        *NotificationsMock
-	NotificationsSlack                    *NotificationsSlack
-	NotificationsSlackWebhook             *NotificationsSlackWebhook
-	NotificationsTeams                    *NotificationsTeams
-	SiemCrowdstrike                       *SiemCrowdstrike
-	SiemElasticsearch                     *SiemElasticsearch
-	SiemGoogleChronicle                   *SiemGoogleChronicle
-	SiemGoogleSecurityOperations          *SiemGoogleSecurityOperations
-	SiemMockSiem                          *SiemMock
-	SiemOpensearch                        *SiemOpenSearch
-	SiemQRadar                            *SiemQRadar
-	SiemRapid7Insightidr                  *SiemRapid7InsightIdr
-	SiemSentinel                          *SiemSentinel
-	SiemSplunk                            *SiemSplunk
-	SiemSumoLogic                         *SiemSumoLogic
-	SinkAwsSecurityLake                   *SinkAwsSecurityLake
-	SinkAwsSqs                            *SinkAwsSqs
-	SinkAzureMonitorLogs                  *SinkAzureMonitorLogs
-	SinkCrowdstrikeHec                    *SinkCrowdstrikeHec
-	SinkElasticsearch                     *SinkElasticsearch
-	SinkGoogleSecOps                      *SinkGoogleSecOps
-	SinkGoogleSecurityOperations          *SinkGoogleSecurityOperations
-	SinkMockSink                          *SinkMock
-	SinkOpensearch                        *SinkOpenSearch
-	SinkSplunk                            *SinkSplunk
-	StorageAwsS3                          *StorageAwsS3
-	StorageAzureBlob                      *StorageAzureBlob
-	StorageGcs                            *StorageGcs
-	StorageMockStorage                    *StorageMock
-	TicketingAutotask                     *TicketingAutotask
-	TicketingFreshdesk                    *TicketingFreshdesk
-	TicketingJira                         *TicketingJira
-	TicketingMockTicketing                *TicketingMock
-	TicketingPagerduty                    *TicketingPagerDuty
-	TicketingServicenow                   *TicketingServiceNow
-	TicketingServicenowSir                *TicketingServiceNowSir
-	TicketingTorq                         *TicketingTorq
-	TicketingZendesk                      *TicketingZendesk
-	VulnerabilitiesCrowdstrike            *VulnerabilitiesCrowdStrike
-	VulnerabilitiesNucleus                *VulnerabilitiesNucleus
-	VulnerabilitiesQualysCloud            *VulnerabilitiesQualysCloud
-	VulnerabilitiesQualysCloudMock        *VulnerabilitiesQualysCloudMock
-	VulnerabilitiesRapid7InsightCloud     *VulnerabilitiesRapid7InsightCloud
+	Type string
+	// Configuration for Armis Centrix™ for Asset Management and Security.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/armis-centrix-setup)
+	AssetsArmisCentrix *AssetsArmisCentrix
+	// Configuration for a mocked Armis Centrix Assets Provider
+	AssetsArmisCentrixMock *AssetsArmisCentrixMock
+	// Configuration for the Axonius Assets Provider
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/axonius-asset-setup)
+	AssetsAxonius *AssetsAxonius
+	// Configuration for CrowdStrike Falcon as an Assets Provider
+	AssetsCrowdstrike *AssetsCrowdStrike
+	// Configuration for Nozomi Vantage.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/nozomi-vantage-setup)
+	AssetsNozomiVantage *AssetsNozomiVantage
+	// Configuration for a mocked Nozomi Vantage provider
+	AssetsNozomiVantageMock *AssetsNozomiVantageMock
+	// Configuration for Qualys Cloud Platform as an Assets Provider
+	AssetsQualysCloud *AssetsQualysCloud
+	// Configuration for a mock Qualys Cloud Platform as an Assets Provider
+	AssetsQualysCloudMock *AssetsQualysCloudMock
+	// Configuration for ServiceNow Configuration Management Database (CMDB).
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/servicenow-assets-setup)
+	AssetsServicenow *AssetsServiceNow
+	// Configuration for a mocked ServiceNow as an Assets Provider
+	AssetsServicenowMock *AssetsServiceNowMock
+	// Configuration for Tanium Cloud as an Assets Provider
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/tanium-setup)
+	AssetsTaniumCloud *AssetsTaniumCloud
+	// Configuration for a mocked Tanium Cloud as an Assets Provider
+	AssetsTaniumCloudMock *AssetsTaniumCloudMock
+	// Configuration for the CrowdStrike Cloud Security Provider
+	CloudsecurityCrowdstrike *CloudSecurityCrowdStrike
+	// Configuration for the Microsoft Defender for Cloud Provider
+	CloudsecurityDefender *CloudSecurityDefender
+	// Configuration for CrowdStrike Falcon® Insight EDR.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/crowdstrike-edr-setup)
+	EdrCrowdstrike *EdrCrowdStrike
+	// Configuration for Microsoft Defender for Endpoint.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/defender-setup)
+	EdrDefender *EdrDefender
+	// Configuration for ThreatDown Endpoint Detection & Response.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/malwarebytes-setup)
+	EdrMalwarebytes *EdrMalwarebytes
+	// Configuration for SentinelOne Singularity™ Endpoint.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/sentinelone-setup)
+	EdrSentinelone *EdrSentinelOne
+	// Configuration for Sophos Endpoint.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/sophos-setup)
+	EdrSophos *EdrSophos
+	// Configuration for Microsoft Entra ID.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/entra-id-setup)
+	IdentityEntraId *IdentityEntraId
+	// Configuration for Google Workspace.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/google-workspace-setup)
+	IdentityGoogle *IdentityGoogle
+	// Configuration for Okta Identity.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/okta-identity-setup)
+	IdentityOkta *IdentityOkta
+	// Configuration for PingOne Cloud Platform.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/ping-identity-setup)
+	IdentityPingone *IdentityPingOne
+	// Configuration for Atlassian Jira.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/jira-notification-setup)
+	NotificationsJira *NotificationsJira
+	// Configuration for the Synqly mock in-memory SIEM Provider. This provider is for testing purposes only and does not retain noficiations pushed to it.
+	NotificationsMockNotifications *NotificationsMock
+	// Configuration for Slack.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/slack-notification-setup)
+	NotificationsSlack *NotificationsSlack
+	// Configuration for the Slack Notification Provider using Incoming Webhooks.
+	// Incoming Webhooks are a way to post messages from apps into Slack. The can not be used for any other actions, such as reading or deleting messages.
+	NotificationsSlackWebhook *NotificationsSlackWebhook
+	// Configuration for Microsoft Teams.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/teams-notification-setup)
+	NotificationsTeams *NotificationsTeams
+	// Configuration for CrowdStrike Falcon® Next-Gen SIEM.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/crowdstrike-siem-setup)
+	SiemCrowdstrike *SiemCrowdstrike
+	// Configuration for Elastic SIEM.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/elastic-setup)
+	SiemElasticsearch *SiemElasticsearch
+	// Configuration for Google Security Operations (formerly Google Chronicle) as a SIEM Provider connecting via the older Backstory and Malachite APIs.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/google-chronicle-setup)
+	SiemGoogleChronicle *SiemGoogleChronicle
+	// Configuration for Google Security Operations (formerly Google Chronicle) as a SIEM Provider.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/google-security-operations-siem-setup)
+	SiemGoogleSecurityOperations *SiemGoogleSecurityOperations
+	// Configuration for the Synqly mock in-memory SIEM Provider. This provider is for testing purposes only and does not retain events pushed to it.
+	SiemMockSiem *SiemMock
+	// Configuration for OpenSearch search and analytics engine. Supports both managed and self-hosted OpenSearch deployments
+	SiemOpensearch *SiemOpenSearch
+	// Configuration for IBM QRadar SIEM.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/qradar-setup)
+	SiemQRadar *SiemQRadar
+	// Configuration for Rapid7 InsightIDR.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/rapid7-idr-setup)
+	SiemRapid7Insightidr *SiemRapid7InsightIdr
+	// Configuration for Microsoft Sentinel SIEM Product.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/microsoft-sentinel-siem-setup)
+	SiemSentinel *SiemSentinel
+	// Configuration for Splunk Enterprise Security.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/splunk-setup)
+	SiemSplunk *SiemSplunk
+	// Configuration for Sumo Logic Cloud SIEM.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/sumo-logic-setup)
+	SiemSumoLogic *SiemSumoLogic
+	// Configuration for Amazon Security Lake as a Sink provider. Events are written directly to an AWS S3 bucket in Apache Parquet format.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/amazon-security-lake-sink-setup)
+	SinkAwsSecurityLake *SinkAwsSecurityLake
+	// Configuration for Amazon Simple Queue Service (SQS).
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/aws-sqs-sink-setup)
+	SinkAwsSqs *SinkAwsSqs
+	// Configuration for Azure Monitor Logs as a Sink Provider. Azure Monitor Logs is a feature of Azure Monitor that collects and organizes log and performance data from monitored resources.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/azure-monitor-logs)
+	SinkAzureMonitorLogs *SinkAzureMonitorLogs
+	// Configuration for CrowdStrike Falcon® Next-Gen SIEM (HEC).
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/crowdstrike-sink-setup)
+	SinkCrowdstrikeHec *SinkCrowdstrikeHec
+	// Configuration for Elasticsearch.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/elastic-setup)
+	SinkElasticsearch *SinkElasticsearch
+	// Configuration for Google Security Operations (formerly Google Chronicle) as a Sink Provider connecting via the older Malachite API.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/google-chronicle-setup)
+	SinkGoogleSecOps *SinkGoogleSecOps
+	// Configuration for Google Security Operations (formerly Google Chronicle) as a Sink Provider.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/google-security-operations-sink-setup)
+	SinkGoogleSecurityOperations *SinkGoogleSecurityOperations
+	// Configuration for the Synqly mock in-memory Sink Provider. This provider is for testing purposes only and does not retain events pushed to it.
+	SinkMockSink *SinkMock
+	// Configuration for OpenSearch search and analytics engine. Supports both managed and self-hosted OpenSearch deployments
+	SinkOpensearch *SinkOpenSearch
+	// Configuration for Splunk as a Sink provider. Allows sending data to Splunk using an HTTP Event Collector (HEC).
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/splunk-setup)
+	SinkSplunk *SinkSplunk
+	// Configuration for Amazon S3.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/aws-s3-storage-setup)
+	StorageAwsS3 *StorageAwsS3
+	// Configuration for Azure Blob Storage as a Storage Provider
+	StorageAzureBlob *StorageAzureBlob
+	// Configuration for Google Cloud Storage for storing unstructured data
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/google-gcs-storage-setup)
+	StorageGcs *StorageGcs
+	// Configuration for the Synqly mock in-memory storage Provider. This provider is for testing purposes only and does not retain files pushed to it.
+	StorageMockStorage *StorageMock
+	// Configuration for Autotask Operations Cloud.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/autotask-ticketing-setup)
+	TicketingAutotask *TicketingAutotask
+	// Configuration for Freshdesk.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/freshdesk-ticketing-setup)
+	TicketingFreshdesk *TicketingFreshdesk
+	// Configuration for Atlassian Jira.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/jira-ticketing-setup)
+	TicketingJira *TicketingJira
+	// Configuration for the Synqly mock in-memory ticketing Provider. This provider is for testing purposes only. It retains tickets for a limited time and does not persist them for long-term usage.
+	TicketingMockTicketing *TicketingMock
+	// Configuration for PagerDuty Operations Cloud.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/pagerduty-ticketing-setup)
+	TicketingPagerduty *TicketingPagerDuty
+	// Configuration for ServiceNow IT Service Management (ITSM).
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/servicenow-ticketing-setup)
+	TicketingServicenow *TicketingServiceNow
+	// Configuration for ServiceNow Security Incident Response (SIR).
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/servicenow-ticketing-setup)
+	TicketingServicenowSir *TicketingServiceNowSir
+	// Configuration for Torq.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/torq-ticketing-setup)
+	TicketingTorq *TicketingTorq
+	// Configuration for Zendesk as a Ticketing Provider
+	TicketingZendesk *TicketingZendesk
+	// Configuration for CrowdStrike Falcon® Spotlight.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/crowdstrike-vulns-setup)
+	VulnerabilitiesCrowdstrike *VulnerabilitiesCrowdStrike
+	// Configuration for Nucleus Vulnerability Management.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/nucleus-vulns-setup)
+	VulnerabilitiesNucleus *VulnerabilitiesNucleus
+	// Configuration for Qualys Vulnerability Management, Detection & Response (VMDR).
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/qualys-vulns-setup)
+	VulnerabilitiesQualysCloud *VulnerabilitiesQualysCloud
+	// Configuration for a mocked Qualys Cloud Platform as a Vulnerabilities Provider
+	VulnerabilitiesQualysCloudMock *VulnerabilitiesQualysCloudMock
+	// Configuration for Rapid7 InsightVM.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/rapid7-vulns-setup)
+	VulnerabilitiesRapid7InsightCloud *VulnerabilitiesRapid7InsightCloud
+	// Configuration for a mocked Rapid7 Insight Cloud as a Vulnerabilities Provider
 	VulnerabilitiesRapid7InsightCloudMock *VulnerabilitiesRapid7InsightCloudMock
-	VulnerabilitiesTaniumCloud            *VulnerabilitiesTaniumCloud
-	VulnerabilitiesTaniumCloudMock        *VulnerabilitiesTaniumCloudMock
-	VulnerabilitiesTenableCloud           *VulnerabilitiesTenableCloud
+	// Configuration for Tanium Vulnerability Management.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/tanium-setup)
+	VulnerabilitiesTaniumCloud *VulnerabilitiesTaniumCloud
+	// Configuration for a mock Tanium Cloud as a Vulnerabilities Provider
+	VulnerabilitiesTaniumCloudMock *VulnerabilitiesTaniumCloudMock
+	// Configuration for Tenable Vulnerability Management.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/tenable-vulns-setup)
+	VulnerabilitiesTenableCloud *VulnerabilitiesTenableCloud
 }
 
 func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
@@ -11200,11 +11402,11 @@ const (
 	ProviderConfigIdEdrCrowdStrike ProviderConfigId = "edr_crowdstrike"
 	// Microsoft Defender for Endpoint
 	ProviderConfigIdEdrDefender ProviderConfigId = "edr_defender"
-	// Malwarebytes EDR
+	// ThreatDown Endpoint Detection & Response
 	ProviderConfigIdEdrMalwarebytes ProviderConfigId = "edr_malwarebytes"
 	// SentinelOne Singularity™ Endpoint
 	ProviderConfigIdEdrSentinelOne ProviderConfigId = "edr_sentinelone"
-	// Sophos EDR
+	// Sophos Endpoint
 	ProviderConfigIdEdrSophos ProviderConfigId = "edr_sophos"
 	// Microsoft Entra ID
 	ProviderConfigIdIdentityEntraId ProviderConfigId = "identity_entra_id"
@@ -11216,7 +11418,7 @@ const (
 	ProviderConfigIdIdentityPingOne ProviderConfigId = "identity_pingone"
 	// Atlassian Jira
 	ProviderConfigIdNotificationsJira ProviderConfigId = "notifications_jira"
-	// Notifications Test
+	// Synqly Test Provider
 	ProviderConfigIdNotificationsMock ProviderConfigId = "notifications_mock_notifications"
 	// Slack Incoming Webhook
 	ProviderConfigIdNotificationsSlackWebhook ProviderConfigId = "notifications_slack_webhook"
@@ -11224,7 +11426,7 @@ const (
 	ProviderConfigIdNotificationsSlack ProviderConfigId = "notifications_slack"
 	// Microsoft Teams
 	ProviderConfigIdNotificationsTeams ProviderConfigId = "notifications_teams"
-	// CrowdStrike Falcon Next-Gen SIEM
+	// CrowdStrike Falcon® Next-Gen SIEM
 	ProviderConfigIdSiemCrowdstrike ProviderConfigId = "siem_crowdstrike"
 	// Elastic SIEM
 	ProviderConfigIdSiemElasticsearch ProviderConfigId = "siem_elasticsearch"
@@ -11232,11 +11434,11 @@ const (
 	ProviderConfigIdSiemGoogleChronicle ProviderConfigId = "siem_google_chronicle"
 	// Google Security Operations
 	ProviderConfigIdSiemGoogleSecurityOperations ProviderConfigId = "siem_google_security_operations"
-	// SIEM Test
+	// Synqly Test Provider
 	ProviderConfigIdSiemMock ProviderConfigId = "siem_mock_siem"
 	// OpenSearch SIEM
 	ProviderConfigIdSiemOpenSearch ProviderConfigId = "siem_opensearch"
-	// QRadar
+	// IBM QRadar SIEM
 	ProviderConfigIdSiemQRadar ProviderConfigId = "siem_q_radar"
 	// Rapid7 InsightIDR
 	ProviderConfigIdSiemRapid7InsightIdr ProviderConfigId = "siem_rapid7_insightidr"
@@ -11246,33 +11448,33 @@ const (
 	ProviderConfigIdSiemSplunk ProviderConfigId = "siem_splunk"
 	// Sumo Logic Cloud SIEM
 	ProviderConfigIdSiemSumoLogic ProviderConfigId = "siem_sumo_logic"
-	// AWS Security Lake
+	// Amazon Security Lake
 	ProviderConfigIdSinkAwsSecurityLake ProviderConfigId = "sink_aws_security_lake"
-	// AWS Simple Queue Service
+	// Amazon Simple Queue Service (SQS)
 	ProviderConfigIdSinkAwsSqs ProviderConfigId = "sink_aws_sqs"
 	// Microsoft Azure Monitor Logs
 	ProviderConfigIdSinkAzureMonitorLogs ProviderConfigId = "sink_azure_monitor_logs"
-	// Crowdstrike HEC
+	// CrowdStrike Falcon® Next-Gen SIEM (HEC)
 	ProviderConfigIdSinkCrowdstrikeHec ProviderConfigId = "sink_crowdstrike_hec"
-	// Elastic
+	// Elasticsearch
 	ProviderConfigIdSinkElasticsearch ProviderConfigId = "sink_elasticsearch"
 	// Google Security Operations (Chronicle Compatibility)
 	ProviderConfigIdSinkGoogleSecOps ProviderConfigId = "sink_google_sec_ops"
 	// Google Security Operations
 	ProviderConfigIdSinkGoogleSecurityOperations ProviderConfigId = "sink_google_security_operations"
-	// Sink Test
+	// Synqly Test Provider
 	ProviderConfigIdSinkMock ProviderConfigId = "sink_mock_sink"
 	// OpenSearch
 	ProviderConfigIdSinkOpenSearch ProviderConfigId = "sink_opensearch"
 	// Splunk Enterprise Security
 	ProviderConfigIdSinkSplunk ProviderConfigId = "sink_splunk"
-	// AWS S3
+	// Amazon S3
 	ProviderConfigIdStorageAwsS3 ProviderConfigId = "storage_aws_s3"
 	// Microsoft Azure Blob Storage
 	ProviderConfigIdStorageAzureBlob ProviderConfigId = "storage_azure_blob"
 	// Google Cloud Storage
 	ProviderConfigIdStorageGcs ProviderConfigId = "storage_gcs"
-	// Storage Test
+	// Synqly Test Provider
 	ProviderConfigIdStorageMock ProviderConfigId = "storage_mock_storage"
 	// Autotask Operations Cloud
 	ProviderConfigIdTicketingAutotask ProviderConfigId = "ticketing_autotask"
@@ -11280,7 +11482,7 @@ const (
 	ProviderConfigIdTicketingFreshdesk ProviderConfigId = "ticketing_freshdesk"
 	// Atlassian Jira
 	ProviderConfigIdTicketingJira ProviderConfigId = "ticketing_jira"
-	// Ticketing Test
+	// Synqly Test Provider
 	ProviderConfigIdTicketingMock ProviderConfigId = "ticketing_mock_ticketing"
 	// PagerDuty Operations Cloud
 	ProviderConfigIdTicketingPagerDuty ProviderConfigId = "ticketing_pagerduty"
@@ -11292,7 +11494,7 @@ const (
 	ProviderConfigIdTicketingTorq ProviderConfigId = "ticketing_torq"
 	// Zendesk
 	ProviderConfigIdTicketingZendesk ProviderConfigId = "ticketing_zendesk"
-	// CrowdStrike Falcon Spotlight
+	// CrowdStrike Falcon® Spotlight
 	ProviderConfigIdVulnerabilitiesCrowdStrike ProviderConfigId = "vulnerabilities_crowdstrike"
 	// Nucleus Vulnerability Management
 	ProviderConfigIdVulnerabilitiesNucleus ProviderConfigId = "vulnerabilities_nucleus"
@@ -11300,7 +11502,7 @@ const (
 	ProviderConfigIdVulnerabilitiesQualysCloud ProviderConfigId = "vulnerabilities_qualys_cloud"
 	// [MOCK] Qualys Vulnerability Management, Detection & Response (VMDR)
 	ProviderConfigIdVulnerabilitiesQualysCloudMock ProviderConfigId = "vulnerabilities_qualys_cloud_mock"
-	// Rapid7 Insight Vulnerability Management Cloud
+	// Rapid7 InsightVM
 	ProviderConfigIdVulnerabilitiesRapid7InsightCloud ProviderConfigId = "vulnerabilities_rapid7_insight_cloud"
 	// [MOCK] Rapid7 Insight Vulnerability Management Cloud
 	ProviderConfigIdVulnerabilitiesRapid7InsightCloudMock ProviderConfigId = "vulnerabilities_rapid7_insight_cloud_mock"
@@ -11471,9 +11673,9 @@ func (p ProviderConfigId) Ptr() *ProviderConfigId {
 
 type QRadarCredential struct {
 	Type string
-	// QRadar authorized service token. Follow [this guide to generate a token](https://www.ibm.com/docs/en/qradar-common?topic=app-creating-authorized-service-token-qradar-operations).
+	// Authorized service token for QRadar Operations. [Guide to generate a token](https://www.ibm.com/docs/en/qradar-common?topic=app-creating-authorized-service-token-qradar-operations).
 	Token *TokenCredential
-	// ID of a Synqly Credential that stores an authorized service token.
+	// Reference to existing Authorized Service Token.
 	TokenId TokenCredentialId
 }
 
@@ -11543,7 +11745,7 @@ type QualysCloudCredential struct {
 	Type string
 	// Username and password used to authenticate with Qualys Cloud.
 	Basic *BasicCredential
-	// ID of a basic credential that stores a Qualys Cloud username and password.
+	// Reference to existing Basic Credentials.
 	BasicId BasicCredentialId
 }
 
@@ -11611,9 +11813,9 @@ func (q *QualysCloudCredential) Accept(visitor QualysCloudCredentialVisitor) err
 
 type Rapid7InsightCloudCredential struct {
 	Type string
-	// Rapid7 Insight Cloud authentication token. Follow [this guide to generate an API token](https://docs.rapid7.com/insight/managing-platform-api-keys/).
+	// Configuration when creating new API Token.
 	Token *TokenCredential
-	// ID of a credential that stores a Rapid7 Insight Cloud authentication token.
+	// Reference to existing API Token.
 	TokenId TokenCredentialId
 }
 
@@ -11679,15 +11881,17 @@ func (r *Rapid7InsightCloudCredential) Accept(visitor Rapid7InsightCloudCredenti
 	return fmt.Errorf("type %T does not define a non-empty union type", r)
 }
 
-// Configuration for CrowdStrike Falcon NextGen SIEM
+// Configuration for CrowdStrike Falcon® Next-Gen SIEM.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/crowdstrike-siem-setup)
 type SiemCrowdstrike struct {
 	// The credential to use for the CrowdStrike Falcon NextGen SIEM tenant.
 	Credential *CrowdStrikeCredential `json:"credential" url:"credential"`
 	// Token credential to use for connecting to the CrowdStrike HEC service. If not provided, sending events to CrowdStrike is disabled.
 	HecCredential *CrowdstrikeHecCredential `json:"hec_credential,omitempty" url:"hec_credential,omitempty"`
-	// The generated CrowdStrike HEC URL provided with your token. This must be an HTTPS URL.
+	// The generated CrowdStrike HEC URL provided with your token.
 	HecUrl *string `json:"hec_url,omitempty" url:"hec_url,omitempty"`
-	// The root domain where your CrowdStrike Falcon NextGen SIEM tenant is located.
+	// Base URL for the CrowdStrike Falcon® Next-Gen SIEM API.
 	Url *string `json:"url,omitempty" url:"url,omitempty"`
 
 	extraProperties map[string]interface{}
@@ -11728,17 +11932,19 @@ func (s *SiemCrowdstrike) String() string {
 	return fmt.Sprintf("%#v", s)
 }
 
-// Configuration for Elasticsearch search and analytics engine. Supports both managed and self-hosted Elasticsearch deployments
+// Configuration for Elastic SIEM.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/elastic-setup)
 type SiemElasticsearch struct {
 	AuthOptions *ElasticsearchAuthOptions `json:"auth_options,omitempty" url:"auth_options,omitempty"`
-	// Optional. The index or data stream to use when writing events. Defaults to the 'index' setting if not set.
+	// The index or data stream to use when writing events. Defaults to the `index` setting if not set.
 	CreateIndex *string                  `json:"create_index,omitempty" url:"create_index,omitempty"`
 	Credential  *ElasticsearchCredential `json:"credential" url:"credential"`
-	// Optional. The index, data stream, or index alias to read events from.
+	// The index, data stream, or index alias to read events from.
 	Index *string `json:"index,omitempty" url:"index,omitempty"`
-	// If true, skips verification of the Elasticsearch server's TLS certificate.
+	// When true, skips verification of the Elasticsearch TLS certificate.
 	SkipTlsVerify *bool `json:"skip_tls_verify,omitempty" url:"skip_tls_verify,omitempty"`
-	// URL for the Elasticsearch API. This should be the base URL for the API, without any path components and must be HTTPS. For example, "https://tenant.elastic.com".
+	// Base URL for the Elasticsearch API.
 	Url string `json:"url" url:"url"`
 
 	extraProperties map[string]interface{}
@@ -11780,16 +11986,18 @@ func (s *SiemElasticsearch) String() string {
 }
 
 // Configuration for Google Security Operations (formerly Google Chronicle) as a SIEM Provider connecting via the older Backstory and Malachite APIs.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/google-chronicle-setup)
 type SiemGoogleChronicle struct {
-	// Optional. The customer ID reported when writing events. This is required for ingestion.
+	// The customer ID reported when writing events. This field is required if writing events.
 	CustomerId *string `json:"customer_id,omitempty" url:"customer_id,omitempty"`
-	// Optional. Google OAuth 2.0 credentials with an email address. Without this credential the provider will not be able to ingest events.
+	// Credentials used for writing events. If not specified then writing events is disabled.
 	IngestionCredential *GoogleChronicleCredential `json:"ingestion_credential,omitempty" url:"ingestion_credential,omitempty"`
-	// Optional. Ingestion URL for the Google SecOps instance. This should be the base event ingestion URL, without any path components.
+	// Base URL for the Google SecOps Ingestion API.
 	IngestionUrl *string `json:"ingestion_url,omitempty" url:"ingestion_url,omitempty"`
-	// Google OAuth 2.0 credentials with an email address.
+	// Credentials used for querying and reading events.
 	SearchCredential *GoogleChronicleCredential `json:"search_credential" url:"search_credential"`
-	// Search URL for the Google SecOps instance. This should be the base event search URL, without any path components.
+	// Base URL for the Google SecOps Search API.
 	SearchUrl *string `json:"search_url,omitempty" url:"search_url,omitempty"`
 
 	extraProperties map[string]interface{}
@@ -11831,16 +12039,18 @@ func (s *SiemGoogleChronicle) String() string {
 }
 
 // Configuration for Google Security Operations (formerly Google Chronicle) as a SIEM Provider.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/google-security-operations-siem-setup)
 type SiemGoogleSecurityOperations struct {
-	// Google OAuth 2.0 credentials with an email address.
+	// Credentials used for accessing the Google SecOps instance.
 	Credential *GoogleServiceAccountCredential `json:"credential" url:"credential"`
 	// The customer ID of the Google SecOps instance.
 	CustomerId string `json:"customer_id" url:"customer_id"`
 	// The project ID of the Google SecOps instance.
 	ProjectId string `json:"project_id" url:"project_id"`
-	// The region of the Google SecOps instance. Usually 'us' or 'eu'.
+	// The region of the Google SecOps instance. Usually `us` or `eu`.
 	Region *string `json:"region,omitempty" url:"region,omitempty"`
-	// The base API URL for posting event, without any path components.
+	// The base URL for the Google SecOps API.
 	Url *string `json:"url,omitempty" url:"url,omitempty"`
 
 	extraProperties map[string]interface{}
@@ -11881,7 +12091,7 @@ func (s *SiemGoogleSecurityOperations) String() string {
 	return fmt.Sprintf("%#v", s)
 }
 
-// Configuration for the Synqly mock in-memory SIEM handler. This provider is for testing purposes only and does not retain events pushed to it.
+// Configuration for the Synqly mock in-memory SIEM Provider. This provider is for testing purposes only and does not retain events pushed to it.
 type SiemMock struct {
 	// Name of the index where events are stored.
 	Index *string `json:"index,omitempty" url:"index,omitempty"`
@@ -11931,9 +12141,9 @@ type SiemOpenSearch struct {
 	Credential  *OpenSearchCredential `json:"credential" url:"credential"`
 	// The index, data stream, or index alias to read events from.
 	Index *string `json:"index,omitempty" url:"index,omitempty"`
-	// If true, skips verification of the OpenSearch server's TLS certificate.
+	// When true, skips verification of the OpenSearch TLS certificate.
 	SkipTlsVerify *bool `json:"skip_tls_verify,omitempty" url:"skip_tls_verify,omitempty"`
-	// URL for the OpenSearch API. This should be the base URL for the API, without any path components and must be HTTPS.
+	// Base URL for the OpenSearch API.
 	Url string `json:"url" url:"url"`
 
 	extraProperties map[string]interface{}
@@ -11974,14 +12184,16 @@ func (s *SiemOpenSearch) String() string {
 	return fmt.Sprintf("%#v", s)
 }
 
-// Configuration for IBM QRadar as a SIEM Provider.
+// Configuration for IBM QRadar SIEM.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/qradar-setup)
 type SiemQRadar struct {
-	// The QRadar HTTP Receiver URL, stored as a secret. This URL has a special port in QRadar and is stored in a credential to protect that information. See https://www.youtube.com/watch?v=UEBLVVNpyfg for a demonstration of setting up and mapping and HTTP Receiver in QRadar.
+	// Port used by QRadar to accept incoming HTTP Receiver events.
 	CollectionPort int               `json:"collection_port" url:"collection_port"`
 	Credential     *QRadarCredential `json:"credential" url:"credential"`
-	// If true, skips verification of the QRadar server's TLS certificate.
+	// When true, skips verification of the QRadar TLS certificate.
 	SkipTlsVerify *bool `json:"skip_tls_verify,omitempty" url:"skip_tls_verify,omitempty"`
-	// URL for the QRadar instance. This should be the base URL instance, without any path components and must be HTTPS. For example, "https://qradar.westus2.cloudapp.azure.com".
+	// Base URL for the QRadar API.
 	Url string `json:"url" url:"url"`
 
 	extraProperties map[string]interface{}
@@ -12022,10 +12234,12 @@ func (s *SiemQRadar) String() string {
 	return fmt.Sprintf("%#v", s)
 }
 
-// Configuration for Rapid7 InsightIDR as a SIEM Provider.
+// Configuration for Rapid7 InsightIDR.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/rapid7-idr-setup)
 type SiemRapid7InsightIdr struct {
 	Credential *Rapid7InsightCloudCredential `json:"credential" url:"credential"`
-	// URL for the Rapid7 API. This should be the base URL for the API, without any path components and must be HTTPS. For example, "https://us2.api.insight.rapid7.com".
+	// Base URL for the Rapid7 API.
 	Url string `json:"url" url:"url"`
 
 	extraProperties map[string]interface{}
@@ -12067,29 +12281,33 @@ func (s *SiemRapid7InsightIdr) String() string {
 }
 
 // Configuration for Microsoft Sentinel SIEM Product.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/microsoft-sentinel-siem-setup)
 type SiemSentinel struct {
 	Credential *SentinelCredential `json:"credential" url:"credential"`
-	// The default tables to use for queries. Supply this value if you would like to a subset of the default tables or non-ASIM data tables with Sentinel/Log Analytics queries. If more than one table is specified, a union operator will join them to query all of the tables at once. Supply a single value with "_" if you would like to query all tables without the normalizing ASIM transformations. **Note** that a single "_" entry will map to a 'union \*' query. Relying heavily on these queries is generally discouraged by Sentinel because they are slower and more resource intensive.
+	// The default tables to use for queries. Supply this value if you would like to a subset of the default tables or non-ASIM data tables with Sentinel/Log Analytics queries.
+	// If more than one table is specified, a union operator will join them to query all of the tables at once. Supply a single value with `*` if you would like to query all tables without the normalizing ASIM transformations.
+	// **Note** that a single `*` entry will map to a `union *` query. Relying heavily on these queries is generally discouraged by Sentinel because they are slower and more resource intensive.
 	DefaultTables []string `json:"default_tables,omitempty" url:"default_tables,omitempty"`
 	// Either the logs ingestion API url for you Data Collection Rule or your Data Collection Endpoint URL. This value must be supplied to ingest data into Microsoft Sentinel. This should look something like https://mydcr-xxx-westus2.logs.z1.ingest.monitor.azure.com
 	IngestUrl *string `json:"ingest_url,omitempty" url:"ingest_url,omitempty"`
-	// The root URL for the Microsoft Azure Monitor Logs API. This is optional and should only be supplied if using an alternate Microsoft cloud, such as GovCloud.
+	// Base URL for the Microsoft Azure Monitor Logs API. Should only be supplied if using an alternate Microsoft cloud, such as GovCloud.
 	LogsUrl *string `json:"logs_url,omitempty" url:"logs_url,omitempty"`
-	// The root URL for the Microsoft Azure Management API. This is optional and should only be supplied if using an alternate Microsoft cloud, such as GovCloud.
+	// Base URL for the Microsoft Azure Management API. Should only be supplied if using an alternate Microsoft cloud, such as GovCloud.
 	ManagementUrl *string `json:"management_url,omitempty" url:"management_url,omitempty"`
-	// The Azure resource group name that contains the Microsoft Sentinel workspace.
+	// Azure resource group name that contains the Microsoft Sentinel workspace.
 	ResourceGroup string `json:"resource_group" url:"resource_group"`
-	// Your Data Collection Rule immutable ID. This value must be supplied to ingest data into Microsoft Sentinel.
+	// Immutable ID of the Data Collection Rule. This value must be supplied to ingest data into Microsoft Sentinel.
 	RuleId *string `json:"rule_id,omitempty" url:"rule_id,omitempty"`
-	// The name of the Data Collection Rule stream. This value must be supplied to ingest data into Microsoft Sentinel.
+	// Name of the Data Collection Rule stream. This value must be supplied to ingest data into Microsoft Sentinel.
 	StreamName *string `json:"stream_name,omitempty" url:"stream_name,omitempty"`
-	// The Azure subscription ID that contains the Microsoft Sentinel workspace.
+	// Azure subscription ID that contains the Microsoft Sentinel workspace.
 	SubscriptionId string `json:"subscription_id" url:"subscription_id"`
-	// The Azure Active Directory tenant ID that contains the Microsoft Sentinel workspace.
+	// Azure Active Directory tenant ID that contains the Microsoft Sentinel workspace.
 	TenantId string `json:"tenant_id" url:"tenant_id"`
-	// The ID of the Microsoft Sentinel Log Analytics workspace.
+	// ID of the Microsoft Sentinel Log Analytics workspace.
 	WorkspaceId string `json:"workspace_id" url:"workspace_id"`
-	// The name of the Microsoft Sentinel Log Analytics workspace.
+	// Name of the Microsoft Sentinel Log Analytics workspace.
 	WorkspaceName string `json:"workspace_name" url:"workspace_name"`
 
 	extraProperties map[string]interface{}
@@ -12130,23 +12348,25 @@ func (s *SiemSentinel) String() string {
 	return fmt.Sprintf("%#v", s)
 }
 
-// Configuration for Splunk as a SIEM Provider. This integration allows sending data to Splunk using an HTTP Event Collector (HEC). Additionally, it can be used to query Splunk using the Splunk Search Service.
+// Configuration for Splunk Enterprise Security.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/splunk-setup)
 type SiemSplunk struct {
-	// Optional token credential to use for connecting to the Splunk HEC service. If not provided, sending events to Splunk is disabled.
+	// Credential to use when connecting to the Splunk HEC service. If not provided, sending events to Splunk is disabled.
 	HecCredential *SplunkHecToken `json:"hec_credential,omitempty" url:"hec_credential,omitempty"`
-	// URL for the Splunk HEC endpoint. This must include the full path to the HEC endpoint. For example, "https://tenant.cloud.splunk.com:8088/services_collector_event".
+	// URL for the Splunk HEC endpoint. Must include the full path to the HEC endpoint.
 	HecUrl *string `json:"hec_url,omitempty" url:"hec_url,omitempty"`
 	// Splunk index to send events to. If not provided, will use the default index for the Splunk collector.
 	Index *string `json:"index,omitempty" url:"index,omitempty"`
-	// Token credential used for connecting to the Splunk search service.
+	// Credential used when authenticating with the Splunk Search Service.
 	SearchServiceCredential *SplunkSearchCredential `json:"search_service_credential" url:"search_service_credential"`
-	// URL used for connecting to the Splunk search service.
+	// URL used when connecting to the Splunk Search Service.
 	SearchServiceUrl string `json:"search_service_url" url:"search_service_url"`
-	// If true, skips verification of the Splunk server's TLS certificate.
+	// When true, skips verification of the Splunk TLS certificate.
 	SkipTlsVerify *bool `json:"skip_tls_verify,omitempty" url:"skip_tls_verify,omitempty"`
-	// Splunk source to send events to. If not provided, will use the default source for the Splunk collector.
+	// Splunk source to send events to. If not provided the default source for the Splunk collector is used.
 	Source *string `json:"source,omitempty" url:"source,omitempty"`
-	// Splunk source type to send events to. If not provided, will use the default source type for the Splunk collector.
+	// Splunk source type to send events to. If not provided the default source type for the Splunk collector is used.
 	SourceType *string `json:"source_type,omitempty" url:"source_type,omitempty"`
 
 	extraProperties map[string]interface{}
@@ -12188,15 +12408,18 @@ func (s *SiemSplunk) String() string {
 }
 
 // Configuration for Sumo Logic Cloud SIEM.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/sumo-logic-setup)
 type SiemSumoLogic struct {
-	// Automatically parse logs as JSON when running log queries against Sumo Logic.
+	// Automatically parse logs as JSON when running log queries.
 	AutoParseLogs *bool `json:"auto_parse_logs,omitempty" url:"auto_parse_logs,omitempty"`
-	// Required if you need to send Sumo Logic events from the Synqly API.
+	// Secure Sumo Logic Collection URL for writing events. If not provided, sending events to Sumo Logic is disabled.
 	CollectionUrl *SumoLogicCollectionUrl `json:"collection_url,omitempty" url:"collection_url,omitempty"`
 	Credential    *SumoLogicCredential    `json:"credential" url:"credential"`
 	// Only query for logs that have been processed into the Sumo Logic Cloud SIEM app.
 	SiemLogsOnly *bool `json:"siem_logs_only,omitempty" url:"siem_logs_only,omitempty"`
-	// Your Sumo Logic API endpoint. See https://help.sumologic.com/docs/api/getting-started/#sumo-logic-endpoints-by-deployment-and-firewall-security for help determining which base URL to use.
+	// Base URL for the Sumo Logic API.
+	// [Sumo Logic endpoints by deployment and firewall security](https://help.sumologic.com/docs/api/getting-started/#sumo-logic-endpoints-by-deployment-and-firewall-security).
 	Url string `json:"url" url:"url"`
 
 	extraProperties map[string]interface{}
@@ -12239,13 +12462,15 @@ func (s *SiemSumoLogic) String() string {
 
 type SentinelCredential struct {
 	Type string
-	// OAuth 2.0 client credentials for authenticating with Microsoft Sentinel. The application registration must have
-	// appropriate permissions to read and write to Microsoft Sentinel. Required permissions include:
-	// - Microsoft.OperationalInsights/workspaces/read
-	// - Microsoft.OperationalInsights/workspaces/write
-	// - Microsoft.SecurityInsights/dataConnectors/*
+	// Client credentials for authenticating with Microsoft Sentinel.
+	// The application registration must have appropriate permissions to read
+	// and write to Microsoft Sentinel. Required permissions:
+	//
+	// - `Microsoft.OperationalInsights/workspaces/read`
+	// - `Microsoft.OperationalInsights/workspaces/write`
+	// - `Microsoft.SecurityInsights/dataConnectors/*`
 	OAuthClient *OAuthClientCredential
-	// ID of a credential that stores OAuth 2.0 client credentials for Microsoft Sentinel.
+	// Reference to existing Client Credentials.
 	OAuthClientId OAuthClientCredentialId
 }
 
@@ -12313,9 +12538,9 @@ func (s *SentinelCredential) Accept(visitor SentinelCredentialVisitor) error {
 
 type SentinelOneCredential struct {
 	Type string
-	// SentinelOne API token for authentication. Follow the API DOC overview once logged into your SentinelOne Management URL, "https://your_management_url/docs/en/generating-api-tokens.html".
+	// Configuration when creating new API Token.
 	Token *TokenCredential
-	// ID of an existing credential that stores a SentinelOne API token.
+	// Reference to existing API Token.
 	TokenId TokenCredentialId
 }
 
@@ -12383,9 +12608,9 @@ func (s *SentinelOneCredential) Accept(visitor SentinelOneCredentialVisitor) err
 
 type SentinelOneEdrEventsCredential struct {
 	Type string
-	// SentinelOne Singularity Data Lake API used for Edr Events. For example, "https://xdr.{region}.sentinelone.net"
+	// Configuration when creating new Token.
 	Token *TokenCredential
-	// ID of an existing credential that stores a SentinelOne API token.
+	// Reference to existing Token.
 	TokenId TokenCredentialId
 }
 
@@ -12453,13 +12678,13 @@ func (s *SentinelOneEdrEventsCredential) Accept(visitor SentinelOneEdrEventsCred
 
 type ServiceNowCredential struct {
 	Type string
-	// Username and password used to authenticate with ServiceNow. The password can be a token that is generated following [this guide to generate an API token](https://docs.servicenow.com/bundle/vancouver-platform-administration/page/administer/users-and-groups/task/t_CreateAUser.html). The token receives the same permissions as the user that generates it, so must have access to the projects you want to use.
+	// Username and secret used to authenticate with ServiceNow. The password can be a [generated token](https://docs.servicenow.com/bundle/vancouver-platform-administration/page/administer/users-and-groups/task/t_CreateAUser.html). The token receives the same permissions as the user that generated it, so they must have access to the necessary projects.
 	Basic *BasicCredential
-	// ID of a credential that stores a username and password used to authenticate with ServiceNow.
+	// Reference to existing Basic Credentials.
 	BasicId BasicCredentialId
-	// Token used to authenticate with ServiceNow. This token will be used with the authentication header `x-sn-apikey`. To use token authentication, the version of ServiceNow must be Washington D.C. or later.
+	// Token used to authenticate with ServiceNow. This token will be used with the authentication header `x-sn-apikey`. To use token authentication, the version of ServiceNow must be `Washington D.C.` or later.
 	Token *TokenCredential
-	// ID of a credential that stores a token used to authenticate with ServiceNow.
+	// Reference to existing Token.
 	TokenId TokenCredentialId
 }
 
@@ -12560,13 +12785,15 @@ func (s *ServiceNowCredential) Accept(visitor ServiceNowCredentialVisitor) error
 	return fmt.Errorf("type %T does not define a non-empty union type", s)
 }
 
-// Configuration for AWS Simple Queue Service (SQS) as a Sink Provider.
+// Configuration for Amazon Simple Queue Service (SQS).
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/aws-sqs-sink-setup)
 type SinkAwsSqs struct {
-	// Credential ID that stores AWS authentication key and secret. This token pair must have write access to the configured SQS queue
+	// AWS Access Keys with write access to the configured SQS queue.
 	Credential *AwsSqsCredential `json:"credential" url:"credential"`
-	// Override the default AWS region for this integration. If not present, the region will be inferred from the URL.
+	// Overrides the default AWS region. If not present, the region will be inferred from the URL.
 	Region *string `json:"region,omitempty" url:"region,omitempty"`
-	// URL of the SQS queue where events are sent. Must be in the format `https://sqs.{region}.amazonaws.com_{account_id}/{queue_name}`.
+	// URL of the SQS queue where events are sent.
 	Url string `json:"url" url:"url"`
 
 	extraProperties map[string]interface{}
@@ -12607,12 +12834,15 @@ func (s *SinkAwsSqs) String() string {
 	return fmt.Sprintf("%#v", s)
 }
 
-// Configuration for AWS Security Lake provider. Events are written directly to an AWS S3 bucket in Apache Parquet format.
+// Configuration for Amazon Security Lake as a Sink provider. Events are written directly to an AWS S3 bucket in Apache Parquet format.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/amazon-security-lake-sink-setup)
 type SinkAwsSecurityLake struct {
+	// AWS Access Keys with write access to the configured S3 bucket.
 	Credential *AwsSecurityLakeCredential `json:"credential" url:"credential"`
 	// Override the default AWS region for this integration. If not present, the region will be inferred from the URL.
 	Region *string `json:"region,omitempty" url:"region,omitempty"`
-	// URL of the S3 bucket where the AWS Security Lake events are stored.
+	// URL of the S3 bucket where the Amazon Security Lake events are stored.
 	Url string `json:"url" url:"url"`
 
 	extraProperties map[string]interface{}
@@ -12654,13 +12884,16 @@ func (s *SinkAwsSecurityLake) String() string {
 }
 
 // Configuration for Azure Monitor Logs as a Sink Provider. Azure Monitor Logs is a feature of Azure Monitor that collects and organizes log and performance data from monitored resources.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/azure-monitor-logs)
 type SinkAzureMonitorLogs struct {
 	// Azure Client (Application) ID.
-	ClientId   string                      `json:"client_id" url:"client_id"`
+	ClientId string `json:"client_id" url:"client_id"`
+	// Credential with access to the configured data collection endpoint.
 	Credential *AzureMonitorLogsCredential `json:"credential" url:"credential"`
 	// Data collection rule immutable ID.
 	RuleId string `json:"rule_id" url:"rule_id"`
-	// Name of the Data collection rule stream.
+	// Name of the data collection rule stream.
 	StreamName string `json:"stream_name" url:"stream_name"`
 	// Azure Directory (tenant) ID.
 	TenantId string `json:"tenant_id" url:"tenant_id"`
@@ -12705,10 +12938,12 @@ func (s *SinkAzureMonitorLogs) String() string {
 	return fmt.Sprintf("%#v", s)
 }
 
-// Configuration for Crowdstrike HEC as a Sink Provider
+// Configuration for CrowdStrike Falcon® Next-Gen SIEM (HEC).
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/crowdstrike-sink-setup)
 type SinkCrowdstrikeHec struct {
 	Credential *CrowdstrikeHecCredential `json:"credential" url:"credential"`
-	// API URL for the CrowdStrike HEC API. This must be an HTTPS URL, for example "https://<some-guid>.ingest.us-2.crowdstrike.com/services/collector".
+	// HTTPS URL for the CrowdStrike HTTP Event Collector (HEC) API.
 	Url string `json:"url" url:"url"`
 
 	extraProperties map[string]interface{}
@@ -12749,15 +12984,17 @@ func (s *SinkCrowdstrikeHec) String() string {
 	return fmt.Sprintf("%#v", s)
 }
 
-// Configuration for Elasticsearch search and analytics engine. Supports both managed and self-hosted Elasticsearch deployments
+// Configuration for Elasticsearch.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/elastic-setup)
 type SinkElasticsearch struct {
 	AuthOptions *ElasticsearchAuthOptions `json:"auth_options,omitempty" url:"auth_options,omitempty"`
 	// The index or data stream to use when writing events.
 	CreateIndex string                   `json:"create_index" url:"create_index"`
 	Credential  *ElasticsearchCredential `json:"credential" url:"credential"`
-	// If true, skips verification of the Elasticsearch server's TLS certificate.
+	// When true, skips verification of the Elasticsearch TLS certificate.
 	SkipTlsVerify *bool `json:"skip_tls_verify,omitempty" url:"skip_tls_verify,omitempty"`
-	// URL for the Elasticsearch API. This should be the base URL for the API, without any path components and must be HTTPS. For example, "https://tenant.elastic.com".
+	// Base URL for the Elasticsearch API.
 	Url string `json:"url" url:"url"`
 
 	extraProperties map[string]interface{}
@@ -12799,12 +13036,14 @@ func (s *SinkElasticsearch) String() string {
 }
 
 // Configuration for Google Security Operations (formerly Google Chronicle) as a Sink Provider connecting via the older Malachite API.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/google-chronicle-setup)
 type SinkGoogleSecOps struct {
-	// The credential set used to write events to Google SecOps.
+	// Credentials used when writing events.
 	Credential *GoogleChronicleCredential `json:"credential" url:"credential"`
 	// The customer ID reported when writing events.
 	CustomerId string `json:"customer_id" url:"customer_id"`
-	// (Optional) Ingestion URL for the Google SecOps instance. This should be the base event ingestion URL, without any path components.
+	// Base URL for the Google SecOps Ingestion API.
 	Url *string `json:"url,omitempty" url:"url,omitempty"`
 
 	extraProperties map[string]interface{}
@@ -12846,16 +13085,18 @@ func (s *SinkGoogleSecOps) String() string {
 }
 
 // Configuration for Google Security Operations (formerly Google Chronicle) as a Sink Provider.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/google-security-operations-sink-setup)
 type SinkGoogleSecurityOperations struct {
-	// Google OAuth 2.0 credentials with an email address.
+	// Credentials used for accessing the Google SecOps instance.
 	Credential *GoogleServiceAccountCredential `json:"credential" url:"credential"`
 	// The customer ID of the Google SecOps instance
 	CustomerId string `json:"customer_id" url:"customer_id"`
 	// The project ID of the Google SecOps instance.
 	ProjectId string `json:"project_id" url:"project_id"`
-	// The region of the Google SecOps instance. Usually 'us' or 'eu'.
+	// The region of the Google SecOps instance. Usually `us` or `eu`.
 	Region *string `json:"region,omitempty" url:"region,omitempty"`
-	// The base API URL for posting event, without any path components.
+	// The base URL for the Google SecOps API.
 	Url *string `json:"url,omitempty" url:"url,omitempty"`
 
 	extraProperties map[string]interface{}
@@ -12896,9 +13137,9 @@ func (s *SinkGoogleSecurityOperations) String() string {
 	return fmt.Sprintf("%#v", s)
 }
 
-// Configuration for the Synqly mock in-memory sink handler. This provider is for testing purposes only and does not retain events pushed to it.
+// Configuration for the Synqly mock in-memory Sink Provider. This provider is for testing purposes only and does not retain events pushed to it.
 type SinkMock struct {
-	// Name of the destination where events are stored. This property is unused.
+	// Name of the destination where events are stored. This field is unused and only used to demonstrate Provider configuration.
 	Destination *string `json:"destination,omitempty" url:"destination,omitempty"`
 
 	extraProperties map[string]interface{}
@@ -12944,9 +13185,9 @@ type SinkOpenSearch struct {
 	// The index or data stream to use when writing events.
 	CreateIndex string                `json:"create_index" url:"create_index"`
 	Credential  *OpenSearchCredential `json:"credential" url:"credential"`
-	// If true, skips verification of the OpenSearch server's TLS certificate.
+	// When true, skips verification of the OpenSearch TLS certificate.
 	SkipTlsVerify *bool `json:"skip_tls_verify,omitempty" url:"skip_tls_verify,omitempty"`
-	// URL for the OpenSearch API. This should be the base URL for the API, without any path components and must be HTTPS.
+	// Base URL for the OpenSearch API.
 	Url string `json:"url" url:"url"`
 
 	extraProperties map[string]interface{}
@@ -12987,19 +13228,21 @@ func (s *SinkOpenSearch) String() string {
 	return fmt.Sprintf("%#v", s)
 }
 
-// Configuration for Splunk as a Sink provider. This integration allows sending data to Splunk using an HTTP Event Collector (HEC).
+// Configuration for Splunk as a Sink provider. Allows sending data to Splunk using an HTTP Event Collector (HEC).
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/splunk-setup)
 type SinkSplunk struct {
-	// Token credential to use for connecting to the Splunk HEC service.
+	// Credential to use when connecting to the Splunk HEC service. If not provided, sending events to Splunk is disabled.
 	HecCredential *SplunkHecToken `json:"hec_credential" url:"hec_credential"`
-	// URL for the Splunk HEC endpoint. This must include the full path to the HEC endpoint. For example, "https://tenant.cloud.splunk.com:8088/services_collector_event".
+	// URL for the Splunk HEC endpoint. Must include the full path to the HEC endpoint.
 	HecUrl string `json:"hec_url" url:"hec_url"`
 	// Splunk index to send events to. If not provided, will use the default index for the Splunk collector.
 	Index *string `json:"index,omitempty" url:"index,omitempty"`
-	// If true, skips verification of the Splunk server's TLS certificate.
+	// When true, skips verification of the Splunk TLS certificate.
 	SkipTlsVerify *bool `json:"skip_tls_verify,omitempty" url:"skip_tls_verify,omitempty"`
-	// Splunk source to send events to. If not provided, will use the default source for the Splunk collector.
+	// Splunk source to send events to. If not provided the default source for the Splunk collector is used.
 	Source *string `json:"source,omitempty" url:"source,omitempty"`
-	// Splunk source type to send events to. If not provided, will use the default source type for the Splunk collector.
+	// Splunk source type to send events to. If not provided the default source type for the Splunk collector is used.
 	SourceType *string `json:"source_type,omitempty" url:"source_type,omitempty"`
 
 	extraProperties map[string]interface{}
@@ -13042,9 +13285,9 @@ func (s *SinkSplunk) String() string {
 
 type SlackCredential struct {
 	Type string
-	// Slack authentication token. Follow [this guide to generate an API token](https://api.slack.com/concepts/token-types#bot). The token must have access to the configured channel.
+	// Follow [this guide to generate a bot token](https://api.slack.com/concepts/token-types#bot). The token must have access to the configured channel.
 	Token *TokenCredential
-	// ID of a credential that stores a token used to authenticate with Slack.
+	// Reference to existing Bot Token.
 	TokenId TokenCredentialId
 }
 
@@ -13114,7 +13357,7 @@ type SlackWebhookCredential struct {
 	Type string
 	// Slack Incoming Webhook URL. Use a Slack app with Incoming Webhooks enabled to generate the URL. See [configuration guide on Incoming Webhooks](https://api.slack.com/messaging/webhooks) for more detail.
 	Secret *SecretCredential
-	// ID of a credential that stores a secret Incoming Webhook URL used to authenticate with Slack.
+	// Reference to existing Incoming Webhook URL.
 	SecretId SecretCredentialId
 }
 
@@ -13182,9 +13425,9 @@ func (s *SlackWebhookCredential) Accept(visitor SlackWebhookCredentialVisitor) e
 
 type SophosCredential struct {
 	Type string
-	// Docs for setting up oAuth - https://developer.sophos.com/intro#getting-started
+	// Configuration when creating new Client Credentials.
 	OAuthClient *OAuthClientCredential
-	// ID of a credential that stores a Sophos oAuth client ID.
+	// Reference to existing Client Credentials.
 	OAuthClientId OAuthClientCredentialId
 }
 
@@ -13252,9 +13495,9 @@ func (s *SophosCredential) Accept(visitor SophosCredentialVisitor) error {
 
 type SplunkHecToken struct {
 	Type string
-	// Credential ID that stores a Splunk HTTP endpoint collector token. Follow [this guide to generate an API token](https://docs.splunk.com/Documentation/Splunk/8.1.3/Data/UsetheHTTPEventCollector#Authentication). The token must have access to the configured data collection endpoint.
+	// Token used when connecting to the Splunk HEC Service.
 	Token *TokenCredential
-	// ID of a credential that stores a Splunk HTTP endpoint collector (HEC) token.
+	// Reference to existing HEC Token.
 	TokenId TokenCredentialId
 }
 
@@ -13322,9 +13565,9 @@ func (s *SplunkHecToken) Accept(visitor SplunkHecTokenVisitor) error {
 
 type SplunkSearchCredential struct {
 	Type string
-	// Optional URL used for connecting to the Splunk search service. If not provided, querying is disabled.
+	// Token used when connecting to the Splunk Search Service.
 	Token *TokenCredential
-	// Optional id of a credential used for connecting to the Splunk search service.
+	// Reference to existing Search Service Token.
 	TokenId TokenCredentialId
 }
 
@@ -13390,14 +13633,16 @@ func (s *SplunkSearchCredential) Accept(visitor SplunkSearchCredentialVisitor) e
 	return fmt.Errorf("type %T does not define a non-empty union type", s)
 }
 
-// Configuration for AWS S3 as a Storage Provider
+// Configuration for Amazon S3.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/aws-s3-storage-setup)
 type StorageAwsS3 struct {
-	// Name of the AWS S3 bucket where files are stored.
+	// Name of the Amazon S3 bucket where files are stored.
 	Bucket     string           `json:"bucket" url:"bucket"`
 	Credential *AwsS3Credential `json:"credential" url:"credential"`
-	// Endpoint used for connecting to the external service. If not provided, will connect to the default endpoint for the Provider.
+	// Endpoint used for connecting to Amazon S3 the external service. If not provided, the default Amazon S3 endpoint will be used.
 	Endpoint *string `json:"endpoint,omitempty" url:"endpoint,omitempty"`
-	// AWS region where the S3 bucket is located.
+	// AWS region where the Amazon S3 bucket is located.
 	Region string `json:"region" url:"region"`
 
 	extraProperties map[string]interface{}
@@ -13483,6 +13728,8 @@ func (s *StorageAzureBlob) String() string {
 }
 
 // Configuration for Google Cloud Storage for storing unstructured data
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/google-gcs-storage-setup)
 type StorageGcs struct {
 	// Name of the bucket where files are stored.
 	Bucket     string         `json:"bucket" url:"bucket"`
@@ -13528,7 +13775,7 @@ func (s *StorageGcs) String() string {
 	return fmt.Sprintf("%#v", s)
 }
 
-// Configuration for the Synqly mock in-memory storage handler. This provider is for testing purposes only and does not retain files pushed to it.
+// Configuration for the Synqly mock in-memory storage Provider. This provider is for testing purposes only and does not retain files pushed to it.
 type StorageMock struct {
 	// Name of the bucket where files are stored.
 	Bucket string `json:"bucket" url:"bucket"`
@@ -13573,9 +13820,9 @@ func (s *StorageMock) String() string {
 
 type SumoLogicCollectionUrl struct {
 	Type string
-	// The Sumo Logic HTTP collection URL, stored as a secret. This URL contains all of the authorization information for sending logs to Sumo Logic and is stored in a credential to protect that information. See https://help.sumologic.com/docs/send-data/hosted-collectors/http-source/logs-metrics/ for instruction on generating a collection URL.
+	// Sumo Logic HTTP collection URL used to write events.
 	Secret *SecretCredential
-	// ID of a credential that stores a Sumo Logic HTTP collection URL.
+	// Reference to existing Secret.
 	SecretId SecretCredentialId
 }
 
@@ -13643,9 +13890,9 @@ func (s *SumoLogicCollectionUrl) Accept(visitor SumoLogicCollectionUrlVisitor) e
 
 type SumoLogicCredential struct {
 	Type string
-	// Your Access ID and Access Key. See https://help.sumologic.com/docs/api/getting-started/#authentication for information on generating these values.
+	// Access ID and Access Key used to authenticate with Sumo Logic.
 	Basic *BasicCredential
-	// ID of a credential that stores a Sumo Logic Access ID and Access Key.
+	// Reference to existing Access Keys.
 	BasicId BasicCredentialId
 }
 
@@ -13711,12 +13958,11 @@ func (s *SumoLogicCredential) Accept(visitor SumoLogicCredentialVisitor) error {
 	return fmt.Errorf("type %T does not define a non-empty union type", s)
 }
 
-// Supported credential types for Tanium Cloud
 type TaniumCloudCredential struct {
 	Type string
-	// Tanium™ API authentication tokens allow users to maintain extended sessions with Tanium Cloud, eliminating the need for repeated authentication in long-running workflows that aren't continuously active. Each token is tied to a specific user or persona, authenticating based on their credentials and permissions. Multiple tokens can be created per user or persona, with a configurable expiration period. To avoid workflow disruptions, users should regularly rotate tokens by requesting new ones and revoking the old ones before they expire. For more details on generating, managing, rotating, or revoking an API token, please refer to [this API Token guide](https://help.tanium.com/bundle/ug_console_cloud/page/platform_user/console_api_tokens.html#add_API_tokens). A persona in Tanium is a set of roles and computer groups selected for a session, allowing different restrictions for a user without needing multiple accounts. For example, a user managing endpoints across various countries can have one persona for client maintenance in a specific country and another for security patch installations in only certain computer groups. For more details please refer our [Tanium Authentication Guide](ref:tanium-setup).
+	// Configuration when creating new API Token.
 	Token *TokenCredential
-	// ID of a credential that stores a Tanium Cloud authentication token.
+	// Reference to existing API Token.
 	TokenId TokenCredentialId
 }
 
@@ -13784,13 +14030,13 @@ func (t *TaniumCloudCredential) Accept(visitor TaniumCloudCredentialVisitor) err
 
 type TeamsCredential struct {
 	Type string
-	// Azure OAuth 2.0 Client ID and Client Secret for an Azure App Registration. Follow [this guide to generate an API token](https://learn.microsoft.com/en-us/connectors/azureadapplications/). The application must be configured with permissions to access Microsoft Power Automate with user delegation.
+	// OAuth 2.0 Client Credentials for an Azure App Registration. The application must be configured with permissions to access Microsoft Power Automate with user delegation.
 	OAuthClient *OAuthClientCredential
-	// The ID of a credential that stores the Azure OAuth 2.0 values for an azure App Registration.
+	// Reference to existing Client Credentials.
 	OAuthClientId OAuthClientCredentialId
 	// Public Webhook URL used to authenticate with Teams.
 	WebhookUrl *SecretCredential
-	// ID of a credential that stores a public Webhook URL used to authenticate with Teams.
+	// Reference to existing Webhook URL.
 	WebhookUrlId SecretCredentialId
 }
 
@@ -13891,12 +14137,11 @@ func (t *TeamsCredential) Accept(visitor TeamsCredentialVisitor) error {
 	return fmt.Errorf("type %T does not define a non-empty union type", t)
 }
 
-// Supported credential types for Tenable Cloud
 type TenableCloudCredential struct {
 	Type string
-	// Tenable Cloud authentication token. Follow [this guide to generate an API token](https://docs.tenable.com/vulnerability-management/Content/Settings/my-account/GenerateAPIKey.htm). Secret must be of the form accessKey=<key>;secretKey=<secret>.
+	// Configuration when creating new API Keys.
 	Token *TokenCredential
-	// ID of a credential that stores a Tenable Cloud authentication token.
+	// Reference to existing API Keys.
 	TokenId TokenCredentialId
 }
 
@@ -13962,13 +14207,15 @@ func (t *TenableCloudCredential) Accept(visitor TenableCloudCredentialVisitor) e
 	return fmt.Errorf("type %T does not define a non-empty union type", t)
 }
 
-// Configuration for Autotask as a Ticketing Provider
+// Configuration for Autotask Operations Cloud.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/autotask-ticketing-setup)
 type TicketingAutotask struct {
 	ApiIntegrationCodeCredential *AutotaskApiIntegrationCodeCredential `json:"api_integration_code_credential" url:"api_integration_code_credential"`
 	SecretCredential             *AutotaskSecretCredential             `json:"secret_credential" url:"secret_credential"`
-	// User name for the Autotask API.
+	// User name of the API User created to authenticate with the Autotask API.
 	UserName string `json:"user_name" url:"user_name"`
-	// Zone path for the Autotask API.
+	// Zone for the Autotask API.
 	ZonePath string `json:"zone_path" url:"zone_path"`
 
 	extraProperties map[string]interface{}
@@ -14009,7 +14256,9 @@ func (t *TicketingAutotask) String() string {
 	return fmt.Sprintf("%#v", t)
 }
 
-// Configuration for Freshdesk as a Ticketing Provider
+// Configuration for Freshdesk.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/freshdesk-ticketing-setup)
 type TicketingFreshdesk struct {
 	Credential *FreshdeskCredential `json:"credential" url:"credential"`
 	// Base URL to your Freshdesk tenant.
@@ -14053,14 +14302,16 @@ func (t *TicketingFreshdesk) String() string {
 	return fmt.Sprintf("%#v", t)
 }
 
-// Configuration for Jira as a Ticketing Provider
+// Configuration for Atlassian Jira.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/jira-ticketing-setup)
 type TicketingJira struct {
 	Credential *JiraCredential `json:"credential" url:"credential"`
 	// Custom field mappings for this provider.
 	CustomFieldMappings []*CustomFieldMapping `json:"custom_field_mappings,omitempty" url:"custom_field_mappings,omitempty"`
 	// Default Project for the integration.
 	DefaultProject *string `json:"default_project,omitempty" url:"default_project,omitempty"`
-	// URL for the Jira API. This should be the base URL for the API, without any path components and must be HTTPS. For example, "https://tenant.atlassian.net".
+	// Base URL for the Jira API.
 	Url string `json:"url" url:"url"`
 
 	extraProperties map[string]interface{}
@@ -14101,7 +14352,7 @@ func (t *TicketingJira) String() string {
 	return fmt.Sprintf("%#v", t)
 }
 
-// Configuration for the Synqly mock in-memory ticketing handler. This provider is for testing purposes only. It retains tickets for a limited time and does not persist them for long-term usage.
+// Configuration for the Synqly mock in-memory ticketing Provider. This provider is for testing purposes only. It retains tickets for a limited time and does not persist them for long-term usage.
 type TicketingMock struct {
 	// Custom field mappings for this provider.
 	CustomFieldMappings []*CustomFieldMapping `json:"custom_field_mappings,omitempty" url:"custom_field_mappings,omitempty"`
@@ -14146,10 +14397,12 @@ func (t *TicketingMock) String() string {
 	return fmt.Sprintf("%#v", t)
 }
 
-// Configuration for PagerDuty as a Ticketing Provider
+// Configuration for PagerDuty Operations Cloud.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/pagerduty-ticketing-setup)
 type TicketingPagerDuty struct {
 	Credential *PagerDutyCredential `json:"credential" url:"credential"`
-	// URL for the PagerDuty API. This should be the base URL for the API, without any path components and must be HTTPS. For example, "https://api.pagerduty.com".
+	// Base URL for the PagerDuty API.
 	Url string `json:"url" url:"url"`
 
 	extraProperties map[string]interface{}
@@ -14190,14 +14443,16 @@ func (t *TicketingPagerDuty) String() string {
 	return fmt.Sprintf("%#v", t)
 }
 
-// Configuration for ServiceNow as a Ticketing Provider
+// Configuration for ServiceNow IT Service Management (ITSM).
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/servicenow-ticketing-setup)
 type TicketingServiceNow struct {
 	Credential *ServiceNowCredential `json:"credential" url:"credential"`
 	// Custom field mappings for this provider.
 	CustomFieldMappings []*CustomFieldMapping `json:"custom_field_mappings,omitempty" url:"custom_field_mappings,omitempty"`
-	// Default Project for the integration. This maps to the custom table for tickets. This table should be derived from Incident table. If not provided, defaults to the incident table.
+	// Default Project for the integration. This maps to the custom table for tickets. This table should be derived from Incident table. Defaults to the incident table if not specified.
 	DefaultProject *string `json:"default_project,omitempty" url:"default_project,omitempty"`
-	// URL for the ServiceNow API. This should be the base URL for the API, without any path components and must be HTTPS. For example, "https://tenant.service-now.com".
+	// Base URL for the ServiceNow API.
 	Url string `json:"url" url:"url"`
 
 	extraProperties map[string]interface{}
@@ -14238,10 +14493,12 @@ func (t *TicketingServiceNow) String() string {
 	return fmt.Sprintf("%#v", t)
 }
 
-// Configuration for ServiceNow Security Incident Response as a Ticketing Provider
+// Configuration for ServiceNow Security Incident Response (SIR).
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/servicenow-ticketing-setup)
 type TicketingServiceNowSir struct {
 	Credential *ServiceNowCredential `json:"credential" url:"credential"`
-	// URL for the ServiceNow API. This should be the base URL for the API, without any path components and must be HTTPS. For example, "https://tenant.service-now.com".
+	// Base URL for the ServiceNow API.
 	Url string `json:"url" url:"url"`
 
 	extraProperties map[string]interface{}
@@ -14282,7 +14539,9 @@ func (t *TicketingServiceNowSir) String() string {
 	return fmt.Sprintf("%#v", t)
 }
 
-// Configuration for Torq as a Ticketing Provider
+// Configuration for Torq.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/torq-ticketing-setup)
 type TicketingTorq struct {
 	Credential *TorqCredential `json:"credential" url:"credential"`
 	// Custom field mappings for this provider.
@@ -14372,9 +14631,9 @@ func (t *TicketingZendesk) String() string {
 
 type TorqCredential struct {
 	Type string
-	// Client ID for the Torq REST API. [Torq API key generation documentation](https://learn.torq.io/apidocs/authentication).
+	// Configuration when creating new Client Credentials.
 	OAuthClient *OAuthClientCredential
-	// Synqly credential id for the Torq Client ID and Client Secret.
+	// Reference to existing Client Credentials.
 	OAuthClientId OAuthClientCredentialId
 }
 
@@ -14497,11 +14756,13 @@ func (v VulnerabilitiesTaniumCloudDataset) Ptr() *VulnerabilitiesTaniumCloudData
 	return &v
 }
 
-// Configuration for CrowdStrike Falcon as a Vulnerabilities Provider
+// Configuration for CrowdStrike Falcon® Spotlight.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/crowdstrike-vulns-setup)
 type VulnerabilitiesCrowdStrike struct {
 	// The credential to use for the CrowdStrike Falcon tenant.
 	Credential *CrowdStrikeCredential `json:"credential" url:"credential"`
-	// The root domain where your CrowdStrike Falcon tenant is located.
+	// Base URL for the CrowdStrike Falcon® Spotlight API.
 	Url *string `json:"url,omitempty" url:"url,omitempty"`
 
 	extraProperties map[string]interface{}
@@ -14542,12 +14803,14 @@ func (v *VulnerabilitiesCrowdStrike) String() string {
 	return fmt.Sprintf("%#v", v)
 }
 
-// Configuration for Nucleus as a Vulnerabilities Provider
+// Configuration for Nucleus Vulnerability Management.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/nucleus-vulns-setup)
 type VulnerabilitiesNucleus struct {
 	Credential *NucleusCredential `json:"credential" url:"credential"`
-	// The **project_id** is a string representing a numeric ID (e.g., "12345") and can be found in the Nucleus UI by selecting **Global Dashboard** from the left-hand menu, then choosing **All Projects** at the top, where the **Projects** widget lists all projects with their IDs.
+	// Numeric identifier for a Nucleus project.
 	ProjectId string `json:"project_id" url:"project_id"`
-	// URL for the Nucleus API. This should be the base URL for the API, without any path components and must be HTTPS, e.g. "https://{sandbox}.nucleussec.com" .
+	// Base URL for the Nucleus API.
 	Url string `json:"url" url:"url"`
 
 	extraProperties map[string]interface{}
@@ -14588,10 +14851,12 @@ func (v *VulnerabilitiesNucleus) String() string {
 	return fmt.Sprintf("%#v", v)
 }
 
-// Configuration for Qualys Cloud Platform as a Vulnerabilities Provider
+// Configuration for Qualys Vulnerability Management, Detection & Response (VMDR).
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/qualys-vulns-setup)
 type VulnerabilitiesQualysCloud struct {
 	Credential *QualysCloudCredential `json:"credential" url:"credential"`
-	// URL for the Qualys Cloud API. This should be the base URL for the API, without any path components and must be HTTPS. For example, "https://qualysguard.qg4.apps.qualys.com".
+	// Base URL for the Qualys Cloud API.
 	Url string `json:"url" url:"url"`
 
 	extraProperties map[string]interface{}
@@ -14674,10 +14939,12 @@ func (v *VulnerabilitiesQualysCloudMock) String() string {
 	return fmt.Sprintf("%#v", v)
 }
 
-// Configuration for Rapid7 Insight Cloud as a Vulnerabilities Provider
+// Configuration for Rapid7 InsightVM.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/rapid7-vulns-setup)
 type VulnerabilitiesRapid7InsightCloud struct {
 	Credential *Rapid7InsightCloudCredential `json:"credential" url:"credential"`
-	// URL for the Rapid7 API. This should be the base URL for the API, without any path components and must be HTTPS. For example, "https://us2.api.insight.rapid7.com".
+	// Base URL for the Rapid7 InsightVM API.
 	Url string `json:"url" url:"url"`
 
 	extraProperties map[string]interface{}
@@ -14760,10 +15027,12 @@ func (v *VulnerabilitiesRapid7InsightCloudMock) String() string {
 	return fmt.Sprintf("%#v", v)
 }
 
-// Configuration for Tanium Cloud as a Vulnerabilities Provider
+// Configuration for Tanium Vulnerability Management.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/tanium-setup)
 type VulnerabilitiesTaniumCloud struct {
 	Credential *TaniumCloudCredential `json:"credential" url:"credential"`
-	// URL for the Tanium Cloud API. This should be the base URL for the API, without any path components and must be HTTPS, e.g. "https://<customername>-api.cloud.tanium.com" or "https://<customername>-api.titankube.com".
+	// Base URL for the Tanium Cloud API
 	Url string `json:"url" url:"url"`
 
 	extraProperties map[string]interface{}
@@ -14846,10 +15115,12 @@ func (v *VulnerabilitiesTaniumCloudMock) String() string {
 	return fmt.Sprintf("%#v", v)
 }
 
-// Configuration for Tenable Cloud as a Vulnerabilities Provider
+// Configuration for Tenable Vulnerability Management.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/tenable-vulns-setup)
 type VulnerabilitiesTenableCloud struct {
 	Credential *TenableCloudCredential `json:"credential" url:"credential"`
-	// URL for the Tenable Cloud API. This should be the base URL for the API, without any path components and must be HTTPS. If not provided, defaults to "https://cloud.tenable.com".
+	// Base URL for the Tenable Cloud API.
 	Url *string `json:"url,omitempty" url:"url,omitempty"`
 
 	extraProperties map[string]interface{}
@@ -14892,10 +15163,9 @@ func (v *VulnerabilitiesTenableCloud) String() string {
 
 type ZendeskCredential struct {
 	Type string
-	// E-mail address and API Token for use with the Zendesk API. Use the e-mail address for the `username` field and API Token for the `secret` field.
-	// See [Zendesk API token generation documentation](https://developer.zendesk.com/api-reference/introduction/security-and-auth/#api-token) for more detail.
+	// E-mail address and API Token for use with the Zendesk API. Use the e-mail address for the `username` field and API Token for the `secret` field. See [Zendesk API token generation documentation](https://developer.zendesk.com/api-reference/introduction/security-and-auth/#api-token) for more detail.
 	Basic *BasicCredential
-	// ID of an existing Synqly credential that stores the Zendesk API basic credential.
+	// Reference to existing Basic Credentials.
 	BasicId BasicCredentialId
 }
 
