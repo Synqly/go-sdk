@@ -7228,6 +7228,50 @@ func (a *AssetsServiceNowMock) String() string {
 	return fmt.Sprintf("%#v", a)
 }
 
+// Configuration for the Sevco Assets Provider
+type AssetsSevco struct {
+	Credential *SevcoCredential `json:"credential" url:"credential"`
+	// URL for the Sevco API. This should be the base URL for the API, without any path components.
+	Url string `json:"url" url:"url"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (a *AssetsSevco) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
+}
+
+func (a *AssetsSevco) UnmarshalJSON(data []byte) error {
+	type unmarshaler AssetsSevco
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*a = AssetsSevco(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+
+	a._rawJSON = nil
+	return nil
+}
+
+func (a *AssetsSevco) String() string {
+	if len(a._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(a); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", a)
+}
+
 // Configuration for Tanium Cloud as an Assets Provider
 //
 // [Configuration guide](https://docs.synqly.com/guides/provider-configuration/tanium-setup)
@@ -10201,6 +10245,8 @@ type ProviderConfig struct {
 	AssetsServicenow *AssetsServiceNow
 	// Configuration for a mocked ServiceNow as an Assets Provider
 	AssetsServicenowMock *AssetsServiceNowMock
+	// Configuration for the Sevco Assets Provider
+	AssetsSevco *AssetsSevco
 	// Configuration for Tanium Cloud as an Assets Provider
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/tanium-setup)
@@ -10488,6 +10534,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.AssetsServicenowMock = value
+	case "assets_sevco":
+		value := new(AssetsSevco)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.AssetsSevco = value
 	case "assets_tanium_cloud":
 		value := new(AssetsTaniumCloud)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -10889,6 +10941,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.AssetsServicenowMock != nil {
 		return core.MarshalJSONWithExtraProperty(p.AssetsServicenowMock, "type", "assets_servicenow_mock")
 	}
+	if p.AssetsSevco != nil {
+		return core.MarshalJSONWithExtraProperty(p.AssetsSevco, "type", "assets_sevco")
+	}
 	if p.AssetsTaniumCloud != nil {
 		return core.MarshalJSONWithExtraProperty(p.AssetsTaniumCloud, "type", "assets_tanium_cloud")
 	}
@@ -11086,6 +11141,7 @@ type ProviderConfigVisitor interface {
 	VisitAssetsQualysCloudMock(*AssetsQualysCloudMock) error
 	VisitAssetsServicenow(*AssetsServiceNow) error
 	VisitAssetsServicenowMock(*AssetsServiceNowMock) error
+	VisitAssetsSevco(*AssetsSevco) error
 	VisitAssetsTaniumCloud(*AssetsTaniumCloud) error
 	VisitAssetsTaniumCloudMock(*AssetsTaniumCloudMock) error
 	VisitCloudsecurityCrowdstrike(*CloudSecurityCrowdStrike) error
@@ -11179,6 +11235,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.AssetsServicenowMock != nil {
 		return visitor.VisitAssetsServicenowMock(p.AssetsServicenowMock)
+	}
+	if p.AssetsSevco != nil {
+		return visitor.VisitAssetsSevco(p.AssetsSevco)
 	}
 	if p.AssetsTaniumCloud != nil {
 		return visitor.VisitAssetsTaniumCloud(p.AssetsTaniumCloud)
@@ -11390,6 +11449,8 @@ const (
 	ProviderConfigIdAssetsServiceNow ProviderConfigId = "assets_servicenow"
 	// [MOCK] ServiceNow Configuration Management Database (CMDB)
 	ProviderConfigIdAssetsServiceNowMock ProviderConfigId = "assets_servicenow_mock"
+	// Sevco for Asset Management and Security
+	ProviderConfigIdAssetsSevco ProviderConfigId = "assets_sevco"
 	// Tanium Vulnerability Management
 	ProviderConfigIdAssetsTaniumCloud ProviderConfigId = "assets_tanium_cloud"
 	// [MOCK] Tanium Vulnerability Management
@@ -11538,6 +11599,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdAssetsServiceNow, nil
 	case "assets_servicenow_mock":
 		return ProviderConfigIdAssetsServiceNowMock, nil
+	case "assets_sevco":
+		return ProviderConfigIdAssetsSevco, nil
 	case "assets_tanium_cloud":
 		return ProviderConfigIdAssetsTaniumCloud, nil
 	case "assets_tanium_cloud_mock":
@@ -12776,6 +12839,76 @@ func (s *ServiceNowCredential) Accept(visitor ServiceNowCredentialVisitor) error
 	if s.BasicId != "" {
 		return visitor.VisitBasicId(s.BasicId)
 	}
+	if s.Token != nil {
+		return visitor.VisitToken(s.Token)
+	}
+	if s.TokenId != "" {
+		return visitor.VisitTokenId(s.TokenId)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", s)
+}
+
+type SevcoCredential struct {
+	Type string
+	// This credential must be an API Secret Key. Generate this key in the UI console. For more details, see the [Creating an API Key](https://docs.sev.co/docs/using-the-api#creating-an-api-key).
+	Token *TokenCredential
+	// Reference to existing Sevco API Secret Key.
+	TokenId TokenCredentialId
+}
+
+func (s *SevcoCredential) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	s.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", s)
+	}
+	switch unmarshaler.Type {
+	case "token":
+		value := new(TokenCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		s.Token = value
+	case "token_id":
+		var valueUnmarshaler struct {
+			TokenId TokenCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		s.TokenId = valueUnmarshaler.TokenId
+	}
+	return nil
+}
+
+func (s SevcoCredential) MarshalJSON() ([]byte, error) {
+	if s.Token != nil {
+		return core.MarshalJSONWithExtraProperty(s.Token, "type", "token")
+	}
+	if s.TokenId != "" {
+		var marshaler = struct {
+			Type    string            `json:"type"`
+			TokenId TokenCredentialId `json:"value"`
+		}{
+			Type:    "token_id",
+			TokenId: s.TokenId,
+		}
+		return json.Marshal(marshaler)
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", s)
+}
+
+type SevcoCredentialVisitor interface {
+	VisitToken(*TokenCredential) error
+	VisitTokenId(TokenCredentialId) error
+}
+
+func (s *SevcoCredential) Accept(visitor SevcoCredentialVisitor) error {
 	if s.Token != nil {
 		return visitor.VisitToken(s.Token)
 	}
