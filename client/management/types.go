@@ -4076,6 +4076,7 @@ type OperationId string
 
 const (
 	OperationIdAssetsCreateAsset                        OperationId = "assets_create_asset"
+	OperationIdAssetsGetLabels                          OperationId = "assets_get_labels"
 	OperationIdAssetsQueryDevices                       OperationId = "assets_query_devices"
 	OperationIdCloudsecurityQueryCloudResourceInventory OperationId = "cloudsecurity_query_cloud_resource_inventory"
 	OperationIdCloudsecurityQueryComplianceFindings     OperationId = "cloudsecurity_query_compliance_findings"
@@ -4146,6 +4147,8 @@ func NewOperationIdFromString(s string) (OperationId, error) {
 	switch s {
 	case "assets_create_asset":
 		return OperationIdAssetsCreateAsset, nil
+	case "assets_get_labels":
+		return OperationIdAssetsGetLabels, nil
 	case "assets_query_devices":
 		return OperationIdAssetsQueryDevices, nil
 	case "cloudsecurity_query_cloud_resource_inventory":

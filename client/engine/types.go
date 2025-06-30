@@ -35,6 +35,47 @@ import (
 // Device inventory information. Represented by OCSF Device Inventory Info class (class_uid 5001).
 type Device = *inventoryinfo.InventoryInfo
 
+type Label struct {
+	Value string `json:"value" url:"value"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (l *Label) GetExtraProperties() map[string]interface{} {
+	return l.extraProperties
+}
+
+func (l *Label) UnmarshalJSON(data []byte) error {
+	type unmarshaler Label
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*l = Label(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *l)
+	if err != nil {
+		return err
+	}
+	l.extraProperties = extraProperties
+
+	l._rawJSON = nil
+	return nil
+}
+
+func (l *Label) String() string {
+	if len(l._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(l._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(l); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", l)
+}
+
 type ActionId string
 
 const (
@@ -2068,6 +2109,7 @@ type OperationId string
 
 const (
 	OperationIdAssetsCreateAsset                        OperationId = "assets_create_asset"
+	OperationIdAssetsGetLabels                          OperationId = "assets_get_labels"
 	OperationIdAssetsQueryDevices                       OperationId = "assets_query_devices"
 	OperationIdCloudsecurityQueryCloudResourceInventory OperationId = "cloudsecurity_query_cloud_resource_inventory"
 	OperationIdCloudsecurityQueryComplianceFindings     OperationId = "cloudsecurity_query_compliance_findings"
@@ -2138,6 +2180,8 @@ func NewOperationIdFromString(s string) (OperationId, error) {
 	switch s {
 	case "assets_create_asset":
 		return OperationIdAssetsCreateAsset, nil
+	case "assets_get_labels":
+		return OperationIdAssetsGetLabels, nil
 	case "assets_query_devices":
 		return OperationIdAssetsQueryDevices, nil
 	case "cloudsecurity_query_cloud_resource_inventory":
