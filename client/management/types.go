@@ -4080,6 +4080,7 @@ const (
 	OperationIdAssetsQueryDevices                       OperationId = "assets_query_devices"
 	OperationIdCloudsecurityQueryCloudResourceInventory OperationId = "cloudsecurity_query_cloud_resource_inventory"
 	OperationIdCloudsecurityQueryComplianceFindings     OperationId = "cloudsecurity_query_compliance_findings"
+	OperationIdCloudsecurityQueryIoms                   OperationId = "cloudsecurity_query_ioms"
 	OperationIdEdrCreateIocs                            OperationId = "edr_create_iocs"
 	OperationIdEdrDeleteIocs                            OperationId = "edr_delete_iocs"
 	OperationIdEdrGetEndpoint                           OperationId = "edr_get_endpoint"
@@ -4155,6 +4156,8 @@ func NewOperationIdFromString(s string) (OperationId, error) {
 		return OperationIdCloudsecurityQueryCloudResourceInventory, nil
 	case "cloudsecurity_query_compliance_findings":
 		return OperationIdCloudsecurityQueryComplianceFindings, nil
+	case "cloudsecurity_query_ioms":
+		return OperationIdCloudsecurityQueryIoms, nil
 	case "edr_create_iocs":
 		return OperationIdEdrCreateIocs, nil
 	case "edr_delete_iocs":
