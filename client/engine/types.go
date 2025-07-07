@@ -3471,7 +3471,9 @@ type ValueMappingId = Id
 
 type CreateAssetDevice struct {
 	// ID of the device.
-	Uid string `json:"uid" url:"uid"`
+	Uid *string `json:"uid,omitempty" url:"uid,omitempty"`
+	// Status of the creation of the asset in the providers system.
+	Status CreateAssetStatus `json:"status" url:"status"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
@@ -3509,6 +3511,31 @@ func (c *CreateAssetDevice) String() string {
 		return value
 	}
 	return fmt.Sprintf("%#v", c)
+}
+
+type CreateAssetStatus string
+
+const (
+	CreateAssetStatusUnknown  CreateAssetStatus = "Unknown"
+	CreateAssetStatusPending  CreateAssetStatus = "Pending"
+	CreateAssetStatusComplete CreateAssetStatus = "Complete"
+)
+
+func NewCreateAssetStatusFromString(s string) (CreateAssetStatus, error) {
+	switch s {
+	case "Unknown":
+		return CreateAssetStatusUnknown, nil
+	case "Pending":
+		return CreateAssetStatusPending, nil
+	case "Complete":
+		return CreateAssetStatusComplete, nil
+	}
+	var t CreateAssetStatus
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (c CreateAssetStatus) Ptr() *CreateAssetStatus {
+	return &c
 }
 
 type CreateFindingsError struct {
