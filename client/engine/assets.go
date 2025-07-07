@@ -116,8 +116,10 @@ func (c *CreateDeviceResponse) String() string {
 
 type GetLabelsResponse struct {
 	// Various metadata about the results organized by group, then type, then field.
-	Meta   *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
-	Result []*Label      `json:"result" url:"result"`
+	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
+	// Cursor to use to retrieve the next page of results
+	Cursor string   `json:"cursor" url:"cursor"`
+	Result []*Label `json:"result" url:"result"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage

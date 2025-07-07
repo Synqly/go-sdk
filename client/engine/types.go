@@ -32,11 +32,142 @@ import (
 	time "time"
 )
 
+type CreateDeviceRequestGeneric struct {
+	// Device object to create
+	Device map[string]interface{} `json:"device" url:"device"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *CreateDeviceRequestGeneric) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
+}
+
+func (c *CreateDeviceRequestGeneric) UnmarshalJSON(data []byte) error {
+	type unmarshaler CreateDeviceRequestGeneric
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = CreateDeviceRequestGeneric(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
+	c._rawJSON = nil
+	return nil
+}
+
+func (c *CreateDeviceRequestGeneric) String() string {
+	if len(c._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
+type CreateDeviceResponseGeneric struct {
+	// Various metadata about the results organized by group, then type, then field.
+	Meta   *MetaResponse          `json:"meta,omitempty" url:"meta,omitempty"`
+	Device map[string]interface{} `json:"device" url:"device"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *CreateDeviceResponseGeneric) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
+}
+
+func (c *CreateDeviceResponseGeneric) UnmarshalJSON(data []byte) error {
+	type unmarshaler CreateDeviceResponseGeneric
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = CreateDeviceResponseGeneric(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
+	c._rawJSON = nil
+	return nil
+}
+
+func (c *CreateDeviceResponseGeneric) String() string {
+	if len(c._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
 // Device inventory information. Represented by OCSF Device Inventory Info class (class_uid 5001).
 type Device = *inventoryinfo.InventoryInfo
 
+type GetLabelsResponseGeneric struct {
+	// Various metadata about the results organized by group, then type, then field.
+	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
+	// Cursor to use to retrieve the next page of results
+	Cursor string                   `json:"cursor" url:"cursor"`
+	Result []map[string]interface{} `json:"result" url:"result"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (g *GetLabelsResponseGeneric) GetExtraProperties() map[string]interface{} {
+	return g.extraProperties
+}
+
+func (g *GetLabelsResponseGeneric) UnmarshalJSON(data []byte) error {
+	type unmarshaler GetLabelsResponseGeneric
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*g = GetLabelsResponseGeneric(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	if err != nil {
+		return err
+	}
+	g.extraProperties = extraProperties
+
+	g._rawJSON = nil
+	return nil
+}
+
+func (g *GetLabelsResponseGeneric) String() string {
+	if len(g._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(g._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(g); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", g)
+}
+
 type Label struct {
-	Value string `json:"value" url:"value"`
+	Value  string `json:"value" url:"value"`
+	Device Device `json:"device" url:"device"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
@@ -74,6 +205,52 @@ func (l *Label) String() string {
 		return value
 	}
 	return fmt.Sprintf("%#v", l)
+}
+
+type QueryDevicesResponseGeneric struct {
+	// Various metadata about the results organized by group, then type, then field.
+	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
+	// Cursor to use to retrieve the next page of results
+	Cursor string `json:"cursor" url:"cursor"`
+	// List of devices
+	Result []map[string]interface{} `json:"result" url:"result"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (q *QueryDevicesResponseGeneric) GetExtraProperties() map[string]interface{} {
+	return q.extraProperties
+}
+
+func (q *QueryDevicesResponseGeneric) UnmarshalJSON(data []byte) error {
+	type unmarshaler QueryDevicesResponseGeneric
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*q = QueryDevicesResponseGeneric(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *q)
+	if err != nil {
+		return err
+	}
+	q.extraProperties = extraProperties
+
+	q._rawJSON = nil
+	return nil
+}
+
+func (q *QueryDevicesResponseGeneric) String() string {
+	if len(q._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(q._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(q); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", q)
 }
 
 type ActionId string
