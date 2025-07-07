@@ -3083,6 +3083,11 @@ func (i *Integration) String() string {
 }
 
 type WebhookConfig struct {
+	// The key used by Synqly to verify incoming webhook payloads sent by the Provider. The format and requirements for this key is Provider specific:
+	//
+	// - **ServiceNow**: Synqly will automatically configure webhooks, using this key as the signing key. If this key is not specified, a random key will be generated.
+	// - **Jira**: Synqly does _not_ automatically configure Jira webhooks. A user with administrator privileges must configure the webhook, including the signing key. If this key is not specified, Synqly will _not_ validate incoming webhooks from Jira. It is strongly recommended that a key is specified and configured with Jira to ensure the integrity of incoming payloads.
+	ProviderKey *string `json:"provider_key,omitempty" url:"provider_key,omitempty"`
 	// List of webhooks for an integration. If the provider supports webhooks, they will be sent to the servers provided in this list.
 	Items []*WebhookItem `json:"items" url:"items"`
 
@@ -3160,6 +3165,9 @@ type WebhookItem struct {
 	WebhookUrl string `json:"webhook_url" url:"webhook_url"`
 	// If specified, only events matching this list will be sent to `webhook_url`. If no filters are specified, all events sent from providers will be forwarded to `webhook_url`.
 	EventFilter []WebhookEvent `json:"event_filter,omitempty" url:"event_filter,omitempty"`
+	// The key used to sign outgoing web hook payloads. If not specified a random key is automatically generated.
+	// Use this key at the target URL to validate that the incoming payload was signed by Synqly. The payload is signed symmetrically with the `integrator_key` using the `HMAC-SHA256` signature scheme. The key should be randomly generated and between 24 bytes (192 bits) and 64 bytes (512 bits) long.
+	IntegratorKey *string `json:"integrator_key,omitempty" url:"integrator_key,omitempty"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
