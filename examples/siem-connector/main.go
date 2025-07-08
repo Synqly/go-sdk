@@ -174,7 +174,7 @@ func (a *App) splunkConfig(splunkURL, credentialId string) *mgmt.ProviderConfig 
 			},
 
 			// fill in required dummy/unused SearchServiceCredential
-			SearchServiceUrl: splunkURL,
+			SearchServiceUrl:        splunkURL,
 			SearchServiceCredential: &mgmt.SplunkSearchCredential{Token: &mgmt.TokenCredential{Secret: "def"}},
 
 			// Do not verify the Splunk server's TLS certificate. This

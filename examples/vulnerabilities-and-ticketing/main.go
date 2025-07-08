@@ -8,6 +8,7 @@ import (
 	"os"
 	"strings"
 
+	"examples/common"
 	koanfyaml "github.com/knadh/koanf/parsers/yaml"
 	"github.com/knadh/koanf/providers/env"
 	"github.com/knadh/koanf/providers/file"
@@ -16,8 +17,6 @@ import (
 	engineClient "github.com/synqly/go-sdk/client/engine/client"
 	"github.com/synqly/go-sdk/client/engine/ocsf/v130/securityfinding"
 	mgmt "github.com/synqly/go-sdk/client/management"
-
-	"examples/common"
 )
 
 var (

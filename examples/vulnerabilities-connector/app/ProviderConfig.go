@@ -5,10 +5,9 @@ import (
 	"fmt"
 	"log"
 
+	"examples/common"
 	"github.com/synqly/go-sdk/client/engine"
 	mgmt "github.com/synqly/go-sdk/client/management"
-
-	"examples/common"
 )
 
 const (
