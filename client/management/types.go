@@ -8520,6 +8520,52 @@ func (e *EdrSophos) String() string {
 	return fmt.Sprintf("%#v", e)
 }
 
+// Configuration for Tanium Cloud as a EDR Provider
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/tanium-setup)
+type EdrTanium struct {
+	Credential *TaniumCloudCredential `json:"credential" url:"credential"`
+	// URL for the Tanium Cloud API. This should be the base URL for the API, without any path components and must be HTTPS, e.g. "https://<customername>-api.cloud.tanium.com" or "https://<customername>-api.titankube.com".
+	Url string `json:"url" url:"url"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (e *EdrTanium) GetExtraProperties() map[string]interface{} {
+	return e.extraProperties
+}
+
+func (e *EdrTanium) UnmarshalJSON(data []byte) error {
+	type unmarshaler EdrTanium
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*e = EdrTanium(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *e)
+	if err != nil {
+		return err
+	}
+	e.extraProperties = extraProperties
+
+	e._rawJSON = nil
+	return nil
+}
+
+func (e *EdrTanium) String() string {
+	if len(e._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(e._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(e); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", e)
+}
+
 // Options used to control how requests are made to Elasticsearch when different authentication types are used.
 type ElasticsearchAuthOptions struct {
 	// Submit API requests as a specific user, with all of their roles and permissions. When populated, this option will send the `es-security-runas-user` header with every request made to the Elasticsearch API.
@@ -10291,6 +10337,10 @@ type ProviderConfig struct {
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/sophos-setup)
 	EdrSophos *EdrSophos
+	// Configuration for Tanium Cloud as a EDR Provider
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/tanium-setup)
+	EdrTanium *EdrTanium
 	// Configuration for Microsoft Entra ID.
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/entra-id-setup)
@@ -10608,6 +10658,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.EdrSophos = value
+	case "edr_tanium":
+		value := new(EdrTanium)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.EdrTanium = value
 	case "identity_entra_id":
 		value := new(IdentityEntraId)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -10985,6 +11041,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.EdrSophos != nil {
 		return core.MarshalJSONWithExtraProperty(p.EdrSophos, "type", "edr_sophos")
 	}
+	if p.EdrTanium != nil {
+		return core.MarshalJSONWithExtraProperty(p.EdrTanium, "type", "edr_tanium")
+	}
 	if p.IdentityEntraId != nil {
 		return core.MarshalJSONWithExtraProperty(p.IdentityEntraId, "type", "identity_entra_id")
 	}
@@ -11165,6 +11224,7 @@ type ProviderConfigVisitor interface {
 	VisitEdrMalwarebytes(*EdrMalwarebytes) error
 	VisitEdrSentinelone(*EdrSentinelOne) error
 	VisitEdrSophos(*EdrSophos) error
+	VisitEdrTanium(*EdrTanium) error
 	VisitIdentityEntraId(*IdentityEntraId) error
 	VisitIdentityGoogle(*IdentityGoogle) error
 	VisitIdentityOkta(*IdentityOkta) error
@@ -11279,6 +11339,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.EdrSophos != nil {
 		return visitor.VisitEdrSophos(p.EdrSophos)
+	}
+	if p.EdrTanium != nil {
+		return visitor.VisitEdrTanium(p.EdrTanium)
 	}
 	if p.IdentityEntraId != nil {
 		return visitor.VisitIdentityEntraId(p.IdentityEntraId)
@@ -11483,6 +11546,8 @@ const (
 	ProviderConfigIdEdrSentinelOne ProviderConfigId = "edr_sentinelone"
 	// Sophos Endpoint
 	ProviderConfigIdEdrSophos ProviderConfigId = "edr_sophos"
+	// Tanium EDR
+	ProviderConfigIdEdrTanium ProviderConfigId = "edr_tanium"
 	// Microsoft Entra ID
 	ProviderConfigIdIdentityEntraId ProviderConfigId = "identity_entra_id"
 	// Google Workspace
@@ -11633,6 +11698,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdEdrSentinelOne, nil
 	case "edr_sophos":
 		return ProviderConfigIdEdrSophos, nil
+	case "edr_tanium":
+		return ProviderConfigIdEdrTanium, nil
 	case "identity_entra_id":
 		return ProviderConfigIdIdentityEntraId, nil
 	case "identity_google":
