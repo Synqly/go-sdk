@@ -2319,6 +2319,7 @@ const (
 	OperationIdSiemGetInvestigation                     OperationId = "siem_get_investigation"
 	OperationIdSiemPatchInvestigation                   OperationId = "siem_patch_investigation"
 	OperationIdSiemPostEvents                           OperationId = "siem_post_events"
+	OperationIdSiemQueryAlerts                          OperationId = "siem_query_alerts"
 	OperationIdSiemQueryEvents                          OperationId = "siem_query_events"
 	OperationIdSiemQueryInvestigations                  OperationId = "siem_query_investigations"
 	OperationIdSiemQueryLogProviders                    OperationId = "siem_query_log_providers"
@@ -2424,6 +2425,8 @@ func NewOperationIdFromString(s string) (OperationId, error) {
 		return OperationIdSiemPatchInvestigation, nil
 	case "siem_post_events":
 		return OperationIdSiemPostEvents, nil
+	case "siem_query_alerts":
+		return OperationIdSiemQueryAlerts, nil
 	case "siem_query_events":
 		return OperationIdSiemQueryEvents, nil
 	case "siem_query_investigations":

@@ -22,6 +22,26 @@ type GetInvestigationRequest struct {
 	IncludeRawData *bool `json:"-" url:"include_raw_data,omitempty"`
 }
 
+type QuerySiemAlertsRequest struct {
+	// Cursor to use to retrieve the next page of results.
+	Cursor *string `json:"-" url:"cursor,omitempty"`
+	// Number of `Account` objects to return in this page. Defaults to 100.
+	Limit *int `json:"-" url:"limit,omitempty"`
+	// Select a field to order the results by. Defaults to `time`. To control the direction of the sorting, append
+	// `[asc]` or `[desc]` to the field name. For example, `name[desc]` will sort the results by `name` in descending order.
+	// The ordering defaults to `asc` if not specified. May be used multiple times to order by multiple fields, and the
+	// ordering is applied in the order the fields are specified.
+	Order []*string `json:"-" url:"order,omitempty"`
+	// Filter results by this query. For more information on filtering, refer to our Filtering Guide. Defaults to no filter.
+	// If used more than once, the queries are ANDed together.
+	Filter []*string `json:"-" url:"filter,omitempty"`
+	// Add metadata to the response by invoking meta functions. Documentation for meta functions is available at https://docs.synqly.com/api-reference/meta-functions. Not all meta function are available at every endpoint.
+	Meta []*string `json:"-" url:"meta,omitempty"`
+	// Include the raw data from the SIEM in the response. This is useful for debugging and troubleshooting.
+	// Defaults to `false`.
+	IncludeRawData *bool `json:"-" url:"include_raw_data,omitempty"`
+}
+
 type QuerySiemEventsRequest struct {
 	// Cursor to use to retrieve the next page of results.
 	Cursor *string `json:"-" url:"cursor,omitempty"`
@@ -244,6 +264,52 @@ func (q *QueryLogProvidersResponse) UnmarshalJSON(data []byte) error {
 }
 
 func (q *QueryLogProvidersResponse) String() string {
+	if len(q._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(q._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(q); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", q)
+}
+
+type QuerySiemAlertsResponse struct {
+	// Various metadata about the results organized by group, then type, then field.
+	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
+	// Cursor to use to retrieve the next page of results
+	Cursor string `json:"cursor" url:"cursor"`
+	// List of alerts
+	Result []map[string]interface{} `json:"result" url:"result"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (q *QuerySiemAlertsResponse) GetExtraProperties() map[string]interface{} {
+	return q.extraProperties
+}
+
+func (q *QuerySiemAlertsResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler QuerySiemAlertsResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*q = QuerySiemAlertsResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *q)
+	if err != nil {
+		return err
+	}
+	q.extraProperties = extraProperties
+
+	q._rawJSON = nil
+	return nil
+}
+
+func (q *QuerySiemAlertsResponse) String() string {
 	if len(q._rawJSON) > 0 {
 		if value, err := core.StringifyJSON(q._rawJSON); err == nil {
 			return value

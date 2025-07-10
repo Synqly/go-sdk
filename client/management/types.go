@@ -4117,6 +4117,7 @@ const (
 	OperationIdSiemGetInvestigation                     OperationId = "siem_get_investigation"
 	OperationIdSiemPatchInvestigation                   OperationId = "siem_patch_investigation"
 	OperationIdSiemPostEvents                           OperationId = "siem_post_events"
+	OperationIdSiemQueryAlerts                          OperationId = "siem_query_alerts"
 	OperationIdSiemQueryEvents                          OperationId = "siem_query_events"
 	OperationIdSiemQueryInvestigations                  OperationId = "siem_query_investigations"
 	OperationIdSiemQueryLogProviders                    OperationId = "siem_query_log_providers"
@@ -4222,6 +4223,8 @@ func NewOperationIdFromString(s string) (OperationId, error) {
 		return OperationIdSiemPatchInvestigation, nil
 	case "siem_post_events":
 		return OperationIdSiemPostEvents, nil
+	case "siem_query_alerts":
+		return OperationIdSiemQueryAlerts, nil
 	case "siem_query_events":
 		return OperationIdSiemQueryEvents, nil
 	case "siem_query_investigations":
@@ -12086,6 +12089,8 @@ type SiemElasticsearch struct {
 	Credential  *ElasticsearchCredential `json:"credential" url:"credential"`
 	// The index, data stream, or index alias to read events from.
 	Index *string `json:"index,omitempty" url:"index,omitempty"`
+	// Base URL for the Kibana API.
+	KibanaUrl *string `json:"kibana_url,omitempty" url:"kibana_url,omitempty"`
 	// When true, skips verification of the Elasticsearch TLS certificate.
 	SkipTlsVerify *bool `json:"skip_tls_verify,omitempty" url:"skip_tls_verify,omitempty"`
 	// Base URL for the Elasticsearch API.
