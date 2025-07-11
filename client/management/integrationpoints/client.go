@@ -49,7 +49,7 @@ func (c *Client) List(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := baseURL + "/v1/integration_points"
+	endpointURL := baseURL + "/v1/integration-points"
 
 	queryParams, err := core.QueryValues(request)
 	if err != nil {
@@ -169,7 +169,7 @@ func (c *Client) Get(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := core.EncodeURL(baseURL+"/v1/integration_points/%v", integrationPointId)
+	endpointURL := core.EncodeURL(baseURL+"/v1/integration-points/%v", integrationPointId)
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
@@ -281,7 +281,7 @@ func (c *Client) Create(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := baseURL + "/v1/integration_points"
+	endpointURL := baseURL + "/v1/integration-points"
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
@@ -395,7 +395,7 @@ func (c *Client) Update(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := core.EncodeURL(baseURL+"/v1/integration_points/%v", integrationPointId)
+	endpointURL := core.EncodeURL(baseURL+"/v1/integration-points/%v", integrationPointId)
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
@@ -509,7 +509,7 @@ func (c *Client) Patch(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := core.EncodeURL(baseURL+"/v1/integration_points/%v", integrationPointId)
+	endpointURL := core.EncodeURL(baseURL+"/v1/integration-points/%v", integrationPointId)
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
@@ -622,7 +622,7 @@ func (c *Client) Delete(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := core.EncodeURL(baseURL+"/v1/integration_points/%v", integrationPointId)
+	endpointURL := core.EncodeURL(baseURL+"/v1/integration-points/%v", integrationPointId)
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
