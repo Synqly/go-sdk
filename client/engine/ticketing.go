@@ -351,7 +351,7 @@ type CreateTicketRequest struct {
 	// Human-readable name for this resource
 	Name string `json:"name" url:"name"`
 	// Ticket summary.
-	Summary string `json:"summary" url:"summary"`
+	Summary *string `json:"summary,omitempty" url:"summary,omitempty"`
 	// User who created this ticket.
 	Creator *string `json:"creator,omitempty" url:"creator,omitempty"`
 	// Who ticket is assigned to.
@@ -568,9 +568,7 @@ func (g *GetTicketResponse) String() string {
 
 type ListAttachmentsMetadataResponse struct {
 	// Various metadata about the results organized by group, then type, then field.
-	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
-	// Cursor to use to retrieve the next page of results
-	Cursor string                `json:"cursor" url:"cursor"`
+	Meta   *MetaResponse         `json:"meta,omitempty" url:"meta,omitempty"`
 	Result []*AttachmentMetadata `json:"result" url:"result"`
 
 	extraProperties map[string]interface{}
@@ -613,10 +611,8 @@ func (l *ListAttachmentsMetadataResponse) String() string {
 
 type ListCommentsResponse struct {
 	// Various metadata about the results organized by group, then type, then field.
-	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
-	// Cursor to use to retrieve the next page of results
-	Cursor string     `json:"cursor" url:"cursor"`
-	Result []*Comment `json:"result" url:"result"`
+	Meta   *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
+	Result []*Comment    `json:"result" url:"result"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
@@ -657,7 +653,9 @@ func (l *ListCommentsResponse) String() string {
 }
 
 type ListNotesResponse struct {
-	Result []*Note `json:"result" url:"result"`
+	// Various metadata about the results organized by group, then type, then field.
+	Meta   *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
+	Result []*Note       `json:"result" url:"result"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
@@ -744,9 +742,7 @@ func (l *ListProjectsResponse) String() string {
 
 type ListRemoteFieldsResponse struct {
 	// Various metadata about the results organized by group, then type, then field.
-	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
-	// Cursor to use to retrieve the next page of results
-	Cursor string         `json:"cursor" url:"cursor"`
+	Meta   *MetaResponse  `json:"meta,omitempty" url:"meta,omitempty"`
 	Result []*RemoteField `json:"result" url:"result"`
 
 	extraProperties map[string]interface{}
@@ -789,6 +785,49 @@ func (l *ListRemoteFieldsResponse) String() string {
 
 // Unique identifier for a note
 type NoteId = Id
+
+type PatchNoteResponse struct {
+	// Various metadata about the results organized by group, then type, then field.
+	Meta   *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
+	Result *Note         `json:"result" url:"result"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (p *PatchNoteResponse) GetExtraProperties() map[string]interface{} {
+	return p.extraProperties
+}
+
+func (p *PatchNoteResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler PatchNoteResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*p = PatchNoteResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *p)
+	if err != nil {
+		return err
+	}
+	p.extraProperties = extraProperties
+
+	p._rawJSON = nil
+	return nil
+}
+
+func (p *PatchNoteResponse) String() string {
+	if len(p._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(p._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(p); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", p)
+}
 
 type PatchTicketResponse struct {
 	// Various metadata about the results organized by group, then type, then field.

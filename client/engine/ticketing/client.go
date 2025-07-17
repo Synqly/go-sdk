@@ -2321,7 +2321,7 @@ func (c *Client) PatchNote(
 	noteId engine.NoteId,
 	request []*engine.PatchOperation,
 	opts ...option.RequestOption,
-) (*engine.CreateNoteResponse, error) {
+) (*engine.PatchNoteResponse, error) {
 	options := core.NewRequestOptions(opts...)
 
 	baseURL := "https://api.synqly.com"
@@ -2442,7 +2442,7 @@ func (c *Client) PatchNote(
 		return apiError
 	}
 
-	var response *engine.CreateNoteResponse
+	var response *engine.PatchNoteResponse
 	if err := c.caller.Call(
 		ctx,
 		&core.CallParams{
