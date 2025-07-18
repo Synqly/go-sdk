@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"examples/common"
+
 	koanfyaml "github.com/knadh/koanf/parsers/yaml"
 	"github.com/knadh/koanf/providers/env"
 	"github.com/knadh/koanf/providers/file"
@@ -101,7 +102,7 @@ See also:
 
 	tick, err := client.Ticketing.CreateTicket(ctx, &engine.CreateTicketRequest{
 		Name:        title,
-		Summary:     summary,
+		Summary:     engine.String(summary),
 		Description: engine.String(description),
 		IssueType:   engine.String("Bug"),
 		Priority:    priority.Ptr(),

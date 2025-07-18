@@ -199,7 +199,7 @@ func createTicket(ctx context.Context, client *engineClient.Client, ticket *Tick
 
 	newTicket, err := client.Ticketing.CreateTicket(ctx, &engine.CreateTicketRequest{
 		Name:        ticket.Title,
-		Summary:     ticket.Summary,
+		Summary:     engine.String(ticket.Summary),
 		Description: engine.String(ticket.Description),
 		IssueType:   engine.String("Bug"),
 		Priority:    priority.Ptr(),
