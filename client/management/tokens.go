@@ -29,7 +29,7 @@ type TokenId = Id
 type CreateIntegrationTokenRequest struct {
 	// Unique name token. If not provided, defaults to generated newly created refresh token id.
 	Name *string `json:"name,omitempty" url:"name,omitempty"`
-	// Token time-to-live. If not provided, defaults to the TTL of the token used to call this API. Use the format "1h", "1m", "1s" for hours, minutes, and seconds respectively.
+	// Token time-to-live. If not provided, defaults to 10 minutes. Use the format "1h", "1m", "1s" for hours, minutes, and seconds respectively, e.g., "2h" for 2 hours.
 	TokenTtl *string `json:"token_ttl,omitempty" url:"token_ttl,omitempty"`
 
 	extraProperties map[string]interface{}
@@ -112,7 +112,7 @@ func (c *CreateIntegrationTokenResponse) String() string {
 }
 
 type CreateSynqlyIntegrationsTokenRequest struct {
-	// Token time-to-live. If not provided, defaults to the TTL of the token used to call this API. Use the format "1h", "1m", "1s" for hours, minutes, and seconds respectively.
+	// Token time-to-live. If not provided, defaults to 24 hours. Use the format "1h", "1m", "1s" for hours, minutes, and seconds respectively, e.g., "24h" for 24 hours.
 	TokenTtl *string `json:"token_ttl,omitempty" url:"token_ttl,omitempty"`
 
 	extraProperties map[string]interface{}
@@ -201,7 +201,7 @@ type CreateTokenRequest struct {
 	Resources *Resources `json:"resources" url:"resources"`
 	// Limit access to supplied permissions
 	PermissionSet Permissions `json:"permission_set" url:"permission_set"`
-	// Token time-to-live. If not provided, defaults to the TTL of the token used to call this API. Use the format "1h", "1m", "1s" for hours, minutes, and seconds respectively.
+	// Token time-to-live. If not provided, defaults to 24 hours. Use the format "1h", "1m", "1s" for hours, minutes, and seconds respectively, e.g., "24h" for 24 hours.
 	TokenTtl *string `json:"token_ttl,omitempty" url:"token_ttl,omitempty"`
 
 	extraProperties map[string]interface{}
