@@ -1840,6 +1840,276 @@ func (t *TicketingWebhookResponse) String() string {
 	return fmt.Sprintf("%#v", t)
 }
 
+type GetGroupMembersResponseGeneric struct {
+	// Various metadata about the results organized by group, then type, then field.
+	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
+	// Cursor to use to retrieve the next page of results
+	Cursor string `json:"cursor" url:"cursor"`
+	// List of users wrapped in the OCSF Entity Management event of type Read that are members in the group referenced by ID.
+	Result []map[string]interface{} `json:"result" url:"result"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (g *GetGroupMembersResponseGeneric) GetExtraProperties() map[string]interface{} {
+	return g.extraProperties
+}
+
+func (g *GetGroupMembersResponseGeneric) UnmarshalJSON(data []byte) error {
+	type unmarshaler GetGroupMembersResponseGeneric
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*g = GetGroupMembersResponseGeneric(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	if err != nil {
+		return err
+	}
+	g.extraProperties = extraProperties
+
+	g._rawJSON = nil
+	return nil
+}
+
+func (g *GetGroupMembersResponseGeneric) String() string {
+	if len(g._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(g._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(g); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", g)
+}
+
+type GetGroupResponseGeneric struct {
+	// Various metadata about the results organized by group, then type, then field.
+	Meta   *MetaResponse          `json:"meta,omitempty" url:"meta,omitempty"`
+	Result map[string]interface{} `json:"result" url:"result"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (g *GetGroupResponseGeneric) GetExtraProperties() map[string]interface{} {
+	return g.extraProperties
+}
+
+func (g *GetGroupResponseGeneric) UnmarshalJSON(data []byte) error {
+	type unmarshaler GetGroupResponseGeneric
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*g = GetGroupResponseGeneric(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	if err != nil {
+		return err
+	}
+	g.extraProperties = extraProperties
+
+	g._rawJSON = nil
+	return nil
+}
+
+func (g *GetGroupResponseGeneric) String() string {
+	if len(g._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(g._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(g); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", g)
+}
+
+type GetUserResponseGeneric struct {
+	// Various metadata about the results organized by group, then type, then field.
+	Meta   *MetaResponse          `json:"meta,omitempty" url:"meta,omitempty"`
+	Result map[string]interface{} `json:"result" url:"result"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (g *GetUserResponseGeneric) GetExtraProperties() map[string]interface{} {
+	return g.extraProperties
+}
+
+func (g *GetUserResponseGeneric) UnmarshalJSON(data []byte) error {
+	type unmarshaler GetUserResponseGeneric
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*g = GetUserResponseGeneric(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	if err != nil {
+		return err
+	}
+	g.extraProperties = extraProperties
+
+	g._rawJSON = nil
+	return nil
+}
+
+func (g *GetUserResponseGeneric) String() string {
+	if len(g._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(g._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(g); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", g)
+}
+
+type QueryGroupsResponseGeneric struct {
+	// Various metadata about the results organized by group, then type, then field.
+	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
+	// Cursor to use to retrieve the next page of results
+	Cursor string `json:"cursor" url:"cursor"`
+	// List groups wrapped in the OCSF Entity Management event of type Read.
+	Result []map[string]interface{} `json:"result" url:"result"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (q *QueryGroupsResponseGeneric) GetExtraProperties() map[string]interface{} {
+	return q.extraProperties
+}
+
+func (q *QueryGroupsResponseGeneric) UnmarshalJSON(data []byte) error {
+	type unmarshaler QueryGroupsResponseGeneric
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*q = QueryGroupsResponseGeneric(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *q)
+	if err != nil {
+		return err
+	}
+	q.extraProperties = extraProperties
+
+	q._rawJSON = nil
+	return nil
+}
+
+func (q *QueryGroupsResponseGeneric) String() string {
+	if len(q._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(q._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(q); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", q)
+}
+
+type QueryIdentityAuditLogResponseGeneric struct {
+	// Various metadata about the results organized by group, then type, then field.
+	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
+	// Cursor to use to retrieve the next page of results
+	Cursor string `json:"cursor" url:"cursor"`
+	// List of events from the audit log. Each event will be one of the OCSF Types Account Change, Authentication, or Group Management.
+	Result []map[string]interface{} `json:"result" url:"result"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (q *QueryIdentityAuditLogResponseGeneric) GetExtraProperties() map[string]interface{} {
+	return q.extraProperties
+}
+
+func (q *QueryIdentityAuditLogResponseGeneric) UnmarshalJSON(data []byte) error {
+	type unmarshaler QueryIdentityAuditLogResponseGeneric
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*q = QueryIdentityAuditLogResponseGeneric(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *q)
+	if err != nil {
+		return err
+	}
+	q.extraProperties = extraProperties
+
+	q._rawJSON = nil
+	return nil
+}
+
+func (q *QueryIdentityAuditLogResponseGeneric) String() string {
+	if len(q._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(q._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(q); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", q)
+}
+
+type QueryUsersResponseGeneric struct {
+	// Various metadata about the results organized by group, then type, then field.
+	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
+	// Cursor to use to retrieve the next page of results
+	Cursor string `json:"cursor" url:"cursor"`
+	// List users wrapped in the OCSF Entity Management event of type Read.
+	Result []map[string]interface{} `json:"result" url:"result"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (q *QueryUsersResponseGeneric) GetExtraProperties() map[string]interface{} {
+	return q.extraProperties
+}
+
+func (q *QueryUsersResponseGeneric) UnmarshalJSON(data []byte) error {
+	type unmarshaler QueryUsersResponseGeneric
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*q = QueryUsersResponseGeneric(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *q)
+	if err != nil {
+		return err
+	}
+	q.extraProperties = extraProperties
+
+	q._rawJSON = nil
+	return nil
+}
+
+func (q *QueryUsersResponseGeneric) String() string {
+	if len(q._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(q._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(q); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", q)
+}
+
 // Integration webhook
 type IntegrationWebHook struct {
 	Id IntegrationWebHookId `json:"id" url:"id"`
