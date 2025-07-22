@@ -9,11 +9,28 @@ import (
 	time "time"
 )
 
+type ListOnCallRequest struct {
+	// Add metadata to the response by invoking meta functions. Documentation for meta functions is available at https://docs.synqly.com/api-reference/meta-functions. Not all meta function are available at every endpoint.
+	Meta []*string `json:"-" url:"meta,omitempty"`
+}
+
 type ListProjectsRequest struct {
 	// Cursor to use to retrieve the next page of results.
 	Cursor *string `json:"-" url:"cursor,omitempty"`
 	// Number of `Projects` objects to return in this page. Defaults to 50.
 	Limit *int `json:"-" url:"limit,omitempty"`
+}
+
+type QueryEscalationPoliciesRequest struct {
+	// Add metadata to the response by invoking meta functions. Documentation for meta functions is available at https://docs.synqly.com/api-reference/meta-functions. Not all meta function are available at every endpoint.
+	Meta []*string `json:"-" url:"meta,omitempty"`
+	// Number of escalation policies to return. Defaults to 50.
+	Limit *int `json:"-" url:"limit,omitempty"`
+	// Start search from cursor position.
+	Cursor *string `json:"-" url:"cursor,omitempty"`
+	// Filter results by this query. For more information on filtering, refer to our Filtering Guide. Defaults to no filter.
+	// If used more than once, the queries are ANDed together.
+	Filter []*string `json:"-" url:"filter,omitempty"`
 }
 
 type QueryTicketsRequest struct {
@@ -695,6 +712,49 @@ func (l *ListNotesResponse) String() string {
 	return fmt.Sprintf("%#v", l)
 }
 
+type ListOnCallResponse struct {
+	// Various metadata about the results organized by group, then type, then field.
+	Meta   *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
+	Result []*Agent      `json:"result" url:"result"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (l *ListOnCallResponse) GetExtraProperties() map[string]interface{} {
+	return l.extraProperties
+}
+
+func (l *ListOnCallResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler ListOnCallResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*l = ListOnCallResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *l)
+	if err != nil {
+		return err
+	}
+	l.extraProperties = extraProperties
+
+	l._rawJSON = nil
+	return nil
+}
+
+func (l *ListOnCallResponse) String() string {
+	if len(l._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(l._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(l); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", l)
+}
+
 type ListProjectsResponse struct {
 	// Various metadata about the results organized by group, then type, then field.
 	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
@@ -870,6 +930,51 @@ func (p *PatchTicketResponse) String() string {
 		return value
 	}
 	return fmt.Sprintf("%#v", p)
+}
+
+type QueryEscalationPoliciesResponse struct {
+	// Various metadata about the results organized by group, then type, then field.
+	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
+	// Cursor to use to retrieve the next page of results
+	Cursor string              `json:"cursor" url:"cursor"`
+	Result []*EscalationPolicy `json:"result" url:"result"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (q *QueryEscalationPoliciesResponse) GetExtraProperties() map[string]interface{} {
+	return q.extraProperties
+}
+
+func (q *QueryEscalationPoliciesResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler QueryEscalationPoliciesResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*q = QueryEscalationPoliciesResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *q)
+	if err != nil {
+		return err
+	}
+	q.extraProperties = extraProperties
+
+	q._rawJSON = nil
+	return nil
+}
+
+func (q *QueryEscalationPoliciesResponse) String() string {
+	if len(q._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(q._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(q); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", q)
 }
 
 type QueryTicketsResponse struct {

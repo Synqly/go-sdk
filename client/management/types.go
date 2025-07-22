@@ -4139,10 +4139,12 @@ const (
 	OperationIdTicketingListAttachmentsMetadata         OperationId = "ticketing_list_attachments_metadata"
 	OperationIdTicketingListComments                    OperationId = "ticketing_list_comments"
 	OperationIdTicketingListNotes                       OperationId = "ticketing_list_notes"
+	OperationIdTicketingListOnCall                      OperationId = "ticketing_list_on_call"
 	OperationIdTicketingListProjects                    OperationId = "ticketing_list_projects"
 	OperationIdTicketingListRemoteFields                OperationId = "ticketing_list_remote_fields"
 	OperationIdTicketingPatchNote                       OperationId = "ticketing_patch_note"
 	OperationIdTicketingPatchTicket                     OperationId = "ticketing_patch_ticket"
+	OperationIdTicketingQueryEscalationPolicies         OperationId = "ticketing_query_escalation_policies"
 	OperationIdTicketingQueryTickets                    OperationId = "ticketing_query_tickets"
 	OperationIdVulnerabilitiesCreateAsset               OperationId = "vulnerabilities_create_asset"
 	OperationIdVulnerabilitiesCreateFindings            OperationId = "vulnerabilities_create_findings"
@@ -4268,6 +4270,8 @@ func NewOperationIdFromString(s string) (OperationId, error) {
 		return OperationIdTicketingListComments, nil
 	case "ticketing_list_notes":
 		return OperationIdTicketingListNotes, nil
+	case "ticketing_list_on_call":
+		return OperationIdTicketingListOnCall, nil
 	case "ticketing_list_projects":
 		return OperationIdTicketingListProjects, nil
 	case "ticketing_list_remote_fields":
@@ -4276,6 +4280,8 @@ func NewOperationIdFromString(s string) (OperationId, error) {
 		return OperationIdTicketingPatchNote, nil
 	case "ticketing_patch_ticket":
 		return OperationIdTicketingPatchTicket, nil
+	case "ticketing_query_escalation_policies":
+		return OperationIdTicketingQueryEscalationPolicies, nil
 	case "ticketing_query_tickets":
 		return OperationIdTicketingQueryTickets, nil
 	case "vulnerabilities_create_asset":

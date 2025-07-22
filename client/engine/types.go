@@ -356,6 +356,8 @@ func (b *Base) String() string {
 	return fmt.Sprintf("%#v", b)
 }
 
+type Id = string
+
 type ParameterLocation string
 
 const (
@@ -2356,10 +2358,12 @@ const (
 	OperationIdTicketingListAttachmentsMetadata         OperationId = "ticketing_list_attachments_metadata"
 	OperationIdTicketingListComments                    OperationId = "ticketing_list_comments"
 	OperationIdTicketingListNotes                       OperationId = "ticketing_list_notes"
+	OperationIdTicketingListOnCall                      OperationId = "ticketing_list_on_call"
 	OperationIdTicketingListProjects                    OperationId = "ticketing_list_projects"
 	OperationIdTicketingListRemoteFields                OperationId = "ticketing_list_remote_fields"
 	OperationIdTicketingPatchNote                       OperationId = "ticketing_patch_note"
 	OperationIdTicketingPatchTicket                     OperationId = "ticketing_patch_ticket"
+	OperationIdTicketingQueryEscalationPolicies         OperationId = "ticketing_query_escalation_policies"
 	OperationIdTicketingQueryTickets                    OperationId = "ticketing_query_tickets"
 	OperationIdVulnerabilitiesCreateAsset               OperationId = "vulnerabilities_create_asset"
 	OperationIdVulnerabilitiesCreateFindings            OperationId = "vulnerabilities_create_findings"
@@ -2485,6 +2489,8 @@ func NewOperationIdFromString(s string) (OperationId, error) {
 		return OperationIdTicketingListComments, nil
 	case "ticketing_list_notes":
 		return OperationIdTicketingListNotes, nil
+	case "ticketing_list_on_call":
+		return OperationIdTicketingListOnCall, nil
 	case "ticketing_list_projects":
 		return OperationIdTicketingListProjects, nil
 	case "ticketing_list_remote_fields":
@@ -2493,6 +2499,8 @@ func NewOperationIdFromString(s string) (OperationId, error) {
 		return OperationIdTicketingPatchNote, nil
 	case "ticketing_patch_ticket":
 		return OperationIdTicketingPatchTicket, nil
+	case "ticketing_query_escalation_policies":
+		return OperationIdTicketingQueryEscalationPolicies, nil
 	case "ticketing_query_tickets":
 		return OperationIdTicketingQueryTickets, nil
 	case "vulnerabilities_create_asset":
@@ -3023,6 +3031,190 @@ func (s *StoragePath) String() string {
 	return fmt.Sprintf("%#v", s)
 }
 
+// The actor object either relates gives a summary of an actor in an escalation policy or gives full details of an actor. This depends on the capabilities of the ticketing provider. An actor is someone or something that will be notifed when certain conditions are met. It can either be an agent, a group, or a schedule.
+type Actor struct {
+	Type            string
+	Agent           *Agent
+	AgentSummary    *AgentSummary
+	GroupSummary    *GroupSummary
+	ScheduleSummary *ScheduleSummary
+}
+
+func (a *Actor) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	a.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", a)
+	}
+	switch unmarshaler.Type {
+	case "agent":
+		value := new(Agent)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		a.Agent = value
+	case "agent_summary":
+		value := new(AgentSummary)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		a.AgentSummary = value
+	case "group_summary":
+		value := new(GroupSummary)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		a.GroupSummary = value
+	case "schedule_summary":
+		value := new(ScheduleSummary)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		a.ScheduleSummary = value
+	}
+	return nil
+}
+
+func (a Actor) MarshalJSON() ([]byte, error) {
+	if a.Agent != nil {
+		return core.MarshalJSONWithExtraProperty(a.Agent, "type", "agent")
+	}
+	if a.AgentSummary != nil {
+		return core.MarshalJSONWithExtraProperty(a.AgentSummary, "type", "agent_summary")
+	}
+	if a.GroupSummary != nil {
+		return core.MarshalJSONWithExtraProperty(a.GroupSummary, "type", "group_summary")
+	}
+	if a.ScheduleSummary != nil {
+		return core.MarshalJSONWithExtraProperty(a.ScheduleSummary, "type", "schedule_summary")
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", a)
+}
+
+type ActorVisitor interface {
+	VisitAgent(*Agent) error
+	VisitAgentSummary(*AgentSummary) error
+	VisitGroupSummary(*GroupSummary) error
+	VisitScheduleSummary(*ScheduleSummary) error
+}
+
+func (a *Actor) Accept(visitor ActorVisitor) error {
+	if a.Agent != nil {
+		return visitor.VisitAgent(a.Agent)
+	}
+	if a.AgentSummary != nil {
+		return visitor.VisitAgentSummary(a.AgentSummary)
+	}
+	if a.GroupSummary != nil {
+		return visitor.VisitGroupSummary(a.GroupSummary)
+	}
+	if a.ScheduleSummary != nil {
+		return visitor.VisitScheduleSummary(a.ScheduleSummary)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", a)
+}
+
+// An agent is a human that can be notified when certain conditions are met
+type Agent struct {
+	Uid         Id      `json:"uid" url:"uid"`
+	FullName    string  `json:"full_name" url:"full_name"`
+	EmailAddr   *string `json:"email_addr,omitempty" url:"email_addr,omitempty"`
+	PhoneNumber *string `json:"phone_number,omitempty" url:"phone_number,omitempty"`
+	TimeZone    *string `json:"time_zone,omitempty" url:"time_zone,omitempty"`
+	JobTitle    *string `json:"job_title,omitempty" url:"job_title,omitempty"`
+	// The attributes that are not mapped to the comment schema. The names and values of those attributes are specific to the provider.
+	Unmapped *Object `json:"unmapped,omitempty" url:"unmapped,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (a *Agent) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
+}
+
+func (a *Agent) UnmarshalJSON(data []byte) error {
+	type unmarshaler Agent
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*a = Agent(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+
+	a._rawJSON = nil
+	return nil
+}
+
+func (a *Agent) String() string {
+	if len(a._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(a); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", a)
+}
+
+// The agent summary object gives a summary of an agent in an escalation policy. An agent is a human that can be notified when certain conditions are met
+type AgentSummary struct {
+	// Unique identifier for the agent.
+	Id Id `json:"id" url:"id"`
+	// Name of the agent.
+	Name string `json:"name" url:"name"`
+	// Indicates if the agent has additional properties that can be retrieved.
+	AdditionalProperties bool `json:"additional_properties" url:"additional_properties"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (a *AgentSummary) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
+}
+
+func (a *AgentSummary) UnmarshalJSON(data []byte) error {
+	type unmarshaler AgentSummary
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*a = AgentSummary(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+
+	a._rawJSON = nil
+	return nil
+}
+
+func (a *AgentSummary) String() string {
+	if len(a._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(a); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", a)
+}
+
 type Attachment struct {
 	// The name of the file.
 	FileName string `json:"file_name" url:"file_name"`
@@ -3223,8 +3415,148 @@ func (c *Comment) String() string {
 	return fmt.Sprintf("%#v", c)
 }
 
+// The escalation policy object describes an escalation policy for a ticket. It contains an id for the escalation policy, an optional name, an optional description, and a list of rules.
+type EscalationPolicy struct {
+	Id          Id                      `json:"id" url:"id"`
+	Name        *string                 `json:"name,omitempty" url:"name,omitempty"`
+	Description *string                 `json:"description,omitempty" url:"description,omitempty"`
+	Rules       []*EscalationPolicyRule `json:"rules" url:"rules"`
+	// The attributes that are not mapped to the comment schema. The names and values of those attributes are specific to the provider.
+	Unmapped *Object `json:"unmapped,omitempty" url:"unmapped,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (e *EscalationPolicy) GetExtraProperties() map[string]interface{} {
+	return e.extraProperties
+}
+
+func (e *EscalationPolicy) UnmarshalJSON(data []byte) error {
+	type unmarshaler EscalationPolicy
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*e = EscalationPolicy(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *e)
+	if err != nil {
+		return err
+	}
+	e.extraProperties = extraProperties
+
+	e._rawJSON = nil
+	return nil
+}
+
+func (e *EscalationPolicy) String() string {
+	if len(e._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(e._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(e); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", e)
+}
+
+// The escalation policy rule object describes a rule for an escalation policy. It contains an optional id for the rule, a delay in seconds before the next actor is notified, and a list of actors.
+type EscalationPolicyRule struct {
+	Id           *Id      `json:"id,omitempty" url:"id,omitempty"`
+	DelaySeconds int      `json:"delay_seconds" url:"delay_seconds"`
+	Actors       []*Actor `json:"actors" url:"actors"`
+	// The attributes that are not mapped to the comment schema. The names and values of those attributes are specific to the provider.
+	Unmapped *Object `json:"unmapped,omitempty" url:"unmapped,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (e *EscalationPolicyRule) GetExtraProperties() map[string]interface{} {
+	return e.extraProperties
+}
+
+func (e *EscalationPolicyRule) UnmarshalJSON(data []byte) error {
+	type unmarshaler EscalationPolicyRule
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*e = EscalationPolicyRule(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *e)
+	if err != nil {
+		return err
+	}
+	e.extraProperties = extraProperties
+
+	e._rawJSON = nil
+	return nil
+}
+
+func (e *EscalationPolicyRule) String() string {
+	if len(e._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(e._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(e); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", e)
+}
+
 // Unique identifier for a field mapping
 type FieldMappingId = Id
+
+// The group summary object gives a summary of a group in an escalation policy. A group is a collection of agents that can be notified when certain conditions are met
+type GroupSummary struct {
+	// Unique identifier for the group.
+	Id Id `json:"id" url:"id"`
+	// Name of the group.
+	Name *string `json:"name,omitempty" url:"name,omitempty"`
+	// Indicates if the group has additional properties that can be retrieved.
+	AdditionalProperties bool `json:"additional_properties" url:"additional_properties"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (g *GroupSummary) GetExtraProperties() map[string]interface{} {
+	return g.extraProperties
+}
+
+func (g *GroupSummary) UnmarshalJSON(data []byte) error {
+	type unmarshaler GroupSummary
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*g = GroupSummary(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	if err != nil {
+		return err
+	}
+	g.extraProperties = extraProperties
+
+	g._rawJSON = nil
+	return nil
+}
+
+func (g *GroupSummary) String() string {
+	if len(g._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(g._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(g); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", g)
+}
 
 // Unique identifier for an issue type
 type IssueTypeId = string
@@ -3552,6 +3884,53 @@ func NewRemoteFieldTypeIdFromString(s string) (RemoteFieldTypeId, error) {
 
 func (r RemoteFieldTypeId) Ptr() *RemoteFieldTypeId {
 	return &r
+}
+
+// The schedule summary object gives a summary of a schedule in an escalation policy. A schedule is a collection of agents that are notified at specific times
+type ScheduleSummary struct {
+	// Unique identifier for the schedule.
+	Id Id `json:"id" url:"id"`
+	// Name of the schedule.
+	Name *string `json:"name,omitempty" url:"name,omitempty"`
+	// Indicates if the schedule has additional properties that can be retrieved.
+	AdditionalProperties bool `json:"additional_properties" url:"additional_properties"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (s *ScheduleSummary) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
+}
+
+func (s *ScheduleSummary) UnmarshalJSON(data []byte) error {
+	type unmarshaler ScheduleSummary
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*s = ScheduleSummary(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+
+	s._rawJSON = nil
+	return nil
+}
+
+func (s *ScheduleSummary) String() string {
+	if len(s._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(s); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", s)
 }
 
 type Status = string
