@@ -45,6 +45,22 @@ type QueryComplianceFindings struct {
 	IncludeRawData *bool `json:"-" url:"include_raw_data,omitempty"`
 }
 
+type QueryEvents struct {
+	// Add metadata to the response by invoking meta functions. Documentation for meta functions is available at https://docs.synqly.com/api-reference/meta-functions. Not all meta function are available at every endpoint.
+	Meta []*string `json:"-" url:"meta,omitempty"`
+	// Number of events to return. Defaults to 100.
+	Limit *int `json:"-" url:"limit,omitempty"`
+	// Select a field to order the results by. Defaults to `name`. To control the direction of the sorting, append
+	// `[asc]` or `[desc]` to the field name. For example, `name[asc]` will sort the results by `name` in ascending order.
+	// The ordering defaults to `asc` if not specified.
+	Order []*string `json:"-" url:"order,omitempty"`
+	// Filter results by this query. For more information on filtering, refer to our Filtering Guide. Defaults to no filter.
+	// If used more than once, the queries are ANDed together.
+	Filter []*string `json:"-" url:"filter,omitempty"`
+	// Start search from cursor position.
+	Cursor *string `json:"-" url:"cursor,omitempty"`
+}
+
 type QueryIoms struct {
 	// Add metadata to the response by invoking meta functions. Documentation for meta functions is available at https://docs.synqly.com/api-reference/meta-functions. Not all meta function are available at every endpoint.
 	Meta []*string `json:"-" url:"meta,omitempty"`
@@ -144,6 +160,52 @@ func (q *QueryComplianceFindingsResponse) UnmarshalJSON(data []byte) error {
 }
 
 func (q *QueryComplianceFindingsResponse) String() string {
+	if len(q._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(q._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(q); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", q)
+}
+
+type QueryEventsResponse struct {
+	// Various metadata about the results organized by group, then type, then field.
+	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
+	// Cursor to use to retrieve the next page of results
+	Cursor string `json:"cursor" url:"cursor"`
+	// List of events that match the query.
+	Result []*Event `json:"result" url:"result"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (q *QueryEventsResponse) GetExtraProperties() map[string]interface{} {
+	return q.extraProperties
+}
+
+func (q *QueryEventsResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler QueryEventsResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*q = QueryEventsResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *q)
+	if err != nil {
+		return err
+	}
+	q.extraProperties = extraProperties
+
+	q._rawJSON = nil
+	return nil
+}
+
+func (q *QueryEventsResponse) String() string {
 	if len(q._rawJSON) > 0 {
 		if value, err := core.StringifyJSON(q._rawJSON); err == nil {
 			return value

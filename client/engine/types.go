@@ -8,6 +8,7 @@ import (
 	core "github.com/synqly/go-sdk/client/engine/core"
 	accountchange "github.com/synqly/go-sdk/client/engine/ocsf/v130/accountchange"
 	apiactivity "github.com/synqly/go-sdk/client/engine/ocsf/v130/apiactivity"
+	applicationlifecycle "github.com/synqly/go-sdk/client/engine/ocsf/v130/applicationlifecycle"
 	authentication "github.com/synqly/go-sdk/client/engine/ocsf/v130/authentication"
 	authorizesession "github.com/synqly/go-sdk/client/engine/ocsf/v130/authorizesession"
 	baseevent "github.com/synqly/go-sdk/client/engine/ocsf/v130/baseevent"
@@ -1415,6 +1416,7 @@ type Event struct {
 	UserAccessManagement      *useraccessmanagement.UserAccess
 	VulnerabilityFinding      *vulnerabilityfinding.VulnerabilityFinding
 	WebResourceAccessActivity *webresourceaccessactivity.WebResourceAccessActivity
+	ApplicationLifecycle      *applicationlifecycle.ApplicationLifecycle
 }
 
 func (e *Event) UnmarshalJSON(data []byte) error {
@@ -1567,6 +1569,12 @@ func (e *Event) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		e.WebResourceAccessActivity = value
+	case "Application Lifecycle":
+		value := new(applicationlifecycle.ApplicationLifecycle)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.ApplicationLifecycle = value
 	}
 	return nil
 }
@@ -1641,6 +1649,9 @@ func (e Event) MarshalJSON() ([]byte, error) {
 	if e.WebResourceAccessActivity != nil {
 		return core.MarshalJSONWithExtraProperty(e.WebResourceAccessActivity, "class_name", "Web Resource Access Activity")
 	}
+	if e.ApplicationLifecycle != nil {
+		return core.MarshalJSONWithExtraProperty(e.ApplicationLifecycle, "class_name", "Application Lifecycle")
+	}
 	return nil, fmt.Errorf("type %T does not define a non-empty union type", e)
 }
 
@@ -1668,6 +1679,7 @@ type EventVisitor interface {
 	VisitUserAccessManagement(*useraccessmanagement.UserAccess) error
 	VisitVulnerabilityFinding(*vulnerabilityfinding.VulnerabilityFinding) error
 	VisitWebResourceAccessActivity(*webresourceaccessactivity.WebResourceAccessActivity) error
+	VisitApplicationLifecycle(*applicationlifecycle.ApplicationLifecycle) error
 }
 
 func (e *Event) Accept(visitor EventVisitor) error {
@@ -1739,6 +1751,9 @@ func (e *Event) Accept(visitor EventVisitor) error {
 	}
 	if e.WebResourceAccessActivity != nil {
 		return visitor.VisitWebResourceAccessActivity(e.WebResourceAccessActivity)
+	}
+	if e.ApplicationLifecycle != nil {
+		return visitor.VisitApplicationLifecycle(e.ApplicationLifecycle)
 	}
 	return fmt.Errorf("type %T does not define a non-empty union type", e)
 }
@@ -2290,6 +2305,7 @@ const (
 	OperationIdAssetsQueryDevices                       OperationId = "assets_query_devices"
 	OperationIdCloudsecurityQueryCloudResourceInventory OperationId = "cloudsecurity_query_cloud_resource_inventory"
 	OperationIdCloudsecurityQueryComplianceFindings     OperationId = "cloudsecurity_query_compliance_findings"
+	OperationIdCloudsecurityQueryEvents                 OperationId = "cloudsecurity_query_events"
 	OperationIdCloudsecurityQueryIoms                   OperationId = "cloudsecurity_query_ioms"
 	OperationIdEdrCreateIocs                            OperationId = "edr_create_iocs"
 	OperationIdEdrDeleteIocs                            OperationId = "edr_delete_iocs"
@@ -2367,6 +2383,8 @@ func NewOperationIdFromString(s string) (OperationId, error) {
 		return OperationIdCloudsecurityQueryCloudResourceInventory, nil
 	case "cloudsecurity_query_compliance_findings":
 		return OperationIdCloudsecurityQueryComplianceFindings, nil
+	case "cloudsecurity_query_events":
+		return OperationIdCloudsecurityQueryEvents, nil
 	case "cloudsecurity_query_ioms":
 		return OperationIdCloudsecurityQueryIoms, nil
 	case "edr_create_iocs":
