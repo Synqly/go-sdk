@@ -14537,6 +14537,8 @@ type TicketingJira struct {
 	Credential *JiraCredential `json:"credential" url:"credential"`
 	// Custom field mappings for this provider.
 	CustomFieldMappings []*CustomFieldMapping `json:"custom_field_mappings,omitempty" url:"custom_field_mappings,omitempty"`
+	// Default Issue Type for the integration. If provided, the issue_type field becomes optional in ticket creation requests.
+	DefaultIssueType *string `json:"default_issue_type,omitempty" url:"default_issue_type,omitempty"`
 	// Default Project for the integration.
 	DefaultProject *string `json:"default_project,omitempty" url:"default_project,omitempty"`
 	// Base URL for the Jira API.
