@@ -14728,6 +14728,10 @@ func (t *TicketingServiceNow) String() string {
 // [Configuration guide](https://docs.synqly.com/guides/provider-configuration/servicenow-ticketing-setup)
 type TicketingServiceNowSir struct {
 	Credential *ServiceNowCredential `json:"credential" url:"credential"`
+	// Custom field mappings for this provider.
+	CustomFieldMappings []*CustomFieldMapping `json:"custom_field_mappings,omitempty" url:"custom_field_mappings,omitempty"`
+	// Default Project for the integration. This maps to the custom table for tickets. This table should be derived from Security Incident table. Defaults to the security incident table if not specified.
+	DefaultProject *string `json:"default_project,omitempty" url:"default_project,omitempty"`
 	// Base URL for the ServiceNow API.
 	Url string `json:"url" url:"url"`
 
