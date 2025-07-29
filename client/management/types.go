@@ -10526,6 +10526,8 @@ type ProviderConfig struct {
 	VulnerabilitiesRapid7InsightCloud *VulnerabilitiesRapid7InsightCloud
 	// Configuration for a mocked Rapid7 Insight Cloud as a Vulnerabilities Provider
 	VulnerabilitiesRapid7InsightCloudMock *VulnerabilitiesRapid7InsightCloudMock
+	// Configuration for ServiceNow Vulnerability Response.
+	VulnerabilitiesServicenowVr *VulnerabilitiesServiceNow
 	// Configuration for Tanium Vulnerability Management.
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/tanium-setup)
@@ -10970,6 +10972,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.VulnerabilitiesRapid7InsightCloudMock = value
+	case "vulnerabilities_servicenow_vr":
+		value := new(VulnerabilitiesServiceNow)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.VulnerabilitiesServicenowVr = value
 	case "vulnerabilities_tanium_cloud":
 		value := new(VulnerabilitiesTaniumCloud)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -11203,6 +11211,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.VulnerabilitiesRapid7InsightCloudMock != nil {
 		return core.MarshalJSONWithExtraProperty(p.VulnerabilitiesRapid7InsightCloudMock, "type", "vulnerabilities_rapid7_insight_cloud_mock")
 	}
+	if p.VulnerabilitiesServicenowVr != nil {
+		return core.MarshalJSONWithExtraProperty(p.VulnerabilitiesServicenowVr, "type", "vulnerabilities_servicenow_vr")
+	}
 	if p.VulnerabilitiesTaniumCloud != nil {
 		return core.MarshalJSONWithExtraProperty(p.VulnerabilitiesTaniumCloud, "type", "vulnerabilities_tanium_cloud")
 	}
@@ -11286,6 +11297,7 @@ type ProviderConfigVisitor interface {
 	VisitVulnerabilitiesQualysCloudMock(*VulnerabilitiesQualysCloudMock) error
 	VisitVulnerabilitiesRapid7InsightCloud(*VulnerabilitiesRapid7InsightCloud) error
 	VisitVulnerabilitiesRapid7InsightCloudMock(*VulnerabilitiesRapid7InsightCloudMock) error
+	VisitVulnerabilitiesServicenowVr(*VulnerabilitiesServiceNow) error
 	VisitVulnerabilitiesTaniumCloud(*VulnerabilitiesTaniumCloud) error
 	VisitVulnerabilitiesTaniumCloudMock(*VulnerabilitiesTaniumCloudMock) error
 	VisitVulnerabilitiesTenableCloud(*VulnerabilitiesTenableCloud) error
@@ -11502,6 +11514,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	if p.VulnerabilitiesRapid7InsightCloudMock != nil {
 		return visitor.VisitVulnerabilitiesRapid7InsightCloudMock(p.VulnerabilitiesRapid7InsightCloudMock)
 	}
+	if p.VulnerabilitiesServicenowVr != nil {
+		return visitor.VisitVulnerabilitiesServicenowVr(p.VulnerabilitiesServicenowVr)
+	}
 	if p.VulnerabilitiesTaniumCloud != nil {
 		return visitor.VisitVulnerabilitiesTaniumCloud(p.VulnerabilitiesTaniumCloud)
 	}
@@ -11658,6 +11673,8 @@ const (
 	ProviderConfigIdVulnerabilitiesRapid7InsightCloud ProviderConfigId = "vulnerabilities_rapid7_insight_cloud"
 	// [MOCK] Rapid7 Insight Vulnerability Management Cloud
 	ProviderConfigIdVulnerabilitiesRapid7InsightCloudMock ProviderConfigId = "vulnerabilities_rapid7_insight_cloud_mock"
+	// ServiceNow Vulnerability Response
+	ProviderConfigIdVulnerabilitiesServiceNow ProviderConfigId = "vulnerabilities_servicenow_vr"
 	// Tanium Vulnerability Management
 	ProviderConfigIdVulnerabilitiesTaniumCloud ProviderConfigId = "vulnerabilities_tanium_cloud"
 	// [MOCK] Tsanium Vulnerability Management
@@ -11810,6 +11827,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdVulnerabilitiesRapid7InsightCloud, nil
 	case "vulnerabilities_rapid7_insight_cloud_mock":
 		return ProviderConfigIdVulnerabilitiesRapid7InsightCloudMock, nil
+	case "vulnerabilities_servicenow_vr":
+		return ProviderConfigIdVulnerabilitiesServiceNow, nil
 	case "vulnerabilities_tanium_cloud":
 		return ProviderConfigIdVulnerabilitiesTaniumCloud, nil
 	case "vulnerabilities_tanium_cloud_mock":
@@ -15250,6 +15269,50 @@ func (v *VulnerabilitiesRapid7InsightCloudMock) UnmarshalJSON(data []byte) error
 }
 
 func (v *VulnerabilitiesRapid7InsightCloudMock) String() string {
+	if len(v._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(v._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(v); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", v)
+}
+
+// Configuration for ServiceNow Vulnerability Response.
+type VulnerabilitiesServiceNow struct {
+	Credential *ServiceNowCredential `json:"credential" url:"credential"`
+	// Base URL for the ServiceNow API.
+	Url string `json:"url" url:"url"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (v *VulnerabilitiesServiceNow) GetExtraProperties() map[string]interface{} {
+	return v.extraProperties
+}
+
+func (v *VulnerabilitiesServiceNow) UnmarshalJSON(data []byte) error {
+	type unmarshaler VulnerabilitiesServiceNow
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*v = VulnerabilitiesServiceNow(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *v)
+	if err != nil {
+		return err
+	}
+	v.extraProperties = extraProperties
+
+	v._rawJSON = nil
+	return nil
+}
+
+func (v *VulnerabilitiesServiceNow) String() string {
 	if len(v._rawJSON) > 0 {
 		if value, err := core.StringifyJSON(v._rawJSON); err == nil {
 			return value
