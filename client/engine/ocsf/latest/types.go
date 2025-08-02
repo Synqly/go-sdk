@@ -22,11 +22,14 @@ import (
 	vulnerabilityfinding "github.com/synqly/go-sdk/client/engine/ocsf/v130/vulnerabilityfinding"
 	webresourceaccessactivity "github.com/synqly/go-sdk/client/engine/ocsf/v130/webresourceaccessactivity"
 	cloudresourcesinventoryinfo "github.com/synqly/go-sdk/client/engine/ocsf/v140/cloudresourcesinventoryinfo"
+	applicationsecurityposturefinding "github.com/synqly/go-sdk/client/engine/ocsf/v150/applicationsecurityposturefinding"
 )
 
 type AccountChange = *accountchange.AccountChange
 
 type ApiActivity = *apiactivity.ApiActivity
+
+type ApplicationSecurityPostureFinding = *applicationsecurityposturefinding.ApplicationSecurityPostureFinding
 
 type Authentication = *authentication.Authentication
 

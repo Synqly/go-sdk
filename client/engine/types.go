@@ -6,6 +6,7 @@ import (
 	json "encoding/json"
 	fmt "fmt"
 	core "github.com/synqly/go-sdk/client/engine/core"
+	latest "github.com/synqly/go-sdk/client/engine/ocsf/latest"
 	accountchange "github.com/synqly/go-sdk/client/engine/ocsf/v130/accountchange"
 	apiactivity "github.com/synqly/go-sdk/client/engine/ocsf/v130/apiactivity"
 	applicationlifecycle "github.com/synqly/go-sdk/client/engine/ocsf/v130/applicationlifecycle"
@@ -30,8 +31,347 @@ import (
 	useraccessmanagement "github.com/synqly/go-sdk/client/engine/ocsf/v130/useraccessmanagement"
 	vulnerabilityfinding "github.com/synqly/go-sdk/client/engine/ocsf/v130/vulnerabilityfinding"
 	webresourceaccessactivity "github.com/synqly/go-sdk/client/engine/ocsf/v130/webresourceaccessactivity"
+	applicationsecurityposturefinding "github.com/synqly/go-sdk/client/engine/ocsf/v150/applicationsecurityposturefinding"
 	time "time"
 )
+
+// An application describes the details for an inventoried application as reported by an Application Security tool or other Developer-centric tooling. Applications can be defined as Github repositories or other code-centric resources.
+type AppSecApplication struct {
+	// The criticality of the application as defined by the event source.
+	Criticality *string `json:"criticality,omitempty" url:"criticality,omitempty"`
+	// Additional data describing the application.
+	Data interface{} `json:"data,omitempty" url:"data,omitempty"`
+	// A description or commentary for an application, usually retrieved from an upstream system.
+	Desc *string `json:"desc,omitempty" url:"desc,omitempty"`
+	// The name of the related application or associated resource group.
+	Group *applicationsecurityposturefinding.Group `json:"group,omitempty" url:"group,omitempty"`
+	// The fully qualified name of the application.
+	Hostname *applicationsecurityposturefinding.Hostname `json:"hostname,omitempty" url:"hostname,omitempty"`
+	// The list of labels associated to the application.
+	Labels []string `json:"labels,omitempty" url:"labels,omitempty"`
+	// The name of the application.
+	Name *string `json:"name,omitempty" url:"name,omitempty"`
+	// The identity of the service or user account that owns the application.
+	Owner *applicationsecurityposturefinding.User `json:"owner,omitempty" url:"owner,omitempty"`
+	// The cloud region of the resource.
+	Region *string `json:"region,omitempty" url:"region,omitempty"`
+	// A graph representation showing how this application relates to and interacts with other entities in the environment. This can include parent/child relationships, dependencies, or other connections.
+	ResourceRelationship *applicationsecurityposturefinding.Graph `json:"resource_relationship,omitempty" url:"resource_relationship,omitempty"`
+	// The risk level, normalized to the caption of the risk_level_id value.
+	RiskLevel *string `json:"risk_level,omitempty" url:"risk_level,omitempty"`
+	// The normalized risk level id.
+	RiskLevelId *applicationsecurityposturefinding.ApplicationRiskLevelId `json:"risk_level_id,omitempty" url:"risk_level_id,omitempty"`
+	// The risk score as reported by the event source.
+	RiskScore *int `json:"risk_score,omitempty" url:"risk_score,omitempty"`
+	// The Software Bill of Materials (SBOM) associated with the application
+	Sbom *applicationsecurityposturefinding.Sbom `json:"sbom,omitempty" url:"sbom,omitempty"`
+	// The list of tags; <code>{key:value}</code> pairs associated to the application.
+	Tags []*applicationsecurityposturefinding.KeyValueObject `json:"tags,omitempty" url:"tags,omitempty"`
+	// The type of application as defined by the event source, e.g., <code>GitHub</code>, <code>Azure Logic App</code>, or <code>Amazon Elastic BeanStalk</code>.
+	Type *string `json:"type,omitempty" url:"type,omitempty"`
+	// The unique identifier for the application.
+	Uid *string `json:"uid,omitempty" url:"uid,omitempty"`
+	// An alternative or contextual identifier for the application, such as a configuration, organization, or license UID.
+	UidAlt *string `json:"uid_alt,omitempty" url:"uid_alt,omitempty"`
+	// The URL of the application.
+	Url *applicationsecurityposturefinding.Url `json:"url,omitempty" url:"url,omitempty"`
+	// The semantic version of the application, e.g., <code>1.7.4</code>.
+	Version *string `json:"version,omitempty" url:"version,omitempty"`
+	// An attribute that describes the type of the application's unique identifier as defined by the provider. This may be used to help find the application in the provider's user interface. Note that the uid attribute is used as the primary identifier for the application for the purposes of the Synqly API.
+	UidType *AppSecApplicationUidType `json:"uid_type,omitempty" url:"uid_type,omitempty"`
+	// An attribute that describes the type of the application's alternate unique identifier as defined by the provider. This may be used to help find the application in the provider's user interface.
+	UidAltType *string `json:"uid_alt_type,omitempty" url:"uid_alt_type,omitempty"`
+	// The attributes that are not mapped to the application schema. The names and values of those attributes are specific to the provider.
+	Unmapped *Object `json:"unmapped,omitempty" url:"unmapped,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (a *AppSecApplication) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
+}
+
+func (a *AppSecApplication) UnmarshalJSON(data []byte) error {
+	type unmarshaler AppSecApplication
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*a = AppSecApplication(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+
+	a._rawJSON = nil
+	return nil
+}
+
+func (a *AppSecApplication) String() string {
+	if len(a._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(a); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", a)
+}
+
+type AppSecApplicationUidType string
+
+const (
+	AppSecApplicationUidTypeProviderRelease     AppSecApplicationUidType = "provider_release"
+	AppSecApplicationUidTypeProviderApplication AppSecApplicationUidType = "provider_application"
+)
+
+func NewAppSecApplicationUidTypeFromString(s string) (AppSecApplicationUidType, error) {
+	switch s {
+	case "provider_release":
+		return AppSecApplicationUidTypeProviderRelease, nil
+	case "provider_application":
+		return AppSecApplicationUidTypeProviderApplication, nil
+	}
+	var t AppSecApplicationUidType
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (a AppSecApplicationUidType) Ptr() *AppSecApplicationUidType {
+	return &a
+}
+
+type AppSecFindingResult struct {
+	Application *AppSecApplication   `json:"application" url:"application"`
+	Finding     AppSecPostureFinding `json:"finding" url:"finding"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (a *AppSecFindingResult) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
+}
+
+func (a *AppSecFindingResult) UnmarshalJSON(data []byte) error {
+	type unmarshaler AppSecFindingResult
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*a = AppSecFindingResult(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+
+	a._rawJSON = nil
+	return nil
+}
+
+func (a *AppSecFindingResult) String() string {
+	if len(a._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(a); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", a)
+}
+
+type AppSecGetApplicationFindingDetailsResponseGeneric struct {
+	// Various metadata about the results organized by group, then type, then field.
+	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
+	// Cursor to use to retrieve the next page of results
+	Cursor string `json:"cursor" url:"cursor"`
+	// Details of the application finding
+	Result map[string]interface{} `json:"result" url:"result"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (a *AppSecGetApplicationFindingDetailsResponseGeneric) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
+}
+
+func (a *AppSecGetApplicationFindingDetailsResponseGeneric) UnmarshalJSON(data []byte) error {
+	type unmarshaler AppSecGetApplicationFindingDetailsResponseGeneric
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*a = AppSecGetApplicationFindingDetailsResponseGeneric(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+
+	a._rawJSON = nil
+	return nil
+}
+
+func (a *AppSecGetApplicationFindingDetailsResponseGeneric) String() string {
+	if len(a._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(a); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", a)
+}
+
+// An application security posture finding
+type AppSecPostureFinding = latest.ApplicationSecurityPostureFinding
+
+type AppSecQueryApplicationFindingsResponseGeneric struct {
+	// Various metadata about the results organized by group, then type, then field.
+	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
+	// Cursor to use to retrieve the next page of results
+	Cursor string `json:"cursor" url:"cursor"`
+	// List of application findings
+	Result []map[string]interface{} `json:"result" url:"result"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (a *AppSecQueryApplicationFindingsResponseGeneric) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
+}
+
+func (a *AppSecQueryApplicationFindingsResponseGeneric) UnmarshalJSON(data []byte) error {
+	type unmarshaler AppSecQueryApplicationFindingsResponseGeneric
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*a = AppSecQueryApplicationFindingsResponseGeneric(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+
+	a._rawJSON = nil
+	return nil
+}
+
+func (a *AppSecQueryApplicationFindingsResponseGeneric) String() string {
+	if len(a._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(a); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", a)
+}
+
+type AppSecQueryApplicationsResponseGeneric struct {
+	// Various metadata about the results organized by group, then type, then field.
+	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
+	// Cursor to use to retrieve the next page of results
+	Cursor string `json:"cursor" url:"cursor"`
+	// List of applications
+	Result []map[string]interface{} `json:"result" url:"result"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (a *AppSecQueryApplicationsResponseGeneric) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
+}
+
+func (a *AppSecQueryApplicationsResponseGeneric) UnmarshalJSON(data []byte) error {
+	type unmarshaler AppSecQueryApplicationsResponseGeneric
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*a = AppSecQueryApplicationsResponseGeneric(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+
+	a._rawJSON = nil
+	return nil
+}
+
+func (a *AppSecQueryApplicationsResponseGeneric) String() string {
+	if len(a._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(a); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", a)
+}
+
+type AppSecQueryFindingsResponseGeneric struct {
+	// Various metadata about the results organized by group, then type, then field.
+	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
+	// Cursor to use to retrieve the next page of results
+	Cursor string `json:"cursor" url:"cursor"`
+	// List of findings and applications results
+	Result []map[string]interface{} `json:"result" url:"result"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (a *AppSecQueryFindingsResponseGeneric) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
+}
+
+func (a *AppSecQueryFindingsResponseGeneric) UnmarshalJSON(data []byte) error {
+	type unmarshaler AppSecQueryFindingsResponseGeneric
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*a = AppSecQueryFindingsResponseGeneric(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+
+	a._rawJSON = nil
+	return nil
+}
+
+func (a *AppSecQueryFindingsResponseGeneric) String() string {
+	if len(a._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(a); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", a)
+}
 
 type CreateDeviceRequestGeneric struct {
 	// Device object to create
@@ -2572,6 +2912,10 @@ func (o OperationStatus) Ptr() *OperationStatus {
 type OperationId string
 
 const (
+	OperationIdAppsecGetApplicationFindingDetails       OperationId = "appsec_get_application_finding_details"
+	OperationIdAppsecQueryApplicationFindings           OperationId = "appsec_query_application_findings"
+	OperationIdAppsecQueryApplications                  OperationId = "appsec_query_applications"
+	OperationIdAppsecQueryFindings                      OperationId = "appsec_query_findings"
 	OperationIdAssetsCreateAsset                        OperationId = "assets_create_asset"
 	OperationIdAssetsGetLabels                          OperationId = "assets_get_labels"
 	OperationIdAssetsQueryDevices                       OperationId = "assets_query_devices"
@@ -2647,6 +2991,14 @@ const (
 
 func NewOperationIdFromString(s string) (OperationId, error) {
 	switch s {
+	case "appsec_get_application_finding_details":
+		return OperationIdAppsecGetApplicationFindingDetails, nil
+	case "appsec_query_application_findings":
+		return OperationIdAppsecQueryApplicationFindings, nil
+	case "appsec_query_applications":
+		return OperationIdAppsecQueryApplications, nil
+	case "appsec_query_findings":
+		return OperationIdAppsecQueryFindings, nil
 	case "assets_create_asset":
 		return OperationIdAssetsCreateAsset, nil
 	case "assets_get_labels":
