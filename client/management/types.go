@@ -10573,6 +10573,10 @@ type ProviderConfig struct {
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/jira-ticketing-setup)
 	TicketingJira *TicketingJira
+	// Configuration for Jira Service Management.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/jira-service-management-ticketing-setup)
+	TicketingJiraServiceManagement *TicketingJiraServiceManagement
 	// Configuration for the Synqly mock in-memory ticketing Provider. This provider is for testing purposes only. It retains tickets for a limited time and does not persist them for long-term usage.
 	TicketingMockTicketing *TicketingMock
 	// Configuration for PagerDuty Operations Cloud.
@@ -10993,6 +10997,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.TicketingJira = value
+	case "ticketing_jira_service_management":
+		value := new(TicketingJiraServiceManagement)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.TicketingJiraServiceManagement = value
 	case "ticketing_mock_ticketing":
 		value := new(TicketingMock)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -11271,6 +11281,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.TicketingJira != nil {
 		return core.MarshalJSONWithExtraProperty(p.TicketingJira, "type", "ticketing_jira")
 	}
+	if p.TicketingJiraServiceManagement != nil {
+		return core.MarshalJSONWithExtraProperty(p.TicketingJiraServiceManagement, "type", "ticketing_jira_service_management")
+	}
 	if p.TicketingMockTicketing != nil {
 		return core.MarshalJSONWithExtraProperty(p.TicketingMockTicketing, "type", "ticketing_mock_ticketing")
 	}
@@ -11382,6 +11395,7 @@ type ProviderConfigVisitor interface {
 	VisitTicketingAutotask(*TicketingAutotask) error
 	VisitTicketingFreshdesk(*TicketingFreshdesk) error
 	VisitTicketingJira(*TicketingJira) error
+	VisitTicketingJiraServiceManagement(*TicketingJiraServiceManagement) error
 	VisitTicketingMockTicketing(*TicketingMock) error
 	VisitTicketingPagerduty(*TicketingPagerDuty) error
 	VisitTicketingServicenow(*TicketingServiceNow) error
@@ -11578,6 +11592,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	if p.TicketingJira != nil {
 		return visitor.VisitTicketingJira(p.TicketingJira)
 	}
+	if p.TicketingJiraServiceManagement != nil {
+		return visitor.VisitTicketingJiraServiceManagement(p.TicketingJiraServiceManagement)
+	}
 	if p.TicketingMockTicketing != nil {
 		return visitor.VisitTicketingMockTicketing(p.TicketingMockTicketing)
 	}
@@ -11751,6 +11768,8 @@ const (
 	ProviderConfigIdTicketingFreshdesk ProviderConfigId = "ticketing_freshdesk"
 	// Atlassian Jira
 	ProviderConfigIdTicketingJira ProviderConfigId = "ticketing_jira"
+	// Jira Service Management
+	ProviderConfigIdTicketingJiraServiceManagement ProviderConfigId = "ticketing_jira_service_management"
 	// Synqly Test Provider
 	ProviderConfigIdTicketingMock ProviderConfigId = "ticketing_mock_ticketing"
 	// PagerDuty Operations Cloud
@@ -11907,6 +11926,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdTicketingFreshdesk, nil
 	case "ticketing_jira":
 		return ProviderConfigIdTicketingJira, nil
+	case "ticketing_jira_service_management":
+		return ProviderConfigIdTicketingJiraServiceManagement, nil
 	case "ticketing_mock_ticketing":
 		return ProviderConfigIdTicketingMock, nil
 	case "ticketing_pagerduty":
@@ -14694,6 +14715,58 @@ func (t *TicketingJira) UnmarshalJSON(data []byte) error {
 }
 
 func (t *TicketingJira) String() string {
+	if len(t._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(t._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(t); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", t)
+}
+
+// Configuration for Jira Service Management.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/jira-service-management-ticketing-setup)
+type TicketingJiraServiceManagement struct {
+	Credential *JiraCredential `json:"credential" url:"credential"`
+	// Custom field mappings for this provider.
+	CustomFieldMappings []*CustomFieldMapping `json:"custom_field_mappings,omitempty" url:"custom_field_mappings,omitempty"`
+	// Default issue type when creating tickets.
+	DefaultIssueType *string `json:"default_issue_type,omitempty" url:"default_issue_type,omitempty"`
+	// Default project when listing, creating, or editing tickets.
+	DefaultProject *string `json:"default_project,omitempty" url:"default_project,omitempty"`
+	// Base URL for the Jira Service Management API.
+	Url string `json:"url" url:"url"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (t *TicketingJiraServiceManagement) GetExtraProperties() map[string]interface{} {
+	return t.extraProperties
+}
+
+func (t *TicketingJiraServiceManagement) UnmarshalJSON(data []byte) error {
+	type unmarshaler TicketingJiraServiceManagement
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*t = TicketingJiraServiceManagement(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *t)
+	if err != nil {
+		return err
+	}
+	t.extraProperties = extraProperties
+
+	t._rawJSON = nil
+	return nil
+}
+
+func (t *TicketingJiraServiceManagement) String() string {
 	if len(t._rawJSON) > 0 {
 		if value, err := core.StringifyJSON(t._rawJSON); err == nil {
 			return value
