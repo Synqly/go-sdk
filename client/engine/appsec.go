@@ -11,7 +11,7 @@ import (
 type AppSecQueryApplicationFindingsRequest struct {
 	// Add metadata to the response by invoking meta functions. Documentation for meta functions is available at https://docs.synqly.com/api-reference/meta-functions. Not all meta function are available at every endpoint.
 	Meta []*string `json:"-" url:"meta,omitempty"`
-	// Number of events to return. Defaults to 100.
+	// Number of findings to return.
 	Limit *int `json:"-" url:"limit,omitempty"`
 	// Select a field to order the results by. Defaults to `name`. To control the direction of the sorting, append
 	// `[asc]` or `[desc]` to the field name. For example, `name[asc]` will sort the results by `name` in ascending order.
@@ -27,7 +27,7 @@ type AppSecQueryApplicationFindingsRequest struct {
 type AppSecQueryApplicationsRequest struct {
 	// Add metadata to the response by invoking meta functions. Documentation for meta functions is available at https://docs.synqly.com/api-reference/meta-functions. Not all meta function are available at every endpoint.
 	Meta []*string `json:"-" url:"meta,omitempty"`
-	// Number of events to return. Defaults to 100.
+	// Number of applications to return.
 	Limit *int `json:"-" url:"limit,omitempty"`
 	// Select a field to order the results by. Defaults to `name`. To control the direction of the sorting, append
 	// `[asc]` or `[desc]` to the field name. For example, `name[asc]` will sort the results by `name` in ascending order.
@@ -44,6 +44,8 @@ type AppSecQueryFindingsRequest struct {
 	// Filter results by this query. For more information on filtering, refer to our Filtering Guide. Defaults to no filter.
 	// If used more than once, the queries are ANDed together.
 	Filter []*string `json:"-" url:"filter,omitempty"`
+	// Number of findings to return.
+	Limit *int `json:"-" url:"limit,omitempty"`
 	// Start search from cursor position.
 	Cursor *string `json:"-" url:"cursor,omitempty"`
 }

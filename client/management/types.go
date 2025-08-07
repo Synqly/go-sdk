@@ -9277,6 +9277,98 @@ func (g *GoogleServiceAccountCredential) Accept(visitor GoogleServiceAccountCred
 	return fmt.Errorf("type %T does not define a non-empty union type", g)
 }
 
+type HclAppScanOnCloudCredential struct {
+	Type string
+	// Configuration when creating new Client Credentials.
+	OAuthClient *OAuthClientCredential
+	// Reference to existing Client Credentials.
+	OAuthClientId OAuthClientCredentialId
+}
+
+func (h *HclAppScanOnCloudCredential) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	h.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", h)
+	}
+	switch unmarshaler.Type {
+	case "o_auth_client":
+		value := new(OAuthClientCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		h.OAuthClient = value
+	case "o_auth_client_id":
+		var valueUnmarshaler struct {
+			OAuthClientId OAuthClientCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		h.OAuthClientId = valueUnmarshaler.OAuthClientId
+	}
+	return nil
+}
+
+func (h HclAppScanOnCloudCredential) MarshalJSON() ([]byte, error) {
+	if h.OAuthClient != nil {
+		return core.MarshalJSONWithExtraProperty(h.OAuthClient, "type", "o_auth_client")
+	}
+	if h.OAuthClientId != "" {
+		var marshaler = struct {
+			Type          string                  `json:"type"`
+			OAuthClientId OAuthClientCredentialId `json:"value"`
+		}{
+			Type:          "o_auth_client_id",
+			OAuthClientId: h.OAuthClientId,
+		}
+		return json.Marshal(marshaler)
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", h)
+}
+
+type HclAppScanOnCloudCredentialVisitor interface {
+	VisitOAuthClient(*OAuthClientCredential) error
+	VisitOAuthClientId(OAuthClientCredentialId) error
+}
+
+func (h *HclAppScanOnCloudCredential) Accept(visitor HclAppScanOnCloudCredentialVisitor) error {
+	if h.OAuthClient != nil {
+		return visitor.VisitOAuthClient(h.OAuthClient)
+	}
+	if h.OAuthClientId != "" {
+		return visitor.VisitOAuthClientId(h.OAuthClientId)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", h)
+}
+
+type HclAppScanOnCloudUrl string
+
+const (
+	HclAppScanOnCloudUrlCloudAppscanCom   HclAppScanOnCloudUrl = "https://cloud.appscan.com"
+	HclAppScanOnCloudUrlEuCloudAppscanCom HclAppScanOnCloudUrl = "https://eu.cloud.appscan.com"
+)
+
+func NewHclAppScanOnCloudUrlFromString(s string) (HclAppScanOnCloudUrl, error) {
+	switch s {
+	case "https://cloud.appscan.com":
+		return HclAppScanOnCloudUrlCloudAppscanCom, nil
+	case "https://eu.cloud.appscan.com":
+		return HclAppScanOnCloudUrlEuCloudAppscanCom, nil
+	}
+	var t HclAppScanOnCloudUrl
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (h HclAppScanOnCloudUrl) Ptr() *HclAppScanOnCloudUrl {
+	return &h
+}
+
 // Configuration for Microsoft Entra ID.
 //
 // [Configuration guide](https://docs.synqly.com/guides/provider-configuration/entra-id-setup)
@@ -10162,7 +10254,7 @@ func (o *OpenSearchCredential) Accept(visitor OpenSearchCredentialVisitor) error
 	return fmt.Errorf("type %T does not define a non-empty union type", o)
 }
 
-type OpenTextApplicationSecurityCredential struct {
+type OpenTextCoreApplicationSecurityCredential struct {
 	Type string
 	// Configuration when creating new Client Credentials.
 	OAuthClient *OAuthClientCredential
@@ -10170,7 +10262,7 @@ type OpenTextApplicationSecurityCredential struct {
 	OAuthClientId OAuthClientCredentialId
 }
 
-func (o *OpenTextApplicationSecurityCredential) UnmarshalJSON(data []byte) error {
+func (o *OpenTextCoreApplicationSecurityCredential) UnmarshalJSON(data []byte) error {
 	var unmarshaler struct {
 		Type string `json:"type"`
 	}
@@ -10200,7 +10292,7 @@ func (o *OpenTextApplicationSecurityCredential) UnmarshalJSON(data []byte) error
 	return nil
 }
 
-func (o OpenTextApplicationSecurityCredential) MarshalJSON() ([]byte, error) {
+func (o OpenTextCoreApplicationSecurityCredential) MarshalJSON() ([]byte, error) {
 	if o.OAuthClient != nil {
 		return core.MarshalJSONWithExtraProperty(o.OAuthClient, "type", "o_auth_client")
 	}
@@ -10217,12 +10309,12 @@ func (o OpenTextApplicationSecurityCredential) MarshalJSON() ([]byte, error) {
 	return nil, fmt.Errorf("type %T does not define a non-empty union type", o)
 }
 
-type OpenTextApplicationSecurityCredentialVisitor interface {
+type OpenTextCoreApplicationSecurityCredentialVisitor interface {
 	VisitOAuthClient(*OAuthClientCredential) error
 	VisitOAuthClientId(OAuthClientCredentialId) error
 }
 
-func (o *OpenTextApplicationSecurityCredential) Accept(visitor OpenTextApplicationSecurityCredentialVisitor) error {
+func (o *OpenTextCoreApplicationSecurityCredential) Accept(visitor OpenTextCoreApplicationSecurityCredentialVisitor) error {
 	if o.OAuthClient != nil {
 		return visitor.VisitOAuthClient(o.OAuthClient)
 	}
@@ -10230,6 +10322,40 @@ func (o *OpenTextApplicationSecurityCredential) Accept(visitor OpenTextApplicati
 		return visitor.VisitOAuthClientId(o.OAuthClientId)
 	}
 	return fmt.Errorf("type %T does not define a non-empty union type", o)
+}
+
+type OpenTextCoreApplicationSecurityUrl string
+
+const (
+	OpenTextCoreApplicationSecurityUrlAmsFortifyCom    OpenTextCoreApplicationSecurityUrl = "https://api.ams.fortify.com"
+	OpenTextCoreApplicationSecurityUrlEmeaFortifyCom   OpenTextCoreApplicationSecurityUrl = "https://api.emea.fortify.com"
+	OpenTextCoreApplicationSecurityUrlApacFortifyCom   OpenTextCoreApplicationSecurityUrl = "https://api.apac.fortify.com"
+	OpenTextCoreApplicationSecurityUrlSgpFortifyCom    OpenTextCoreApplicationSecurityUrl = "https://api.sgp.fortify.com"
+	OpenTextCoreApplicationSecurityUrlFedFortifygovCom OpenTextCoreApplicationSecurityUrl = "https://api.fed.fortifygov.com"
+	OpenTextCoreApplicationSecurityUrlTrialFortifyCom  OpenTextCoreApplicationSecurityUrl = "https://api.trial.fortify.com"
+)
+
+func NewOpenTextCoreApplicationSecurityUrlFromString(s string) (OpenTextCoreApplicationSecurityUrl, error) {
+	switch s {
+	case "https://api.ams.fortify.com":
+		return OpenTextCoreApplicationSecurityUrlAmsFortifyCom, nil
+	case "https://api.emea.fortify.com":
+		return OpenTextCoreApplicationSecurityUrlEmeaFortifyCom, nil
+	case "https://api.apac.fortify.com":
+		return OpenTextCoreApplicationSecurityUrlApacFortifyCom, nil
+	case "https://api.sgp.fortify.com":
+		return OpenTextCoreApplicationSecurityUrlSgpFortifyCom, nil
+	case "https://api.fed.fortifygov.com":
+		return OpenTextCoreApplicationSecurityUrlFedFortifygovCom, nil
+	case "https://api.trial.fortify.com":
+		return OpenTextCoreApplicationSecurityUrlTrialFortifyCom, nil
+	}
+	var t OpenTextCoreApplicationSecurityUrl
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (o OpenTextCoreApplicationSecurityUrl) Ptr() *OpenTextCoreApplicationSecurityUrl {
+	return &o
 }
 
 type PagerDutyCredential struct {
@@ -10374,8 +10500,10 @@ func (p *PingOneCredential) Accept(visitor PingOneCredentialVisitor) error {
 
 type ProviderConfig struct {
 	Type string
+	// Configuration for HCL AppScan on Cloud as an application security provider.
+	AppsecHclAppscanOnCloud *AppsecHclAppScanOnCloud
 	// Configuration for OpenText Core Application Security (formerly Fortify On Demand) as an application security provider.
-	AppsecOpentextApplicationSecurity *AppsecOpenTextApplicationSecurity
+	AppsecOpentextCoreApplicationSecurity *AppsecOpenTextCoreApplicationSecurity
 	// Configuration for Armis Centrix™ for Asset Management and Security.
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/armis-centrix-setup)
@@ -10643,12 +10771,18 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 		return fmt.Errorf("%T did not include discriminant type", p)
 	}
 	switch unmarshaler.Type {
-	case "appsec_opentext_application_security":
-		value := new(AppsecOpenTextApplicationSecurity)
+	case "appsec_hcl_appscan_on_cloud":
+		value := new(AppsecHclAppScanOnCloud)
 		if err := json.Unmarshal(data, &value); err != nil {
 			return err
 		}
-		p.AppsecOpentextApplicationSecurity = value
+		p.AppsecHclAppscanOnCloud = value
+	case "appsec_opentext_core_application_security":
+		value := new(AppsecOpenTextCoreApplicationSecurity)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.AppsecOpentextCoreApplicationSecurity = value
 	case "assets_armis_centrix":
 		value := new(AssetsArmisCentrix)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -11104,8 +11238,11 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 }
 
 func (p ProviderConfig) MarshalJSON() ([]byte, error) {
-	if p.AppsecOpentextApplicationSecurity != nil {
-		return core.MarshalJSONWithExtraProperty(p.AppsecOpentextApplicationSecurity, "type", "appsec_opentext_application_security")
+	if p.AppsecHclAppscanOnCloud != nil {
+		return core.MarshalJSONWithExtraProperty(p.AppsecHclAppscanOnCloud, "type", "appsec_hcl_appscan_on_cloud")
+	}
+	if p.AppsecOpentextCoreApplicationSecurity != nil {
+		return core.MarshalJSONWithExtraProperty(p.AppsecOpentextCoreApplicationSecurity, "type", "appsec_opentext_core_application_security")
 	}
 	if p.AssetsArmisCentrix != nil {
 		return core.MarshalJSONWithExtraProperty(p.AssetsArmisCentrix, "type", "assets_armis_centrix")
@@ -11336,7 +11473,8 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 }
 
 type ProviderConfigVisitor interface {
-	VisitAppsecOpentextApplicationSecurity(*AppsecOpenTextApplicationSecurity) error
+	VisitAppsecHclAppscanOnCloud(*AppsecHclAppScanOnCloud) error
+	VisitAppsecOpentextCoreApplicationSecurity(*AppsecOpenTextCoreApplicationSecurity) error
 	VisitAssetsArmisCentrix(*AssetsArmisCentrix) error
 	VisitAssetsArmisCentrixMock(*AssetsArmisCentrixMock) error
 	VisitAssetsAxonius(*AssetsAxonius) error
@@ -11415,8 +11553,11 @@ type ProviderConfigVisitor interface {
 }
 
 func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
-	if p.AppsecOpentextApplicationSecurity != nil {
-		return visitor.VisitAppsecOpentextApplicationSecurity(p.AppsecOpentextApplicationSecurity)
+	if p.AppsecHclAppscanOnCloud != nil {
+		return visitor.VisitAppsecHclAppscanOnCloud(p.AppsecHclAppscanOnCloud)
+	}
+	if p.AppsecOpentextCoreApplicationSecurity != nil {
+		return visitor.VisitAppsecOpentextCoreApplicationSecurity(p.AppsecOpentextCoreApplicationSecurity)
 	}
 	if p.AssetsArmisCentrix != nil {
 		return visitor.VisitAssetsArmisCentrix(p.AssetsArmisCentrix)
@@ -11650,8 +11791,10 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 type ProviderConfigId string
 
 const (
+	// HCL AppScan on Cloud
+	ProviderConfigIdAppsecHclAppScanOnCloud ProviderConfigId = "appsec_hcl_appscan_on_cloud"
 	// OpenText Core Application Security
-	ProviderConfigIdAppsecOpenTextApplicationSecurity ProviderConfigId = "appsec_opentext_application_security"
+	ProviderConfigIdAppsecOpenTextCoreApplicationSecurity ProviderConfigId = "appsec_opentext_core_application_security"
 	// Armis Centrix™ for Asset Management and Security
 	ProviderConfigIdAssetsArmisCentrix ProviderConfigId = "assets_armis_centrix"
 	// [MOCK] Armis Centrix™ for Asset Management and Security
@@ -11808,8 +11951,10 @@ const (
 
 func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 	switch s {
-	case "appsec_opentext_application_security":
-		return ProviderConfigIdAppsecOpenTextApplicationSecurity, nil
+	case "appsec_hcl_appscan_on_cloud":
+		return ProviderConfigIdAppsecHclAppScanOnCloud, nil
+	case "appsec_opentext_core_application_security":
+		return ProviderConfigIdAppsecOpenTextCoreApplicationSecurity, nil
 	case "assets_armis_centrix":
 		return ProviderConfigIdAssetsArmisCentrix, nil
 	case "assets_armis_centrix_mock":
@@ -15705,28 +15850,28 @@ func (z *ZendeskCredential) Accept(visitor ZendeskCredentialVisitor) error {
 	return fmt.Errorf("type %T does not define a non-empty union type", z)
 }
 
-// Configuration for OpenText Core Application Security (formerly Fortify On Demand) as an application security provider.
-type AppsecOpenTextApplicationSecurity struct {
-	// Credentials used for accessing the OpenText Core Application Security API.
-	Credential *OpenTextApplicationSecurityCredential `json:"credential" url:"credential"`
-	// Base URL for the OpenText Core Application Security API.
-	Url string `json:"url" url:"url"`
+// Configuration for HCL AppScan on Cloud as an application security provider.
+type AppsecHclAppScanOnCloud struct {
+	// Credentials used for accessing the HCL AppScan on Cloud API.
+	Credential *HclAppScanOnCloudCredential `json:"credential" url:"credential"`
+	// Base URL for the HCL AppScan on Cloud API. This URL should be the same as the URL used to access the HCL AppScan on Cloud web interface.
+	Url HclAppScanOnCloudUrl `json:"url" url:"url"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
 }
 
-func (a *AppsecOpenTextApplicationSecurity) GetExtraProperties() map[string]interface{} {
+func (a *AppsecHclAppScanOnCloud) GetExtraProperties() map[string]interface{} {
 	return a.extraProperties
 }
 
-func (a *AppsecOpenTextApplicationSecurity) UnmarshalJSON(data []byte) error {
-	type unmarshaler AppsecOpenTextApplicationSecurity
+func (a *AppsecHclAppScanOnCloud) UnmarshalJSON(data []byte) error {
+	type unmarshaler AppsecHclAppScanOnCloud
 	var value unmarshaler
 	if err := json.Unmarshal(data, &value); err != nil {
 		return err
 	}
-	*a = AppsecOpenTextApplicationSecurity(value)
+	*a = AppsecHclAppScanOnCloud(value)
 
 	extraProperties, err := core.ExtractExtraProperties(data, *a)
 	if err != nil {
@@ -15738,7 +15883,52 @@ func (a *AppsecOpenTextApplicationSecurity) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (a *AppsecOpenTextApplicationSecurity) String() string {
+func (a *AppsecHclAppScanOnCloud) String() string {
+	if len(a._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(a); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", a)
+}
+
+// Configuration for OpenText Core Application Security (formerly Fortify On Demand) as an application security provider.
+type AppsecOpenTextCoreApplicationSecurity struct {
+	// Credentials used for accessing the OpenText Core Application Security API.
+	Credential *OpenTextCoreApplicationSecurityCredential `json:"credential" url:"credential"`
+	// Base URL for the OpenText Core Application Security API. This URL should be the same as the URL used to access the OpenText Core Application Security web interface.
+	Url OpenTextCoreApplicationSecurityUrl `json:"url" url:"url"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (a *AppsecOpenTextCoreApplicationSecurity) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
+}
+
+func (a *AppsecOpenTextCoreApplicationSecurity) UnmarshalJSON(data []byte) error {
+	type unmarshaler AppsecOpenTextCoreApplicationSecurity
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*a = AppsecOpenTextCoreApplicationSecurity(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+
+	a._rawJSON = nil
+	return nil
+}
+
+func (a *AppsecOpenTextCoreApplicationSecurity) String() string {
 	if len(a._rawJSON) > 0 {
 		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
 			return value
