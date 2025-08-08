@@ -8552,7 +8552,7 @@ func (e *EdrSophos) String() string {
 // [Configuration guide](https://docs.synqly.com/guides/provider-configuration/tanium-setup)
 type EdrTanium struct {
 	Credential *TaniumCloudCredential `json:"credential" url:"credential"`
-	// URL for the Tanium Cloud API. This should be the base URL for the API, without any path components and must be HTTPS, e.g. "https://<customername>-api.cloud.tanium.com" or "https://<customername>-api.titankube.com".
+	// Base URL for the Tanium Cloud API
 	Url string `json:"url" url:"url"`
 
 	extraProperties map[string]interface{}
