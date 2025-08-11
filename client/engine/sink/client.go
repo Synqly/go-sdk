@@ -37,7 +37,7 @@ func NewClient(opts ...option.RequestOption) *Client {
 // Writes a batch of `Event` objects to the Sink configured with the token used for authentication.
 func (c *Client) PostEvents(
 	ctx context.Context,
-	request []*engine.Event,
+	request *engine.PostSinkEventRequest,
 	opts ...option.RequestOption,
 ) error {
 	options := core.NewRequestOptions(opts...)
@@ -50,6 +50,14 @@ func (c *Client) PostEvents(
 		baseURL = options.BaseURL
 	}
 	endpointURL := baseURL + "/v1/sink/events"
+
+	queryParams, err := core.QueryValues(request)
+	if err != nil {
+		return err
+	}
+	if len(queryParams) > 0 {
+		endpointURL += "?" + queryParams.Encode()
+	}
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 

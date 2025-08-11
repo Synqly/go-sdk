@@ -7541,6 +7541,154 @@ func (a *AutotaskSecretCredential) Accept(visitor AutotaskSecretCredentialVisito
 	return fmt.Errorf("type %T does not define a non-empty union type", a)
 }
 
+type AwsRegion string
+
+const (
+	// US East 1 (N. Virginia)
+	AwsRegionUsEast1 AwsRegion = "us-east-1"
+	// US East 2 (Ohio)
+	AwsRegionUsEast2 AwsRegion = "us-east-2"
+	// US West 1 (N. California)
+	AwsRegionUsWest1 AwsRegion = "us-west-1"
+	// US West 2 (Oregon)
+	AwsRegionUsWest2 AwsRegion = "us-west-2"
+	// Africa South 1 (Cape Town)
+	AwsRegionAfSouth1 AwsRegion = "af-south-1"
+	// Asia Pacific East 1 (Hong Kong)
+	AwsRegionApEast1 AwsRegion = "ap-east-1"
+	// Asia Pacific South 2 (Hyderabad)
+	AwsRegionApSouth2 AwsRegion = "ap-south-2"
+	// Asia Pacific Southeast 3 (Jakarta)
+	AwsRegionApSoutheast3 AwsRegion = "ap-southeast-3"
+	// Asia Pacific Southeast 5 (Malaysia)
+	AwsRegionApSoutheast5 AwsRegion = "ap-southeast-5"
+	// Asia Pacific Southeast 4 (Melbourne)
+	AwsRegionApSoutheast4 AwsRegion = "ap-southeast-4"
+	// Asia Pacific South 1 (Mumbai)
+	AwsRegionApSouth1 AwsRegion = "ap-south-1"
+	// Asia Pacific Northeast 3 (Osaka)
+	AwsRegionApNortheast3 AwsRegion = "ap-northeast-3"
+	// Asia Pacific Northeast 2 (Seoul)
+	AwsRegionApNortheast2 AwsRegion = "ap-northeast-2"
+	// Asia Pacific Southeast 1 (Singapore)
+	AwsRegionApSoutheast1 AwsRegion = "ap-southeast-1"
+	// Asia Pacific Southeast 2 (Sydney)
+	AwsRegionApSoutheast2 AwsRegion = "ap-southeast-2"
+	// Asia Pacific East 2 (Taipei)
+	AwsRegionApEast2 AwsRegion = "ap-east-2"
+	// Asia Pacific Southeast 7 (Thailand)
+	AwsRegionApSoutheast7 AwsRegion = "ap-southeast-7"
+	// Asia Pacific Northeast 1 (Tokyo)
+	AwsRegionApNortheast1 AwsRegion = "ap-northeast-1"
+	// Canada Central 1 (Central)
+	AwsRegionCaCentral1 AwsRegion = "ca-central-1"
+	// Canada West 1 (Calgary)
+	AwsRegionCaWest1 AwsRegion = "ca-west-1"
+	// Europe Central 1 (Frankfurt)
+	AwsRegionEuCentral1 AwsRegion = "eu-central-1"
+	// Europe West 1 (Ireland)
+	AwsRegionEuWest1 AwsRegion = "eu-west-1"
+	// Europe West 2 (London)
+	AwsRegionEuWest2 AwsRegion = "eu-west-2"
+	// Europe South 1 (Milan)
+	AwsRegionEuSouth1 AwsRegion = "eu-south-1"
+	// Europe West 3 (Paris)
+	AwsRegionEuWest3 AwsRegion = "eu-west-3"
+	// Europe South 2 (Spain)
+	AwsRegionEuSouth2 AwsRegion = "eu-south-2"
+	// Europe North 1 (Stockholm)
+	AwsRegionEuNorth1 AwsRegion = "eu-north-1"
+	// Europe Central 2 (Zurich)
+	AwsRegionEuCentral2 AwsRegion = "eu-central-2"
+	// Israel Central 1 (Tel Aviv)
+	AwsRegionIlCentral1 AwsRegion = "il-central-1"
+	// Mexico Central 1
+	AwsRegionMxCentral1 AwsRegion = "mx-central-1"
+	// Middle East South 1 (Bahrain)
+	AwsRegionMeSouth1 AwsRegion = "me-south-1"
+	// Middle East Central 1 (UAE)
+	AwsRegionMeCentral1 AwsRegion = "me-central-1"
+	// South America East 1 (São Paulo)
+	AwsRegionSaEast1 AwsRegion = "sa-east-1"
+)
+
+func NewAwsRegionFromString(s string) (AwsRegion, error) {
+	switch s {
+	case "us-east-1":
+		return AwsRegionUsEast1, nil
+	case "us-east-2":
+		return AwsRegionUsEast2, nil
+	case "us-west-1":
+		return AwsRegionUsWest1, nil
+	case "us-west-2":
+		return AwsRegionUsWest2, nil
+	case "af-south-1":
+		return AwsRegionAfSouth1, nil
+	case "ap-east-1":
+		return AwsRegionApEast1, nil
+	case "ap-south-2":
+		return AwsRegionApSouth2, nil
+	case "ap-southeast-3":
+		return AwsRegionApSoutheast3, nil
+	case "ap-southeast-5":
+		return AwsRegionApSoutheast5, nil
+	case "ap-southeast-4":
+		return AwsRegionApSoutheast4, nil
+	case "ap-south-1":
+		return AwsRegionApSouth1, nil
+	case "ap-northeast-3":
+		return AwsRegionApNortheast3, nil
+	case "ap-northeast-2":
+		return AwsRegionApNortheast2, nil
+	case "ap-southeast-1":
+		return AwsRegionApSoutheast1, nil
+	case "ap-southeast-2":
+		return AwsRegionApSoutheast2, nil
+	case "ap-east-2":
+		return AwsRegionApEast2, nil
+	case "ap-southeast-7":
+		return AwsRegionApSoutheast7, nil
+	case "ap-northeast-1":
+		return AwsRegionApNortheast1, nil
+	case "ca-central-1":
+		return AwsRegionCaCentral1, nil
+	case "ca-west-1":
+		return AwsRegionCaWest1, nil
+	case "eu-central-1":
+		return AwsRegionEuCentral1, nil
+	case "eu-west-1":
+		return AwsRegionEuWest1, nil
+	case "eu-west-2":
+		return AwsRegionEuWest2, nil
+	case "eu-south-1":
+		return AwsRegionEuSouth1, nil
+	case "eu-west-3":
+		return AwsRegionEuWest3, nil
+	case "eu-south-2":
+		return AwsRegionEuSouth2, nil
+	case "eu-north-1":
+		return AwsRegionEuNorth1, nil
+	case "eu-central-2":
+		return AwsRegionEuCentral2, nil
+	case "il-central-1":
+		return AwsRegionIlCentral1, nil
+	case "mx-central-1":
+		return AwsRegionMxCentral1, nil
+	case "me-south-1":
+		return AwsRegionMeSouth1, nil
+	case "me-central-1":
+		return AwsRegionMeCentral1, nil
+	case "sa-east-1":
+		return AwsRegionSaEast1, nil
+	}
+	var t AwsRegion
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (a AwsRegion) Ptr() *AwsRegion {
+	return &a
+}
+
 type AwsS3Credential struct {
 	Type string
 	// Configuration when creating new AWS Access Keys.
@@ -10641,6 +10789,8 @@ type ProviderConfig struct {
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/sumo-logic-setup)
 	SiemSumoLogic *SiemSumoLogic
+	// Configuration for Amazon S3 as a Sink provider. Events are written directly to an AWS S3 bucket in compressed JSON format.
+	SinkAwsS3 *SinkAwsS3
 	// Configuration for Amazon Security Lake as a Sink provider. Events are written directly to an AWS S3 bucket in Apache Parquet format.
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/amazon-security-lake-sink-setup)
@@ -11029,6 +11179,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.SiemSumoLogic = value
+	case "sink_aws_s3":
+		value := new(SinkAwsS3)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.SinkAwsS3 = value
 	case "sink_aws_security_lake":
 		value := new(SinkAwsSecurityLake)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -11367,6 +11523,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.SiemSumoLogic != nil {
 		return core.MarshalJSONWithExtraProperty(p.SiemSumoLogic, "type", "siem_sumo_logic")
 	}
+	if p.SinkAwsS3 != nil {
+		return core.MarshalJSONWithExtraProperty(p.SinkAwsS3, "type", "sink_aws_s3")
+	}
 	if p.SinkAwsSecurityLake != nil {
 		return core.MarshalJSONWithExtraProperty(p.SinkAwsSecurityLake, "type", "sink_aws_security_lake")
 	}
@@ -11516,6 +11675,7 @@ type ProviderConfigVisitor interface {
 	VisitSiemSentinel(*SiemSentinel) error
 	VisitSiemSplunk(*SiemSplunk) error
 	VisitSiemSumoLogic(*SiemSumoLogic) error
+	VisitSinkAwsS3(*SinkAwsS3) error
 	VisitSinkAwsSecurityLake(*SinkAwsSecurityLake) error
 	VisitSinkAwsSqs(*SinkAwsSqs) error
 	VisitSinkAzureMonitorLogs(*SinkAzureMonitorLogs) error
@@ -11681,6 +11841,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.SiemSumoLogic != nil {
 		return visitor.VisitSiemSumoLogic(p.SiemSumoLogic)
+	}
+	if p.SinkAwsS3 != nil {
+		return visitor.VisitSinkAwsS3(p.SinkAwsS3)
 	}
 	if p.SinkAwsSecurityLake != nil {
 		return visitor.VisitSinkAwsSecurityLake(p.SinkAwsSecurityLake)
@@ -11877,6 +12040,8 @@ const (
 	ProviderConfigIdSiemSplunk ProviderConfigId = "siem_splunk"
 	// Sumo Logic Cloud SIEM
 	ProviderConfigIdSiemSumoLogic ProviderConfigId = "siem_sumo_logic"
+	// Amazon S3
+	ProviderConfigIdSinkAwsS3 ProviderConfigId = "sink_aws_s3"
 	// Amazon Security Lake
 	ProviderConfigIdSinkAwsSecurityLake ProviderConfigId = "sink_aws_security_lake"
 	// Amazon Simple Queue Service (SQS)
@@ -12037,6 +12202,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdSiemSplunk, nil
 	case "siem_sumo_logic":
 		return ProviderConfigIdSiemSumoLogic, nil
+	case "sink_aws_s3":
+		return ProviderConfigIdSinkAwsS3, nil
 	case "sink_aws_security_lake":
 		return ProviderConfigIdSinkAwsSecurityLake, nil
 	case "sink_aws_sqs":
@@ -13300,6 +13467,55 @@ func (s *SevcoCredential) Accept(visitor SevcoCredentialVisitor) error {
 		return visitor.VisitTokenId(s.TokenId)
 	}
 	return fmt.Errorf("type %T does not define a non-empty union type", s)
+}
+
+// Configuration for Amazon S3 as a Sink provider. Events are written directly to an AWS S3 bucket in compressed JSON format.
+type SinkAwsS3 struct {
+	// Bucket
+	Bucket string `json:"bucket" url:"bucket"`
+	// Credential
+	Credential *AwsS3Credential `json:"credential" url:"credential"`
+	// Path
+	Path string `json:"path" url:"path"`
+	// AWS Region
+	Region AwsRegion `json:"region" url:"region"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (s *SinkAwsS3) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
+}
+
+func (s *SinkAwsS3) UnmarshalJSON(data []byte) error {
+	type unmarshaler SinkAwsS3
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*s = SinkAwsS3(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+
+	s._rawJSON = nil
+	return nil
+}
+
+func (s *SinkAwsS3) String() string {
+	if len(s._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(s); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", s)
 }
 
 // Configuration for Amazon Simple Queue Service (SQS).
