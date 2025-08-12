@@ -259,10 +259,8 @@ github.com/stretchr/testify v1.10.0 h1:Xv5erBjTwe/5IxqUQTdXv5kgmIvbHo3QQyRwhJsOf
 github.com/stretchr/testify v1.10.0/go.mod h1:r2ic/lqez/lEtzL7wO/rwa5dbSLXVDPFyf8C91i36aY=
 github.com/subosito/gotenv v1.6.0 h1:9NlTDc1FTs4qu0DDq7AEtTPNw6SVm7uBMsUCUjABIf8=
 github.com/subosito/gotenv v1.6.0/go.mod h1:Dk4QP5c2W3ibzajGcXpNraDfq2IrhjMIvMSWPKKo0FU=
-github.com/synqly/go-sdk v0.4.22 h1:+MjkMLkzzp0aMr0d9puPc8CYa6Ixs2np85blqVRzDZ0=
-github.com/synqly/go-sdk v0.4.22/go.mod h1:T0qiOnP0ZE1kuJNbEb455ApX30X9626YpIgqqlHs3wQ=
-github.com/synqly/go-sdk v0.4.25 h1:XEHw8hL+dWnwVjiKrY540fDIq7PcAcMTmdWLSNGx8BY=
-github.com/synqly/go-sdk v0.4.25/go.mod h1:T0qiOnP0ZE1kuJNbEb455ApX30X9626YpIgqqlHs3wQ=
+github.com/synqly/go-sdk v0.4.41 h1:v9lQP8w/5IeytPOM7VOWUuxHZQ3TOIIFpeeW7Tije1I=
+github.com/synqly/go-sdk v0.4.41/go.mod h1:T0qiOnP0ZE1kuJNbEb455ApX30X9626YpIgqqlHs3wQ=
 github.com/yuin/goldmark v1.1.27/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
 github.com/yuin/goldmark v1.2.1/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
 github.com/yuin/goldmark v1.3.5/go.mod h1:mwnBkeHKe2W/ZEtQ+71ViKU8L12m81fl3OWwC1Zlc8k=
