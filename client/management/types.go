@@ -1140,7 +1140,7 @@ type RequestBody struct {
 	// otherwise this will be a reference object. The reference object
 	// has a single key `$ref`, which is a URI [RFC3986] identifying the
 	// location of a component within the Engine OpenAPI specification.
-	Schema map[string]interface{} `json:"schema" url:"schema"`
+	Schema map[string]interface{} `json:"schema,omitempty" url:"schema,omitempty"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
