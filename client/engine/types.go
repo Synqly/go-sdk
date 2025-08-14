@@ -5348,6 +5348,94 @@ func (c *CreateAssetDevice) String() string {
 	return fmt.Sprintf("%#v", c)
 }
 
+type CreateAssetRequestGeneric struct {
+	// Asset to create in the vulnerability scanning system.
+	Asset map[string]interface{} `json:"asset" url:"asset"`
+	// Name of the source that created the asset.
+	SourceName string `json:"source_name" url:"source_name"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *CreateAssetRequestGeneric) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
+}
+
+func (c *CreateAssetRequestGeneric) UnmarshalJSON(data []byte) error {
+	type unmarshaler CreateAssetRequestGeneric
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = CreateAssetRequestGeneric(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
+	c._rawJSON = nil
+	return nil
+}
+
+func (c *CreateAssetRequestGeneric) String() string {
+	if len(c._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
+type CreateAssetResponseGeneric struct {
+	// Various metadata about the results organized by group, then type, then field.
+	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
+	// Created device.
+	Device map[string]interface{} `json:"device" url:"device"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *CreateAssetResponseGeneric) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
+}
+
+func (c *CreateAssetResponseGeneric) UnmarshalJSON(data []byte) error {
+	type unmarshaler CreateAssetResponseGeneric
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = CreateAssetResponseGeneric(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
+	c._rawJSON = nil
+	return nil
+}
+
+func (c *CreateAssetResponseGeneric) String() string {
+	if len(c._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
 type CreateAssetStatus string
 
 const (
@@ -5415,7 +5503,91 @@ func (c *CreateFindingsError) String() string {
 	return fmt.Sprintf("%#v", c)
 }
 
+type CreateFindingsRequestGeneric struct {
+	Findings []map[string]interface{} `json:"findings" url:"findings"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *CreateFindingsRequestGeneric) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
+}
+
+func (c *CreateFindingsRequestGeneric) UnmarshalJSON(data []byte) error {
+	type unmarshaler CreateFindingsRequestGeneric
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = CreateFindingsRequestGeneric(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
+	c._rawJSON = nil
+	return nil
+}
+
+func (c *CreateFindingsRequestGeneric) String() string {
+	if len(c._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
 type EventId = Id
+
+type GetScanActivityResponseGeneric struct {
+	// Various metadata about the results organized by group, then type, then field.
+	Meta   *MetaResponse          `json:"meta,omitempty" url:"meta,omitempty"`
+	Result map[string]interface{} `json:"result" url:"result"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (g *GetScanActivityResponseGeneric) GetExtraProperties() map[string]interface{} {
+	return g.extraProperties
+}
+
+func (g *GetScanActivityResponseGeneric) UnmarshalJSON(data []byte) error {
+	type unmarshaler GetScanActivityResponseGeneric
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*g = GetScanActivityResponseGeneric(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	if err != nil {
+		return err
+	}
+	g.extraProperties = extraProperties
+
+	g._rawJSON = nil
+	return nil
+}
+
+func (g *GetScanActivityResponseGeneric) String() string {
+	if len(g._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(g._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(g); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", g)
+}
 
 type NucleusFindingState struct {
 	// Due date for the finding.
@@ -5522,6 +5694,145 @@ func (p *ProviderSpecificFindingState) Accept(visitor ProviderSpecificFindingSta
 		return visitor.VisitNucleus(p.Nucleus)
 	}
 	return fmt.Errorf("type %T does not define a non-empty union type", p)
+}
+
+type QueryAssetsResponseGeneric struct {
+	// Various metadata about the results organized by group, then type, then field.
+	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
+	// Cursor to use to retrieve the next page of results
+	Cursor string `json:"cursor" url:"cursor"`
+	// If the provider supports asynchronous queries and the query is still running, this field will be `PENDING` until the query is complete. In this case, the client should retry using the provided cursor.
+	Status QueryStatus              `json:"status" url:"status"`
+	Result []map[string]interface{} `json:"result" url:"result"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (q *QueryAssetsResponseGeneric) GetExtraProperties() map[string]interface{} {
+	return q.extraProperties
+}
+
+func (q *QueryAssetsResponseGeneric) UnmarshalJSON(data []byte) error {
+	type unmarshaler QueryAssetsResponseGeneric
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*q = QueryAssetsResponseGeneric(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *q)
+	if err != nil {
+		return err
+	}
+	q.extraProperties = extraProperties
+
+	q._rawJSON = nil
+	return nil
+}
+
+func (q *QueryAssetsResponseGeneric) String() string {
+	if len(q._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(q._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(q); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", q)
+}
+
+type QueryFindingsResponseGeneric struct {
+	// Various metadata about the results organized by group, then type, then field.
+	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
+	// Cursor to use to retrieve the next page of results
+	Cursor string `json:"cursor" url:"cursor"`
+	// If the provider supports asynchronous queries and the query is still running, this field will be `PENDING` until the query is complete. In this case, the client should retry using the provided cursor.
+	Status QueryStatus              `json:"status" url:"status"`
+	Result []map[string]interface{} `json:"result" url:"result"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (q *QueryFindingsResponseGeneric) GetExtraProperties() map[string]interface{} {
+	return q.extraProperties
+}
+
+func (q *QueryFindingsResponseGeneric) UnmarshalJSON(data []byte) error {
+	type unmarshaler QueryFindingsResponseGeneric
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*q = QueryFindingsResponseGeneric(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *q)
+	if err != nil {
+		return err
+	}
+	q.extraProperties = extraProperties
+
+	q._rawJSON = nil
+	return nil
+}
+
+func (q *QueryFindingsResponseGeneric) String() string {
+	if len(q._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(q._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(q); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", q)
+}
+
+type QueryScansResponseGeneric struct {
+	// Various metadata about the results organized by group, then type, then field.
+	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
+	// Cursor to use to retrieve the next page of results
+	Cursor string                   `json:"cursor" url:"cursor"`
+	Result []map[string]interface{} `json:"result" url:"result"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (q *QueryScansResponseGeneric) GetExtraProperties() map[string]interface{} {
+	return q.extraProperties
+}
+
+func (q *QueryScansResponseGeneric) UnmarshalJSON(data []byte) error {
+	type unmarshaler QueryScansResponseGeneric
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*q = QueryScansResponseGeneric(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *q)
+	if err != nil {
+		return err
+	}
+	q.extraProperties = extraProperties
+
+	q._rawJSON = nil
+	return nil
+}
+
+func (q *QueryScansResponseGeneric) String() string {
+	if len(q._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(q._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(q); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", q)
 }
 
 // Configuration options of a scan.
