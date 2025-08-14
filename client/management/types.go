@@ -6751,6 +6751,25 @@ func (a AssetsArmisDataset) Ptr() *AssetsArmisDataset {
 	return &a
 }
 
+type AssetsAxoniusDataset string
+
+const (
+	AssetsAxoniusDatasetBasicVer0 AssetsAxoniusDataset = "basic_v0"
+)
+
+func NewAssetsAxoniusDatasetFromString(s string) (AssetsAxoniusDataset, error) {
+	switch s {
+	case "basic_v0":
+		return AssetsAxoniusDatasetBasicVer0, nil
+	}
+	var t AssetsAxoniusDataset
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (a AssetsAxoniusDataset) Ptr() *AssetsAxoniusDataset {
+	return &a
+}
+
 type AssetsNozomiVantageDataset string
 
 const (
@@ -6950,6 +6969,48 @@ func (a *AssetsAxonius) UnmarshalJSON(data []byte) error {
 }
 
 func (a *AssetsAxonius) String() string {
+	if len(a._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(a); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", a)
+}
+
+// Configuration for a mocked Axonius as an Assets Provider
+type AssetsAxoniusMock struct {
+	Dataset AssetsAxoniusDataset `json:"dataset" url:"dataset"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (a *AssetsAxoniusMock) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
+}
+
+func (a *AssetsAxoniusMock) UnmarshalJSON(data []byte) error {
+	type unmarshaler AssetsAxoniusMock
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*a = AssetsAxoniusMock(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+
+	a._rawJSON = nil
+	return nil
+}
+
+func (a *AssetsAxoniusMock) String() string {
 	if len(a._rawJSON) > 0 {
 		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
 			return value
@@ -10662,6 +10723,8 @@ type ProviderConfig struct {
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/axonius-asset-setup)
 	AssetsAxonius *AssetsAxonius
+	// Configuration for a mocked Axonius as an Assets Provider
+	AssetsAxoniusMock *AssetsAxoniusMock
 	// Configuration for CrowdStrike Falcon as an Assets Provider
 	AssetsCrowdstrike *AssetsCrowdStrike
 	// Configuration for Nozomi Vantage.
@@ -10951,6 +11014,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.AssetsAxonius = value
+	case "assets_axonius_mock":
+		value := new(AssetsAxoniusMock)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.AssetsAxoniusMock = value
 	case "assets_crowdstrike":
 		value := new(AssetsCrowdStrike)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -11409,6 +11478,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.AssetsAxonius != nil {
 		return core.MarshalJSONWithExtraProperty(p.AssetsAxonius, "type", "assets_axonius")
 	}
+	if p.AssetsAxoniusMock != nil {
+		return core.MarshalJSONWithExtraProperty(p.AssetsAxoniusMock, "type", "assets_axonius_mock")
+	}
 	if p.AssetsCrowdstrike != nil {
 		return core.MarshalJSONWithExtraProperty(p.AssetsCrowdstrike, "type", "assets_crowdstrike")
 	}
@@ -11637,6 +11709,7 @@ type ProviderConfigVisitor interface {
 	VisitAssetsArmisCentrix(*AssetsArmisCentrix) error
 	VisitAssetsArmisCentrixMock(*AssetsArmisCentrixMock) error
 	VisitAssetsAxonius(*AssetsAxonius) error
+	VisitAssetsAxoniusMock(*AssetsAxoniusMock) error
 	VisitAssetsCrowdstrike(*AssetsCrowdStrike) error
 	VisitAssetsNozomiVantage(*AssetsNozomiVantage) error
 	VisitAssetsNozomiVantageMock(*AssetsNozomiVantageMock) error
@@ -11727,6 +11800,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.AssetsAxonius != nil {
 		return visitor.VisitAssetsAxonius(p.AssetsAxonius)
+	}
+	if p.AssetsAxoniusMock != nil {
+		return visitor.VisitAssetsAxoniusMock(p.AssetsAxoniusMock)
 	}
 	if p.AssetsCrowdstrike != nil {
 		return visitor.VisitAssetsCrowdstrike(p.AssetsCrowdstrike)
@@ -11964,6 +12040,8 @@ const (
 	ProviderConfigIdAssetsArmisCentrixMock ProviderConfigId = "assets_armis_centrix_mock"
 	// Axonius Asset Cloud
 	ProviderConfigIdAssetsAxonius ProviderConfigId = "assets_axonius"
+	// [MOCK] Axonius Asset Cloud
+	ProviderConfigIdAssetsAxoniusMock ProviderConfigId = "assets_axonius_mock"
 	// CrowdStrike Falcon Spotlight
 	ProviderConfigIdAssetsCrowdStrike ProviderConfigId = "assets_crowdstrike"
 	// Nozomi Vantage
@@ -12126,6 +12204,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdAssetsArmisCentrixMock, nil
 	case "assets_axonius":
 		return ProviderConfigIdAssetsAxonius, nil
+	case "assets_axonius_mock":
+		return ProviderConfigIdAssetsAxoniusMock, nil
 	case "assets_crowdstrike":
 		return ProviderConfigIdAssetsCrowdStrike, nil
 	case "assets_nozomi_vantage":
