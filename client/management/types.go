@@ -6770,6 +6770,25 @@ func (a AssetsAxoniusDataset) Ptr() *AssetsAxoniusDataset {
 	return &a
 }
 
+type AssetsCrowdStrikeDataset string
+
+const (
+	AssetsCrowdStrikeDatasetBasicVer0 AssetsCrowdStrikeDataset = "basic_v0"
+)
+
+func NewAssetsCrowdStrikeDatasetFromString(s string) (AssetsCrowdStrikeDataset, error) {
+	switch s {
+	case "basic_v0":
+		return AssetsCrowdStrikeDatasetBasicVer0, nil
+	}
+	var t AssetsCrowdStrikeDataset
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (a AssetsCrowdStrikeDataset) Ptr() *AssetsCrowdStrikeDataset {
+	return &a
+}
+
 type AssetsNozomiVantageDataset string
 
 const (
@@ -7056,6 +7075,48 @@ func (a *AssetsCrowdStrike) UnmarshalJSON(data []byte) error {
 }
 
 func (a *AssetsCrowdStrike) String() string {
+	if len(a._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(a); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", a)
+}
+
+// Configuration for a mocked CrowdStrike Falcon as an Assets Provider
+type AssetsCrowdStrikeMock struct {
+	Dataset AssetsCrowdStrikeDataset `json:"dataset" url:"dataset"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (a *AssetsCrowdStrikeMock) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
+}
+
+func (a *AssetsCrowdStrikeMock) UnmarshalJSON(data []byte) error {
+	type unmarshaler AssetsCrowdStrikeMock
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*a = AssetsCrowdStrikeMock(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+
+	a._rawJSON = nil
+	return nil
+}
+
+func (a *AssetsCrowdStrikeMock) String() string {
 	if len(a._rawJSON) > 0 {
 		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
 			return value
@@ -10727,6 +10788,8 @@ type ProviderConfig struct {
 	AssetsAxoniusMock *AssetsAxoniusMock
 	// Configuration for CrowdStrike Falcon as an Assets Provider
 	AssetsCrowdstrike *AssetsCrowdStrike
+	// Configuration for a mocked CrowdStrike Falcon as an Assets Provider
+	AssetsCrowdstrikeMock *AssetsCrowdStrikeMock
 	// Configuration for Nozomi Vantage.
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/nozomi-vantage-setup)
@@ -11026,6 +11089,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.AssetsCrowdstrike = value
+	case "assets_crowdstrike_mock":
+		value := new(AssetsCrowdStrikeMock)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.AssetsCrowdstrikeMock = value
 	case "assets_nozomi_vantage":
 		value := new(AssetsNozomiVantage)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -11484,6 +11553,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.AssetsCrowdstrike != nil {
 		return core.MarshalJSONWithExtraProperty(p.AssetsCrowdstrike, "type", "assets_crowdstrike")
 	}
+	if p.AssetsCrowdstrikeMock != nil {
+		return core.MarshalJSONWithExtraProperty(p.AssetsCrowdstrikeMock, "type", "assets_crowdstrike_mock")
+	}
 	if p.AssetsNozomiVantage != nil {
 		return core.MarshalJSONWithExtraProperty(p.AssetsNozomiVantage, "type", "assets_nozomi_vantage")
 	}
@@ -11711,6 +11783,7 @@ type ProviderConfigVisitor interface {
 	VisitAssetsAxonius(*AssetsAxonius) error
 	VisitAssetsAxoniusMock(*AssetsAxoniusMock) error
 	VisitAssetsCrowdstrike(*AssetsCrowdStrike) error
+	VisitAssetsCrowdstrikeMock(*AssetsCrowdStrikeMock) error
 	VisitAssetsNozomiVantage(*AssetsNozomiVantage) error
 	VisitAssetsNozomiVantageMock(*AssetsNozomiVantageMock) error
 	VisitAssetsQualysCloud(*AssetsQualysCloud) error
@@ -11806,6 +11879,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.AssetsCrowdstrike != nil {
 		return visitor.VisitAssetsCrowdstrike(p.AssetsCrowdstrike)
+	}
+	if p.AssetsCrowdstrikeMock != nil {
+		return visitor.VisitAssetsCrowdstrikeMock(p.AssetsCrowdstrikeMock)
 	}
 	if p.AssetsNozomiVantage != nil {
 		return visitor.VisitAssetsNozomiVantage(p.AssetsNozomiVantage)
@@ -12044,6 +12120,8 @@ const (
 	ProviderConfigIdAssetsAxoniusMock ProviderConfigId = "assets_axonius_mock"
 	// CrowdStrike Falcon Spotlight
 	ProviderConfigIdAssetsCrowdStrike ProviderConfigId = "assets_crowdstrike"
+	// [MOCK] CrowdStrike Falcon Spotlight
+	ProviderConfigIdAssetsCrowdStrikeMock ProviderConfigId = "assets_crowdstrike_mock"
 	// Nozomi Vantage
 	ProviderConfigIdAssetsNozomiVantage ProviderConfigId = "assets_nozomi_vantage"
 	// [MOCK] Nozomi Vantage
@@ -12208,6 +12286,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdAssetsAxoniusMock, nil
 	case "assets_crowdstrike":
 		return ProviderConfigIdAssetsCrowdStrike, nil
+	case "assets_crowdstrike_mock":
+		return ProviderConfigIdAssetsCrowdStrikeMock, nil
 	case "assets_nozomi_vantage":
 		return ProviderConfigIdAssetsNozomiVantage, nil
 	case "assets_nozomi_vantage_mock":
