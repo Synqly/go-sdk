@@ -10771,8 +10771,12 @@ func (p *PingOneCredential) Accept(visitor PingOneCredentialVisitor) error {
 type ProviderConfig struct {
 	Type string
 	// Configuration for HCL AppScan on Cloud as an application security provider.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/hcl-appscan-appsec-setup)
 	AppsecHclAppscanOnCloud *AppsecHclAppScanOnCloud
 	// Configuration for OpenText Core Application Security (formerly Fortify On Demand) as an application security provider.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/opentext-core-applicationsecurity-appsec-setup)
 	AppsecOpentextCoreApplicationSecurity *AppsecOpenTextCoreApplicationSecurity
 	// Configuration for Armis Centrix™ for Asset Management and Security.
 	//
@@ -16227,6 +16231,8 @@ func (z *ZendeskCredential) Accept(visitor ZendeskCredentialVisitor) error {
 }
 
 // Configuration for HCL AppScan on Cloud as an application security provider.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/hcl-appscan-appsec-setup)
 type AppsecHclAppScanOnCloud struct {
 	// Credentials used for accessing the HCL AppScan on Cloud API.
 	Credential *HclAppScanOnCloudCredential `json:"credential" url:"credential"`
@@ -16272,6 +16278,8 @@ func (a *AppsecHclAppScanOnCloud) String() string {
 }
 
 // Configuration for OpenText Core Application Security (formerly Fortify On Demand) as an application security provider.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/opentext-core-applicationsecurity-appsec-setup)
 type AppsecOpenTextCoreApplicationSecurity struct {
 	// Credentials used for accessing the OpenText Core Application Security API.
 	Credential *OpenTextCoreApplicationSecurityCredential `json:"credential" url:"credential"`
