@@ -17,6 +17,7 @@ import (
 	configstate "github.com/synqly/go-sdk/client/engine/ocsf/v130/configstate"
 	detectionfinding "github.com/synqly/go-sdk/client/engine/ocsf/v130/detectionfinding"
 	dnsactivity "github.com/synqly/go-sdk/client/engine/ocsf/v130/dnsactivity"
+	entitymanagement "github.com/synqly/go-sdk/client/engine/ocsf/v130/entitymanagement"
 	fileactivity "github.com/synqly/go-sdk/client/engine/ocsf/v130/fileactivity"
 	groupmanagement "github.com/synqly/go-sdk/client/engine/ocsf/v130/groupmanagement"
 	incidentfinding "github.com/synqly/go-sdk/client/engine/ocsf/v130/incidentfinding"
@@ -2373,6 +2374,7 @@ type Event struct {
 	ClassName                 string
 	AccountChange             *accountchange.AccountChange
 	ApiActivity               *apiactivity.ApiActivity
+	EntityManagement          *entitymanagement.EntityManagement
 	Authentication            *authentication.Authentication
 	AuthorizeSession          *authorizesession.AuthorizeSession
 	BaseEvent                 *baseevent.BaseEvent
@@ -2421,6 +2423,12 @@ func (e *Event) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		e.ApiActivity = value
+	case "Entity Management":
+		value := new(entitymanagement.EntityManagement)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.EntityManagement = value
 	case "Authentication":
 		value := new(authentication.Authentication)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -2564,6 +2572,9 @@ func (e Event) MarshalJSON() ([]byte, error) {
 	if e.ApiActivity != nil {
 		return core.MarshalJSONWithExtraProperty(e.ApiActivity, "class_name", "API Activity")
 	}
+	if e.EntityManagement != nil {
+		return core.MarshalJSONWithExtraProperty(e.EntityManagement, "class_name", "Entity Management")
+	}
 	if e.Authentication != nil {
 		return core.MarshalJSONWithExtraProperty(e.Authentication, "class_name", "Authentication")
 	}
@@ -2636,6 +2647,7 @@ func (e Event) MarshalJSON() ([]byte, error) {
 type EventVisitor interface {
 	VisitAccountChange(*accountchange.AccountChange) error
 	VisitApiActivity(*apiactivity.ApiActivity) error
+	VisitEntityManagement(*entitymanagement.EntityManagement) error
 	VisitAuthentication(*authentication.Authentication) error
 	VisitAuthorizeSession(*authorizesession.AuthorizeSession) error
 	VisitBaseEvent(*baseevent.BaseEvent) error
@@ -2666,6 +2678,9 @@ func (e *Event) Accept(visitor EventVisitor) error {
 	}
 	if e.ApiActivity != nil {
 		return visitor.VisitApiActivity(e.ApiActivity)
+	}
+	if e.EntityManagement != nil {
+		return visitor.VisitEntityManagement(e.EntityManagement)
 	}
 	if e.Authentication != nil {
 		return visitor.VisitAuthentication(e.Authentication)
