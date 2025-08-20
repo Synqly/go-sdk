@@ -6846,6 +6846,25 @@ func (a AssetsServiceNowDataset) Ptr() *AssetsServiceNowDataset {
 	return &a
 }
 
+type AssetsSevcoDataset string
+
+const (
+	AssetsSevcoDatasetBasicVer0 AssetsSevcoDataset = "basic_v0"
+)
+
+func NewAssetsSevcoDatasetFromString(s string) (AssetsSevcoDataset, error) {
+	switch s {
+	case "basic_v0":
+		return AssetsSevcoDatasetBasicVer0, nil
+	}
+	var t AssetsSevcoDataset
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (a AssetsSevcoDataset) Ptr() *AssetsSevcoDataset {
+	return &a
+}
+
 type AssetsTaniumCloudDataset string
 
 const (
@@ -7424,6 +7443,48 @@ func (a *AssetsSevco) UnmarshalJSON(data []byte) error {
 }
 
 func (a *AssetsSevco) String() string {
+	if len(a._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(a); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", a)
+}
+
+// Configuration for a mocked Sevco Assets Provider
+type AssetsSevcoMock struct {
+	Dataset AssetsSevcoDataset `json:"dataset" url:"dataset"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (a *AssetsSevcoMock) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
+}
+
+func (a *AssetsSevcoMock) UnmarshalJSON(data []byte) error {
+	type unmarshaler AssetsSevcoMock
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*a = AssetsSevcoMock(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+
+	a._rawJSON = nil
+	return nil
+}
+
+func (a *AssetsSevcoMock) String() string {
 	if len(a._rawJSON) > 0 {
 		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
 			return value
@@ -10926,6 +10987,8 @@ type ProviderConfig struct {
 	AssetsServicenowMock *AssetsServiceNowMock
 	// Configuration for the Sevco Assets Provider
 	AssetsSevco *AssetsSevco
+	// Configuration for a mocked Sevco Assets Provider
+	AssetsSevcoMock *AssetsSevcoMock
 	// Configuration for Tanium Cloud as an Assets Provider
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/tanium-setup)
@@ -11257,6 +11320,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.AssetsSevco = value
+	case "assets_sevco_mock":
+		value := new(AssetsSevcoMock)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.AssetsSevcoMock = value
 	case "assets_tanium_cloud":
 		value := new(AssetsTaniumCloud)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -11703,6 +11772,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.AssetsSevco != nil {
 		return core.MarshalJSONWithExtraProperty(p.AssetsSevco, "type", "assets_sevco")
 	}
+	if p.AssetsSevcoMock != nil {
+		return core.MarshalJSONWithExtraProperty(p.AssetsSevcoMock, "type", "assets_sevco_mock")
+	}
 	if p.AssetsTaniumCloud != nil {
 		return core.MarshalJSONWithExtraProperty(p.AssetsTaniumCloud, "type", "assets_tanium_cloud")
 	}
@@ -11920,6 +11992,7 @@ type ProviderConfigVisitor interface {
 	VisitAssetsServicenow(*AssetsServiceNow) error
 	VisitAssetsServicenowMock(*AssetsServiceNowMock) error
 	VisitAssetsSevco(*AssetsSevco) error
+	VisitAssetsSevcoMock(*AssetsSevcoMock) error
 	VisitAssetsTaniumCloud(*AssetsTaniumCloud) error
 	VisitAssetsTaniumCloudMock(*AssetsTaniumCloudMock) error
 	VisitCloudsecurityAws(*CloudSecurityAws) error
@@ -12033,6 +12106,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.AssetsSevco != nil {
 		return visitor.VisitAssetsSevco(p.AssetsSevco)
+	}
+	if p.AssetsSevcoMock != nil {
+		return visitor.VisitAssetsSevcoMock(p.AssetsSevcoMock)
 	}
 	if p.AssetsTaniumCloud != nil {
 		return visitor.VisitAssetsTaniumCloud(p.AssetsTaniumCloud)
@@ -12269,6 +12345,8 @@ const (
 	ProviderConfigIdAssetsServiceNowMock ProviderConfigId = "assets_servicenow_mock"
 	// Sevco for Asset Management and Security
 	ProviderConfigIdAssetsSevco ProviderConfigId = "assets_sevco"
+	// [MOCK] Sevco for Asset Management and Security
+	ProviderConfigIdAssetsSevcoMock ProviderConfigId = "assets_sevco_mock"
 	// Tanium Vulnerability Management
 	ProviderConfigIdAssetsTaniumCloud ProviderConfigId = "assets_tanium_cloud"
 	// [MOCK] Tanium Vulnerability Management
@@ -12437,6 +12515,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdAssetsServiceNowMock, nil
 	case "assets_sevco":
 		return ProviderConfigIdAssetsSevco, nil
+	case "assets_sevco_mock":
+		return ProviderConfigIdAssetsSevcoMock, nil
 	case "assets_tanium_cloud":
 		return ProviderConfigIdAssetsTaniumCloud, nil
 	case "assets_tanium_cloud_mock":
