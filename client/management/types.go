@@ -7663,6 +7663,76 @@ func (a *AutotaskSecretCredential) Accept(visitor AutotaskSecretCredentialVisito
 	return fmt.Errorf("type %T does not define a non-empty union type", a)
 }
 
+type AwsProviderCredential struct {
+	Type string
+	// Configuration when creating new AWS Access Keys.
+	Aws *AwsCredential
+	// Reference to existing AWS Access Keys.
+	AwsId AwsCredentialId
+}
+
+func (a *AwsProviderCredential) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	a.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", a)
+	}
+	switch unmarshaler.Type {
+	case "aws":
+		value := new(AwsCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		a.Aws = value
+	case "aws_id":
+		var valueUnmarshaler struct {
+			AwsId AwsCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		a.AwsId = valueUnmarshaler.AwsId
+	}
+	return nil
+}
+
+func (a AwsProviderCredential) MarshalJSON() ([]byte, error) {
+	if a.Aws != nil {
+		return core.MarshalJSONWithExtraProperty(a.Aws, "type", "aws")
+	}
+	if a.AwsId != "" {
+		var marshaler = struct {
+			Type  string          `json:"type"`
+			AwsId AwsCredentialId `json:"value"`
+		}{
+			Type:  "aws_id",
+			AwsId: a.AwsId,
+		}
+		return json.Marshal(marshaler)
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", a)
+}
+
+type AwsProviderCredentialVisitor interface {
+	VisitAws(*AwsCredential) error
+	VisitAwsId(AwsCredentialId) error
+}
+
+func (a *AwsProviderCredential) Accept(visitor AwsProviderCredentialVisitor) error {
+	if a.Aws != nil {
+		return visitor.VisitAws(a.Aws)
+	}
+	if a.AwsId != "" {
+		return visitor.VisitAwsId(a.AwsId)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", a)
+}
+
 type AwsRegion string
 
 const (
@@ -8229,6 +8299,50 @@ func (a *AzureMonitorLogsCredential) Accept(visitor AzureMonitorLogsCredentialVi
 		return visitor.VisitTokenId(a.TokenId)
 	}
 	return fmt.Errorf("type %T does not define a non-empty union type", a)
+}
+
+// Configuration for the AWS Cloud Security Provider
+type CloudSecurityAws struct {
+	Credential *AwsProviderCredential `json:"credential" url:"credential"`
+	// The [AWS region](https://docs.aws.amazon.com/global-infrastructure/latest/regions/aws-regions.html) to use for the AWS Cloud Security Provider.
+	Region AwsRegion `json:"region" url:"region"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *CloudSecurityAws) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
+}
+
+func (c *CloudSecurityAws) UnmarshalJSON(data []byte) error {
+	type unmarshaler CloudSecurityAws
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = CloudSecurityAws(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
+	c._rawJSON = nil
+	return nil
+}
+
+func (c *CloudSecurityAws) String() string {
+	if len(c._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
 }
 
 // Configuration for the CrowdStrike Cloud Security Provider
@@ -10818,6 +10932,8 @@ type ProviderConfig struct {
 	AssetsTaniumCloud *AssetsTaniumCloud
 	// Configuration for a mocked Tanium Cloud as an Assets Provider
 	AssetsTaniumCloudMock *AssetsTaniumCloudMock
+	// Configuration for the AWS Cloud Security Provider
+	CloudsecurityAws *CloudSecurityAws
 	// Configuration for the CrowdStrike Cloud Security Provider
 	CloudsecurityCrowdstrike *CloudSecurityCrowdStrike
 	// Configuration for the Microsoft Defender for Cloud Provider
@@ -11153,6 +11269,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.AssetsTaniumCloudMock = value
+	case "cloudsecurity_aws":
+		value := new(CloudSecurityAws)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.CloudsecurityAws = value
 	case "cloudsecurity_crowdstrike":
 		value := new(CloudSecurityCrowdStrike)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -11587,6 +11709,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.AssetsTaniumCloudMock != nil {
 		return core.MarshalJSONWithExtraProperty(p.AssetsTaniumCloudMock, "type", "assets_tanium_cloud_mock")
 	}
+	if p.CloudsecurityAws != nil {
+		return core.MarshalJSONWithExtraProperty(p.CloudsecurityAws, "type", "cloudsecurity_aws")
+	}
 	if p.CloudsecurityCrowdstrike != nil {
 		return core.MarshalJSONWithExtraProperty(p.CloudsecurityCrowdstrike, "type", "cloudsecurity_crowdstrike")
 	}
@@ -11797,6 +11922,7 @@ type ProviderConfigVisitor interface {
 	VisitAssetsSevco(*AssetsSevco) error
 	VisitAssetsTaniumCloud(*AssetsTaniumCloud) error
 	VisitAssetsTaniumCloudMock(*AssetsTaniumCloudMock) error
+	VisitCloudsecurityAws(*CloudSecurityAws) error
 	VisitCloudsecurityCrowdstrike(*CloudSecurityCrowdStrike) error
 	VisitCloudsecurityDefender(*CloudSecurityDefender) error
 	VisitEdrCrowdstrike(*EdrCrowdStrike) error
@@ -11913,6 +12039,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.AssetsTaniumCloudMock != nil {
 		return visitor.VisitAssetsTaniumCloudMock(p.AssetsTaniumCloudMock)
+	}
+	if p.CloudsecurityAws != nil {
+		return visitor.VisitCloudsecurityAws(p.CloudsecurityAws)
 	}
 	if p.CloudsecurityCrowdstrike != nil {
 		return visitor.VisitCloudsecurityCrowdstrike(p.CloudsecurityCrowdstrike)
@@ -12144,6 +12273,8 @@ const (
 	ProviderConfigIdAssetsTaniumCloud ProviderConfigId = "assets_tanium_cloud"
 	// [MOCK] Tanium Vulnerability Management
 	ProviderConfigIdAssetsTaniumCloudMock ProviderConfigId = "assets_tanium_cloud_mock"
+	// AWS Cloud Security
+	ProviderConfigIdCloudSecurityAws ProviderConfigId = "cloudsecurity_aws"
 	// CrowdStrike Falcon® Insight EDR
 	ProviderConfigIdCloudSecurityCrowdStrike ProviderConfigId = "cloudsecurity_crowdstrike"
 	// Microsoft Defender for Cloud
@@ -12310,6 +12441,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdAssetsTaniumCloud, nil
 	case "assets_tanium_cloud_mock":
 		return ProviderConfigIdAssetsTaniumCloudMock, nil
+	case "cloudsecurity_aws":
+		return ProviderConfigIdCloudSecurityAws, nil
 	case "cloudsecurity_crowdstrike":
 		return ProviderConfigIdCloudSecurityCrowdStrike, nil
 	case "cloudsecurity_defender":
