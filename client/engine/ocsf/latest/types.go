@@ -64,3 +64,5 @@ type SecurityFinding = *securityfinding.SecurityFinding
 type VulnerabilityFinding = *vulnerabilityfinding.VulnerabilityFinding
 
 type WebResourceAccessActivity = *webresourceaccessactivity.WebResourceAccessActivity
+
+type Ocsf150Application = *applicationsecurityposturefinding.Application

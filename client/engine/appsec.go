@@ -148,7 +148,7 @@ type AppSecQueryApplicationsResponse struct {
 	// Cursor to use to retrieve the next page of results
 	Cursor string `json:"cursor" url:"cursor"`
 	// List of applications
-	Result []*AppSecApplication `json:"result" url:"result"`
+	Result []AppSecApplication `json:"result" url:"result"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
@@ -194,7 +194,7 @@ type AppSecQueryFindingsResponse struct {
 	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
 	// Cursor to use to retrieve the next page of results
 	Cursor string                 `json:"cursor" url:"cursor"`
-	Result []*AppSecFindingResult `json:"result" url:"result"`
+	Result []AppSecPostureFinding `json:"result" url:"result"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
