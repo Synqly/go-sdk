@@ -3638,6 +3638,7 @@ const (
 	OperationIdVulnerabilitiesQueryScans                OperationId = "vulnerabilities_query_scans"
 	OperationIdVulnerabilitiesUpdateAsset               OperationId = "vulnerabilities_update_asset"
 	OperationIdVulnerabilitiesUpdateFinding             OperationId = "vulnerabilities_update_finding"
+	OperationIdVulnerabilitiesUploadScan                OperationId = "vulnerabilities_upload_scan"
 )
 
 func NewOperationIdFromString(s string) (OperationId, error) {
@@ -3792,6 +3793,8 @@ func NewOperationIdFromString(s string) (OperationId, error) {
 		return OperationIdVulnerabilitiesUpdateAsset, nil
 	case "vulnerabilities_update_finding":
 		return OperationIdVulnerabilitiesUpdateFinding, nil
+	case "vulnerabilities_upload_scan":
+		return OperationIdVulnerabilitiesUploadScan, nil
 	}
 	var t OperationId
 	return "", fmt.Errorf("%s is not a valid %T", s, t)

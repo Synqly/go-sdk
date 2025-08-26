@@ -449,3 +449,95 @@ func (u *UpdateFindingRequest) String() string {
 	}
 	return fmt.Sprintf("%#v", u)
 }
+
+type UploadScanRequest struct {
+	// Assets and optional findings to upload in the vulnerability scanning system.
+	Assets []Asset `json:"assets" url:"assets"`
+	// Name of the source for this scan, such as a tool or process. Does not have to be unique, defaults to `Integration import`.
+	SourceName *string `json:"source_name,omitempty" url:"source_name,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (u *UploadScanRequest) GetExtraProperties() map[string]interface{} {
+	return u.extraProperties
+}
+
+func (u *UploadScanRequest) UnmarshalJSON(data []byte) error {
+	type unmarshaler UploadScanRequest
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*u = UploadScanRequest(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *u)
+	if err != nil {
+		return err
+	}
+	u.extraProperties = extraProperties
+
+	u._rawJSON = nil
+	return nil
+}
+
+func (u *UploadScanRequest) String() string {
+	if len(u._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(u._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(u); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", u)
+}
+
+type UploadScanResponse struct {
+	// Various metadata about the results organized by group, then type, then field.
+	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
+	// ID of the scan.
+	ScanId string `json:"scan_id" url:"scan_id"`
+	// Specifies the status of the upload scan job, which can be COMPLETE or PENDING.
+	Status QueryStatus `json:"status" url:"status"`
+	// Provides additional details about any errors encountered during the upload scan operation.
+	Errors *Problem `json:"errors,omitempty" url:"errors,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (u *UploadScanResponse) GetExtraProperties() map[string]interface{} {
+	return u.extraProperties
+}
+
+func (u *UploadScanResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler UploadScanResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*u = UploadScanResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *u)
+	if err != nil {
+		return err
+	}
+	u.extraProperties = extraProperties
+
+	u._rawJSON = nil
+	return nil
+}
+
+func (u *UploadScanResponse) String() string {
+	if len(u._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(u._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(u); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", u)
+}
