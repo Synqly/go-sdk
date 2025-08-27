@@ -23,6 +23,9 @@ import (
 	webresourceaccessactivity "github.com/synqly/go-sdk/client/engine/ocsf/v130/webresourceaccessactivity"
 	cloudresourcesinventoryinfo "github.com/synqly/go-sdk/client/engine/ocsf/v140/cloudresourcesinventoryinfo"
 	applicationsecurityposturefinding "github.com/synqly/go-sdk/client/engine/ocsf/v150/applicationsecurityposturefinding"
+	emailactivity "github.com/synqly/go-sdk/client/engine/ocsf/v160/emailactivity"
+	filehostingactivity "github.com/synqly/go-sdk/client/engine/ocsf/v160/filehostingactivity"
+	httpactivity "github.com/synqly/go-sdk/client/engine/ocsf/v160/httpactivity"
 )
 
 type AccountChange = *accountchange.AccountChange
@@ -41,11 +44,17 @@ type DetectionFinding = *detectionfinding.DetectionFinding
 
 type DnsActivity = *dnsactivity.DnsActivity
 
+type EmailActivity = *emailactivity.EmailActivity
+
 type EntityManagement = *entitymanagement.EntityManagement
 
 type FileActivity = *fileactivity.FileActivity
 
+type FileHostingActivity = *filehostingactivity.FileHosting
+
 type GroupManagement = *groupmanagement.GroupManagement
+
+type HttpActivity = *httpactivity.HttpActivity
 
 type IncidentFinding = *incidentfinding.IncidentFinding
 

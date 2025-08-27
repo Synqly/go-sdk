@@ -32,6 +32,9 @@ import (
 	useraccessmanagement "github.com/synqly/go-sdk/client/engine/ocsf/v130/useraccessmanagement"
 	vulnerabilityfinding "github.com/synqly/go-sdk/client/engine/ocsf/v130/vulnerabilityfinding"
 	webresourceaccessactivity "github.com/synqly/go-sdk/client/engine/ocsf/v130/webresourceaccessactivity"
+	emailactivity "github.com/synqly/go-sdk/client/engine/ocsf/v160/emailactivity"
+	filehostingactivity "github.com/synqly/go-sdk/client/engine/ocsf/v160/filehostingactivity"
+	httpactivity "github.com/synqly/go-sdk/client/engine/ocsf/v160/httpactivity"
 	time "time"
 )
 
@@ -2233,6 +2236,7 @@ type Event struct {
 	DeviceConfigState         *configstate.ConfigState
 	DetectionFinding          *detectionfinding.DetectionFinding
 	DnsActivity               *dnsactivity.DnsActivity
+	HttpActivity              *httpactivity.HttpActivity
 	FileSystemActivity        *fileactivity.FileActivity
 	GroupManagement           *groupmanagement.GroupManagement
 	IncidentFinding           *incidentfinding.IncidentFinding
@@ -2248,6 +2252,8 @@ type Event struct {
 	VulnerabilityFinding      *vulnerabilityfinding.VulnerabilityFinding
 	WebResourceAccessActivity *webresourceaccessactivity.WebResourceAccessActivity
 	ApplicationLifecycle      *applicationlifecycle.ApplicationLifecycle
+	FileHostingActivity       *filehostingactivity.FileHosting
+	EmailActivity             *emailactivity.EmailActivity
 }
 
 func (e *Event) UnmarshalJSON(data []byte) error {
@@ -2322,6 +2328,12 @@ func (e *Event) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		e.DnsActivity = value
+	case "HTTP Activity":
+		value := new(httpactivity.HttpActivity)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.HttpActivity = value
 	case "File System Activity":
 		value := new(fileactivity.FileActivity)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -2412,6 +2424,18 @@ func (e *Event) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		e.ApplicationLifecycle = value
+	case "File Hosting Activity":
+		value := new(filehostingactivity.FileHosting)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.FileHostingActivity = value
+	case "Email Activity":
+		value := new(emailactivity.EmailActivity)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.EmailActivity = value
 	}
 	return nil
 }
@@ -2446,6 +2470,9 @@ func (e Event) MarshalJSON() ([]byte, error) {
 	}
 	if e.DnsActivity != nil {
 		return core.MarshalJSONWithExtraProperty(e.DnsActivity, "class_name", "DNS Activity")
+	}
+	if e.HttpActivity != nil {
+		return core.MarshalJSONWithExtraProperty(e.HttpActivity, "class_name", "HTTP Activity")
 	}
 	if e.FileSystemActivity != nil {
 		return core.MarshalJSONWithExtraProperty(e.FileSystemActivity, "class_name", "File System Activity")
@@ -2492,6 +2519,12 @@ func (e Event) MarshalJSON() ([]byte, error) {
 	if e.ApplicationLifecycle != nil {
 		return core.MarshalJSONWithExtraProperty(e.ApplicationLifecycle, "class_name", "Application Lifecycle")
 	}
+	if e.FileHostingActivity != nil {
+		return core.MarshalJSONWithExtraProperty(e.FileHostingActivity, "class_name", "File Hosting Activity")
+	}
+	if e.EmailActivity != nil {
+		return core.MarshalJSONWithExtraProperty(e.EmailActivity, "class_name", "Email Activity")
+	}
 	return nil, fmt.Errorf("type %T does not define a non-empty union type", e)
 }
 
@@ -2506,6 +2539,7 @@ type EventVisitor interface {
 	VisitDeviceConfigState(*configstate.ConfigState) error
 	VisitDetectionFinding(*detectionfinding.DetectionFinding) error
 	VisitDnsActivity(*dnsactivity.DnsActivity) error
+	VisitHttpActivity(*httpactivity.HttpActivity) error
 	VisitFileSystemActivity(*fileactivity.FileActivity) error
 	VisitGroupManagement(*groupmanagement.GroupManagement) error
 	VisitIncidentFinding(*incidentfinding.IncidentFinding) error
@@ -2521,6 +2555,8 @@ type EventVisitor interface {
 	VisitVulnerabilityFinding(*vulnerabilityfinding.VulnerabilityFinding) error
 	VisitWebResourceAccessActivity(*webresourceaccessactivity.WebResourceAccessActivity) error
 	VisitApplicationLifecycle(*applicationlifecycle.ApplicationLifecycle) error
+	VisitFileHostingActivity(*filehostingactivity.FileHosting) error
+	VisitEmailActivity(*emailactivity.EmailActivity) error
 }
 
 func (e *Event) Accept(visitor EventVisitor) error {
@@ -2553,6 +2589,9 @@ func (e *Event) Accept(visitor EventVisitor) error {
 	}
 	if e.DnsActivity != nil {
 		return visitor.VisitDnsActivity(e.DnsActivity)
+	}
+	if e.HttpActivity != nil {
+		return visitor.VisitHttpActivity(e.HttpActivity)
 	}
 	if e.FileSystemActivity != nil {
 		return visitor.VisitFileSystemActivity(e.FileSystemActivity)
@@ -2598,6 +2637,12 @@ func (e *Event) Accept(visitor EventVisitor) error {
 	}
 	if e.ApplicationLifecycle != nil {
 		return visitor.VisitApplicationLifecycle(e.ApplicationLifecycle)
+	}
+	if e.FileHostingActivity != nil {
+		return visitor.VisitFileHostingActivity(e.FileHostingActivity)
+	}
+	if e.EmailActivity != nil {
+		return visitor.VisitEmailActivity(e.EmailActivity)
 	}
 	return fmt.Errorf("type %T does not define a non-empty union type", e)
 }
