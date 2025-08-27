@@ -34,9 +34,10 @@ func NewClient(opts ...option.RequestOption) *Client {
 	}
 }
 
-// Initiates a new session for the given member in a Synqly organization. The organization is identified by the given organization token.
+// Initiates a new session for the given member in specified Synqly organization.
 func (c *Client) Logon(
 	ctx context.Context,
+	organizationId management.OrganizationId,
 	request *management.LogonRequest,
 	opts ...option.RequestOption,
 ) (*management.LogonResponse, error) {
@@ -49,7 +50,7 @@ func (c *Client) Logon(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := baseURL + "/v1/auth/logon"
+	endpointURL := core.EncodeURL(baseURL+"/v1/auth/logon/%v", organizationId)
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
