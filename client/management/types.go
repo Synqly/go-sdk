@@ -9964,14 +9964,14 @@ func (i *IdentityOkta) String() string {
 // [Configuration guide](https://docs.synqly.com/guides/provider-configuration/ping-identity-setup)
 type IdentityPingOne struct {
 	// Base URL for making authentication requests to PingOne.
-	AuthUrl string `json:"auth_url" url:"auth_url"`
+	AuthUrl PingOneAuthUrl `json:"auth_url" url:"auth_url"`
 	// Client ID for the application set up as a worker.
 	ClientId   string             `json:"client_id" url:"client_id"`
 	Credential *PingOneCredential `json:"credential" url:"credential"`
 	// The organization ID that the client app is a part of.
 	OrganizationId string `json:"organization_id" url:"organization_id"`
 	// Base URL for the PingOne API.
-	Url string `json:"url" url:"url"`
+	Url PingOneApiurl `json:"url" url:"url"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
@@ -10874,6 +10874,74 @@ func (p *PagerDutyCredential) Accept(visitor PagerDutyCredentialVisitor) error {
 		return visitor.VisitTokenId(p.TokenId)
 	}
 	return fmt.Errorf("type %T does not define a non-empty union type", p)
+}
+
+type PingOneApiurl string
+
+const (
+	PingOneApiurlPingoneApiUrlUs   PingOneApiurl = "https://api.pingone.com"
+	PingOneApiurlPingoneApiUrlCa   PingOneApiurl = "https://api.pingone.ca"
+	PingOneApiurlPingoneApiUrlEu   PingOneApiurl = "https://api.pingone.eu"
+	PingOneApiurlPingoneApiUrlAu   PingOneApiurl = "https://api.pingone.com.au"
+	PingOneApiurlPingoneApiUrlAsia PingOneApiurl = "https://api.pingone.sg"
+	PingOneApiurlPingoneApiUrlSg   PingOneApiurl = "https://api.pingone.asia"
+)
+
+func NewPingOneApiurlFromString(s string) (PingOneApiurl, error) {
+	switch s {
+	case "https://api.pingone.com":
+		return PingOneApiurlPingoneApiUrlUs, nil
+	case "https://api.pingone.ca":
+		return PingOneApiurlPingoneApiUrlCa, nil
+	case "https://api.pingone.eu":
+		return PingOneApiurlPingoneApiUrlEu, nil
+	case "https://api.pingone.com.au":
+		return PingOneApiurlPingoneApiUrlAu, nil
+	case "https://api.pingone.sg":
+		return PingOneApiurlPingoneApiUrlAsia, nil
+	case "https://api.pingone.asia":
+		return PingOneApiurlPingoneApiUrlSg, nil
+	}
+	var t PingOneApiurl
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (p PingOneApiurl) Ptr() *PingOneApiurl {
+	return &p
+}
+
+type PingOneAuthUrl string
+
+const (
+	PingOneAuthUrlPingoneAuthUrlUs   PingOneAuthUrl = "https://auth.pingone.com"
+	PingOneAuthUrlPingoneAuthUrlCa   PingOneAuthUrl = "https://auth.pingone.ca"
+	PingOneAuthUrlPingoneAuthUrlEu   PingOneAuthUrl = "https://auth.pingone.eu"
+	PingOneAuthUrlPingoneAuthUrlAu   PingOneAuthUrl = "https://auth.pingone.com.au"
+	PingOneAuthUrlPingoneAuthUrlSg   PingOneAuthUrl = "https://auth.pingone.sg"
+	PingOneAuthUrlPingoneAuthUrlAsia PingOneAuthUrl = "https://auth.pingone.asia"
+)
+
+func NewPingOneAuthUrlFromString(s string) (PingOneAuthUrl, error) {
+	switch s {
+	case "https://auth.pingone.com":
+		return PingOneAuthUrlPingoneAuthUrlUs, nil
+	case "https://auth.pingone.ca":
+		return PingOneAuthUrlPingoneAuthUrlCa, nil
+	case "https://auth.pingone.eu":
+		return PingOneAuthUrlPingoneAuthUrlEu, nil
+	case "https://auth.pingone.com.au":
+		return PingOneAuthUrlPingoneAuthUrlAu, nil
+	case "https://auth.pingone.sg":
+		return PingOneAuthUrlPingoneAuthUrlSg, nil
+	case "https://auth.pingone.asia":
+		return PingOneAuthUrlPingoneAuthUrlAsia, nil
+	}
+	var t PingOneAuthUrl
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (p PingOneAuthUrl) Ptr() *PingOneAuthUrl {
+	return &p
 }
 
 type PingOneCredential struct {
