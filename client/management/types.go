@@ -3132,37 +3132,6 @@ func (w *WebhookConfig) String() string {
 	return fmt.Sprintf("%#v", w)
 }
 
-type WebhookEvent string
-
-const (
-	WebhookEventTicketCreated        WebhookEvent = "TicketCreated"
-	WebhookEventTicketUpdated        WebhookEvent = "TicketUpdated"
-	WebhookEventTicketDeleted        WebhookEvent = "TicketDeleted"
-	WebhookEventTicketCommentCreated WebhookEvent = "TicketCommentCreated"
-	WebhookEventTicketCommentDeleted WebhookEvent = "TicketCommentDeleted"
-)
-
-func NewWebhookEventFromString(s string) (WebhookEvent, error) {
-	switch s {
-	case "TicketCreated":
-		return WebhookEventTicketCreated, nil
-	case "TicketUpdated":
-		return WebhookEventTicketUpdated, nil
-	case "TicketDeleted":
-		return WebhookEventTicketDeleted, nil
-	case "TicketCommentCreated":
-		return WebhookEventTicketCommentCreated, nil
-	case "TicketCommentDeleted":
-		return WebhookEventTicketCommentDeleted, nil
-	}
-	var t WebhookEvent
-	return "", fmt.Errorf("%s is not a valid %T", s, t)
-}
-
-func (w WebhookEvent) Ptr() *WebhookEvent {
-	return &w
-}
-
 type WebhookItem struct {
 	// Webhook URL. Events from providers will be sent to this URL.
 	WebhookUrl string `json:"webhook_url" url:"webhook_url"`
@@ -4587,6 +4556,37 @@ func NewOrganizationTypeFromString(s string) (OrganizationType, error) {
 
 func (o OrganizationType) Ptr() *OrganizationType {
 	return &o
+}
+
+type WebhookEvent string
+
+const (
+	WebhookEventTicketCreated        WebhookEvent = "TicketCreated"
+	WebhookEventTicketUpdated        WebhookEvent = "TicketUpdated"
+	WebhookEventTicketDeleted        WebhookEvent = "TicketDeleted"
+	WebhookEventTicketCommentCreated WebhookEvent = "TicketCommentCreated"
+	WebhookEventTicketCommentDeleted WebhookEvent = "TicketCommentDeleted"
+)
+
+func NewWebhookEventFromString(s string) (WebhookEvent, error) {
+	switch s {
+	case "TicketCreated":
+		return WebhookEventTicketCreated, nil
+	case "TicketUpdated":
+		return WebhookEventTicketUpdated, nil
+	case "TicketDeleted":
+		return WebhookEventTicketDeleted, nil
+	case "TicketCommentCreated":
+		return WebhookEventTicketCommentCreated, nil
+	case "TicketCommentDeleted":
+		return WebhookEventTicketCommentDeleted, nil
+	}
+	var t WebhookEvent
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (w WebhookEvent) Ptr() *WebhookEvent {
+	return &w
 }
 
 type WebhookFilter string

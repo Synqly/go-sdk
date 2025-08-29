@@ -2686,6 +2686,8 @@ type TicketingWebhookResponse struct {
 	Priority *Priority `json:"priority,omitempty" url:"priority,omitempty"`
 	// Short Description of the ticket in the ticketing system.
 	ShortDescription *string `json:"short_description,omitempty" url:"short_description,omitempty"`
+	// The type of event that was sent by the ticketing system.
+	EventType *WebhookEvent `json:"event_type,omitempty" url:"event_type,omitempty"`
 	// The Raw JSON that was sent by the ticketing system for this webhook event.
 	RawPayload string `json:"raw_payload" url:"raw_payload"`
 
@@ -3825,6 +3827,37 @@ func (o *OperationWebhookPayload) String() string {
 		return value
 	}
 	return fmt.Sprintf("%#v", o)
+}
+
+type WebhookEvent string
+
+const (
+	WebhookEventTicketCreated        WebhookEvent = "TicketCreated"
+	WebhookEventTicketUpdated        WebhookEvent = "TicketUpdated"
+	WebhookEventTicketDeleted        WebhookEvent = "TicketDeleted"
+	WebhookEventTicketCommentCreated WebhookEvent = "TicketCommentCreated"
+	WebhookEventTicketCommentDeleted WebhookEvent = "TicketCommentDeleted"
+)
+
+func NewWebhookEventFromString(s string) (WebhookEvent, error) {
+	switch s {
+	case "TicketCreated":
+		return WebhookEventTicketCreated, nil
+	case "TicketUpdated":
+		return WebhookEventTicketUpdated, nil
+	case "TicketDeleted":
+		return WebhookEventTicketDeleted, nil
+	case "TicketCommentCreated":
+		return WebhookEventTicketCommentCreated, nil
+	case "TicketCommentDeleted":
+		return WebhookEventTicketCommentDeleted, nil
+	}
+	var t WebhookEvent
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (w WebhookEvent) Ptr() *WebhookEvent {
+	return &w
 }
 
 type WebhookFilter string
