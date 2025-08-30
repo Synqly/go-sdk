@@ -8955,7 +8955,7 @@ func (e *EdrSentinelOne) String() string {
 type EdrSophos struct {
 	Credential *SophosCredential `json:"credential" url:"credential"`
 	// Base URL for the Sophos Endpoint API.
-	Url *string `json:"url,omitempty" url:"url,omitempty"`
+	Url string `json:"url" url:"url"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
