@@ -4236,7 +4236,7 @@ func (s *StoragePath) String() string {
 	return fmt.Sprintf("%#v", s)
 }
 
-// The actor object either relates gives a summary of an actor in an escalation policy or gives full details of an actor. This depends on the capabilities of the ticketing provider. An actor is someone or something that will be notifed when certain conditions are met. It can either be an agent, a group, or a schedule.
+// The actor object either relates gives a summary of an actor in an escalation policy or gives full details of an actor. This depends on the capabilities of the ticketing provider. An actor is someone or something that will be notified when certain conditions are met. It can either be an agent, a group, or a schedule.
 type Actor struct {
 	Type            string
 	Agent           *Agent
@@ -4620,6 +4620,133 @@ func (c *Comment) String() string {
 	return fmt.Sprintf("%#v", c)
 }
 
+type CreateCommentResponseGeneric struct {
+	// Various metadata about the results organized by group, then type, then field.
+	Meta   *MetaResponse          `json:"meta,omitempty" url:"meta,omitempty"`
+	Result map[string]interface{} `json:"result" url:"result"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *CreateCommentResponseGeneric) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
+}
+
+func (c *CreateCommentResponseGeneric) UnmarshalJSON(data []byte) error {
+	type unmarshaler CreateCommentResponseGeneric
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = CreateCommentResponseGeneric(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
+	c._rawJSON = nil
+	return nil
+}
+
+func (c *CreateCommentResponseGeneric) String() string {
+	if len(c._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
+type CreateNoteResponseGeneric struct {
+	Result map[string]interface{} `json:"result" url:"result"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *CreateNoteResponseGeneric) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
+}
+
+func (c *CreateNoteResponseGeneric) UnmarshalJSON(data []byte) error {
+	type unmarshaler CreateNoteResponseGeneric
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = CreateNoteResponseGeneric(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
+	c._rawJSON = nil
+	return nil
+}
+
+func (c *CreateNoteResponseGeneric) String() string {
+	if len(c._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
+type CreateTicketResponseGeneric struct {
+	// Various metadata about the results organized by group, then type, then field.
+	Meta   *MetaResponse          `json:"meta,omitempty" url:"meta,omitempty"`
+	Result map[string]interface{} `json:"result" url:"result"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *CreateTicketResponseGeneric) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
+}
+
+func (c *CreateTicketResponseGeneric) UnmarshalJSON(data []byte) error {
+	type unmarshaler CreateTicketResponseGeneric
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = CreateTicketResponseGeneric(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
+	c._rawJSON = nil
+	return nil
+}
+
+func (c *CreateTicketResponseGeneric) String() string {
+	if len(c._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
 // The escalation policy object describes an escalation policy for a ticket. It contains an id for the escalation policy, an optional name, an optional description, and a list of rules.
 type EscalationPolicy struct {
 	Id          Id                      `json:"id" url:"id"`
@@ -4716,6 +4843,49 @@ func (e *EscalationPolicyRule) String() string {
 // Unique identifier for a field mapping
 type FieldMappingId = Id
 
+type GetTicketResponseGeneric struct {
+	// Various metadata about the results organized by group, then type, then field.
+	Meta   *MetaResponse          `json:"meta,omitempty" url:"meta,omitempty"`
+	Result map[string]interface{} `json:"result" url:"result"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (g *GetTicketResponseGeneric) GetExtraProperties() map[string]interface{} {
+	return g.extraProperties
+}
+
+func (g *GetTicketResponseGeneric) UnmarshalJSON(data []byte) error {
+	type unmarshaler GetTicketResponseGeneric
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*g = GetTicketResponseGeneric(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	if err != nil {
+		return err
+	}
+	g.extraProperties = extraProperties
+
+	g._rawJSON = nil
+	return nil
+}
+
+func (g *GetTicketResponseGeneric) String() string {
+	if len(g._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(g._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(g); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", g)
+}
+
 // The group summary object gives a summary of a group in an escalation policy. A group is a collection of agents that can be notified when certain conditions are met
 type GroupSummary struct {
 	// Unique identifier for the group.
@@ -4765,6 +4935,139 @@ func (g *GroupSummary) String() string {
 
 // Unique identifier for an issue type
 type IssueTypeId = string
+
+type ListCommentsResponseGeneric struct {
+	// Various metadata about the results organized by group, then type, then field.
+	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
+	// Cursor to use to retrieve the next page of results
+	Cursor string                   `json:"cursor" url:"cursor"`
+	Result []map[string]interface{} `json:"result" url:"result"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (l *ListCommentsResponseGeneric) GetExtraProperties() map[string]interface{} {
+	return l.extraProperties
+}
+
+func (l *ListCommentsResponseGeneric) UnmarshalJSON(data []byte) error {
+	type unmarshaler ListCommentsResponseGeneric
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*l = ListCommentsResponseGeneric(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *l)
+	if err != nil {
+		return err
+	}
+	l.extraProperties = extraProperties
+
+	l._rawJSON = nil
+	return nil
+}
+
+func (l *ListCommentsResponseGeneric) String() string {
+	if len(l._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(l._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(l); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", l)
+}
+
+type ListNotesResponseGeneric struct {
+	// Various metadata about the results organized by group, then type, then field.
+	Meta   *MetaResponse            `json:"meta,omitempty" url:"meta,omitempty"`
+	Result []map[string]interface{} `json:"result" url:"result"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (l *ListNotesResponseGeneric) GetExtraProperties() map[string]interface{} {
+	return l.extraProperties
+}
+
+func (l *ListNotesResponseGeneric) UnmarshalJSON(data []byte) error {
+	type unmarshaler ListNotesResponseGeneric
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*l = ListNotesResponseGeneric(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *l)
+	if err != nil {
+		return err
+	}
+	l.extraProperties = extraProperties
+
+	l._rawJSON = nil
+	return nil
+}
+
+func (l *ListNotesResponseGeneric) String() string {
+	if len(l._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(l._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(l); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", l)
+}
+
+type ListProjectsResponseGeneric struct {
+	// Various metadata about the results organized by group, then type, then field.
+	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
+	// Cursor to use to retrieve the next page of results
+	Cursor string                   `json:"cursor" url:"cursor"`
+	Result []map[string]interface{} `json:"result" url:"result"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (l *ListProjectsResponseGeneric) GetExtraProperties() map[string]interface{} {
+	return l.extraProperties
+}
+
+func (l *ListProjectsResponseGeneric) UnmarshalJSON(data []byte) error {
+	type unmarshaler ListProjectsResponseGeneric
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*l = ListProjectsResponseGeneric(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *l)
+	if err != nil {
+		return err
+	}
+	l.extraProperties = extraProperties
+
+	l._rawJSON = nil
+	return nil
+}
+
+func (l *ListProjectsResponseGeneric) String() string {
+	if len(l._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(l._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(l); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", l)
+}
 
 // Note on a ticket
 type Note struct {
@@ -4843,6 +5146,92 @@ func (n *Note) String() string {
 		return value
 	}
 	return fmt.Sprintf("%#v", n)
+}
+
+type PatchNoteResponseGeneric struct {
+	// Various metadata about the results organized by group, then type, then field.
+	Meta   *MetaResponse          `json:"meta,omitempty" url:"meta,omitempty"`
+	Result map[string]interface{} `json:"result" url:"result"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (p *PatchNoteResponseGeneric) GetExtraProperties() map[string]interface{} {
+	return p.extraProperties
+}
+
+func (p *PatchNoteResponseGeneric) UnmarshalJSON(data []byte) error {
+	type unmarshaler PatchNoteResponseGeneric
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*p = PatchNoteResponseGeneric(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *p)
+	if err != nil {
+		return err
+	}
+	p.extraProperties = extraProperties
+
+	p._rawJSON = nil
+	return nil
+}
+
+func (p *PatchNoteResponseGeneric) String() string {
+	if len(p._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(p._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(p); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", p)
+}
+
+type PatchTicketResponseGeneric struct {
+	// Various metadata about the results organized by group, then type, then field.
+	Meta   *MetaResponse          `json:"meta,omitempty" url:"meta,omitempty"`
+	Result map[string]interface{} `json:"result" url:"result"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (p *PatchTicketResponseGeneric) GetExtraProperties() map[string]interface{} {
+	return p.extraProperties
+}
+
+func (p *PatchTicketResponseGeneric) UnmarshalJSON(data []byte) error {
+	type unmarshaler PatchTicketResponseGeneric
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*p = PatchTicketResponseGeneric(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *p)
+	if err != nil {
+		return err
+	}
+	p.extraProperties = extraProperties
+
+	p._rawJSON = nil
+	return nil
+}
+
+func (p *PatchTicketResponseGeneric) String() string {
+	if len(p._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(p._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(p); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", p)
 }
 
 type Priority string
@@ -4933,6 +5322,52 @@ func (p *Project) String() string {
 
 // Unique identifier for a project
 type ProjectId = Id
+
+type QueryTicketsResponseGeneric struct {
+	// Various metadata about the results organized by group, then type, then field.
+	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
+	// Cursor to use to retrieve the next page of results
+	Cursor string `json:"cursor" url:"cursor"`
+	// list of results
+	Result []map[string]interface{} `json:"result" url:"result"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (q *QueryTicketsResponseGeneric) GetExtraProperties() map[string]interface{} {
+	return q.extraProperties
+}
+
+func (q *QueryTicketsResponseGeneric) UnmarshalJSON(data []byte) error {
+	type unmarshaler QueryTicketsResponseGeneric
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*q = QueryTicketsResponseGeneric(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *q)
+	if err != nil {
+		return err
+	}
+	q.extraProperties = extraProperties
+
+	q._rawJSON = nil
+	return nil
+}
+
+func (q *QueryTicketsResponseGeneric) String() string {
+	if len(q._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(q._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(q); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", q)
+}
 
 type RemoteField struct {
 	// Remote ID of the field.
