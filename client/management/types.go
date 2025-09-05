@@ -11259,6 +11259,8 @@ type ProviderConfig struct {
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/crowdstrike-vulns-setup)
 	VulnerabilitiesCrowdstrike *VulnerabilitiesCrowdStrike
+	// Configuration for [MOCK] CrowdStrike Falcon® Spotlight.
+	VulnerabilitiesCrowdstrikeMock *VulnerabilitiesCrowdStrikeMock
 	// Configuration for Nucleus Vulnerability Management.
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/nucleus-vulns-setup)
@@ -11739,6 +11741,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.VulnerabilitiesCrowdstrike = value
+	case "vulnerabilities_crowdstrike_mock":
+		value := new(VulnerabilitiesCrowdStrikeMock)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.VulnerabilitiesCrowdstrikeMock = value
 	case "vulnerabilities_nucleus":
 		value := new(VulnerabilitiesNucleus)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -12017,6 +12025,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.VulnerabilitiesCrowdstrike != nil {
 		return core.MarshalJSONWithExtraProperty(p.VulnerabilitiesCrowdstrike, "type", "vulnerabilities_crowdstrike")
 	}
+	if p.VulnerabilitiesCrowdstrikeMock != nil {
+		return core.MarshalJSONWithExtraProperty(p.VulnerabilitiesCrowdstrikeMock, "type", "vulnerabilities_crowdstrike_mock")
+	}
 	if p.VulnerabilitiesNucleus != nil {
 		return core.MarshalJSONWithExtraProperty(p.VulnerabilitiesNucleus, "type", "vulnerabilities_nucleus")
 	}
@@ -12121,6 +12132,7 @@ type ProviderConfigVisitor interface {
 	VisitTicketingTorq(*TicketingTorq) error
 	VisitTicketingZendesk(*TicketingZendesk) error
 	VisitVulnerabilitiesCrowdstrike(*VulnerabilitiesCrowdStrike) error
+	VisitVulnerabilitiesCrowdstrikeMock(*VulnerabilitiesCrowdStrikeMock) error
 	VisitVulnerabilitiesNucleus(*VulnerabilitiesNucleus) error
 	VisitVulnerabilitiesQualysCloud(*VulnerabilitiesQualysCloud) error
 	VisitVulnerabilitiesQualysCloudMock(*VulnerabilitiesQualysCloudMock) error
@@ -12352,6 +12364,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	if p.VulnerabilitiesCrowdstrike != nil {
 		return visitor.VisitVulnerabilitiesCrowdstrike(p.VulnerabilitiesCrowdstrike)
 	}
+	if p.VulnerabilitiesCrowdstrikeMock != nil {
+		return visitor.VisitVulnerabilitiesCrowdstrikeMock(p.VulnerabilitiesCrowdstrikeMock)
+	}
 	if p.VulnerabilitiesNucleus != nil {
 		return visitor.VisitVulnerabilitiesNucleus(p.VulnerabilitiesNucleus)
 	}
@@ -12532,6 +12547,8 @@ const (
 	ProviderConfigIdTicketingZendesk ProviderConfigId = "ticketing_zendesk"
 	// CrowdStrike Falcon® Spotlight
 	ProviderConfigIdVulnerabilitiesCrowdStrike ProviderConfigId = "vulnerabilities_crowdstrike"
+	// [MOCK] CrowdStrike Falcon® Spotlight
+	ProviderConfigIdVulnerabilitiesCrowdStrikeMock ProviderConfigId = "vulnerabilities_crowdstrike_mock"
 	// Nucleus Vulnerability Management
 	ProviderConfigIdVulnerabilitiesNucleus ProviderConfigId = "vulnerabilities_nucleus"
 	// Qualys Vulnerability Management, Detection & Response (VMDR)
@@ -12702,6 +12719,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdTicketingZendesk, nil
 	case "vulnerabilities_crowdstrike":
 		return ProviderConfigIdVulnerabilitiesCrowdStrike, nil
+	case "vulnerabilities_crowdstrike_mock":
+		return ProviderConfigIdVulnerabilitiesCrowdStrikeMock, nil
 	case "vulnerabilities_nucleus":
 		return ProviderConfigIdVulnerabilitiesNucleus, nil
 	case "vulnerabilities_qualys_cloud":
@@ -15938,6 +15957,25 @@ func (t *TorqCredential) Accept(visitor TorqCredentialVisitor) error {
 	return fmt.Errorf("type %T does not define a non-empty union type", t)
 }
 
+type VulnerabilitiesCrowdStrikeDataset string
+
+const (
+	VulnerabilitiesCrowdStrikeDatasetBasicVer0 VulnerabilitiesCrowdStrikeDataset = "basic_v0"
+)
+
+func NewVulnerabilitiesCrowdStrikeDatasetFromString(s string) (VulnerabilitiesCrowdStrikeDataset, error) {
+	switch s {
+	case "basic_v0":
+		return VulnerabilitiesCrowdStrikeDatasetBasicVer0, nil
+	}
+	var t VulnerabilitiesCrowdStrikeDataset
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (v VulnerabilitiesCrowdStrikeDataset) Ptr() *VulnerabilitiesCrowdStrikeDataset {
+	return &v
+}
+
 type VulnerabilitiesQualysCloudDataset string
 
 const (
@@ -16031,6 +16069,48 @@ func (v *VulnerabilitiesCrowdStrike) UnmarshalJSON(data []byte) error {
 }
 
 func (v *VulnerabilitiesCrowdStrike) String() string {
+	if len(v._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(v._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(v); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", v)
+}
+
+// Configuration for [MOCK] CrowdStrike Falcon® Spotlight.
+type VulnerabilitiesCrowdStrikeMock struct {
+	Dataset VulnerabilitiesCrowdStrikeDataset `json:"dataset" url:"dataset"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (v *VulnerabilitiesCrowdStrikeMock) GetExtraProperties() map[string]interface{} {
+	return v.extraProperties
+}
+
+func (v *VulnerabilitiesCrowdStrikeMock) UnmarshalJSON(data []byte) error {
+	type unmarshaler VulnerabilitiesCrowdStrikeMock
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*v = VulnerabilitiesCrowdStrikeMock(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *v)
+	if err != nil {
+		return err
+	}
+	v.extraProperties = extraProperties
+
+	v._rawJSON = nil
+	return nil
+}
+
+func (v *VulnerabilitiesCrowdStrikeMock) String() string {
 	if len(v._rawJSON) > 0 {
 		if value, err := core.StringifyJSON(v._rawJSON); err == nil {
 			return value
