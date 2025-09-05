@@ -13,6 +13,7 @@ import (
 	authentication "github.com/synqly/go-sdk/client/engine/ocsf/v130/authentication"
 	authorizesession "github.com/synqly/go-sdk/client/engine/ocsf/v130/authorizesession"
 	baseevent "github.com/synqly/go-sdk/client/engine/ocsf/v130/baseevent"
+	cloudactivity "github.com/synqly/go-sdk/client/engine/ocsf/v130/cloudactivity"
 	compliancefinding "github.com/synqly/go-sdk/client/engine/ocsf/v130/compliancefinding"
 	configstate "github.com/synqly/go-sdk/client/engine/ocsf/v130/configstate"
 	detectionfinding "github.com/synqly/go-sdk/client/engine/ocsf/v130/detectionfinding"
@@ -2254,6 +2255,7 @@ type Event struct {
 	ApplicationLifecycle      *applicationlifecycle.ApplicationLifecycle
 	FileHostingActivity       *filehostingactivity.FileHosting
 	EmailActivity             *emailactivity.EmailActivity
+	CloudActivity             *cloudactivity.CloudActivity
 }
 
 func (e *Event) UnmarshalJSON(data []byte) error {
@@ -2436,6 +2438,12 @@ func (e *Event) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		e.EmailActivity = value
+	case "Cloud Activity":
+		value := new(cloudactivity.CloudActivity)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.CloudActivity = value
 	}
 	return nil
 }
@@ -2525,6 +2533,9 @@ func (e Event) MarshalJSON() ([]byte, error) {
 	if e.EmailActivity != nil {
 		return core.MarshalJSONWithExtraProperty(e.EmailActivity, "class_name", "Email Activity")
 	}
+	if e.CloudActivity != nil {
+		return core.MarshalJSONWithExtraProperty(e.CloudActivity, "class_name", "Cloud Activity")
+	}
 	return nil, fmt.Errorf("type %T does not define a non-empty union type", e)
 }
 
@@ -2557,6 +2568,7 @@ type EventVisitor interface {
 	VisitApplicationLifecycle(*applicationlifecycle.ApplicationLifecycle) error
 	VisitFileHostingActivity(*filehostingactivity.FileHosting) error
 	VisitEmailActivity(*emailactivity.EmailActivity) error
+	VisitCloudActivity(*cloudactivity.CloudActivity) error
 }
 
 func (e *Event) Accept(visitor EventVisitor) error {
@@ -2643,6 +2655,9 @@ func (e *Event) Accept(visitor EventVisitor) error {
 	}
 	if e.EmailActivity != nil {
 		return visitor.VisitEmailActivity(e.EmailActivity)
+	}
+	if e.CloudActivity != nil {
+		return visitor.VisitCloudActivity(e.CloudActivity)
 	}
 	return fmt.Errorf("type %T does not define a non-empty union type", e)
 }

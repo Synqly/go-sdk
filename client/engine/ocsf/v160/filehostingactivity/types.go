@@ -474,12 +474,18 @@ type AccountTypeId = int
 
 // The Actor object contains details about the user, role, application, service, or process that initiated or performed a specific activity. Note that Actor is not the threat actor of a campaign but may be part of a campaign.
 type Actor struct {
+	// The actor type, normalized to the caption of the actor_type_id value. In the case of 'Other', it is defined by the data source.
+	ActorType *string `json:"actor_type,omitempty" url:"actor_type,omitempty"`
+	// The normalized identifier of the actor type.
+	ActorTypeId *ActorActorTypeId `json:"actor_type_id,omitempty" url:"actor_type_id,omitempty"`
 	// The client application or service that initiated the activity. This can be in conjunction with the <code>user</code> if present. Note that <code>app_name</code> is distinct from the <code>process</code> if present.
 	AppName *string `json:"app_name,omitempty" url:"app_name,omitempty"`
 	// The unique identifier of the client application or service that initiated the activity. This can be in conjunction with the <code>user</code> if present. Note that <code>app_name</code> is distinct from the <code>process.pid</code> or <code>process.uid</code> if present.
 	AppUid *string `json:"app_uid,omitempty" url:"app_uid,omitempty"`
 	// Provides details about an authorization, such as authorization outcome, and any associated policies related to the activity/event.
 	Authorizations []*Authorization `json:"authorizations,omitempty" url:"authorizations,omitempty"`
+	// Groups which are pertinent to the action. For example, the team name for Teams, where the user may not necessarily be a member of the group, but it is still relevant to the action taken.
+	Groups []*Group `json:"groups,omitempty" url:"groups,omitempty"`
 	// This object describes details about the Identity Provider used.
 	Idp *Idp `json:"idp,omitempty" url:"idp,omitempty"`
 	// The name of the service that invoked the activity as described in the event.
@@ -528,6 +534,14 @@ func (a *Actor) String() string {
 	}
 	return fmt.Sprintf("%#v", a)
 }
+
+// ActorActorTypeId is an enum, and the following values are allowed.
+// 0 - Unknown: The actor type is unknown.
+// 1 - Internal: Internal actor.
+// 2 - Guest: Guest actor.
+// 3 - Federated: Federated actor.
+// 99 - Other: The actor type is not mapped. See the actor_type attribute, which contains a data source specific value.
+type ActorActorTypeId = int
 
 // The Advisory object represents publicly disclosed cybersecurity vulnerabilities defined in a Security advisory. e.g. <code> Microsoft KB Article</code>, <code>Apple Security Advisory</code>, or a <code>GitHub Security Advisory (GHSA)</code>
 type Advisory struct {
@@ -2484,6 +2498,8 @@ type DomainContactTypeId = int
 
 // The Email object describes the email metadata such as sender, recipients, and direction, and can include embedded URLs and files.
 type Email struct {
+	// The BCC recipients of the email. Similar to cc field but for BCC recipients.
+	Bcc []string `json:"bcc,omitempty" url:"bcc,omitempty"`
 	// The machine-readable email header Cc values, as defined by RFC 5322. For example <code>example.user@usersdomain.com</code>.
 	Cc []EmailAddress `json:"cc,omitempty" url:"cc,omitempty"`
 	// The human-readable email header Cc Mailbox values. For example <code>'Example User &lt;example.user@usersdomain.com&gt;'</code>.
@@ -2504,8 +2520,12 @@ type Email struct {
 	FromMailboxes []EmailAddress `json:"from_mailboxes,omitempty" url:"from_mailboxes,omitempty"`
 	// Additional HTTP headers of an HTTP request or response.
 	HttpHeaders []*HttpHeader `json:"http_headers,omitempty" url:"http_headers,omitempty"`
+	// True if the email is viewable externally (presumably by external users).
+	IsExternallyViewable *bool `json:"is_externally_viewable,omitempty" url:"is_externally_viewable,omitempty"`
 	// The indication of whether the email has been read.
 	IsRead *bool `json:"is_read,omitempty" url:"is_read,omitempty"`
+	// Labels associated with the object, such as security or sensitivity labels created by a scanning app.
+	Labels []string `json:"labels,omitempty" url:"labels,omitempty"`
 	// The email header Message-ID value, as defined by RFC 5322.
 	MessageUid *string `json:"message_uid,omitempty" url:"message_uid,omitempty"`
 	// The email authentication header.
@@ -2522,6 +2542,8 @@ type Email struct {
 	Sender *EmailAddress `json:"sender,omitempty" url:"sender,omitempty"`
 	// The human readable email address of the system or server that actually transmitted the email message, extracted from the email headers per RFC 5322. This differs from the <code>from_mailbox</code> field, which shows the message author. The sender mailbox field is most commonly used when multiple addresses appear in the <code> from_mailboxes </code> field, or when the transmitting system is different from the message author (such as when sending on behalf of someone else).
 	SenderMailbox *string `json:"sender_mailbox,omitempty" url:"sender_mailbox,omitempty"`
+	// Unique ID of the sender mailbox. This is distinct from the sender's email address.
+	SenderMailboxUid *string `json:"sender_mailbox_uid,omitempty" url:"sender_mailbox_uid,omitempty"`
 	// The size in bytes of the email, including attachments.
 	Size *int `json:"size,omitempty" url:"size,omitempty"`
 	// The value of the SMTP MAIL FROM command.
@@ -2530,6 +2552,10 @@ type Email struct {
 	SmtpTo []EmailAddress `json:"smtp_to,omitempty" url:"smtp_to,omitempty"`
 	// The email header Subject value, as defined by RFC 5322.
 	Subject *string `json:"subject,omitempty" url:"subject,omitempty"`
+	// The time at which the email was sent.
+	TimeSent *Timestamp `json:"time_sent,omitempty" url:"time_sent,omitempty"`
+	// The time at which the email was sent.
+	TimeSentDt *time.Time `json:"time_sent_dt,omitempty" url:"time_sent_dt,omitempty"`
 	// The machine-readable email header To values, as defined by RFC 5322. For example <code>example.user@usersdomain.com</code>
 	To []EmailAddress `json:"to,omitempty" url:"to,omitempty"`
 	// The human-readable email header To Mailbox values. For example <code>'Example User &lt;example.user@usersdomain.com&gt;'</code>.
@@ -2537,7 +2563,7 @@ type Email struct {
 	// The unique identifier of the email thread.
 	Uid *string `json:"uid,omitempty" url:"uid,omitempty"`
 	// The URLs embedded in the email.
-	Urls []*Url `json:"urls,omitempty" url:"urls,omitempty"`
+	Urls []string `json:"urls,omitempty" url:"urls,omitempty"`
 	// The X-Originating-IP header identifying the emails originating IP address(es).
 	XOriginatingIp []IpAddress `json:"x_originating_ip,omitempty" url:"x_originating_ip,omitempty"`
 
@@ -2550,12 +2576,18 @@ func (e *Email) GetExtraProperties() map[string]interface{} {
 }
 
 func (e *Email) UnmarshalJSON(data []byte) error {
-	type unmarshaler Email
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
+	type embed Email
+	var unmarshaler = struct {
+		embed
+		TimeSentDt *core.DateTime `json:"time_sent_dt,omitempty"`
+	}{
+		embed: embed(*e),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
 		return err
 	}
-	*e = Email(value)
+	*e = Email(unmarshaler.embed)
+	e.TimeSentDt = unmarshaler.TimeSentDt.TimePtr()
 
 	extraProperties, err := core.ExtractExtraProperties(data, *e)
 	if err != nil {
@@ -2565,6 +2597,18 @@ func (e *Email) UnmarshalJSON(data []byte) error {
 
 	e._rawJSON = nil
 	return nil
+}
+
+func (e *Email) MarshalJSON() ([]byte, error) {
+	type embed Email
+	var marshaler = struct {
+		embed
+		TimeSentDt *core.DateTime `json:"time_sent_dt,omitempty"`
+	}{
+		embed:      embed(*e),
+		TimeSentDt: core.NewOptionalDateTime(e.TimeSentDt),
+	}
+	return json.Marshal(marshaler)
 }
 
 func (e *Email) String() string {
@@ -2993,6 +3037,8 @@ type File struct {
 	AccessedTimeDt *time.Time `json:"accessed_time_dt,omitempty" url:"accessed_time_dt,omitempty"`
 	// The name of the user who last accessed the object.
 	Accessor *User `json:"accessor,omitempty" url:"accessor,omitempty"`
+	// The app which mediated access to the file. This could be separate from the source app, for example a case where a user exports a report from a web app. The source app would be their browser and the accessor app the web app.
+	AccessorApp *Product `json:"accessor_app,omitempty" url:"accessor_app,omitempty"`
 	// The bitmask value that represents the file attributes.
 	Attributes *int `json:"attributes,omitempty" url:"attributes,omitempty"`
 	// The name of the company that published the file. For example: <code>Microsoft Corporation</code>.
@@ -3031,6 +3077,8 @@ type File struct {
 	IsReadonly *bool `json:"is_readonly,omitempty" url:"is_readonly,omitempty"`
 	// The indication of whether the object is part of the operating system.
 	IsSystem *bool `json:"is_system,omitempty" url:"is_system,omitempty"`
+	// Labels associated with the object, such as security or sensitivity labels created by a scanning app.
+	Labels []string `json:"labels,omitempty" url:"labels,omitempty"`
 	// The Multipurpose Internet Mail Extensions (MIME) type of the file, if applicable.
 	MimeType *string `json:"mime_type,omitempty" url:"mime_type,omitempty"`
 	// The time when the file was last modified.
@@ -3426,6 +3474,8 @@ type HttpRequest struct {
 	Url *Url `json:"url,omitempty" url:"url,omitempty"`
 	// The request header that identifies the operating system and web browser.
 	UserAgent *string `json:"user_agent,omitempty" url:"user_agent,omitempty"`
+	// Concise version of the user agent, e.g. Chrome or Firefox instead of the full user-agent string.
+	UserAgentName *string `json:"user_agent_name,omitempty" url:"user_agent_name,omitempty"`
 	// The Hypertext Transfer Protocol (HTTP) version.
 	Version *string `json:"version,omitempty" url:"version,omitempty"`
 	// The X-Forwarded-For header identifying the originating IP address(es) of a client connecting to a web server through an HTTP proxy or a load balancer.
@@ -4092,6 +4142,8 @@ type Location struct {
 	Provider *string `json:"provider,omitempty" url:"provider,omitempty"`
 	// The alphanumeric code that identifies the principal subdivision (e.g. province or state) of the country. For example, 'CH-VD' for the Canton of Vaud, Switzerland
 	Region *string `json:"region,omitempty" url:"region,omitempty"`
+	// Timezone string. This provides timezone information that may be present even when latitude and longitude are absent.
+	Timezone *string `json:"timezone,omitempty" url:"timezone,omitempty"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
@@ -5947,6 +5999,8 @@ type ProcessIntegrityId = int
 type Product struct {
 	// The Common Platform Enumeration (CPE) name as described by (<a target='_blank' href='https://nvd.nist.gov/products/cpe'>NIST</a>) For example: <code>cpe:/a:apple:safari:16.2</code>.
 	CpeName *string `json:"cpe_name,omitempty" url:"cpe_name,omitempty"`
+	// Indicates the source from which the app was installed, such as the app store.
+	DistributionMode *string `json:"distribution_mode,omitempty" url:"distribution_mode,omitempty"`
 	// The feature that reported the event.
 	Feature *Feature `json:"feature,omitempty" url:"feature,omitempty"`
 	// The two letter lower case language codes, as defined by <a target='_blank' href='https://en.wikipedia.org/wiki/ISO_639-1'>ISO 639-1</a>. For example: <code>en</code> (English), <code>de</code> (German), or <code>fr</code> (French).
@@ -5963,6 +6017,8 @@ type Product struct {
 	VendorName *string `json:"vendor_name,omitempty" url:"vendor_name,omitempty"`
 	// The version of the product, as defined by the event source. For example: <code>2013.1.3-beta</code>.
 	Version *string `json:"version,omitempty" url:"version,omitempty"`
+	// The product workload associated with the event.
+	Workload *string `json:"workload,omitempty" url:"workload,omitempty"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage

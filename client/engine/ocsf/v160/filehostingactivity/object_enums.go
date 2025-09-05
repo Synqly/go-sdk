@@ -44,6 +44,20 @@ const Account_Type_EmailAccount AccountTypeId = 18
 // Other. The account type is not mapped.
 const Account_Type_Other AccountTypeId = 99
 
+// ActorActorTypeId Values
+// Actor Type ID. The normalized identifier of the actor type.
+
+// Unknown. The actor type is unknown.
+const Actor_ActorType_Unknown ActorActorTypeId = 0
+// Internal. Internal actor.
+const Actor_ActorType_Internal ActorActorTypeId = 1
+// Guest. Guest actor.
+const Actor_ActorType_Guest ActorActorTypeId = 2
+// Federated. Federated actor.
+const Actor_ActorType_Federated ActorActorTypeId = 3
+// Other. The actor type is not mapped. See the actor_type attribute, which contains a data source specific value.
+const Actor_ActorType_Other ActorActorTypeId = 99
+
 // AdvisoryInstallStateId Values
 // Install State ID. The normalized install state ID of the Advisory.
 

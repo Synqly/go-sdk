@@ -6,6 +6,7 @@ import (
 	accountchange "github.com/synqly/go-sdk/client/engine/ocsf/v130/accountchange"
 	apiactivity "github.com/synqly/go-sdk/client/engine/ocsf/v130/apiactivity"
 	authentication "github.com/synqly/go-sdk/client/engine/ocsf/v130/authentication"
+	cloudactivity "github.com/synqly/go-sdk/client/engine/ocsf/v130/cloudactivity"
 	compliancefinding "github.com/synqly/go-sdk/client/engine/ocsf/v130/compliancefinding"
 	detectionfinding "github.com/synqly/go-sdk/client/engine/ocsf/v130/detectionfinding"
 	dnsactivity "github.com/synqly/go-sdk/client/engine/ocsf/v130/dnsactivity"
@@ -35,6 +36,8 @@ type ApiActivity = *apiactivity.ApiActivity
 type ApplicationSecurityPostureFinding = *applicationsecurityposturefinding.ApplicationSecurityPostureFinding
 
 type Authentication = *authentication.Authentication
+
+type CloudActivity = *cloudactivity.CloudActivity
 
 type CloudResourcesInventoryInfo = *cloudresourcesinventoryinfo.CloudResourcesInventoryInfo
 
