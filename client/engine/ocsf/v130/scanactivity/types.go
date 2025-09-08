@@ -1793,6 +1793,8 @@ type Email struct {
 	Cc []EmailAddress `json:"cc,omitempty" url:"cc,omitempty"`
 	// The <strong>Delivered-To</strong> email header field.
 	DeliveredTo *EmailAddress `json:"delivered_to,omitempty" url:"delivered_to,omitempty"`
+	// The files that are part of the event or object.
+	Files []*File `json:"files,omitempty" url:"files,omitempty"`
 	// The email header From values, as defined by RFC 5322.
 	From EmailAddress `json:"from" url:"from"`
 	// True if the email is viewable externally (presumably by external users).
@@ -2245,6 +2247,8 @@ type File struct {
 	TypeId FileTypeId `json:"type_id" url:"type_id"`
 	// The unique identifier of the file as defined by the storage system, such the file system file ID.
 	Uid *string `json:"uid,omitempty" url:"uid,omitempty"`
+	// The URL object that pertains to the event or object. See specific usage.
+	Url *Url `json:"url,omitempty" url:"url,omitempty"`
 	// The file version. For example: <code>8.0.7601.17514</code>.
 	Version *string `json:"version,omitempty" url:"version,omitempty"`
 	// An unordered collection of zero or more name/value pairs where each pair represents a file or folder extended attribute.</p>For example: Windows alternate data stream attributes (ADS stream name, ADS size, etc.), user-defined or application-defined attributes, ACL, owner, primary group, etc. Examples from DCS: </p><ul><li><strong>ads_name</strong></li><li><strong>ads_size</strong></li><li><strong>dacl</strong></li><li><strong>owner</strong></li><li><strong>primary_group</strong></li><li><strong>link_name</strong> - name of the link associated to the file.</li><li><strong>hard_link_count</strong> - the number of links that are associated to the file.</li></ul>
@@ -4538,6 +4542,159 @@ func (t *Timespan) String() string {
 // 8 - Years
 // 99 - Other: The type is not mapped. See the <code>type</code> attribute, which contains a data source specific value.
 type TimespanTypeId = int
+
+// The Uniform Resource Locator(URL) object describes the characteristics of a URL. Defined in <a target='_blank' href='https://datatracker.ietf.org/doc/html/rfc1738'>RFC 1738</a> and by D3FEND <a target='_blank' href='https://d3fend.mitre.org/dao/artifact/d3f:URL/'>d3f:URL</a>.
+type Url struct {
+	// The Website categorization names, as defined by <code>category_ids</code> enum values.
+	Categories []string `json:"categories,omitempty" url:"categories,omitempty"`
+	// The Website categorization identifiers.
+	CategoryIds []UrlCategoryIds `json:"category_ids,omitempty" url:"category_ids,omitempty"`
+	// The domain portion of the URL. For example: <code>example.com</code> in <code>https://sub.example.com</code>.
+	Domain *string `json:"domain,omitempty" url:"domain,omitempty"`
+	// The URL host as extracted from the URL. For example: <code>www.example.com</code> from <code>www.example.com/download/trouble</code>.
+	Hostname *Hostname `json:"hostname,omitempty" url:"hostname,omitempty"`
+	// The URL path as extracted from the URL. For example: <code>/download/trouble</code> from <code>www.example.com/download/trouble</code>.
+	Path *string `json:"path,omitempty" url:"path,omitempty"`
+	// The URL port. For example: <code>80</code>.
+	Port *Port `json:"port,omitempty" url:"port,omitempty"`
+	// The query portion of the URL. For example: the query portion of the URL <code>http://www.example.com/search?q=bad&sort=date</code> is <code>q=bad&sort=date</code>.
+	QueryString *string `json:"query_string,omitempty" url:"query_string,omitempty"`
+	// The context in which a resource was retrieved in a web request.
+	ResourceType *string `json:"resource_type,omitempty" url:"resource_type,omitempty"`
+	// The scheme portion of the URL. For example: <code>http</code>, <code>https</code>, <code>ftp</code>, or <code>sftp</code>.
+	Scheme *string `json:"scheme,omitempty" url:"scheme,omitempty"`
+	// The subdomain portion of the URL. For example: <code>sub</code> in <code>https://sub.example.com</code> or <code>sub2.sub1</code> in <code>https://sub2.sub1.example.com</code>.
+	Subdomain *string `json:"subdomain,omitempty" url:"subdomain,omitempty"`
+	// The URL string. See RFC 1738. For example: <code>http://www.example.com/download/trouble.exe</code>. Note: The URL path should not populate the URL string.
+	UrlString *UrlString `json:"url_string,omitempty" url:"url_string,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (u *Url) GetExtraProperties() map[string]interface{} {
+	return u.extraProperties
+}
+
+func (u *Url) UnmarshalJSON(data []byte) error {
+	type unmarshaler Url
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*u = Url(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *u)
+	if err != nil {
+		return err
+	}
+	u.extraProperties = extraProperties
+
+	u._rawJSON = nil
+	return nil
+}
+
+func (u *Url) String() string {
+	if len(u._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(u._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(u); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", u)
+}
+
+// UrlCategoryIds is an enum, and the following values are allowed.
+// 0 - Unknown: The Domain/URL category is unknown.
+// 1 - MatureContent
+// 3 - Pornography
+// 4 - SexEducation
+// 5 - Swimsuit
+// 6 - Nudity
+// 7 - Extreme
+// 9 - Questionable*Illegal
+// 11 - Gambling
+// 14 - Hate_Racism
+// 15 - Weapons
+// 16 - Abortion
+// 17 - Hacking
+// 18 - Phishing
+// 20 - Entertainment
+// 21 - Economy
+// 22 - Belief
+// 23 - Alcohol
+// 24 - Tobacco
+// 25 - ControlledSubstances
+// 26 - ChildPornography
+// 27 - Education
+// 29 - CharitableOrganizations
+// 30 - Culture
+// 31 - FinancialServices
+// 32 - Trading
+// 33 - Games
+// 34 - Legal
+// 35 - Military
+// 36 - SocialAdvocacy
+// 37 - Health
+// 38 - Internet
+// 40 - Portals
+// 43 - Malnets
+// 44 - Botnets
+// 45 - Careers
+// 46 - Media
+// 47 - Dating
+// 49 - Reference
+// 50 - PotentiallyAdult
+// 51 - IM_SMS
+// 52 - Email
+// 53 - Forums
+// 54 - Religion
+// 55 - SocialNetworking
+// 56 - Sharing
+// 57 - RemoteAccessTools
+// 58 - Shopping
+// 59 - Auctions
+// 60 - RealEstate
+// 61 - DailyLiving
+// 63 - PersonalSites
+// 64 - Dining_Food
+// 65 - Recreation
+// 66 - Travel
+// 67 - Vehicles
+// 68 - Jokes
+// 71 - SoftwareDownloads
+// 83 - to_Peer_P2P*
+// 84 - VideoClips
+// 85 - BusinessApplications
+// 86 - ProxyAvoidance
+// 87 - ForKids
+// 88 - Analytics
+// 89 - WebHosting
+// 90 - Uncategorized
+// 92 - Suspicious
+// 93 - SexualExpression
+// 95 - Translation
+// 96 - Viewable_Infrastructure
+// 97 - ContentServers
+// 98 - Placeholders
+// 99 - Other: The Domain/URL category is not mapped. See the <code>categories</code> attribute, which contains a data source specific value.
+// 101 - Spam
+// 102 - PotentiallyUnwantedSoftware
+// 103 - DynamicDNSHost
+// 106 - Card_Invitations
+// 107 - Informational
+// 108 - InformationSecurity
+// 109 - InternetConnectedDevices
+// 110 - InternetTelephony
+// 111 - OnlineMeetings
+// 112 - MediaSharing
+// 113 - AudioStreams
+// 114 - VideoStreams
+// 118 - CopyrightConcerns
+// 121 - Marijuana
+type UrlCategoryIds = int
 
 // The User object describes the characteristics of a user/person or a security principal. Defined by D3FEND <a target='_blank' href='https://d3fend.mitre.org/dao/artifact/d3f:UserAccount/'>d3f:UserAccount</a>.
 type User struct {

@@ -1946,6 +1946,8 @@ type Email struct {
 	Cc []EmailAddress `json:"cc,omitempty" url:"cc,omitempty"`
 	// The <strong>Delivered-To</strong> email header field.
 	DeliveredTo *EmailAddress `json:"delivered_to,omitempty" url:"delivered_to,omitempty"`
+	// The files that are part of the event or object.
+	Files []*File `json:"files,omitempty" url:"files,omitempty"`
 	// The email header From values, as defined by RFC 5322.
 	From EmailAddress `json:"from" url:"from"`
 	// True if the email is viewable externally (presumably by external users).
@@ -2443,6 +2445,8 @@ type File struct {
 	TypeId FileTypeId `json:"type_id" url:"type_id"`
 	// The unique identifier of the file as defined by the storage system, such the file system file ID.
 	Uid *string `json:"uid,omitempty" url:"uid,omitempty"`
+	// The URL object that pertains to the event or object. See specific usage.
+	Url *Url `json:"url,omitempty" url:"url,omitempty"`
 	// The file version. For example: <code>8.0.7601.17514</code>.
 	Version *string `json:"version,omitempty" url:"version,omitempty"`
 	// An unordered collection of zero or more name/value pairs where each pair represents a file or folder extended attribute.</p>For example: Windows alternate data stream attributes (ADS stream name, ADS size, etc.), user-defined or application-defined attributes, ACL, owner, primary group, etc. Examples from DCS: </p><ul><li><strong>ads_name</strong></li><li><strong>ads_size</strong></li><li><strong>dacl</strong></li><li><strong>owner</strong></li><li><strong>primary_group</strong></li><li><strong>link_name</strong> - name of the link associated to the file.</li><li><strong>hard_link_count</strong> - the number of links that are associated to the file.</li></ul>

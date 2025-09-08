@@ -664,6 +664,184 @@ const Timespan_Type_Years TimespanTypeId = 8
 // Other. The type is not mapped. See the <code>type</code> attribute, which contains a data source specific value.
 const Timespan_Type_Other TimespanTypeId = 99
 
+// UrlCategoryIds Values
+// Website Categorization IDs. The Website categorization identifiers.
+
+// Unknown. The Domain/URL category is unknown.
+const Url_CategoryIds_Unknown UrlCategoryIds = 0
+// Adult_MatureContent
+const Url_CategoryIds_Adult_MatureContent UrlCategoryIds = 1
+// Pornography
+const Url_CategoryIds_Pornography UrlCategoryIds = 3
+// SexEducation
+const Url_CategoryIds_SexEducation UrlCategoryIds = 4
+// IntimateApparel_Swimsuit
+const Url_CategoryIds_IntimateApparel_Swimsuit UrlCategoryIds = 5
+// Nudity
+const Url_CategoryIds_Nudity UrlCategoryIds = 6
+// Extreme
+const Url_CategoryIds_Extreme UrlCategoryIds = 7
+// Scam_Questionable_Illegal
+const Url_CategoryIds_Scam_Questionable_Illegal UrlCategoryIds = 9
+// Gambling
+const Url_CategoryIds_Gambling UrlCategoryIds = 11
+// Violence_Hate_Racism
+const Url_CategoryIds_Violence_Hate_Racism UrlCategoryIds = 14
+// Weapons
+const Url_CategoryIds_Weapons UrlCategoryIds = 15
+// Abortion
+const Url_CategoryIds_Abortion UrlCategoryIds = 16
+// Hacking
+const Url_CategoryIds_Hacking UrlCategoryIds = 17
+// Phishing
+const Url_CategoryIds_Phishing UrlCategoryIds = 18
+// Entertainment
+const Url_CategoryIds_Entertainment UrlCategoryIds = 20
+// Business_Economy
+const Url_CategoryIds_Business_Economy UrlCategoryIds = 21
+// AlternativeSpirituality_Belief
+const Url_CategoryIds_AlternativeSpirituality_Belief UrlCategoryIds = 22
+// Alcohol
+const Url_CategoryIds_Alcohol UrlCategoryIds = 23
+// Tobacco
+const Url_CategoryIds_Tobacco UrlCategoryIds = 24
+// ControlledSubstances
+const Url_CategoryIds_ControlledSubstances UrlCategoryIds = 25
+// ChildPornography
+const Url_CategoryIds_ChildPornography UrlCategoryIds = 26
+// Education
+const Url_CategoryIds_Education UrlCategoryIds = 27
+// CharitableOrganizations
+const Url_CategoryIds_CharitableOrganizations UrlCategoryIds = 29
+// Art_Culture
+const Url_CategoryIds_Art_Culture UrlCategoryIds = 30
+// FinancialServices
+const Url_CategoryIds_FinancialServices UrlCategoryIds = 31
+// Brokerage_Trading
+const Url_CategoryIds_Brokerage_Trading UrlCategoryIds = 32
+// Games
+const Url_CategoryIds_Games UrlCategoryIds = 33
+// Government_Legal
+const Url_CategoryIds_Government_Legal UrlCategoryIds = 34
+// Military
+const Url_CategoryIds_Military UrlCategoryIds = 35
+// Political_SocialAdvocacy
+const Url_CategoryIds_Political_SocialAdvocacy UrlCategoryIds = 36
+// Health
+const Url_CategoryIds_Health UrlCategoryIds = 37
+// Technology_Internet
+const Url_CategoryIds_Technology_Internet UrlCategoryIds = 38
+// SearchEngines_Portals
+const Url_CategoryIds_SearchEngines_Portals UrlCategoryIds = 40
+// MaliciousSources_Malnets
+const Url_CategoryIds_MaliciousSources_Malnets UrlCategoryIds = 43
+// MaliciousOutboundData_Botnets
+const Url_CategoryIds_MaliciousOutboundData_Botnets UrlCategoryIds = 44
+// JobSearch_Careers
+const Url_CategoryIds_JobSearch_Careers UrlCategoryIds = 45
+// News_Media
+const Url_CategoryIds_News_Media UrlCategoryIds = 46
+// Personals_Dating
+const Url_CategoryIds_Personals_Dating UrlCategoryIds = 47
+// Reference
+const Url_CategoryIds_Reference UrlCategoryIds = 49
+// MixedContent_PotentiallyAdult
+const Url_CategoryIds_MixedContent_PotentiallyAdult UrlCategoryIds = 50
+// Chat_IM_SMS
+const Url_CategoryIds_Chat_IM_SMS UrlCategoryIds = 51
+// Email
+const Url_CategoryIds_Email UrlCategoryIds = 52
+// Newsgroups_Forums
+const Url_CategoryIds_Newsgroups_Forums UrlCategoryIds = 53
+// Religion
+const Url_CategoryIds_Religion UrlCategoryIds = 54
+// SocialNetworking
+const Url_CategoryIds_SocialNetworking UrlCategoryIds = 55
+// FileStorage_Sharing
+const Url_CategoryIds_FileStorage_Sharing UrlCategoryIds = 56
+// RemoteAccessTools
+const Url_CategoryIds_RemoteAccessTools UrlCategoryIds = 57
+// Shopping
+const Url_CategoryIds_Shopping UrlCategoryIds = 58
+// Auctions
+const Url_CategoryIds_Auctions UrlCategoryIds = 59
+// RealEstate
+const Url_CategoryIds_RealEstate UrlCategoryIds = 60
+// Society_DailyLiving
+const Url_CategoryIds_Society_DailyLiving UrlCategoryIds = 61
+// PersonalSites
+const Url_CategoryIds_PersonalSites UrlCategoryIds = 63
+// Restaurants_Dining_Food
+const Url_CategoryIds_Restaurants_Dining_Food UrlCategoryIds = 64
+// Sports_Recreation
+const Url_CategoryIds_Sports_Recreation UrlCategoryIds = 65
+// Travel
+const Url_CategoryIds_Travel UrlCategoryIds = 66
+// Vehicles
+const Url_CategoryIds_Vehicles UrlCategoryIds = 67
+// Humor_Jokes
+const Url_CategoryIds_Humor_Jokes UrlCategoryIds = 68
+// SoftwareDownloads
+const Url_CategoryIds_SoftwareDownloads UrlCategoryIds = 71
+// Peer_to_Peer_P2P_
+const Url_CategoryIds_Peer_to_Peer_P2P_ UrlCategoryIds = 83
+// Audio_VideoClips
+const Url_CategoryIds_Audio_VideoClips UrlCategoryIds = 84
+// Office_BusinessApplications
+const Url_CategoryIds_Office_BusinessApplications UrlCategoryIds = 85
+// ProxyAvoidance
+const Url_CategoryIds_ProxyAvoidance UrlCategoryIds = 86
+// ForKids
+const Url_CategoryIds_ForKids UrlCategoryIds = 87
+// WebAds_Analytics
+const Url_CategoryIds_WebAds_Analytics UrlCategoryIds = 88
+// WebHosting
+const Url_CategoryIds_WebHosting UrlCategoryIds = 89
+// Uncategorized
+const Url_CategoryIds_Uncategorized UrlCategoryIds = 90
+// Suspicious
+const Url_CategoryIds_Suspicious UrlCategoryIds = 92
+// SexualExpression
+const Url_CategoryIds_SexualExpression UrlCategoryIds = 93
+// Translation
+const Url_CategoryIds_Translation UrlCategoryIds = 95
+// Non_Viewable_Infrastructure
+const Url_CategoryIds_Non_Viewable_Infrastructure UrlCategoryIds = 96
+// ContentServers
+const Url_CategoryIds_ContentServers UrlCategoryIds = 97
+// Placeholders
+const Url_CategoryIds_Placeholders UrlCategoryIds = 98
+// Other. The Domain/URL category is not mapped. See the <code>categories</code> attribute, which contains a data source specific value.
+const Url_CategoryIds_Other UrlCategoryIds = 99
+// Spam
+const Url_CategoryIds_Spam UrlCategoryIds = 101
+// PotentiallyUnwantedSoftware
+const Url_CategoryIds_PotentiallyUnwantedSoftware UrlCategoryIds = 102
+// DynamicDNSHost
+const Url_CategoryIds_DynamicDNSHost UrlCategoryIds = 103
+// E_Card_Invitations
+const Url_CategoryIds_E_Card_Invitations UrlCategoryIds = 106
+// Informational
+const Url_CategoryIds_Informational UrlCategoryIds = 107
+// Computer_InformationSecurity
+const Url_CategoryIds_Computer_InformationSecurity UrlCategoryIds = 108
+// InternetConnectedDevices
+const Url_CategoryIds_InternetConnectedDevices UrlCategoryIds = 109
+// InternetTelephony
+const Url_CategoryIds_InternetTelephony UrlCategoryIds = 110
+// OnlineMeetings
+const Url_CategoryIds_OnlineMeetings UrlCategoryIds = 111
+// MediaSharing
+const Url_CategoryIds_MediaSharing UrlCategoryIds = 112
+// Radio_AudioStreams
+const Url_CategoryIds_Radio_AudioStreams UrlCategoryIds = 113
+// TV_VideoStreams
+const Url_CategoryIds_TV_VideoStreams UrlCategoryIds = 114
+// Piracy_CopyrightConcerns
+const Url_CategoryIds_Piracy_CopyrightConcerns UrlCategoryIds = 118
+// Marijuana
+const Url_CategoryIds_Marijuana UrlCategoryIds = 121
+
 // UserMfaStatusId Values
 // MFA Status ID. The normalized identifier of the user's multi-factor authentication status.
 

@@ -35,6 +35,8 @@ const Activity_MembershipChange ActivityId = 13
 const Activity_Informational ActivityId = 14
 // Export. A resource was exported.
 const Activity_Export ActivityId = 15
+// Execute. A task, action, or script was executed.
+const Activity_Execute ActivityId = 16
 // Other. The event activity is not mapped. See the <code>activity_name</code> attribute, which contains a data source specific value.
 const Activity_Other ActivityId = 99
 
@@ -47,7 +49,7 @@ const Category_ApplicationActivity CategoryUid = 6
 // ClassUid Values
 // Class ID. The unique identifier of a class. A class describes the attributes available in an event.
 
-// CloudActivity. Cloud activity events report events and actions logged or collected from a cloud environment. This class extends Web Resources Activity with additional fields for cloud-specific metadata.
+// CloudActivity. Cloud activity events report events and actions logged or collected from a cloud environment. This class is based on Web Resources Activity, but is more broad and suited to event logs with diverse types of data available.
 const Class_CloudActivity ClassUid = 6090
 
 // SeverityId Values
@@ -117,6 +119,8 @@ const Type_CloudActivity_MembershipChange TypeUid = 609013
 const Type_CloudActivity_Informational TypeUid = 609014
 // CloudActivity_Export. A resource was exported.
 const Type_CloudActivity_Export TypeUid = 609015
+// CloudActivity_Execute. A task, action, or script was executed.
+const Type_CloudActivity_Execute TypeUid = 609016
 // CloudActivity_Other
 const Type_CloudActivity_Other TypeUid = 609099
 

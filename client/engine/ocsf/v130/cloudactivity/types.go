@@ -65,6 +65,7 @@ type UserName = string
 // 13 - MembershipChange: The membership relating to a resource was changed.
 // 14 - Informational: An informational event was logged.
 // 15 - Export: A resource was exported.
+// 16 - Execute: A task, action, or script was executed.
 // 99 - Other: The event activity is not mapped. See the <code>activity_name</code> attribute, which contains a data source specific value.
 type ActivityId = int
 
@@ -73,10 +74,10 @@ type ActivityId = int
 type CategoryUid = int
 
 // ClassUid is an enum, and the following values are allowed.
-// 6090 - CloudActivity: Cloud activity events report events and actions logged or collected from a cloud environment. This class extends Web Resources Activity with additional fields for cloud-specific metadata.
+// 6090 - CloudActivity: Cloud activity events report events and actions logged or collected from a cloud environment. This class is based on Web Resources Activity, but is more broad and suited to event logs with diverse types of data available.
 type ClassUid = int
 
-// Cloud activity events report events and actions logged or collected from a cloud environment. This class extends Web Resources Activity with additional fields for cloud-specific metadata.
+// Cloud activity events report events and actions logged or collected from a cloud environment. This class is based on Web Resources Activity, but is more broad and suited to event logs with diverse types of data available.
 type CloudActivity struct {
 	// The normalized identifier of the activity that triggered the event.
 	ActivityId ActivityId `json:"activity_id" url:"activity_id"`
@@ -276,6 +277,7 @@ type StatusId = int
 // 609013 - MembershipChange: The membership relating to a resource was changed.
 // 609014 - Informational: An informational event was logged.
 // 609015 - Export: A resource was exported.
+// 609016 - Execute: A task, action, or script was executed.
 // 609099 - Other
 type TypeUid = int
 
@@ -1801,6 +1803,8 @@ type Email struct {
 	Cc []EmailAddress `json:"cc,omitempty" url:"cc,omitempty"`
 	// The <strong>Delivered-To</strong> email header field.
 	DeliveredTo *EmailAddress `json:"delivered_to,omitempty" url:"delivered_to,omitempty"`
+	// The files that are part of the event or object.
+	Files []*File `json:"files,omitempty" url:"files,omitempty"`
 	// The email header From values, as defined by RFC 5322.
 	From EmailAddress `json:"from" url:"from"`
 	// True if the email is viewable externally (presumably by external users).
@@ -2253,6 +2257,8 @@ type File struct {
 	TypeId FileTypeId `json:"type_id" url:"type_id"`
 	// The unique identifier of the file as defined by the storage system, such the file system file ID.
 	Uid *string `json:"uid,omitempty" url:"uid,omitempty"`
+	// The URL object that pertains to the event or object. See specific usage.
+	Url *Url `json:"url,omitempty" url:"url,omitempty"`
 	// The file version. For example: <code>8.0.7601.17514</code>.
 	Version *string `json:"version,omitempty" url:"version,omitempty"`
 	// An unordered collection of zero or more name/value pairs where each pair represents a file or folder extended attribute.</p>For example: Windows alternate data stream attributes (ADS stream name, ADS size, etc.), user-defined or application-defined attributes, ACL, owner, primary group, etc. Examples from DCS: </p><ul><li><strong>ads_name</strong></li><li><strong>ads_size</strong></li><li><strong>dacl</strong></li><li><strong>owner</strong></li><li><strong>primary_group</strong></li><li><strong>link_name</strong> - name of the link associated to the file.</li><li><strong>hard_link_count</strong> - the number of links that are associated to the file.</li></ul>
@@ -4945,12 +4951,16 @@ type Sharing struct {
 	Anonymous *bool `json:"anonymous,omitempty" url:"anonymous,omitempty"`
 	// True if the recipients have permission to re-share the resource.
 	CanReshare *bool `json:"can_reshare,omitempty" url:"can_reshare,omitempty"`
+	// Unique ID of a sharing link.
+	LinkId *string `json:"link_id,omitempty" url:"link_id,omitempty"`
 	// List of permissions granted.
 	Permissions []*SharingPermission `json:"permissions,omitempty" url:"permissions,omitempty"`
 	// The scope, normalized to the caption of the scope_id value.
 	Scope *string `json:"scope,omitempty" url:"scope,omitempty"`
 	// The normalized identifier of the sharing scope.
 	ScopeId *SharingScopeId `json:"scope_id,omitempty" url:"scope_id,omitempty"`
+	// Describes the nature of a sharing action, such as creating a link for others to access a resource.
+	SharingAction *string `json:"sharing_action,omitempty" url:"sharing_action,omitempty"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
