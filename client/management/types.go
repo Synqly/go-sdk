@@ -11203,6 +11203,10 @@ type ProviderConfig struct {
 	SinkMockSink *SinkMock
 	// Configuration for OpenSearch search and analytics engine. Supports both managed and self-hosted OpenSearch deployments
 	SinkOpensearch *SinkOpenSearch
+	// Configuration for IBM QRadar Sink.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/qradar-sink-setup)
+	SinkQRadar *SinkQRadar
 	// Configuration for Splunk as a Sink provider. Allows sending data to Splunk using an HTTP Event Collector (HEC).
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/splunk-setup)
@@ -11645,6 +11649,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.SinkOpensearch = value
+	case "sink_q_radar":
+		value := new(SinkQRadar)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.SinkQRadar = value
 	case "sink_splunk":
 		value := new(SinkSplunk)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -11977,6 +11987,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.SinkOpensearch != nil {
 		return core.MarshalJSONWithExtraProperty(p.SinkOpensearch, "type", "sink_opensearch")
 	}
+	if p.SinkQRadar != nil {
+		return core.MarshalJSONWithExtraProperty(p.SinkQRadar, "type", "sink_q_radar")
+	}
 	if p.SinkSplunk != nil {
 		return core.MarshalJSONWithExtraProperty(p.SinkSplunk, "type", "sink_splunk")
 	}
@@ -12116,6 +12129,7 @@ type ProviderConfigVisitor interface {
 	VisitSinkGoogleSecurityOperations(*SinkGoogleSecurityOperations) error
 	VisitSinkMockSink(*SinkMock) error
 	VisitSinkOpensearch(*SinkOpenSearch) error
+	VisitSinkQRadar(*SinkQRadar) error
 	VisitSinkSplunk(*SinkSplunk) error
 	VisitStorageAwsS3(*StorageAwsS3) error
 	VisitStorageAzureBlob(*StorageAzureBlob) error
@@ -12316,6 +12330,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	if p.SinkOpensearch != nil {
 		return visitor.VisitSinkOpensearch(p.SinkOpensearch)
 	}
+	if p.SinkQRadar != nil {
+		return visitor.VisitSinkQRadar(p.SinkQRadar)
+	}
 	if p.SinkSplunk != nil {
 		return visitor.VisitSinkSplunk(p.SinkSplunk)
 	}
@@ -12515,6 +12532,8 @@ const (
 	ProviderConfigIdSinkMock ProviderConfigId = "sink_mock_sink"
 	// OpenSearch
 	ProviderConfigIdSinkOpenSearch ProviderConfigId = "sink_opensearch"
+	// IBM QRadar Sink
+	ProviderConfigIdSinkQRadar ProviderConfigId = "sink_q_radar"
 	// Splunk Enterprise Security
 	ProviderConfigIdSinkSplunk ProviderConfigId = "sink_splunk"
 	// Amazon S3
@@ -12687,6 +12706,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdSinkMock, nil
 	case "sink_opensearch":
 		return ProviderConfigIdSinkOpenSearch, nil
+	case "sink_q_radar":
+		return ProviderConfigIdSinkQRadar, nil
 	case "sink_splunk":
 		return ProviderConfigIdSinkSplunk, nil
 	case "storage_aws_s3":
@@ -14417,6 +14438,55 @@ func (s *SinkOpenSearch) UnmarshalJSON(data []byte) error {
 }
 
 func (s *SinkOpenSearch) String() string {
+	if len(s._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(s); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", s)
+}
+
+// Configuration for IBM QRadar Sink.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/qradar-sink-setup)
+type SinkQRadar struct {
+	// Port used by QRadar to accept incoming HTTP Receiver events.
+	CollectionPort int `json:"collection_port" url:"collection_port"`
+	// When true, skips verification of the QRadar TLS certificate. This should only be used for testing purposes and is not recommended in production environments.
+	SkipTlsVerify *bool `json:"skip_tls_verify,omitempty" url:"skip_tls_verify,omitempty"`
+	// Base URL for the QRadar API.
+	Url string `json:"url" url:"url"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (s *SinkQRadar) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
+}
+
+func (s *SinkQRadar) UnmarshalJSON(data []byte) error {
+	type unmarshaler SinkQRadar
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*s = SinkQRadar(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+
+	s._rawJSON = nil
+	return nil
+}
+
+func (s *SinkQRadar) String() string {
 	if len(s._rawJSON) > 0 {
 		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
 			return value
