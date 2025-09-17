@@ -8908,6 +8908,8 @@ type EdrSentinelOne struct {
 	EdrEventsCredential *SentinelOneEdrEventsCredential `json:"edr_events_credential,omitempty" url:"edr_events_credential,omitempty"`
 	// Base URL for the SentinelOne Singularity Data Lake API. This URL is required is required when querying EDR events.
 	EdrEventsUrl *string `json:"edr_events_url,omitempty" url:"edr_events_url,omitempty"`
+	// When true, skips verification of the SentinelOne TLS certificate.
+	SkipTlsVerify *bool `json:"skip_tls_verify,omitempty" url:"skip_tls_verify,omitempty"`
 	// Base URL for the SentinelOne Management API.
 	Url string `json:"url" url:"url"`
 
