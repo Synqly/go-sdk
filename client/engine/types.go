@@ -229,6 +229,40 @@ func (a *AppSecQueryFindingsResponseGeneric) String() string {
 	return fmt.Sprintf("%#v", a)
 }
 
+type AppSecSeverityFilterValue string
+
+const (
+	AppSecSeverityFilterValueCritical      AppSecSeverityFilterValue = "critical"
+	AppSecSeverityFilterValueHigh          AppSecSeverityFilterValue = "high"
+	AppSecSeverityFilterValueMedium        AppSecSeverityFilterValue = "medium"
+	AppSecSeverityFilterValueLow           AppSecSeverityFilterValue = "low"
+	AppSecSeverityFilterValueInformational AppSecSeverityFilterValue = "informational"
+	AppSecSeverityFilterValueUnknown       AppSecSeverityFilterValue = "unknown"
+)
+
+func NewAppSecSeverityFilterValueFromString(s string) (AppSecSeverityFilterValue, error) {
+	switch s {
+	case "critical":
+		return AppSecSeverityFilterValueCritical, nil
+	case "high":
+		return AppSecSeverityFilterValueHigh, nil
+	case "medium":
+		return AppSecSeverityFilterValueMedium, nil
+	case "low":
+		return AppSecSeverityFilterValueLow, nil
+	case "informational":
+		return AppSecSeverityFilterValueInformational, nil
+	case "unknown":
+		return AppSecSeverityFilterValueUnknown, nil
+	}
+	var t AppSecSeverityFilterValue
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (a AppSecSeverityFilterValue) Ptr() *AppSecSeverityFilterValue {
+	return &a
+}
+
 type CreateDeviceRequestGeneric struct {
 	// Device object to create
 	Device map[string]interface{} `json:"device" url:"device"`

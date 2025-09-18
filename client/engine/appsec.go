@@ -41,11 +41,13 @@ type AppSecQueryApplicationsRequest struct {
 }
 
 type AppSecQueryFindingsRequest struct {
+	// Add metadata to the response by invoking meta functions. Documentation for meta functions is available at https://docs.synqly.com/api-reference/meta-functions. Not all meta function are available at every endpoint.
+	Meta []*string `json:"-" url:"meta,omitempty"`
+	// Number of findings to return.
+	Limit *int `json:"-" url:"limit,omitempty"`
 	// Filter results by this query. For more information on filtering, refer to our Filtering Guide. Defaults to no filter.
 	// If used more than once, the queries are ANDed together.
 	Filter []*string `json:"-" url:"filter,omitempty"`
-	// Number of findings to return.
-	Limit *int `json:"-" url:"limit,omitempty"`
 	// Start search from cursor position.
 	Cursor *string `json:"-" url:"cursor,omitempty"`
 }

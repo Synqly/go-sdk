@@ -9517,6 +9517,76 @@ func (g *GcsCredential) Accept(visitor GcsCredentialVisitor) error {
 	return fmt.Errorf("type %T does not define a non-empty union type", g)
 }
 
+type GitLabCredential struct {
+	Type string
+	// Configuration when creating new Token.
+	Token *TokenCredential
+	// Reference to existing Token.
+	TokenId TokenCredentialId
+}
+
+func (g *GitLabCredential) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	g.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", g)
+	}
+	switch unmarshaler.Type {
+	case "token":
+		value := new(TokenCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		g.Token = value
+	case "token_id":
+		var valueUnmarshaler struct {
+			TokenId TokenCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		g.TokenId = valueUnmarshaler.TokenId
+	}
+	return nil
+}
+
+func (g GitLabCredential) MarshalJSON() ([]byte, error) {
+	if g.Token != nil {
+		return core.MarshalJSONWithExtraProperty(g.Token, "type", "token")
+	}
+	if g.TokenId != "" {
+		var marshaler = struct {
+			Type    string            `json:"type"`
+			TokenId TokenCredentialId `json:"value"`
+		}{
+			Type:    "token_id",
+			TokenId: g.TokenId,
+		}
+		return json.Marshal(marshaler)
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", g)
+}
+
+type GitLabCredentialVisitor interface {
+	VisitToken(*TokenCredential) error
+	VisitTokenId(TokenCredentialId) error
+}
+
+func (g *GitLabCredential) Accept(visitor GitLabCredentialVisitor) error {
+	if g.Token != nil {
+		return visitor.VisitToken(g.Token)
+	}
+	if g.TokenId != "" {
+		return visitor.VisitTokenId(g.TokenId)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", g)
+}
+
 type GoogleChronicleCredential struct {
 	Type string
 	// OAuth client credentials for a Google Cloud Service Account with permissions for Google Security Operations (formerly Google Chronicle).
@@ -11018,6 +11088,8 @@ func (p *PingOneCredential) Accept(visitor PingOneCredentialVisitor) error {
 
 type ProviderConfig struct {
 	Type string
+	// Configuration for GitLab as an application security provider.
+	AppsecGitlab *AppsecGitLab
 	// Configuration for HCL AppScan on Cloud as an application security provider.
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/hcl-appscan-appsec-setup)
@@ -11309,6 +11381,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 		return fmt.Errorf("%T did not include discriminant type", p)
 	}
 	switch unmarshaler.Type {
+	case "appsec_gitlab":
+		value := new(AppsecGitLab)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.AppsecGitlab = value
 	case "appsec_hcl_appscan_on_cloud":
 		value := new(AppsecHclAppScanOnCloud)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -11818,6 +11896,9 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 }
 
 func (p ProviderConfig) MarshalJSON() ([]byte, error) {
+	if p.AppsecGitlab != nil {
+		return core.MarshalJSONWithExtraProperty(p.AppsecGitlab, "type", "appsec_gitlab")
+	}
 	if p.AppsecHclAppscanOnCloud != nil {
 		return core.MarshalJSONWithExtraProperty(p.AppsecHclAppscanOnCloud, "type", "appsec_hcl_appscan_on_cloud")
 	}
@@ -12074,6 +12155,7 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 }
 
 type ProviderConfigVisitor interface {
+	VisitAppsecGitlab(*AppsecGitLab) error
 	VisitAppsecHclAppscanOnCloud(*AppsecHclAppScanOnCloud) error
 	VisitAppsecOpentextCoreApplicationSecurity(*AppsecOpenTextCoreApplicationSecurity) error
 	VisitAssetsArmisCentrix(*AssetsArmisCentrix) error
@@ -12161,6 +12243,9 @@ type ProviderConfigVisitor interface {
 }
 
 func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
+	if p.AppsecGitlab != nil {
+		return visitor.VisitAppsecGitlab(p.AppsecGitlab)
+	}
 	if p.AppsecHclAppscanOnCloud != nil {
 		return visitor.VisitAppsecHclAppscanOnCloud(p.AppsecHclAppscanOnCloud)
 	}
@@ -12420,6 +12505,8 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 type ProviderConfigId string
 
 const (
+	// GitLab
+	ProviderConfigIdAppsecGitLab ProviderConfigId = "appsec_gitlab"
 	// HCL AppScan on Cloud
 	ProviderConfigIdAppsecHclAppScanOnCloud ProviderConfigId = "appsec_hcl_appscan_on_cloud"
 	// OpenText Core Application Security
@@ -12594,6 +12681,8 @@ const (
 
 func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 	switch s {
+	case "appsec_gitlab":
+		return ProviderConfigIdAppsecGitLab, nil
 	case "appsec_hcl_appscan_on_cloud":
 		return ProviderConfigIdAppsecHclAppScanOnCloud, nil
 	case "appsec_opentext_core_application_security":
@@ -16664,6 +16753,51 @@ func (z *ZendeskCredential) Accept(visitor ZendeskCredentialVisitor) error {
 		return visitor.VisitBasicId(z.BasicId)
 	}
 	return fmt.Errorf("type %T does not define a non-empty union type", z)
+}
+
+// Configuration for GitLab as an application security provider.
+type AppsecGitLab struct {
+	// Credentials used for accessing the GitLab API.
+	Credential *GitLabCredential `json:"credential" url:"credential"`
+	// Base URL for the GitLab API. This URL should be the same as the URL used to access your GitLab instance.
+	Url string `json:"url" url:"url"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (a *AppsecGitLab) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
+}
+
+func (a *AppsecGitLab) UnmarshalJSON(data []byte) error {
+	type unmarshaler AppsecGitLab
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*a = AppsecGitLab(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+
+	a._rawJSON = nil
+	return nil
+}
+
+func (a *AppsecGitLab) String() string {
+	if len(a._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(a); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", a)
 }
 
 // Configuration for HCL AppScan on Cloud as an application security provider.
