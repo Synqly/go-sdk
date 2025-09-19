@@ -33,6 +33,7 @@ import (
 	useraccessmanagement "github.com/synqly/go-sdk/client/engine/ocsf/v130/useraccessmanagement"
 	vulnerabilityfinding "github.com/synqly/go-sdk/client/engine/ocsf/v130/vulnerabilityfinding"
 	webresourceaccessactivity "github.com/synqly/go-sdk/client/engine/ocsf/v130/webresourceaccessactivity"
+	cloudresourcesinventoryinfo "github.com/synqly/go-sdk/client/engine/ocsf/v140/cloudresourcesinventoryinfo"
 	emailactivity "github.com/synqly/go-sdk/client/engine/ocsf/v160/emailactivity"
 	filehostingactivity "github.com/synqly/go-sdk/client/engine/ocsf/v160/filehostingactivity"
 	httpactivity "github.com/synqly/go-sdk/client/engine/ocsf/v160/httpactivity"
@@ -2260,36 +2261,37 @@ func (q QueryStatus) Ptr() *QueryStatus {
 }
 
 type Event struct {
-	ClassName                 string
-	AccountChange             *accountchange.AccountChange
-	ApiActivity               *apiactivity.ApiActivity
-	EntityManagement          *entitymanagement.EntityManagement
-	Authentication            *authentication.Authentication
-	AuthorizeSession          *authorizesession.AuthorizeSession
-	BaseEvent                 *baseevent.BaseEvent
-	ComplianceFinding         *compliancefinding.ComplianceFinding
-	DeviceConfigState         *configstate.ConfigState
-	DetectionFinding          *detectionfinding.DetectionFinding
-	DnsActivity               *dnsactivity.DnsActivity
-	HttpActivity              *httpactivity.HttpActivity
-	FileSystemActivity        *fileactivity.FileActivity
-	GroupManagement           *groupmanagement.GroupManagement
-	IncidentFinding           *incidentfinding.IncidentFinding
-	DeviceInventoryInfo       *inventoryinfo.InventoryInfo
-	ModuleActivity            *moduleactivity.ModuleActivity
-	NetworkActivity           *networkactivity.NetworkActivity
-	ProcessActivity           *processactivity.ProcessActivity
-	ScanActivity              *scanactivity.ScanActivity
-	ScheduledJobActivity      *scheduledjobactivity.ScheduledJobActivity
-	SecurityFinding           *securityfinding.SecurityFinding
-	SoftwareInfo              *softwareinfo.SoftwareInfo
-	UserAccessManagement      *useraccessmanagement.UserAccess
-	VulnerabilityFinding      *vulnerabilityfinding.VulnerabilityFinding
-	WebResourceAccessActivity *webresourceaccessactivity.WebResourceAccessActivity
-	ApplicationLifecycle      *applicationlifecycle.ApplicationLifecycle
-	FileHostingActivity       *filehostingactivity.FileHosting
-	EmailActivity             *emailactivity.EmailActivity
-	CloudActivity             *cloudactivity.CloudActivity
+	ClassName                   string
+	AccountChange               *accountchange.AccountChange
+	ApiActivity                 *apiactivity.ApiActivity
+	EntityManagement            *entitymanagement.EntityManagement
+	Authentication              *authentication.Authentication
+	AuthorizeSession            *authorizesession.AuthorizeSession
+	BaseEvent                   *baseevent.BaseEvent
+	ComplianceFinding           *compliancefinding.ComplianceFinding
+	DeviceConfigState           *configstate.ConfigState
+	DetectionFinding            *detectionfinding.DetectionFinding
+	DnsActivity                 *dnsactivity.DnsActivity
+	HttpActivity                *httpactivity.HttpActivity
+	FileSystemActivity          *fileactivity.FileActivity
+	GroupManagement             *groupmanagement.GroupManagement
+	IncidentFinding             *incidentfinding.IncidentFinding
+	DeviceInventoryInfo         *inventoryinfo.InventoryInfo
+	ModuleActivity              *moduleactivity.ModuleActivity
+	NetworkActivity             *networkactivity.NetworkActivity
+	ProcessActivity             *processactivity.ProcessActivity
+	ScanActivity                *scanactivity.ScanActivity
+	ScheduledJobActivity        *scheduledjobactivity.ScheduledJobActivity
+	SecurityFinding             *securityfinding.SecurityFinding
+	SoftwareInfo                *softwareinfo.SoftwareInfo
+	UserAccessManagement        *useraccessmanagement.UserAccess
+	VulnerabilityFinding        *vulnerabilityfinding.VulnerabilityFinding
+	WebResourceAccessActivity   *webresourceaccessactivity.WebResourceAccessActivity
+	ApplicationLifecycle        *applicationlifecycle.ApplicationLifecycle
+	FileHostingActivity         *filehostingactivity.FileHosting
+	EmailActivity               *emailactivity.EmailActivity
+	CloudActivity               *cloudactivity.CloudActivity
+	CloudResourcesInventoryInfo *cloudresourcesinventoryinfo.CloudResourcesInventoryInfo
 }
 
 func (e *Event) UnmarshalJSON(data []byte) error {
@@ -2478,6 +2480,12 @@ func (e *Event) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		e.CloudActivity = value
+	case "Cloud Resources Inventory Info":
+		value := new(cloudresourcesinventoryinfo.CloudResourcesInventoryInfo)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.CloudResourcesInventoryInfo = value
 	}
 	return nil
 }
@@ -2570,6 +2578,9 @@ func (e Event) MarshalJSON() ([]byte, error) {
 	if e.CloudActivity != nil {
 		return core.MarshalJSONWithExtraProperty(e.CloudActivity, "class_name", "Cloud Activity")
 	}
+	if e.CloudResourcesInventoryInfo != nil {
+		return core.MarshalJSONWithExtraProperty(e.CloudResourcesInventoryInfo, "class_name", "Cloud Resources Inventory Info")
+	}
 	return nil, fmt.Errorf("type %T does not define a non-empty union type", e)
 }
 
@@ -2603,6 +2614,7 @@ type EventVisitor interface {
 	VisitFileHostingActivity(*filehostingactivity.FileHosting) error
 	VisitEmailActivity(*emailactivity.EmailActivity) error
 	VisitCloudActivity(*cloudactivity.CloudActivity) error
+	VisitCloudResourcesInventoryInfo(*cloudresourcesinventoryinfo.CloudResourcesInventoryInfo) error
 }
 
 func (e *Event) Accept(visitor EventVisitor) error {
@@ -2692,6 +2704,9 @@ func (e *Event) Accept(visitor EventVisitor) error {
 	}
 	if e.CloudActivity != nil {
 		return visitor.VisitCloudActivity(e.CloudActivity)
+	}
+	if e.CloudResourcesInventoryInfo != nil {
+		return visitor.VisitCloudResourcesInventoryInfo(e.CloudResourcesInventoryInfo)
 	}
 	return fmt.Errorf("type %T does not define a non-empty union type", e)
 }

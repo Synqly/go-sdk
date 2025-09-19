@@ -4183,7 +4183,7 @@ type Product struct {
 	// The URL pointing towards the product.
 	UrlString *UrlString `json:"url_string,omitempty" url:"url_string,omitempty"`
 	// The name of the vendor of the product.
-	VendorName string `json:"vendor_name" url:"vendor_name"`
+	VendorName *string `json:"vendor_name,omitempty" url:"vendor_name,omitempty"`
 	// The version of the product, as defined by the event source. For example: <code>2013.1.3-beta</code>.
 	Version *string `json:"version,omitempty" url:"version,omitempty"`
 	// The product workload associated with the event.
