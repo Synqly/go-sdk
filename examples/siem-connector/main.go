@@ -12,6 +12,7 @@ import (
 
 	engine "github.com/synqly/go-sdk/client/engine"
 	engineClient "github.com/synqly/go-sdk/client/engine/client"
+
 	// Each OCSF event type has its own package. This is intended to make imports
 	// more granular, allowing the end-user to import only the types they need.
 	scheduledJobActivity "github.com/synqly/go-sdk/client/engine/ocsf/v130/scheduledjobactivity"
@@ -238,6 +239,7 @@ func (app *App) backgroundJob(durationSeconds int) {
 // createSampleEvent generates a sample ScheduledJobActivity OCSF (https://ocsf.io/) Event
 func createSampleEvent() *engine.Event {
 	actionId := scheduledJobActivity.Action_Allowed
+	vendorName := "Synqly SDK for Go"
 	return &engine.Event{
 		ScheduledJobActivity: &scheduledJobActivity.ScheduledJobActivity{
 			ActivityId: scheduledJobActivity.Activity_Update,
@@ -254,7 +256,7 @@ func createSampleEvent() *engine.Event {
 			},
 			Metadata: &scheduledJobActivity.Metadata{
 				Product: &scheduledJobActivity.Product{
-					VendorName: "Synqly SDK for Go",
+					VendorName: &vendorName,
 				},
 				Version: "1.1.0",
 			},
