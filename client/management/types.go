@@ -6665,6 +6665,25 @@ func (w *WebhooksPermissions) String() string {
 	return fmt.Sprintf("%#v", w)
 }
 
+type AppsecOpentextCoreApplicationSecurityDataset string
+
+const (
+	AppsecOpentextCoreApplicationSecurityDatasetBasicVer0 AppsecOpentextCoreApplicationSecurityDataset = "basic_v0"
+)
+
+func NewAppsecOpentextCoreApplicationSecurityDatasetFromString(s string) (AppsecOpentextCoreApplicationSecurityDataset, error) {
+	switch s {
+	case "basic_v0":
+		return AppsecOpentextCoreApplicationSecurityDatasetBasicVer0, nil
+	}
+	var t AppsecOpentextCoreApplicationSecurityDataset
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (a AppsecOpentextCoreApplicationSecurityDataset) Ptr() *AppsecOpentextCoreApplicationSecurityDataset {
+	return &a
+}
+
 type ArmisCredential struct {
 	Type string
 	// Configuration when creating new API Key.
@@ -11098,6 +11117,10 @@ type ProviderConfig struct {
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/opentext-core-applicationsecurity-appsec-setup)
 	AppsecOpentextCoreApplicationSecurity *AppsecOpenTextCoreApplicationSecurity
+	// Configuration for [MOCK] OpenText Core Application Security.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/opentext-core-applicationsecurity-appsec-setup)
+	AppsecOpentextCoreApplicationSecurityMock *AppsecOpenTextCoreApplicationSecurityMock
 	// Configuration for Armis Centrix™ for Asset Management and Security.
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/armis-centrix-setup)
@@ -11399,6 +11422,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.AppsecOpentextCoreApplicationSecurity = value
+	case "appsec_opentext_core_application_security_mock":
+		value := new(AppsecOpenTextCoreApplicationSecurityMock)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.AppsecOpentextCoreApplicationSecurityMock = value
 	case "assets_armis_centrix":
 		value := new(AssetsArmisCentrix)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -11905,6 +11934,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.AppsecOpentextCoreApplicationSecurity != nil {
 		return core.MarshalJSONWithExtraProperty(p.AppsecOpentextCoreApplicationSecurity, "type", "appsec_opentext_core_application_security")
 	}
+	if p.AppsecOpentextCoreApplicationSecurityMock != nil {
+		return core.MarshalJSONWithExtraProperty(p.AppsecOpentextCoreApplicationSecurityMock, "type", "appsec_opentext_core_application_security_mock")
+	}
 	if p.AssetsArmisCentrix != nil {
 		return core.MarshalJSONWithExtraProperty(p.AssetsArmisCentrix, "type", "assets_armis_centrix")
 	}
@@ -12158,6 +12190,7 @@ type ProviderConfigVisitor interface {
 	VisitAppsecGitlab(*AppsecGitLab) error
 	VisitAppsecHclAppscanOnCloud(*AppsecHclAppScanOnCloud) error
 	VisitAppsecOpentextCoreApplicationSecurity(*AppsecOpenTextCoreApplicationSecurity) error
+	VisitAppsecOpentextCoreApplicationSecurityMock(*AppsecOpenTextCoreApplicationSecurityMock) error
 	VisitAssetsArmisCentrix(*AssetsArmisCentrix) error
 	VisitAssetsArmisCentrixMock(*AssetsArmisCentrixMock) error
 	VisitAssetsAxonius(*AssetsAxonius) error
@@ -12251,6 +12284,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.AppsecOpentextCoreApplicationSecurity != nil {
 		return visitor.VisitAppsecOpentextCoreApplicationSecurity(p.AppsecOpentextCoreApplicationSecurity)
+	}
+	if p.AppsecOpentextCoreApplicationSecurityMock != nil {
+		return visitor.VisitAppsecOpentextCoreApplicationSecurityMock(p.AppsecOpentextCoreApplicationSecurityMock)
 	}
 	if p.AssetsArmisCentrix != nil {
 		return visitor.VisitAssetsArmisCentrix(p.AssetsArmisCentrix)
@@ -12511,6 +12547,8 @@ const (
 	ProviderConfigIdAppsecHclAppScanOnCloud ProviderConfigId = "appsec_hcl_appscan_on_cloud"
 	// OpenText Core Application Security
 	ProviderConfigIdAppsecOpenTextCoreApplicationSecurity ProviderConfigId = "appsec_opentext_core_application_security"
+	// [MOCK] OpenText Core Application Security
+	ProviderConfigIdAppsecOpenTextCoreApplicationSecurityMock ProviderConfigId = "appsec_opentext_core_application_security_mock"
 	// Armis Centrix™ for Asset Management and Security
 	ProviderConfigIdAssetsArmisCentrix ProviderConfigId = "assets_armis_centrix"
 	// [MOCK] Armis Centrix™ for Asset Management and Security
@@ -12687,6 +12725,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdAppsecHclAppScanOnCloud, nil
 	case "appsec_opentext_core_application_security":
 		return ProviderConfigIdAppsecOpenTextCoreApplicationSecurity, nil
+	case "appsec_opentext_core_application_security_mock":
+		return ProviderConfigIdAppsecOpenTextCoreApplicationSecurityMock, nil
 	case "assets_armis_centrix":
 		return ProviderConfigIdAssetsArmisCentrix, nil
 	case "assets_armis_centrix_mock":
@@ -16883,6 +16923,50 @@ func (a *AppsecOpenTextCoreApplicationSecurity) UnmarshalJSON(data []byte) error
 }
 
 func (a *AppsecOpenTextCoreApplicationSecurity) String() string {
+	if len(a._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(a); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", a)
+}
+
+// Configuration for [MOCK] OpenText Core Application Security.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/opentext-core-applicationsecurity-appsec-setup)
+type AppsecOpenTextCoreApplicationSecurityMock struct {
+	Dataset AppsecOpentextCoreApplicationSecurityDataset `json:"dataset" url:"dataset"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (a *AppsecOpenTextCoreApplicationSecurityMock) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
+}
+
+func (a *AppsecOpenTextCoreApplicationSecurityMock) UnmarshalJSON(data []byte) error {
+	type unmarshaler AppsecOpenTextCoreApplicationSecurityMock
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*a = AppsecOpenTextCoreApplicationSecurityMock(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+
+	a._rawJSON = nil
+	return nil
+}
+
+func (a *AppsecOpenTextCoreApplicationSecurityMock) String() string {
 	if len(a._rawJSON) > 0 {
 		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
 			return value
