@@ -34,6 +34,7 @@ import (
 	vulnerabilityfinding "github.com/synqly/go-sdk/client/engine/ocsf/v130/vulnerabilityfinding"
 	webresourceaccessactivity "github.com/synqly/go-sdk/client/engine/ocsf/v130/webresourceaccessactivity"
 	cloudresourcesinventoryinfo "github.com/synqly/go-sdk/client/engine/ocsf/v140/cloudresourcesinventoryinfo"
+	applicationsecurityposturefinding "github.com/synqly/go-sdk/client/engine/ocsf/v150/applicationsecurityposturefinding"
 	emailactivity "github.com/synqly/go-sdk/client/engine/ocsf/v160/emailactivity"
 	filehostingactivity "github.com/synqly/go-sdk/client/engine/ocsf/v160/filehostingactivity"
 	httpactivity "github.com/synqly/go-sdk/client/engine/ocsf/v160/httpactivity"
@@ -2261,37 +2262,38 @@ func (q QueryStatus) Ptr() *QueryStatus {
 }
 
 type Event struct {
-	ClassName                   string
-	AccountChange               *accountchange.AccountChange
-	ApiActivity                 *apiactivity.ApiActivity
-	EntityManagement            *entitymanagement.EntityManagement
-	Authentication              *authentication.Authentication
-	AuthorizeSession            *authorizesession.AuthorizeSession
-	BaseEvent                   *baseevent.BaseEvent
-	ComplianceFinding           *compliancefinding.ComplianceFinding
-	DeviceConfigState           *configstate.ConfigState
-	DetectionFinding            *detectionfinding.DetectionFinding
-	DnsActivity                 *dnsactivity.DnsActivity
-	HttpActivity                *httpactivity.HttpActivity
-	FileSystemActivity          *fileactivity.FileActivity
-	GroupManagement             *groupmanagement.GroupManagement
-	IncidentFinding             *incidentfinding.IncidentFinding
-	DeviceInventoryInfo         *inventoryinfo.InventoryInfo
-	ModuleActivity              *moduleactivity.ModuleActivity
-	NetworkActivity             *networkactivity.NetworkActivity
-	ProcessActivity             *processactivity.ProcessActivity
-	ScanActivity                *scanactivity.ScanActivity
-	ScheduledJobActivity        *scheduledjobactivity.ScheduledJobActivity
-	SecurityFinding             *securityfinding.SecurityFinding
-	SoftwareInfo                *softwareinfo.SoftwareInfo
-	UserAccessManagement        *useraccessmanagement.UserAccess
-	VulnerabilityFinding        *vulnerabilityfinding.VulnerabilityFinding
-	WebResourceAccessActivity   *webresourceaccessactivity.WebResourceAccessActivity
-	ApplicationLifecycle        *applicationlifecycle.ApplicationLifecycle
-	FileHostingActivity         *filehostingactivity.FileHosting
-	EmailActivity               *emailactivity.EmailActivity
-	CloudActivity               *cloudactivity.CloudActivity
-	CloudResourcesInventoryInfo *cloudresourcesinventoryinfo.CloudResourcesInventoryInfo
+	ClassName                         string
+	AccountChange                     *accountchange.AccountChange
+	ApiActivity                       *apiactivity.ApiActivity
+	ApplicationSecurityPostureFinding *applicationsecurityposturefinding.ApplicationSecurityPostureFinding
+	EntityManagement                  *entitymanagement.EntityManagement
+	Authentication                    *authentication.Authentication
+	AuthorizeSession                  *authorizesession.AuthorizeSession
+	BaseEvent                         *baseevent.BaseEvent
+	ComplianceFinding                 *compliancefinding.ComplianceFinding
+	DeviceConfigState                 *configstate.ConfigState
+	DetectionFinding                  *detectionfinding.DetectionFinding
+	DnsActivity                       *dnsactivity.DnsActivity
+	HttpActivity                      *httpactivity.HttpActivity
+	FileSystemActivity                *fileactivity.FileActivity
+	GroupManagement                   *groupmanagement.GroupManagement
+	IncidentFinding                   *incidentfinding.IncidentFinding
+	DeviceInventoryInfo               *inventoryinfo.InventoryInfo
+	ModuleActivity                    *moduleactivity.ModuleActivity
+	NetworkActivity                   *networkactivity.NetworkActivity
+	ProcessActivity                   *processactivity.ProcessActivity
+	ScanActivity                      *scanactivity.ScanActivity
+	ScheduledJobActivity              *scheduledjobactivity.ScheduledJobActivity
+	SecurityFinding                   *securityfinding.SecurityFinding
+	SoftwareInfo                      *softwareinfo.SoftwareInfo
+	UserAccessManagement              *useraccessmanagement.UserAccess
+	VulnerabilityFinding              *vulnerabilityfinding.VulnerabilityFinding
+	WebResourceAccessActivity         *webresourceaccessactivity.WebResourceAccessActivity
+	ApplicationLifecycle              *applicationlifecycle.ApplicationLifecycle
+	FileHostingActivity               *filehostingactivity.FileHosting
+	EmailActivity                     *emailactivity.EmailActivity
+	CloudActivity                     *cloudactivity.CloudActivity
+	CloudResourcesInventoryInfo       *cloudresourcesinventoryinfo.CloudResourcesInventoryInfo
 }
 
 func (e *Event) UnmarshalJSON(data []byte) error {
@@ -2318,6 +2320,12 @@ func (e *Event) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		e.ApiActivity = value
+	case "Application Security Posture Finding":
+		value := new(applicationsecurityposturefinding.ApplicationSecurityPostureFinding)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.ApplicationSecurityPostureFinding = value
 	case "Entity Management":
 		value := new(entitymanagement.EntityManagement)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -2497,6 +2505,9 @@ func (e Event) MarshalJSON() ([]byte, error) {
 	if e.ApiActivity != nil {
 		return core.MarshalJSONWithExtraProperty(e.ApiActivity, "class_name", "API Activity")
 	}
+	if e.ApplicationSecurityPostureFinding != nil {
+		return core.MarshalJSONWithExtraProperty(e.ApplicationSecurityPostureFinding, "class_name", "Application Security Posture Finding")
+	}
 	if e.EntityManagement != nil {
 		return core.MarshalJSONWithExtraProperty(e.EntityManagement, "class_name", "Entity Management")
 	}
@@ -2587,6 +2598,7 @@ func (e Event) MarshalJSON() ([]byte, error) {
 type EventVisitor interface {
 	VisitAccountChange(*accountchange.AccountChange) error
 	VisitApiActivity(*apiactivity.ApiActivity) error
+	VisitApplicationSecurityPostureFinding(*applicationsecurityposturefinding.ApplicationSecurityPostureFinding) error
 	VisitEntityManagement(*entitymanagement.EntityManagement) error
 	VisitAuthentication(*authentication.Authentication) error
 	VisitAuthorizeSession(*authorizesession.AuthorizeSession) error
@@ -2623,6 +2635,9 @@ func (e *Event) Accept(visitor EventVisitor) error {
 	}
 	if e.ApiActivity != nil {
 		return visitor.VisitApiActivity(e.ApiActivity)
+	}
+	if e.ApplicationSecurityPostureFinding != nil {
+		return visitor.VisitApplicationSecurityPostureFinding(e.ApplicationSecurityPostureFinding)
 	}
 	if e.EntityManagement != nil {
 		return visitor.VisitEntityManagement(e.EntityManagement)
