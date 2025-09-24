@@ -7169,6 +7169,53 @@ func (a *AssetsCrowdStrikeMock) String() string {
 	return fmt.Sprintf("%#v", a)
 }
 
+// Configuration for Ivanti Neurons as an Assets Provider
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/ivanti-asset-setup)
+type AssetsIvantiNeurons struct {
+	AccountIdentifier string            `json:"account_identifier" url:"account_identifier"`
+	Credential        *IvantiCredential `json:"credential" url:"credential"`
+	// Base URL for the Ivanti Neurons API.
+	Url string `json:"url" url:"url"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (a *AssetsIvantiNeurons) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
+}
+
+func (a *AssetsIvantiNeurons) UnmarshalJSON(data []byte) error {
+	type unmarshaler AssetsIvantiNeurons
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*a = AssetsIvantiNeurons(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+
+	a._rawJSON = nil
+	return nil
+}
+
+func (a *AssetsIvantiNeurons) String() string {
+	if len(a._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(a); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", a)
+}
+
 // Configuration for Nozomi Vantage.
 //
 // [Configuration guide](https://docs.synqly.com/guides/provider-configuration/nozomi-vantage-setup)
@@ -10102,6 +10149,76 @@ func (i *IdentityPingOne) String() string {
 	return fmt.Sprintf("%#v", i)
 }
 
+type IvantiCredential struct {
+	Type string
+	// Configuration when creating new Token URL.
+	OAuthClient *OAuthClientCredential
+	// Reference to existing Token URL.
+	OAuthClientId OAuthClientCredentialId
+}
+
+func (i *IvantiCredential) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	i.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", i)
+	}
+	switch unmarshaler.Type {
+	case "o_auth_client":
+		value := new(OAuthClientCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		i.OAuthClient = value
+	case "o_auth_client_id":
+		var valueUnmarshaler struct {
+			OAuthClientId OAuthClientCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		i.OAuthClientId = valueUnmarshaler.OAuthClientId
+	}
+	return nil
+}
+
+func (i IvantiCredential) MarshalJSON() ([]byte, error) {
+	if i.OAuthClient != nil {
+		return core.MarshalJSONWithExtraProperty(i.OAuthClient, "type", "o_auth_client")
+	}
+	if i.OAuthClientId != "" {
+		var marshaler = struct {
+			Type          string                  `json:"type"`
+			OAuthClientId OAuthClientCredentialId `json:"value"`
+		}{
+			Type:          "o_auth_client_id",
+			OAuthClientId: i.OAuthClientId,
+		}
+		return json.Marshal(marshaler)
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", i)
+}
+
+type IvantiCredentialVisitor interface {
+	VisitOAuthClient(*OAuthClientCredential) error
+	VisitOAuthClientId(OAuthClientCredentialId) error
+}
+
+func (i *IvantiCredential) Accept(visitor IvantiCredentialVisitor) error {
+	if i.OAuthClient != nil {
+		return visitor.VisitOAuthClient(i.OAuthClient)
+	}
+	if i.OAuthClientId != "" {
+		return visitor.VisitOAuthClientId(i.OAuthClientId)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", i)
+}
+
 type JiraCredential struct {
 	Type string
 	// Configuration when creating new Basic Credentials.
@@ -11137,6 +11254,10 @@ type ProviderConfig struct {
 	AssetsCrowdstrike *AssetsCrowdStrike
 	// Configuration for a mocked CrowdStrike Falcon as an Assets Provider
 	AssetsCrowdstrikeMock *AssetsCrowdStrikeMock
+	// Configuration for Ivanti Neurons as an Assets Provider
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/ivanti-asset-setup)
+	AssetsIvantiNeurons *AssetsIvantiNeurons
 	// Configuration for Nozomi Vantage.
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/nozomi-vantage-setup)
@@ -11464,6 +11585,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.AssetsCrowdstrikeMock = value
+	case "assets_ivanti_neurons":
+		value := new(AssetsIvantiNeurons)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.AssetsIvantiNeurons = value
 	case "assets_nozomi_vantage":
 		value := new(AssetsNozomiVantage)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -11955,6 +12082,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.AssetsCrowdstrikeMock != nil {
 		return core.MarshalJSONWithExtraProperty(p.AssetsCrowdstrikeMock, "type", "assets_crowdstrike_mock")
 	}
+	if p.AssetsIvantiNeurons != nil {
+		return core.MarshalJSONWithExtraProperty(p.AssetsIvantiNeurons, "type", "assets_ivanti_neurons")
+	}
 	if p.AssetsNozomiVantage != nil {
 		return core.MarshalJSONWithExtraProperty(p.AssetsNozomiVantage, "type", "assets_nozomi_vantage")
 	}
@@ -12197,6 +12327,7 @@ type ProviderConfigVisitor interface {
 	VisitAssetsAxoniusMock(*AssetsAxoniusMock) error
 	VisitAssetsCrowdstrike(*AssetsCrowdStrike) error
 	VisitAssetsCrowdstrikeMock(*AssetsCrowdStrikeMock) error
+	VisitAssetsIvantiNeurons(*AssetsIvantiNeurons) error
 	VisitAssetsNozomiVantage(*AssetsNozomiVantage) error
 	VisitAssetsNozomiVantageMock(*AssetsNozomiVantageMock) error
 	VisitAssetsQualysCloud(*AssetsQualysCloud) error
@@ -12305,6 +12436,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.AssetsCrowdstrikeMock != nil {
 		return visitor.VisitAssetsCrowdstrikeMock(p.AssetsCrowdstrikeMock)
+	}
+	if p.AssetsIvantiNeurons != nil {
+		return visitor.VisitAssetsIvantiNeurons(p.AssetsIvantiNeurons)
 	}
 	if p.AssetsNozomiVantage != nil {
 		return visitor.VisitAssetsNozomiVantage(p.AssetsNozomiVantage)
@@ -12561,6 +12695,8 @@ const (
 	ProviderConfigIdAssetsCrowdStrike ProviderConfigId = "assets_crowdstrike"
 	// [MOCK] CrowdStrike Falcon Spotlight
 	ProviderConfigIdAssetsCrowdStrikeMock ProviderConfigId = "assets_crowdstrike_mock"
+	// Ivanti Neurons
+	ProviderConfigIdAssetsIvantiNeurons ProviderConfigId = "assets_ivanti_neurons"
 	// Nozomi Vantage
 	ProviderConfigIdAssetsNozomiVantage ProviderConfigId = "assets_nozomi_vantage"
 	// [MOCK] Nozomi Vantage
@@ -12739,6 +12875,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdAssetsCrowdStrike, nil
 	case "assets_crowdstrike_mock":
 		return ProviderConfigIdAssetsCrowdStrikeMock, nil
+	case "assets_ivanti_neurons":
+		return ProviderConfigIdAssetsIvantiNeurons, nil
 	case "assets_nozomi_vantage":
 		return ProviderConfigIdAssetsNozomiVantage, nil
 	case "assets_nozomi_vantage_mock":
