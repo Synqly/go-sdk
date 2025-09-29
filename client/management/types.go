@@ -8823,6 +8823,25 @@ func (d *DefenderCredential) Accept(visitor DefenderCredentialVisitor) error {
 	return fmt.Errorf("type %T does not define a non-empty union type", d)
 }
 
+type EdrCrowdStrikeDataset string
+
+const (
+	EdrCrowdStrikeDatasetBasicVer0 EdrCrowdStrikeDataset = "basic_v0"
+)
+
+func NewEdrCrowdStrikeDatasetFromString(s string) (EdrCrowdStrikeDataset, error) {
+	switch s {
+	case "basic_v0":
+		return EdrCrowdStrikeDatasetBasicVer0, nil
+	}
+	var t EdrCrowdStrikeDataset
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (e EdrCrowdStrikeDataset) Ptr() *EdrCrowdStrikeDataset {
+	return &e
+}
+
 // Configuration for CrowdStrike Falcon® Insight EDR.
 //
 // [Configuration guide](https://docs.synqly.com/guides/provider-configuration/crowdstrike-edr-setup)
@@ -8858,6 +8877,48 @@ func (e *EdrCrowdStrike) UnmarshalJSON(data []byte) error {
 }
 
 func (e *EdrCrowdStrike) String() string {
+	if len(e._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(e._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(e); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", e)
+}
+
+// Configuration for [MOCK] CrowdStrike Falcon® Insight EDR.
+type EdrCrowdStrikeMock struct {
+	Dataset EdrCrowdStrikeDataset `json:"dataset" url:"dataset"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (e *EdrCrowdStrikeMock) GetExtraProperties() map[string]interface{} {
+	return e.extraProperties
+}
+
+func (e *EdrCrowdStrikeMock) UnmarshalJSON(data []byte) error {
+	type unmarshaler EdrCrowdStrikeMock
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*e = EdrCrowdStrikeMock(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *e)
+	if err != nil {
+		return err
+	}
+	e.extraProperties = extraProperties
+
+	e._rawJSON = nil
+	return nil
+}
+
+func (e *EdrCrowdStrikeMock) String() string {
 	if len(e._rawJSON) > 0 {
 		if value, err := core.StringifyJSON(e._rawJSON); err == nil {
 			return value
@@ -11294,6 +11355,8 @@ type ProviderConfig struct {
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/crowdstrike-edr-setup)
 	EdrCrowdstrike *EdrCrowdStrike
+	// Configuration for [MOCK] CrowdStrike Falcon® Insight EDR.
+	EdrCrowdstrikeMock *EdrCrowdStrikeMock
 	// Configuration for Microsoft Defender for Endpoint.
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/defender-setup)
@@ -11675,6 +11738,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.EdrCrowdstrike = value
+	case "edr_crowdstrike_mock":
+		value := new(EdrCrowdStrikeMock)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.EdrCrowdstrikeMock = value
 	case "edr_defender":
 		value := new(EdrDefender)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -12127,6 +12196,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.EdrCrowdstrike != nil {
 		return core.MarshalJSONWithExtraProperty(p.EdrCrowdstrike, "type", "edr_crowdstrike")
 	}
+	if p.EdrCrowdstrikeMock != nil {
+		return core.MarshalJSONWithExtraProperty(p.EdrCrowdstrikeMock, "type", "edr_crowdstrike_mock")
+	}
 	if p.EdrDefender != nil {
 		return core.MarshalJSONWithExtraProperty(p.EdrDefender, "type", "edr_defender")
 	}
@@ -12342,6 +12414,7 @@ type ProviderConfigVisitor interface {
 	VisitCloudsecurityCrowdstrike(*CloudSecurityCrowdStrike) error
 	VisitCloudsecurityDefender(*CloudSecurityDefender) error
 	VisitEdrCrowdstrike(*EdrCrowdStrike) error
+	VisitEdrCrowdstrikeMock(*EdrCrowdStrikeMock) error
 	VisitEdrDefender(*EdrDefender) error
 	VisitEdrMalwarebytes(*EdrMalwarebytes) error
 	VisitEdrSentinelone(*EdrSentinelOne) error
@@ -12481,6 +12554,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.EdrCrowdstrike != nil {
 		return visitor.VisitEdrCrowdstrike(p.EdrCrowdstrike)
+	}
+	if p.EdrCrowdstrikeMock != nil {
+		return visitor.VisitEdrCrowdstrikeMock(p.EdrCrowdstrikeMock)
 	}
 	if p.EdrDefender != nil {
 		return visitor.VisitEdrDefender(p.EdrDefender)
@@ -12725,6 +12801,8 @@ const (
 	ProviderConfigIdCloudSecurityDefender ProviderConfigId = "cloudsecurity_defender"
 	// CrowdStrike Falcon® Insight EDR
 	ProviderConfigIdEdrCrowdStrike ProviderConfigId = "edr_crowdstrike"
+	// [MOCK] CrowdStrike Falcon® Insight EDR
+	ProviderConfigIdEdrCrowdStrikeMock ProviderConfigId = "edr_crowdstrike_mock"
 	// Microsoft Defender for Endpoint
 	ProviderConfigIdEdrDefender ProviderConfigId = "edr_defender"
 	// ThreatDown Endpoint Detection & Response
@@ -12905,6 +12983,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdCloudSecurityDefender, nil
 	case "edr_crowdstrike":
 		return ProviderConfigIdEdrCrowdStrike, nil
+	case "edr_crowdstrike_mock":
+		return ProviderConfigIdEdrCrowdStrikeMock, nil
 	case "edr_defender":
 		return ProviderConfigIdEdrDefender, nil
 	case "edr_malwarebytes":
