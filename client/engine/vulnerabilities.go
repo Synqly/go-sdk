@@ -265,6 +265,49 @@ func (g *GetScanActivityResponse) String() string {
 	return fmt.Sprintf("%#v", g)
 }
 
+type GetScanStatusResponse struct {
+	// Various metadata about the results organized by group, then type, then field.
+	Meta   *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
+	Result *ScanStatus   `json:"result" url:"result"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (g *GetScanStatusResponse) GetExtraProperties() map[string]interface{} {
+	return g.extraProperties
+}
+
+func (g *GetScanStatusResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler GetScanStatusResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*g = GetScanStatusResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	if err != nil {
+		return err
+	}
+	g.extraProperties = extraProperties
+
+	g._rawJSON = nil
+	return nil
+}
+
+func (g *GetScanStatusResponse) String() string {
+	if len(g._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(g._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(g); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", g)
+}
+
 type QueryAssetsResponse struct {
 	// Various metadata about the results organized by group, then type, then field.
 	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
@@ -496,11 +539,8 @@ func (u *UploadScanRequest) String() string {
 
 type UploadScanResponse struct {
 	// Various metadata about the results organized by group, then type, then field.
-	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
-	// ID of the scan.
-	ScanId string `json:"scan_id" url:"scan_id"`
-	// Specifies the status of the upload scan job, which can be COMPLETE or PENDING.
-	Status QueryStatus `json:"status" url:"status"`
+	Meta   *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
+	Result *ScanStatus   `json:"result" url:"result"`
 	// Provides additional details about any errors encountered during the upload scan operation.
 	Errors *Problem `json:"errors,omitempty" url:"errors,omitempty"`
 

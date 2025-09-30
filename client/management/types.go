@@ -4125,6 +4125,7 @@ const (
 	OperationIdVulnerabilitiesCreateAsset               OperationId = "vulnerabilities_create_asset"
 	OperationIdVulnerabilitiesCreateFindings            OperationId = "vulnerabilities_create_findings"
 	OperationIdVulnerabilitiesGetScanActivity           OperationId = "vulnerabilities_get_scan_activity"
+	OperationIdVulnerabilitiesGetScanStatus             OperationId = "vulnerabilities_get_scan_status"
 	OperationIdVulnerabilitiesQueryAssets               OperationId = "vulnerabilities_query_assets"
 	OperationIdVulnerabilitiesQueryFindings             OperationId = "vulnerabilities_query_findings"
 	OperationIdVulnerabilitiesQueryScans                OperationId = "vulnerabilities_query_scans"
@@ -4275,6 +4276,8 @@ func NewOperationIdFromString(s string) (OperationId, error) {
 		return OperationIdVulnerabilitiesCreateFindings, nil
 	case "vulnerabilities_get_scan_activity":
 		return OperationIdVulnerabilitiesGetScanActivity, nil
+	case "vulnerabilities_get_scan_status":
+		return OperationIdVulnerabilitiesGetScanStatus, nil
 	case "vulnerabilities_query_assets":
 		return OperationIdVulnerabilitiesQueryAssets, nil
 	case "vulnerabilities_query_findings":

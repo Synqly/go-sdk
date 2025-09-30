@@ -3610,6 +3610,7 @@ const (
 	OperationIdVulnerabilitiesCreateAsset               OperationId = "vulnerabilities_create_asset"
 	OperationIdVulnerabilitiesCreateFindings            OperationId = "vulnerabilities_create_findings"
 	OperationIdVulnerabilitiesGetScanActivity           OperationId = "vulnerabilities_get_scan_activity"
+	OperationIdVulnerabilitiesGetScanStatus             OperationId = "vulnerabilities_get_scan_status"
 	OperationIdVulnerabilitiesQueryAssets               OperationId = "vulnerabilities_query_assets"
 	OperationIdVulnerabilitiesQueryFindings             OperationId = "vulnerabilities_query_findings"
 	OperationIdVulnerabilitiesQueryScans                OperationId = "vulnerabilities_query_scans"
@@ -3760,6 +3761,8 @@ func NewOperationIdFromString(s string) (OperationId, error) {
 		return OperationIdVulnerabilitiesCreateFindings, nil
 	case "vulnerabilities_get_scan_activity":
 		return OperationIdVulnerabilitiesGetScanActivity, nil
+	case "vulnerabilities_get_scan_status":
+		return OperationIdVulnerabilitiesGetScanStatus, nil
 	case "vulnerabilities_query_assets":
 		return OperationIdVulnerabilitiesQueryAssets, nil
 	case "vulnerabilities_query_findings":
@@ -6050,6 +6053,49 @@ func (g *GetScanActivityResponseGeneric) String() string {
 	return fmt.Sprintf("%#v", g)
 }
 
+type GetScanStatusResponseGeneric struct {
+	// Various metadata about the results organized by group, then type, then field.
+	Meta   *MetaResponse          `json:"meta,omitempty" url:"meta,omitempty"`
+	Result map[string]interface{} `json:"result" url:"result"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (g *GetScanStatusResponseGeneric) GetExtraProperties() map[string]interface{} {
+	return g.extraProperties
+}
+
+func (g *GetScanStatusResponseGeneric) UnmarshalJSON(data []byte) error {
+	type unmarshaler GetScanStatusResponseGeneric
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*g = GetScanStatusResponseGeneric(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	if err != nil {
+		return err
+	}
+	g.extraProperties = extraProperties
+
+	g._rawJSON = nil
+	return nil
+}
+
+func (g *GetScanStatusResponseGeneric) String() string {
+	if len(g._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(g._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(g); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", g)
+}
+
 type NucleusFindingState struct {
 	// Due date for the finding.
 	DueDate *time.Time `json:"due_date,omitempty" url:"due_date,omitempty"`
@@ -6470,8 +6516,125 @@ func (s *ScanSchedule) String() string {
 	return fmt.Sprintf("%#v", s)
 }
 
+type ScanStatus struct {
+	// ID of the scan.
+	ScanId string `json:"scan_id" url:"scan_id"`
+	// Specifies the status of the scan, which can be Complete, Pending, or Error.
+	Status UploadScanStatus `json:"status" url:"status"`
+	// Provider specific status message for this scan.
+	Message *string `json:"message,omitempty" url:"message,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (s *ScanStatus) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
+}
+
+func (s *ScanStatus) UnmarshalJSON(data []byte) error {
+	type unmarshaler ScanStatus
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*s = ScanStatus(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+
+	s._rawJSON = nil
+	return nil
+}
+
+func (s *ScanStatus) String() string {
+	if len(s._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(s); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", s)
+}
+
 // Result of a vulnerability scan. Represented by OCSF Security Finding class (class_uid 2001).
 type SecurityFinding = *securityfinding.SecurityFinding
+
+type UploadScanResponseGeneric struct {
+	// Various metadata about the results organized by group, then type, then field.
+	Meta   *MetaResponse          `json:"meta,omitempty" url:"meta,omitempty"`
+	Result map[string]interface{} `json:"result" url:"result"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (u *UploadScanResponseGeneric) GetExtraProperties() map[string]interface{} {
+	return u.extraProperties
+}
+
+func (u *UploadScanResponseGeneric) UnmarshalJSON(data []byte) error {
+	type unmarshaler UploadScanResponseGeneric
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*u = UploadScanResponseGeneric(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *u)
+	if err != nil {
+		return err
+	}
+	u.extraProperties = extraProperties
+
+	u._rawJSON = nil
+	return nil
+}
+
+func (u *UploadScanResponseGeneric) String() string {
+	if len(u._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(u._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(u); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", u)
+}
+
+type UploadScanStatus string
+
+const (
+	UploadScanStatusUnknown  UploadScanStatus = "Unknown"
+	UploadScanStatusPending  UploadScanStatus = "Pending"
+	UploadScanStatusComplete UploadScanStatus = "Complete"
+	UploadScanStatusError    UploadScanStatus = "Error"
+)
+
+func NewUploadScanStatusFromString(s string) (UploadScanStatus, error) {
+	switch s {
+	case "Unknown":
+		return UploadScanStatusUnknown, nil
+	case "Pending":
+		return UploadScanStatusPending, nil
+	case "Complete":
+		return UploadScanStatusComplete, nil
+	case "Error":
+		return UploadScanStatusError, nil
+	}
+	var t UploadScanStatus
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (u UploadScanStatus) Ptr() *UploadScanStatus {
+	return &u
+}
 
 type User struct {
 	// ID of the user.
