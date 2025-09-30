@@ -11403,6 +11403,8 @@ func (p *PingOneCredential) Accept(visitor PingOneCredentialVisitor) error {
 type ProviderConfig struct {
 	Type string
 	// Configuration for GitLab as an application security provider.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/gitlab-appsec-setup)
 	AppsecGitlab *AppsecGitLab
 	// Configuration for HCL AppScan on Cloud as an application security provider.
 	//
@@ -17150,6 +17152,8 @@ func (z *ZendeskCredential) Accept(visitor ZendeskCredentialVisitor) error {
 }
 
 // Configuration for GitLab as an application security provider.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/gitlab-appsec-setup)
 type AppsecGitLab struct {
 	// Credentials used for accessing the GitLab API.
 	Credential *GitLabCredential `json:"credential" url:"credential"`
