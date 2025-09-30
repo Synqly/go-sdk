@@ -8570,6 +8570,50 @@ func (c *CloudSecurityDefender) String() string {
 	return fmt.Sprintf("%#v", c)
 }
 
+// Configuration for Palo Alto Networks Cortex Cloud Security
+type CloudSecurityPaloAlto struct {
+	Credential *PaloAltoCredential `json:"credential" url:"credential"`
+	// Base URL for the Palo Alto Networks Cortex Cloud Security API.
+	Url string `json:"url" url:"url"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *CloudSecurityPaloAlto) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
+}
+
+func (c *CloudSecurityPaloAlto) UnmarshalJSON(data []byte) error {
+	type unmarshaler CloudSecurityPaloAlto
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = CloudSecurityPaloAlto(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
+	c._rawJSON = nil
+	return nil
+}
+
+func (c *CloudSecurityPaloAlto) String() string {
+	if len(c._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
 type CrowdStrikeCredential struct {
 	Type string
 	// Configuration when creating new Client Credentials.
@@ -11148,6 +11192,76 @@ func (p *PagerDutyCredential) Accept(visitor PagerDutyCredentialVisitor) error {
 	return fmt.Errorf("type %T does not define a non-empty union type", p)
 }
 
+type PaloAltoCredential struct {
+	Type string
+	// Configuration when creating new API Key.
+	Basic *BasicCredential
+	// Reference to existing API Key.
+	BasicId BasicCredentialId
+}
+
+func (p *PaloAltoCredential) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	p.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", p)
+	}
+	switch unmarshaler.Type {
+	case "basic":
+		value := new(BasicCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.Basic = value
+	case "basic_id":
+		var valueUnmarshaler struct {
+			BasicId BasicCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		p.BasicId = valueUnmarshaler.BasicId
+	}
+	return nil
+}
+
+func (p PaloAltoCredential) MarshalJSON() ([]byte, error) {
+	if p.Basic != nil {
+		return core.MarshalJSONWithExtraProperty(p.Basic, "type", "basic")
+	}
+	if p.BasicId != "" {
+		var marshaler = struct {
+			Type    string            `json:"type"`
+			BasicId BasicCredentialId `json:"value"`
+		}{
+			Type:    "basic_id",
+			BasicId: p.BasicId,
+		}
+		return json.Marshal(marshaler)
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", p)
+}
+
+type PaloAltoCredentialVisitor interface {
+	VisitBasic(*BasicCredential) error
+	VisitBasicId(BasicCredentialId) error
+}
+
+func (p *PaloAltoCredential) Accept(visitor PaloAltoCredentialVisitor) error {
+	if p.Basic != nil {
+		return visitor.VisitBasic(p.Basic)
+	}
+	if p.BasicId != "" {
+		return visitor.VisitBasicId(p.BasicId)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", p)
+}
+
 type PingOneApiurl string
 
 const (
@@ -11354,6 +11468,8 @@ type ProviderConfig struct {
 	CloudsecurityCrowdstrike *CloudSecurityCrowdStrike
 	// Configuration for the Microsoft Defender for Cloud Provider
 	CloudsecurityDefender *CloudSecurityDefender
+	// Configuration for Palo Alto Networks Cortex Cloud Security
+	CloudsecurityPaloalto *CloudSecurityPaloAlto
 	// Configuration for CrowdStrike Falcon® Insight EDR.
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/crowdstrike-edr-setup)
@@ -11735,6 +11851,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.CloudsecurityDefender = value
+	case "cloudsecurity_paloalto":
+		value := new(CloudSecurityPaloAlto)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.CloudsecurityPaloalto = value
 	case "edr_crowdstrike":
 		value := new(EdrCrowdStrike)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -12196,6 +12318,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.CloudsecurityDefender != nil {
 		return core.MarshalJSONWithExtraProperty(p.CloudsecurityDefender, "type", "cloudsecurity_defender")
 	}
+	if p.CloudsecurityPaloalto != nil {
+		return core.MarshalJSONWithExtraProperty(p.CloudsecurityPaloalto, "type", "cloudsecurity_paloalto")
+	}
 	if p.EdrCrowdstrike != nil {
 		return core.MarshalJSONWithExtraProperty(p.EdrCrowdstrike, "type", "edr_crowdstrike")
 	}
@@ -12416,6 +12541,7 @@ type ProviderConfigVisitor interface {
 	VisitCloudsecurityAws(*CloudSecurityAws) error
 	VisitCloudsecurityCrowdstrike(*CloudSecurityCrowdStrike) error
 	VisitCloudsecurityDefender(*CloudSecurityDefender) error
+	VisitCloudsecurityPaloalto(*CloudSecurityPaloAlto) error
 	VisitEdrCrowdstrike(*EdrCrowdStrike) error
 	VisitEdrCrowdstrikeMock(*EdrCrowdStrikeMock) error
 	VisitEdrDefender(*EdrDefender) error
@@ -12554,6 +12680,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.CloudsecurityDefender != nil {
 		return visitor.VisitCloudsecurityDefender(p.CloudsecurityDefender)
+	}
+	if p.CloudsecurityPaloalto != nil {
+		return visitor.VisitCloudsecurityPaloalto(p.CloudsecurityPaloalto)
 	}
 	if p.EdrCrowdstrike != nil {
 		return visitor.VisitEdrCrowdstrike(p.EdrCrowdstrike)
@@ -12802,6 +12931,8 @@ const (
 	ProviderConfigIdCloudSecurityCrowdStrike ProviderConfigId = "cloudsecurity_crowdstrike"
 	// Microsoft Defender for Cloud
 	ProviderConfigIdCloudSecurityDefender ProviderConfigId = "cloudsecurity_defender"
+	// Palo Alto Networks Cortex Cloud Security
+	ProviderConfigIdCloudSecurityPaloAlto ProviderConfigId = "cloudsecurity_paloalto"
 	// CrowdStrike Falcon® Insight EDR
 	ProviderConfigIdEdrCrowdStrike ProviderConfigId = "edr_crowdstrike"
 	// [MOCK] CrowdStrike Falcon® Insight EDR
@@ -12984,6 +13115,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdCloudSecurityCrowdStrike, nil
 	case "cloudsecurity_defender":
 		return ProviderConfigIdCloudSecurityDefender, nil
+	case "cloudsecurity_paloalto":
+		return ProviderConfigIdCloudSecurityPaloAlto, nil
 	case "edr_crowdstrike":
 		return ProviderConfigIdEdrCrowdStrike, nil
 	case "edr_crowdstrike_mock":
