@@ -342,8 +342,7 @@ func (c *Client) UploadFile(
 	return nil
 }
 
-// Downloads a file from the provided `{path}` in the token-linked
-// `Integration`.
+// Downloads a file from the provided `{path}` in the token-linked `Integration`.
 func (c *Client) DownloadFile(
 	ctx context.Context,
 	path string,

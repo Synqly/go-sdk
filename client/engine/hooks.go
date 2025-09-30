@@ -6,25 +6,6 @@ import (
 	json "encoding/json"
 )
 
-type OpenPostProxyHook struct {
-	// Add metadata to the response by invoking meta functions. Documentation for meta functions is available at https://docs.synqly.com/api-reference/meta-functions. Not all meta function are available at every endpoint.
-	Meta []*string   `json:"-" url:"meta,omitempty"`
-	Body interface{} `json:"-" url:"-"`
-}
-
-func (o *OpenPostProxyHook) UnmarshalJSON(data []byte) error {
-	var body interface{}
-	if err := json.Unmarshal(data, &body); err != nil {
-		return err
-	}
-	o.Body = body
-	return nil
-}
-
-func (o *OpenPostProxyHook) MarshalJSON() ([]byte, error) {
-	return json.Marshal(o.Body)
-}
-
 type PostProxyHook struct {
 	// Add metadata to the response by invoking meta functions. Documentation for meta functions is available at https://docs.synqly.com/api-reference/meta-functions. Not all meta function are available at every endpoint.
 	Meta []*string `json:"-" url:"meta,omitempty"`

@@ -34,8 +34,7 @@ func NewClient(opts ...option.RequestOption) *Client {
 	}
 }
 
-// List all remote fields for all Projects in a ticketing integration. The response will include a list of
-// fields for each issue type in the ticketing provider.
+// List all remote fields for all Projects in a ticketing integration. The response will include a list of fields for each issue type in the ticketing provider.
 func (c *Client) ListRemoteFields(
 	ctx context.Context,
 	opts ...option.RequestOption,
@@ -174,8 +173,7 @@ func (c *Client) ListRemoteFields(
 	return response, nil
 }
 
-// Returns a list of `Projects` from the token-linked `Integration`.
-// Tickets must be created and retrieved within the context of a specific Project.
+// Returns a list of `Projects` from the token-linked `Integration`. Tickets must be created and retrieved within the context of a specific Project.
 func (c *Client) ListProjects(
 	ctx context.Context,
 	request *engine.ListProjectsRequest,

@@ -34,8 +34,7 @@ func NewClient(opts ...option.RequestOption) *Client {
 	}
 }
 
-// Returns the `Notification` object matching `{notificationId}` from the token-linked
-// `Integration`.
+// Returns the `Notification` object matching `{notificationId}` from the token-linked `Integration`.
 func (c *Client) GetMessage(
 	ctx context.Context,
 	notificationId engine.NotificationId,

@@ -30,12 +30,9 @@ type QueryIdentityAuditLogRequest struct {
 	Limit *int `json:"-" url:"limit,omitempty"`
 	// Start search from cursor position.
 	Cursor *string `json:"-" url:"cursor,omitempty"`
-	// Select a field to order the results by. Defaults to `time`. To control the direction of the sorting, append
-	// `[asc]` or `[desc]` to the field name. For example, `time[asc]` will sort the results by `time` in ascending order.
-	// The ordering defaults to `asc` if not specified.
+	// Select a field to order the results by. Defaults to `time`. To control the direction of the sorting, append `[asc]` or `[desc]` to the field name. For example, `time[asc]` will sort the results by `time` in ascending order. The ordering defaults to `asc` if not specified.
 	Order []*string `json:"-" url:"order,omitempty"`
-	// Filter results by this query. For more information on filtering, refer to our Filtering Guide. Defaults to no filter.
-	// If used more than once, the queries are ANDed together.
+	// Filter results by this query. For more information on filtering, refer to our Filtering Guide. Defaults to no filter. If used more than once, the queries are ANDed together.
 	Filter []*string `json:"-" url:"filter,omitempty"`
 	// Include the raw data from the SIEM in the response. Defaults to `false`.
 	IncludeRawData *bool `json:"-" url:"include_raw_data,omitempty"`
@@ -48,12 +45,9 @@ type QueryGroupRequest struct {
 	Limit *int `json:"-" url:"limit,omitempty"`
 	// Start search from cursor position.
 	Cursor *string `json:"-" url:"cursor,omitempty"`
-	// Select a field to order the results by. Defaults to `uid`. To control the direction of the sorting, append
-	// `[asc]` or `[desc]` to the field name. For example, `email_addr[asc]` will sort the results by `email_addr` in
-	// ascending order. The ordering defaults to `asc` if not specified.
+	// Select a field to order the results by. Defaults to `uid`. To control the direction of the sorting, append `[asc]` or `[desc]` to the field name. For example, `email_addr[asc]` will sort the results by `email_addr` in ascending order. The ordering defaults to `asc` if not specified.
 	Order []*string `json:"-" url:"order,omitempty"`
-	// Filter results by this query. For more information on filtering, refer to our Filtering Guide. Defaults to no filter.
-	// If used more than once, the queries are ANDed together.
+	// Filter results by this query. For more information on filtering, refer to our Filtering Guide. Defaults to no filter. If used more than once, the queries are ANDed together.
 	Filter []*string `json:"-" url:"filter,omitempty"`
 }
 
@@ -64,12 +58,9 @@ type QueryUserRequest struct {
 	Limit *int `json:"-" url:"limit,omitempty"`
 	// Start search from cursor position.
 	Cursor *string `json:"-" url:"cursor,omitempty"`
-	// Select a field to order the results by. Defaults to `uid`. To control the direction of the sorting, append
-	// `[asc]` or `[desc]` to the field name. For example, `email_addr[asc]` will sort the results by `email_addr` in
-	// ascending order. The ordering defaults to `asc` if not specified.
+	// Select a field to order the results by. Defaults to `uid`. To control the direction of the sorting, append `[asc]` or `[desc]` to the field name. For example, `email_addr[asc]` will sort the results by `email_addr` in ascending order. The ordering defaults to `asc` if not specified.
 	Order []*string `json:"-" url:"order,omitempty"`
-	// Filter results by this query. For more information on filtering, refer to our Filtering Guide. Defaults to no filter.
-	// If used more than once, the queries are ANDed together.
+	// Filter results by this query. For more information on filtering, refer to our Filtering Guide. Defaults to no filter. If used more than once, the queries are ANDed together.
 	Filter []*string `json:"-" url:"filter,omitempty"`
 }
 

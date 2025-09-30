@@ -27,18 +27,13 @@ type QuerySiemAlertsRequest struct {
 	Cursor *string `json:"-" url:"cursor,omitempty"`
 	// Number of `Account` objects to return in this page. Defaults to 100.
 	Limit *int `json:"-" url:"limit,omitempty"`
-	// Select a field to order the results by. Defaults to `time`. To control the direction of the sorting, append
-	// `[asc]` or `[desc]` to the field name. For example, `name[desc]` will sort the results by `name` in descending order.
-	// The ordering defaults to `asc` if not specified. May be used multiple times to order by multiple fields, and the
-	// ordering is applied in the order the fields are specified.
+	// Select a field to order the results by. Defaults to `time`. To control the direction of the sorting, append `[asc]` or `[desc]` to the field name. For example, `name[desc]` will sort the results by `name` in descending order. The ordering defaults to `asc` if not specified. May be used multiple times to order by multiple fields, and the ordering is applied in the order the fields are specified.
 	Order []*string `json:"-" url:"order,omitempty"`
-	// Filter results by this query. For more information on filtering, refer to our Filtering Guide. Defaults to no filter.
-	// If used more than once, the queries are ANDed together.
+	// Filter results by this query. For more information on filtering, refer to our Filtering Guide. Defaults to no filter. If used more than once, the queries are ANDed together.
 	Filter []*string `json:"-" url:"filter,omitempty"`
 	// Add metadata to the response by invoking meta functions. Documentation for meta functions is available at https://docs.synqly.com/api-reference/meta-functions. Not all meta function are available at every endpoint.
 	Meta []*string `json:"-" url:"meta,omitempty"`
-	// Include the raw data from the SIEM in the response. This is useful for debugging and troubleshooting.
-	// Defaults to `false`.
+	// Include the raw data from the SIEM in the response. This is useful for debugging and troubleshooting. Defaults to `false`.
 	IncludeRawData *bool `json:"-" url:"include_raw_data,omitempty"`
 }
 
@@ -47,22 +42,17 @@ type QuerySiemEventsRequest struct {
 	Cursor *string `json:"-" url:"cursor,omitempty"`
 	// Number of `Account` objects to return in this page. Defaults to 100.
 	Limit *int `json:"-" url:"limit,omitempty"`
-	// Select a field to order the results by. Defaults to `time`. To control the direction of the sorting, append
-	// `[asc]` or `[desc]` to the field name. For example, `name[desc]` will sort the results by `name` in descending order.
-	// The ordering defaults to `asc` if not specified. May be used multiple times to order by multiple fields, and the
-	// ordering is applied in the order the fields are specified.
+	// Select a field to order the results by. Defaults to `time`. To control the direction of the sorting, append `[asc]` or `[desc]` to the field name. For example, `name[desc]` will sort the results by `name` in descending order. The ordering defaults to `asc` if not specified. May be used multiple times to order by multiple fields, and the ordering is applied in the order the fields are specified.
 	Order []*string `json:"-" url:"order,omitempty"`
-	// Filter results by this query. For more information on filtering, refer to our Filtering Guide. Defaults to no filter.
-	// If used more than once, the queries are ANDed together.
+	// Filter results by this query. For more information on filtering, refer to our Filtering Guide. Defaults to no filter. If used more than once, the queries are ANDed together.
 	Filter []*string `json:"-" url:"filter,omitempty"`
 	// Add metadata to the response by invoking meta functions. Documentation for meta functions is available at https://docs.synqly.com/api-reference/meta-functions. Not all meta function are available at every endpoint.
 	Meta []*string `json:"-" url:"meta,omitempty"`
 	// Provider-specific query to pass through to the SIEM. This is useful for advanced queries that are not
-	// supported by the API. The keys and values are provider-specific. For example, to perform a specific query in
-	// Rapid7 IDR, you can use the `query: "{advanced query}"` key-value pair.
+	// supported by the API. The keys and values are provider-specific. For example, to perform a specific
+	// query in Rapid7 IDR, you can use the `query: "{advanced query}"` key-value pair.
 	PassthroughParam []*string `json:"-" url:"passthrough-param,omitempty"`
-	// Include the raw data from the SIEM in the response. This is useful for debugging and troubleshooting.
-	// Defaults to `false`.
+	// Include the raw data from the SIEM in the response. This is useful for debugging and troubleshooting. Defaults to `false`.
 	IncludeRawData *bool `json:"-" url:"include_raw_data,omitempty"`
 }
 

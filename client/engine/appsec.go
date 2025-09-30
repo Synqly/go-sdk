@@ -13,12 +13,9 @@ type AppSecQueryApplicationFindingsRequest struct {
 	Meta []*string `json:"-" url:"meta,omitempty"`
 	// Number of findings to return.
 	Limit *int `json:"-" url:"limit,omitempty"`
-	// Select a field to order the results by. Defaults to `name`. To control the direction of the sorting, append
-	// `[asc]` or `[desc]` to the field name. For example, `name[asc]` will sort the results by `name` in ascending order.
-	// The ordering defaults to `asc` if not specified.
+	// Select a field to order the results by. Defaults to `name`. To control the direction of the sorting, append `[asc]` or `[desc]` to the field name. For example, `name[asc]` will sort the results by `name` in ascending order. The ordering defaults to `asc` if not specified.
 	Order []*string `json:"-" url:"order,omitempty"`
-	// Filter results by this query. For more information on filtering, refer to our Filtering Guide. Defaults to no filter.
-	// If used more than once, the queries are ANDed together.
+	// Filter results by this query. For more information on filtering, refer to our Filtering Guide. Defaults to no filter. If used more than once, the queries are ANDed together.
 	Filter []*string `json:"-" url:"filter,omitempty"`
 	// Start search from cursor position.
 	Cursor *string `json:"-" url:"cursor,omitempty"`
@@ -29,12 +26,9 @@ type AppSecQueryApplicationsRequest struct {
 	Meta []*string `json:"-" url:"meta,omitempty"`
 	// Number of applications to return.
 	Limit *int `json:"-" url:"limit,omitempty"`
-	// Select a field to order the results by. Defaults to `name`. To control the direction of the sorting, append
-	// `[asc]` or `[desc]` to the field name. For example, `name[asc]` will sort the results by `name` in ascending order.
-	// The ordering defaults to `asc` if not specified.
+	// Select a field to order the results by. Defaults to `name`. To control the direction of the sorting, append `[asc]` or `[desc]` to the field name. For example, `name[asc]` will sort the results by `name` in ascending order. The ordering defaults to `asc` if not specified.
 	Order []*string `json:"-" url:"order,omitempty"`
-	// Filter results by this query. For more information on filtering, refer to our Filtering Guide. Defaults to no filter.
-	// If used more than once, the queries are ANDed together.
+	// Filter results by this query. For more information on filtering, refer to our Filtering Guide. Defaults to no filter. If used more than once, the queries are ANDed together.
 	Filter []*string `json:"-" url:"filter,omitempty"`
 	// Start search from cursor position.
 	Cursor *string `json:"-" url:"cursor,omitempty"`
@@ -45,8 +39,7 @@ type AppSecQueryFindingsRequest struct {
 	Meta []*string `json:"-" url:"meta,omitempty"`
 	// Number of findings to return.
 	Limit *int `json:"-" url:"limit,omitempty"`
-	// Filter results by this query. For more information on filtering, refer to our Filtering Guide. Defaults to no filter.
-	// If used more than once, the queries are ANDed together.
+	// Filter results by this query. For more information on filtering, refer to our Filtering Guide. Defaults to no filter. If used more than once, the queries are ANDed together.
 	Filter []*string `json:"-" url:"filter,omitempty"`
 	// Start search from cursor position.
 	Cursor *string `json:"-" url:"cursor,omitempty"`
