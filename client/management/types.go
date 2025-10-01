@@ -17992,6 +17992,8 @@ type Token struct {
 	Expires time.Time `json:"expires" url:"expires"`
 	// Permissions granted to this token.
 	Permissions *Permission `json:"permissions" url:"permissions"`
+	// Additional claims added to the token.
+	Claims map[string]interface{} `json:"claims,omitempty" url:"claims,omitempty"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
@@ -18113,6 +18115,218 @@ func (t *TokenPair) String() string {
 		return value
 	}
 	return fmt.Sprintf("%#v", t)
+}
+
+type McpDeveloperUsageScopeOptions struct {
+	// Restrict integration creation and usage to this account. The MCP
+	// will be given account-owner permissions for this account.
+	AccountId AccountId `json:"account_id" url:"account_id"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (m *McpDeveloperUsageScopeOptions) GetExtraProperties() map[string]interface{} {
+	return m.extraProperties
+}
+
+func (m *McpDeveloperUsageScopeOptions) UnmarshalJSON(data []byte) error {
+	type unmarshaler McpDeveloperUsageScopeOptions
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*m = McpDeveloperUsageScopeOptions(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *m)
+	if err != nil {
+		return err
+	}
+	m.extraProperties = extraProperties
+
+	m._rawJSON = nil
+	return nil
+}
+
+func (m *McpDeveloperUsageScopeOptions) String() string {
+	if len(m._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(m._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(m); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", m)
+}
+
+type McpIntegrationUsageScopeOptions struct {
+	// Restrict integration usage to this account. By default, the MCP server
+	// will have access to all integrations within this account; this may be
+	// restricted to a specific set of tools using the
+	// `restrict_to_connector_operations` property.
+	AccountId AccountId `json:"account_id" url:"account_id"`
+	// Optionally restrict access to the tools associated with the specified
+	// connector operations. If not specified, the MCP server will advertise
+	// all tools for this scope.
+	RestrictToConnectorOperations []OperationId `json:"restrict_to_connector_operations,omitempty" url:"restrict_to_connector_operations,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (m *McpIntegrationUsageScopeOptions) GetExtraProperties() map[string]interface{} {
+	return m.extraProperties
+}
+
+func (m *McpIntegrationUsageScopeOptions) UnmarshalJSON(data []byte) error {
+	type unmarshaler McpIntegrationUsageScopeOptions
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*m = McpIntegrationUsageScopeOptions(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *m)
+	if err != nil {
+		return err
+	}
+	m.extraProperties = extraProperties
+
+	m._rawJSON = nil
+	return nil
+}
+
+func (m *McpIntegrationUsageScopeOptions) String() string {
+	if len(m._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(m._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(m); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", m)
+}
+
+type McpManagementScopeOptions struct {
+	// Optionally restrict access to a specific environment.
+	Environment *Environment `json:"environment,omitempty" url:"environment,omitempty"`
+	// Optionally restrict access to a specific account. This is recommended for production use cases. If provided, this overrides any `environment` restriction.
+	AccountId *AccountId `json:"account_id,omitempty" url:"account_id,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (m *McpManagementScopeOptions) GetExtraProperties() map[string]interface{} {
+	return m.extraProperties
+}
+
+func (m *McpManagementScopeOptions) UnmarshalJSON(data []byte) error {
+	type unmarshaler McpManagementScopeOptions
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*m = McpManagementScopeOptions(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *m)
+	if err != nil {
+		return err
+	}
+	m.extraProperties = extraProperties
+
+	m._rawJSON = nil
+	return nil
+}
+
+func (m *McpManagementScopeOptions) String() string {
+	if len(m._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(m._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(m); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", m)
+}
+
+type McpTokenScope struct {
+	Type string
+	// Grants access to the management API. The MCP server will advertise tools that support management APIs, such as creating and updating integrations.
+	Management *McpManagementScopeOptions
+	// Grants access to the Connector APIs. Use this scope when your agent will access integrations.
+	IntegrationUsage *McpIntegrationUsageScopeOptions
+	// Grants access to the Developer MCP tools and associated APIs.
+	Developer *McpDeveloperUsageScopeOptions
+}
+
+func (m *McpTokenScope) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	m.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", m)
+	}
+	switch unmarshaler.Type {
+	case "management":
+		value := new(McpManagementScopeOptions)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		m.Management = value
+	case "integration-usage":
+		value := new(McpIntegrationUsageScopeOptions)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		m.IntegrationUsage = value
+	case "developer":
+		value := new(McpDeveloperUsageScopeOptions)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		m.Developer = value
+	}
+	return nil
+}
+
+func (m McpTokenScope) MarshalJSON() ([]byte, error) {
+	if m.Management != nil {
+		return core.MarshalJSONWithExtraProperty(m.Management, "type", "management")
+	}
+	if m.IntegrationUsage != nil {
+		return core.MarshalJSONWithExtraProperty(m.IntegrationUsage, "type", "integration-usage")
+	}
+	if m.Developer != nil {
+		return core.MarshalJSONWithExtraProperty(m.Developer, "type", "developer")
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", m)
+}
+
+type McpTokenScopeVisitor interface {
+	VisitManagement(*McpManagementScopeOptions) error
+	VisitIntegrationUsage(*McpIntegrationUsageScopeOptions) error
+	VisitDeveloper(*McpDeveloperUsageScopeOptions) error
+}
+
+func (m *McpTokenScope) Accept(visitor McpTokenScopeVisitor) error {
+	if m.Management != nil {
+		return visitor.VisitManagement(m.Management)
+	}
+	if m.IntegrationUsage != nil {
+		return visitor.VisitIntegrationUsage(m.IntegrationUsage)
+	}
+	if m.Developer != nil {
+		return visitor.VisitDeveloper(m.Developer)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", m)
 }
 
 type RefreshToken struct {

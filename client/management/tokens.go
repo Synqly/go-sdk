@@ -111,6 +111,92 @@ func (c *CreateIntegrationTokenResponse) String() string {
 	return fmt.Sprintf("%#v", c)
 }
 
+type CreateMcpTokenRequest struct {
+	// Token time-to-live. If not provided, defaults to 1 hour. May be set to a maximum of 24 hours. Use the format "1h", "1m", "1s" for hours, minutes, and seconds respectively, e.g., "2h" for 2 hours.
+	TokenTtl *string `json:"token_ttl,omitempty" url:"token_ttl,omitempty"`
+	// Controls the tools that are available to the MCP server,
+	// and the APIs that can be accessed by the MCP server.
+	Scope *McpTokenScope `json:"scope" url:"scope"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *CreateMcpTokenRequest) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
+}
+
+func (c *CreateMcpTokenRequest) UnmarshalJSON(data []byte) error {
+	type unmarshaler CreateMcpTokenRequest
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = CreateMcpTokenRequest(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
+	c._rawJSON = nil
+	return nil
+}
+
+func (c *CreateMcpTokenRequest) String() string {
+	if len(c._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
+type CreateMcpTokenResponse struct {
+	Result *Token `json:"result" url:"result"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *CreateMcpTokenResponse) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
+}
+
+func (c *CreateMcpTokenResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler CreateMcpTokenResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = CreateMcpTokenResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
+	c._rawJSON = nil
+	return nil
+}
+
+func (c *CreateMcpTokenResponse) String() string {
+	if len(c._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
 type CreateSynqlyIntegrationsTokenRequest struct {
 	// Token time-to-live. If not provided, defaults to 24 hours. Use the format "1h", "1m", "1s" for hours, minutes, and seconds respectively, e.g., "24h" for 24 hours.
 	TokenTtl *string `json:"token_ttl,omitempty" url:"token_ttl,omitempty"`
