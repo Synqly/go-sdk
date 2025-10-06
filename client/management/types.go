@@ -11647,6 +11647,10 @@ type ProviderConfig struct {
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/pagerduty-ticketing-setup)
 	TicketingPagerduty *TicketingPagerDuty
+	// Configuration for [MOCK] PagerDuty Operations Cloud.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/pagerduty-ticketing-setup)
+	TicketingPagerdutyMock *TicketingPagerDutyMock
 	// Configuration for ServiceNow IT Service Management (ITSM).
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/servicenow-ticketing-setup)
@@ -12153,6 +12157,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.TicketingPagerduty = value
+	case "ticketing_pagerduty_mock":
+		value := new(TicketingPagerDutyMock)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.TicketingPagerdutyMock = value
 	case "ticketing_servicenow":
 		value := new(TicketingServiceNow)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -12470,6 +12480,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.TicketingPagerduty != nil {
 		return core.MarshalJSONWithExtraProperty(p.TicketingPagerduty, "type", "ticketing_pagerduty")
 	}
+	if p.TicketingPagerdutyMock != nil {
+		return core.MarshalJSONWithExtraProperty(p.TicketingPagerdutyMock, "type", "ticketing_pagerduty_mock")
+	}
 	if p.TicketingServicenow != nil {
 		return core.MarshalJSONWithExtraProperty(p.TicketingServicenow, "type", "ticketing_servicenow")
 	}
@@ -12593,6 +12606,7 @@ type ProviderConfigVisitor interface {
 	VisitTicketingJiraServiceManagement(*TicketingJiraServiceManagement) error
 	VisitTicketingMockTicketing(*TicketingMock) error
 	VisitTicketingPagerduty(*TicketingPagerDuty) error
+	VisitTicketingPagerdutyMock(*TicketingPagerDutyMock) error
 	VisitTicketingServicenow(*TicketingServiceNow) error
 	VisitTicketingServicenowSir(*TicketingServiceNowSir) error
 	VisitTicketingTorq(*TicketingTorq) error
@@ -12833,6 +12847,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	if p.TicketingPagerduty != nil {
 		return visitor.VisitTicketingPagerduty(p.TicketingPagerduty)
 	}
+	if p.TicketingPagerdutyMock != nil {
+		return visitor.VisitTicketingPagerdutyMock(p.TicketingPagerdutyMock)
+	}
 	if p.TicketingServicenow != nil {
 		return visitor.VisitTicketingServicenow(p.TicketingServicenow)
 	}
@@ -13033,6 +13050,8 @@ const (
 	ProviderConfigIdTicketingMock ProviderConfigId = "ticketing_mock_ticketing"
 	// PagerDuty Operations Cloud
 	ProviderConfigIdTicketingPagerDuty ProviderConfigId = "ticketing_pagerduty"
+	// [MOCK] PagerDuty Operations Cloud
+	ProviderConfigIdTicketingPagerDutyMock ProviderConfigId = "ticketing_pagerduty_mock"
 	// ServiceNow IT Service Management (ITSM)
 	ProviderConfigIdTicketingServiceNow ProviderConfigId = "ticketing_servicenow"
 	// ServiceNow Security Incident Response (SIR)
@@ -13217,6 +13236,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdTicketingMock, nil
 	case "ticketing_pagerduty":
 		return ProviderConfigIdTicketingPagerDuty, nil
+	case "ticketing_pagerduty_mock":
+		return ProviderConfigIdTicketingPagerDutyMock, nil
 	case "ticketing_servicenow":
 		return ProviderConfigIdTicketingServiceNow, nil
 	case "ticketing_servicenow_sir":
@@ -15964,6 +15985,25 @@ func (t *TenableCloudCredential) Accept(visitor TenableCloudCredentialVisitor) e
 	return fmt.Errorf("type %T does not define a non-empty union type", t)
 }
 
+type TicketingPagerdutyDataset string
+
+const (
+	TicketingPagerdutyDatasetBasicVer0 TicketingPagerdutyDataset = "basic_v0"
+)
+
+func NewTicketingPagerdutyDatasetFromString(s string) (TicketingPagerdutyDataset, error) {
+	switch s {
+	case "basic_v0":
+		return TicketingPagerdutyDatasetBasicVer0, nil
+	}
+	var t TicketingPagerdutyDataset
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (t TicketingPagerdutyDataset) Ptr() *TicketingPagerdutyDataset {
+	return &t
+}
+
 // Configuration for Autotask Operations Cloud.
 //
 // [Configuration guide](https://docs.synqly.com/guides/provider-configuration/autotask-ticketing-setup)
@@ -16243,6 +16283,50 @@ func (t *TicketingPagerDuty) UnmarshalJSON(data []byte) error {
 }
 
 func (t *TicketingPagerDuty) String() string {
+	if len(t._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(t._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(t); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", t)
+}
+
+// Configuration for [MOCK] PagerDuty Operations Cloud.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/pagerduty-ticketing-setup)
+type TicketingPagerDutyMock struct {
+	Dataset TicketingPagerdutyDataset `json:"dataset" url:"dataset"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (t *TicketingPagerDutyMock) GetExtraProperties() map[string]interface{} {
+	return t.extraProperties
+}
+
+func (t *TicketingPagerDutyMock) UnmarshalJSON(data []byte) error {
+	type unmarshaler TicketingPagerDutyMock
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*t = TicketingPagerDutyMock(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *t)
+	if err != nil {
+		return err
+	}
+	t.extraProperties = extraProperties
+
+	t._rawJSON = nil
+	return nil
+}
+
+func (t *TicketingPagerDutyMock) String() string {
 	if len(t._rawJSON) > 0 {
 		if value, err := core.StringifyJSON(t._rawJSON); err == nil {
 			return value
