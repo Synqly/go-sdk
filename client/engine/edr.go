@@ -47,6 +47,8 @@ type QueryApplicationsRequest struct {
 type QueryEdrEventsRequest struct {
 	// Add metadata to the response by invoking meta functions. Documentation for meta functions is available at https://docs.synqly.com/api-reference/meta-functions. Not all meta function are available at every endpoint.
 	Meta []*string `json:"-" url:"meta,omitempty"`
+	// Provider-specific query to pass through to the EDR. This is useful for advanced queries that require additional filtering.
+	PassthroughParam []*string `json:"-" url:"passthrough-param,omitempty"`
 	// Filter events. Multiple filters can be provided.
 	Filter []*string `json:"-" url:"filter,omitempty"`
 	// Include the raw data from the EDR in the response. Defaults to `false`.
