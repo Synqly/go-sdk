@@ -7085,6 +7085,52 @@ func (a *AssetsAxoniusMock) String() string {
 	return fmt.Sprintf("%#v", a)
 }
 
+// Configuration for the Claroty xDome Assets Provider
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/claroty-asset-setup)
+type AssetsClarotyXdome struct {
+	Credential *ClarotyCredential `json:"credential" url:"credential"`
+	// Base URL for the Claroty xDome API.
+	Url ClarotyApiurl `json:"url" url:"url"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (a *AssetsClarotyXdome) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
+}
+
+func (a *AssetsClarotyXdome) UnmarshalJSON(data []byte) error {
+	type unmarshaler AssetsClarotyXdome
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*a = AssetsClarotyXdome(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+
+	a._rawJSON = nil
+	return nil
+}
+
+func (a *AssetsClarotyXdome) String() string {
+	if len(a._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(a); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", a)
+}
+
 // Configuration for CrowdStrike Falcon as an Assets Provider
 type AssetsCrowdStrike struct {
 	// The credential to use for the CrowdStrike Falcon tenant.
@@ -8432,6 +8478,107 @@ func (a *AzureMonitorLogsCredential) Accept(visitor AzureMonitorLogsCredentialVi
 		return visitor.VisitTokenId(a.TokenId)
 	}
 	return fmt.Errorf("type %T does not define a non-empty union type", a)
+}
+
+type ClarotyApiurl string
+
+const (
+	ClarotyApiurlClarotyApiUrlUs   ClarotyApiurl = "https://api.claroty.com"
+	ClarotyApiurlClarotyApiUrlEu   ClarotyApiurl = "https://eu.api.claroty.com"
+	ClarotyApiurlClarotyApiUrlCa   ClarotyApiurl = "https://ca.api.claroty.com"
+	ClarotyApiurlClarotyApiUrlAu   ClarotyApiurl = "https://au.api.claroty.com"
+	ClarotyApiurlClarotyApiUrlDemo ClarotyApiurl = "https://demo-api.claroty.com"
+)
+
+func NewClarotyApiurlFromString(s string) (ClarotyApiurl, error) {
+	switch s {
+	case "https://api.claroty.com":
+		return ClarotyApiurlClarotyApiUrlUs, nil
+	case "https://eu.api.claroty.com":
+		return ClarotyApiurlClarotyApiUrlEu, nil
+	case "https://ca.api.claroty.com":
+		return ClarotyApiurlClarotyApiUrlCa, nil
+	case "https://au.api.claroty.com":
+		return ClarotyApiurlClarotyApiUrlAu, nil
+	case "https://demo-api.claroty.com":
+		return ClarotyApiurlClarotyApiUrlDemo, nil
+	}
+	var t ClarotyApiurl
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (c ClarotyApiurl) Ptr() *ClarotyApiurl {
+	return &c
+}
+
+type ClarotyCredential struct {
+	Type string
+	// Configuration when creating new API Token.
+	Token *TokenCredential
+	// Reference to existing API Token.
+	TokenId TokenCredentialId
+}
+
+func (c *ClarotyCredential) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	c.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", c)
+	}
+	switch unmarshaler.Type {
+	case "token":
+		value := new(TokenCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		c.Token = value
+	case "token_id":
+		var valueUnmarshaler struct {
+			TokenId TokenCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		c.TokenId = valueUnmarshaler.TokenId
+	}
+	return nil
+}
+
+func (c ClarotyCredential) MarshalJSON() ([]byte, error) {
+	if c.Token != nil {
+		return core.MarshalJSONWithExtraProperty(c.Token, "type", "token")
+	}
+	if c.TokenId != "" {
+		var marshaler = struct {
+			Type    string            `json:"type"`
+			TokenId TokenCredentialId `json:"value"`
+		}{
+			Type:    "token_id",
+			TokenId: c.TokenId,
+		}
+		return json.Marshal(marshaler)
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", c)
+}
+
+type ClarotyCredentialVisitor interface {
+	VisitToken(*TokenCredential) error
+	VisitTokenId(TokenCredentialId) error
+}
+
+func (c *ClarotyCredential) Accept(visitor ClarotyCredentialVisitor) error {
+	if c.Token != nil {
+		return visitor.VisitToken(c.Token)
+	}
+	if c.TokenId != "" {
+		return visitor.VisitTokenId(c.TokenId)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", c)
 }
 
 // Configuration for the AWS Cloud Security Provider
@@ -11430,6 +11577,10 @@ type ProviderConfig struct {
 	AssetsAxonius *AssetsAxonius
 	// Configuration for a mocked Axonius as an Assets Provider
 	AssetsAxoniusMock *AssetsAxoniusMock
+	// Configuration for the Claroty xDome Assets Provider
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/claroty-asset-setup)
+	AssetsClarotyXdome *AssetsClarotyXdome
 	// Configuration for CrowdStrike Falcon as an Assets Provider
 	AssetsCrowdstrike *AssetsCrowdStrike
 	// Configuration for a mocked CrowdStrike Falcon as an Assets Provider
@@ -11761,6 +11912,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.AssetsAxoniusMock = value
+	case "assets_claroty_xdome":
+		value := new(AssetsClarotyXdome)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.AssetsClarotyXdome = value
 	case "assets_crowdstrike":
 		value := new(AssetsCrowdStrike)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -12282,6 +12439,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.AssetsAxoniusMock != nil {
 		return core.MarshalJSONWithExtraProperty(p.AssetsAxoniusMock, "type", "assets_axonius_mock")
 	}
+	if p.AssetsClarotyXdome != nil {
+		return core.MarshalJSONWithExtraProperty(p.AssetsClarotyXdome, "type", "assets_claroty_xdome")
+	}
 	if p.AssetsCrowdstrike != nil {
 		return core.MarshalJSONWithExtraProperty(p.AssetsCrowdstrike, "type", "assets_crowdstrike")
 	}
@@ -12540,6 +12700,7 @@ type ProviderConfigVisitor interface {
 	VisitAssetsArmisCentrixMock(*AssetsArmisCentrixMock) error
 	VisitAssetsAxonius(*AssetsAxonius) error
 	VisitAssetsAxoniusMock(*AssetsAxoniusMock) error
+	VisitAssetsClarotyXdome(*AssetsClarotyXdome) error
 	VisitAssetsCrowdstrike(*AssetsCrowdStrike) error
 	VisitAssetsCrowdstrikeMock(*AssetsCrowdStrikeMock) error
 	VisitAssetsIvantiNeurons(*AssetsIvantiNeurons) error
@@ -12648,6 +12809,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.AssetsAxoniusMock != nil {
 		return visitor.VisitAssetsAxoniusMock(p.AssetsAxoniusMock)
+	}
+	if p.AssetsClarotyXdome != nil {
+		return visitor.VisitAssetsClarotyXdome(p.AssetsClarotyXdome)
 	}
 	if p.AssetsCrowdstrike != nil {
 		return visitor.VisitAssetsCrowdstrike(p.AssetsCrowdstrike)
@@ -12918,6 +13082,8 @@ const (
 	ProviderConfigIdAssetsAxonius ProviderConfigId = "assets_axonius"
 	// [MOCK] Axonius Asset Cloud
 	ProviderConfigIdAssetsAxoniusMock ProviderConfigId = "assets_axonius_mock"
+	// Claroty xDome
+	ProviderConfigIdAssetsClarotyXdome ProviderConfigId = "assets_claroty_xdome"
 	// CrowdStrike Falcon Spotlight
 	ProviderConfigIdAssetsCrowdStrike ProviderConfigId = "assets_crowdstrike"
 	// [MOCK] CrowdStrike Falcon Spotlight
@@ -13104,6 +13270,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdAssetsAxonius, nil
 	case "assets_axonius_mock":
 		return ProviderConfigIdAssetsAxoniusMock, nil
+	case "assets_claroty_xdome":
+		return ProviderConfigIdAssetsClarotyXdome, nil
 	case "assets_crowdstrike":
 		return ProviderConfigIdAssetsCrowdStrike, nil
 	case "assets_crowdstrike_mock":
