@@ -6687,6 +6687,50 @@ func (a AppsecOpentextCoreApplicationSecurityDataset) Ptr() *AppsecOpentextCoreA
 	return &a
 }
 
+// Configuration for Amazon Inspector as an application security provider.
+type AppsecAmazonInspector struct {
+	Credential *AwsProviderCredential `json:"credential" url:"credential"`
+	// The [AWS region](https://docs.aws.amazon.com/global-infrastructure/latest/regions/aws-regions.html) to use for the Amazon Inspector provider.
+	Region AwsRegion `json:"region" url:"region"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (a *AppsecAmazonInspector) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
+}
+
+func (a *AppsecAmazonInspector) UnmarshalJSON(data []byte) error {
+	type unmarshaler AppsecAmazonInspector
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*a = AppsecAmazonInspector(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+
+	a._rawJSON = nil
+	return nil
+}
+
+func (a *AppsecAmazonInspector) String() string {
+	if len(a._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(a); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", a)
+}
+
 type ArmisCredential struct {
 	Type string
 	// Configuration when creating new API Key.
@@ -11549,6 +11593,8 @@ func (p *PingOneCredential) Accept(visitor PingOneCredentialVisitor) error {
 
 type ProviderConfig struct {
 	Type string
+	// Configuration for Amazon Inspector as an application security provider.
+	AppsecAmazonInspector *AppsecAmazonInspector
 	// Configuration for GitLab as an application security provider.
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/gitlab-appsec-setup)
@@ -11864,6 +11910,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 		return fmt.Errorf("%T did not include discriminant type", p)
 	}
 	switch unmarshaler.Type {
+	case "appsec_amazon_inspector":
+		value := new(AppsecAmazonInspector)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.AppsecAmazonInspector = value
 	case "appsec_gitlab":
 		value := new(AppsecGitLab)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -12415,6 +12467,9 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 }
 
 func (p ProviderConfig) MarshalJSON() ([]byte, error) {
+	if p.AppsecAmazonInspector != nil {
+		return core.MarshalJSONWithExtraProperty(p.AppsecAmazonInspector, "type", "appsec_amazon_inspector")
+	}
 	if p.AppsecGitlab != nil {
 		return core.MarshalJSONWithExtraProperty(p.AppsecGitlab, "type", "appsec_gitlab")
 	}
@@ -12692,6 +12747,7 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 }
 
 type ProviderConfigVisitor interface {
+	VisitAppsecAmazonInspector(*AppsecAmazonInspector) error
 	VisitAppsecGitlab(*AppsecGitLab) error
 	VisitAppsecHclAppscanOnCloud(*AppsecHclAppScanOnCloud) error
 	VisitAppsecOpentextCoreApplicationSecurity(*AppsecOpenTextCoreApplicationSecurity) error
@@ -12786,6 +12842,9 @@ type ProviderConfigVisitor interface {
 }
 
 func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
+	if p.AppsecAmazonInspector != nil {
+		return visitor.VisitAppsecAmazonInspector(p.AppsecAmazonInspector)
+	}
 	if p.AppsecGitlab != nil {
 		return visitor.VisitAppsecGitlab(p.AppsecGitlab)
 	}
@@ -13066,6 +13125,8 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 type ProviderConfigId string
 
 const (
+	// Amazon Inspector
+	ProviderConfigIdAppsecAmazonInspector ProviderConfigId = "appsec_amazon_inspector"
 	// GitLab
 	ProviderConfigIdAppsecGitLab ProviderConfigId = "appsec_gitlab"
 	// HCL AppScan on Cloud
@@ -13254,6 +13315,8 @@ const (
 
 func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 	switch s {
+	case "appsec_amazon_inspector":
+		return ProviderConfigIdAppsecAmazonInspector, nil
 	case "appsec_gitlab":
 		return ProviderConfigIdAppsecGitLab, nil
 	case "appsec_hcl_appscan_on_cloud":
