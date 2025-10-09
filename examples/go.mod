@@ -1,6 +1,6 @@
 module examples
 
-go 1.24
+go 1.25
 
 require (
 	github.com/brianvoe/gofakeit v3.18.0+incompatible
