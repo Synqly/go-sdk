@@ -164,6 +164,8 @@ func (c *CreateIocsRequest) String() string {
 }
 
 type CreateIocsResponse struct {
+	// Additional messages from the service response that may be helpful to the client.
+	Messages *MessagesResponse `json:"messages,omitempty" url:"messages,omitempty"`
 	// Various metadata about the results organized by group, then type, then field.
 	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
 	// A list of the indicators that were created
@@ -208,6 +210,8 @@ func (c *CreateIocsResponse) String() string {
 }
 
 type DeleteIocsResponse struct {
+	// Additional messages from the service response that may be helpful to the client.
+	Messages *MessagesResponse `json:"messages,omitempty" url:"messages,omitempty"`
 	// Various metadata about the results organized by group, then type, then field.
 	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
 	// A list of ids of the iocs that were deleted.
@@ -252,6 +256,8 @@ func (d *DeleteIocsResponse) String() string {
 }
 
 type GetEndpointResponse struct {
+	// Additional messages from the service response that may be helpful to the client.
+	Messages *MessagesResponse `json:"messages,omitempty" url:"messages,omitempty"`
 	// Various metadata about the results organized by group, then type, then field.
 	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
 	// A single endpoint assets that match the Id.
@@ -342,6 +348,8 @@ func (n *NetworkQuarantineRequest) String() string {
 }
 
 type NetworkQuarantineResponse struct {
+	// Additional messages from the service response that may be helpful to the client.
+	Messages *MessagesResponse `json:"messages,omitempty" url:"messages,omitempty"`
 	// Various metadata about the results organized by group, then type, then field.
 	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
 	// The list of endpoint IDs or action IDs that were successfully quarantined or unquarantined.
@@ -386,6 +394,8 @@ func (n *NetworkQuarantineResponse) String() string {
 }
 
 type QueryAlertsResponse struct {
+	// Additional messages from the service response that may be helpful to the client.
+	Messages *MessagesResponse `json:"messages,omitempty" url:"messages,omitempty"`
 	// Various metadata about the results organized by group, then type, then field.
 	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
 	// Cursor to use to retrieve the next page of results
@@ -432,6 +442,8 @@ func (q *QueryAlertsResponse) String() string {
 }
 
 type QueryApplicationsResponse struct {
+	// Additional messages from the service response that may be helpful to the client.
+	Messages *MessagesResponse `json:"messages,omitempty" url:"messages,omitempty"`
 	// Various metadata about the results organized by group, then type, then field.
 	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
 	// Cursor to use to retrieve the next page of results
@@ -478,6 +490,8 @@ func (q *QueryApplicationsResponse) String() string {
 }
 
 type QueryEdrEventsResponse struct {
+	// Additional messages from the service response that may be helpful to the client.
+	Messages *MessagesResponse `json:"messages,omitempty" url:"messages,omitempty"`
 	// Various metadata about the results organized by group, then type, then field.
 	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
 	// Cursor to use to retrieve the next page of results
@@ -524,6 +538,8 @@ func (q *QueryEdrEventsResponse) String() string {
 }
 
 type QueryEndpointsResponse struct {
+	// Additional messages from the service response that may be helpful to the client.
+	Messages *MessagesResponse `json:"messages,omitempty" url:"messages,omitempty"`
 	// Various metadata about the results organized by group, then type, then field.
 	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
 	// Cursor to use to retrieve the next page of results
@@ -570,6 +586,8 @@ func (q *QueryEndpointsResponse) String() string {
 }
 
 type QueryIocsResponse struct {
+	// Additional messages from the service response that may be helpful to the client.
+	Messages *MessagesResponse `json:"messages,omitempty" url:"messages,omitempty"`
 	// Various metadata about the results organized by group, then type, then field.
 	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
 	// Cursor to use to retrieve the next page of results
@@ -616,6 +634,8 @@ func (q *QueryIocsResponse) String() string {
 }
 
 type QueryPostureScoreResponse struct {
+	// Additional messages from the service response that may be helpful to the client.
+	Messages *MessagesResponse `json:"messages,omitempty" url:"messages,omitempty"`
 	// Various metadata about the results organized by group, then type, then field.
 	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
 	// Cursor to use to retrieve the next page of results
@@ -662,6 +682,8 @@ func (q *QueryPostureScoreResponse) String() string {
 }
 
 type QueryThreatsResponse struct {
+	// Additional messages from the service response that may be helpful to the client.
+	Messages *MessagesResponse `json:"messages,omitempty" url:"messages,omitempty"`
 	// Various metadata about the results organized by group, then type, then field.
 	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
 	// Cursor to use to retrieve the next page of results

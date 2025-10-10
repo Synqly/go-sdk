@@ -39,7 +39,7 @@ func (c *Client) PostEvents(
 	ctx context.Context,
 	request *engine.PostSinkEventRequest,
 	opts ...option.RequestOption,
-) error {
+) (*engine.CreateSinkEventsResponse, error) {
 	options := core.NewRequestOptions(opts...)
 
 	baseURL := "https://api.synqly.com"
@@ -53,7 +53,7 @@ func (c *Client) PostEvents(
 
 	queryParams, err := core.QueryValues(request)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if len(queryParams) > 0 {
 		endpointURL += "?" + queryParams.Encode()
@@ -164,6 +164,7 @@ func (c *Client) PostEvents(
 		return apiError
 	}
 
+	var response *engine.CreateSinkEventsResponse
 	if err := c.caller.Call(
 		ctx,
 		&core.CallParams{
@@ -173,10 +174,11 @@ func (c *Client) PostEvents(
 			Headers:      headers,
 			Client:       options.HTTPClient,
 			Request:      request,
+			Response:     &response,
 			ErrorDecoder: errorDecoder,
 		},
 	); err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+	return response, nil
 }

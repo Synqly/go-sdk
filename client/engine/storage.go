@@ -16,6 +16,8 @@ type ListStorageRequest struct {
 }
 
 type ListStorageResponse struct {
+	// Additional messages from the service response that may be helpful to the client.
+	Messages *MessagesResponse `json:"messages,omitempty" url:"messages,omitempty"`
 	// Various metadata about the results organized by group, then type, then field.
 	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
 	// Cursor to use to retrieve the next page of results

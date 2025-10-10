@@ -46,6 +46,8 @@ type AppSecQueryFindingsRequest struct {
 }
 
 type AppSecGetApplicationFindingDetailsResponse struct {
+	// Additional messages from the service response that may be helpful to the client.
+	Messages *MessagesResponse `json:"messages,omitempty" url:"messages,omitempty"`
 	// Various metadata about the results organized by group, then type, then field.
 	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
 	// Cursor to use to retrieve the next page of results
@@ -92,6 +94,8 @@ func (a *AppSecGetApplicationFindingDetailsResponse) String() string {
 }
 
 type AppSecQueryApplicationFindingsResponse struct {
+	// Additional messages from the service response that may be helpful to the client.
+	Messages *MessagesResponse `json:"messages,omitempty" url:"messages,omitempty"`
 	// Various metadata about the results organized by group, then type, then field.
 	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
 	// Cursor to use to retrieve the next page of results
@@ -138,6 +142,8 @@ func (a *AppSecQueryApplicationFindingsResponse) String() string {
 }
 
 type AppSecQueryApplicationsResponse struct {
+	// Additional messages from the service response that may be helpful to the client.
+	Messages *MessagesResponse `json:"messages,omitempty" url:"messages,omitempty"`
 	// Various metadata about the results organized by group, then type, then field.
 	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
 	// Cursor to use to retrieve the next page of results
@@ -185,6 +191,8 @@ func (a *AppSecQueryApplicationsResponse) String() string {
 
 // The combined result of an application's finding and the application details from the token-linked application security integration.
 type AppSecQueryFindingsResponse struct {
+	// Additional messages from the service response that may be helpful to the client.
+	Messages *MessagesResponse `json:"messages,omitempty" url:"messages,omitempty"`
 	// Various metadata about the results organized by group, then type, then field.
 	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
 	// Cursor to use to retrieve the next page of results

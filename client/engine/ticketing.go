@@ -145,6 +145,8 @@ func (c *CreateAttachmentRequest) String() string {
 }
 
 type CreateAttachmentResponse struct {
+	// Additional messages from the service response that may be helpful to the client.
+	Messages *MessagesResponse `json:"messages,omitempty" url:"messages,omitempty"`
 	// Various metadata about the results organized by group, then type, then field.
 	Meta   *MetaResponse       `json:"meta,omitempty" url:"meta,omitempty"`
 	Result *AttachmentMetadata `json:"result" url:"result"`
@@ -232,6 +234,8 @@ func (c *CreateCommentRequest) String() string {
 }
 
 type CreateCommentResponse struct {
+	// Additional messages from the service response that may be helpful to the client.
+	Messages *MessagesResponse `json:"messages,omitempty" url:"messages,omitempty"`
 	// Various metadata about the results organized by group, then type, then field.
 	Meta   *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
 	Result *Comment      `json:"result" url:"result"`
@@ -450,6 +454,8 @@ func (c *CreateTicketRequest) String() string {
 }
 
 type CreateTicketResponse struct {
+	// Additional messages from the service response that may be helpful to the client.
+	Messages *MessagesResponse `json:"messages,omitempty" url:"messages,omitempty"`
 	// Various metadata about the results organized by group, then type, then field.
 	Meta   *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
 	Result *Ticket       `json:"result" url:"result"`
@@ -493,6 +499,8 @@ func (c *CreateTicketResponse) String() string {
 }
 
 type DownloadAttachmentResponse struct {
+	// Additional messages from the service response that may be helpful to the client.
+	Messages *MessagesResponse `json:"messages,omitempty" url:"messages,omitempty"`
 	// Various metadata about the results organized by group, then type, then field.
 	Meta   *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
 	Result *Attachment   `json:"result" url:"result"`
@@ -536,6 +544,8 @@ func (d *DownloadAttachmentResponse) String() string {
 }
 
 type GetTicketResponse struct {
+	// Additional messages from the service response that may be helpful to the client.
+	Messages *MessagesResponse `json:"messages,omitempty" url:"messages,omitempty"`
 	// Various metadata about the results organized by group, then type, then field.
 	Meta   *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
 	Result *Ticket       `json:"result" url:"result"`
@@ -579,6 +589,8 @@ func (g *GetTicketResponse) String() string {
 }
 
 type ListAttachmentsMetadataResponse struct {
+	// Additional messages from the service response that may be helpful to the client.
+	Messages *MessagesResponse `json:"messages,omitempty" url:"messages,omitempty"`
 	// Various metadata about the results organized by group, then type, then field.
 	Meta   *MetaResponse         `json:"meta,omitempty" url:"meta,omitempty"`
 	Result []*AttachmentMetadata `json:"result" url:"result"`
@@ -622,6 +634,8 @@ func (l *ListAttachmentsMetadataResponse) String() string {
 }
 
 type ListCommentsResponse struct {
+	// Additional messages from the service response that may be helpful to the client.
+	Messages *MessagesResponse `json:"messages,omitempty" url:"messages,omitempty"`
 	// Various metadata about the results organized by group, then type, then field.
 	Meta   *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
 	Result []*Comment    `json:"result" url:"result"`
@@ -665,6 +679,8 @@ func (l *ListCommentsResponse) String() string {
 }
 
 type ListNotesResponse struct {
+	// Additional messages from the service response that may be helpful to the client.
+	Messages *MessagesResponse `json:"messages,omitempty" url:"messages,omitempty"`
 	// Various metadata about the results organized by group, then type, then field.
 	Meta   *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
 	Result []*Note       `json:"result" url:"result"`
@@ -708,6 +724,8 @@ func (l *ListNotesResponse) String() string {
 }
 
 type ListOnCallResponse struct {
+	// Additional messages from the service response that may be helpful to the client.
+	Messages *MessagesResponse `json:"messages,omitempty" url:"messages,omitempty"`
 	// Various metadata about the results organized by group, then type, then field.
 	Meta   *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
 	Result []*Agent      `json:"result" url:"result"`
@@ -751,6 +769,8 @@ func (l *ListOnCallResponse) String() string {
 }
 
 type ListProjectsResponse struct {
+	// Additional messages from the service response that may be helpful to the client.
+	Messages *MessagesResponse `json:"messages,omitempty" url:"messages,omitempty"`
 	// Various metadata about the results organized by group, then type, then field.
 	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
 	// Cursor to use to retrieve the next page of results
@@ -796,6 +816,8 @@ func (l *ListProjectsResponse) String() string {
 }
 
 type ListRemoteFieldsResponse struct {
+	// Additional messages from the service response that may be helpful to the client.
+	Messages *MessagesResponse `json:"messages,omitempty" url:"messages,omitempty"`
 	// Various metadata about the results organized by group, then type, then field.
 	Meta   *MetaResponse  `json:"meta,omitempty" url:"meta,omitempty"`
 	Result []*RemoteField `json:"result" url:"result"`
@@ -842,6 +864,8 @@ func (l *ListRemoteFieldsResponse) String() string {
 type NoteId = Id
 
 type PatchNoteResponse struct {
+	// Additional messages from the service response that may be helpful to the client.
+	Messages *MessagesResponse `json:"messages,omitempty" url:"messages,omitempty"`
 	// Various metadata about the results organized by group, then type, then field.
 	Meta   *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
 	Result *Note         `json:"result" url:"result"`
@@ -885,6 +909,8 @@ func (p *PatchNoteResponse) String() string {
 }
 
 type PatchTicketResponse struct {
+	// Additional messages from the service response that may be helpful to the client.
+	Messages *MessagesResponse `json:"messages,omitempty" url:"messages,omitempty"`
 	// Various metadata about the results organized by group, then type, then field.
 	Meta   *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
 	Result *Ticket       `json:"result" url:"result"`
@@ -928,6 +954,8 @@ func (p *PatchTicketResponse) String() string {
 }
 
 type QueryEscalationPoliciesResponse struct {
+	// Additional messages from the service response that may be helpful to the client.
+	Messages *MessagesResponse `json:"messages,omitempty" url:"messages,omitempty"`
 	// Various metadata about the results organized by group, then type, then field.
 	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
 	// Cursor to use to retrieve the next page of results
@@ -973,6 +1001,8 @@ func (q *QueryEscalationPoliciesResponse) String() string {
 }
 
 type QueryTicketsResponse struct {
+	// Additional messages from the service response that may be helpful to the client.
+	Messages *MessagesResponse `json:"messages,omitempty" url:"messages,omitempty"`
 	// Various metadata about the results organized by group, then type, then field.
 	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
 	// Cursor to use to retrieve the next page of results

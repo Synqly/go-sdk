@@ -65,6 +65,8 @@ type QueryUserRequest struct {
 }
 
 type GetGroupMembersResponse struct {
+	// Additional messages from the service response that may be helpful to the client.
+	Messages *MessagesResponse `json:"messages,omitempty" url:"messages,omitempty"`
 	// Various metadata about the results organized by group, then type, then field.
 	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
 	// Cursor to use to retrieve the next page of results
@@ -111,6 +113,8 @@ func (g *GetGroupMembersResponse) String() string {
 }
 
 type GetGroupResponse struct {
+	// Additional messages from the service response that may be helpful to the client.
+	Messages *MessagesResponse `json:"messages,omitempty" url:"messages,omitempty"`
 	// Various metadata about the results organized by group, then type, then field.
 	Meta   *MetaResponse           `json:"meta,omitempty" url:"meta,omitempty"`
 	Result latest.EntityManagement `json:"result" url:"result"`
@@ -154,6 +158,8 @@ func (g *GetGroupResponse) String() string {
 }
 
 type GetUserResponse struct {
+	// Additional messages from the service response that may be helpful to the client.
+	Messages *MessagesResponse `json:"messages,omitempty" url:"messages,omitempty"`
 	// Various metadata about the results organized by group, then type, then field.
 	Meta   *MetaResponse           `json:"meta,omitempty" url:"meta,omitempty"`
 	Result latest.EntityManagement `json:"result" url:"result"`
@@ -200,6 +206,8 @@ func (g *GetUserResponse) String() string {
 type GroupId = string
 
 type QueryGroupsResponse struct {
+	// Additional messages from the service response that may be helpful to the client.
+	Messages *MessagesResponse `json:"messages,omitempty" url:"messages,omitempty"`
 	// Various metadata about the results organized by group, then type, then field.
 	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
 	// Cursor to use to retrieve the next page of results
@@ -246,6 +254,8 @@ func (q *QueryGroupsResponse) String() string {
 }
 
 type QueryIdentityAuditLogResponse struct {
+	// Additional messages from the service response that may be helpful to the client.
+	Messages *MessagesResponse `json:"messages,omitempty" url:"messages,omitempty"`
 	// Various metadata about the results organized by group, then type, then field.
 	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
 	// Cursor to use to retrieve the next page of results
@@ -292,6 +302,8 @@ func (q *QueryIdentityAuditLogResponse) String() string {
 }
 
 type QueryUsersResponse struct {
+	// Additional messages from the service response that may be helpful to the client.
+	Messages *MessagesResponse `json:"messages,omitempty" url:"messages,omitempty"`
 	// Various metadata about the results organized by group, then type, then field.
 	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
 	// Cursor to use to retrieve the next page of results

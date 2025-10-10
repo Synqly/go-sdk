@@ -4,6 +4,8 @@ package engine
 
 import (
 	json "encoding/json"
+	fmt "fmt"
+	core "github.com/synqly/go-sdk/client/engine/core"
 )
 
 type PostSinkEventRequest struct {
@@ -23,4 +25,50 @@ func (p *PostSinkEventRequest) UnmarshalJSON(data []byte) error {
 
 func (p *PostSinkEventRequest) MarshalJSON() ([]byte, error) {
 	return json.Marshal(p.Body)
+}
+
+type CreateSinkEventsResponse struct {
+	// Additional messages from the service response that may be helpful to the client.
+	Messages *MessagesResponse `json:"messages,omitempty" url:"messages,omitempty"`
+	// Various metadata about the results organized by group, then type, then field.
+	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
+	// List of events written if available. Most providers do not return events, just a success status. Review messages for any failure details available.
+	Result []map[string]interface{} `json:"result" url:"result"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *CreateSinkEventsResponse) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
+}
+
+func (c *CreateSinkEventsResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler CreateSinkEventsResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = CreateSinkEventsResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
+	c._rawJSON = nil
+	return nil
+}
+
+func (c *CreateSinkEventsResponse) String() string {
+	if len(c._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
 }

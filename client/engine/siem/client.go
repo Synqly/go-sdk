@@ -778,7 +778,7 @@ func (c *Client) PostEvents(
 	ctx context.Context,
 	request []*engine.Event,
 	opts ...option.RequestOption,
-) error {
+) (*engine.CreateSiemEventsResponse, error) {
 	options := core.NewRequestOptions(opts...)
 
 	baseURL := "https://api.synqly.com"
@@ -895,6 +895,7 @@ func (c *Client) PostEvents(
 		return apiError
 	}
 
+	var response *engine.CreateSiemEventsResponse
 	if err := c.caller.Call(
 		ctx,
 		&core.CallParams{
@@ -904,12 +905,13 @@ func (c *Client) PostEvents(
 			Headers:      headers,
 			Client:       options.HTTPClient,
 			Request:      request,
+			Response:     &response,
 			ErrorDecoder: errorDecoder,
 		},
 	); err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+	return response, nil
 }
 
 // Queries events from the SIEM configured with the token used for authentication.

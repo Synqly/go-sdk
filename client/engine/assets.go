@@ -71,6 +71,8 @@ func (c *CreateDeviceRequest) String() string {
 }
 
 type CreateDeviceResponse struct {
+	// Additional messages from the service response that may be helpful to the client.
+	Messages *MessagesResponse `json:"messages,omitempty" url:"messages,omitempty"`
 	// Various metadata about the results organized by group, then type, then field.
 	Meta   *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
 	Device Device        `json:"device" url:"device"`
@@ -114,6 +116,8 @@ func (c *CreateDeviceResponse) String() string {
 }
 
 type GetLabelsResponse struct {
+	// Additional messages from the service response that may be helpful to the client.
+	Messages *MessagesResponse `json:"messages,omitempty" url:"messages,omitempty"`
 	// Various metadata about the results organized by group, then type, then field.
 	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
 	// Cursor to use to retrieve the next page of results
@@ -159,6 +163,8 @@ func (g *GetLabelsResponse) String() string {
 }
 
 type QueryDevicesResponse struct {
+	// Additional messages from the service response that may be helpful to the client.
+	Messages *MessagesResponse `json:"messages,omitempty" url:"messages,omitempty"`
 	// Various metadata about the results organized by group, then type, then field.
 	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
 	// Cursor to use to retrieve the next page of results

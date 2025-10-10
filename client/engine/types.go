@@ -800,6 +800,8 @@ func (a *ApiHasStatus) String() string {
 }
 
 type ApiQueryResponse struct {
+	// Additional messages from the service response that may be helpful to the client.
+	Messages *MessagesResponse `json:"messages,omitempty" url:"messages,omitempty"`
 	// Various metadata about the results organized by group, then type, then field.
 	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
 	// Cursor to use to retrieve the next page of results
@@ -844,6 +846,8 @@ func (a *ApiQueryResponse) String() string {
 }
 
 type ApiResponse struct {
+	// Additional messages from the service response that may be helpful to the client.
+	Messages *MessagesResponse `json:"messages,omitempty" url:"messages,omitempty"`
 	// Various metadata about the results organized by group, then type, then field.
 	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
 
@@ -925,6 +929,48 @@ func (b *BaseResourceRequest) String() string {
 		return value
 	}
 	return fmt.Sprintf("%#v", b)
+}
+
+type MessagesResponse struct {
+	// Warnings or issues that occurred during processing that did not prevent the request from returning, but may indicate a problem or issue with expected processing behavior.
+	Problems []*Problem `json:"problems,omitempty" url:"problems,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (m *MessagesResponse) GetExtraProperties() map[string]interface{} {
+	return m.extraProperties
+}
+
+func (m *MessagesResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler MessagesResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*m = MessagesResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *m)
+	if err != nil {
+		return err
+	}
+	m.extraProperties = extraProperties
+
+	m._rawJSON = nil
+	return nil
+}
+
+func (m *MessagesResponse) String() string {
+	if len(m._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(m._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(m); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", m)
 }
 
 type MetaApi struct {
@@ -1725,6 +1771,8 @@ func (i IntegrationTicketWhen) Ptr() *IntegrationTicketWhen {
 }
 
 type TicketingWebhookResponse struct {
+	// Additional messages from the service response that may be helpful to the client.
+	Messages *MessagesResponse `json:"messages,omitempty" url:"messages,omitempty"`
 	// Various metadata about the results organized by group, then type, then field.
 	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
 	// The ID of the ticket in the ticketing system.

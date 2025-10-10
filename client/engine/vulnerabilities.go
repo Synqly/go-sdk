@@ -91,6 +91,8 @@ func (c *CreateAssetRequest) String() string {
 }
 
 type CreateAssetResponse struct {
+	// Additional messages from the service response that may be helpful to the client.
+	Messages *MessagesResponse `json:"messages,omitempty" url:"messages,omitempty"`
 	// Various metadata about the results organized by group, then type, then field.
 	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
 	// Created device.
@@ -176,6 +178,8 @@ func (c *CreateFindingsRequest) String() string {
 }
 
 type CreateFindingsResponse struct {
+	// Additional messages from the service response that may be helpful to the client.
+	Messages *MessagesResponse `json:"messages,omitempty" url:"messages,omitempty"`
 	// Various metadata about the results organized by group, then type, then field.
 	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
 	// Specifies the status of the create/import findings job, which can be COMPLETE or PENDING.
@@ -222,6 +226,8 @@ func (c *CreateFindingsResponse) String() string {
 }
 
 type GetScanActivityResponse struct {
+	// Additional messages from the service response that may be helpful to the client.
+	Messages *MessagesResponse `json:"messages,omitempty" url:"messages,omitempty"`
 	// Various metadata about the results organized by group, then type, then field.
 	Meta   *MetaResponse              `json:"meta,omitempty" url:"meta,omitempty"`
 	Result *scanactivity.ScanActivity `json:"result" url:"result"`
@@ -265,6 +271,8 @@ func (g *GetScanActivityResponse) String() string {
 }
 
 type GetScanStatusResponse struct {
+	// Additional messages from the service response that may be helpful to the client.
+	Messages *MessagesResponse `json:"messages,omitempty" url:"messages,omitempty"`
 	// Various metadata about the results organized by group, then type, then field.
 	Meta   *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
 	Result *ScanStatus   `json:"result" url:"result"`
@@ -308,6 +316,8 @@ func (g *GetScanStatusResponse) String() string {
 }
 
 type QueryAssetsResponse struct {
+	// Additional messages from the service response that may be helpful to the client.
+	Messages *MessagesResponse `json:"messages,omitempty" url:"messages,omitempty"`
 	// Various metadata about the results organized by group, then type, then field.
 	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
 	// Cursor to use to retrieve the next page of results
@@ -355,6 +365,8 @@ func (q *QueryAssetsResponse) String() string {
 }
 
 type QueryFindingsResponse struct {
+	// Additional messages from the service response that may be helpful to the client.
+	Messages *MessagesResponse `json:"messages,omitempty" url:"messages,omitempty"`
 	// Various metadata about the results organized by group, then type, then field.
 	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
 	// Cursor to use to retrieve the next page of results
@@ -402,6 +414,8 @@ func (q *QueryFindingsResponse) String() string {
 }
 
 type QueryScansResponse struct {
+	// Additional messages from the service response that may be helpful to the client.
+	Messages *MessagesResponse `json:"messages,omitempty" url:"messages,omitempty"`
 	// Various metadata about the results organized by group, then type, then field.
 	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
 	// Cursor to use to retrieve the next page of results
@@ -537,6 +551,8 @@ func (u *UploadScanRequest) String() string {
 }
 
 type UploadScanResponse struct {
+	// Additional messages from the service response that may be helpful to the client.
+	Messages *MessagesResponse `json:"messages,omitempty" url:"messages,omitempty"`
 	// Various metadata about the results organized by group, then type, then field.
 	Meta   *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
 	Result *ScanStatus   `json:"result" url:"result"`
