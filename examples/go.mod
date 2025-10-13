@@ -8,7 +8,7 @@ require (
 	github.com/knadh/koanf v1.5.0
 	github.com/knadh/koanf/v2 v2.0.1
 	github.com/spf13/viper v1.20.1
-	github.com/synqly/go-sdk v1.0.3
+	github.com/synqly/go-sdk v1.0.17
 	gopkg.in/yaml.v2 v2.4.0
 )
 

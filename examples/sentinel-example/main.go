@@ -73,7 +73,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	err = e.Sink.PostEvents(ctx, &engine.PostSinkEventRequest{
+	_, err = e.Sink.PostEvents(ctx, &engine.PostSinkEventRequest{
 		Body: []*engine.Event{detection},
 	})
 	if err != nil {

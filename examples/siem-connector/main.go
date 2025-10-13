@@ -221,7 +221,7 @@ func (app *App) backgroundJob(durationSeconds int) {
 			// it to post data.
 			if tenant.EventLogger != nil {
 				// Log the result of the work to Synqly
-				err := tenant.EventLogger.Siem.PostEvents(
+				_, err := tenant.EventLogger.Siem.PostEvents(
 					ctx,
 					[]*engine.Event{newEvent},
 				)
