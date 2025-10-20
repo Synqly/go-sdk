@@ -8,7 +8,7 @@ import (
 	core "github.com/synqly/go-sdk/client/engine/core"
 )
 
-// Notification object
+// Notification object. With some providers (Slack, Teams), if only the `summary` field is populated, the message will be treated as a "passthrough notification". In such cases, the `summary` field will be used as the entire message, and no further formatting will be applied. This is useful if you need to include provider-specific formatting.
 type CreateNotificationRequest struct {
 	// This field is deprecated and no longer used.
 	Name *string `json:"name,omitempty" url:"name,omitempty"`
