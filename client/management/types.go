@@ -889,6 +889,8 @@ type ProviderCapabilities struct {
 	Name string `json:"name" url:"name"`
 	// Display name of the Provider.
 	Fullname string `json:"fullname" url:"fullname"`
+	// Display name of the Provider vendor.
+	Vendor string `json:"vendor" url:"vendor"`
 	// Description of the Provider.
 	Description string `json:"description" url:"description"`
 	// Id of the Connector that the Provider implements.
