@@ -16872,13 +16872,16 @@ func (v VulnerabilitiesQualysCloudDataset) Ptr() *VulnerabilitiesQualysCloudData
 type VulnerabilitiesRapid7InsightCloudDataset string
 
 const (
-	VulnerabilitiesRapid7InsightCloudDatasetBasicVer0 VulnerabilitiesRapid7InsightCloudDataset = "basic_v0"
+	VulnerabilitiesRapid7InsightCloudDatasetBasicVer0  VulnerabilitiesRapid7InsightCloudDataset = "basic_v0"
+	VulnerabilitiesRapid7InsightCloudDatasetBasicVer01 VulnerabilitiesRapid7InsightCloudDataset = "basic_v0_1"
 )
 
 func NewVulnerabilitiesRapid7InsightCloudDatasetFromString(s string) (VulnerabilitiesRapid7InsightCloudDataset, error) {
 	switch s {
 	case "basic_v0":
 		return VulnerabilitiesRapid7InsightCloudDatasetBasicVer0, nil
+	case "basic_v0_1":
+		return VulnerabilitiesRapid7InsightCloudDatasetBasicVer01, nil
 	}
 	var t VulnerabilitiesRapid7InsightCloudDataset
 	return "", fmt.Errorf("%s is not a valid %T", s, t)
