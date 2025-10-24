@@ -4325,14 +4325,22 @@ type ResourceDetails struct {
 	Criticality *string `json:"criticality,omitempty" url:"criticality,omitempty"`
 	// Additional data describing the resource.
 	Data interface{} `json:"data,omitempty" url:"data,omitempty"`
+	// The IP address of the resource.
+	Ip *IpAddress `json:"ip,omitempty" url:"ip,omitempty"`
 	// The name of the related resource group.
 	Group *Group `json:"group,omitempty" url:"group,omitempty"`
 	// The list of labels/tags associated to a resource.
 	Labels []string `json:"labels,omitempty" url:"labels,omitempty"`
+	// The last seen time of the resource.
+	LastSeenTime *Timestamp `json:"last_seen_time,omitempty" url:"last_seen_time,omitempty"`
+	// The MAC address of the resource.
+	Mac *string `json:"mac,omitempty" url:"mac,omitempty"`
 	// The name of the resource.
 	Name *string `json:"name,omitempty" url:"name,omitempty"`
 	// The namespace is useful when similar entities exist that you need to keep separate.
 	Namespace *string `json:"namespace,omitempty" url:"namespace,omitempty"`
+	// The type of the operating system of the resource.
+	OsType *string `json:"os_type,omitempty" url:"os_type,omitempty"`
 	// The identity of the service or user account that owns the resource.
 	Owner *User `json:"owner,omitempty" url:"owner,omitempty"`
 	// The cloud region of the resource.
