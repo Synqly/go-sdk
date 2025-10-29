@@ -13307,7 +13307,7 @@ const (
 	ProviderConfigIdVulnerabilitiesServiceNow ProviderConfigId = "vulnerabilities_servicenow_vr"
 	// Tanium Vulnerability Management
 	ProviderConfigIdVulnerabilitiesTaniumCloud ProviderConfigId = "vulnerabilities_tanium_cloud"
-	// [MOCK] Tsanium Vulnerability Management
+	// [MOCK] Tanium Vulnerability Management
 	ProviderConfigIdVulnerabilitiesTaniumCloudMock ProviderConfigId = "vulnerabilities_tanium_cloud_mock"
 	// Tenable Vulnerability Management
 	ProviderConfigIdVulnerabilitiesTenableCloud ProviderConfigId = "vulnerabilities_tenable_cloud"
