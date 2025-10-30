@@ -10520,6 +10520,76 @@ func (i *IvantiCredential) Accept(visitor IvantiCredentialVisitor) error {
 	return fmt.Errorf("type %T does not define a non-empty union type", i)
 }
 
+type IvantiCredentialTicketing struct {
+	Type string
+	// REST API Key used for authenticating with Ivanti ITSM. This key is static  and does not expire, unlike Session IDs.
+	Token *TokenCredential
+	// Reference to existing REST API Key.
+	TokenId TokenCredentialId
+}
+
+func (i *IvantiCredentialTicketing) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	i.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", i)
+	}
+	switch unmarshaler.Type {
+	case "token":
+		value := new(TokenCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		i.Token = value
+	case "token_id":
+		var valueUnmarshaler struct {
+			TokenId TokenCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		i.TokenId = valueUnmarshaler.TokenId
+	}
+	return nil
+}
+
+func (i IvantiCredentialTicketing) MarshalJSON() ([]byte, error) {
+	if i.Token != nil {
+		return core.MarshalJSONWithExtraProperty(i.Token, "type", "token")
+	}
+	if i.TokenId != "" {
+		var marshaler = struct {
+			Type    string            `json:"type"`
+			TokenId TokenCredentialId `json:"value"`
+		}{
+			Type:    "token_id",
+			TokenId: i.TokenId,
+		}
+		return json.Marshal(marshaler)
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", i)
+}
+
+type IvantiCredentialTicketingVisitor interface {
+	VisitToken(*TokenCredential) error
+	VisitTokenId(TokenCredentialId) error
+}
+
+func (i *IvantiCredentialTicketing) Accept(visitor IvantiCredentialTicketingVisitor) error {
+	if i.Token != nil {
+		return visitor.VisitToken(i.Token)
+	}
+	if i.TokenId != "" {
+		return visitor.VisitTokenId(i.TokenId)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", i)
+}
+
 type JiraCredential struct {
 	Type string
 	// Configuration when creating new Basic Credentials.
@@ -11832,6 +11902,10 @@ type ProviderConfig struct {
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/freshdesk-ticketing-setup)
 	TicketingFreshdesk *TicketingFreshdesk
+	// Configuration for the Ivanti Neurons Ticketing Provider
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/ivanti-ticketing-setup)
+	TicketingIvanti *TicketingIvanti
 	// Configuration for Atlassian Jira.
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/jira-ticketing-setup)
@@ -12344,6 +12418,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.TicketingFreshdesk = value
+	case "ticketing_ivanti":
+		value := new(TicketingIvanti)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.TicketingIvanti = value
 	case "ticketing_jira":
 		value := new(TicketingJira)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -12685,6 +12765,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.TicketingFreshdesk != nil {
 		return core.MarshalJSONWithExtraProperty(p.TicketingFreshdesk, "type", "ticketing_freshdesk")
 	}
+	if p.TicketingIvanti != nil {
+		return core.MarshalJSONWithExtraProperty(p.TicketingIvanti, "type", "ticketing_ivanti")
+	}
 	if p.TicketingJira != nil {
 		return core.MarshalJSONWithExtraProperty(p.TicketingJira, "type", "ticketing_jira")
 	}
@@ -12821,6 +12904,7 @@ type ProviderConfigVisitor interface {
 	VisitStorageMockStorage(*StorageMock) error
 	VisitTicketingAutotask(*TicketingAutotask) error
 	VisitTicketingFreshdesk(*TicketingFreshdesk) error
+	VisitTicketingIvanti(*TicketingIvanti) error
 	VisitTicketingJira(*TicketingJira) error
 	VisitTicketingJiraServiceManagement(*TicketingJiraServiceManagement) error
 	VisitTicketingMockTicketing(*TicketingMock) error
@@ -13060,6 +13144,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	if p.TicketingFreshdesk != nil {
 		return visitor.VisitTicketingFreshdesk(p.TicketingFreshdesk)
 	}
+	if p.TicketingIvanti != nil {
+		return visitor.VisitTicketingIvanti(p.TicketingIvanti)
+	}
 	if p.TicketingJira != nil {
 		return visitor.VisitTicketingJira(p.TicketingJira)
 	}
@@ -13271,6 +13358,8 @@ const (
 	ProviderConfigIdTicketingAutotask ProviderConfigId = "ticketing_autotask"
 	// Freshdesk
 	ProviderConfigIdTicketingFreshdesk ProviderConfigId = "ticketing_freshdesk"
+	// Ivanti Neurons Ticketing
+	ProviderConfigIdTicketingIvanti ProviderConfigId = "ticketing_ivanti"
 	// Atlassian Jira
 	ProviderConfigIdTicketingJira ProviderConfigId = "ticketing_jira"
 	// Jira Service Management
@@ -13461,6 +13550,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdTicketingAutotask, nil
 	case "ticketing_freshdesk":
 		return ProviderConfigIdTicketingFreshdesk, nil
+	case "ticketing_ivanti":
+		return ProviderConfigIdTicketingIvanti, nil
 	case "ticketing_jira":
 		return ProviderConfigIdTicketingJira, nil
 	case "ticketing_jira_service_management":
@@ -16321,6 +16412,52 @@ func (t *TicketingFreshdesk) UnmarshalJSON(data []byte) error {
 }
 
 func (t *TicketingFreshdesk) String() string {
+	if len(t._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(t._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(t); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", t)
+}
+
+// Configuration for the Ivanti Neurons Ticketing Provider
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/ivanti-ticketing-setup)
+type TicketingIvanti struct {
+	Credential *IvantiCredentialTicketing `json:"credential" url:"credential"`
+	// Base URL for the Ivanti ITSM API. This should be the base URL for your Ivanti instance, without any path components.
+	Url string `json:"url" url:"url"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (t *TicketingIvanti) GetExtraProperties() map[string]interface{} {
+	return t.extraProperties
+}
+
+func (t *TicketingIvanti) UnmarshalJSON(data []byte) error {
+	type unmarshaler TicketingIvanti
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*t = TicketingIvanti(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *t)
+	if err != nil {
+		return err
+	}
+	t.extraProperties = extraProperties
+
+	t._rawJSON = nil
+	return nil
+}
+
+func (t *TicketingIvanti) String() string {
 	if len(t._rawJSON) > 0 {
 		if value, err := core.StringifyJSON(t._rawJSON); err == nil {
 			return value
