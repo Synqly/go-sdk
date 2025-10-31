@@ -6690,6 +6690,8 @@ func (a AppsecOpentextCoreApplicationSecurityDataset) Ptr() *AppsecOpentextCoreA
 }
 
 // Configuration for Amazon Inspector as an application security provider.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/amazon-inspector-appsec-setup)
 type AppsecAmazonInspector struct {
 	Credential *AwsProviderCredential `json:"credential" url:"credential"`
 	// The [AWS region](https://docs.aws.amazon.com/global-infrastructure/latest/regions/aws-regions.html) to use for the Amazon Inspector provider.
@@ -11666,6 +11668,8 @@ func (p *PingOneCredential) Accept(visitor PingOneCredentialVisitor) error {
 type ProviderConfig struct {
 	Type string
 	// Configuration for Amazon Inspector as an application security provider.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/amazon-inspector-appsec-setup)
 	AppsecAmazonInspector *AppsecAmazonInspector
 	// Configuration for GitLab as an application security provider.
 	//
