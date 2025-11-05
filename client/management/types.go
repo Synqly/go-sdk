@@ -6437,6 +6437,7 @@ const (
 	TokensActionsDelete                   TokensActions = "delete"
 	TokensActionsGet                      TokensActions = "get"
 	TokensActionsReset                    TokensActions = "reset"
+	TokensActionsRotate                   TokensActions = "rotate"
 	TokensActionsRefresh                  TokensActions = "refresh"
 	TokensActionsRemoveSecondary          TokensActions = "remove_secondary"
 	TokensActionsAll                      TokensActions = "*"
@@ -6458,6 +6459,8 @@ func NewTokensActionsFromString(s string) (TokensActions, error) {
 		return TokensActionsGet, nil
 	case "reset":
 		return TokensActionsReset, nil
+	case "rotate":
+		return TokensActionsRotate, nil
 	case "refresh":
 		return TokensActionsRefresh, nil
 	case "remove_secondary":

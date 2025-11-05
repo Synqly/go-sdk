@@ -532,3 +532,44 @@ func (r *ResetTokenResponse) String() string {
 	}
 	return fmt.Sprintf("%#v", r)
 }
+
+type RotateTokenResponse struct {
+	Result *RefreshToken `json:"result" url:"result"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (r *RotateTokenResponse) GetExtraProperties() map[string]interface{} {
+	return r.extraProperties
+}
+
+func (r *RotateTokenResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler RotateTokenResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*r = RotateTokenResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *r)
+	if err != nil {
+		return err
+	}
+	r.extraProperties = extraProperties
+
+	r._rawJSON = nil
+	return nil
+}
+
+func (r *RotateTokenResponse) String() string {
+	if len(r._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(r._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(r); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", r)
+}
