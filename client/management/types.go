@@ -18584,6 +18584,31 @@ func (t *TokenPair) String() string {
 	return fmt.Sprintf("%#v", t)
 }
 
+type TokenType string
+
+const (
+	TokenTypeAdhoc   TokenType = "adhoc"
+	TokenTypeLogon   TokenType = "logon"
+	TokenTypeDefault TokenType = "default"
+)
+
+func NewTokenTypeFromString(s string) (TokenType, error) {
+	switch s {
+	case "adhoc":
+		return TokenTypeAdhoc, nil
+	case "logon":
+		return TokenTypeLogon, nil
+	case "default":
+		return TokenTypeDefault, nil
+	}
+	var t TokenType
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (t TokenType) Ptr() *TokenType {
+	return &t
+}
+
 type McpDeveloperUsageScopeOptions struct {
 	// Restrict integration creation and usage to this account. The MCP
 	// will be given account-owner permissions for this account.
@@ -18804,6 +18829,8 @@ type RefreshToken struct {
 	// Last time object was updated
 	UpdatedAt time.Time `json:"updated_at" url:"updated_at"`
 	Id        TokenId   `json:"id" url:"id"`
+	// Human friendly display name for this account.
+	Fullname string `json:"fullname" url:"fullname"`
 	// Member Id
 	MemberId *Id `json:"member_id,omitempty" url:"member_id,omitempty"`
 	// ID of the entity that owns this token
@@ -18814,6 +18841,8 @@ type RefreshToken struct {
 	Expires time.Time `json:"expires" url:"expires"`
 	// Token time-to-live
 	TokenTtl string `json:"token_ttl" url:"token_ttl"`
+	// Type of token created
+	TokenType TokenType `json:"token_type" url:"token_type"`
 	// Primary running access and refresh tokens
 	Primary *TokenPair `json:"primary" url:"primary"`
 	// Temporary secondary TokenPair created after a RefreshToken operation

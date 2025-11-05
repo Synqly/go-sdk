@@ -281,8 +281,10 @@ func (c *CreateSynqlyIntegrationsTokenResponse) String() string {
 }
 
 type CreateTokenRequest struct {
-	// Unique name token. If not provided, defaults to generated newly created refresh token id.
+	// Unique short name for this token (lowercase [a-z0-9_-], can be used in URLs). Also used for case insensitive duplicate name detection and default sort order. Defaults to TokenId if both name and fullname are not specified.
 	Name *string `json:"name,omitempty" url:"name,omitempty"`
+	// Human friendly display name for this Token, will auto-generate 'name' field (if 'name' is not specified). Defaults to the same value as the 'name' field if not specified.
+	Fullname *string `json:"fullname,omitempty" url:"fullname,omitempty"`
 	// Limit access to supplied resources
 	Resources *Resources `json:"resources" url:"resources"`
 	// Limit access to supplied permissions
