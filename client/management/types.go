@@ -3683,11 +3683,11 @@ func (m *Member) String() string {
 
 type MemberOptions struct {
 	// Optional member time-to-live duration. After a member expires, system requires a change password to re-enable member. Minimum 1 day, Maximum 1 year, Default 180 days.
-	Ttl string `json:"ttl" url:"ttl"`
+	Ttl *string `json:"ttl,omitempty" url:"ttl,omitempty"`
 	// Options: "expired" will force change password on first logon.
-	Options []Options `json:"options" url:"options"`
+	Options []Options `json:"options,omitempty" url:"options,omitempty"`
 	// Optional token time-to-live duration. Tokens are created for this member with this duration as their TTL. Minimum 10 miniutes, Maximum 1 week, Defaults 1 hour.
-	TokenTtl string `json:"token_ttl" url:"token_ttl"`
+	TokenTtl *string `json:"token_ttl,omitempty" url:"token_ttl,omitempty"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage

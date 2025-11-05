@@ -36,7 +36,7 @@ type CreateMemberRequest struct {
 	Secret string `json:"secret" url:"secret"`
 	// Roles granted to this member. Tokens inherit this access. Defaults to `member`.
 	RoleBinding []RoleName     `json:"role_binding,omitempty" url:"role_binding,omitempty"`
-	Options     *MemberOptions `json:"options" url:"options"`
+	Options     *MemberOptions `json:"options,omitempty" url:"options,omitempty"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
