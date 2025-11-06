@@ -23,6 +23,74 @@ type ListOperationsRequest struct {
 	Filter []*string `json:"-" url:"filter,omitempty"`
 }
 
+type ListExecutionHistoryRequestParams struct {
+	// Filter operation execution history by this query.
+	// Available filters:
+	//
+	//   - `id[eq]` - Filter by specific operation ID
+	//   - `integration_id[eq]` - Filter by specific integration ID
+	//   - `account_id[eq]` - Filter by specific account ID
+	//   - `execution_id[eq]` - Filter by specific execution ID
+	//   - `started_at[gte]` - Filter executions started at or after a specific datetime (RFC3339 format)
+	//   - `started_at[lte]` - Filter executions started at or before a specific datetime (RFC3339 format)
+	//   - `started_at[gt]` - Filter executions started after a specific datetime
+	//   - `started_at[lt]` - Filter executions started before a specific datetime
+	//   - `operation_id[eq]` - Filter by operation name (e.g., "assets_query_devices")
+	//     If used more than once, the queries are ANDed together.
+	Filter []*string `json:"-" url:"filter,omitempty"`
+	// Select a field to order the results by. Defaults to `started_at[desc]`. To control the direction of the sorting, append
+	// `[asc]` or `[desc]` to the field id. For example, `started_at[asc]` will sort the results by `started_at` in ascending order.
+	// The ordering defaults to `desc` if not specified. May be used multiple times to order by multiple fields, and the
+	// ordering is applied in the order the fields are specified.
+	Order []*string `json:"-" url:"order,omitempty"`
+	// Number of results to return (default 100, max 500)
+	Limit *int `json:"-" url:"limit,omitempty"`
+	// Return execution history starting after this cursor.
+	StartAfter *string `json:"-" url:"start_after,omitempty"`
+}
+
+type ListExecutionHistoryResponse struct {
+	// List of execution events
+	Result []*OperationExecutionEvent `json:"result" url:"result"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (l *ListExecutionHistoryResponse) GetExtraProperties() map[string]interface{} {
+	return l.extraProperties
+}
+
+func (l *ListExecutionHistoryResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler ListExecutionHistoryResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*l = ListExecutionHistoryResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *l)
+	if err != nil {
+		return err
+	}
+	l.extraProperties = extraProperties
+
+	l._rawJSON = nil
+	return nil
+}
+
+func (l *ListExecutionHistoryResponse) String() string {
+	if len(l._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(l._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(l); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", l)
+}
+
 type ListOperationsResponse struct {
 	Result []*Operation `json:"result" url:"result"`
 

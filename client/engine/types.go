@@ -2274,8 +2274,6 @@ type Operation struct {
 	AccountId Id `json:"account_id" url:"account_id"`
 	// Integration ID to use for the operation.
 	IntegrationId Id `json:"integration_id" url:"integration_id"`
-	// Run now or on the specified schedule.
-	Schedule *OperationSchedule `json:"schedule,omitempty" url:"schedule,omitempty"`
 	// Name of the operation that will be run for this operation.
 	Operation string `json:"operation" url:"operation"`
 	// Parameters for the operation that will be run for this operation.
@@ -2435,68 +2433,6 @@ func (o *OperationInput) String() string {
 	return fmt.Sprintf("%#v", o)
 }
 
-type OperationSchedule struct {
-	// Run now or on the specified time.
-	RunAt *time.Time `json:"run_at,omitempty" url:"run_at,omitempty"`
-	// Set the interval duration for recuring operations. (minimum 1h)
-	Interval *string `json:"interval,omitempty" url:"interval,omitempty"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (o *OperationSchedule) GetExtraProperties() map[string]interface{} {
-	return o.extraProperties
-}
-
-func (o *OperationSchedule) UnmarshalJSON(data []byte) error {
-	type embed OperationSchedule
-	var unmarshaler = struct {
-		embed
-		RunAt *core.DateTime `json:"run_at,omitempty"`
-	}{
-		embed: embed(*o),
-	}
-	if err := json.Unmarshal(data, &unmarshaler); err != nil {
-		return err
-	}
-	*o = OperationSchedule(unmarshaler.embed)
-	o.RunAt = unmarshaler.RunAt.TimePtr()
-
-	extraProperties, err := core.ExtractExtraProperties(data, *o)
-	if err != nil {
-		return err
-	}
-	o.extraProperties = extraProperties
-
-	o._rawJSON = nil
-	return nil
-}
-
-func (o *OperationSchedule) MarshalJSON() ([]byte, error) {
-	type embed OperationSchedule
-	var marshaler = struct {
-		embed
-		RunAt *core.DateTime `json:"run_at,omitempty"`
-	}{
-		embed: embed(*o),
-		RunAt: core.NewOptionalDateTime(o.RunAt),
-	}
-	return json.Marshal(marshaler)
-}
-
-func (o *OperationSchedule) String() string {
-	if len(o._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(o._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(o); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", o)
-}
-
 type OperationStatus string
 
 const (
@@ -2504,6 +2440,7 @@ const (
 	OperationStatusProcessing OperationStatus = "PROCESSING"
 	OperationStatusCancelled  OperationStatus = "CANCELLED"
 	OperationStatusComplete   OperationStatus = "COMPLETE"
+	OperationStatusDisabled   OperationStatus = "DISABLED"
 )
 
 func NewOperationStatusFromString(s string) (OperationStatus, error) {
@@ -2516,6 +2453,8 @@ func NewOperationStatusFromString(s string) (OperationStatus, error) {
 		return OperationStatusCancelled, nil
 	case "COMPLETE":
 		return OperationStatusComplete, nil
+	case "DISABLED":
+		return OperationStatusDisabled, nil
 	}
 	var t OperationStatus
 	return "", fmt.Errorf("%s is not a valid %T", s, t)
@@ -2827,8 +2766,6 @@ type OperationWebhookPayload struct {
 	CreatedAt time.Time `json:"created_at" url:"created_at"`
 	// Last time object was updated
 	UpdatedAt time.Time `json:"updated_at" url:"updated_at"`
-	// Run now or on the specified schedule.
-	Schedule *OperationSchedule `json:"schedule,omitempty" url:"schedule,omitempty"`
 	// Name of the operation that will be run for this operation.
 	Operation string `json:"operation" url:"operation"`
 	// Account ID containing the integration.

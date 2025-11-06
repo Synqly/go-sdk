@@ -40,6 +40,10 @@ type CreateIntegrationPointRequest struct {
 	Mappings []*MappingChainTemplate `json:"mappings,omitempty" url:"mappings,omitempty"`
 	// Additional data mappings for integrations added to this integration point. This allows for custom data to be mapped to the custom_fields portion of the response.
 	AdditionalMappings []*AdditionalMappingTemplate `json:"additional_mappings,omitempty" url:"additional_mappings,omitempty"`
+	// A list of operations that are scheduled to run for this integration point.
+	// Whenever an integration is created, these operations will automatically
+	// be scheduled to run based on the schedule defined for the operation.
+	ScheduledOperations []*OperationSchedule `json:"scheduled_operations,omitempty" url:"scheduled_operations,omitempty"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage

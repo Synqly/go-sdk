@@ -2760,6 +2760,10 @@ type IntegrationPoint struct {
 	Mappings []*MappingChainTemplate `json:"mappings,omitempty" url:"mappings,omitempty"`
 	// Additional data mappings for integrations added to this integration point. This allows for custom data to be mapped to the custom_fields portion of the response.
 	AdditionalMappings []*AdditionalMappingTemplate `json:"additional_mappings,omitempty" url:"additional_mappings,omitempty"`
+	// A list of operations that are scheduled to run for this integration point.
+	// Whenever an integration is created, these operations will automatically
+	// be scheduled to run based on the schedule defined for the operation.
+	ScheduledOperations []*OperationSchedule `json:"scheduled_operations,omitempty" url:"scheduled_operations,omitempty"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
@@ -3803,8 +3807,6 @@ type Operation struct {
 	AccountId Id `json:"account_id" url:"account_id"`
 	// Integration ID to use for the operation.
 	IntegrationId Id `json:"integration_id" url:"integration_id"`
-	// Run now or on the specified schedule.
-	Schedule *OperationSchedule `json:"schedule,omitempty" url:"schedule,omitempty"`
 	// Name of the operation that will be run for this operation.
 	Operation string `json:"operation" url:"operation"`
 	// Parameters for the operation that will be run for this operation.
@@ -3964,68 +3966,6 @@ func (o *OperationInput) String() string {
 	return fmt.Sprintf("%#v", o)
 }
 
-type OperationSchedule struct {
-	// Run now or on the specified time.
-	RunAt *time.Time `json:"run_at,omitempty" url:"run_at,omitempty"`
-	// Set the interval duration for recuring operations. (minimum 1h)
-	Interval *string `json:"interval,omitempty" url:"interval,omitempty"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (o *OperationSchedule) GetExtraProperties() map[string]interface{} {
-	return o.extraProperties
-}
-
-func (o *OperationSchedule) UnmarshalJSON(data []byte) error {
-	type embed OperationSchedule
-	var unmarshaler = struct {
-		embed
-		RunAt *core.DateTime `json:"run_at,omitempty"`
-	}{
-		embed: embed(*o),
-	}
-	if err := json.Unmarshal(data, &unmarshaler); err != nil {
-		return err
-	}
-	*o = OperationSchedule(unmarshaler.embed)
-	o.RunAt = unmarshaler.RunAt.TimePtr()
-
-	extraProperties, err := core.ExtractExtraProperties(data, *o)
-	if err != nil {
-		return err
-	}
-	o.extraProperties = extraProperties
-
-	o._rawJSON = nil
-	return nil
-}
-
-func (o *OperationSchedule) MarshalJSON() ([]byte, error) {
-	type embed OperationSchedule
-	var marshaler = struct {
-		embed
-		RunAt *core.DateTime `json:"run_at,omitempty"`
-	}{
-		embed: embed(*o),
-		RunAt: core.NewOptionalDateTime(o.RunAt),
-	}
-	return json.Marshal(marshaler)
-}
-
-func (o *OperationSchedule) String() string {
-	if len(o._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(o._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(o); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", o)
-}
-
 type OperationStatus string
 
 const (
@@ -4033,6 +3973,7 @@ const (
 	OperationStatusProcessing OperationStatus = "PROCESSING"
 	OperationStatusCancelled  OperationStatus = "CANCELLED"
 	OperationStatusComplete   OperationStatus = "COMPLETE"
+	OperationStatusDisabled   OperationStatus = "DISABLED"
 )
 
 func NewOperationStatusFromString(s string) (OperationStatus, error) {
@@ -4045,12 +3986,140 @@ func NewOperationStatusFromString(s string) (OperationStatus, error) {
 		return OperationStatusCancelled, nil
 	case "COMPLETE":
 		return OperationStatusComplete, nil
+	case "DISABLED":
+		return OperationStatusDisabled, nil
 	}
 	var t OperationStatus
 	return "", fmt.Errorf("%s is not a valid %T", s, t)
 }
 
 func (o OperationStatus) Ptr() *OperationStatus {
+	return &o
+}
+
+// A single execution of an operation, capturing start time, completion time,
+// and metrics for that specific run.
+type OperationExecutionEvent struct {
+	// Unique identifier for this execution
+	ExecutionId Id `json:"execution_id" url:"execution_id"`
+	// ID of the operation that was executed
+	OperationId Id `json:"operation_id" url:"operation_id"`
+	// When this execution started
+	StartedAt time.Time `json:"started_at" url:"started_at"`
+	// When this execution completed
+	CompletedAt time.Time `json:"completed_at" url:"completed_at"`
+	// Account ID containing the integration
+	AccountId Id `json:"account_id" url:"account_id"`
+	// Integration ID used for the operation
+	IntegrationId Id `json:"integration_id" url:"integration_id"`
+	// Integration-point ID if triggered by a schedule, omitted if manually triggered
+	// via the API
+	IntegrationPointId *Id `json:"integration_point_id,omitempty" url:"integration_point_id,omitempty"`
+	// Name of the operation (e.g., "assets_query_devices")
+	Operation string `json:"operation" url:"operation"`
+	// How this execution was triggered
+	TriggerType OperationTriggerType `json:"trigger_type" url:"trigger_type"`
+	// Source of trigger - "manual" for API calls, integration-point ID for scheduled
+	TriggerSource string `json:"trigger_source" url:"trigger_source"`
+	// Final status of the execution
+	Status OperationStatus `json:"status" url:"status"`
+	// Approximate number of records processed
+	RecordsProcessed int64 `json:"records_processed" url:"records_processed"`
+	// CPU time in microseconds
+	CpuTime int64 `json:"cpu_time" url:"cpu_time"`
+	// Number of bytes sent to sink integration
+	InBytes int64 `json:"in_bytes" url:"in_bytes"`
+	// Total execution duration in microseconds
+	Duration int64 `json:"duration" url:"duration"`
+	// Cursor value at execution start
+	InitialCursor *string `json:"initial_cursor,omitempty" url:"initial_cursor,omitempty"`
+	// Cursor value at execution completion
+	FinalCursor *string `json:"final_cursor,omitempty" url:"final_cursor,omitempty"`
+	// Error message if execution failed
+	Error *string `json:"error,omitempty" url:"error,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (o *OperationExecutionEvent) GetExtraProperties() map[string]interface{} {
+	return o.extraProperties
+}
+
+func (o *OperationExecutionEvent) UnmarshalJSON(data []byte) error {
+	type embed OperationExecutionEvent
+	var unmarshaler = struct {
+		embed
+		StartedAt   *core.DateTime `json:"started_at"`
+		CompletedAt *core.DateTime `json:"completed_at"`
+	}{
+		embed: embed(*o),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*o = OperationExecutionEvent(unmarshaler.embed)
+	o.StartedAt = unmarshaler.StartedAt.Time()
+	o.CompletedAt = unmarshaler.CompletedAt.Time()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *o)
+	if err != nil {
+		return err
+	}
+	o.extraProperties = extraProperties
+
+	o._rawJSON = nil
+	return nil
+}
+
+func (o *OperationExecutionEvent) MarshalJSON() ([]byte, error) {
+	type embed OperationExecutionEvent
+	var marshaler = struct {
+		embed
+		StartedAt   *core.DateTime `json:"started_at"`
+		CompletedAt *core.DateTime `json:"completed_at"`
+	}{
+		embed:       embed(*o),
+		StartedAt:   core.NewDateTime(o.StartedAt),
+		CompletedAt: core.NewDateTime(o.CompletedAt),
+	}
+	return json.Marshal(marshaler)
+}
+
+func (o *OperationExecutionEvent) String() string {
+	if len(o._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(o._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(o); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", o)
+}
+
+// How an operation execution was initiated
+type OperationTriggerType string
+
+const (
+	// Manually triggered via API
+	OperationTriggerTypeApi OperationTriggerType = "API"
+	// Automatically triggered by integration-point schedule
+	OperationTriggerTypeScheduled OperationTriggerType = "SCHEDULED"
+)
+
+func NewOperationTriggerTypeFromString(s string) (OperationTriggerType, error) {
+	switch s {
+	case "API":
+		return OperationTriggerTypeApi, nil
+	case "SCHEDULED":
+		return OperationTriggerTypeScheduled, nil
+	}
+	var t OperationTriggerType
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (o OperationTriggerType) Ptr() *OperationTriggerType {
 	return &o
 }
 
@@ -4302,6 +4371,275 @@ func NewOperationIdFromString(s string) (OperationId, error) {
 
 func (o OperationId) Ptr() *OperationId {
 	return &o
+}
+
+type OperationFrequency struct {
+	Type string
+	// Frequency of operation executions is defined by a periodic interval.
+	Periodic OperationFrequencyPeriodic
+}
+
+func (o *OperationFrequency) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	o.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", o)
+	}
+	switch unmarshaler.Type {
+	case "periodic":
+		var valueUnmarshaler struct {
+			Periodic OperationFrequencyPeriodic `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		o.Periodic = valueUnmarshaler.Periodic
+	}
+	return nil
+}
+
+func (o OperationFrequency) MarshalJSON() ([]byte, error) {
+	if o.Periodic != "" {
+		var marshaler = struct {
+			Type     string                     `json:"type"`
+			Periodic OperationFrequencyPeriodic `json:"value"`
+		}{
+			Type:     "periodic",
+			Periodic: o.Periodic,
+		}
+		return json.Marshal(marshaler)
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", o)
+}
+
+type OperationFrequencyVisitor interface {
+	VisitPeriodic(OperationFrequencyPeriodic) error
+}
+
+func (o *OperationFrequency) Accept(visitor OperationFrequencyVisitor) error {
+	if o.Periodic != "" {
+		return visitor.VisitPeriodic(o.Periodic)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", o)
+}
+
+// Frequency of operation executions is defined by a periodic interval. Value is a string in the format "4h" (every 4 hours).
+// You may use "m" for minutes, "h" for hours, and "d" for days.
+type OperationFrequencyPeriodic = string
+
+// Controls how data is fetched from the source API on each execution.
+type OperationIncrementalPullConfig struct {
+	// Fetch strategy: incremental (only changed data) or full_snapshot (all data every time).
+	Mode OperationIncrementalPullMode `json:"mode" url:"mode"`
+	// Custom field to use for time-based filtering in incremental mode.
+	// Overrides the operation's default time filter field.
+	// Examples: "modified_time" or "finding.last_seen_time".
+	// The filter will use this field with "[gt]" (greater than) operator.
+	// First run will use `initial_backfill_start_time` as the filter value, and
+	// subsequent runs use the last execution time.
+	TimeFilterField *string `json:"time_filter_field,omitempty" url:"time_filter_field,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (o *OperationIncrementalPullConfig) GetExtraProperties() map[string]interface{} {
+	return o.extraProperties
+}
+
+func (o *OperationIncrementalPullConfig) UnmarshalJSON(data []byte) error {
+	type unmarshaler OperationIncrementalPullConfig
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*o = OperationIncrementalPullConfig(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *o)
+	if err != nil {
+		return err
+	}
+	o.extraProperties = extraProperties
+
+	o._rawJSON = nil
+	return nil
+}
+
+func (o *OperationIncrementalPullConfig) String() string {
+	if len(o._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(o._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(o); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", o)
+}
+
+// Strategy for fetching data from the source API.
+type OperationIncrementalPullMode string
+
+const (
+	// Fetch only data changed since last execution (default, more efficient).
+	OperationIncrementalPullModeIncremental OperationIncrementalPullMode = "incremental"
+	// Fetch all data every time (useful for small datasets or when changes are hard to track).
+	OperationIncrementalPullModeFullSnapshot OperationIncrementalPullMode = "full_snapshot"
+)
+
+func NewOperationIncrementalPullModeFromString(s string) (OperationIncrementalPullMode, error) {
+	switch s {
+	case "incremental":
+		return OperationIncrementalPullModeIncremental, nil
+	case "full_snapshot":
+		return OperationIncrementalPullModeFullSnapshot, nil
+	}
+	var t OperationIncrementalPullMode
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (o OperationIncrementalPullMode) Ptr() *OperationIncrementalPullMode {
+	return &o
+}
+
+type OperationSchedule struct {
+	// ID of the operation to schedule (e.g., query_alerts, query_endpoints).
+	Operation ScheduledOperationId `json:"operation" url:"operation"`
+	// Whether the schedule is active. When false, no executions will occur.
+	Enabled bool `json:"enabled" url:"enabled"`
+	// How often the operation should execute (e.g., every 4 hours).
+	// If an execution takes longer than the interval, the next execution
+	// will start immediately after the previous one completes.
+	Frequency *OperationFrequency `json:"frequency" url:"frequency"`
+	// Optional filters to apply when querying data from the source API.
+	// Format and available filters depend on the specific operation.
+	// Example: "severity[eq]critical" or "status[eq]active".
+	Filters []string `json:"filters,omitempty" url:"filters,omitempty"`
+	// Starting point for the initial data collection. No data before this time will be fetched.
+	// Accepts:
+	//
+	//   - RFC 3339 datetime: "2024-01-01T00:00:00Z"
+	//   - Relative duration: "7d" (7 days ago), "24h" (24 hours ago), "30m" (30 minutes ago)
+	//   - "max": Collect all available historical data
+	//     If not specified, starts from the operation's creation time.
+	BackfillFromTime *string `json:"backfill_from_time,omitempty" url:"backfill_from_time,omitempty"`
+	// Configuration for how data is fetched on each execution.
+	// By default, operations fetch only data that changed since the last run (incremental)
+	// and the time filter used depends on the operation.
+	// Use this to override the default behavior or switch to full snapshots.
+	IncrementalConfig *OperationIncrementalPullConfig `json:"incremental_config,omitempty" url:"incremental_config,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (o *OperationSchedule) GetExtraProperties() map[string]interface{} {
+	return o.extraProperties
+}
+
+func (o *OperationSchedule) UnmarshalJSON(data []byte) error {
+	type unmarshaler OperationSchedule
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*o = OperationSchedule(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *o)
+	if err != nil {
+		return err
+	}
+	o.extraProperties = extraProperties
+
+	o._rawJSON = nil
+	return nil
+}
+
+func (o *OperationSchedule) String() string {
+	if len(o._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(o._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(o); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", o)
+}
+
+type ScheduledOperationId string
+
+const (
+	ScheduledOperationIdAssetsQueryDevices             ScheduledOperationId = "assets_query_devices"
+	ScheduledOperationIdEdrQueryAlerts                 ScheduledOperationId = "edr_query_alerts"
+	ScheduledOperationIdEdrQueryApplications           ScheduledOperationId = "edr_query_applications"
+	ScheduledOperationIdEdrQueryEndpoints              ScheduledOperationId = "edr_query_endpoints"
+	ScheduledOperationIdEdrQueryIocs                   ScheduledOperationId = "edr_query_iocs"
+	ScheduledOperationIdEdrQueryPostureScore           ScheduledOperationId = "edr_query_posture_score"
+	ScheduledOperationIdEdrQueryThreatevents           ScheduledOperationId = "edr_query_threatevents"
+	ScheduledOperationIdIdentityQueryAuditLog          ScheduledOperationId = "identity_query_audit_log"
+	ScheduledOperationIdIdentityQueryGroups            ScheduledOperationId = "identity_query_groups"
+	ScheduledOperationIdIdentityQueryUsers             ScheduledOperationId = "identity_query_users"
+	ScheduledOperationIdSiemQueryEvents                ScheduledOperationId = "siem_query_events"
+	ScheduledOperationIdSiemQueryInvestigations        ScheduledOperationId = "siem_query_investigations"
+	ScheduledOperationIdVulnerabilitiesQueryAssets     ScheduledOperationId = "vulnerabilities_query_assets"
+	ScheduledOperationIdVulnerabilitiesQueryFindings   ScheduledOperationId = "vulnerabilities_query_findings"
+	ScheduledOperationIdVulnerabilitiesQueryScans      ScheduledOperationId = "vulnerabilities_query_scans"
+	ScheduledOperationIdAppsecQueryApplications        ScheduledOperationId = "appsec_query_applications"
+	ScheduledOperationIdAppsecQueryApplicationFindings ScheduledOperationId = "appsec_query_application_findings"
+	ScheduledOperationIdAppsecQueryFindings            ScheduledOperationId = "appsec_query_findings"
+)
+
+func NewScheduledOperationIdFromString(s string) (ScheduledOperationId, error) {
+	switch s {
+	case "assets_query_devices":
+		return ScheduledOperationIdAssetsQueryDevices, nil
+	case "edr_query_alerts":
+		return ScheduledOperationIdEdrQueryAlerts, nil
+	case "edr_query_applications":
+		return ScheduledOperationIdEdrQueryApplications, nil
+	case "edr_query_endpoints":
+		return ScheduledOperationIdEdrQueryEndpoints, nil
+	case "edr_query_iocs":
+		return ScheduledOperationIdEdrQueryIocs, nil
+	case "edr_query_posture_score":
+		return ScheduledOperationIdEdrQueryPostureScore, nil
+	case "edr_query_threatevents":
+		return ScheduledOperationIdEdrQueryThreatevents, nil
+	case "identity_query_audit_log":
+		return ScheduledOperationIdIdentityQueryAuditLog, nil
+	case "identity_query_groups":
+		return ScheduledOperationIdIdentityQueryGroups, nil
+	case "identity_query_users":
+		return ScheduledOperationIdIdentityQueryUsers, nil
+	case "siem_query_events":
+		return ScheduledOperationIdSiemQueryEvents, nil
+	case "siem_query_investigations":
+		return ScheduledOperationIdSiemQueryInvestigations, nil
+	case "vulnerabilities_query_assets":
+		return ScheduledOperationIdVulnerabilitiesQueryAssets, nil
+	case "vulnerabilities_query_findings":
+		return ScheduledOperationIdVulnerabilitiesQueryFindings, nil
+	case "vulnerabilities_query_scans":
+		return ScheduledOperationIdVulnerabilitiesQueryScans, nil
+	case "appsec_query_applications":
+		return ScheduledOperationIdAppsecQueryApplications, nil
+	case "appsec_query_application_findings":
+		return ScheduledOperationIdAppsecQueryApplicationFindings, nil
+	case "appsec_query_findings":
+		return ScheduledOperationIdAppsecQueryFindings, nil
+	}
+	var t ScheduledOperationId
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (s ScheduledOperationId) Ptr() *ScheduledOperationId {
+	return &s
 }
 
 type CreateOrganizationResponseResult struct {
@@ -5865,14 +6203,17 @@ func (m *MembersPermissions) String() string {
 type OperationsActions string
 
 const (
-	OperationsActionsList OperationsActions = "list"
-	OperationsActionsAll  OperationsActions = "*"
+	OperationsActionsList        OperationsActions = "list"
+	OperationsActionsListHistory OperationsActions = "list_history"
+	OperationsActionsAll         OperationsActions = "*"
 )
 
 func NewOperationsActionsFromString(s string) (OperationsActions, error) {
 	switch s {
 	case "list":
 		return OperationsActionsList, nil
+	case "list_history":
+		return OperationsActionsListHistory, nil
 	case "*":
 		return OperationsActionsAll, nil
 	}

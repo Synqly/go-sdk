@@ -12,8 +12,6 @@ import (
 type AsyncOperationRequestId = Id
 
 type CreateOperationRequest struct {
-	// Run now or on the specified schedule.
-	Schedule *OperationSchedule `json:"schedule,omitempty" url:"schedule,omitempty"`
 	// Name of the operation that will be run for this operation.
 	Operation string `json:"operation" url:"operation"`
 	// Input parameters to the operation that will be run for this operation.
