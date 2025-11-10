@@ -677,7 +677,9 @@ type Connector struct {
 	// List of Providers that implement the Connector.
 	ProviderIds []ProviderId `json:"provider_ids" url:"provider_ids"`
 	// List of capabilities for Providers that implement the Connector.
-	Providers []*ProviderCapabilities `json:"providers,omitempty" url:"providers,omitempty"`
+	// Uses ProviderCapabilitiesBase which omits the expandable connector
+	// field since nested providers never have expanded connectors.
+	Providers []*ProviderCapabilitiesBase `json:"providers,omitempty" url:"providers,omitempty"`
 	// DEPRECATED – use `id` instead.
 	Connector *CategoryId `json:"connector,omitempty" url:"connector,omitempty"`
 
@@ -895,6 +897,12 @@ type ProviderCapabilities struct {
 	Description string `json:"description" url:"description"`
 	// Id of the Connector that the Provider implements.
 	ConnectorId CategoryId `json:"connector_id" url:"connector_id"`
+	// Operations that the Provider implements.
+	Operations []*ProviderOperations `json:"operations,omitempty" url:"operations,omitempty"`
+	// Details on the specific configuration options for the Provider.
+	ProviderConfig interface{} `json:"provider_config,omitempty" url:"provider_config,omitempty"`
+	// Provider availability information.
+	Release *ProviderRelease `json:"release,omitempty" url:"release,omitempty"`
 	// Id of the Connector that the Provider implements – or, if
 	// `expand=connector` is set – the details of the Connector. NOTE:
 	// The current default behavior is to return the ID of the
@@ -904,12 +912,6 @@ type ProviderCapabilities struct {
 	// Connector ID. This field will soon only be populated when
 	// `expand=connector` is set in the APIs that support it.
 	Connector *ConnectorOrId `json:"connector,omitempty" url:"connector,omitempty"`
-	// Operations that the Provider implements.
-	Operations []*ProviderOperations `json:"operations,omitempty" url:"operations,omitempty"`
-	// Details on the specific configuration options for the Provider.
-	ProviderConfig interface{} `json:"provider_config,omitempty" url:"provider_config,omitempty"`
-	// Provider availability inforamtion.
-	Release *ProviderRelease `json:"release,omitempty" url:"release,omitempty"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
@@ -938,6 +940,67 @@ func (p *ProviderCapabilities) UnmarshalJSON(data []byte) error {
 }
 
 func (p *ProviderCapabilities) String() string {
+	if len(p._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(p._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(p); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", p)
+}
+
+// Base properties for provider capabilities. This type is used both
+// directly (when providers are nested in connectors) and extended by
+// ProviderCapabilities (which adds the expandable connector field).
+type ProviderCapabilitiesBase struct {
+	// Unique identifier for the Provider.
+	Id ProviderId `json:"id" url:"id"`
+	// Name of the Provider.
+	Name string `json:"name" url:"name"`
+	// Display name of the Provider.
+	Fullname string `json:"fullname" url:"fullname"`
+	// Display name of the Provider vendor.
+	Vendor string `json:"vendor" url:"vendor"`
+	// Description of the Provider.
+	Description string `json:"description" url:"description"`
+	// Id of the Connector that the Provider implements.
+	ConnectorId CategoryId `json:"connector_id" url:"connector_id"`
+	// Operations that the Provider implements.
+	Operations []*ProviderOperations `json:"operations,omitempty" url:"operations,omitempty"`
+	// Details on the specific configuration options for the Provider.
+	ProviderConfig interface{} `json:"provider_config,omitempty" url:"provider_config,omitempty"`
+	// Provider availability information.
+	Release *ProviderRelease `json:"release,omitempty" url:"release,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (p *ProviderCapabilitiesBase) GetExtraProperties() map[string]interface{} {
+	return p.extraProperties
+}
+
+func (p *ProviderCapabilitiesBase) UnmarshalJSON(data []byte) error {
+	type unmarshaler ProviderCapabilitiesBase
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*p = ProviderCapabilitiesBase(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *p)
+	if err != nil {
+		return err
+	}
+	p.extraProperties = extraProperties
+
+	p._rawJSON = nil
+	return nil
+}
+
+func (p *ProviderCapabilitiesBase) String() string {
 	if len(p._rawJSON) > 0 {
 		if value, err := core.StringifyJSON(p._rawJSON); err == nil {
 			return value
