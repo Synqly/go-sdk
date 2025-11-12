@@ -2479,6 +2479,12 @@ const (
 	OperationIdCloudsecurityQueryEvents                 OperationId = "cloudsecurity_query_events"
 	OperationIdCloudsecurityQueryIoms                   OperationId = "cloudsecurity_query_ioms"
 	OperationIdCloudsecurityQueryThreats                OperationId = "cloudsecurity_query_threats"
+	OperationIdCustomDelete                             OperationId = "custom_delete"
+	OperationIdCustomGet                                OperationId = "custom_get"
+	OperationIdCustomPatch                              OperationId = "custom_patch"
+	OperationIdCustomPost                               OperationId = "custom_post"
+	OperationIdCustomPostBatch                          OperationId = "custom_post_batch"
+	OperationIdCustomQuery                              OperationId = "custom_query"
 	OperationIdEdrCreateIocs                            OperationId = "edr_create_iocs"
 	OperationIdEdrDeleteIocs                            OperationId = "edr_delete_iocs"
 	OperationIdEdrGetEndpoint                           OperationId = "edr_get_endpoint"
@@ -2573,6 +2579,18 @@ func NewOperationIdFromString(s string) (OperationId, error) {
 		return OperationIdCloudsecurityQueryIoms, nil
 	case "cloudsecurity_query_threats":
 		return OperationIdCloudsecurityQueryThreats, nil
+	case "custom_delete":
+		return OperationIdCustomDelete, nil
+	case "custom_get":
+		return OperationIdCustomGet, nil
+	case "custom_patch":
+		return OperationIdCustomPatch, nil
+	case "custom_post":
+		return OperationIdCustomPost, nil
+	case "custom_post_batch":
+		return OperationIdCustomPostBatch, nil
+	case "custom_query":
+		return OperationIdCustomQuery, nil
 	case "edr_create_iocs":
 		return OperationIdEdrCreateIocs, nil
 	case "edr_delete_iocs":

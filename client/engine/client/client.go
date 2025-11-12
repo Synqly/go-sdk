@@ -7,6 +7,7 @@ import (
 	assets "github.com/synqly/go-sdk/client/engine/assets"
 	cloudsecurity "github.com/synqly/go-sdk/client/engine/cloudsecurity"
 	core "github.com/synqly/go-sdk/client/engine/core"
+	custom "github.com/synqly/go-sdk/client/engine/custom"
 	edr "github.com/synqly/go-sdk/client/engine/edr"
 	hooks "github.com/synqly/go-sdk/client/engine/hooks"
 	identity "github.com/synqly/go-sdk/client/engine/identity"
@@ -30,6 +31,7 @@ type Client struct {
 	Appsec              *appsec.Client
 	Assets              *assets.Client
 	Cloudsecurity       *cloudsecurity.Client
+	Custom              *custom.Client
 	Edr                 *edr.Client
 	Hooks               *hooks.Client
 	Identity            *identity.Client
@@ -57,6 +59,7 @@ func NewClient(opts ...option.RequestOption) *Client {
 		Appsec:              appsec.NewClient(opts...),
 		Assets:              assets.NewClient(opts...),
 		Cloudsecurity:       cloudsecurity.NewClient(opts...),
+		Custom:              custom.NewClient(opts...),
 		Edr:                 edr.NewClient(opts...),
 		Hooks:               hooks.NewClient(opts...),
 		Identity:            identity.NewClient(opts...),

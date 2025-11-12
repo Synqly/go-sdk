@@ -664,6 +664,42 @@ func (c *CreateBridgeResponseResult) String() string {
 	return fmt.Sprintf("%#v", c)
 }
 
+type Availability string
+
+const (
+	// Internal use only.
+	AvailabilityInternal Availability = "internal"
+	// Currently in active development.
+	AvailabilityInDevelopment Availability = "in-development"
+	// Available for use, but not ready for production.
+	AvailabilityPreRelease Availability = "pre-release"
+	// Will be removed in the future.
+	AvailabilityDeprecated Availability = "deprecated"
+	// Stable and available for production use.
+	AvailabilityGenerallyAvailable Availability = "generally-available"
+)
+
+func NewAvailabilityFromString(s string) (Availability, error) {
+	switch s {
+	case "internal":
+		return AvailabilityInternal, nil
+	case "in-development":
+		return AvailabilityInDevelopment, nil
+	case "pre-release":
+		return AvailabilityPreRelease, nil
+	case "deprecated":
+		return AvailabilityDeprecated, nil
+	case "generally-available":
+		return AvailabilityGenerallyAvailable, nil
+	}
+	var t Availability
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (a Availability) Ptr() *Availability {
+	return &a
+}
+
 // Provides details of the Connector.
 type Connector struct {
 	// Unique identifier for the Connector.
@@ -682,6 +718,8 @@ type Connector struct {
 	Providers []*ProviderCapabilitiesBase `json:"providers,omitempty" url:"providers,omitempty"`
 	// DEPRECATED – use `id` instead.
 	Connector *CategoryId `json:"connector,omitempty" url:"connector,omitempty"`
+	// Connector availability information.
+	Release *ConnectorRelease `json:"release,omitempty" url:"release,omitempty"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
@@ -763,6 +801,48 @@ func (c *ConnectorOrId) Accept(visitor ConnectorOrIdVisitor) error {
 		return visitor.VisitConnector(c.Connector)
 	}
 	return fmt.Errorf("type %T does not include a non-empty union type", c)
+}
+
+type ConnectorRelease struct {
+	// Availability status.
+	Availability Availability `json:"availability" url:"availability"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *ConnectorRelease) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
+}
+
+func (c *ConnectorRelease) UnmarshalJSON(data []byte) error {
+	type unmarshaler ConnectorRelease
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = ConnectorRelease(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
+	c._rawJSON = nil
+	return nil
+}
+
+func (c *ConnectorRelease) String() string {
+	if len(c._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
 }
 
 type FilterOperation string
@@ -850,38 +930,6 @@ func NewFilterTypeFromString(s string) (FilterType, error) {
 
 func (f FilterType) Ptr() *FilterType {
 	return &f
-}
-
-type ProviderAvailability string
-
-const (
-	// Currently in active development.
-	ProviderAvailabilityInDevelopment ProviderAvailability = "in-development"
-	// Available for use, but not ready for production.
-	ProviderAvailabilityPreRelease ProviderAvailability = "pre-release"
-	// Will be removed in the future.
-	ProviderAvailabilityDeprecated ProviderAvailability = "deprecated"
-	// Stable and available for production use.
-	ProviderAvailabilityGenerallyAvailable ProviderAvailability = "generally-available"
-)
-
-func NewProviderAvailabilityFromString(s string) (ProviderAvailability, error) {
-	switch s {
-	case "in-development":
-		return ProviderAvailabilityInDevelopment, nil
-	case "pre-release":
-		return ProviderAvailabilityPreRelease, nil
-	case "deprecated":
-		return ProviderAvailabilityDeprecated, nil
-	case "generally-available":
-		return ProviderAvailabilityGenerallyAvailable, nil
-	}
-	var t ProviderAvailability
-	return "", fmt.Errorf("%s is not a valid %T", s, t)
-}
-
-func (p ProviderAvailability) Ptr() *ProviderAvailability {
-	return &p
 }
 
 type ProviderCapabilities struct {
@@ -1154,7 +1202,7 @@ func (p *ProviderOperations) String() string {
 
 type ProviderRelease struct {
 	// Availability status.
-	Availability ProviderAvailability `json:"availability" url:"availability"`
+	Availability Availability `json:"availability" url:"availability"`
 	// Environments the Provider is available to.
 	Environments []ProviderEnvironment `json:"environments" url:"environments"`
 
@@ -1252,6 +1300,7 @@ const (
 	CategoryIdAppsec          CategoryId = "appsec"
 	CategoryIdAssets          CategoryId = "assets"
 	CategoryIdCloudsecurity   CategoryId = "cloudsecurity"
+	CategoryIdCustom          CategoryId = "custom"
 	CategoryIdEdr             CategoryId = "edr"
 	CategoryIdIdentity        CategoryId = "identity"
 	CategoryIdNotifications   CategoryId = "notifications"
@@ -1270,6 +1319,8 @@ func NewCategoryIdFromString(s string) (CategoryId, error) {
 		return CategoryIdAssets, nil
 	case "cloudsecurity":
 		return CategoryIdCloudsecurity, nil
+	case "custom":
+		return CategoryIdCustom, nil
 	case "edr":
 		return CategoryIdEdr, nil
 	case "identity":
@@ -2668,6 +2719,122 @@ func (t *TokenCredential) String() string {
 
 // Unique identifier for a Token Credential
 type TokenCredentialId = CredentialId
+
+type CreateCustomResponseResult struct {
+	Custom *Custom `json:"custom" url:"custom"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *CreateCustomResponseResult) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
+}
+
+func (c *CreateCustomResponseResult) UnmarshalJSON(data []byte) error {
+	type unmarshaler CreateCustomResponseResult
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = CreateCustomResponseResult(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
+	c._rawJSON = nil
+	return nil
+}
+
+func (c *CreateCustomResponseResult) String() string {
+	if len(c._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
+type Custom struct {
+	// Human-readable name for this resource
+	Name string `json:"name" url:"name"`
+	// Time object was originally created
+	CreatedAt time.Time `json:"created_at" url:"created_at"`
+	// Last time object was updated
+	UpdatedAt time.Time `json:"updated_at" url:"updated_at"`
+	Id        CustomId  `json:"id" url:"id"`
+	// Human friendly display name for this custom provider.
+	Fullname string `json:"fullname" url:"fullname"`
+	// Organization that manages this custom provider.
+	OrganizationId OrganizationId `json:"organization_id" url:"organization_id"`
+	// The YAML custom provider definition. Must follow the custom provider definition schema.
+	Data string `json:"data" url:"data"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *Custom) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
+}
+
+func (c *Custom) UnmarshalJSON(data []byte) error {
+	type embed Custom
+	var unmarshaler = struct {
+		embed
+		CreatedAt *core.DateTime `json:"created_at"`
+		UpdatedAt *core.DateTime `json:"updated_at"`
+	}{
+		embed: embed(*c),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*c = Custom(unmarshaler.embed)
+	c.CreatedAt = unmarshaler.CreatedAt.Time()
+	c.UpdatedAt = unmarshaler.UpdatedAt.Time()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
+	c._rawJSON = nil
+	return nil
+}
+
+func (c *Custom) MarshalJSON() ([]byte, error) {
+	type embed Custom
+	var marshaler = struct {
+		embed
+		CreatedAt *core.DateTime `json:"created_at"`
+		UpdatedAt *core.DateTime `json:"updated_at"`
+	}{
+		embed:     embed(*c),
+		CreatedAt: core.NewDateTime(c.CreatedAt),
+		UpdatedAt: core.NewDateTime(c.UpdatedAt),
+	}
+	return json.Marshal(marshaler)
+}
+
+func (c *Custom) String() string {
+	if len(c._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
 
 // Unique identifier for this Integration
 type IntegrationId = Id
@@ -4201,6 +4368,12 @@ const (
 	OperationIdCloudsecurityQueryEvents                 OperationId = "cloudsecurity_query_events"
 	OperationIdCloudsecurityQueryIoms                   OperationId = "cloudsecurity_query_ioms"
 	OperationIdCloudsecurityQueryThreats                OperationId = "cloudsecurity_query_threats"
+	OperationIdCustomDelete                             OperationId = "custom_delete"
+	OperationIdCustomGet                                OperationId = "custom_get"
+	OperationIdCustomPatch                              OperationId = "custom_patch"
+	OperationIdCustomPost                               OperationId = "custom_post"
+	OperationIdCustomPostBatch                          OperationId = "custom_post_batch"
+	OperationIdCustomQuery                              OperationId = "custom_query"
 	OperationIdEdrCreateIocs                            OperationId = "edr_create_iocs"
 	OperationIdEdrDeleteIocs                            OperationId = "edr_delete_iocs"
 	OperationIdEdrGetEndpoint                           OperationId = "edr_get_endpoint"
@@ -4295,6 +4468,18 @@ func NewOperationIdFromString(s string) (OperationId, error) {
 		return OperationIdCloudsecurityQueryIoms, nil
 	case "cloudsecurity_query_threats":
 		return OperationIdCloudsecurityQueryThreats, nil
+	case "custom_delete":
+		return OperationIdCustomDelete, nil
+	case "custom_get":
+		return OperationIdCustomGet, nil
+	case "custom_patch":
+		return OperationIdCustomPatch, nil
+	case "custom_post":
+		return OperationIdCustomPost, nil
+	case "custom_post_batch":
+		return OperationIdCustomPostBatch, nil
+	case "custom_query":
+		return OperationIdCustomQuery, nil
 	case "edr_create_iocs":
 		return OperationIdEdrCreateIocs, nil
 	case "edr_delete_iocs":
@@ -5521,6 +5706,7 @@ type ApiPermissionMap struct {
 	Billing           *BillingPermissions           `json:"billing,omitempty" url:"billing,omitempty"`
 	Bridges           *BridgesPermissions           `json:"bridges,omitempty" url:"bridges,omitempty"`
 	Credentials       *CredentialsPermissions       `json:"credentials,omitempty" url:"credentials,omitempty"`
+	Customs           *CustomsPermissions           `json:"customs,omitempty" url:"customs,omitempty"`
 	Integrations      *IntegrationsPermissions      `json:"integrations,omitempty" url:"integrations,omitempty"`
 	IntegrationPoints *IntegrationPointsPermissions `json:"integration_points,omitempty" url:"integration_points,omitempty"`
 	Operations        *OperationsPermissions        `json:"operations,omitempty" url:"operations,omitempty"`
@@ -5927,6 +6113,85 @@ func (c *CredentialsPermissions) UnmarshalJSON(data []byte) error {
 }
 
 func (c *CredentialsPermissions) String() string {
+	if len(c._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
+type CustomsActions string
+
+const (
+	CustomsActionsList   CustomsActions = "list"
+	CustomsActionsCreate CustomsActions = "create"
+	CustomsActionsGet    CustomsActions = "get"
+	CustomsActionsUpdate CustomsActions = "update"
+	CustomsActionsPatch  CustomsActions = "patch"
+	CustomsActionsDelete CustomsActions = "delete"
+	CustomsActionsAll    CustomsActions = "*"
+)
+
+func NewCustomsActionsFromString(s string) (CustomsActions, error) {
+	switch s {
+	case "list":
+		return CustomsActionsList, nil
+	case "create":
+		return CustomsActionsCreate, nil
+	case "get":
+		return CustomsActionsGet, nil
+	case "update":
+		return CustomsActionsUpdate, nil
+	case "patch":
+		return CustomsActionsPatch, nil
+	case "delete":
+		return CustomsActionsDelete, nil
+	case "*":
+		return CustomsActionsAll, nil
+	}
+	var t CustomsActions
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (c CustomsActions) Ptr() *CustomsActions {
+	return &c
+}
+
+// Permissions for the customs API
+type CustomsPermissions struct {
+	Actions []CustomsActions `json:"actions" url:"actions"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *CustomsPermissions) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
+}
+
+func (c *CustomsPermissions) UnmarshalJSON(data []byte) error {
+	type unmarshaler CustomsPermissions
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = CustomsPermissions(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
+	c._rawJSON = nil
+	return nil
+}
+
+func (c *CustomsPermissions) String() string {
 	if len(c._rawJSON) > 0 {
 		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
 			return value
@@ -9359,6 +9624,279 @@ func (c *CrowdstrikeHecCredential) Accept(visitor CrowdstrikeHecCredentialVisito
 	return fmt.Errorf("type %T does not define a non-empty union type", c)
 }
 
+type CustomCredential struct {
+	Type string
+	// Configuration when creating new AWS Access Keys.
+	Aws *AwsCredential
+	// Reference to existing AWS Access Keys.
+	AwsId AwsCredentialId
+	// Configuration when creating new Basic Credentials.
+	Basic *BasicCredential
+	// Reference to existing Basic Credentials.
+	BasicId BasicCredentialId
+	// Configuration when creating new Client Credentials.
+	OAuthClient *OAuthClientCredential
+	// Reference to existing Client Credentials.
+	OAuthClientId OAuthClientCredentialId
+	// Configuration when creating new Secret.
+	Secret *SecretCredential
+	// Reference to existing Secret.
+	SecretId SecretCredentialId
+	// Configuration when creating new Token.
+	Token *TokenCredential
+	// Reference to existing Token.
+	TokenId TokenCredentialId
+}
+
+func (c *CustomCredential) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	c.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", c)
+	}
+	switch unmarshaler.Type {
+	case "aws":
+		value := new(AwsCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		c.Aws = value
+	case "aws_id":
+		var valueUnmarshaler struct {
+			AwsId AwsCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		c.AwsId = valueUnmarshaler.AwsId
+	case "basic":
+		value := new(BasicCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		c.Basic = value
+	case "basic_id":
+		var valueUnmarshaler struct {
+			BasicId BasicCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		c.BasicId = valueUnmarshaler.BasicId
+	case "o_auth_client":
+		value := new(OAuthClientCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		c.OAuthClient = value
+	case "o_auth_client_id":
+		var valueUnmarshaler struct {
+			OAuthClientId OAuthClientCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		c.OAuthClientId = valueUnmarshaler.OAuthClientId
+	case "secret":
+		value := new(SecretCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		c.Secret = value
+	case "secret_id":
+		var valueUnmarshaler struct {
+			SecretId SecretCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		c.SecretId = valueUnmarshaler.SecretId
+	case "token":
+		value := new(TokenCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		c.Token = value
+	case "token_id":
+		var valueUnmarshaler struct {
+			TokenId TokenCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		c.TokenId = valueUnmarshaler.TokenId
+	}
+	return nil
+}
+
+func (c CustomCredential) MarshalJSON() ([]byte, error) {
+	if c.Aws != nil {
+		return core.MarshalJSONWithExtraProperty(c.Aws, "type", "aws")
+	}
+	if c.AwsId != "" {
+		var marshaler = struct {
+			Type  string          `json:"type"`
+			AwsId AwsCredentialId `json:"value"`
+		}{
+			Type:  "aws_id",
+			AwsId: c.AwsId,
+		}
+		return json.Marshal(marshaler)
+	}
+	if c.Basic != nil {
+		return core.MarshalJSONWithExtraProperty(c.Basic, "type", "basic")
+	}
+	if c.BasicId != "" {
+		var marshaler = struct {
+			Type    string            `json:"type"`
+			BasicId BasicCredentialId `json:"value"`
+		}{
+			Type:    "basic_id",
+			BasicId: c.BasicId,
+		}
+		return json.Marshal(marshaler)
+	}
+	if c.OAuthClient != nil {
+		return core.MarshalJSONWithExtraProperty(c.OAuthClient, "type", "o_auth_client")
+	}
+	if c.OAuthClientId != "" {
+		var marshaler = struct {
+			Type          string                  `json:"type"`
+			OAuthClientId OAuthClientCredentialId `json:"value"`
+		}{
+			Type:          "o_auth_client_id",
+			OAuthClientId: c.OAuthClientId,
+		}
+		return json.Marshal(marshaler)
+	}
+	if c.Secret != nil {
+		return core.MarshalJSONWithExtraProperty(c.Secret, "type", "secret")
+	}
+	if c.SecretId != "" {
+		var marshaler = struct {
+			Type     string             `json:"type"`
+			SecretId SecretCredentialId `json:"value"`
+		}{
+			Type:     "secret_id",
+			SecretId: c.SecretId,
+		}
+		return json.Marshal(marshaler)
+	}
+	if c.Token != nil {
+		return core.MarshalJSONWithExtraProperty(c.Token, "type", "token")
+	}
+	if c.TokenId != "" {
+		var marshaler = struct {
+			Type    string            `json:"type"`
+			TokenId TokenCredentialId `json:"value"`
+		}{
+			Type:    "token_id",
+			TokenId: c.TokenId,
+		}
+		return json.Marshal(marshaler)
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", c)
+}
+
+type CustomCredentialVisitor interface {
+	VisitAws(*AwsCredential) error
+	VisitAwsId(AwsCredentialId) error
+	VisitBasic(*BasicCredential) error
+	VisitBasicId(BasicCredentialId) error
+	VisitOAuthClient(*OAuthClientCredential) error
+	VisitOAuthClientId(OAuthClientCredentialId) error
+	VisitSecret(*SecretCredential) error
+	VisitSecretId(SecretCredentialId) error
+	VisitToken(*TokenCredential) error
+	VisitTokenId(TokenCredentialId) error
+}
+
+func (c *CustomCredential) Accept(visitor CustomCredentialVisitor) error {
+	if c.Aws != nil {
+		return visitor.VisitAws(c.Aws)
+	}
+	if c.AwsId != "" {
+		return visitor.VisitAwsId(c.AwsId)
+	}
+	if c.Basic != nil {
+		return visitor.VisitBasic(c.Basic)
+	}
+	if c.BasicId != "" {
+		return visitor.VisitBasicId(c.BasicId)
+	}
+	if c.OAuthClient != nil {
+		return visitor.VisitOAuthClient(c.OAuthClient)
+	}
+	if c.OAuthClientId != "" {
+		return visitor.VisitOAuthClientId(c.OAuthClientId)
+	}
+	if c.Secret != nil {
+		return visitor.VisitSecret(c.Secret)
+	}
+	if c.SecretId != "" {
+		return visitor.VisitSecretId(c.SecretId)
+	}
+	if c.Token != nil {
+		return visitor.VisitToken(c.Token)
+	}
+	if c.TokenId != "" {
+		return visitor.VisitTokenId(c.TokenId)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", c)
+}
+
+// Defines URL and Credential to use for the endpoint
+type CustomEndpoint struct {
+	// The credential to use for the custom endpoint. Review the custom provider definition for the custom_id you supplied for the credential type that must be defined.
+	Credential *CustomCredential `json:"credential" url:"credential"`
+	// When true, skips verification of the TLS certificate.
+	SkipTlsVerify *bool `json:"skip_tls_verify,omitempty" url:"skip_tls_verify,omitempty"`
+	// Custom URL for the provider. If not provided, the default endpoint URL defined in the provider definition for the provided custom_id will be used instead.
+	Url *string `json:"url,omitempty" url:"url,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *CustomEndpoint) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
+}
+
+func (c *CustomEndpoint) UnmarshalJSON(data []byte) error {
+	type unmarshaler CustomEndpoint
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = CustomEndpoint(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
+	c._rawJSON = nil
+	return nil
+}
+
+func (c *CustomEndpoint) String() string {
+	if len(c._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
 type CustomFieldMapping struct {
 	// Name for the custom field that you will use in the `custom_fields` field in the returned ticket objects.
 	Name string `json:"name" url:"name"`
@@ -9394,6 +9932,53 @@ func (c *CustomFieldMapping) UnmarshalJSON(data []byte) error {
 }
 
 func (c *CustomFieldMapping) String() string {
+	if len(c._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
+// Configuration for Synqly Custom Provider.
+type CustomSynqly struct {
+	// Customer provider ID associated with this credential configuration
+	CustomId string `json:"custom_id" url:"custom_id"`
+	// Custom endpoints. Review the custom provider definition for the custom_id you supplied for the list of endpoints that must be defined. All endpoint in the provider definition are required.
+	Endpoints map[string]*CustomEndpoint `json:"endpoints" url:"endpoints"`
+	// Tags that customize how provider requests are made, such as supplying a URL path parameter or account ID. Review the custom provider definition for the custom_id you supplied for the list of tags that must be defined. All tags in the provider definition are required.
+	Tags map[string]string `json:"tags" url:"tags"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *CustomSynqly) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
+}
+
+func (c *CustomSynqly) UnmarshalJSON(data []byte) error {
+	type unmarshaler CustomSynqly
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = CustomSynqly(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
+	c._rawJSON = nil
+	return nil
+}
+
+func (c *CustomSynqly) String() string {
 	if len(c._rawJSON) > 0 {
 		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
 			return value
@@ -12155,6 +12740,8 @@ type ProviderConfig struct {
 	CloudsecurityDefender *CloudSecurityDefender
 	// Configuration for Palo Alto Networks Cortex Cloud Security
 	CloudsecurityPaloalto *CloudSecurityPaloAlto
+	// Configuration for Synqly Custom Provider.
+	CustomSynqly *CustomSynqly
 	// Configuration for CrowdStrike Falcon® Insight EDR.
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/crowdstrike-edr-setup)
@@ -12562,6 +13149,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.CloudsecurityPaloalto = value
+	case "custom_synqly":
+		value := new(CustomSynqly)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.CustomSynqly = value
 	case "edr_crowdstrike":
 		value := new(EdrCrowdStrike)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -13044,6 +13637,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.CloudsecurityPaloalto != nil {
 		return core.MarshalJSONWithExtraProperty(p.CloudsecurityPaloalto, "type", "cloudsecurity_paloalto")
 	}
+	if p.CustomSynqly != nil {
+		return core.MarshalJSONWithExtraProperty(p.CustomSynqly, "type", "custom_synqly")
+	}
 	if p.EdrCrowdstrike != nil {
 		return core.MarshalJSONWithExtraProperty(p.EdrCrowdstrike, "type", "edr_crowdstrike")
 	}
@@ -13273,6 +13869,7 @@ type ProviderConfigVisitor interface {
 	VisitCloudsecurityCrowdstrike(*CloudSecurityCrowdStrike) error
 	VisitCloudsecurityDefender(*CloudSecurityDefender) error
 	VisitCloudsecurityPaloalto(*CloudSecurityPaloAlto) error
+	VisitCustomSynqly(*CustomSynqly) error
 	VisitEdrCrowdstrike(*EdrCrowdStrike) error
 	VisitEdrCrowdstrikeMock(*EdrCrowdStrikeMock) error
 	VisitEdrDefender(*EdrDefender) error
@@ -13422,6 +14019,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.CloudsecurityPaloalto != nil {
 		return visitor.VisitCloudsecurityPaloalto(p.CloudsecurityPaloalto)
+	}
+	if p.CustomSynqly != nil {
+		return visitor.VisitCustomSynqly(p.CustomSynqly)
 	}
 	if p.EdrCrowdstrike != nil {
 		return visitor.VisitEdrCrowdstrike(p.EdrCrowdstrike)
@@ -13682,6 +14282,8 @@ const (
 	ProviderConfigIdCloudSecurityDefender ProviderConfigId = "cloudsecurity_defender"
 	// Palo Alto Networks Cortex Cloud Security
 	ProviderConfigIdCloudSecurityPaloAlto ProviderConfigId = "cloudsecurity_paloalto"
+	// Synqly Custom Provider
+	ProviderConfigIdCustomSynqly ProviderConfigId = "custom_synqly"
 	// CrowdStrike Falcon® Insight EDR
 	ProviderConfigIdEdrCrowdStrike ProviderConfigId = "edr_crowdstrike"
 	// [MOCK] CrowdStrike Falcon® Insight EDR
@@ -13874,6 +14476,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdCloudSecurityDefender, nil
 	case "cloudsecurity_paloalto":
 		return ProviderConfigIdCloudSecurityPaloAlto, nil
+	case "custom_synqly":
+		return ProviderConfigIdCustomSynqly, nil
 	case "edr_crowdstrike":
 		return ProviderConfigIdEdrCrowdStrike, nil
 	case "edr_crowdstrike_mock":
