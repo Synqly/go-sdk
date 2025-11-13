@@ -4832,7 +4832,9 @@ const (
 	ScheduledOperationIdEdrQueryThreatevents           ScheduledOperationId = "edr_query_threatevents"
 	ScheduledOperationIdIdentityQueryAuditLog          ScheduledOperationId = "identity_query_audit_log"
 	ScheduledOperationIdIdentityQueryGroups            ScheduledOperationId = "identity_query_groups"
+	ScheduledOperationIdIdentityQueryGroupsEnriched    ScheduledOperationId = "identity_query_groups_enriched"
 	ScheduledOperationIdIdentityQueryUsers             ScheduledOperationId = "identity_query_users"
+	ScheduledOperationIdIdentityQueryUsersEnriched     ScheduledOperationId = "identity_query_users_enriched"
 	ScheduledOperationIdSiemQueryEvents                ScheduledOperationId = "siem_query_events"
 	ScheduledOperationIdSiemQueryInvestigations        ScheduledOperationId = "siem_query_investigations"
 	ScheduledOperationIdVulnerabilitiesQueryAssets     ScheduledOperationId = "vulnerabilities_query_assets"
@@ -4863,8 +4865,12 @@ func NewScheduledOperationIdFromString(s string) (ScheduledOperationId, error) {
 		return ScheduledOperationIdIdentityQueryAuditLog, nil
 	case "identity_query_groups":
 		return ScheduledOperationIdIdentityQueryGroups, nil
+	case "identity_query_groups_enriched":
+		return ScheduledOperationIdIdentityQueryGroupsEnriched, nil
 	case "identity_query_users":
 		return ScheduledOperationIdIdentityQueryUsers, nil
+	case "identity_query_users_enriched":
+		return ScheduledOperationIdIdentityQueryUsersEnriched, nil
 	case "siem_query_events":
 		return ScheduledOperationIdSiemQueryEvents, nil
 	case "siem_query_investigations":
