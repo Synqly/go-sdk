@@ -932,6 +932,30 @@ func (f FilterType) Ptr() *FilterType {
 	return &f
 }
 
+type OrderDirection string
+
+const (
+	// Order in ascending order.
+	OrderDirectionAscending OrderDirection = "asc"
+	// Order in descending order.
+	OrderDirectionDescending OrderDirection = "desc"
+)
+
+func NewOrderDirectionFromString(s string) (OrderDirection, error) {
+	switch s {
+	case "asc":
+		return OrderDirectionAscending, nil
+	case "desc":
+		return OrderDirectionDescending, nil
+	}
+	var t OrderDirection
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (o OrderDirection) Ptr() *OrderDirection {
+	return &o
+}
+
 type ProviderCapabilities struct {
 	// Unique identifier for the Provider.
 	Id ProviderId `json:"id" url:"id"`
@@ -1158,6 +1182,8 @@ type ProviderOperations struct {
 	SupportedResponseFields []string `json:"supported_response_fields,omitempty" url:"supported_response_fields,omitempty"`
 	// Filters that can be applied to this operation.
 	Filters []*ProviderFilter `json:"filters,omitempty" url:"filters,omitempty"`
+	// Orders that can be applied to this operation.
+	Orders []*ProviderOrder `json:"orders,omitempty" url:"orders,omitempty"`
 	// This field is only available if the operation supports a request
 	// body. Describes the request body and its schema.
 	RequestBody *RequestBody `json:"request_body,omitempty" url:"request_body,omitempty"`
@@ -1189,6 +1215,50 @@ func (p *ProviderOperations) UnmarshalJSON(data []byte) error {
 }
 
 func (p *ProviderOperations) String() string {
+	if len(p._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(p._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(p); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", p)
+}
+
+type ProviderOrder struct {
+	// Name of the field to order by.
+	Name string `json:"name" url:"name"`
+	// List of possible directions to order by.
+	Directions []OrderDirection `json:"directions" url:"directions"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (p *ProviderOrder) GetExtraProperties() map[string]interface{} {
+	return p.extraProperties
+}
+
+func (p *ProviderOrder) UnmarshalJSON(data []byte) error {
+	type unmarshaler ProviderOrder
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*p = ProviderOrder(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *p)
+	if err != nil {
+		return err
+	}
+	p.extraProperties = extraProperties
+
+	p._rawJSON = nil
+	return nil
+}
+
+func (p *ProviderOrder) String() string {
 	if len(p._rawJSON) > 0 {
 		if value, err := core.StringifyJSON(p._rawJSON); err == nil {
 			return value
