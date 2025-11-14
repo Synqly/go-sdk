@@ -17430,7 +17430,11 @@ func (t TicketingPagerdutyDataset) Ptr() *TicketingPagerdutyDataset {
 // [Configuration guide](https://docs.synqly.com/guides/provider-configuration/autotask-ticketing-setup)
 type TicketingAutotask struct {
 	ApiIntegrationCodeCredential *AutotaskApiIntegrationCodeCredential `json:"api_integration_code_credential" url:"api_integration_code_credential"`
-	SecretCredential             *AutotaskSecretCredential             `json:"secret_credential" url:"secret_credential"`
+	// Default Issue Type (Ticket Category) for the integration. If provided, the issue_type field becomes optional in ticket creation requests. In Autotask, this corresponds to the Ticket Category ID.
+	DefaultIssueType *int `json:"default_issue_type,omitempty" url:"default_issue_type,omitempty"`
+	// Default Project (Company ID) for the integration. If provided, the project field becomes optional in ticket creation requests. In Autotask, this corresponds to the Company ID associated with tickets.
+	DefaultProject   *int                      `json:"default_project,omitempty" url:"default_project,omitempty"`
+	SecretCredential *AutotaskSecretCredential `json:"secret_credential" url:"secret_credential"`
 	// User name of the API User created to authenticate with the Autotask API.
 	UserName string `json:"user_name" url:"user_name"`
 	// Zone for the Autotask API.
