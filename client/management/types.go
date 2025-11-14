@@ -17812,6 +17812,8 @@ type TicketingServiceNow struct {
 	Credential *ServiceNowCredential `json:"credential" url:"credential"`
 	// Custom field mappings for this provider.
 	CustomFieldMappings []*CustomFieldMapping `json:"custom_field_mappings,omitempty" url:"custom_field_mappings,omitempty"`
+	// Default Issue Type for the integration. If provided, the issue_type field becomes optional in ticket creation requests.
+	DefaultIssueType *string `json:"default_issue_type,omitempty" url:"default_issue_type,omitempty"`
 	// Default Project for the integration. This maps to the custom table for tickets. This table should be derived from Incident table. Defaults to the incident table if not specified.
 	DefaultProject *string `json:"default_project,omitempty" url:"default_project,omitempty"`
 	// Base URL for the ServiceNow API.
@@ -17862,6 +17864,8 @@ type TicketingServiceNowSir struct {
 	Credential *ServiceNowCredential `json:"credential" url:"credential"`
 	// Custom field mappings for this provider.
 	CustomFieldMappings []*CustomFieldMapping `json:"custom_field_mappings,omitempty" url:"custom_field_mappings,omitempty"`
+	// Default Issue Type for the integration. If provided, the issue_type field becomes optional in ticket creation requests.
+	DefaultIssueType *string `json:"default_issue_type,omitempty" url:"default_issue_type,omitempty"`
 	// Default Project for the integration. This maps to the custom table for tickets. This table should be derived from Security Incident table. Defaults to the security incident table if not specified.
 	DefaultProject *string `json:"default_project,omitempty" url:"default_project,omitempty"`
 	// Base URL for the ServiceNow API.
