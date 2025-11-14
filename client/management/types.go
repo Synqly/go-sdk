@@ -10960,6 +10960,76 @@ func (g *GcsCredential) Accept(visitor GcsCredentialVisitor) error {
 	return fmt.Errorf("type %T does not define a non-empty union type", g)
 }
 
+type GcsJsonCredential struct {
+	Type string
+	// Configuration when creating new Token.
+	Token *TokenCredential
+	// Reference to existing Token.
+	TokenId TokenCredentialId
+}
+
+func (g *GcsJsonCredential) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	g.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", g)
+	}
+	switch unmarshaler.Type {
+	case "token":
+		value := new(TokenCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		g.Token = value
+	case "token_id":
+		var valueUnmarshaler struct {
+			TokenId TokenCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		g.TokenId = valueUnmarshaler.TokenId
+	}
+	return nil
+}
+
+func (g GcsJsonCredential) MarshalJSON() ([]byte, error) {
+	if g.Token != nil {
+		return core.MarshalJSONWithExtraProperty(g.Token, "type", "token")
+	}
+	if g.TokenId != "" {
+		var marshaler = struct {
+			Type    string            `json:"type"`
+			TokenId TokenCredentialId `json:"value"`
+		}{
+			Type:    "token_id",
+			TokenId: g.TokenId,
+		}
+		return json.Marshal(marshaler)
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", g)
+}
+
+type GcsJsonCredentialVisitor interface {
+	VisitToken(*TokenCredential) error
+	VisitTokenId(TokenCredentialId) error
+}
+
+func (g *GcsJsonCredential) Accept(visitor GcsJsonCredentialVisitor) error {
+	if g.Token != nil {
+		return visitor.VisitToken(g.Token)
+	}
+	if g.TokenId != "" {
+		return visitor.VisitTokenId(g.TokenId)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", g)
+}
+
 type GitLabCredential struct {
 	Type string
 	// Configuration when creating new Token.
@@ -12942,6 +13012,8 @@ type ProviderConfig struct {
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/elastic-setup)
 	SinkElasticsearch *SinkElasticsearch
+	// Configuration for Google Cloud Storage as a Sink provider. Events are written directly to a GCS bucket in compressed JSON format.
+	SinkGcs *SinkGcs
 	// Configuration for Google Security Operations (formerly Google Chronicle) as a Sink Provider connecting via the older Malachite API.
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/google-chronicle-setup)
@@ -13432,6 +13504,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.SinkElasticsearch = value
+	case "sink_gcs":
+		value := new(SinkGcs)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.SinkGcs = value
 	case "sink_google_sec_ops":
 		value := new(SinkGoogleSecOps)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -13818,6 +13896,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.SinkElasticsearch != nil {
 		return core.MarshalJSONWithExtraProperty(p.SinkElasticsearch, "type", "sink_elasticsearch")
 	}
+	if p.SinkGcs != nil {
+		return core.MarshalJSONWithExtraProperty(p.SinkGcs, "type", "sink_gcs")
+	}
 	if p.SinkGoogleSecOps != nil {
 		return core.MarshalJSONWithExtraProperty(p.SinkGoogleSecOps, "type", "sink_google_sec_ops")
 	}
@@ -13982,6 +14063,7 @@ type ProviderConfigVisitor interface {
 	VisitSinkAzureMonitorLogs(*SinkAzureMonitorLogs) error
 	VisitSinkCrowdstrikeHec(*SinkCrowdstrikeHec) error
 	VisitSinkElasticsearch(*SinkElasticsearch) error
+	VisitSinkGcs(*SinkGcs) error
 	VisitSinkGoogleSecOps(*SinkGoogleSecOps) error
 	VisitSinkGoogleSecurityOperations(*SinkGoogleSecurityOperations) error
 	VisitSinkMockSink(*SinkMock) error
@@ -14200,6 +14282,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.SinkElasticsearch != nil {
 		return visitor.VisitSinkElasticsearch(p.SinkElasticsearch)
+	}
+	if p.SinkGcs != nil {
+		return visitor.VisitSinkGcs(p.SinkGcs)
 	}
 	if p.SinkGoogleSecOps != nil {
 		return visitor.VisitSinkGoogleSecOps(p.SinkGoogleSecOps)
@@ -14429,6 +14514,8 @@ const (
 	ProviderConfigIdSinkCrowdstrikeHec ProviderConfigId = "sink_crowdstrike_hec"
 	// Elasticsearch
 	ProviderConfigIdSinkElasticsearch ProviderConfigId = "sink_elasticsearch"
+	// Google Cloud Storage
+	ProviderConfigIdSinkGcs ProviderConfigId = "sink_gcs"
 	// Google Security Operations (Chronicle Compatibility)
 	ProviderConfigIdSinkGoogleSecOps ProviderConfigId = "sink_google_sec_ops"
 	// Google Security Operations
@@ -14623,6 +14710,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdSinkCrowdstrikeHec, nil
 	case "sink_elasticsearch":
 		return ProviderConfigIdSinkElasticsearch, nil
+	case "sink_gcs":
+		return ProviderConfigIdSinkGcs, nil
 	case "sink_google_sec_ops":
 		return ProviderConfigIdSinkGoogleSecOps, nil
 	case "sink_google_security_operations":
@@ -16174,6 +16263,53 @@ func (s *SinkElasticsearch) UnmarshalJSON(data []byte) error {
 }
 
 func (s *SinkElasticsearch) String() string {
+	if len(s._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(s); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", s)
+}
+
+// Configuration for Google Cloud Storage as a Sink provider. Events are written directly to a GCS bucket in compressed JSON format.
+type SinkGcs struct {
+	// Name of the GCS bucket
+	Bucket string `json:"bucket" url:"bucket"`
+	// Google Cloud Service Account JSON key with write access to the configured GCS bucket
+	Credential *GcsJsonCredential `json:"credential" url:"credential"`
+	// Files will be written under this path.
+	Path string `json:"path" url:"path"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (s *SinkGcs) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
+}
+
+func (s *SinkGcs) UnmarshalJSON(data []byte) error {
+	type unmarshaler SinkGcs
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*s = SinkGcs(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+
+	s._rawJSON = nil
+	return nil
+}
+
+func (s *SinkGcs) String() string {
 	if len(s._rawJSON) > 0 {
 		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
 			return value
