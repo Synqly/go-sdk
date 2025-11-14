@@ -18008,6 +18008,8 @@ type TicketingServiceNowSir struct {
 	Credential *ServiceNowCredential `json:"credential" url:"credential"`
 	// Custom field mappings for this provider.
 	CustomFieldMappings []*CustomFieldMapping `json:"custom_field_mappings,omitempty" url:"custom_field_mappings,omitempty"`
+	// Default Creator (email) for the integration. If provided, the creator field becomes optional in ticket creation requests.
+	DefaultCreator *string `json:"default_creator,omitempty" url:"default_creator,omitempty"`
 	// Default Issue Type for the integration. If provided, the issue_type field becomes optional in ticket creation requests.
 	DefaultIssueType *string `json:"default_issue_type,omitempty" url:"default_issue_type,omitempty"`
 	// Default Project for the integration. This maps to the custom table for tickets. This table should be derived from Security Incident table. Defaults to the security incident table if not specified.
@@ -18060,6 +18062,10 @@ type TicketingTorq struct {
 	Credential *TorqCredential `json:"credential" url:"credential"`
 	// Custom field mappings for this provider.
 	CustomFieldMappings []*CustomFieldMapping `json:"custom_field_mappings,omitempty" url:"custom_field_mappings,omitempty"`
+	// Default Creator (email) for the integration. If provided, the creator field becomes optional in ticket creation requests.
+	DefaultCreator *string `json:"default_creator,omitempty" url:"default_creator,omitempty"`
+	// Default Issue Type for the integration. If provided, the issue_type field becomes optional in ticket creation requests.
+	DefaultIssueType *string `json:"default_issue_type,omitempty" url:"default_issue_type,omitempty"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
