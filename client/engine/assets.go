@@ -115,53 +115,6 @@ func (c *CreateDeviceResponse) String() string {
 	return fmt.Sprintf("%#v", c)
 }
 
-type GetLabelsResponse struct {
-	// Additional messages from the service response that may be helpful to the client.
-	Messages *MessagesResponse `json:"messages,omitempty" url:"messages,omitempty"`
-	// Various metadata about the results organized by group, then type, then field.
-	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
-	// Cursor to use to retrieve the next page of results
-	Cursor string   `json:"cursor" url:"cursor"`
-	Result []*Label `json:"result" url:"result"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (g *GetLabelsResponse) GetExtraProperties() map[string]interface{} {
-	return g.extraProperties
-}
-
-func (g *GetLabelsResponse) UnmarshalJSON(data []byte) error {
-	type unmarshaler GetLabelsResponse
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*g = GetLabelsResponse(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *g)
-	if err != nil {
-		return err
-	}
-	g.extraProperties = extraProperties
-
-	g._rawJSON = nil
-	return nil
-}
-
-func (g *GetLabelsResponse) String() string {
-	if len(g._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(g._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(g); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", g)
-}
-
 type QueryDevicesResponse struct {
 	// Additional messages from the service response that may be helpful to the client.
 	Messages *MessagesResponse `json:"messages,omitempty" url:"messages,omitempty"`

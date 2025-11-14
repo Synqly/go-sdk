@@ -50,6 +50,53 @@ type AppSecPostureFinding = latest.ApplicationSecurityPostureFinding
 // Device inventory information. Represented by OCSF Device Inventory Info class (class_uid 5001).
 type Device = *inventoryinfo.InventoryInfo
 
+type GetLabelsResponse struct {
+	// Additional messages from the service response that may be helpful to the client.
+	Messages *MessagesResponse `json:"messages,omitempty" url:"messages,omitempty"`
+	// Various metadata about the results organized by group, then type, then field.
+	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
+	// Cursor to use to retrieve the next page of results
+	Cursor string   `json:"cursor" url:"cursor"`
+	Result []*Label `json:"result" url:"result"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (g *GetLabelsResponse) GetExtraProperties() map[string]interface{} {
+	return g.extraProperties
+}
+
+func (g *GetLabelsResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler GetLabelsResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*g = GetLabelsResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	if err != nil {
+		return err
+	}
+	g.extraProperties = extraProperties
+
+	g._rawJSON = nil
+	return nil
+}
+
+func (g *GetLabelsResponse) String() string {
+	if len(g._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(g._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(g); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", g)
+}
+
 type Label struct {
 	Value  string `json:"value" url:"value"`
 	Device Device `json:"device" url:"device"`
@@ -2543,6 +2590,7 @@ const (
 	OperationIdTicketingQueryTickets                    OperationId = "ticketing_query_tickets"
 	OperationIdVulnerabilitiesCreateAsset               OperationId = "vulnerabilities_create_asset"
 	OperationIdVulnerabilitiesCreateFindings            OperationId = "vulnerabilities_create_findings"
+	OperationIdVulnerabilitiesGetLabels                 OperationId = "vulnerabilities_get_labels"
 	OperationIdVulnerabilitiesGetScanActivity           OperationId = "vulnerabilities_get_scan_activity"
 	OperationIdVulnerabilitiesGetScanStatus             OperationId = "vulnerabilities_get_scan_status"
 	OperationIdVulnerabilitiesQueryAssets               OperationId = "vulnerabilities_query_assets"
@@ -2707,6 +2755,8 @@ func NewOperationIdFromString(s string) (OperationId, error) {
 		return OperationIdVulnerabilitiesCreateAsset, nil
 	case "vulnerabilities_create_findings":
 		return OperationIdVulnerabilitiesCreateFindings, nil
+	case "vulnerabilities_get_labels":
+		return OperationIdVulnerabilitiesGetLabels, nil
 	case "vulnerabilities_get_scan_activity":
 		return OperationIdVulnerabilitiesGetScanActivity, nil
 	case "vulnerabilities_get_scan_status":
