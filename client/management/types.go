@@ -17483,6 +17483,10 @@ func (t *TicketingAutotask) String() string {
 // [Configuration guide](https://docs.synqly.com/guides/provider-configuration/freshdesk-ticketing-setup)
 type TicketingFreshdesk struct {
 	Credential *FreshdeskCredential `json:"credential" url:"credential"`
+	// Default contact email for ticket creation. If provided, the contact field becomes optional in ticket creation requests. If not provided, the contact field is required.
+	DefaultContact *string `json:"default_contact,omitempty" url:"default_contact,omitempty"`
+	// Default issue type for ticket creation (e.g., "Incident", "Problem", "Question"). If provided, the type field becomes optional. If not provided, the type field is required.
+	DefaultType *string `json:"default_type,omitempty" url:"default_type,omitempty"`
 	// Base URL to your Freshdesk tenant.
 	Url string `json:"url" url:"url"`
 
