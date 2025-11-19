@@ -17864,6 +17864,10 @@ func (t *TicketingMock) String() string {
 // [Configuration guide](https://docs.synqly.com/guides/provider-configuration/pagerduty-ticketing-setup)
 type TicketingPagerDuty struct {
 	Credential *PagerDutyCredential `json:"credential" url:"credential"`
+	// Default email address for the creator field. If provided, the creator field becomes optional for ticket and comment creation. If not provided, the creator field is required.
+	DefaultCreator *string `json:"default_creator,omitempty" url:"default_creator,omitempty"`
+	// Default PagerDuty service ID for ticket creation. If provided, the project field becomes optional in ticket creation requests. If not provided, the project field is required.
+	DefaultProject *string `json:"default_project,omitempty" url:"default_project,omitempty"`
 	// Base URL for the PagerDuty API.
 	Url string `json:"url" url:"url"`
 
