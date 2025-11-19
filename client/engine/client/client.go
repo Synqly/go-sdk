@@ -11,6 +11,7 @@ import (
 	edr "github.com/synqly/go-sdk/client/engine/edr"
 	hooks "github.com/synqly/go-sdk/client/engine/hooks"
 	identity "github.com/synqly/go-sdk/client/engine/identity"
+	incidentresponse "github.com/synqly/go-sdk/client/engine/incidentresponse"
 	integrationwebhooks "github.com/synqly/go-sdk/client/engine/integrationwebhooks"
 	notifications "github.com/synqly/go-sdk/client/engine/notifications"
 	operations "github.com/synqly/go-sdk/client/engine/operations"
@@ -35,6 +36,7 @@ type Client struct {
 	Edr                 *edr.Client
 	Hooks               *hooks.Client
 	Identity            *identity.Client
+	Incidentresponse    *incidentresponse.Client
 	IntegrationWebhooks *integrationwebhooks.Client
 	Notifications       *notifications.Client
 	Operations          *operations.Client
@@ -63,6 +65,7 @@ func NewClient(opts ...option.RequestOption) *Client {
 		Edr:                 edr.NewClient(opts...),
 		Hooks:               hooks.NewClient(opts...),
 		Identity:            identity.NewClient(opts...),
+		Incidentresponse:    incidentresponse.NewClient(opts...),
 		IntegrationWebhooks: integrationwebhooks.NewClient(opts...),
 		Notifications:       notifications.NewClient(opts...),
 		Operations:          operations.NewClient(opts...),

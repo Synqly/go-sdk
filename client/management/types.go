@@ -1367,18 +1367,19 @@ func (r *RequestBody) String() string {
 type CategoryId string
 
 const (
-	CategoryIdAppsec          CategoryId = "appsec"
-	CategoryIdAssets          CategoryId = "assets"
-	CategoryIdCloudsecurity   CategoryId = "cloudsecurity"
-	CategoryIdCustom          CategoryId = "custom"
-	CategoryIdEdr             CategoryId = "edr"
-	CategoryIdIdentity        CategoryId = "identity"
-	CategoryIdNotifications   CategoryId = "notifications"
-	CategoryIdSiem            CategoryId = "siem"
-	CategoryIdSink            CategoryId = "sink"
-	CategoryIdStorage         CategoryId = "storage"
-	CategoryIdTicketing       CategoryId = "ticketing"
-	CategoryIdVulnerabilities CategoryId = "vulnerabilities"
+	CategoryIdAppsec           CategoryId = "appsec"
+	CategoryIdAssets           CategoryId = "assets"
+	CategoryIdCloudsecurity    CategoryId = "cloudsecurity"
+	CategoryIdCustom           CategoryId = "custom"
+	CategoryIdEdr              CategoryId = "edr"
+	CategoryIdIdentity         CategoryId = "identity"
+	CategoryIdIncidentresponse CategoryId = "incidentresponse"
+	CategoryIdNotifications    CategoryId = "notifications"
+	CategoryIdSiem             CategoryId = "siem"
+	CategoryIdSink             CategoryId = "sink"
+	CategoryIdStorage          CategoryId = "storage"
+	CategoryIdTicketing        CategoryId = "ticketing"
+	CategoryIdVulnerabilities  CategoryId = "vulnerabilities"
 )
 
 func NewCategoryIdFromString(s string) (CategoryId, error) {
@@ -1395,6 +1396,8 @@ func NewCategoryIdFromString(s string) (CategoryId, error) {
 		return CategoryIdEdr, nil
 	case "identity":
 		return CategoryIdIdentity, nil
+	case "incidentresponse":
+		return CategoryIdIncidentresponse, nil
 	case "notifications":
 		return CategoryIdNotifications, nil
 	case "siem":
@@ -4426,91 +4429,93 @@ func (o OperationTriggerType) Ptr() *OperationTriggerType {
 type OperationId string
 
 const (
-	OperationIdAppsecGetApplicationFindingDetails       OperationId = "appsec_get_application_finding_details"
-	OperationIdAppsecQueryApplicationFindings           OperationId = "appsec_query_application_findings"
-	OperationIdAppsecQueryApplications                  OperationId = "appsec_query_applications"
-	OperationIdAppsecQueryFindings                      OperationId = "appsec_query_findings"
-	OperationIdAssetsCreateAsset                        OperationId = "assets_create_asset"
-	OperationIdAssetsGetLabels                          OperationId = "assets_get_labels"
-	OperationIdAssetsQueryDevices                       OperationId = "assets_query_devices"
-	OperationIdCloudsecurityQueryCloudResourceInventory OperationId = "cloudsecurity_query_cloud_resource_inventory"
-	OperationIdCloudsecurityQueryComplianceFindings     OperationId = "cloudsecurity_query_compliance_findings"
-	OperationIdCloudsecurityQueryEvents                 OperationId = "cloudsecurity_query_events"
-	OperationIdCloudsecurityQueryIoms                   OperationId = "cloudsecurity_query_ioms"
-	OperationIdCloudsecurityQueryThreats                OperationId = "cloudsecurity_query_threats"
-	OperationIdCustomDelete                             OperationId = "custom_delete"
-	OperationIdCustomGet                                OperationId = "custom_get"
-	OperationIdCustomPatch                              OperationId = "custom_patch"
-	OperationIdCustomPost                               OperationId = "custom_post"
-	OperationIdCustomPostBatch                          OperationId = "custom_post_batch"
-	OperationIdCustomQuery                              OperationId = "custom_query"
-	OperationIdEdrCreateIocs                            OperationId = "edr_create_iocs"
-	OperationIdEdrDeleteIocs                            OperationId = "edr_delete_iocs"
-	OperationIdEdrGetEndpoint                           OperationId = "edr_get_endpoint"
-	OperationIdEdrNetworkQuarantine                     OperationId = "edr_network_quarantine"
-	OperationIdEdrQueryAlerts                           OperationId = "edr_query_alerts"
-	OperationIdEdrQueryApplications                     OperationId = "edr_query_applications"
-	OperationIdEdrQueryEdrEvents                        OperationId = "edr_query_edr_events"
-	OperationIdEdrQueryEndpoints                        OperationId = "edr_query_endpoints"
-	OperationIdEdrQueryIocs                             OperationId = "edr_query_iocs"
-	OperationIdEdrQueryPostureScore                     OperationId = "edr_query_posture_score"
-	OperationIdEdrQueryThreatevents                     OperationId = "edr_query_threatevents"
-	OperationIdIdentityDisableUser                      OperationId = "identity_disable_user"
-	OperationIdIdentityEnableUser                       OperationId = "identity_enable_user"
-	OperationIdIdentityExpireAllUserSessions            OperationId = "identity_expire_all_user_sessions"
-	OperationIdIdentityForceUserPasswordReset           OperationId = "identity_force_user_password_reset"
-	OperationIdIdentityGetGroup                         OperationId = "identity_get_group"
-	OperationIdIdentityGetGroupMembers                  OperationId = "identity_get_group_members"
-	OperationIdIdentityGetUser                          OperationId = "identity_get_user"
-	OperationIdIdentityQueryAuditLog                    OperationId = "identity_query_audit_log"
-	OperationIdIdentityQueryGroups                      OperationId = "identity_query_groups"
-	OperationIdIdentityQueryUsers                       OperationId = "identity_query_users"
-	OperationIdNotificationsClearMessage                OperationId = "notifications_clear_message"
-	OperationIdNotificationsCreateMessage               OperationId = "notifications_create_message"
-	OperationIdNotificationsGetMessage                  OperationId = "notifications_get_message"
-	OperationIdSiemGetEvidence                          OperationId = "siem_get_evidence"
-	OperationIdSiemGetInvestigation                     OperationId = "siem_get_investigation"
-	OperationIdSiemPatchInvestigation                   OperationId = "siem_patch_investigation"
-	OperationIdSiemPostEvents                           OperationId = "siem_post_events"
-	OperationIdSiemQueryAlerts                          OperationId = "siem_query_alerts"
-	OperationIdSiemQueryEvents                          OperationId = "siem_query_events"
-	OperationIdSiemQueryInvestigations                  OperationId = "siem_query_investigations"
-	OperationIdSiemQueryLogProviders                    OperationId = "siem_query_log_providers"
-	OperationIdSinkPostEvents                           OperationId = "sink_post_events"
-	OperationIdStorageDeleteFile                        OperationId = "storage_delete_file"
-	OperationIdStorageDownloadFile                      OperationId = "storage_download_file"
-	OperationIdStorageListFiles                         OperationId = "storage_list_files"
-	OperationIdStorageUploadFile                        OperationId = "storage_upload_file"
-	OperationIdTicketingCreateAttachment                OperationId = "ticketing_create_attachment"
-	OperationIdTicketingCreateComment                   OperationId = "ticketing_create_comment"
-	OperationIdTicketingCreateNote                      OperationId = "ticketing_create_note"
-	OperationIdTicketingCreateTicket                    OperationId = "ticketing_create_ticket"
-	OperationIdTicketingDeleteAttachment                OperationId = "ticketing_delete_attachment"
-	OperationIdTicketingDeleteComment                   OperationId = "ticketing_delete_comment"
-	OperationIdTicketingDeleteNote                      OperationId = "ticketing_delete_note"
-	OperationIdTicketingDownloadAttachment              OperationId = "ticketing_download_attachment"
-	OperationIdTicketingGetTicket                       OperationId = "ticketing_get_ticket"
-	OperationIdTicketingListAttachmentsMetadata         OperationId = "ticketing_list_attachments_metadata"
-	OperationIdTicketingListComments                    OperationId = "ticketing_list_comments"
-	OperationIdTicketingListNotes                       OperationId = "ticketing_list_notes"
-	OperationIdTicketingListOnCall                      OperationId = "ticketing_list_on_call"
-	OperationIdTicketingListProjects                    OperationId = "ticketing_list_projects"
-	OperationIdTicketingListRemoteFields                OperationId = "ticketing_list_remote_fields"
-	OperationIdTicketingPatchNote                       OperationId = "ticketing_patch_note"
-	OperationIdTicketingPatchTicket                     OperationId = "ticketing_patch_ticket"
-	OperationIdTicketingQueryEscalationPolicies         OperationId = "ticketing_query_escalation_policies"
-	OperationIdTicketingQueryTickets                    OperationId = "ticketing_query_tickets"
-	OperationIdVulnerabilitiesCreateAsset               OperationId = "vulnerabilities_create_asset"
-	OperationIdVulnerabilitiesCreateFindings            OperationId = "vulnerabilities_create_findings"
-	OperationIdVulnerabilitiesGetLabels                 OperationId = "vulnerabilities_get_labels"
-	OperationIdVulnerabilitiesGetScanActivity           OperationId = "vulnerabilities_get_scan_activity"
-	OperationIdVulnerabilitiesGetScanStatus             OperationId = "vulnerabilities_get_scan_status"
-	OperationIdVulnerabilitiesQueryAssets               OperationId = "vulnerabilities_query_assets"
-	OperationIdVulnerabilitiesQueryFindings             OperationId = "vulnerabilities_query_findings"
-	OperationIdVulnerabilitiesQueryScans                OperationId = "vulnerabilities_query_scans"
-	OperationIdVulnerabilitiesUpdateAsset               OperationId = "vulnerabilities_update_asset"
-	OperationIdVulnerabilitiesUpdateFinding             OperationId = "vulnerabilities_update_finding"
-	OperationIdVulnerabilitiesUploadScan                OperationId = "vulnerabilities_upload_scan"
+	OperationIdAppsecGetApplicationFindingDetails               OperationId = "appsec_get_application_finding_details"
+	OperationIdAppsecQueryApplicationFindings                   OperationId = "appsec_query_application_findings"
+	OperationIdAppsecQueryApplications                          OperationId = "appsec_query_applications"
+	OperationIdAppsecQueryFindings                              OperationId = "appsec_query_findings"
+	OperationIdAssetsCreateAsset                                OperationId = "assets_create_asset"
+	OperationIdAssetsGetLabels                                  OperationId = "assets_get_labels"
+	OperationIdAssetsQueryDevices                               OperationId = "assets_query_devices"
+	OperationIdCloudsecurityQueryCloudResourceInventory         OperationId = "cloudsecurity_query_cloud_resource_inventory"
+	OperationIdCloudsecurityQueryComplianceFindings             OperationId = "cloudsecurity_query_compliance_findings"
+	OperationIdCloudsecurityQueryEvents                         OperationId = "cloudsecurity_query_events"
+	OperationIdCloudsecurityQueryIoms                           OperationId = "cloudsecurity_query_ioms"
+	OperationIdCloudsecurityQueryThreats                        OperationId = "cloudsecurity_query_threats"
+	OperationIdCustomDelete                                     OperationId = "custom_delete"
+	OperationIdCustomGet                                        OperationId = "custom_get"
+	OperationIdCustomPatch                                      OperationId = "custom_patch"
+	OperationIdCustomPost                                       OperationId = "custom_post"
+	OperationIdCustomPostBatch                                  OperationId = "custom_post_batch"
+	OperationIdCustomQuery                                      OperationId = "custom_query"
+	OperationIdEdrCreateIocs                                    OperationId = "edr_create_iocs"
+	OperationIdEdrDeleteIocs                                    OperationId = "edr_delete_iocs"
+	OperationIdEdrGetEndpoint                                   OperationId = "edr_get_endpoint"
+	OperationIdEdrNetworkQuarantine                             OperationId = "edr_network_quarantine"
+	OperationIdEdrQueryAlerts                                   OperationId = "edr_query_alerts"
+	OperationIdEdrQueryApplications                             OperationId = "edr_query_applications"
+	OperationIdEdrQueryEdrEvents                                OperationId = "edr_query_edr_events"
+	OperationIdEdrQueryEndpoints                                OperationId = "edr_query_endpoints"
+	OperationIdEdrQueryIocs                                     OperationId = "edr_query_iocs"
+	OperationIdEdrQueryPostureScore                             OperationId = "edr_query_posture_score"
+	OperationIdEdrQueryThreatevents                             OperationId = "edr_query_threatevents"
+	OperationIdIdentityDisableUser                              OperationId = "identity_disable_user"
+	OperationIdIdentityEnableUser                               OperationId = "identity_enable_user"
+	OperationIdIdentityExpireAllUserSessions                    OperationId = "identity_expire_all_user_sessions"
+	OperationIdIdentityForceUserPasswordReset                   OperationId = "identity_force_user_password_reset"
+	OperationIdIdentityGetGroup                                 OperationId = "identity_get_group"
+	OperationIdIdentityGetGroupMembers                          OperationId = "identity_get_group_members"
+	OperationIdIdentityGetUser                                  OperationId = "identity_get_user"
+	OperationIdIdentityQueryAuditLog                            OperationId = "identity_query_audit_log"
+	OperationIdIdentityQueryGroups                              OperationId = "identity_query_groups"
+	OperationIdIdentityQueryUsers                               OperationId = "identity_query_users"
+	OperationIdIncidentresponseQueryEscalationPolicies          OperationId = "incidentresponse_query_escalation_policies"
+	OperationIdIncidentresponseQueryEscalationPolicyUsersOnCall OperationId = "incidentresponse_query_escalation_policy_users_on_call"
+	OperationIdNotificationsClearMessage                        OperationId = "notifications_clear_message"
+	OperationIdNotificationsCreateMessage                       OperationId = "notifications_create_message"
+	OperationIdNotificationsGetMessage                          OperationId = "notifications_get_message"
+	OperationIdSiemGetEvidence                                  OperationId = "siem_get_evidence"
+	OperationIdSiemGetInvestigation                             OperationId = "siem_get_investigation"
+	OperationIdSiemPatchInvestigation                           OperationId = "siem_patch_investigation"
+	OperationIdSiemPostEvents                                   OperationId = "siem_post_events"
+	OperationIdSiemQueryAlerts                                  OperationId = "siem_query_alerts"
+	OperationIdSiemQueryEvents                                  OperationId = "siem_query_events"
+	OperationIdSiemQueryInvestigations                          OperationId = "siem_query_investigations"
+	OperationIdSiemQueryLogProviders                            OperationId = "siem_query_log_providers"
+	OperationIdSinkPostEvents                                   OperationId = "sink_post_events"
+	OperationIdStorageDeleteFile                                OperationId = "storage_delete_file"
+	OperationIdStorageDownloadFile                              OperationId = "storage_download_file"
+	OperationIdStorageListFiles                                 OperationId = "storage_list_files"
+	OperationIdStorageUploadFile                                OperationId = "storage_upload_file"
+	OperationIdTicketingCreateAttachment                        OperationId = "ticketing_create_attachment"
+	OperationIdTicketingCreateComment                           OperationId = "ticketing_create_comment"
+	OperationIdTicketingCreateNote                              OperationId = "ticketing_create_note"
+	OperationIdTicketingCreateTicket                            OperationId = "ticketing_create_ticket"
+	OperationIdTicketingDeleteAttachment                        OperationId = "ticketing_delete_attachment"
+	OperationIdTicketingDeleteComment                           OperationId = "ticketing_delete_comment"
+	OperationIdTicketingDeleteNote                              OperationId = "ticketing_delete_note"
+	OperationIdTicketingDownloadAttachment                      OperationId = "ticketing_download_attachment"
+	OperationIdTicketingGetTicket                               OperationId = "ticketing_get_ticket"
+	OperationIdTicketingListAttachmentsMetadata                 OperationId = "ticketing_list_attachments_metadata"
+	OperationIdTicketingListComments                            OperationId = "ticketing_list_comments"
+	OperationIdTicketingListNotes                               OperationId = "ticketing_list_notes"
+	OperationIdTicketingListOnCall                              OperationId = "ticketing_list_on_call"
+	OperationIdTicketingListProjects                            OperationId = "ticketing_list_projects"
+	OperationIdTicketingListRemoteFields                        OperationId = "ticketing_list_remote_fields"
+	OperationIdTicketingPatchNote                               OperationId = "ticketing_patch_note"
+	OperationIdTicketingPatchTicket                             OperationId = "ticketing_patch_ticket"
+	OperationIdTicketingQueryEscalationPolicies                 OperationId = "ticketing_query_escalation_policies"
+	OperationIdTicketingQueryTickets                            OperationId = "ticketing_query_tickets"
+	OperationIdVulnerabilitiesCreateAsset                       OperationId = "vulnerabilities_create_asset"
+	OperationIdVulnerabilitiesCreateFindings                    OperationId = "vulnerabilities_create_findings"
+	OperationIdVulnerabilitiesGetLabels                         OperationId = "vulnerabilities_get_labels"
+	OperationIdVulnerabilitiesGetScanActivity                   OperationId = "vulnerabilities_get_scan_activity"
+	OperationIdVulnerabilitiesGetScanStatus                     OperationId = "vulnerabilities_get_scan_status"
+	OperationIdVulnerabilitiesQueryAssets                       OperationId = "vulnerabilities_query_assets"
+	OperationIdVulnerabilitiesQueryFindings                     OperationId = "vulnerabilities_query_findings"
+	OperationIdVulnerabilitiesQueryScans                        OperationId = "vulnerabilities_query_scans"
+	OperationIdVulnerabilitiesUpdateAsset                       OperationId = "vulnerabilities_update_asset"
+	OperationIdVulnerabilitiesUpdateFinding                     OperationId = "vulnerabilities_update_finding"
+	OperationIdVulnerabilitiesUploadScan                        OperationId = "vulnerabilities_upload_scan"
 )
 
 func NewOperationIdFromString(s string) (OperationId, error) {
@@ -4593,6 +4598,10 @@ func NewOperationIdFromString(s string) (OperationId, error) {
 		return OperationIdIdentityQueryGroups, nil
 	case "identity_query_users":
 		return OperationIdIdentityQueryUsers, nil
+	case "incidentresponse_query_escalation_policies":
+		return OperationIdIncidentresponseQueryEscalationPolicies, nil
+	case "incidentresponse_query_escalation_policy_users_on_call":
+		return OperationIdIncidentresponseQueryEscalationPolicyUsersOnCall, nil
 	case "notifications_clear_message":
 		return OperationIdNotificationsClearMessage, nil
 	case "notifications_create_message":
@@ -11596,6 +11605,50 @@ func (i *IdentityPingOne) String() string {
 	return fmt.Sprintf("%#v", i)
 }
 
+// Configuration for PagerDuty as an incident response provider.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/pagerduty-incident-response-setup)
+type IncidentResponsePagerDuty struct {
+	Credential *PagerDutyCredential `json:"credential" url:"credential"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (i *IncidentResponsePagerDuty) GetExtraProperties() map[string]interface{} {
+	return i.extraProperties
+}
+
+func (i *IncidentResponsePagerDuty) UnmarshalJSON(data []byte) error {
+	type unmarshaler IncidentResponsePagerDuty
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*i = IncidentResponsePagerDuty(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *i)
+	if err != nil {
+		return err
+	}
+	i.extraProperties = extraProperties
+
+	i._rawJSON = nil
+	return nil
+}
+
+func (i *IncidentResponsePagerDuty) String() string {
+	if len(i._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(i._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(i); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", i)
+}
+
 type IvantiCredential struct {
 	Type string
 	// Configuration when creating new Token URL.
@@ -12933,6 +12986,10 @@ type ProviderConfig struct {
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/ping-identity-setup)
 	IdentityPingone *IdentityPingOne
+	// Configuration for PagerDuty as an incident response provider.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/pagerduty-incident-response-setup)
+	IncidentresponsePagerduty *IncidentResponsePagerDuty
 	// Configuration for Atlassian Jira.
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/jira-notification-setup)
@@ -13372,6 +13429,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.IdentityPingone = value
+	case "incidentresponse_pagerduty":
+		value := new(IncidentResponsePagerDuty)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.IncidentresponsePagerduty = value
 	case "notifications_jira":
 		value := new(NotificationsJira)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -13830,6 +13893,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.IdentityPingone != nil {
 		return core.MarshalJSONWithExtraProperty(p.IdentityPingone, "type", "identity_pingone")
 	}
+	if p.IncidentresponsePagerduty != nil {
+		return core.MarshalJSONWithExtraProperty(p.IncidentresponsePagerduty, "type", "incidentresponse_pagerduty")
+	}
 	if p.NotificationsJira != nil {
 		return core.MarshalJSONWithExtraProperty(p.NotificationsJira, "type", "notifications_jira")
 	}
@@ -14041,6 +14107,7 @@ type ProviderConfigVisitor interface {
 	VisitIdentityGoogle(*IdentityGoogle) error
 	VisitIdentityOkta(*IdentityOkta) error
 	VisitIdentityPingone(*IdentityPingOne) error
+	VisitIncidentresponsePagerduty(*IncidentResponsePagerDuty) error
 	VisitNotificationsJira(*NotificationsJira) error
 	VisitNotificationsMockNotifications(*NotificationsMock) error
 	VisitNotificationsSlack(*NotificationsSlack) error
@@ -14216,6 +14283,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.IdentityPingone != nil {
 		return visitor.VisitIdentityPingone(p.IdentityPingone)
+	}
+	if p.IncidentresponsePagerduty != nil {
+		return visitor.VisitIncidentresponsePagerduty(p.IncidentresponsePagerduty)
 	}
 	if p.NotificationsJira != nil {
 		return visitor.VisitNotificationsJira(p.NotificationsJira)
@@ -14470,6 +14540,8 @@ const (
 	ProviderConfigIdIdentityOkta ProviderConfigId = "identity_okta"
 	// PingOne Cloud Platform
 	ProviderConfigIdIdentityPingOne ProviderConfigId = "identity_pingone"
+	// PagerDuty Operations Cloud
+	ProviderConfigIdIncidentResponsePagerDuty ProviderConfigId = "incidentresponse_pagerduty"
 	// Atlassian Jira
 	ProviderConfigIdNotificationsJira ProviderConfigId = "notifications_jira"
 	// Synqly Test Provider
@@ -14666,6 +14738,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdIdentityOkta, nil
 	case "identity_pingone":
 		return ProviderConfigIdIdentityPingOne, nil
+	case "incidentresponse_pagerduty":
+		return ProviderConfigIdIncidentResponsePagerDuty, nil
 	case "notifications_jira":
 		return ProviderConfigIdNotificationsJira, nil
 	case "notifications_mock_notifications":

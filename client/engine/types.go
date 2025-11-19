@@ -2113,6 +2113,675 @@ func (t *TicketingWebhookResponse) String() string {
 	return fmt.Sprintf("%#v", t)
 }
 
+type IncidentResponseEscalationPolicy struct {
+	// A Unix timestamp in milliseconds representing the time the escalation policy was created.
+	CreatedTime *int `json:"created_time,omitempty" url:"created_time,omitempty"`
+	// The human readable time the escalation policy was created.
+	CreatedTimeDt *time.Time `json:"created_time_dt,omitempty" url:"created_time_dt,omitempty"`
+	// The description of the escalation policy.
+	Desc *string `json:"desc,omitempty" url:"desc,omitempty"`
+	// The name of the escalation policy.
+	Name *string `json:"name,omitempty" url:"name,omitempty"`
+	// The escalation rules for the escalation policy.
+	EscalationRules []*IncidentResponseEscalationRule `json:"escalation_rules,omitempty" url:"escalation_rules,omitempty"`
+	// A deep-linked url to the escalation policy in a providers interface.
+	SrcUrl *string `json:"src_url,omitempty" url:"src_url,omitempty"`
+	// The teams that own the escalation policy.
+	Teams []*IncidentResponseTeamUnion `json:"teams,omitempty" url:"teams,omitempty"`
+	// The unique identifier for the escalation policy.
+	Uid Id `json:"uid" url:"uid"`
+	// A Unix timestamp in milliseconds representing the time the escalation policy was last updated.
+	UpdatedTime *int `json:"updated_time,omitempty" url:"updated_time,omitempty"`
+	// The human readable time the escalation policy was last updated.
+	UpdatedTimeDt *time.Time `json:"updated_time_dt,omitempty" url:"updated_time_dt,omitempty"`
+	// The attributes that are not mapped to the incident response user schema. The names and values of those attributes are specific to each provider.
+	Unmapped *Object `json:"unmapped,omitempty" url:"unmapped,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (i *IncidentResponseEscalationPolicy) GetExtraProperties() map[string]interface{} {
+	return i.extraProperties
+}
+
+func (i *IncidentResponseEscalationPolicy) UnmarshalJSON(data []byte) error {
+	type embed IncidentResponseEscalationPolicy
+	var unmarshaler = struct {
+		embed
+		CreatedTimeDt *core.DateTime `json:"created_time_dt,omitempty"`
+		UpdatedTimeDt *core.DateTime `json:"updated_time_dt,omitempty"`
+	}{
+		embed: embed(*i),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*i = IncidentResponseEscalationPolicy(unmarshaler.embed)
+	i.CreatedTimeDt = unmarshaler.CreatedTimeDt.TimePtr()
+	i.UpdatedTimeDt = unmarshaler.UpdatedTimeDt.TimePtr()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *i)
+	if err != nil {
+		return err
+	}
+	i.extraProperties = extraProperties
+
+	i._rawJSON = nil
+	return nil
+}
+
+func (i *IncidentResponseEscalationPolicy) MarshalJSON() ([]byte, error) {
+	type embed IncidentResponseEscalationPolicy
+	var marshaler = struct {
+		embed
+		CreatedTimeDt *core.DateTime `json:"created_time_dt,omitempty"`
+		UpdatedTimeDt *core.DateTime `json:"updated_time_dt,omitempty"`
+	}{
+		embed:         embed(*i),
+		CreatedTimeDt: core.NewOptionalDateTime(i.CreatedTimeDt),
+		UpdatedTimeDt: core.NewOptionalDateTime(i.UpdatedTimeDt),
+	}
+	return json.Marshal(marshaler)
+}
+
+func (i *IncidentResponseEscalationPolicy) String() string {
+	if len(i._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(i._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(i); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", i)
+}
+
+type IncidentResponseEscalationRule struct {
+	// The delay in milliseconds before the next target is notified.
+	EscalationDelay *int `json:"escalation_delay,omitempty" url:"escalation_delay,omitempty"`
+	// The targets to notify.
+	Targets []*IncidentResponseEscalationTargetUnion `json:"targets,omitempty" url:"targets,omitempty"`
+	// The unique identifier for the escalation rule.
+	Uid Id `json:"uid" url:"uid"`
+	// The attributes that are not mapped to the incident response user schema. The names and values of those attributes are specific to each provider.
+	Unmapped *Object `json:"unmapped,omitempty" url:"unmapped,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (i *IncidentResponseEscalationRule) GetExtraProperties() map[string]interface{} {
+	return i.extraProperties
+}
+
+func (i *IncidentResponseEscalationRule) UnmarshalJSON(data []byte) error {
+	type unmarshaler IncidentResponseEscalationRule
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*i = IncidentResponseEscalationRule(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *i)
+	if err != nil {
+		return err
+	}
+	i.extraProperties = extraProperties
+
+	i._rawJSON = nil
+	return nil
+}
+
+func (i *IncidentResponseEscalationRule) String() string {
+	if len(i._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(i._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(i); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", i)
+}
+
+type IncidentResponseEscalationTargetUnion struct {
+	Type                              string
+	IncidentResponseUser              *IncidentResponseUser
+	IncidentResponseTeam              *IncidentResponseTeam
+	IncidentResponseSchedule          *IncidentResponseSchedule
+	IncidentResponseUserReference     *IncidentResponseUserReference
+	IncidentResponseTeamReference     *IncidentResponseTeamReference
+	IncidentResponseScheduleReference *IncidentResponseScheduleReference
+}
+
+func (i *IncidentResponseEscalationTargetUnion) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	i.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", i)
+	}
+	switch unmarshaler.Type {
+	case "incident_response_user":
+		value := new(IncidentResponseUser)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		i.IncidentResponseUser = value
+	case "incident_response_team":
+		value := new(IncidentResponseTeam)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		i.IncidentResponseTeam = value
+	case "incident_response_schedule":
+		value := new(IncidentResponseSchedule)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		i.IncidentResponseSchedule = value
+	case "incident_response_user_reference":
+		value := new(IncidentResponseUserReference)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		i.IncidentResponseUserReference = value
+	case "incident_response_team_reference":
+		value := new(IncidentResponseTeamReference)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		i.IncidentResponseTeamReference = value
+	case "incident_response_schedule_reference":
+		value := new(IncidentResponseScheduleReference)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		i.IncidentResponseScheduleReference = value
+	}
+	return nil
+}
+
+func (i IncidentResponseEscalationTargetUnion) MarshalJSON() ([]byte, error) {
+	if i.IncidentResponseUser != nil {
+		return core.MarshalJSONWithExtraProperty(i.IncidentResponseUser, "type", "incident_response_user")
+	}
+	if i.IncidentResponseTeam != nil {
+		return core.MarshalJSONWithExtraProperty(i.IncidentResponseTeam, "type", "incident_response_team")
+	}
+	if i.IncidentResponseSchedule != nil {
+		return core.MarshalJSONWithExtraProperty(i.IncidentResponseSchedule, "type", "incident_response_schedule")
+	}
+	if i.IncidentResponseUserReference != nil {
+		return core.MarshalJSONWithExtraProperty(i.IncidentResponseUserReference, "type", "incident_response_user_reference")
+	}
+	if i.IncidentResponseTeamReference != nil {
+		return core.MarshalJSONWithExtraProperty(i.IncidentResponseTeamReference, "type", "incident_response_team_reference")
+	}
+	if i.IncidentResponseScheduleReference != nil {
+		return core.MarshalJSONWithExtraProperty(i.IncidentResponseScheduleReference, "type", "incident_response_schedule_reference")
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", i)
+}
+
+type IncidentResponseEscalationTargetUnionVisitor interface {
+	VisitIncidentResponseUser(*IncidentResponseUser) error
+	VisitIncidentResponseTeam(*IncidentResponseTeam) error
+	VisitIncidentResponseSchedule(*IncidentResponseSchedule) error
+	VisitIncidentResponseUserReference(*IncidentResponseUserReference) error
+	VisitIncidentResponseTeamReference(*IncidentResponseTeamReference) error
+	VisitIncidentResponseScheduleReference(*IncidentResponseScheduleReference) error
+}
+
+func (i *IncidentResponseEscalationTargetUnion) Accept(visitor IncidentResponseEscalationTargetUnionVisitor) error {
+	if i.IncidentResponseUser != nil {
+		return visitor.VisitIncidentResponseUser(i.IncidentResponseUser)
+	}
+	if i.IncidentResponseTeam != nil {
+		return visitor.VisitIncidentResponseTeam(i.IncidentResponseTeam)
+	}
+	if i.IncidentResponseSchedule != nil {
+		return visitor.VisitIncidentResponseSchedule(i.IncidentResponseSchedule)
+	}
+	if i.IncidentResponseUserReference != nil {
+		return visitor.VisitIncidentResponseUserReference(i.IncidentResponseUserReference)
+	}
+	if i.IncidentResponseTeamReference != nil {
+		return visitor.VisitIncidentResponseTeamReference(i.IncidentResponseTeamReference)
+	}
+	if i.IncidentResponseScheduleReference != nil {
+		return visitor.VisitIncidentResponseScheduleReference(i.IncidentResponseScheduleReference)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", i)
+}
+
+type IncidentResponseSchedule struct {
+	// The description of the incident response schedule.
+	Desc *string `json:"desc,omitempty" url:"desc,omitempty"`
+	// The name of the incident response schedule.
+	Name *string `json:"name,omitempty" url:"name,omitempty"`
+	// A deep-linked url to the incident response schedule in a providers interface.
+	SrcUrl *string `json:"src_url,omitempty" url:"src_url,omitempty"`
+	// The unique identifier for the incident response schedule.
+	Uid Id `json:"uid" url:"uid"`
+	// The incident response teams that own or are a part of the incident response schedule.
+	Teams []*IncidentResponseTeamUnion `json:"teams,omitempty" url:"teams,omitempty"`
+	// The incident response users that are a part of the incident response schedule.
+	Users []*IncidentResponseUserUnion `json:"users,omitempty" url:"users,omitempty"`
+	// The attributes that are not mapped to the incident response user schema. The names and values of those attributes are specific to each provider.
+	Unmapped *Object `json:"unmapped,omitempty" url:"unmapped,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (i *IncidentResponseSchedule) GetExtraProperties() map[string]interface{} {
+	return i.extraProperties
+}
+
+func (i *IncidentResponseSchedule) UnmarshalJSON(data []byte) error {
+	type unmarshaler IncidentResponseSchedule
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*i = IncidentResponseSchedule(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *i)
+	if err != nil {
+		return err
+	}
+	i.extraProperties = extraProperties
+
+	i._rawJSON = nil
+	return nil
+}
+
+func (i *IncidentResponseSchedule) String() string {
+	if len(i._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(i._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(i); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", i)
+}
+
+type IncidentResponseScheduleReference struct {
+	// The name of the incident response schedule being referenced.
+	Name *string `json:"name,omitempty" url:"name,omitempty"`
+	// The description of the incident response schedule being referenced.
+	Desc *string `json:"desc,omitempty" url:"desc,omitempty"`
+	// The unique identifier for the incident response schedule being referenced.
+	Uid Id `json:"uid" url:"uid"`
+	// A deep-linked url to the incident response schedule in a providers interface.
+	SrcUrl *string `json:"src_url,omitempty" url:"src_url,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (i *IncidentResponseScheduleReference) GetExtraProperties() map[string]interface{} {
+	return i.extraProperties
+}
+
+func (i *IncidentResponseScheduleReference) UnmarshalJSON(data []byte) error {
+	type unmarshaler IncidentResponseScheduleReference
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*i = IncidentResponseScheduleReference(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *i)
+	if err != nil {
+		return err
+	}
+	i.extraProperties = extraProperties
+
+	i._rawJSON = nil
+	return nil
+}
+
+func (i *IncidentResponseScheduleReference) String() string {
+	if len(i._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(i._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(i); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", i)
+}
+
+type IncidentResponseTeam struct {
+	// The description of the incident response team.
+	Desc *string `json:"desc,omitempty" url:"desc,omitempty"`
+	// The name of the incident response team.
+	Name *string `json:"name,omitempty" url:"name,omitempty"`
+	// A deep-linked url to the incident response team in a providers interface.
+	SrcUrl *string `json:"src_url,omitempty" url:"src_url,omitempty"`
+	// The unique identifier for the incident response team.
+	Uid Id `json:"uid" url:"uid"`
+	// The attributes that are not mapped to the incident response user schema. The names and values of those attributes are specific to each provider.
+	Unmapped *Object `json:"unmapped,omitempty" url:"unmapped,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (i *IncidentResponseTeam) GetExtraProperties() map[string]interface{} {
+	return i.extraProperties
+}
+
+func (i *IncidentResponseTeam) UnmarshalJSON(data []byte) error {
+	type unmarshaler IncidentResponseTeam
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*i = IncidentResponseTeam(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *i)
+	if err != nil {
+		return err
+	}
+	i.extraProperties = extraProperties
+
+	i._rawJSON = nil
+	return nil
+}
+
+func (i *IncidentResponseTeam) String() string {
+	if len(i._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(i._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(i); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", i)
+}
+
+type IncidentResponseTeamReference struct {
+	// The name of the incident response team being referenced.
+	Name *string `json:"name,omitempty" url:"name,omitempty"`
+	// The description of the incident response team being referenced.
+	Desc *string `json:"desc,omitempty" url:"desc,omitempty"`
+	// The unique identifier for the incident response team being referenced.
+	Uid Id `json:"uid" url:"uid"`
+	// A deep-linked url to the incident response team in a providers interface.
+	SrcUrl *string `json:"src_url,omitempty" url:"src_url,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (i *IncidentResponseTeamReference) GetExtraProperties() map[string]interface{} {
+	return i.extraProperties
+}
+
+func (i *IncidentResponseTeamReference) UnmarshalJSON(data []byte) error {
+	type unmarshaler IncidentResponseTeamReference
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*i = IncidentResponseTeamReference(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *i)
+	if err != nil {
+		return err
+	}
+	i.extraProperties = extraProperties
+
+	i._rawJSON = nil
+	return nil
+}
+
+func (i *IncidentResponseTeamReference) String() string {
+	if len(i._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(i._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(i); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", i)
+}
+
+type IncidentResponseTeamUnion struct {
+	Type                          string
+	IncidentResponseTeam          *IncidentResponseTeam
+	IncidentResponseTeamReference *IncidentResponseTeamReference
+}
+
+func (i *IncidentResponseTeamUnion) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	i.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", i)
+	}
+	switch unmarshaler.Type {
+	case "incident_response_team":
+		value := new(IncidentResponseTeam)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		i.IncidentResponseTeam = value
+	case "incident_response_team_reference":
+		value := new(IncidentResponseTeamReference)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		i.IncidentResponseTeamReference = value
+	}
+	return nil
+}
+
+func (i IncidentResponseTeamUnion) MarshalJSON() ([]byte, error) {
+	if i.IncidentResponseTeam != nil {
+		return core.MarshalJSONWithExtraProperty(i.IncidentResponseTeam, "type", "incident_response_team")
+	}
+	if i.IncidentResponseTeamReference != nil {
+		return core.MarshalJSONWithExtraProperty(i.IncidentResponseTeamReference, "type", "incident_response_team_reference")
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", i)
+}
+
+type IncidentResponseTeamUnionVisitor interface {
+	VisitIncidentResponseTeam(*IncidentResponseTeam) error
+	VisitIncidentResponseTeamReference(*IncidentResponseTeamReference) error
+}
+
+func (i *IncidentResponseTeamUnion) Accept(visitor IncidentResponseTeamUnionVisitor) error {
+	if i.IncidentResponseTeam != nil {
+		return visitor.VisitIncidentResponseTeam(i.IncidentResponseTeam)
+	}
+	if i.IncidentResponseTeamReference != nil {
+		return visitor.VisitIncidentResponseTeamReference(i.IncidentResponseTeamReference)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", i)
+}
+
+type IncidentResponseUser struct {
+	// The email address of the incident response user.
+	EmailAddr *string `json:"email_addr,omitempty" url:"email_addr,omitempty"`
+	// The incident response teams that the incident response user is a member of.
+	Teams []*IncidentResponseTeamUnion `json:"teams,omitempty" url:"teams,omitempty"`
+	// The name of the incident response user.
+	Name *string `json:"name,omitempty" url:"name,omitempty"`
+	// The unique identifier for the incident response user.
+	Uid Id `json:"uid" url:"uid"`
+	// The timezone of the incident response user. This value is represented as a IANA timezone string.
+	Timezone *string `json:"timezone,omitempty" url:"timezone,omitempty"`
+	// The job title of the incident response user.
+	JobTitle *string `json:"job_title,omitempty" url:"job_title,omitempty"`
+	// A deep-linked url to the incident response user in a providers interface.
+	SrcUrl *string `json:"src_url,omitempty" url:"src_url,omitempty"`
+	// The attributes that are not mapped to the incident response user schema. The names and values of those attributes are specific to each provider.
+	Unmapped *Object `json:"unmapped,omitempty" url:"unmapped,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (i *IncidentResponseUser) GetExtraProperties() map[string]interface{} {
+	return i.extraProperties
+}
+
+func (i *IncidentResponseUser) UnmarshalJSON(data []byte) error {
+	type unmarshaler IncidentResponseUser
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*i = IncidentResponseUser(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *i)
+	if err != nil {
+		return err
+	}
+	i.extraProperties = extraProperties
+
+	i._rawJSON = nil
+	return nil
+}
+
+func (i *IncidentResponseUser) String() string {
+	if len(i._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(i._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(i); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", i)
+}
+
+type IncidentResponseUserReference struct {
+	// The name of the incident response user being referenced.
+	Name *string `json:"name,omitempty" url:"name,omitempty"`
+	// The description of the incident response user being referenced.
+	Desc *string `json:"desc,omitempty" url:"desc,omitempty"`
+	// The unique identifier for the incident response user being referenced.
+	Uid Id `json:"uid" url:"uid"`
+	// A deep-linked url to the incident response user in a providers interface.
+	SrcUrl *string `json:"src_url,omitempty" url:"src_url,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (i *IncidentResponseUserReference) GetExtraProperties() map[string]interface{} {
+	return i.extraProperties
+}
+
+func (i *IncidentResponseUserReference) UnmarshalJSON(data []byte) error {
+	type unmarshaler IncidentResponseUserReference
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*i = IncidentResponseUserReference(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *i)
+	if err != nil {
+		return err
+	}
+	i.extraProperties = extraProperties
+
+	i._rawJSON = nil
+	return nil
+}
+
+func (i *IncidentResponseUserReference) String() string {
+	if len(i._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(i._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(i); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", i)
+}
+
+type IncidentResponseUserUnion struct {
+	Type                          string
+	IncidentResponseUser          *IncidentResponseUser
+	IncidentResponseUserReference *IncidentResponseUserReference
+}
+
+func (i *IncidentResponseUserUnion) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	i.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", i)
+	}
+	switch unmarshaler.Type {
+	case "incident_response_user":
+		value := new(IncidentResponseUser)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		i.IncidentResponseUser = value
+	case "incident_response_user_reference":
+		value := new(IncidentResponseUserReference)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		i.IncidentResponseUserReference = value
+	}
+	return nil
+}
+
+func (i IncidentResponseUserUnion) MarshalJSON() ([]byte, error) {
+	if i.IncidentResponseUser != nil {
+		return core.MarshalJSONWithExtraProperty(i.IncidentResponseUser, "type", "incident_response_user")
+	}
+	if i.IncidentResponseUserReference != nil {
+		return core.MarshalJSONWithExtraProperty(i.IncidentResponseUserReference, "type", "incident_response_user_reference")
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", i)
+}
+
+type IncidentResponseUserUnionVisitor interface {
+	VisitIncidentResponseUser(*IncidentResponseUser) error
+	VisitIncidentResponseUserReference(*IncidentResponseUserReference) error
+}
+
+func (i *IncidentResponseUserUnion) Accept(visitor IncidentResponseUserUnionVisitor) error {
+	if i.IncidentResponseUser != nil {
+		return visitor.VisitIncidentResponseUser(i.IncidentResponseUser)
+	}
+	if i.IncidentResponseUserReference != nil {
+		return visitor.VisitIncidentResponseUserReference(i.IncidentResponseUserReference)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", i)
+}
+
 // Integration webhook
 type IntegrationWebHook struct {
 	Id IntegrationWebHookId `json:"id" url:"id"`
@@ -2514,91 +3183,93 @@ func (o OperationStatus) Ptr() *OperationStatus {
 type OperationId string
 
 const (
-	OperationIdAppsecGetApplicationFindingDetails       OperationId = "appsec_get_application_finding_details"
-	OperationIdAppsecQueryApplicationFindings           OperationId = "appsec_query_application_findings"
-	OperationIdAppsecQueryApplications                  OperationId = "appsec_query_applications"
-	OperationIdAppsecQueryFindings                      OperationId = "appsec_query_findings"
-	OperationIdAssetsCreateAsset                        OperationId = "assets_create_asset"
-	OperationIdAssetsGetLabels                          OperationId = "assets_get_labels"
-	OperationIdAssetsQueryDevices                       OperationId = "assets_query_devices"
-	OperationIdCloudsecurityQueryCloudResourceInventory OperationId = "cloudsecurity_query_cloud_resource_inventory"
-	OperationIdCloudsecurityQueryComplianceFindings     OperationId = "cloudsecurity_query_compliance_findings"
-	OperationIdCloudsecurityQueryEvents                 OperationId = "cloudsecurity_query_events"
-	OperationIdCloudsecurityQueryIoms                   OperationId = "cloudsecurity_query_ioms"
-	OperationIdCloudsecurityQueryThreats                OperationId = "cloudsecurity_query_threats"
-	OperationIdCustomDelete                             OperationId = "custom_delete"
-	OperationIdCustomGet                                OperationId = "custom_get"
-	OperationIdCustomPatch                              OperationId = "custom_patch"
-	OperationIdCustomPost                               OperationId = "custom_post"
-	OperationIdCustomPostBatch                          OperationId = "custom_post_batch"
-	OperationIdCustomQuery                              OperationId = "custom_query"
-	OperationIdEdrCreateIocs                            OperationId = "edr_create_iocs"
-	OperationIdEdrDeleteIocs                            OperationId = "edr_delete_iocs"
-	OperationIdEdrGetEndpoint                           OperationId = "edr_get_endpoint"
-	OperationIdEdrNetworkQuarantine                     OperationId = "edr_network_quarantine"
-	OperationIdEdrQueryAlerts                           OperationId = "edr_query_alerts"
-	OperationIdEdrQueryApplications                     OperationId = "edr_query_applications"
-	OperationIdEdrQueryEdrEvents                        OperationId = "edr_query_edr_events"
-	OperationIdEdrQueryEndpoints                        OperationId = "edr_query_endpoints"
-	OperationIdEdrQueryIocs                             OperationId = "edr_query_iocs"
-	OperationIdEdrQueryPostureScore                     OperationId = "edr_query_posture_score"
-	OperationIdEdrQueryThreatevents                     OperationId = "edr_query_threatevents"
-	OperationIdIdentityDisableUser                      OperationId = "identity_disable_user"
-	OperationIdIdentityEnableUser                       OperationId = "identity_enable_user"
-	OperationIdIdentityExpireAllUserSessions            OperationId = "identity_expire_all_user_sessions"
-	OperationIdIdentityForceUserPasswordReset           OperationId = "identity_force_user_password_reset"
-	OperationIdIdentityGetGroup                         OperationId = "identity_get_group"
-	OperationIdIdentityGetGroupMembers                  OperationId = "identity_get_group_members"
-	OperationIdIdentityGetUser                          OperationId = "identity_get_user"
-	OperationIdIdentityQueryAuditLog                    OperationId = "identity_query_audit_log"
-	OperationIdIdentityQueryGroups                      OperationId = "identity_query_groups"
-	OperationIdIdentityQueryUsers                       OperationId = "identity_query_users"
-	OperationIdNotificationsClearMessage                OperationId = "notifications_clear_message"
-	OperationIdNotificationsCreateMessage               OperationId = "notifications_create_message"
-	OperationIdNotificationsGetMessage                  OperationId = "notifications_get_message"
-	OperationIdSiemGetEvidence                          OperationId = "siem_get_evidence"
-	OperationIdSiemGetInvestigation                     OperationId = "siem_get_investigation"
-	OperationIdSiemPatchInvestigation                   OperationId = "siem_patch_investigation"
-	OperationIdSiemPostEvents                           OperationId = "siem_post_events"
-	OperationIdSiemQueryAlerts                          OperationId = "siem_query_alerts"
-	OperationIdSiemQueryEvents                          OperationId = "siem_query_events"
-	OperationIdSiemQueryInvestigations                  OperationId = "siem_query_investigations"
-	OperationIdSiemQueryLogProviders                    OperationId = "siem_query_log_providers"
-	OperationIdSinkPostEvents                           OperationId = "sink_post_events"
-	OperationIdStorageDeleteFile                        OperationId = "storage_delete_file"
-	OperationIdStorageDownloadFile                      OperationId = "storage_download_file"
-	OperationIdStorageListFiles                         OperationId = "storage_list_files"
-	OperationIdStorageUploadFile                        OperationId = "storage_upload_file"
-	OperationIdTicketingCreateAttachment                OperationId = "ticketing_create_attachment"
-	OperationIdTicketingCreateComment                   OperationId = "ticketing_create_comment"
-	OperationIdTicketingCreateNote                      OperationId = "ticketing_create_note"
-	OperationIdTicketingCreateTicket                    OperationId = "ticketing_create_ticket"
-	OperationIdTicketingDeleteAttachment                OperationId = "ticketing_delete_attachment"
-	OperationIdTicketingDeleteComment                   OperationId = "ticketing_delete_comment"
-	OperationIdTicketingDeleteNote                      OperationId = "ticketing_delete_note"
-	OperationIdTicketingDownloadAttachment              OperationId = "ticketing_download_attachment"
-	OperationIdTicketingGetTicket                       OperationId = "ticketing_get_ticket"
-	OperationIdTicketingListAttachmentsMetadata         OperationId = "ticketing_list_attachments_metadata"
-	OperationIdTicketingListComments                    OperationId = "ticketing_list_comments"
-	OperationIdTicketingListNotes                       OperationId = "ticketing_list_notes"
-	OperationIdTicketingListOnCall                      OperationId = "ticketing_list_on_call"
-	OperationIdTicketingListProjects                    OperationId = "ticketing_list_projects"
-	OperationIdTicketingListRemoteFields                OperationId = "ticketing_list_remote_fields"
-	OperationIdTicketingPatchNote                       OperationId = "ticketing_patch_note"
-	OperationIdTicketingPatchTicket                     OperationId = "ticketing_patch_ticket"
-	OperationIdTicketingQueryEscalationPolicies         OperationId = "ticketing_query_escalation_policies"
-	OperationIdTicketingQueryTickets                    OperationId = "ticketing_query_tickets"
-	OperationIdVulnerabilitiesCreateAsset               OperationId = "vulnerabilities_create_asset"
-	OperationIdVulnerabilitiesCreateFindings            OperationId = "vulnerabilities_create_findings"
-	OperationIdVulnerabilitiesGetLabels                 OperationId = "vulnerabilities_get_labels"
-	OperationIdVulnerabilitiesGetScanActivity           OperationId = "vulnerabilities_get_scan_activity"
-	OperationIdVulnerabilitiesGetScanStatus             OperationId = "vulnerabilities_get_scan_status"
-	OperationIdVulnerabilitiesQueryAssets               OperationId = "vulnerabilities_query_assets"
-	OperationIdVulnerabilitiesQueryFindings             OperationId = "vulnerabilities_query_findings"
-	OperationIdVulnerabilitiesQueryScans                OperationId = "vulnerabilities_query_scans"
-	OperationIdVulnerabilitiesUpdateAsset               OperationId = "vulnerabilities_update_asset"
-	OperationIdVulnerabilitiesUpdateFinding             OperationId = "vulnerabilities_update_finding"
-	OperationIdVulnerabilitiesUploadScan                OperationId = "vulnerabilities_upload_scan"
+	OperationIdAppsecGetApplicationFindingDetails               OperationId = "appsec_get_application_finding_details"
+	OperationIdAppsecQueryApplicationFindings                   OperationId = "appsec_query_application_findings"
+	OperationIdAppsecQueryApplications                          OperationId = "appsec_query_applications"
+	OperationIdAppsecQueryFindings                              OperationId = "appsec_query_findings"
+	OperationIdAssetsCreateAsset                                OperationId = "assets_create_asset"
+	OperationIdAssetsGetLabels                                  OperationId = "assets_get_labels"
+	OperationIdAssetsQueryDevices                               OperationId = "assets_query_devices"
+	OperationIdCloudsecurityQueryCloudResourceInventory         OperationId = "cloudsecurity_query_cloud_resource_inventory"
+	OperationIdCloudsecurityQueryComplianceFindings             OperationId = "cloudsecurity_query_compliance_findings"
+	OperationIdCloudsecurityQueryEvents                         OperationId = "cloudsecurity_query_events"
+	OperationIdCloudsecurityQueryIoms                           OperationId = "cloudsecurity_query_ioms"
+	OperationIdCloudsecurityQueryThreats                        OperationId = "cloudsecurity_query_threats"
+	OperationIdCustomDelete                                     OperationId = "custom_delete"
+	OperationIdCustomGet                                        OperationId = "custom_get"
+	OperationIdCustomPatch                                      OperationId = "custom_patch"
+	OperationIdCustomPost                                       OperationId = "custom_post"
+	OperationIdCustomPostBatch                                  OperationId = "custom_post_batch"
+	OperationIdCustomQuery                                      OperationId = "custom_query"
+	OperationIdEdrCreateIocs                                    OperationId = "edr_create_iocs"
+	OperationIdEdrDeleteIocs                                    OperationId = "edr_delete_iocs"
+	OperationIdEdrGetEndpoint                                   OperationId = "edr_get_endpoint"
+	OperationIdEdrNetworkQuarantine                             OperationId = "edr_network_quarantine"
+	OperationIdEdrQueryAlerts                                   OperationId = "edr_query_alerts"
+	OperationIdEdrQueryApplications                             OperationId = "edr_query_applications"
+	OperationIdEdrQueryEdrEvents                                OperationId = "edr_query_edr_events"
+	OperationIdEdrQueryEndpoints                                OperationId = "edr_query_endpoints"
+	OperationIdEdrQueryIocs                                     OperationId = "edr_query_iocs"
+	OperationIdEdrQueryPostureScore                             OperationId = "edr_query_posture_score"
+	OperationIdEdrQueryThreatevents                             OperationId = "edr_query_threatevents"
+	OperationIdIdentityDisableUser                              OperationId = "identity_disable_user"
+	OperationIdIdentityEnableUser                               OperationId = "identity_enable_user"
+	OperationIdIdentityExpireAllUserSessions                    OperationId = "identity_expire_all_user_sessions"
+	OperationIdIdentityForceUserPasswordReset                   OperationId = "identity_force_user_password_reset"
+	OperationIdIdentityGetGroup                                 OperationId = "identity_get_group"
+	OperationIdIdentityGetGroupMembers                          OperationId = "identity_get_group_members"
+	OperationIdIdentityGetUser                                  OperationId = "identity_get_user"
+	OperationIdIdentityQueryAuditLog                            OperationId = "identity_query_audit_log"
+	OperationIdIdentityQueryGroups                              OperationId = "identity_query_groups"
+	OperationIdIdentityQueryUsers                               OperationId = "identity_query_users"
+	OperationIdIncidentresponseQueryEscalationPolicies          OperationId = "incidentresponse_query_escalation_policies"
+	OperationIdIncidentresponseQueryEscalationPolicyUsersOnCall OperationId = "incidentresponse_query_escalation_policy_users_on_call"
+	OperationIdNotificationsClearMessage                        OperationId = "notifications_clear_message"
+	OperationIdNotificationsCreateMessage                       OperationId = "notifications_create_message"
+	OperationIdNotificationsGetMessage                          OperationId = "notifications_get_message"
+	OperationIdSiemGetEvidence                                  OperationId = "siem_get_evidence"
+	OperationIdSiemGetInvestigation                             OperationId = "siem_get_investigation"
+	OperationIdSiemPatchInvestigation                           OperationId = "siem_patch_investigation"
+	OperationIdSiemPostEvents                                   OperationId = "siem_post_events"
+	OperationIdSiemQueryAlerts                                  OperationId = "siem_query_alerts"
+	OperationIdSiemQueryEvents                                  OperationId = "siem_query_events"
+	OperationIdSiemQueryInvestigations                          OperationId = "siem_query_investigations"
+	OperationIdSiemQueryLogProviders                            OperationId = "siem_query_log_providers"
+	OperationIdSinkPostEvents                                   OperationId = "sink_post_events"
+	OperationIdStorageDeleteFile                                OperationId = "storage_delete_file"
+	OperationIdStorageDownloadFile                              OperationId = "storage_download_file"
+	OperationIdStorageListFiles                                 OperationId = "storage_list_files"
+	OperationIdStorageUploadFile                                OperationId = "storage_upload_file"
+	OperationIdTicketingCreateAttachment                        OperationId = "ticketing_create_attachment"
+	OperationIdTicketingCreateComment                           OperationId = "ticketing_create_comment"
+	OperationIdTicketingCreateNote                              OperationId = "ticketing_create_note"
+	OperationIdTicketingCreateTicket                            OperationId = "ticketing_create_ticket"
+	OperationIdTicketingDeleteAttachment                        OperationId = "ticketing_delete_attachment"
+	OperationIdTicketingDeleteComment                           OperationId = "ticketing_delete_comment"
+	OperationIdTicketingDeleteNote                              OperationId = "ticketing_delete_note"
+	OperationIdTicketingDownloadAttachment                      OperationId = "ticketing_download_attachment"
+	OperationIdTicketingGetTicket                               OperationId = "ticketing_get_ticket"
+	OperationIdTicketingListAttachmentsMetadata                 OperationId = "ticketing_list_attachments_metadata"
+	OperationIdTicketingListComments                            OperationId = "ticketing_list_comments"
+	OperationIdTicketingListNotes                               OperationId = "ticketing_list_notes"
+	OperationIdTicketingListOnCall                              OperationId = "ticketing_list_on_call"
+	OperationIdTicketingListProjects                            OperationId = "ticketing_list_projects"
+	OperationIdTicketingListRemoteFields                        OperationId = "ticketing_list_remote_fields"
+	OperationIdTicketingPatchNote                               OperationId = "ticketing_patch_note"
+	OperationIdTicketingPatchTicket                             OperationId = "ticketing_patch_ticket"
+	OperationIdTicketingQueryEscalationPolicies                 OperationId = "ticketing_query_escalation_policies"
+	OperationIdTicketingQueryTickets                            OperationId = "ticketing_query_tickets"
+	OperationIdVulnerabilitiesCreateAsset                       OperationId = "vulnerabilities_create_asset"
+	OperationIdVulnerabilitiesCreateFindings                    OperationId = "vulnerabilities_create_findings"
+	OperationIdVulnerabilitiesGetLabels                         OperationId = "vulnerabilities_get_labels"
+	OperationIdVulnerabilitiesGetScanActivity                   OperationId = "vulnerabilities_get_scan_activity"
+	OperationIdVulnerabilitiesGetScanStatus                     OperationId = "vulnerabilities_get_scan_status"
+	OperationIdVulnerabilitiesQueryAssets                       OperationId = "vulnerabilities_query_assets"
+	OperationIdVulnerabilitiesQueryFindings                     OperationId = "vulnerabilities_query_findings"
+	OperationIdVulnerabilitiesQueryScans                        OperationId = "vulnerabilities_query_scans"
+	OperationIdVulnerabilitiesUpdateAsset                       OperationId = "vulnerabilities_update_asset"
+	OperationIdVulnerabilitiesUpdateFinding                     OperationId = "vulnerabilities_update_finding"
+	OperationIdVulnerabilitiesUploadScan                        OperationId = "vulnerabilities_upload_scan"
 )
 
 func NewOperationIdFromString(s string) (OperationId, error) {
@@ -2681,6 +3352,10 @@ func NewOperationIdFromString(s string) (OperationId, error) {
 		return OperationIdIdentityQueryGroups, nil
 	case "identity_query_users":
 		return OperationIdIdentityQueryUsers, nil
+	case "incidentresponse_query_escalation_policies":
+		return OperationIdIncidentresponseQueryEscalationPolicies, nil
+	case "incidentresponse_query_escalation_policy_users_on_call":
+		return OperationIdIncidentresponseQueryEscalationPolicyUsersOnCall, nil
 	case "notifications_clear_message":
 		return OperationIdNotificationsClearMessage, nil
 	case "notifications_create_message":
