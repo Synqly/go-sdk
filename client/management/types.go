@@ -13057,6 +13057,8 @@ type ProviderConfig struct {
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/aws-sqs-sink-setup)
 	SinkAwsSqs *SinkAwsSqs
+	// Configuration for Azure Blob Storage as a Sink provider. Events are written directly to an Azure Blob Storage container in compressed JSON format.
+	SinkAzureBlob *SinkAzureBlob
 	// Configuration for Azure Monitor Logs as a Sink Provider. Azure Monitor Logs is a feature of Azure Monitor that collects and organizes log and performance data from monitored resources.
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/azure-monitor-logs)
@@ -13549,6 +13551,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.SinkAwsSqs = value
+	case "sink_azure_blob":
+		value := new(SinkAzureBlob)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.SinkAzureBlob = value
 	case "sink_azure_monitor_logs":
 		value := new(SinkAzureMonitorLogs)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -13953,6 +13961,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.SinkAwsSqs != nil {
 		return core.MarshalJSONWithExtraProperty(p.SinkAwsSqs, "type", "sink_aws_sqs")
 	}
+	if p.SinkAzureBlob != nil {
+		return core.MarshalJSONWithExtraProperty(p.SinkAzureBlob, "type", "sink_azure_blob")
+	}
 	if p.SinkAzureMonitorLogs != nil {
 		return core.MarshalJSONWithExtraProperty(p.SinkAzureMonitorLogs, "type", "sink_azure_monitor_logs")
 	}
@@ -14127,6 +14138,7 @@ type ProviderConfigVisitor interface {
 	VisitSinkAwsS3(*SinkAwsS3) error
 	VisitSinkAwsSecurityLake(*SinkAwsSecurityLake) error
 	VisitSinkAwsSqs(*SinkAwsSqs) error
+	VisitSinkAzureBlob(*SinkAzureBlob) error
 	VisitSinkAzureMonitorLogs(*SinkAzureMonitorLogs) error
 	VisitSinkCrowdstrikeHec(*SinkCrowdstrikeHec) error
 	VisitSinkElasticsearch(*SinkElasticsearch) error
@@ -14343,6 +14355,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.SinkAwsSqs != nil {
 		return visitor.VisitSinkAwsSqs(p.SinkAwsSqs)
+	}
+	if p.SinkAzureBlob != nil {
+		return visitor.VisitSinkAzureBlob(p.SinkAzureBlob)
 	}
 	if p.SinkAzureMonitorLogs != nil {
 		return visitor.VisitSinkAzureMonitorLogs(p.SinkAzureMonitorLogs)
@@ -14580,6 +14595,8 @@ const (
 	ProviderConfigIdSinkAwsSecurityLake ProviderConfigId = "sink_aws_security_lake"
 	// Amazon Simple Queue Service (SQS)
 	ProviderConfigIdSinkAwsSqs ProviderConfigId = "sink_aws_sqs"
+	// Microsoft Azure Blob Storage
+	ProviderConfigIdSinkAzureBlob ProviderConfigId = "sink_azure_blob"
 	// Microsoft Azure Monitor Logs
 	ProviderConfigIdSinkAzureMonitorLogs ProviderConfigId = "sink_azure_monitor_logs"
 	// CrowdStrike Falcon® Next-Gen SIEM (HEC)
@@ -14778,6 +14795,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdSinkAwsSecurityLake, nil
 	case "sink_aws_sqs":
 		return ProviderConfigIdSinkAwsSqs, nil
+	case "sink_azure_blob":
+		return ProviderConfigIdSinkAzureBlob, nil
 	case "sink_azure_monitor_logs":
 		return ProviderConfigIdSinkAzureMonitorLogs, nil
 	case "sink_crowdstrike_hec":
@@ -16185,6 +16204,53 @@ func (s *SinkAwsSecurityLake) UnmarshalJSON(data []byte) error {
 }
 
 func (s *SinkAwsSecurityLake) String() string {
+	if len(s._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(s); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", s)
+}
+
+// Configuration for Azure Blob Storage as a Sink provider. Events are written directly to an Azure Blob Storage container in compressed JSON format.
+type SinkAzureBlob struct {
+	// Name of the Azure Blob Storage container
+	Bucket string `json:"bucket" url:"bucket"`
+	// Azure token with write access to the configured blob container.
+	Credential *AzureBlobCredential `json:"credential" url:"credential"`
+	// Files will be written under this path.
+	Path string `json:"path" url:"path"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (s *SinkAzureBlob) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
+}
+
+func (s *SinkAzureBlob) UnmarshalJSON(data []byte) error {
+	type unmarshaler SinkAzureBlob
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*s = SinkAzureBlob(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+
+	s._rawJSON = nil
+	return nil
+}
+
+func (s *SinkAzureBlob) String() string {
 	if len(s._rawJSON) > 0 {
 		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
 			return value
