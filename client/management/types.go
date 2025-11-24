@@ -13093,6 +13093,10 @@ type ProviderConfig struct {
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/splunk-setup)
 	SinkSplunk *SinkSplunk
+	// Configuration for Sumo Logic as a Sink provider. Allows sending data to Sumo Logic using a collection URL.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/sumo-logic-sink-setup)
+	SinkSumoLogic *SinkSumoLogic
 	// Configuration for Amazon S3.
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/aws-s3-storage-setup)
@@ -13617,6 +13621,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.SinkSplunk = value
+	case "sink_sumo_logic":
+		value := new(SinkSumoLogic)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.SinkSumoLogic = value
 	case "storage_aws_s3":
 		value := new(StorageAwsS3)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -13994,6 +14004,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.SinkSplunk != nil {
 		return core.MarshalJSONWithExtraProperty(p.SinkSplunk, "type", "sink_splunk")
 	}
+	if p.SinkSumoLogic != nil {
+		return core.MarshalJSONWithExtraProperty(p.SinkSumoLogic, "type", "sink_sumo_logic")
+	}
 	if p.StorageAwsS3 != nil {
 		return core.MarshalJSONWithExtraProperty(p.StorageAwsS3, "type", "storage_aws_s3")
 	}
@@ -14149,6 +14162,7 @@ type ProviderConfigVisitor interface {
 	VisitSinkOpensearch(*SinkOpenSearch) error
 	VisitSinkQRadar(*SinkQRadar) error
 	VisitSinkSplunk(*SinkSplunk) error
+	VisitSinkSumoLogic(*SinkSumoLogic) error
 	VisitStorageAwsS3(*StorageAwsS3) error
 	VisitStorageAzureBlob(*StorageAzureBlob) error
 	VisitStorageGcs(*StorageGcs) error
@@ -14389,6 +14403,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	if p.SinkSplunk != nil {
 		return visitor.VisitSinkSplunk(p.SinkSplunk)
 	}
+	if p.SinkSumoLogic != nil {
+		return visitor.VisitSinkSumoLogic(p.SinkSumoLogic)
+	}
 	if p.StorageAwsS3 != nil {
 		return visitor.VisitStorageAwsS3(p.StorageAwsS3)
 	}
@@ -14617,6 +14634,8 @@ const (
 	ProviderConfigIdSinkQRadar ProviderConfigId = "sink_q_radar"
 	// Splunk Enterprise Security
 	ProviderConfigIdSinkSplunk ProviderConfigId = "sink_splunk"
+	// Sumo Logic Sink
+	ProviderConfigIdSinkSumoLogic ProviderConfigId = "sink_sumo_logic"
 	// Amazon S3
 	ProviderConfigIdStorageAwsS3 ProviderConfigId = "storage_aws_s3"
 	// Microsoft Azure Blob Storage
@@ -14817,6 +14836,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdSinkQRadar, nil
 	case "sink_splunk":
 		return ProviderConfigIdSinkSplunk, nil
+	case "sink_sumo_logic":
+		return ProviderConfigIdSinkSumoLogic, nil
 	case "storage_aws_s3":
 		return ProviderConfigIdStorageAwsS3, nil
 	case "storage_azure_blob":
@@ -16747,6 +16768,51 @@ func (s *SinkSplunk) UnmarshalJSON(data []byte) error {
 }
 
 func (s *SinkSplunk) String() string {
+	if len(s._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(s); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", s)
+}
+
+// Configuration for Sumo Logic as a Sink provider. Allows sending data to Sumo Logic using a collection URL.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/sumo-logic-sink-setup)
+type SinkSumoLogic struct {
+	// Sumo Logic Collection URL for writing events.
+	CollectionUrl *SumoLogicCollectionUrl `json:"collection_url" url:"collection_url"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (s *SinkSumoLogic) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
+}
+
+func (s *SinkSumoLogic) UnmarshalJSON(data []byte) error {
+	type unmarshaler SinkSumoLogic
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*s = SinkSumoLogic(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+
+	s._rawJSON = nil
+	return nil
+}
+
+func (s *SinkSumoLogic) String() string {
 	if len(s._rawJSON) > 0 {
 		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
 			return value
