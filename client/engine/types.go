@@ -1388,11 +1388,58 @@ func (m *MetaApiResponse) String() string {
 	return fmt.Sprintf("%#v", m)
 }
 
+type MetaMapping struct {
+	// Mapping chains applied for any transformation that were performed during the request.
+	Chains *MetaMappingChains `json:"chains,omitempty" url:"chains,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (m *MetaMapping) GetExtraProperties() map[string]interface{} {
+	return m.extraProperties
+}
+
+func (m *MetaMapping) UnmarshalJSON(data []byte) error {
+	type unmarshaler MetaMapping
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*m = MetaMapping(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *m)
+	if err != nil {
+		return err
+	}
+	m.extraProperties = extraProperties
+
+	m._rawJSON = nil
+	return nil
+}
+
+func (m *MetaMapping) String() string {
+	if len(m._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(m._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(m); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", m)
+}
+
+// The list of mapping chains applied, indexed by operation ID. Each entry contains an array of mapping IDs.
+type MetaMappingChains = map[string][]string
+
 type MetaResponse struct {
 	// Statistics about items contained in the response.
 	Stats *MetaStats `json:"stats,omitempty" url:"stats,omitempty"`
 	// Information about backing API requests made to fulfill the response.
 	Api *MetaApi `json:"api,omitempty" url:"api,omitempty"`
+	// Information about mappings applied during transformation.
+	Mapping *MetaMapping `json:"mapping,omitempty" url:"mapping,omitempty"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
