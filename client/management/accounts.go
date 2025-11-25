@@ -32,7 +32,7 @@ type CreateAccountRequest struct {
 	Fullname *string `json:"fullname,omitempty" url:"fullname,omitempty"`
 	// Environment this account runs in. Defaults to `prod` if not specified.
 	Environment *Environment `json:"environment,omitempty" url:"environment,omitempty"`
-	// User defined labels that apply to this account. These values can be used in role bindings to limit the scope of permissions.
+	// User defined labels that apply to this account. Labels are limited to 48 characters in length and must contain only letters, numbers, underscores, hyphens, colons, and periods. The label values can be used in role bindings to limit the scope of permissions.
 	Labels []string `json:"labels,omitempty" url:"labels,omitempty"`
 
 	extraProperties map[string]interface{}
