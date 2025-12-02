@@ -12595,6 +12595,76 @@ func (o *OpenSearchCredential) Accept(visitor OpenSearchCredentialVisitor) error
 	return fmt.Errorf("type %T does not define a non-empty union type", o)
 }
 
+type OpenTextApplicationSecurityCredential struct {
+	Type string
+	// Configuration when creating new Token.
+	Token *TokenCredential
+	// Reference to existing Token.
+	TokenId TokenCredentialId
+}
+
+func (o *OpenTextApplicationSecurityCredential) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	o.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", o)
+	}
+	switch unmarshaler.Type {
+	case "token":
+		value := new(TokenCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		o.Token = value
+	case "token_id":
+		var valueUnmarshaler struct {
+			TokenId TokenCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		o.TokenId = valueUnmarshaler.TokenId
+	}
+	return nil
+}
+
+func (o OpenTextApplicationSecurityCredential) MarshalJSON() ([]byte, error) {
+	if o.Token != nil {
+		return core.MarshalJSONWithExtraProperty(o.Token, "type", "token")
+	}
+	if o.TokenId != "" {
+		var marshaler = struct {
+			Type    string            `json:"type"`
+			TokenId TokenCredentialId `json:"value"`
+		}{
+			Type:    "token_id",
+			TokenId: o.TokenId,
+		}
+		return json.Marshal(marshaler)
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", o)
+}
+
+type OpenTextApplicationSecurityCredentialVisitor interface {
+	VisitToken(*TokenCredential) error
+	VisitTokenId(TokenCredentialId) error
+}
+
+func (o *OpenTextApplicationSecurityCredential) Accept(visitor OpenTextApplicationSecurityCredentialVisitor) error {
+	if o.Token != nil {
+		return visitor.VisitToken(o.Token)
+	}
+	if o.TokenId != "" {
+		return visitor.VisitTokenId(o.TokenId)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", o)
+}
+
 type OpenTextCoreApplicationSecurityCredential struct {
 	Type string
 	// Configuration when creating new Client Credentials.
@@ -12991,6 +13061,14 @@ type ProviderConfig struct {
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/hcl-appscan-appsec-setup)
 	AppsecHclAppscanOnCloud *AppsecHclAppScanOnCloud
+	// Configuration for OpenText Application Security (formerly Fortify Software Security Center) as an application security provider.
+	//
+	// **This provider is for on-premise installations of OpenText Application Security. For the SaaS product, please use the OpenText Core Application Security provider.**
+	//
+	// As this provider is for an on-premise only product, either a Synqly Bridge Agent must be used or the OpenText Application Security installation must be accessible from a public URL.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/opentext-applicationsecurity-appsec-setup)
+	AppsecOpentextApplicationSecurity *AppsecOpenTextApplicationSecurity
 	// Configuration for OpenText Core Application Security (formerly Fortify On Demand) as an application security provider.
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/opentext-core-applicationsecurity-appsec-setup)
@@ -13338,6 +13416,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.AppsecHclAppscanOnCloud = value
+	case "appsec_opentext_application_security":
+		value := new(AppsecOpenTextApplicationSecurity)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.AppsecOpentextApplicationSecurity = value
 	case "appsec_opentext_core_application_security":
 		value := new(AppsecOpenTextCoreApplicationSecurity)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -13928,6 +14012,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.AppsecHclAppscanOnCloud != nil {
 		return core.MarshalJSONWithExtraProperty(p.AppsecHclAppscanOnCloud, "type", "appsec_hcl_appscan_on_cloud")
 	}
+	if p.AppsecOpentextApplicationSecurity != nil {
+		return core.MarshalJSONWithExtraProperty(p.AppsecOpentextApplicationSecurity, "type", "appsec_opentext_application_security")
+	}
 	if p.AppsecOpentextCoreApplicationSecurity != nil {
 		return core.MarshalJSONWithExtraProperty(p.AppsecOpentextCoreApplicationSecurity, "type", "appsec_opentext_core_application_security")
 	}
@@ -14223,6 +14310,7 @@ type ProviderConfigVisitor interface {
 	VisitAppsecAmazonInspector(*AppsecAmazonInspector) error
 	VisitAppsecGitlab(*AppsecGitLab) error
 	VisitAppsecHclAppscanOnCloud(*AppsecHclAppScanOnCloud) error
+	VisitAppsecOpentextApplicationSecurity(*AppsecOpenTextApplicationSecurity) error
 	VisitAppsecOpentextCoreApplicationSecurity(*AppsecOpenTextCoreApplicationSecurity) error
 	VisitAppsecOpentextCoreApplicationSecurityMock(*AppsecOpenTextCoreApplicationSecurityMock) error
 	VisitAssetsArmisCentrix(*AssetsArmisCentrix) error
@@ -14330,6 +14418,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.AppsecHclAppscanOnCloud != nil {
 		return visitor.VisitAppsecHclAppscanOnCloud(p.AppsecHclAppscanOnCloud)
+	}
+	if p.AppsecOpentextApplicationSecurity != nil {
+		return visitor.VisitAppsecOpentextApplicationSecurity(p.AppsecOpentextApplicationSecurity)
 	}
 	if p.AppsecOpentextCoreApplicationSecurity != nil {
 		return visitor.VisitAppsecOpentextCoreApplicationSecurity(p.AppsecOpentextCoreApplicationSecurity)
@@ -14632,6 +14723,8 @@ const (
 	ProviderConfigIdAppsecGitLab ProviderConfigId = "appsec_gitlab"
 	// HCL AppScan on Cloud
 	ProviderConfigIdAppsecHclAppScanOnCloud ProviderConfigId = "appsec_hcl_appscan_on_cloud"
+	// OpenText Application Security
+	ProviderConfigIdAppsecOpenTextApplicationSecurity ProviderConfigId = "appsec_opentext_application_security"
 	// OpenText Core Application Security
 	ProviderConfigIdAppsecOpenTextCoreApplicationSecurity ProviderConfigId = "appsec_opentext_core_application_security"
 	// [MOCK] OpenText Core Application Security
@@ -14836,6 +14929,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdAppsecGitLab, nil
 	case "appsec_hcl_appscan_on_cloud":
 		return ProviderConfigIdAppsecHclAppScanOnCloud, nil
+	case "appsec_opentext_application_security":
+		return ProviderConfigIdAppsecOpenTextApplicationSecurity, nil
 	case "appsec_opentext_core_application_security":
 		return ProviderConfigIdAppsecOpenTextCoreApplicationSecurity, nil
 	case "appsec_opentext_core_application_security_mock":
@@ -19288,6 +19383,63 @@ func (a *AppsecHclAppScanOnCloud) UnmarshalJSON(data []byte) error {
 }
 
 func (a *AppsecHclAppScanOnCloud) String() string {
+	if len(a._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(a); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", a)
+}
+
+// Configuration for OpenText Application Security (formerly Fortify Software Security Center) as an application security provider.
+//
+// **This provider is for on-premise installations of OpenText Application Security. For the SaaS product, please use the OpenText Core Application Security provider.**
+//
+// As this provider is for an on-premise only product, either a Synqly Bridge Agent must be used or the OpenText Application Security installation must be accessible from a public URL.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/opentext-applicationsecurity-appsec-setup)
+type AppsecOpenTextApplicationSecurity struct {
+	// Credentials used for accessing the OpenText Application Security API.
+	Credential *OpenTextApplicationSecurityCredential `json:"credential" url:"credential"`
+	// Base URL for the OpenText Application Security API. This URL should
+	// be the same as the URL used to access the OpenText Application
+	// Security web interface.
+	//
+	// **If a Synqly Bridge Agent is not used, this URL must be a publically accessible**
+	//
+	// For more information on using a Synqly Bridge Agent, see the [Synqly Bridge Agent documentation](https://docs.synqly.com/bridge/agent-setup).
+	Url string `json:"url" url:"url"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (a *AppsecOpenTextApplicationSecurity) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
+}
+
+func (a *AppsecOpenTextApplicationSecurity) UnmarshalJSON(data []byte) error {
+	type unmarshaler AppsecOpenTextApplicationSecurity
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*a = AppsecOpenTextApplicationSecurity(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+
+	a._rawJSON = nil
+	return nil
+}
+
+func (a *AppsecOpenTextApplicationSecurity) String() string {
 	if len(a._rawJSON) > 0 {
 		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
 			return value
