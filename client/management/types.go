@@ -11605,6 +11605,121 @@ func (i *IdentityPingOne) String() string {
 	return fmt.Sprintf("%#v", i)
 }
 
+type IncidentIoCredential struct {
+	Type string
+	// Configuration when creating new Token.
+	Token *TokenCredential
+	// Reference to existing Token.
+	TokenId TokenCredentialId
+}
+
+func (i *IncidentIoCredential) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	i.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", i)
+	}
+	switch unmarshaler.Type {
+	case "token":
+		value := new(TokenCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		i.Token = value
+	case "token_id":
+		var valueUnmarshaler struct {
+			TokenId TokenCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		i.TokenId = valueUnmarshaler.TokenId
+	}
+	return nil
+}
+
+func (i IncidentIoCredential) MarshalJSON() ([]byte, error) {
+	if i.Token != nil {
+		return core.MarshalJSONWithExtraProperty(i.Token, "type", "token")
+	}
+	if i.TokenId != "" {
+		var marshaler = struct {
+			Type    string            `json:"type"`
+			TokenId TokenCredentialId `json:"value"`
+		}{
+			Type:    "token_id",
+			TokenId: i.TokenId,
+		}
+		return json.Marshal(marshaler)
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", i)
+}
+
+type IncidentIoCredentialVisitor interface {
+	VisitToken(*TokenCredential) error
+	VisitTokenId(TokenCredentialId) error
+}
+
+func (i *IncidentIoCredential) Accept(visitor IncidentIoCredentialVisitor) error {
+	if i.Token != nil {
+		return visitor.VisitToken(i.Token)
+	}
+	if i.TokenId != "" {
+		return visitor.VisitTokenId(i.TokenId)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", i)
+}
+
+// Configuration for incident.io as an Incident Response Provider.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/incident-io-incident-response-setup)
+type IncidentResponseIncidentIo struct {
+	// Credential used for accessing the incident.io API.
+	Credential *IncidentIoCredential `json:"credential" url:"credential"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (i *IncidentResponseIncidentIo) GetExtraProperties() map[string]interface{} {
+	return i.extraProperties
+}
+
+func (i *IncidentResponseIncidentIo) UnmarshalJSON(data []byte) error {
+	type unmarshaler IncidentResponseIncidentIo
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*i = IncidentResponseIncidentIo(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *i)
+	if err != nil {
+		return err
+	}
+	i.extraProperties = extraProperties
+
+	i._rawJSON = nil
+	return nil
+}
+
+func (i *IncidentResponseIncidentIo) String() string {
+	if len(i._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(i._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(i); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", i)
+}
+
 // Configuration for PagerDuty as an incident response provider.
 //
 // [Configuration guide](https://docs.synqly.com/guides/provider-configuration/pagerduty-incident-response-setup)
@@ -12986,6 +13101,10 @@ type ProviderConfig struct {
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/ping-identity-setup)
 	IdentityPingone *IdentityPingOne
+	// Configuration for incident.io as an Incident Response Provider.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/incident-io-incident-response-setup)
+	IncidentresponseIncidentio *IncidentResponseIncidentIo
 	// Configuration for PagerDuty as an incident response provider.
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/pagerduty-incident-response-setup)
@@ -13435,6 +13554,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.IdentityPingone = value
+	case "incidentresponse_incidentio":
+		value := new(IncidentResponseIncidentIo)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.IncidentresponseIncidentio = value
 	case "incidentresponse_pagerduty":
 		value := new(IncidentResponsePagerDuty)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -13911,6 +14036,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.IdentityPingone != nil {
 		return core.MarshalJSONWithExtraProperty(p.IdentityPingone, "type", "identity_pingone")
 	}
+	if p.IncidentresponseIncidentio != nil {
+		return core.MarshalJSONWithExtraProperty(p.IncidentresponseIncidentio, "type", "incidentresponse_incidentio")
+	}
 	if p.IncidentresponsePagerduty != nil {
 		return core.MarshalJSONWithExtraProperty(p.IncidentresponsePagerduty, "type", "incidentresponse_pagerduty")
 	}
@@ -14131,6 +14259,7 @@ type ProviderConfigVisitor interface {
 	VisitIdentityGoogle(*IdentityGoogle) error
 	VisitIdentityOkta(*IdentityOkta) error
 	VisitIdentityPingone(*IdentityPingOne) error
+	VisitIncidentresponseIncidentio(*IncidentResponseIncidentIo) error
 	VisitIncidentresponsePagerduty(*IncidentResponsePagerDuty) error
 	VisitNotificationsJira(*NotificationsJira) error
 	VisitNotificationsMockNotifications(*NotificationsMock) error
@@ -14309,6 +14438,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.IdentityPingone != nil {
 		return visitor.VisitIdentityPingone(p.IdentityPingone)
+	}
+	if p.IncidentresponseIncidentio != nil {
+		return visitor.VisitIncidentresponseIncidentio(p.IncidentresponseIncidentio)
 	}
 	if p.IncidentresponsePagerduty != nil {
 		return visitor.VisitIncidentresponsePagerduty(p.IncidentresponsePagerduty)
@@ -14572,6 +14704,8 @@ const (
 	ProviderConfigIdIdentityOkta ProviderConfigId = "identity_okta"
 	// PingOne Cloud Platform
 	ProviderConfigIdIdentityPingOne ProviderConfigId = "identity_pingone"
+	// incident.io
+	ProviderConfigIdIncidentResponseIncidentIo ProviderConfigId = "incidentresponse_incidentio"
 	// PagerDuty Operations Cloud
 	ProviderConfigIdIncidentResponsePagerDuty ProviderConfigId = "incidentresponse_pagerduty"
 	// Atlassian Jira
@@ -14774,6 +14908,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdIdentityOkta, nil
 	case "identity_pingone":
 		return ProviderConfigIdIdentityPingOne, nil
+	case "incidentresponse_incidentio":
+		return ProviderConfigIdIncidentResponseIncidentIo, nil
 	case "incidentresponse_pagerduty":
 		return ProviderConfigIdIncidentResponsePagerDuty, nil
 	case "notifications_jira":

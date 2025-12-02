@@ -20,10 +20,6 @@ type IncidentResponseQueryEscalationPoliciesRequest struct {
 type IncidentResponseQueryEscalationPolicyUsersOnCallRequest struct {
 	// Add metadata to the response by invoking meta functions. Documentation for meta functions is available at https://docs.synqly.com/api-reference/meta-functions. Not all meta function are available at every endpoint.
 	Meta []*string `json:"-" url:"meta,omitempty"`
-	// Number of users that are currently on call to return. Defaults to 100.
-	Limit *int `json:"-" url:"limit,omitempty"`
-	// Start search from cursor position.
-	Cursor *string `json:"-" url:"cursor,omitempty"`
 }
 
 type IncidentResponseQueryEscalationPoliciesResponse struct {
@@ -77,10 +73,8 @@ type IncidentResponseQueryEscalationPolicyUsersOnCallResponse struct {
 	// Additional messages from the service response that may be helpful to the client.
 	Messages *MessagesResponse `json:"messages,omitempty" url:"messages,omitempty"`
 	// Various metadata about the results organized by group, then type, then field.
-	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
-	// Cursor to use to retrieve the next page of results
-	Cursor string                  `json:"cursor" url:"cursor"`
-	Result []*IncidentResponseUser `json:"result" url:"result"`
+	Meta   *MetaResponse                `json:"meta,omitempty" url:"meta,omitempty"`
+	Result []*IncidentResponseUserUnion `json:"result" url:"result"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
