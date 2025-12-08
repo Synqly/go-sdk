@@ -2155,6 +2155,58 @@ func (a *AwsCredential) String() string {
 // Unique identifier for an AWS Credential
 type AwsCredentialId = CredentialId
 
+// AWS Role configuration to authenticate with AWS. Delegated access with AWS Roles are used to create short-term credentials to access AWS resources in the destination AWS account. You can review [this guide on delegating access across AWS accounts using IAM roles](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_create_for-user.html).
+type AwsRoleCredential struct {
+	// ARN of the AWS role to assume in the destination account.
+	RoleArn string `json:"role_arn" url:"role_arn"`
+	// External ID to use when assuming the AWS role in the destination account.
+	ExternalId string `json:"external_id" url:"external_id"`
+	// Name of the AWS role session.
+	RoleSessionName *string `json:"role_session_name,omitempty" url:"role_session_name,omitempty"`
+	// The duration, in seconds, of the role session. The value specified can range from 900 seconds (15 minutes) up to the maximum session duration set for the role. The maximum session duration setting can have a value from 1 hour.
+	Duration *int `json:"duration,omitempty" url:"duration,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (a *AwsRoleCredential) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
+}
+
+func (a *AwsRoleCredential) UnmarshalJSON(data []byte) error {
+	type unmarshaler AwsRoleCredential
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*a = AwsRoleCredential(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+
+	a._rawJSON = nil
+	return nil
+}
+
+func (a *AwsRoleCredential) String() string {
+	if len(a._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(a); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", a)
+}
+
+// Unique identifier for an AWS Role Credential
+type AwsRoleCredentialId = CredentialId
+
 // Username and secret used to authenticate with an external service.
 type BasicCredential struct {
 	// Username value for authentication
@@ -2338,6 +2390,7 @@ func (c *CredentialBase) String() string {
 type CredentialConfig struct {
 	Type        string
 	Aws         *AwsCredential
+	AwsRole     *AwsRoleCredential
 	Token       *TokenCredential
 	Basic       *BasicCredential
 	Secret      *SecretCredential
@@ -2362,6 +2415,12 @@ func (c *CredentialConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		c.Aws = value
+	case "aws_role":
+		value := new(AwsRoleCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		c.AwsRole = value
 	case "token":
 		value := new(TokenCredential)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -2394,6 +2453,9 @@ func (c CredentialConfig) MarshalJSON() ([]byte, error) {
 	if c.Aws != nil {
 		return core.MarshalJSONWithExtraProperty(c.Aws, "type", "aws")
 	}
+	if c.AwsRole != nil {
+		return core.MarshalJSONWithExtraProperty(c.AwsRole, "type", "aws_role")
+	}
 	if c.Token != nil {
 		return core.MarshalJSONWithExtraProperty(c.Token, "type", "token")
 	}
@@ -2411,6 +2473,7 @@ func (c CredentialConfig) MarshalJSON() ([]byte, error) {
 
 type CredentialConfigVisitor interface {
 	VisitAws(*AwsCredential) error
+	VisitAwsRole(*AwsRoleCredential) error
 	VisitToken(*TokenCredential) error
 	VisitBasic(*BasicCredential) error
 	VisitSecret(*SecretCredential) error
@@ -2420,6 +2483,9 @@ type CredentialConfigVisitor interface {
 func (c *CredentialConfig) Accept(visitor CredentialConfigVisitor) error {
 	if c.Aws != nil {
 		return visitor.VisitAws(c.Aws)
+	}
+	if c.AwsRole != nil {
+		return visitor.VisitAwsRole(c.AwsRole)
 	}
 	if c.Token != nil {
 		return visitor.VisitToken(c.Token)
@@ -2572,6 +2638,7 @@ type CredentialType string
 
 const (
 	CredentialTypeAws         CredentialType = "aws"
+	CredentialTypeAwsRole     CredentialType = "aws_role"
 	CredentialTypeToken       CredentialType = "token"
 	CredentialTypeBasic       CredentialType = "basic"
 	CredentialTypeSecret      CredentialType = "secret"
@@ -2582,6 +2649,8 @@ func NewCredentialTypeFromString(s string) (CredentialType, error) {
 	switch s {
 	case "aws":
 		return CredentialTypeAws, nil
+	case "aws_role":
+		return CredentialTypeAwsRole, nil
 	case "token":
 		return CredentialTypeToken, nil
 	case "basic":
@@ -7459,6 +7528,7 @@ func (a AppsecOpentextCoreApplicationSecurityDataset) Ptr() *AppsecOpentextCoreA
 //
 // [Configuration guide](https://docs.synqly.com/guides/provider-configuration/amazon-inspector-appsec-setup)
 type AppsecAmazonInspector struct {
+	// AWS credentials with access to [Amazon Inspector](https://docs.aws.amazon.com/inspector/latest/user/what-is-inspector.html).
 	Credential *AwsProviderCredential `json:"credential" url:"credential"`
 	// The [AWS region](https://docs.aws.amazon.com/global-infrastructure/latest/regions/aws-regions.html) to use for the Amazon Inspector provider.
 	Region AwsRegion `json:"region" url:"region"`
@@ -8723,6 +8793,10 @@ type AwsProviderCredential struct {
 	Aws *AwsCredential
 	// Reference to existing AWS Access Keys.
 	AwsId AwsCredentialId
+	// Configuration when creating new AWS Role.
+	AwsRole *AwsRoleCredential
+	// Reference to existing AWS Role.
+	AwsRoleId AwsRoleCredentialId
 }
 
 func (a *AwsProviderCredential) UnmarshalJSON(data []byte) error {
@@ -8751,6 +8825,20 @@ func (a *AwsProviderCredential) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		a.AwsId = valueUnmarshaler.AwsId
+	case "aws_role":
+		value := new(AwsRoleCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		a.AwsRole = value
+	case "aws_role_id":
+		var valueUnmarshaler struct {
+			AwsRoleId AwsRoleCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		a.AwsRoleId = valueUnmarshaler.AwsRoleId
 	}
 	return nil
 }
@@ -8769,12 +8857,27 @@ func (a AwsProviderCredential) MarshalJSON() ([]byte, error) {
 		}
 		return json.Marshal(marshaler)
 	}
+	if a.AwsRole != nil {
+		return core.MarshalJSONWithExtraProperty(a.AwsRole, "type", "aws_role")
+	}
+	if a.AwsRoleId != "" {
+		var marshaler = struct {
+			Type      string              `json:"type"`
+			AwsRoleId AwsRoleCredentialId `json:"value"`
+		}{
+			Type:      "aws_role_id",
+			AwsRoleId: a.AwsRoleId,
+		}
+		return json.Marshal(marshaler)
+	}
 	return nil, fmt.Errorf("type %T does not define a non-empty union type", a)
 }
 
 type AwsProviderCredentialVisitor interface {
 	VisitAws(*AwsCredential) error
 	VisitAwsId(AwsCredentialId) error
+	VisitAwsRole(*AwsRoleCredential) error
+	VisitAwsRoleId(AwsRoleCredentialId) error
 }
 
 func (a *AwsProviderCredential) Accept(visitor AwsProviderCredentialVisitor) error {
@@ -8783,6 +8886,12 @@ func (a *AwsProviderCredential) Accept(visitor AwsProviderCredentialVisitor) err
 	}
 	if a.AwsId != "" {
 		return visitor.VisitAwsId(a.AwsId)
+	}
+	if a.AwsRole != nil {
+		return visitor.VisitAwsRole(a.AwsRole)
+	}
+	if a.AwsRoleId != "" {
+		return visitor.VisitAwsRoleId(a.AwsRoleId)
 	}
 	return fmt.Errorf("type %T does not define a non-empty union type", a)
 }
@@ -8933,216 +9042,6 @@ func NewAwsRegionFromString(s string) (AwsRegion, error) {
 
 func (a AwsRegion) Ptr() *AwsRegion {
 	return &a
-}
-
-type AwsS3Credential struct {
-	Type string
-	// Configuration when creating new AWS Access Keys.
-	Aws *AwsCredential
-	// Reference to existing AWS Access Keys.
-	AwsId AwsCredentialId
-}
-
-func (a *AwsS3Credential) UnmarshalJSON(data []byte) error {
-	var unmarshaler struct {
-		Type string `json:"type"`
-	}
-	if err := json.Unmarshal(data, &unmarshaler); err != nil {
-		return err
-	}
-	a.Type = unmarshaler.Type
-	if unmarshaler.Type == "" {
-		return fmt.Errorf("%T did not include discriminant type", a)
-	}
-	switch unmarshaler.Type {
-	case "aws":
-		value := new(AwsCredential)
-		if err := json.Unmarshal(data, &value); err != nil {
-			return err
-		}
-		a.Aws = value
-	case "aws_id":
-		var valueUnmarshaler struct {
-			AwsId AwsCredentialId `json:"value"`
-		}
-		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
-			return err
-		}
-		a.AwsId = valueUnmarshaler.AwsId
-	}
-	return nil
-}
-
-func (a AwsS3Credential) MarshalJSON() ([]byte, error) {
-	if a.Aws != nil {
-		return core.MarshalJSONWithExtraProperty(a.Aws, "type", "aws")
-	}
-	if a.AwsId != "" {
-		var marshaler = struct {
-			Type  string          `json:"type"`
-			AwsId AwsCredentialId `json:"value"`
-		}{
-			Type:  "aws_id",
-			AwsId: a.AwsId,
-		}
-		return json.Marshal(marshaler)
-	}
-	return nil, fmt.Errorf("type %T does not define a non-empty union type", a)
-}
-
-type AwsS3CredentialVisitor interface {
-	VisitAws(*AwsCredential) error
-	VisitAwsId(AwsCredentialId) error
-}
-
-func (a *AwsS3Credential) Accept(visitor AwsS3CredentialVisitor) error {
-	if a.Aws != nil {
-		return visitor.VisitAws(a.Aws)
-	}
-	if a.AwsId != "" {
-		return visitor.VisitAwsId(a.AwsId)
-	}
-	return fmt.Errorf("type %T does not define a non-empty union type", a)
-}
-
-type AwsSqsCredential struct {
-	Type string
-	// Configuration when creating new AWS Access Keys.
-	Aws *AwsCredential
-	// Reference to existing AWS Access Keys.
-	AwsId AwsCredentialId
-}
-
-func (a *AwsSqsCredential) UnmarshalJSON(data []byte) error {
-	var unmarshaler struct {
-		Type string `json:"type"`
-	}
-	if err := json.Unmarshal(data, &unmarshaler); err != nil {
-		return err
-	}
-	a.Type = unmarshaler.Type
-	if unmarshaler.Type == "" {
-		return fmt.Errorf("%T did not include discriminant type", a)
-	}
-	switch unmarshaler.Type {
-	case "aws":
-		value := new(AwsCredential)
-		if err := json.Unmarshal(data, &value); err != nil {
-			return err
-		}
-		a.Aws = value
-	case "aws_id":
-		var valueUnmarshaler struct {
-			AwsId AwsCredentialId `json:"value"`
-		}
-		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
-			return err
-		}
-		a.AwsId = valueUnmarshaler.AwsId
-	}
-	return nil
-}
-
-func (a AwsSqsCredential) MarshalJSON() ([]byte, error) {
-	if a.Aws != nil {
-		return core.MarshalJSONWithExtraProperty(a.Aws, "type", "aws")
-	}
-	if a.AwsId != "" {
-		var marshaler = struct {
-			Type  string          `json:"type"`
-			AwsId AwsCredentialId `json:"value"`
-		}{
-			Type:  "aws_id",
-			AwsId: a.AwsId,
-		}
-		return json.Marshal(marshaler)
-	}
-	return nil, fmt.Errorf("type %T does not define a non-empty union type", a)
-}
-
-type AwsSqsCredentialVisitor interface {
-	VisitAws(*AwsCredential) error
-	VisitAwsId(AwsCredentialId) error
-}
-
-func (a *AwsSqsCredential) Accept(visitor AwsSqsCredentialVisitor) error {
-	if a.Aws != nil {
-		return visitor.VisitAws(a.Aws)
-	}
-	if a.AwsId != "" {
-		return visitor.VisitAwsId(a.AwsId)
-	}
-	return fmt.Errorf("type %T does not define a non-empty union type", a)
-}
-
-type AwsSecurityLakeCredential struct {
-	Type string
-	// Configuration when creating new AWS Access Keys.
-	Aws *AwsCredential
-	// Reference to existing AWS Access Keys.
-	AwsId AwsCredentialId
-}
-
-func (a *AwsSecurityLakeCredential) UnmarshalJSON(data []byte) error {
-	var unmarshaler struct {
-		Type string `json:"type"`
-	}
-	if err := json.Unmarshal(data, &unmarshaler); err != nil {
-		return err
-	}
-	a.Type = unmarshaler.Type
-	if unmarshaler.Type == "" {
-		return fmt.Errorf("%T did not include discriminant type", a)
-	}
-	switch unmarshaler.Type {
-	case "aws":
-		value := new(AwsCredential)
-		if err := json.Unmarshal(data, &value); err != nil {
-			return err
-		}
-		a.Aws = value
-	case "aws_id":
-		var valueUnmarshaler struct {
-			AwsId AwsCredentialId `json:"value"`
-		}
-		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
-			return err
-		}
-		a.AwsId = valueUnmarshaler.AwsId
-	}
-	return nil
-}
-
-func (a AwsSecurityLakeCredential) MarshalJSON() ([]byte, error) {
-	if a.Aws != nil {
-		return core.MarshalJSONWithExtraProperty(a.Aws, "type", "aws")
-	}
-	if a.AwsId != "" {
-		var marshaler = struct {
-			Type  string          `json:"type"`
-			AwsId AwsCredentialId `json:"value"`
-		}{
-			Type:  "aws_id",
-			AwsId: a.AwsId,
-		}
-		return json.Marshal(marshaler)
-	}
-	return nil, fmt.Errorf("type %T does not define a non-empty union type", a)
-}
-
-type AwsSecurityLakeCredentialVisitor interface {
-	VisitAws(*AwsCredential) error
-	VisitAwsId(AwsCredentialId) error
-}
-
-func (a *AwsSecurityLakeCredential) Accept(visitor AwsSecurityLakeCredentialVisitor) error {
-	if a.Aws != nil {
-		return visitor.VisitAws(a.Aws)
-	}
-	if a.AwsId != "" {
-		return visitor.VisitAwsId(a.AwsId)
-	}
-	return fmt.Errorf("type %T does not define a non-empty union type", a)
 }
 
 type AxoniusCredential struct {
@@ -9458,6 +9357,7 @@ func (c *ClarotyCredential) Accept(visitor ClarotyCredentialVisitor) error {
 
 // Configuration for the AWS Cloud Security Provider
 type CloudSecurityAws struct {
+	// AWS credentials with access to [Amazon Security Hub](https://docs.aws.amazon.com/securityhub/latest/userguide/what-are-securityhub-services.html).
 	Credential *AwsProviderCredential `json:"credential" url:"credential"`
 	// The [AWS region](https://docs.aws.amazon.com/global-infrastructure/latest/regions/aws-regions.html) to use for the AWS Cloud Security Provider.
 	Region AwsRegion `json:"region" url:"region"`
@@ -16405,13 +16305,13 @@ func (s *SevcoCredential) Accept(visitor SevcoCredentialVisitor) error {
 
 // Configuration for Amazon S3 as a Sink provider. Events are written directly to an AWS S3 bucket in compressed JSON format.
 type SinkAwsS3 struct {
-	// Bucket
+	// Name of the Amazon S3 bucket
 	Bucket string `json:"bucket" url:"bucket"`
-	// Credential
-	Credential *AwsS3Credential `json:"credential" url:"credential"`
-	// Path
+	// AWS credentials with write access to the configured S3 bucket.
+	Credential *AwsProviderCredential `json:"credential" url:"credential"`
+	// Files will be written under this path.
 	Path string `json:"path" url:"path"`
-	// AWS Region
+	// AWS Region where the S3 bucket is located.
 	Region AwsRegion `json:"region" url:"region"`
 
 	extraProperties map[string]interface{}
@@ -16456,8 +16356,8 @@ func (s *SinkAwsS3) String() string {
 //
 // [Configuration guide](https://docs.synqly.com/guides/provider-configuration/aws-sqs-sink-setup)
 type SinkAwsSqs struct {
-	// AWS Access Keys with write access to the configured SQS queue.
-	Credential *AwsSqsCredential `json:"credential" url:"credential"`
+	// AWS credentials with write access to the configured SQS queue.
+	Credential *AwsProviderCredential `json:"credential" url:"credential"`
 	// Overrides the default AWS region. If not present, the region will be inferred from the URL.
 	Region *string `json:"region,omitempty" url:"region,omitempty"`
 	// URL of the SQS queue where events are sent.
@@ -16505,8 +16405,8 @@ func (s *SinkAwsSqs) String() string {
 //
 // [Configuration guide](https://docs.synqly.com/guides/provider-configuration/amazon-security-lake-sink-setup)
 type SinkAwsSecurityLake struct {
-	// AWS Access Keys with write access to the configured S3 bucket.
-	Credential *AwsSecurityLakeCredential `json:"credential" url:"credential"`
+	// AWS credentials with write access to the configured S3 bucket.
+	Credential *AwsProviderCredential `json:"credential" url:"credential"`
 	// Override the default AWS region for this integration. If not present, the region will be inferred from the URL.
 	Region *string `json:"region,omitempty" url:"region,omitempty"`
 	// URL of the S3 bucket where the Amazon Security Lake events are stored.
@@ -17493,8 +17393,9 @@ func (s *SplunkSearchCredential) Accept(visitor SplunkSearchCredentialVisitor) e
 // [Configuration guide](https://docs.synqly.com/guides/provider-configuration/aws-s3-storage-setup)
 type StorageAwsS3 struct {
 	// Name of the Amazon S3 bucket where files are stored.
-	Bucket     string           `json:"bucket" url:"bucket"`
-	Credential *AwsS3Credential `json:"credential" url:"credential"`
+	Bucket string `json:"bucket" url:"bucket"`
+	// AWS credentials with write access to the configured S3 bucket.
+	Credential *AwsProviderCredential `json:"credential" url:"credential"`
 	// Endpoint used for connecting to Amazon S3 the external service. If not provided, the default Amazon S3 endpoint will be used.
 	Endpoint *string `json:"endpoint,omitempty" url:"endpoint,omitempty"`
 	// AWS region where the Amazon S3 bucket is located.
