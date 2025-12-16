@@ -11375,6 +11375,576 @@ func (h HclAppScanOnCloudUrl) Ptr() *HclAppScanOnCloudUrl {
 	return &h
 }
 
+type HttpReceiverAuthConfig struct {
+	Type              string
+	BasicConfig       *HttpReceiverBasicAuthConfig
+	OAuthClientConfig *HttpReceiverOAuthConfig
+	TokenConfig       *HttpReceiverTokenAuthConfig
+}
+
+func (h *HttpReceiverAuthConfig) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	h.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", h)
+	}
+	switch unmarshaler.Type {
+	case "basic_config":
+		value := new(HttpReceiverBasicAuthConfig)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		h.BasicConfig = value
+	case "o_auth_client_config":
+		value := new(HttpReceiverOAuthConfig)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		h.OAuthClientConfig = value
+	case "token_config":
+		value := new(HttpReceiverTokenAuthConfig)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		h.TokenConfig = value
+	}
+	return nil
+}
+
+func (h HttpReceiverAuthConfig) MarshalJSON() ([]byte, error) {
+	if h.BasicConfig != nil {
+		return core.MarshalJSONWithExtraProperty(h.BasicConfig, "type", "basic_config")
+	}
+	if h.OAuthClientConfig != nil {
+		return core.MarshalJSONWithExtraProperty(h.OAuthClientConfig, "type", "o_auth_client_config")
+	}
+	if h.TokenConfig != nil {
+		return core.MarshalJSONWithExtraProperty(h.TokenConfig, "type", "token_config")
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", h)
+}
+
+type HttpReceiverAuthConfigVisitor interface {
+	VisitBasicConfig(*HttpReceiverBasicAuthConfig) error
+	VisitOAuthClientConfig(*HttpReceiverOAuthConfig) error
+	VisitTokenConfig(*HttpReceiverTokenAuthConfig) error
+}
+
+func (h *HttpReceiverAuthConfig) Accept(visitor HttpReceiverAuthConfigVisitor) error {
+	if h.BasicConfig != nil {
+		return visitor.VisitBasicConfig(h.BasicConfig)
+	}
+	if h.OAuthClientConfig != nil {
+		return visitor.VisitOAuthClientConfig(h.OAuthClientConfig)
+	}
+	if h.TokenConfig != nil {
+		return visitor.VisitTokenConfig(h.TokenConfig)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", h)
+}
+
+// Standard HTTP Basic authentication (RFC 7617). Credentials are sent in the Authorization header as Base64-encoded `username:password`.
+type HttpReceiverBasicAuthConfig struct {
+	Credential *HttpReceiverBasicCredential `json:"credential" url:"credential"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (h *HttpReceiverBasicAuthConfig) GetExtraProperties() map[string]interface{} {
+	return h.extraProperties
+}
+
+func (h *HttpReceiverBasicAuthConfig) UnmarshalJSON(data []byte) error {
+	type unmarshaler HttpReceiverBasicAuthConfig
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*h = HttpReceiverBasicAuthConfig(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *h)
+	if err != nil {
+		return err
+	}
+	h.extraProperties = extraProperties
+
+	h._rawJSON = nil
+	return nil
+}
+
+func (h *HttpReceiverBasicAuthConfig) String() string {
+	if len(h._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(h._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(h); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", h)
+}
+
+type HttpReceiverBasicCredential struct {
+	Type string
+	// Configuration when creating new Basic Credentials.
+	Basic *BasicCredential
+	// Reference to existing Basic Credentials.
+	BasicId BasicCredentialId
+}
+
+func (h *HttpReceiverBasicCredential) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	h.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", h)
+	}
+	switch unmarshaler.Type {
+	case "basic":
+		value := new(BasicCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		h.Basic = value
+	case "basic_id":
+		var valueUnmarshaler struct {
+			BasicId BasicCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		h.BasicId = valueUnmarshaler.BasicId
+	}
+	return nil
+}
+
+func (h HttpReceiverBasicCredential) MarshalJSON() ([]byte, error) {
+	if h.Basic != nil {
+		return core.MarshalJSONWithExtraProperty(h.Basic, "type", "basic")
+	}
+	if h.BasicId != "" {
+		var marshaler = struct {
+			Type    string            `json:"type"`
+			BasicId BasicCredentialId `json:"value"`
+		}{
+			Type:    "basic_id",
+			BasicId: h.BasicId,
+		}
+		return json.Marshal(marshaler)
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", h)
+}
+
+type HttpReceiverBasicCredentialVisitor interface {
+	VisitBasic(*BasicCredential) error
+	VisitBasicId(BasicCredentialId) error
+}
+
+func (h *HttpReceiverBasicCredential) Accept(visitor HttpReceiverBasicCredentialVisitor) error {
+	if h.Basic != nil {
+		return visitor.VisitBasic(h.Basic)
+	}
+	if h.BasicId != "" {
+		return visitor.VisitBasicId(h.BasicId)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", h)
+}
+
+// HTTP method to use for sending events.
+type HttpReceiverMethod string
+
+const (
+	HttpReceiverMethodPost  HttpReceiverMethod = "POST"
+	HttpReceiverMethodPut   HttpReceiverMethod = "PUT"
+	HttpReceiverMethodPatch HttpReceiverMethod = "PATCH"
+	HttpReceiverMethodGet   HttpReceiverMethod = "GET"
+)
+
+func NewHttpReceiverMethodFromString(s string) (HttpReceiverMethod, error) {
+	switch s {
+	case "POST":
+		return HttpReceiverMethodPost, nil
+	case "PUT":
+		return HttpReceiverMethodPut, nil
+	case "PATCH":
+		return HttpReceiverMethodPatch, nil
+	case "GET":
+		return HttpReceiverMethodGet, nil
+	}
+	var t HttpReceiverMethod
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (h HttpReceiverMethod) Ptr() *HttpReceiverMethod {
+	return &h
+}
+
+// OAuth 2.0 client credentials flow (RFC 6749) for service-to-service authentication.
+type HttpReceiverOAuthConfig struct {
+	// How to send client credentials when requesting OAuth access tokens:
+	//
+	// - `in_header`: Send client credentials via HTTP Basic authentication. This is the **recommended and most secure method**, used by most modern OAuth 2.0 providers.
+	// - `in_params`: Send client credentials URL-encoded in the request body as form parameters. Required by some legacy OAuth servers and specific provider implementations. Consult your OAuth provider documentation for details.
+	AuthStyle  *HttpReceiverOAuthStyle      `json:"auth_style,omitempty" url:"auth_style,omitempty"`
+	Credential *HttpReceiverOAuthCredential `json:"credential" url:"credential"`
+	// Additional parameters to include in OAuth token request
+	EndpointParams map[string]string `json:"endpoint_params,omitempty" url:"endpoint_params,omitempty"`
+	// OAuth2 scopes to request when fetching access token
+	Scopes []string `json:"scopes,omitempty" url:"scopes,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (h *HttpReceiverOAuthConfig) GetExtraProperties() map[string]interface{} {
+	return h.extraProperties
+}
+
+func (h *HttpReceiverOAuthConfig) UnmarshalJSON(data []byte) error {
+	type unmarshaler HttpReceiverOAuthConfig
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*h = HttpReceiverOAuthConfig(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *h)
+	if err != nil {
+		return err
+	}
+	h.extraProperties = extraProperties
+
+	h._rawJSON = nil
+	return nil
+}
+
+func (h *HttpReceiverOAuthConfig) String() string {
+	if len(h._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(h._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(h); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", h)
+}
+
+type HttpReceiverOAuthCredential struct {
+	Type string
+	// Configuration when creating new Client Credentials.
+	OAuthClient *OAuthClientCredential
+	// Reference to existing Client Credentials.
+	OAuthClientId OAuthClientCredentialId
+}
+
+func (h *HttpReceiverOAuthCredential) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	h.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", h)
+	}
+	switch unmarshaler.Type {
+	case "o_auth_client":
+		value := new(OAuthClientCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		h.OAuthClient = value
+	case "o_auth_client_id":
+		var valueUnmarshaler struct {
+			OAuthClientId OAuthClientCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		h.OAuthClientId = valueUnmarshaler.OAuthClientId
+	}
+	return nil
+}
+
+func (h HttpReceiverOAuthCredential) MarshalJSON() ([]byte, error) {
+	if h.OAuthClient != nil {
+		return core.MarshalJSONWithExtraProperty(h.OAuthClient, "type", "o_auth_client")
+	}
+	if h.OAuthClientId != "" {
+		var marshaler = struct {
+			Type          string                  `json:"type"`
+			OAuthClientId OAuthClientCredentialId `json:"value"`
+		}{
+			Type:          "o_auth_client_id",
+			OAuthClientId: h.OAuthClientId,
+		}
+		return json.Marshal(marshaler)
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", h)
+}
+
+type HttpReceiverOAuthCredentialVisitor interface {
+	VisitOAuthClient(*OAuthClientCredential) error
+	VisitOAuthClientId(OAuthClientCredentialId) error
+}
+
+func (h *HttpReceiverOAuthCredential) Accept(visitor HttpReceiverOAuthCredentialVisitor) error {
+	if h.OAuthClient != nil {
+		return visitor.VisitOAuthClient(h.OAuthClient)
+	}
+	if h.OAuthClientId != "" {
+		return visitor.VisitOAuthClientId(h.OAuthClientId)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", h)
+}
+
+// How to send client credentials when requesting OAuth access tokens:
+//
+// - `in_header`: Send client credentials via HTTP Basic authentication. This is the **recommended and most secure method**, used by most modern OAuth 2.0 providers.
+// - `in_params`: Send client credentials URL-encoded in the request body as form parameters. Required by some legacy OAuth servers and specific provider implementations. Consult your OAuth provider documentation for details.
+type HttpReceiverOAuthStyle string
+
+const (
+	HttpReceiverOAuthStyleInHeader HttpReceiverOAuthStyle = "in_header"
+	HttpReceiverOAuthStyleInParams HttpReceiverOAuthStyle = "in_params"
+)
+
+func NewHttpReceiverOAuthStyleFromString(s string) (HttpReceiverOAuthStyle, error) {
+	switch s {
+	case "in_header":
+		return HttpReceiverOAuthStyleInHeader, nil
+	case "in_params":
+		return HttpReceiverOAuthStyleInParams, nil
+	}
+	var t HttpReceiverOAuthStyle
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (h HttpReceiverOAuthStyle) Ptr() *HttpReceiverOAuthStyle {
+	return &h
+}
+
+type HttpReceiverSigningCredential struct {
+	Type string
+	// Configuration when creating new Secret.
+	Secret *SecretCredential
+	// Reference to existing Secret.
+	SecretId SecretCredentialId
+}
+
+func (h *HttpReceiverSigningCredential) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	h.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", h)
+	}
+	switch unmarshaler.Type {
+	case "secret":
+		value := new(SecretCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		h.Secret = value
+	case "secret_id":
+		var valueUnmarshaler struct {
+			SecretId SecretCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		h.SecretId = valueUnmarshaler.SecretId
+	}
+	return nil
+}
+
+func (h HttpReceiverSigningCredential) MarshalJSON() ([]byte, error) {
+	if h.Secret != nil {
+		return core.MarshalJSONWithExtraProperty(h.Secret, "type", "secret")
+	}
+	if h.SecretId != "" {
+		var marshaler = struct {
+			Type     string             `json:"type"`
+			SecretId SecretCredentialId `json:"value"`
+		}{
+			Type:     "secret_id",
+			SecretId: h.SecretId,
+		}
+		return json.Marshal(marshaler)
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", h)
+}
+
+type HttpReceiverSigningCredentialVisitor interface {
+	VisitSecret(*SecretCredential) error
+	VisitSecretId(SecretCredentialId) error
+}
+
+func (h *HttpReceiverSigningCredential) Accept(visitor HttpReceiverSigningCredentialVisitor) error {
+	if h.Secret != nil {
+		return visitor.VisitSecret(h.Secret)
+	}
+	if h.SecretId != "" {
+		return visitor.VisitSecretId(h.SecretId)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", h)
+}
+
+// Token-based authentication for API keys, bearer tokens, and custom token schemes. By default, sends token in Authorization header as a Bearer token. Use the **Header Name** and **Template** options to override this behavior.
+type HttpReceiverTokenAuthConfig struct {
+	Credential *HttpReceiverTokenCredential `json:"credential" url:"credential"`
+	// HTTP header name to use when sending the token.
+	HeaderName *string `json:"header_name,omitempty" url:"header_name,omitempty"`
+	// Template to use when building the HTTP header value. Use `{{token}}` as a placeholder for the secret token value. This will be substituted at runtime. Do not store any secrets in this field.
+	Template *string `json:"template,omitempty" url:"template,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (h *HttpReceiverTokenAuthConfig) GetExtraProperties() map[string]interface{} {
+	return h.extraProperties
+}
+
+func (h *HttpReceiverTokenAuthConfig) UnmarshalJSON(data []byte) error {
+	type unmarshaler HttpReceiverTokenAuthConfig
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*h = HttpReceiverTokenAuthConfig(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *h)
+	if err != nil {
+		return err
+	}
+	h.extraProperties = extraProperties
+
+	h._rawJSON = nil
+	return nil
+}
+
+func (h *HttpReceiverTokenAuthConfig) String() string {
+	if len(h._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(h._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(h); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", h)
+}
+
+type HttpReceiverTokenCredential struct {
+	Type string
+	// Configuration when creating new Token.
+	Token *TokenCredential
+	// Reference to existing Token.
+	TokenId TokenCredentialId
+}
+
+func (h *HttpReceiverTokenCredential) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	h.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", h)
+	}
+	switch unmarshaler.Type {
+	case "token":
+		value := new(TokenCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		h.Token = value
+	case "token_id":
+		var valueUnmarshaler struct {
+			TokenId TokenCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		h.TokenId = valueUnmarshaler.TokenId
+	}
+	return nil
+}
+
+func (h HttpReceiverTokenCredential) MarshalJSON() ([]byte, error) {
+	if h.Token != nil {
+		return core.MarshalJSONWithExtraProperty(h.Token, "type", "token")
+	}
+	if h.TokenId != "" {
+		var marshaler = struct {
+			Type    string            `json:"type"`
+			TokenId TokenCredentialId `json:"value"`
+		}{
+			Type:    "token_id",
+			TokenId: h.TokenId,
+		}
+		return json.Marshal(marshaler)
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", h)
+}
+
+type HttpReceiverTokenCredentialVisitor interface {
+	VisitToken(*TokenCredential) error
+	VisitTokenId(TokenCredentialId) error
+}
+
+func (h *HttpReceiverTokenCredential) Accept(visitor HttpReceiverTokenCredentialVisitor) error {
+	if h.Token != nil {
+		return visitor.VisitToken(h.Token)
+	}
+	if h.TokenId != "" {
+		return visitor.VisitTokenId(h.TokenId)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", h)
+}
+
+// Format for serializing events in the request body sent to the receiving endpoint.
+type HttpRequestBodyFormat string
+
+const (
+	HttpRequestBodyFormatJsonl     HttpRequestBodyFormat = "jsonl"
+	HttpRequestBodyFormatJsonArray HttpRequestBodyFormat = "json_array"
+)
+
+func NewHttpRequestBodyFormatFromString(s string) (HttpRequestBodyFormat, error) {
+	switch s {
+	case "jsonl":
+		return HttpRequestBodyFormatJsonl, nil
+	case "json_array":
+		return HttpRequestBodyFormatJsonArray, nil
+	}
+	var t HttpRequestBodyFormat
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (h HttpRequestBodyFormat) Ptr() *HttpRequestBodyFormat {
+	return &h
+}
+
 // Configuration for Microsoft Entra ID.
 //
 // [Configuration guide](https://docs.synqly.com/guides/provider-configuration/entra-id-setup)
@@ -13244,6 +13814,8 @@ type ProviderConfig struct {
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/google-security-operations-sink-setup)
 	SinkGoogleSecurityOperations *SinkGoogleSecurityOperations
+	// Generic Sink provider for sending events to any HTTP endpoint. Ideal for integrating with log aggregators, SIEM platforms, custom webhooks, data lakes, and any HTTP-based event ingestion system.
+	SinkHttp *SinkHttp
 	// Configuration for the Synqly mock in-memory Sink Provider. This provider is for testing purposes only and does not retain events pushed to it.
 	SinkMockSink *SinkMock
 	// Configuration for OpenSearch search and analytics engine. Supports both managed and self-hosted OpenSearch deployments
@@ -13778,6 +14350,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.SinkGoogleSecurityOperations = value
+	case "sink_http":
+		value := new(SinkHttp)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.SinkHttp = value
 	case "sink_mock_sink":
 		value := new(SinkMock)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -14182,6 +14760,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.SinkGoogleSecurityOperations != nil {
 		return core.MarshalJSONWithExtraProperty(p.SinkGoogleSecurityOperations, "type", "sink_google_security_operations")
 	}
+	if p.SinkHttp != nil {
+		return core.MarshalJSONWithExtraProperty(p.SinkHttp, "type", "sink_http")
+	}
 	if p.SinkMockSink != nil {
 		return core.MarshalJSONWithExtraProperty(p.SinkMockSink, "type", "sink_mock_sink")
 	}
@@ -14351,6 +14932,7 @@ type ProviderConfigVisitor interface {
 	VisitSinkGcs(*SinkGcs) error
 	VisitSinkGoogleSecOps(*SinkGoogleSecOps) error
 	VisitSinkGoogleSecurityOperations(*SinkGoogleSecurityOperations) error
+	VisitSinkHttp(*SinkHttp) error
 	VisitSinkMockSink(*SinkMock) error
 	VisitSinkOpensearch(*SinkOpenSearch) error
 	VisitSinkQRadar(*SinkQRadar) error
@@ -14593,6 +15175,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	if p.SinkGoogleSecurityOperations != nil {
 		return visitor.VisitSinkGoogleSecurityOperations(p.SinkGoogleSecurityOperations)
 	}
+	if p.SinkHttp != nil {
+		return visitor.VisitSinkHttp(p.SinkHttp)
+	}
 	if p.SinkMockSink != nil {
 		return visitor.VisitSinkMockSink(p.SinkMockSink)
 	}
@@ -14834,6 +15419,8 @@ const (
 	ProviderConfigIdSinkGoogleSecOps ProviderConfigId = "sink_google_sec_ops"
 	// Google Security Operations
 	ProviderConfigIdSinkGoogleSecurityOperations ProviderConfigId = "sink_google_security_operations"
+	// Generic HTTP Receiver
+	ProviderConfigIdSinkHttp ProviderConfigId = "sink_http"
 	// Synqly Test Provider
 	ProviderConfigIdSinkMock ProviderConfigId = "sink_mock_sink"
 	// OpenSearch
@@ -15042,6 +15629,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdSinkGoogleSecOps, nil
 	case "sink_google_security_operations":
 		return ProviderConfigIdSinkGoogleSecurityOperations, nil
+	case "sink_http":
+		return ProviderConfigIdSinkHttp, nil
 	case "sink_mock_sink":
 		return ProviderConfigIdSinkMock, nil
 	case "sink_opensearch":
@@ -16787,6 +17376,67 @@ func (s *SinkGoogleSecurityOperations) UnmarshalJSON(data []byte) error {
 }
 
 func (s *SinkGoogleSecurityOperations) String() string {
+	if len(s._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(s); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", s)
+}
+
+// Generic Sink provider for sending events to any HTTP endpoint. Ideal for integrating with log aggregators, SIEM platforms, custom webhooks, data lakes, and any HTTP-based event ingestion system.
+type SinkHttp struct {
+	// HTTP status codes that indicate successful event delivery. Defaults to standard success codes. Configure if receiving endpoint uses different response codes (e.g. `207 Multi-Status`).
+	AcceptedResponseCodes []int `json:"accepted_response_codes,omitempty" url:"accepted_response_codes,omitempty"`
+	// Configuration for authorizing requests with the receiving endpoint. Must be specified if the endpoint requires it. Can be combined with **Payload Signing** for defense-in-depth security.
+	Authorization *HttpReceiverAuthConfig `json:"authorization,omitempty" url:"authorization,omitempty"`
+	// HTTP method to use for sending events.
+	HttpMethod *HttpReceiverMethod `json:"http_method,omitempty" url:"http_method,omitempty"`
+	// Format for serializing events in the HTTP request body. Choose based on receiving endpoint requirements and performance needs.
+	//
+	// - `jsonl` - JSON Lines (newline-delimited JSON) where each event is a separate JSON object on its own line. Memory efficient for large batches, supports streaming.
+	// - `json_array` - Standard JSON array format - events wrapped in `[{...}, {...}]`. Simpler structure, easier debugging and testing.
+	RequestBodyFormat *HttpRequestBodyFormat `json:"request_body_format,omitempty" url:"request_body_format,omitempty"`
+	// Enables payload signing, allowing the receiving endpoint to verify payload integrity and authenticity.
+	SigningCredential *HttpReceiverSigningCredential `json:"signing_credential,omitempty" url:"signing_credential,omitempty"`
+	// Disables TLS certification verification.
+	// **Warning:** this disables security checks and makes connections vulnerable to man-in-the-middle attacks.
+	SkipTlsVerify *bool `json:"skip_tls_verify,omitempty" url:"skip_tls_verify,omitempty"`
+	// Additional HTTP headers to include on every request. Use for non-sensitive metadata like source system identifiers, API versioning, or custom routing headers that don't change per request.
+	StaticHeaders map[string]string `json:"static_headers,omitempty" url:"static_headers,omitempty"`
+	// Receiving endpoint where events will be sent.
+	Url string `json:"url" url:"url"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (s *SinkHttp) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
+}
+
+func (s *SinkHttp) UnmarshalJSON(data []byte) error {
+	type unmarshaler SinkHttp
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*s = SinkHttp(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+
+	s._rawJSON = nil
+	return nil
+}
+
+func (s *SinkHttp) String() string {
 	if len(s._rawJSON) > 0 {
 		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
 			return value
