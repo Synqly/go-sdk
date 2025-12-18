@@ -8,12 +8,6 @@ import (
 	core "github.com/synqly/go-sdk/client/engine/core"
 )
 
-type GetLabelsRequest struct {
-	// Filter results by this query. For more information on filtering, refer to the Assets Filtering Guide.
-	// Defaults to no filter.
-	Filter *string `json:"-" url:"filter,omitempty"`
-}
-
 type QueryDevicesRequest struct {
 	// Add metadata to the response by invoking meta functions. Documentation for meta functions is available at https://docs.synqly.com/api-reference/meta-functions. Not all meta function are available at every endpoint.
 	Meta []*string `json:"-" url:"meta,omitempty"`

@@ -98,8 +98,8 @@ func (g *GetLabelsResponse) String() string {
 }
 
 type Label struct {
-	Value  string `json:"value" url:"value"`
-	Device Device `json:"device" url:"device"`
+	Key   *string `json:"key,omitempty" url:"key,omitempty"`
+	Value string  `json:"value" url:"value"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage

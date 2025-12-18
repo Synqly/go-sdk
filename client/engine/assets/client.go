@@ -319,7 +319,6 @@ func (c *Client) CreateAsset(
 // Get labels from an asset inventory system
 func (c *Client) GetLabels(
 	ctx context.Context,
-	request *engine.GetLabelsRequest,
 	opts ...option.RequestOption,
 ) (*engine.GetLabelsResponse, error) {
 	options := core.NewRequestOptions(opts...)
@@ -332,14 +331,6 @@ func (c *Client) GetLabels(
 		baseURL = options.BaseURL
 	}
 	endpointURL := baseURL + "/v1/assets/labels"
-
-	queryParams, err := core.QueryValues(request)
-	if err != nil {
-		return nil, err
-	}
-	if len(queryParams) > 0 {
-		endpointURL += "?" + queryParams.Encode()
-	}
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
