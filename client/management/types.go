@@ -7505,6 +7505,53 @@ func (w *WebhooksPermissions) String() string {
 	return fmt.Sprintf("%#v", w)
 }
 
+// Configuration for Snyk as an application security provider.
+type AppSecSnyk struct {
+	// Credentials used for accessing the Snyk API.
+	Credential *SnykCredential `json:"credential" url:"credential"`
+	// The ID of the Snyk organization to use. This value can be found in the Snyk Organizations Settings page.
+	OrganizationId string `json:"organization_id" url:"organization_id"`
+	// The data region that the Snyk organization is hosted in. This value can be found in the Snyk URL and on the Snyk login page. For more information, see the [Snyk documentation](https://docs.snyk.io/snyk-data-and-governance/regional-hosting-and-data-residency#regional-urls).
+	Region SnykRegion `json:"region" url:"region"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (a *AppSecSnyk) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
+}
+
+func (a *AppSecSnyk) UnmarshalJSON(data []byte) error {
+	type unmarshaler AppSecSnyk
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*a = AppSecSnyk(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+
+	a._rawJSON = nil
+	return nil
+}
+
+func (a *AppSecSnyk) String() string {
+	if len(a._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(a); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", a)
+}
+
 type AppsecOpentextCoreApplicationSecurityDataset string
 
 const (
@@ -13611,6 +13658,8 @@ type ProviderConfig struct {
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/opentext-core-applicationsecurity-appsec-setup)
 	AppsecOpentextCoreApplicationSecurityMock *AppsecOpenTextCoreApplicationSecurityMock
+	// Configuration for Snyk as an application security provider.
+	AppsecSnyk *AppSecSnyk
 	// Configuration for Armis Centrix™ for Asset Management and Security.
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/armis-centrix-setup)
@@ -13972,6 +14021,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.AppsecOpentextCoreApplicationSecurityMock = value
+	case "appsec_snyk":
+		value := new(AppSecSnyk)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.AppsecSnyk = value
 	case "assets_armis_centrix":
 		value := new(AssetsArmisCentrix)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -14571,6 +14626,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.AppsecOpentextCoreApplicationSecurityMock != nil {
 		return core.MarshalJSONWithExtraProperty(p.AppsecOpentextCoreApplicationSecurityMock, "type", "appsec_opentext_core_application_security_mock")
 	}
+	if p.AppsecSnyk != nil {
+		return core.MarshalJSONWithExtraProperty(p.AppsecSnyk, "type", "appsec_snyk")
+	}
 	if p.AssetsArmisCentrix != nil {
 		return core.MarshalJSONWithExtraProperty(p.AssetsArmisCentrix, "type", "assets_armis_centrix")
 	}
@@ -14869,6 +14927,7 @@ type ProviderConfigVisitor interface {
 	VisitAppsecOpentextApplicationSecurity(*AppsecOpenTextApplicationSecurity) error
 	VisitAppsecOpentextCoreApplicationSecurity(*AppsecOpenTextCoreApplicationSecurity) error
 	VisitAppsecOpentextCoreApplicationSecurityMock(*AppsecOpenTextCoreApplicationSecurityMock) error
+	VisitAppsecSnyk(*AppSecSnyk) error
 	VisitAssetsArmisCentrix(*AssetsArmisCentrix) error
 	VisitAssetsArmisCentrixMock(*AssetsArmisCentrixMock) error
 	VisitAssetsAxonius(*AssetsAxonius) error
@@ -14985,6 +15044,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.AppsecOpentextCoreApplicationSecurityMock != nil {
 		return visitor.VisitAppsecOpentextCoreApplicationSecurityMock(p.AppsecOpentextCoreApplicationSecurityMock)
+	}
+	if p.AppsecSnyk != nil {
+		return visitor.VisitAppsecSnyk(p.AppsecSnyk)
 	}
 	if p.AssetsArmisCentrix != nil {
 		return visitor.VisitAssetsArmisCentrix(p.AssetsArmisCentrix)
@@ -15293,6 +15355,8 @@ const (
 	ProviderConfigIdAppsecOpenTextCoreApplicationSecurity ProviderConfigId = "appsec_opentext_core_application_security"
 	// [MOCK] OpenText Core Application Security
 	ProviderConfigIdAppsecOpenTextCoreApplicationSecurityMock ProviderConfigId = "appsec_opentext_core_application_security_mock"
+	// Snyk
+	ProviderConfigIdAppSecSnyk ProviderConfigId = "appsec_snyk"
 	// Armis Centrix™ for Asset Management and Security
 	ProviderConfigIdAssetsArmisCentrix ProviderConfigId = "assets_armis_centrix"
 	// [MOCK] Armis Centrix™ for Asset Management and Security
@@ -15503,6 +15567,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdAppsecOpenTextCoreApplicationSecurity, nil
 	case "appsec_opentext_core_application_security_mock":
 		return ProviderConfigIdAppsecOpenTextCoreApplicationSecurityMock, nil
+	case "appsec_snyk":
+		return ProviderConfigIdAppSecSnyk, nil
 	case "assets_armis_centrix":
 		return ProviderConfigIdAssetsArmisCentrix, nil
 	case "assets_armis_centrix_mock":
@@ -17826,6 +17892,151 @@ func (s *SlackWebhookCredential) Accept(visitor SlackWebhookCredentialVisitor) e
 		return visitor.VisitSecretId(s.SecretId)
 	}
 	return fmt.Errorf("type %T does not define a non-empty union type", s)
+}
+
+type SnykCredential struct {
+	Type string
+	// Configuration when creating new Client Credentials.
+	OAuthClient *OAuthClientCredential
+	// Reference to existing Client Credentials.
+	OAuthClientId OAuthClientCredentialId
+	// Configuration when creating new API Key Credentials.
+	Token *TokenCredential
+	// Reference to existing API Key Credentials.
+	TokenId TokenCredentialId
+}
+
+func (s *SnykCredential) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	s.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", s)
+	}
+	switch unmarshaler.Type {
+	case "o_auth_client":
+		value := new(OAuthClientCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		s.OAuthClient = value
+	case "o_auth_client_id":
+		var valueUnmarshaler struct {
+			OAuthClientId OAuthClientCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		s.OAuthClientId = valueUnmarshaler.OAuthClientId
+	case "token":
+		value := new(TokenCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		s.Token = value
+	case "token_id":
+		var valueUnmarshaler struct {
+			TokenId TokenCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		s.TokenId = valueUnmarshaler.TokenId
+	}
+	return nil
+}
+
+func (s SnykCredential) MarshalJSON() ([]byte, error) {
+	if s.OAuthClient != nil {
+		return core.MarshalJSONWithExtraProperty(s.OAuthClient, "type", "o_auth_client")
+	}
+	if s.OAuthClientId != "" {
+		var marshaler = struct {
+			Type          string                  `json:"type"`
+			OAuthClientId OAuthClientCredentialId `json:"value"`
+		}{
+			Type:          "o_auth_client_id",
+			OAuthClientId: s.OAuthClientId,
+		}
+		return json.Marshal(marshaler)
+	}
+	if s.Token != nil {
+		return core.MarshalJSONWithExtraProperty(s.Token, "type", "token")
+	}
+	if s.TokenId != "" {
+		var marshaler = struct {
+			Type    string            `json:"type"`
+			TokenId TokenCredentialId `json:"value"`
+		}{
+			Type:    "token_id",
+			TokenId: s.TokenId,
+		}
+		return json.Marshal(marshaler)
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", s)
+}
+
+type SnykCredentialVisitor interface {
+	VisitOAuthClient(*OAuthClientCredential) error
+	VisitOAuthClientId(OAuthClientCredentialId) error
+	VisitToken(*TokenCredential) error
+	VisitTokenId(TokenCredentialId) error
+}
+
+func (s *SnykCredential) Accept(visitor SnykCredentialVisitor) error {
+	if s.OAuthClient != nil {
+		return visitor.VisitOAuthClient(s.OAuthClient)
+	}
+	if s.OAuthClientId != "" {
+		return visitor.VisitOAuthClientId(s.OAuthClientId)
+	}
+	if s.Token != nil {
+		return visitor.VisitToken(s.Token)
+	}
+	if s.TokenId != "" {
+		return visitor.VisitTokenId(s.TokenId)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", s)
+}
+
+type SnykRegion string
+
+const (
+	// Region Name: SYNK-US-01
+	// Snyk Login and Web UI URL: https://app.snyk.io
+	SnykRegionUsRegion1 SnykRegion = "SNYK-US-01"
+	// Region Name: SYNK-US-02
+	// Snyk Login and Web UI URL: https://app.us.snyk.io/
+	SnykRegionUsRegion2 SnykRegion = "SNYK-US-02"
+	// Region Name: SYNK-EU-01
+	// Snyk Login and Web UI URL: https://app.eu.snyk.io/
+	SnykRegionEuRegion1 SnykRegion = "SNYK-EU-01"
+	// Region Name: SYNK-AU-01
+	// Snyk Login and Web UI URL: https://app.au.snyk.io/
+	SnykRegionAuRegion1 SnykRegion = "SNYK-AU-01"
+)
+
+func NewSnykRegionFromString(s string) (SnykRegion, error) {
+	switch s {
+	case "SNYK-US-01":
+		return SnykRegionUsRegion1, nil
+	case "SNYK-US-02":
+		return SnykRegionUsRegion2, nil
+	case "SNYK-EU-01":
+		return SnykRegionEuRegion1, nil
+	case "SNYK-AU-01":
+		return SnykRegionAuRegion1, nil
+	}
+	var t SnykRegion
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (s SnykRegion) Ptr() *SnykRegion {
+	return &s
 }
 
 type SophosCredential struct {
