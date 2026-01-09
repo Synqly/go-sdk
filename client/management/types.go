@@ -11050,6 +11050,76 @@ func (g *GcsJsonCredential) Accept(visitor GcsJsonCredentialVisitor) error {
 	return fmt.Errorf("type %T does not define a non-empty union type", g)
 }
 
+type GitHubCredential struct {
+	Type string
+	// Configuration when creating new Token.
+	Token *TokenCredential
+	// Reference to existing Token.
+	TokenId TokenCredentialId
+}
+
+func (g *GitHubCredential) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	g.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", g)
+	}
+	switch unmarshaler.Type {
+	case "token":
+		value := new(TokenCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		g.Token = value
+	case "token_id":
+		var valueUnmarshaler struct {
+			TokenId TokenCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		g.TokenId = valueUnmarshaler.TokenId
+	}
+	return nil
+}
+
+func (g GitHubCredential) MarshalJSON() ([]byte, error) {
+	if g.Token != nil {
+		return core.MarshalJSONWithExtraProperty(g.Token, "type", "token")
+	}
+	if g.TokenId != "" {
+		var marshaler = struct {
+			Type    string            `json:"type"`
+			TokenId TokenCredentialId `json:"value"`
+		}{
+			Type:    "token_id",
+			TokenId: g.TokenId,
+		}
+		return json.Marshal(marshaler)
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", g)
+}
+
+type GitHubCredentialVisitor interface {
+	VisitToken(*TokenCredential) error
+	VisitTokenId(TokenCredentialId) error
+}
+
+func (g *GitHubCredential) Accept(visitor GitHubCredentialVisitor) error {
+	if g.Token != nil {
+		return visitor.VisitToken(g.Token)
+	}
+	if g.TokenId != "" {
+		return visitor.VisitTokenId(g.TokenId)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", g)
+}
+
 type GitLabCredential struct {
 	Type string
 	// Configuration when creating new Token.
@@ -13634,6 +13704,8 @@ type ProviderConfig struct {
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/amazon-inspector-appsec-setup)
 	AppsecAmazonInspector *AppsecAmazonInspector
+	// Configuration for GitHub as an application security provider.
+	AppsecGithub *AppsecGitHub
 	// Configuration for GitLab as an application security provider.
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/gitlab-appsec-setup)
@@ -13991,6 +14063,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.AppsecAmazonInspector = value
+	case "appsec_github":
+		value := new(AppsecGitHub)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.AppsecGithub = value
 	case "appsec_gitlab":
 		value := new(AppsecGitLab)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -14611,6 +14689,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.AppsecAmazonInspector != nil {
 		return core.MarshalJSONWithExtraProperty(p.AppsecAmazonInspector, "type", "appsec_amazon_inspector")
 	}
+	if p.AppsecGithub != nil {
+		return core.MarshalJSONWithExtraProperty(p.AppsecGithub, "type", "appsec_github")
+	}
 	if p.AppsecGitlab != nil {
 		return core.MarshalJSONWithExtraProperty(p.AppsecGitlab, "type", "appsec_gitlab")
 	}
@@ -14922,6 +15003,7 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 
 type ProviderConfigVisitor interface {
 	VisitAppsecAmazonInspector(*AppsecAmazonInspector) error
+	VisitAppsecGithub(*AppsecGitHub) error
 	VisitAppsecGitlab(*AppsecGitLab) error
 	VisitAppsecHclAppscanOnCloud(*AppsecHclAppScanOnCloud) error
 	VisitAppsecOpentextApplicationSecurity(*AppsecOpenTextApplicationSecurity) error
@@ -15029,6 +15111,9 @@ type ProviderConfigVisitor interface {
 func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	if p.AppsecAmazonInspector != nil {
 		return visitor.VisitAppsecAmazonInspector(p.AppsecAmazonInspector)
+	}
+	if p.AppsecGithub != nil {
+		return visitor.VisitAppsecGithub(p.AppsecGithub)
 	}
 	if p.AppsecGitlab != nil {
 		return visitor.VisitAppsecGitlab(p.AppsecGitlab)
@@ -15345,6 +15430,8 @@ type ProviderConfigId string
 const (
 	// Amazon Inspector
 	ProviderConfigIdAppsecAmazonInspector ProviderConfigId = "appsec_amazon_inspector"
+	// GitHub
+	ProviderConfigIdAppsecGitHub ProviderConfigId = "appsec_github"
 	// GitLab
 	ProviderConfigIdAppsecGitLab ProviderConfigId = "appsec_gitlab"
 	// HCL AppScan on Cloud
@@ -15557,6 +15644,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 	switch s {
 	case "appsec_amazon_inspector":
 		return ProviderConfigIdAppsecAmazonInspector, nil
+	case "appsec_github":
+		return ProviderConfigIdAppsecGitHub, nil
 	case "appsec_gitlab":
 		return ProviderConfigIdAppsecGitLab, nil
 	case "appsec_hcl_appscan_on_cloud":
@@ -20143,6 +20232,53 @@ func (z *ZendeskCredential) Accept(visitor ZendeskCredentialVisitor) error {
 		return visitor.VisitBasicId(z.BasicId)
 	}
 	return fmt.Errorf("type %T does not define a non-empty union type", z)
+}
+
+// Configuration for GitHub as an application security provider.
+type AppsecGitHub struct {
+	// Credentials used for accessing the GitHub API.
+	Credential *GitHubCredential `json:"credential" url:"credential"`
+	// GitHub organization slug. This value can be found in the URL of the organization's GitHub page or by converting the organization display name to a slug. For example, if the organization display name is "My GitHub Organization" and the URL is "https://github.com/organizations/my-github-organization", the slug would be "my-github-organization".
+	OrganizationSlug string `json:"organization_slug" url:"organization_slug"`
+	// Base URL for the GitHub environment. Only necessary with GitHub Enterprise Server deployments.
+	Url string `json:"url" url:"url"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (a *AppsecGitHub) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
+}
+
+func (a *AppsecGitHub) UnmarshalJSON(data []byte) error {
+	type unmarshaler AppsecGitHub
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*a = AppsecGitHub(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+
+	a._rawJSON = nil
+	return nil
+}
+
+func (a *AppsecGitHub) String() string {
+	if len(a._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(a); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", a)
 }
 
 // Configuration for GitLab as an application security provider.
