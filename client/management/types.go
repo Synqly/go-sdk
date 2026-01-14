@@ -13977,6 +13977,8 @@ type ProviderConfig struct {
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/ivanti-ticketing-setup)
 	TicketingIvanti *TicketingIvanti
+	// Configuration for a mocked Ivanti Neurons Ticketing Provider
+	TicketingIvantiMock *TicketingIvantiMock
 	// Configuration for Atlassian Jira.
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/jira-ticketing-setup)
@@ -14561,6 +14563,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.TicketingIvanti = value
+	case "ticketing_ivanti_mock":
+		value := new(TicketingIvantiMock)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.TicketingIvantiMock = value
 	case "ticketing_jira":
 		value := new(TicketingJira)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -14938,6 +14946,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.TicketingIvanti != nil {
 		return core.MarshalJSONWithExtraProperty(p.TicketingIvanti, "type", "ticketing_ivanti")
 	}
+	if p.TicketingIvantiMock != nil {
+		return core.MarshalJSONWithExtraProperty(p.TicketingIvantiMock, "type", "ticketing_ivanti_mock")
+	}
 	if p.TicketingJira != nil {
 		return core.MarshalJSONWithExtraProperty(p.TicketingJira, "type", "ticketing_jira")
 	}
@@ -15086,6 +15097,7 @@ type ProviderConfigVisitor interface {
 	VisitTicketingAutotask(*TicketingAutotask) error
 	VisitTicketingFreshdesk(*TicketingFreshdesk) error
 	VisitTicketingIvanti(*TicketingIvanti) error
+	VisitTicketingIvantiMock(*TicketingIvantiMock) error
 	VisitTicketingJira(*TicketingJira) error
 	VisitTicketingJiraServiceManagement(*TicketingJiraServiceManagement) error
 	VisitTicketingMockTicketing(*TicketingMock) error
@@ -15361,6 +15373,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	if p.TicketingIvanti != nil {
 		return visitor.VisitTicketingIvanti(p.TicketingIvanti)
 	}
+	if p.TicketingIvantiMock != nil {
+		return visitor.VisitTicketingIvantiMock(p.TicketingIvantiMock)
+	}
 	if p.TicketingJira != nil {
 		return visitor.VisitTicketingJira(p.TicketingJira)
 	}
@@ -15596,6 +15611,8 @@ const (
 	ProviderConfigIdTicketingFreshdesk ProviderConfigId = "ticketing_freshdesk"
 	// Ivanti Neurons Ticketing
 	ProviderConfigIdTicketingIvanti ProviderConfigId = "ticketing_ivanti"
+	// [MOCK] Ivanti Neurons Ticketing
+	ProviderConfigIdTicketingIvantiMock ProviderConfigId = "ticketing_ivanti_mock"
 	// Atlassian Jira
 	ProviderConfigIdTicketingJira ProviderConfigId = "ticketing_jira"
 	// Jira Service Management
@@ -15810,6 +15827,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdTicketingFreshdesk, nil
 	case "ticketing_ivanti":
 		return ProviderConfigIdTicketingIvanti, nil
+	case "ticketing_ivanti_mock":
+		return ProviderConfigIdTicketingIvantiMock, nil
 	case "ticketing_jira":
 		return ProviderConfigIdTicketingJira, nil
 	case "ticketing_jira_service_management":
@@ -18913,6 +18932,25 @@ func (t *TenableCloudCredential) Accept(visitor TenableCloudCredentialVisitor) e
 	return fmt.Errorf("type %T does not define a non-empty union type", t)
 }
 
+type TicketingIvantiDataset string
+
+const (
+	TicketingIvantiDatasetBasicVer0 TicketingIvantiDataset = "basic_v0"
+)
+
+func NewTicketingIvantiDatasetFromString(s string) (TicketingIvantiDataset, error) {
+	switch s {
+	case "basic_v0":
+		return TicketingIvantiDatasetBasicVer0, nil
+	}
+	var t TicketingIvantiDataset
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (t TicketingIvantiDataset) Ptr() *TicketingIvantiDataset {
+	return &t
+}
+
 type TicketingPagerdutyDataset string
 
 const (
@@ -19070,6 +19108,48 @@ func (t *TicketingIvanti) UnmarshalJSON(data []byte) error {
 }
 
 func (t *TicketingIvanti) String() string {
+	if len(t._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(t._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(t); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", t)
+}
+
+// Configuration for a mocked Ivanti Neurons Ticketing Provider
+type TicketingIvantiMock struct {
+	Dataset TicketingIvantiDataset `json:"dataset" url:"dataset"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (t *TicketingIvantiMock) GetExtraProperties() map[string]interface{} {
+	return t.extraProperties
+}
+
+func (t *TicketingIvantiMock) UnmarshalJSON(data []byte) error {
+	type unmarshaler TicketingIvantiMock
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*t = TicketingIvantiMock(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *t)
+	if err != nil {
+		return err
+	}
+	t.extraProperties = extraProperties
+
+	t._rawJSON = nil
+	return nil
+}
+
+func (t *TicketingIvantiMock) String() string {
 	if len(t._rawJSON) > 0 {
 		if value, err := core.StringifyJSON(t._rawJSON); err == nil {
 			return value
