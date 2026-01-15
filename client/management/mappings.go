@@ -8,6 +8,25 @@ import (
 	core "github.com/synqly/go-sdk/client/management/core"
 )
 
+type ApplyMappingRequest struct {
+	// Include the raw data from the input in the response
+	IncludeRawData *bool                    `json:"-" url:"include_raw_data,omitempty"`
+	Body           *ApplyMappingRequestBody `json:"-" url:"-"`
+}
+
+func (a *ApplyMappingRequest) UnmarshalJSON(data []byte) error {
+	body := new(ApplyMappingRequestBody)
+	if err := json.Unmarshal(data, &body); err != nil {
+		return err
+	}
+	a.Body = body
+	return nil
+}
+
+func (a *ApplyMappingRequest) MarshalJSON() ([]byte, error) {
+	return json.Marshal(a.Body)
+}
+
 type ListMappingsRequest struct {
 	// Number of mapping objects to return in this page. Defaults to 100. Items listed will not include the `data` field.
 	Limit *int `json:"-" url:"limit,omitempty"`
@@ -25,7 +44,7 @@ type ListMappingsRequest struct {
 	Total *bool `json:"-" url:"total,omitempty"`
 }
 
-type ApplyMappingRequest struct {
+type ApplyMappingRequestBody struct {
 	// List of mappings to utilize. This can include custom mappings you have defined as well as Synqly built-in mappings.
 	Mappings []string `json:"mappings" url:"mappings"`
 	// JSON input data to apply the mapping chain to.
@@ -35,17 +54,17 @@ type ApplyMappingRequest struct {
 	_rawJSON        json.RawMessage
 }
 
-func (a *ApplyMappingRequest) GetExtraProperties() map[string]interface{} {
+func (a *ApplyMappingRequestBody) GetExtraProperties() map[string]interface{} {
 	return a.extraProperties
 }
 
-func (a *ApplyMappingRequest) UnmarshalJSON(data []byte) error {
-	type unmarshaler ApplyMappingRequest
+func (a *ApplyMappingRequestBody) UnmarshalJSON(data []byte) error {
+	type unmarshaler ApplyMappingRequestBody
 	var value unmarshaler
 	if err := json.Unmarshal(data, &value); err != nil {
 		return err
 	}
-	*a = ApplyMappingRequest(value)
+	*a = ApplyMappingRequestBody(value)
 
 	extraProperties, err := core.ExtractExtraProperties(data, *a)
 	if err != nil {
@@ -57,7 +76,7 @@ func (a *ApplyMappingRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (a *ApplyMappingRequest) String() string {
+func (a *ApplyMappingRequestBody) String() string {
 	if len(a._rawJSON) > 0 {
 		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
 			return value
