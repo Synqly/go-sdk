@@ -7506,6 +7506,8 @@ func (w *WebhooksPermissions) String() string {
 }
 
 // Configuration for Snyk as an application security provider.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/snyk-appsec-setup)
 type AppSecSnyk struct {
 	// Credentials used for accessing the Snyk API.
 	Credential *SnykCredential `json:"credential" url:"credential"`
@@ -13705,6 +13707,8 @@ type ProviderConfig struct {
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/amazon-inspector-appsec-setup)
 	AppsecAmazonInspector *AppsecAmazonInspector
 	// Configuration for GitHub as an application security provider.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/github-appsec-setup)
 	AppsecGithub *AppsecGitHub
 	// Configuration for GitLab as an application security provider.
 	//
@@ -13731,6 +13735,8 @@ type ProviderConfig struct {
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/opentext-core-applicationsecurity-appsec-setup)
 	AppsecOpentextCoreApplicationSecurityMock *AppsecOpenTextCoreApplicationSecurityMock
 	// Configuration for Snyk as an application security provider.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/snyk-appsec-setup)
 	AppsecSnyk *AppSecSnyk
 	// Configuration for Armis Centrix™ for Asset Management and Security.
 	//
@@ -20315,6 +20321,8 @@ func (z *ZendeskCredential) Accept(visitor ZendeskCredentialVisitor) error {
 }
 
 // Configuration for GitHub as an application security provider.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/github-appsec-setup)
 type AppsecGitHub struct {
 	// Credentials used for accessing the GitHub API.
 	Credential *GitHubCredential `json:"credential" url:"credential"`
