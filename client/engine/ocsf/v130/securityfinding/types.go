@@ -3456,6 +3456,8 @@ type NetworkInterface struct {
 	Name *string `json:"name,omitempty" url:"name,omitempty"`
 	// The namespace is useful in merger or acquisition situations. For example, when similar entities exist that you need to keep separate.
 	Namespace *string `json:"namespace,omitempty" url:"namespace,omitempty"`
+	// The type of the operating system of the resource.
+	OsType *string `json:"os_type,omitempty" url:"os_type,omitempty"`
 	// The subnet prefix length determines the number of bits used to represent the network part of the IP address. The remaining bits are reserved for identifying individual hosts within that subnet.
 	SubnetPrefix *int `json:"subnet_prefix,omitempty" url:"subnet_prefix,omitempty"`
 	// The type of network interface.

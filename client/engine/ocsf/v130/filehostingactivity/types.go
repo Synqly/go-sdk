@@ -133,6 +133,8 @@ type FileHosting struct {
 	Severity *string `json:"severity,omitempty" url:"severity,omitempty"`
 	// <p>The normalized identifier of the event/finding severity.</p>The normalized severity is a measurement the effort and expense required to manage and resolve an event or incident. Smaller numerical values represent lower impact events, and larger numerical values represent higher impact events.
 	SeverityId SeverityId `json:"severity_id" url:"severity_id"`
+	// Information about how and with whom a resource was shared, such as sharing permissions and scope.
+	Sharing *Sharing `json:"sharing,omitempty" url:"sharing,omitempty"`
 	// The endpoint that performed the activity on the target file.
 	SrcEndpoint *NetworkEndpoint `json:"src_endpoint" url:"src_endpoint"`
 	// The start time of a time period, or the time of the least recent event included in the aggregate event.
@@ -4584,6 +4586,125 @@ func (s *Session) String() string {
 	}
 	return fmt.Sprintf("%#v", s)
 }
+
+// The Sharing object encompasses information about how and with whom a resource was shared.
+type Sharing struct {
+	// The actor(s) with whom the resource has been shared. Note that with the addition of groups to the Actor object, sharing with a group can be represented by an Actor object with an empty user field and a populated groups field.
+	Actors []*Actor `json:"actors,omitempty" url:"actors,omitempty"`
+	// True if anonymous access is enabled for sharing.
+	Anonymous *bool `json:"anonymous,omitempty" url:"anonymous,omitempty"`
+	// True if the recipients have permission to re-share the resource.
+	CanReshare *bool `json:"can_reshare,omitempty" url:"can_reshare,omitempty"`
+	// Unique ID of a sharing link.
+	LinkId *string `json:"link_id,omitempty" url:"link_id,omitempty"`
+	// List of permissions granted.
+	Permissions []*SharingPermission `json:"permissions,omitempty" url:"permissions,omitempty"`
+	// The scope, normalized to the caption of the scope_id value.
+	Scope *string `json:"scope,omitempty" url:"scope,omitempty"`
+	// The normalized identifier of the sharing scope.
+	ScopeId *SharingScopeId `json:"scope_id,omitempty" url:"scope_id,omitempty"`
+	// Describes the nature of a sharing action, such as creating a link for others to access a resource.
+	SharingAction *string `json:"sharing_action,omitempty" url:"sharing_action,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (s *Sharing) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
+}
+
+func (s *Sharing) UnmarshalJSON(data []byte) error {
+	type unmarshaler Sharing
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*s = Sharing(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+
+	s._rawJSON = nil
+	return nil
+}
+
+func (s *Sharing) String() string {
+	if len(s._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(s); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", s)
+}
+
+// The Sharing Permission type represents the permissions granted to recipients via a Sharing object.
+type SharingPermission struct {
+	// The sharing permission type, normalized to the caption of the sharing_permission_type_id value.
+	SharingPermissionType *string `json:"sharing_permission_type,omitempty" url:"sharing_permission_type,omitempty"`
+	// The normalized identifier of the sharing permission type.
+	SharingPermissionTypeId SharingPermissionSharingPermissionTypeId `json:"sharing_permission_type_id" url:"sharing_permission_type_id"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (s *SharingPermission) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
+}
+
+func (s *SharingPermission) UnmarshalJSON(data []byte) error {
+	type unmarshaler SharingPermission
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*s = SharingPermission(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+
+	s._rawJSON = nil
+	return nil
+}
+
+func (s *SharingPermission) String() string {
+	if len(s._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(s); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", s)
+}
+
+// SharingPermissionSharingPermissionTypeId is an enum, and the following values are allowed.
+// 0 - Unknown: The sharing permission type is unknown.
+// 1 - View: View permission.
+// 2 - Modify: Modify permission.
+// 99 - Other: The sharing permission type is not mapped.
+type SharingPermissionSharingPermissionTypeId = int
+
+// SharingScopeId is an enum, and the following values are allowed.
+// 0 - Unknown: The scope is unknown.
+// 1 - User: User scope.
+// 2 - Group: Group scope.
+// 3 - Tenant: Tenant scope.
+// 4 - Organization: Organization scope.
+// 5 - World: World scope.
+// 99 - Other: The scope is not mapped.
+type SharingScopeId = int
 
 // The MITRE ATT&CK® Sub Technique object describes the sub technique ID and/or name associated to an attack, as defined by <a target='_blank' href='https://attack.mitre.org/wiki/ATT&CK_Matrix'>ATT&CK® Matrix</a>.
 type SubTechnique struct {

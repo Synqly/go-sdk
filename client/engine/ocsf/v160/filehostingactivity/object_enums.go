@@ -1122,6 +1122,36 @@ const Script_Type_VBA ScriptTypeId = 7
 // Other. The script type is not mapped. See the <code>type</code> attribute which contains an event source specific value.
 const Script_Type_Other ScriptTypeId = 99
 
+// SharingPermissionSharingPermissionTypeId Values
+// Sharing Permission Type ID. The normalized identifier of the sharing permission type.
+
+// Unknown. The sharing permission type is unknown.
+const SharingPermission_SharingPermissionType_Unknown SharingPermissionSharingPermissionTypeId = 0
+// View. View permission.
+const SharingPermission_SharingPermissionType_View SharingPermissionSharingPermissionTypeId = 1
+// Modify. Modify permission.
+const SharingPermission_SharingPermissionType_Modify SharingPermissionSharingPermissionTypeId = 2
+// Other. The sharing permission type is not mapped.
+const SharingPermission_SharingPermissionType_Other SharingPermissionSharingPermissionTypeId = 99
+
+// SharingScopeId Values
+// Scope ID. The normalized identifier of the sharing scope.
+
+// Unknown. The scope is unknown.
+const Sharing_Scope_Unknown SharingScopeId = 0
+// User. User scope.
+const Sharing_Scope_User SharingScopeId = 1
+// Group. Group scope.
+const Sharing_Scope_Group SharingScopeId = 2
+// Tenant. Tenant scope.
+const Sharing_Scope_Tenant SharingScopeId = 3
+// Organization. Organization scope.
+const Sharing_Scope_Organization SharingScopeId = 4
+// World. World scope.
+const Sharing_Scope_World SharingScopeId = 5
+// Other. The scope is not mapped.
+const Sharing_Scope_Other SharingScopeId = 99
+
 // SsoAuthProtocolId Values
 // Auth Protocol ID. The normalized identifier of the authentication protocol used by the SSO resource.
 
