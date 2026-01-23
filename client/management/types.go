@@ -14089,6 +14089,8 @@ type ProviderConfig struct {
 	TicketingTorq *TicketingTorq
 	// Configuration for Zendesk as a Ticketing Provider
 	TicketingZendesk *TicketingZendesk
+	// Configuration for Amazon Inspector as a vulnerabilities provider.
+	VulnerabilitiesAmazonInspector *VulnerabilitiesAmazonInspector
 	// Configuration for CrowdStrike Falcon® Spotlight.
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/crowdstrike-vulns-setup)
@@ -14707,6 +14709,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.TicketingZendesk = value
+	case "vulnerabilities_amazon_inspector":
+		value := new(VulnerabilitiesAmazonInspector)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.VulnerabilitiesAmazonInspector = value
 	case "vulnerabilities_crowdstrike":
 		value := new(VulnerabilitiesCrowdStrike)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -15063,6 +15071,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.TicketingZendesk != nil {
 		return core.MarshalJSONWithExtraProperty(p.TicketingZendesk, "type", "ticketing_zendesk")
 	}
+	if p.VulnerabilitiesAmazonInspector != nil {
+		return core.MarshalJSONWithExtraProperty(p.VulnerabilitiesAmazonInspector, "type", "vulnerabilities_amazon_inspector")
+	}
 	if p.VulnerabilitiesCrowdstrike != nil {
 		return core.MarshalJSONWithExtraProperty(p.VulnerabilitiesCrowdstrike, "type", "vulnerabilities_crowdstrike")
 	}
@@ -15195,6 +15206,7 @@ type ProviderConfigVisitor interface {
 	VisitTicketingServicenowSir(*TicketingServiceNowSir) error
 	VisitTicketingTorq(*TicketingTorq) error
 	VisitTicketingZendesk(*TicketingZendesk) error
+	VisitVulnerabilitiesAmazonInspector(*VulnerabilitiesAmazonInspector) error
 	VisitVulnerabilitiesCrowdstrike(*VulnerabilitiesCrowdStrike) error
 	VisitVulnerabilitiesCrowdstrikeMock(*VulnerabilitiesCrowdStrikeMock) error
 	VisitVulnerabilitiesNucleus(*VulnerabilitiesNucleus) error
@@ -15494,6 +15506,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	if p.TicketingZendesk != nil {
 		return visitor.VisitTicketingZendesk(p.TicketingZendesk)
 	}
+	if p.VulnerabilitiesAmazonInspector != nil {
+		return visitor.VisitVulnerabilitiesAmazonInspector(p.VulnerabilitiesAmazonInspector)
+	}
 	if p.VulnerabilitiesCrowdstrike != nil {
 		return visitor.VisitVulnerabilitiesCrowdstrike(p.VulnerabilitiesCrowdstrike)
 	}
@@ -15724,6 +15739,8 @@ const (
 	ProviderConfigIdTicketingTorq ProviderConfigId = "ticketing_torq"
 	// Zendesk
 	ProviderConfigIdTicketingZendesk ProviderConfigId = "ticketing_zendesk"
+	// Amazon Inspector
+	ProviderConfigIdVulnerabilitiesAmazonInspector ProviderConfigId = "vulnerabilities_amazon_inspector"
 	// CrowdStrike Falcon® Spotlight
 	ProviderConfigIdVulnerabilitiesCrowdStrike ProviderConfigId = "vulnerabilities_crowdstrike"
 	// [MOCK] CrowdStrike Falcon® Spotlight
@@ -15942,6 +15959,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdTicketingTorq, nil
 	case "ticketing_zendesk":
 		return ProviderConfigIdTicketingZendesk, nil
+	case "vulnerabilities_amazon_inspector":
+		return ProviderConfigIdVulnerabilitiesAmazonInspector, nil
 	case "vulnerabilities_crowdstrike":
 		return ProviderConfigIdVulnerabilitiesCrowdStrike, nil
 	case "vulnerabilities_crowdstrike_mock":
@@ -19890,6 +19909,51 @@ func NewVulnerabilitiesTaniumCloudDatasetFromString(s string) (VulnerabilitiesTa
 
 func (v VulnerabilitiesTaniumCloudDataset) Ptr() *VulnerabilitiesTaniumCloudDataset {
 	return &v
+}
+
+// Configuration for Amazon Inspector as a vulnerabilities provider.
+type VulnerabilitiesAmazonInspector struct {
+	// AWS credentials with access to [Amazon Inspector](https://docs.aws.amazon.com/inspector/latest/user/what-is-inspector.html).
+	Credential *AwsProviderCredential `json:"credential" url:"credential"`
+	// The [AWS region](https://docs.aws.amazon.com/global-infrastructure/latest/regions/aws-regions.html) to use when connecting to Amazon Inspector.
+	Region AwsRegion `json:"region" url:"region"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (v *VulnerabilitiesAmazonInspector) GetExtraProperties() map[string]interface{} {
+	return v.extraProperties
+}
+
+func (v *VulnerabilitiesAmazonInspector) UnmarshalJSON(data []byte) error {
+	type unmarshaler VulnerabilitiesAmazonInspector
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*v = VulnerabilitiesAmazonInspector(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *v)
+	if err != nil {
+		return err
+	}
+	v.extraProperties = extraProperties
+
+	v._rawJSON = nil
+	return nil
+}
+
+func (v *VulnerabilitiesAmazonInspector) String() string {
+	if len(v._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(v._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(v); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", v)
 }
 
 // Configuration for CrowdStrike Falcon® Spotlight.
