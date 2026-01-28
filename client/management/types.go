@@ -4543,6 +4543,7 @@ const (
 	OperationIdNotificationsClearMessage                        OperationId = "notifications_clear_message"
 	OperationIdNotificationsCreateMessage                       OperationId = "notifications_create_message"
 	OperationIdNotificationsGetMessage                          OperationId = "notifications_get_message"
+	OperationIdSiemGetAlert                                     OperationId = "siem_get_alert"
 	OperationIdSiemGetEvidence                                  OperationId = "siem_get_evidence"
 	OperationIdSiemGetInvestigation                             OperationId = "siem_get_investigation"
 	OperationIdSiemPatchInvestigation                           OperationId = "siem_patch_investigation"
@@ -4680,6 +4681,8 @@ func NewOperationIdFromString(s string) (OperationId, error) {
 		return OperationIdNotificationsCreateMessage, nil
 	case "notifications_get_message":
 		return OperationIdNotificationsGetMessage, nil
+	case "siem_get_alert":
+		return OperationIdSiemGetAlert, nil
 	case "siem_get_evidence":
 		return OperationIdSiemGetEvidence, nil
 	case "siem_get_investigation":
