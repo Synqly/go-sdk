@@ -6331,54 +6331,42 @@ func (r *Request) String() string {
 
 // The Resource Details object describes details about resources that were affected by the activity/event.
 type ResourceDetails struct {
-	// A list of <code>agent</code> objects associated with a device, endpoint, or resource.
+	// A list of agent objects associated with a device, endpoint, or resource.
 	AgentList []*Agent `json:"agent_list,omitempty" url:"agent_list,omitempty"`
 	// The canonical cloud partition name to which the region is assigned (e.g. AWS Partitions: aws, aws-cn, aws-us-gov).
 	CloudPartition *string `json:"cloud_partition,omitempty" url:"cloud_partition,omitempty"`
-	// The time when the resource was created.
-	CreatedTime *Timestamp `json:"created_time,omitempty" url:"created_time,omitempty"`
-	// The time when the resource was created.
-	CreatedTimeDt *time.Time `json:"created_time_dt,omitempty" url:"created_time_dt,omitempty"`
 	// The criticality of the resource as defined by the event source.
 	Criticality *string `json:"criticality,omitempty" url:"criticality,omitempty"`
 	// Additional data describing the resource.
 	Data interface{} `json:"data,omitempty" url:"data,omitempty"`
 	// The name of the related resource group.
 	Group *Group `json:"group,omitempty" url:"group,omitempty"`
-	// The fully qualified name of the resource.
-	Hostname *Hostname `json:"hostname,omitempty" url:"hostname,omitempty"`
-	// The IP address of the resource, in either IPv4 or IPv6 format.
+	// The IP address associated with the resource.
 	Ip *IpAddress `json:"ip,omitempty" url:"ip,omitempty"`
-	// Indicates whether the device or resource has a backup enabled, such as an automated snapshot or a cloud backup. For example, this is indicated by the <code>cloudBackupEnabled</code> value within JAMF Pro mobile devices or the registration of an AWS ARN with the AWS Backup service.
-	IsBackedUp *bool `json:"is_backed_up,omitempty" url:"is_backed_up,omitempty"`
-	// The list of labels associated to the resource.
+	// The list of labels/tags associated to a resource.
 	Labels []string `json:"labels,omitempty" url:"labels,omitempty"`
-	// The time when the resource was last modified.
-	ModifiedTime *Timestamp `json:"modified_time,omitempty" url:"modified_time,omitempty"`
-	// The time when the resource was last modified.
-	ModifiedTimeDt *time.Time `json:"modified_time_dt,omitempty" url:"modified_time_dt,omitempty"`
+	// The timestamp when the resource was last observed or reported.
+	LastSeenTime *Timestamp `json:"last_seen_time,omitempty" url:"last_seen_time,omitempty"`
+	// The timestamp when the resource was last observed or reported.
+	LastSeenTimeDt *time.Time `json:"last_seen_time_dt,omitempty" url:"last_seen_time_dt,omitempty"`
+	// The MAC address associated with the resource.
+	Mac *MacAddress `json:"mac,omitempty" url:"mac,omitempty"`
 	// The name of the resource.
 	Name *string `json:"name,omitempty" url:"name,omitempty"`
 	// The namespace is useful when similar entities exist that you need to keep separate.
 	Namespace *string `json:"namespace,omitempty" url:"namespace,omitempty"`
+	// The type of operating system running on the resource.
+	OsType *string `json:"os_type,omitempty" url:"os_type,omitempty"`
 	// The identity of the service or user account that owns the resource.
 	Owner *User `json:"owner,omitempty" url:"owner,omitempty"`
 	// The cloud region of the resource.
 	Region *string `json:"region,omitempty" url:"region,omitempty"`
-	// A graph representation showing how this resource relates to and interacts with other entities in the environment. This can include parent/child relationships, dependencies, or other connections.
-	ResourceRelationship *Graph `json:"resource_relationship,omitempty" url:"resource_relationship,omitempty"`
-	// The list of tags; <code>{key:value}</code> pairs associated to the resource.
-	Tags []*KeyValueObject `json:"tags,omitempty" url:"tags,omitempty"`
 	// The resource type as defined by the event source.
 	Type *string `json:"type,omitempty" url:"type,omitempty"`
 	// The unique identifier of the resource.
-	Uid *ResourceUid `json:"uid,omitempty" url:"uid,omitempty"`
-	// The alternative unique identifier of the resource.
-	UidAlt *ResourceUid `json:"uid_alt,omitempty" url:"uid_alt,omitempty"`
-	// The version of the resource. For example <code>1.2.3</code>.
+	Uid *string `json:"uid,omitempty" url:"uid,omitempty"`
+	// The version of the resource. For example 1.2.3.
 	Version *string `json:"version,omitempty" url:"version,omitempty"`
-	// The specific availability zone within a cloud region where the resource is located.
-	Zone *string `json:"zone,omitempty" url:"zone,omitempty"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
@@ -6392,8 +6380,7 @@ func (r *ResourceDetails) UnmarshalJSON(data []byte) error {
 	type embed ResourceDetails
 	var unmarshaler = struct {
 		embed
-		CreatedTimeDt  *core.DateTime `json:"created_time_dt,omitempty"`
-		ModifiedTimeDt *core.DateTime `json:"modified_time_dt,omitempty"`
+		LastSeenTimeDt *core.DateTime `json:"last_seen_time_dt,omitempty"`
 	}{
 		embed: embed(*r),
 	}
@@ -6401,8 +6388,7 @@ func (r *ResourceDetails) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*r = ResourceDetails(unmarshaler.embed)
-	r.CreatedTimeDt = unmarshaler.CreatedTimeDt.TimePtr()
-	r.ModifiedTimeDt = unmarshaler.ModifiedTimeDt.TimePtr()
+	r.LastSeenTimeDt = unmarshaler.LastSeenTimeDt.TimePtr()
 
 	extraProperties, err := core.ExtractExtraProperties(data, *r)
 	if err != nil {
@@ -6418,12 +6404,10 @@ func (r *ResourceDetails) MarshalJSON() ([]byte, error) {
 	type embed ResourceDetails
 	var marshaler = struct {
 		embed
-		CreatedTimeDt  *core.DateTime `json:"created_time_dt,omitempty"`
-		ModifiedTimeDt *core.DateTime `json:"modified_time_dt,omitempty"`
+		LastSeenTimeDt *core.DateTime `json:"last_seen_time_dt,omitempty"`
 	}{
 		embed:          embed(*r),
-		CreatedTimeDt:  core.NewOptionalDateTime(r.CreatedTimeDt),
-		ModifiedTimeDt: core.NewOptionalDateTime(r.ModifiedTimeDt),
+		LastSeenTimeDt: core.NewOptionalDateTime(r.LastSeenTimeDt),
 	}
 	return json.Marshal(marshaler)
 }

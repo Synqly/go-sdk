@@ -1641,7 +1641,7 @@ type DatabaseTypeId = int
 
 // The databucket object is a basic container that holds data, typically organized through the use of data partitions.
 type Databucket struct {
-	// A list of <code>agent</code> objects associated with a device, endpoint, or resource.
+	// A list of agent objects associated with a device, endpoint, or resource.
 	AgentList []*Agent `json:"agent_list,omitempty" url:"agent_list,omitempty"`
 	// The canonical cloud partition name to which the region is assigned (e.g. AWS Partitions: aws, aws-cn, aws-us-gov).
 	CloudPartition *string `json:"cloud_partition,omitempty" url:"cloud_partition,omitempty"`
@@ -1663,16 +1663,20 @@ type Databucket struct {
 	Group *Group `json:"group,omitempty" url:"group,omitempty"`
 	// The group names to which the databucket belongs.
 	Groups []*Group `json:"groups,omitempty" url:"groups,omitempty"`
-	// The fully qualified name of the resource.
-	Hostname *Hostname `json:"hostname,omitempty" url:"hostname,omitempty"`
-	// The IP address of the resource, in either IPv4 or IPv6 format.
+	// The IP address associated with the resource.
 	Ip *IpAddress `json:"ip,omitempty" url:"ip,omitempty"`
 	// Indicates if the databucket is encrypted.
 	IsEncrypted *bool `json:"is_encrypted,omitempty" url:"is_encrypted,omitempty"`
 	// Indicates if the databucket is publicly accessible.
 	IsPublic *bool `json:"is_public,omitempty" url:"is_public,omitempty"`
-	// The list of labels associated to the resource.
+	// The list of labels/tags associated to a resource.
 	Labels []string `json:"labels,omitempty" url:"labels,omitempty"`
+	// The timestamp when the resource was last observed or reported.
+	LastSeenTime *Timestamp `json:"last_seen_time,omitempty" url:"last_seen_time,omitempty"`
+	// The timestamp when the resource was last observed or reported.
+	LastSeenTimeDt *time.Time `json:"last_seen_time_dt,omitempty" url:"last_seen_time_dt,omitempty"`
+	// The MAC address associated with the resource.
+	Mac *MacAddress `json:"mac,omitempty" url:"mac,omitempty"`
 	// The most recent time when any changes, updates, or modifications were made within the databucket.
 	ModifiedTime *Timestamp `json:"modified_time,omitempty" url:"modified_time,omitempty"`
 	// The most recent time when any changes, updates, or modifications were made within the databucket.
@@ -1681,21 +1685,21 @@ type Databucket struct {
 	Name *string `json:"name,omitempty" url:"name,omitempty"`
 	// The namespace is useful when similar entities exist that you need to keep separate.
 	Namespace *string `json:"namespace,omitempty" url:"namespace,omitempty"`
+	// The type of operating system running on the resource.
+	OsType *string `json:"os_type,omitempty" url:"os_type,omitempty"`
 	// The identity of the service or user account that owns the resource.
 	Owner *User `json:"owner,omitempty" url:"owner,omitempty"`
 	// The cloud region of the resource.
 	Region *string `json:"region,omitempty" url:"region,omitempty"`
 	// The size of the databucket in bytes.
 	Size *int `json:"size,omitempty" url:"size,omitempty"`
-	// The list of tags; <code>{key:value}</code> pairs associated to the resource.
-	Tags []*KeyValueObject `json:"tags,omitempty" url:"tags,omitempty"`
 	// The databucket type.
 	Type *string `json:"type,omitempty" url:"type,omitempty"`
 	// The normalized identifier of the databucket type.
 	TypeId DatabucketTypeId `json:"type_id" url:"type_id"`
 	// The unique identifier of the databucket.
 	Uid *string `json:"uid,omitempty" url:"uid,omitempty"`
-	// The version of the resource. For example <code>1.2.3</code>.
+	// The version of the resource. For example 1.2.3.
 	Version *string `json:"version,omitempty" url:"version,omitempty"`
 
 	extraProperties map[string]interface{}
@@ -1711,6 +1715,7 @@ func (d *Databucket) UnmarshalJSON(data []byte) error {
 	var unmarshaler = struct {
 		embed
 		CreatedTimeDt  *core.DateTime `json:"created_time_dt,omitempty"`
+		LastSeenTimeDt *core.DateTime `json:"last_seen_time_dt,omitempty"`
 		ModifiedTimeDt *core.DateTime `json:"modified_time_dt,omitempty"`
 	}{
 		embed: embed(*d),
@@ -1720,6 +1725,7 @@ func (d *Databucket) UnmarshalJSON(data []byte) error {
 	}
 	*d = Databucket(unmarshaler.embed)
 	d.CreatedTimeDt = unmarshaler.CreatedTimeDt.TimePtr()
+	d.LastSeenTimeDt = unmarshaler.LastSeenTimeDt.TimePtr()
 	d.ModifiedTimeDt = unmarshaler.ModifiedTimeDt.TimePtr()
 
 	extraProperties, err := core.ExtractExtraProperties(data, *d)
@@ -1737,10 +1743,12 @@ func (d *Databucket) MarshalJSON() ([]byte, error) {
 	var marshaler = struct {
 		embed
 		CreatedTimeDt  *core.DateTime `json:"created_time_dt,omitempty"`
+		LastSeenTimeDt *core.DateTime `json:"last_seen_time_dt,omitempty"`
 		ModifiedTimeDt *core.DateTime `json:"modified_time_dt,omitempty"`
 	}{
 		embed:          embed(*d),
 		CreatedTimeDt:  core.NewOptionalDateTime(d.CreatedTimeDt),
+		LastSeenTimeDt: core.NewOptionalDateTime(d.LastSeenTimeDt),
 		ModifiedTimeDt: core.NewOptionalDateTime(d.ModifiedTimeDt),
 	}
 	return json.Marshal(marshaler)
@@ -5245,7 +5253,7 @@ func (r *Request) String() string {
 
 // The Resource Details object describes details about resources that were affected by the activity/event.
 type ResourceDetails struct {
-	// A list of <code>agent</code> objects associated with a device, endpoint, or resource.
+	// A list of agent objects associated with a device, endpoint, or resource.
 	AgentList []*Agent `json:"agent_list,omitempty" url:"agent_list,omitempty"`
 	// The canonical cloud partition name to which the region is assigned (e.g. AWS Partitions: aws, aws-cn, aws-us-gov).
 	CloudPartition *string `json:"cloud_partition,omitempty" url:"cloud_partition,omitempty"`
@@ -5255,27 +5263,31 @@ type ResourceDetails struct {
 	Data interface{} `json:"data,omitempty" url:"data,omitempty"`
 	// The name of the related resource group.
 	Group *Group `json:"group,omitempty" url:"group,omitempty"`
-	// The fully qualified name of the resource.
-	Hostname *Hostname `json:"hostname,omitempty" url:"hostname,omitempty"`
-	// The IP address of the resource, in either IPv4 or IPv6 format.
+	// The IP address associated with the resource.
 	Ip *IpAddress `json:"ip,omitempty" url:"ip,omitempty"`
-	// The list of labels associated to the resource.
+	// The list of labels/tags associated to a resource.
 	Labels []string `json:"labels,omitempty" url:"labels,omitempty"`
+	// The timestamp when the resource was last observed or reported.
+	LastSeenTime *Timestamp `json:"last_seen_time,omitempty" url:"last_seen_time,omitempty"`
+	// The timestamp when the resource was last observed or reported.
+	LastSeenTimeDt *time.Time `json:"last_seen_time_dt,omitempty" url:"last_seen_time_dt,omitempty"`
+	// The MAC address associated with the resource.
+	Mac *MacAddress `json:"mac,omitempty" url:"mac,omitempty"`
 	// The name of the resource.
 	Name *string `json:"name,omitempty" url:"name,omitempty"`
 	// The namespace is useful when similar entities exist that you need to keep separate.
 	Namespace *string `json:"namespace,omitempty" url:"namespace,omitempty"`
+	// The type of operating system running on the resource.
+	OsType *string `json:"os_type,omitempty" url:"os_type,omitempty"`
 	// The identity of the service or user account that owns the resource.
 	Owner *User `json:"owner,omitempty" url:"owner,omitempty"`
 	// The cloud region of the resource.
 	Region *string `json:"region,omitempty" url:"region,omitempty"`
-	// The list of tags; <code>{key:value}</code> pairs associated to the resource.
-	Tags []*KeyValueObject `json:"tags,omitempty" url:"tags,omitempty"`
 	// The resource type as defined by the event source.
 	Type *string `json:"type,omitempty" url:"type,omitempty"`
 	// The unique identifier of the resource.
 	Uid *string `json:"uid,omitempty" url:"uid,omitempty"`
-	// The version of the resource. For example <code>1.2.3</code>.
+	// The version of the resource. For example 1.2.3.
 	Version *string `json:"version,omitempty" url:"version,omitempty"`
 
 	extraProperties map[string]interface{}
@@ -5287,12 +5299,18 @@ func (r *ResourceDetails) GetExtraProperties() map[string]interface{} {
 }
 
 func (r *ResourceDetails) UnmarshalJSON(data []byte) error {
-	type unmarshaler ResourceDetails
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
+	type embed ResourceDetails
+	var unmarshaler = struct {
+		embed
+		LastSeenTimeDt *core.DateTime `json:"last_seen_time_dt,omitempty"`
+	}{
+		embed: embed(*r),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
 		return err
 	}
-	*r = ResourceDetails(value)
+	*r = ResourceDetails(unmarshaler.embed)
+	r.LastSeenTimeDt = unmarshaler.LastSeenTimeDt.TimePtr()
 
 	extraProperties, err := core.ExtractExtraProperties(data, *r)
 	if err != nil {
@@ -5302,6 +5320,18 @@ func (r *ResourceDetails) UnmarshalJSON(data []byte) error {
 
 	r._rawJSON = nil
 	return nil
+}
+
+func (r *ResourceDetails) MarshalJSON() ([]byte, error) {
+	type embed ResourceDetails
+	var marshaler = struct {
+		embed
+		LastSeenTimeDt *core.DateTime `json:"last_seen_time_dt,omitempty"`
+	}{
+		embed:          embed(*r),
+		LastSeenTimeDt: core.NewOptionalDateTime(r.LastSeenTimeDt),
+	}
+	return json.Marshal(marshaler)
 }
 
 func (r *ResourceDetails) String() string {

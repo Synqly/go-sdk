@@ -4319,7 +4319,7 @@ func (r *Request) String() string {
 
 // The Resource Details object describes details about resources that were affected by the activity/event.
 type ResourceDetails struct {
-	// A list of <code>agent</code> objects associated with a device, endpoint, or resource.
+	// A list of agent objects associated with a device, endpoint, or resource.
 	AgentList []*Agent `json:"agent_list,omitempty" url:"agent_list,omitempty"`
 	// The canonical cloud partition name to which the region is assigned (e.g. AWS Partitions: aws, aws-cn, aws-us-gov).
 	CloudPartition *string `json:"cloud_partition,omitempty" url:"cloud_partition,omitempty"`
@@ -4327,21 +4327,23 @@ type ResourceDetails struct {
 	Criticality *string `json:"criticality,omitempty" url:"criticality,omitempty"`
 	// Additional data describing the resource.
 	Data interface{} `json:"data,omitempty" url:"data,omitempty"`
-	// The IP address of the resource.
-	Ip *IpAddress `json:"ip,omitempty" url:"ip,omitempty"`
 	// The name of the related resource group.
 	Group *Group `json:"group,omitempty" url:"group,omitempty"`
+	// The IP address associated with the resource.
+	Ip *IpAddress `json:"ip,omitempty" url:"ip,omitempty"`
 	// The list of labels/tags associated to a resource.
 	Labels []string `json:"labels,omitempty" url:"labels,omitempty"`
-	// The last seen time of the resource.
+	// The timestamp when the resource was last observed or reported.
 	LastSeenTime *Timestamp `json:"last_seen_time,omitempty" url:"last_seen_time,omitempty"`
-	// The MAC address of the resource.
-	Mac *string `json:"mac,omitempty" url:"mac,omitempty"`
+	// The timestamp when the resource was last observed or reported.
+	LastSeenTimeDt *time.Time `json:"last_seen_time_dt,omitempty" url:"last_seen_time_dt,omitempty"`
+	// The MAC address associated with the resource.
+	Mac *MacAddress `json:"mac,omitempty" url:"mac,omitempty"`
 	// The name of the resource.
 	Name *string `json:"name,omitempty" url:"name,omitempty"`
 	// The namespace is useful when similar entities exist that you need to keep separate.
 	Namespace *string `json:"namespace,omitempty" url:"namespace,omitempty"`
-	// The type of the operating system of the resource.
+	// The type of operating system running on the resource.
 	OsType *string `json:"os_type,omitempty" url:"os_type,omitempty"`
 	// The identity of the service or user account that owns the resource.
 	Owner *User `json:"owner,omitempty" url:"owner,omitempty"`
@@ -4351,7 +4353,7 @@ type ResourceDetails struct {
 	Type *string `json:"type,omitempty" url:"type,omitempty"`
 	// The unique identifier of the resource.
 	Uid *string `json:"uid,omitempty" url:"uid,omitempty"`
-	// The version of the resource. For example <code>1.2.3</code>.
+	// The version of the resource. For example 1.2.3.
 	Version *string `json:"version,omitempty" url:"version,omitempty"`
 
 	extraProperties map[string]interface{}
@@ -4363,12 +4365,18 @@ func (r *ResourceDetails) GetExtraProperties() map[string]interface{} {
 }
 
 func (r *ResourceDetails) UnmarshalJSON(data []byte) error {
-	type unmarshaler ResourceDetails
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
+	type embed ResourceDetails
+	var unmarshaler = struct {
+		embed
+		LastSeenTimeDt *core.DateTime `json:"last_seen_time_dt,omitempty"`
+	}{
+		embed: embed(*r),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
 		return err
 	}
-	*r = ResourceDetails(value)
+	*r = ResourceDetails(unmarshaler.embed)
+	r.LastSeenTimeDt = unmarshaler.LastSeenTimeDt.TimePtr()
 
 	extraProperties, err := core.ExtractExtraProperties(data, *r)
 	if err != nil {
@@ -4378,6 +4386,18 @@ func (r *ResourceDetails) UnmarshalJSON(data []byte) error {
 
 	r._rawJSON = nil
 	return nil
+}
+
+func (r *ResourceDetails) MarshalJSON() ([]byte, error) {
+	type embed ResourceDetails
+	var marshaler = struct {
+		embed
+		LastSeenTimeDt *core.DateTime `json:"last_seen_time_dt,omitempty"`
+	}{
+		embed:          embed(*r),
+		LastSeenTimeDt: core.NewOptionalDateTime(r.LastSeenTimeDt),
+	}
+	return json.Marshal(marshaler)
 }
 
 func (r *ResourceDetails) String() string {
