@@ -6,6 +6,7 @@ import (
 	accounts "github.com/synqly/go-sdk/client/management/accounts"
 	audit "github.com/synqly/go-sdk/client/management/audit"
 	auth "github.com/synqly/go-sdk/client/management/auth"
+	billing "github.com/synqly/go-sdk/client/management/billing"
 	bridges "github.com/synqly/go-sdk/client/management/bridges"
 	capabilities "github.com/synqly/go-sdk/client/management/capabilities"
 	core "github.com/synqly/go-sdk/client/management/core"
@@ -36,6 +37,7 @@ type Client struct {
 	Accounts             *accounts.Client
 	Audit                *audit.Client
 	Auth                 *auth.Client
+	Billing              *billing.Client
 	Bridges              *bridges.Client
 	Capabilities         *capabilities.Client
 	Credentials          *credentials.Client
@@ -69,6 +71,7 @@ func NewClient(opts ...option.RequestOption) *Client {
 		Accounts:             accounts.NewClient(opts...),
 		Audit:                audit.NewClient(opts...),
 		Auth:                 auth.NewClient(opts...),
+		Billing:              billing.NewClient(opts...),
 		Bridges:              bridges.NewClient(opts...),
 		Capabilities:         capabilities.NewClient(opts...),
 		Credentials:          credentials.NewClient(opts...),

@@ -389,6 +389,87 @@ func (l *LogonResponseResult) String() string {
 	return fmt.Sprintf("%#v", l)
 }
 
+// Billing report covering total usage for a specific month.
+type Billing struct {
+	// Human-readable name for this resource
+	Name string `json:"name" url:"name"`
+	// Time object was originally created
+	CreatedAt time.Time `json:"created_at" url:"created_at"`
+	// Last time object was updated
+	UpdatedAt time.Time `json:"updated_at" url:"updated_at"`
+	// Organization being billed.
+	OrganizationId OrganizationId `json:"organization_id" url:"organization_id"`
+	// Billing report month. Full reports are available for the previous 12 months and a partial report for the current month-to-date.
+	Month BillingMonth `json:"month" url:"month"`
+	// Billing report generation date
+	ReportDate time.Time `json:"report_date" url:"report_date"`
+	// Total usage for all Accounts and Integrations within the Organization, exported in comma-separated values (CSV) format. Columns include Organization name, Account names, Integration names, Environment, successful and failed requests, and total ingress and egress amounts in bytes.
+	CsvData string `json:"csv_data" url:"csv_data"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (b *Billing) GetExtraProperties() map[string]interface{} {
+	return b.extraProperties
+}
+
+func (b *Billing) UnmarshalJSON(data []byte) error {
+	type embed Billing
+	var unmarshaler = struct {
+		embed
+		CreatedAt  *core.DateTime `json:"created_at"`
+		UpdatedAt  *core.DateTime `json:"updated_at"`
+		ReportDate *core.DateTime `json:"report_date"`
+	}{
+		embed: embed(*b),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*b = Billing(unmarshaler.embed)
+	b.CreatedAt = unmarshaler.CreatedAt.Time()
+	b.UpdatedAt = unmarshaler.UpdatedAt.Time()
+	b.ReportDate = unmarshaler.ReportDate.Time()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *b)
+	if err != nil {
+		return err
+	}
+	b.extraProperties = extraProperties
+
+	b._rawJSON = nil
+	return nil
+}
+
+func (b *Billing) MarshalJSON() ([]byte, error) {
+	type embed Billing
+	var marshaler = struct {
+		embed
+		CreatedAt  *core.DateTime `json:"created_at"`
+		UpdatedAt  *core.DateTime `json:"updated_at"`
+		ReportDate *core.DateTime `json:"report_date"`
+	}{
+		embed:      embed(*b),
+		CreatedAt:  core.NewDateTime(b.CreatedAt),
+		UpdatedAt:  core.NewDateTime(b.UpdatedAt),
+		ReportDate: core.NewDateTime(b.ReportDate),
+	}
+	return json.Marshal(marshaler)
+}
+
+func (b *Billing) String() string {
+	if len(b._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(b._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(b); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", b)
+}
+
 // A Bridge Group represents a connection between the Synqly Saas or Embedded service and a Bridge Agent. See 'Synqly Bridge Agent' guide in Synqly docs for additional information.
 type BridgeGroup struct {
 	// Human-readable name for this resource
