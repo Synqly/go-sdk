@@ -14181,6 +14181,8 @@ type ProviderConfig struct {
 	VulnerabilitiesCrowdstrike *VulnerabilitiesCrowdStrike
 	// Configuration for [MOCK] CrowdStrike Falcon® Spotlight.
 	VulnerabilitiesCrowdstrikeMock *VulnerabilitiesCrowdStrikeMock
+	// Configuration for Microsoft Defender for Endpoint.
+	VulnerabilitiesDefender *VulnerabilitiesDefender
 	// Configuration for Nucleus Vulnerability Management.
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/nucleus-vulns-setup)
@@ -14811,6 +14813,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.VulnerabilitiesCrowdstrikeMock = value
+	case "vulnerabilities_defender":
+		value := new(VulnerabilitiesDefender)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.VulnerabilitiesDefender = value
 	case "vulnerabilities_nucleus":
 		value := new(VulnerabilitiesNucleus)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -15164,6 +15172,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.VulnerabilitiesCrowdstrikeMock != nil {
 		return core.MarshalJSONWithExtraProperty(p.VulnerabilitiesCrowdstrikeMock, "type", "vulnerabilities_crowdstrike_mock")
 	}
+	if p.VulnerabilitiesDefender != nil {
+		return core.MarshalJSONWithExtraProperty(p.VulnerabilitiesDefender, "type", "vulnerabilities_defender")
+	}
 	if p.VulnerabilitiesNucleus != nil {
 		return core.MarshalJSONWithExtraProperty(p.VulnerabilitiesNucleus, "type", "vulnerabilities_nucleus")
 	}
@@ -15293,6 +15304,7 @@ type ProviderConfigVisitor interface {
 	VisitVulnerabilitiesAmazonInspector(*VulnerabilitiesAmazonInspector) error
 	VisitVulnerabilitiesCrowdstrike(*VulnerabilitiesCrowdStrike) error
 	VisitVulnerabilitiesCrowdstrikeMock(*VulnerabilitiesCrowdStrikeMock) error
+	VisitVulnerabilitiesDefender(*VulnerabilitiesDefender) error
 	VisitVulnerabilitiesNucleus(*VulnerabilitiesNucleus) error
 	VisitVulnerabilitiesQualysCloud(*VulnerabilitiesQualysCloud) error
 	VisitVulnerabilitiesQualysCloudMock(*VulnerabilitiesQualysCloudMock) error
@@ -15599,6 +15611,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	if p.VulnerabilitiesCrowdstrikeMock != nil {
 		return visitor.VisitVulnerabilitiesCrowdstrikeMock(p.VulnerabilitiesCrowdstrikeMock)
 	}
+	if p.VulnerabilitiesDefender != nil {
+		return visitor.VisitVulnerabilitiesDefender(p.VulnerabilitiesDefender)
+	}
 	if p.VulnerabilitiesNucleus != nil {
 		return visitor.VisitVulnerabilitiesNucleus(p.VulnerabilitiesNucleus)
 	}
@@ -15829,6 +15844,8 @@ const (
 	ProviderConfigIdVulnerabilitiesCrowdStrike ProviderConfigId = "vulnerabilities_crowdstrike"
 	// [MOCK] CrowdStrike Falcon® Spotlight
 	ProviderConfigIdVulnerabilitiesCrowdStrikeMock ProviderConfigId = "vulnerabilities_crowdstrike_mock"
+	// Microsoft Defender for Endpoint
+	ProviderConfigIdVulnerabilitiesDefender ProviderConfigId = "vulnerabilities_defender"
 	// Nucleus Vulnerability Management
 	ProviderConfigIdVulnerabilitiesNucleus ProviderConfigId = "vulnerabilities_nucleus"
 	// Qualys Vulnerability Management, Detection & Response (VMDR)
@@ -16049,6 +16066,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdVulnerabilitiesCrowdStrike, nil
 	case "vulnerabilities_crowdstrike_mock":
 		return ProviderConfigIdVulnerabilitiesCrowdStrikeMock, nil
+	case "vulnerabilities_defender":
+		return ProviderConfigIdVulnerabilitiesDefender, nil
 	case "vulnerabilities_nucleus":
 		return ProviderConfigIdVulnerabilitiesNucleus, nil
 	case "vulnerabilities_qualys_cloud":
@@ -20118,6 +20137,52 @@ func (v *VulnerabilitiesCrowdStrikeMock) UnmarshalJSON(data []byte) error {
 }
 
 func (v *VulnerabilitiesCrowdStrikeMock) String() string {
+	if len(v._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(v._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(v); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", v)
+}
+
+// Configuration for Microsoft Defender for Endpoint.
+type VulnerabilitiesDefender struct {
+	Credential *DefenderCredential `json:"credential" url:"credential"`
+	// Tenant ID for the Microsoft Defender Management Console.
+	TenantId string `json:"tenant_id" url:"tenant_id"`
+	// Base URL for the Microsoft Defender API.
+	Url string `json:"url" url:"url"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (v *VulnerabilitiesDefender) GetExtraProperties() map[string]interface{} {
+	return v.extraProperties
+}
+
+func (v *VulnerabilitiesDefender) UnmarshalJSON(data []byte) error {
+	type unmarshaler VulnerabilitiesDefender
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*v = VulnerabilitiesDefender(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *v)
+	if err != nil {
+		return err
+	}
+	v.extraProperties = extraProperties
+
+	v._rawJSON = nil
+	return nil
+}
+
+func (v *VulnerabilitiesDefender) String() string {
 	if len(v._rawJSON) > 0 {
 		if value, err := core.StringifyJSON(v._rawJSON); err == nil {
 			return value
