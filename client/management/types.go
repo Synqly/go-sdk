@@ -7589,6 +7589,37 @@ func (w *WebhooksPermissions) String() string {
 	return fmt.Sprintf("%#v", w)
 }
 
+type ApiRegion string
+
+const (
+	ApiRegionEurope       ApiRegion = "eu"
+	ApiRegionGermany      ApiRegion = "de"
+	ApiRegionUnitedStates ApiRegion = "us"
+	ApiRegionCanada       ApiRegion = "ca"
+	ApiRegionJapan        ApiRegion = "jpn"
+)
+
+func NewApiRegionFromString(s string) (ApiRegion, error) {
+	switch s {
+	case "eu":
+		return ApiRegionEurope, nil
+	case "de":
+		return ApiRegionGermany, nil
+	case "us":
+		return ApiRegionUnitedStates, nil
+	case "ca":
+		return ApiRegionCanada, nil
+	case "jpn":
+		return ApiRegionJapan, nil
+	}
+	var t ApiRegion
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (a ApiRegion) Ptr() *ApiRegion {
+	return &a
+}
+
 // Configuration for Snyk as an application security provider.
 //
 // [Configuration guide](https://docs.synqly.com/guides/provider-configuration/snyk-appsec-setup)
@@ -10245,6 +10276,76 @@ func (d *DefenderCredential) Accept(visitor DefenderCredentialVisitor) error {
 	return fmt.Errorf("type %T does not define a non-empty union type", d)
 }
 
+type EsetCredential struct {
+	Type string
+	// Configuration when creating new Client Credentials.
+	OAuthClient *OAuthClientCredential
+	// Reference to existing Client Credentials.
+	OAuthClientId OAuthClientCredentialId
+}
+
+func (e *EsetCredential) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	e.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", e)
+	}
+	switch unmarshaler.Type {
+	case "o_auth_client":
+		value := new(OAuthClientCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.OAuthClient = value
+	case "o_auth_client_id":
+		var valueUnmarshaler struct {
+			OAuthClientId OAuthClientCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		e.OAuthClientId = valueUnmarshaler.OAuthClientId
+	}
+	return nil
+}
+
+func (e EsetCredential) MarshalJSON() ([]byte, error) {
+	if e.OAuthClient != nil {
+		return core.MarshalJSONWithExtraProperty(e.OAuthClient, "type", "o_auth_client")
+	}
+	if e.OAuthClientId != "" {
+		var marshaler = struct {
+			Type          string                  `json:"type"`
+			OAuthClientId OAuthClientCredentialId `json:"value"`
+		}{
+			Type:          "o_auth_client_id",
+			OAuthClientId: e.OAuthClientId,
+		}
+		return json.Marshal(marshaler)
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", e)
+}
+
+type EsetCredentialVisitor interface {
+	VisitOAuthClient(*OAuthClientCredential) error
+	VisitOAuthClientId(OAuthClientCredentialId) error
+}
+
+func (e *EsetCredential) Accept(visitor EsetCredentialVisitor) error {
+	if e.OAuthClient != nil {
+		return visitor.VisitOAuthClient(e.OAuthClient)
+	}
+	if e.OAuthClientId != "" {
+		return visitor.VisitOAuthClientId(e.OAuthClientId)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", e)
+}
+
 type EdrCrowdStrikeDataset string
 
 const (
@@ -10389,6 +10490,50 @@ func (e *EdrDefender) UnmarshalJSON(data []byte) error {
 }
 
 func (e *EdrDefender) String() string {
+	if len(e._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(e._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(e); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", e)
+}
+
+// Configuration for ESET Connect as a EDR Provider
+type EdrEsetConnect struct {
+	Credential *EsetCredential `json:"credential" url:"credential"`
+	// Region to use when connecting to the ESET Connect API.
+	Region ApiRegion `json:"region" url:"region"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (e *EdrEsetConnect) GetExtraProperties() map[string]interface{} {
+	return e.extraProperties
+}
+
+func (e *EdrEsetConnect) UnmarshalJSON(data []byte) error {
+	type unmarshaler EdrEsetConnect
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*e = EdrEsetConnect(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *e)
+	if err != nil {
+		return err
+	}
+	e.extraProperties = extraProperties
+
+	e._rawJSON = nil
+	return nil
+}
+
+func (e *EdrEsetConnect) String() string {
 	if len(e._rawJSON) > 0 {
 		if value, err := core.StringifyJSON(e._rawJSON); err == nil {
 			return value
@@ -13964,6 +14109,8 @@ type ProviderConfig struct {
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/defender-setup)
 	EdrDefender *EdrDefender
+	// Configuration for ESET Connect as a EDR Provider
+	EdrEsetConnect *EdrEsetConnect
 	// Configuration for ThreatDown Endpoint Detection & Response.
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/malwarebytes-setup)
@@ -14435,6 +14582,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.EdrDefender = value
+	case "edr_eset_connect":
+		value := new(EdrEsetConnect)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.EdrEsetConnect = value
 	case "edr_malwarebytes":
 		value := new(EdrMalwarebytes)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -14983,6 +15136,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.EdrDefender != nil {
 		return core.MarshalJSONWithExtraProperty(p.EdrDefender, "type", "edr_defender")
 	}
+	if p.EdrEsetConnect != nil {
+		return core.MarshalJSONWithExtraProperty(p.EdrEsetConnect, "type", "edr_eset_connect")
+	}
 	if p.EdrMalwarebytes != nil {
 		return core.MarshalJSONWithExtraProperty(p.EdrMalwarebytes, "type", "edr_malwarebytes")
 	}
@@ -15241,6 +15397,7 @@ type ProviderConfigVisitor interface {
 	VisitEdrCrowdstrike(*EdrCrowdStrike) error
 	VisitEdrCrowdstrikeMock(*EdrCrowdStrikeMock) error
 	VisitEdrDefender(*EdrDefender) error
+	VisitEdrEsetConnect(*EdrEsetConnect) error
 	VisitEdrMalwarebytes(*EdrMalwarebytes) error
 	VisitEdrSentinelone(*EdrSentinelOne) error
 	VisitEdrSophos(*EdrSophos) error
@@ -15421,6 +15578,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.EdrDefender != nil {
 		return visitor.VisitEdrDefender(p.EdrDefender)
+	}
+	if p.EdrEsetConnect != nil {
+		return visitor.VisitEdrEsetConnect(p.EdrEsetConnect)
 	}
 	if p.EdrMalwarebytes != nil {
 		return visitor.VisitEdrMalwarebytes(p.EdrMalwarebytes)
@@ -15718,6 +15878,8 @@ const (
 	ProviderConfigIdEdrCrowdStrikeMock ProviderConfigId = "edr_crowdstrike_mock"
 	// Microsoft Defender for Endpoint
 	ProviderConfigIdEdrDefender ProviderConfigId = "edr_defender"
+	// ESET Connect
+	ProviderConfigIdEdrEsetConnect ProviderConfigId = "edr_eset_connect"
 	// ThreatDown Endpoint Detection & Response
 	ProviderConfigIdEdrMalwarebytes ProviderConfigId = "edr_malwarebytes"
 	// SentinelOne Singularity™ Endpoint
@@ -15940,6 +16102,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdEdrCrowdStrikeMock, nil
 	case "edr_defender":
 		return ProviderConfigIdEdrDefender, nil
+	case "edr_eset_connect":
+		return ProviderConfigIdEdrEsetConnect, nil
 	case "edr_malwarebytes":
 		return ProviderConfigIdEdrMalwarebytes, nil
 	case "edr_sentinelone":
