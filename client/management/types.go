@@ -3544,6 +3544,48 @@ func (i *Integration) String() string {
 	return fmt.Sprintf("%#v", i)
 }
 
+type IntegrationMessagesResponse struct {
+	// Warnings or issues that occurred during integration creation that did not prevent the request from returning, but may indicate a problem with the integration configuration.
+	Problems []*Problem `json:"problems,omitempty" url:"problems,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (i *IntegrationMessagesResponse) GetExtraProperties() map[string]interface{} {
+	return i.extraProperties
+}
+
+func (i *IntegrationMessagesResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler IntegrationMessagesResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*i = IntegrationMessagesResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *i)
+	if err != nil {
+		return err
+	}
+	i.extraProperties = extraProperties
+
+	i._rawJSON = nil
+	return nil
+}
+
+func (i *IntegrationMessagesResponse) String() string {
+	if len(i._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(i._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(i); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", i)
+}
+
 type WebhookConfig struct {
 	// The key used by Synqly to verify incoming webhook payloads sent by the Provider. The format and requirements for this key is Provider specific:
 	//

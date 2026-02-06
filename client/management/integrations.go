@@ -104,6 +104,8 @@ func (c *CreateIntegrationRequest) String() string {
 
 type CreateIntegrationResponse struct {
 	Result *CreateIntegrationResponseResult `json:"result" url:"result"`
+	// Warnings or issues that occurred during integration creation, such as authentication failures or invalid custom field mappings.
+	Messages *IntegrationMessagesResponse `json:"messages,omitempty" url:"messages,omitempty"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
