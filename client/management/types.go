@@ -8327,6 +8327,52 @@ func (a *AssetsCrowdStrikeMock) String() string {
 	return fmt.Sprintf("%#v", a)
 }
 
+// Configuration for Microsoft Defender for Endpoint as an Assets Provider
+type AssetsDefender struct {
+	Credential *DefenderCredential `json:"credential" url:"credential"`
+	// Tenant ID for the Microsoft Defender Management Console.
+	TenantId string `json:"tenant_id" url:"tenant_id"`
+	// Base URL for the Microsoft Defender API.
+	Url string `json:"url" url:"url"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (a *AssetsDefender) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
+}
+
+func (a *AssetsDefender) UnmarshalJSON(data []byte) error {
+	type unmarshaler AssetsDefender
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*a = AssetsDefender(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+
+	a._rawJSON = nil
+	return nil
+}
+
+func (a *AssetsDefender) String() string {
+	if len(a._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(a); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", a)
+}
+
 // Configuration for Ivanti Neurons as an Assets Provider
 //
 // [Configuration guide](https://docs.synqly.com/guides/provider-configuration/ivanti-asset-setup)
@@ -14099,6 +14145,8 @@ type ProviderConfig struct {
 	AssetsCrowdstrike *AssetsCrowdStrike
 	// Configuration for a mocked CrowdStrike Falcon as an Assets Provider
 	AssetsCrowdstrikeMock *AssetsCrowdStrikeMock
+	// Configuration for Microsoft Defender for Endpoint as an Assets Provider
+	AssetsDefender *AssetsDefender
 	// Configuration for Ivanti Neurons as an Assets Provider
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/ivanti-asset-setup)
@@ -14504,6 +14552,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.AssetsCrowdstrikeMock = value
+	case "assets_defender":
+		value := new(AssetsDefender)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.AssetsDefender = value
 	case "assets_ivanti_neurons":
 		value := new(AssetsIvantiNeurons)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -15118,6 +15172,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.AssetsCrowdstrikeMock != nil {
 		return core.MarshalJSONWithExtraProperty(p.AssetsCrowdstrikeMock, "type", "assets_crowdstrike_mock")
 	}
+	if p.AssetsDefender != nil {
+		return core.MarshalJSONWithExtraProperty(p.AssetsDefender, "type", "assets_defender")
+	}
 	if p.AssetsIvantiNeurons != nil {
 		return core.MarshalJSONWithExtraProperty(p.AssetsIvantiNeurons, "type", "assets_ivanti_neurons")
 	}
@@ -15419,6 +15476,7 @@ type ProviderConfigVisitor interface {
 	VisitAssetsClarotyXdome(*AssetsClarotyXdome) error
 	VisitAssetsCrowdstrike(*AssetsCrowdStrike) error
 	VisitAssetsCrowdstrikeMock(*AssetsCrowdStrikeMock) error
+	VisitAssetsDefender(*AssetsDefender) error
 	VisitAssetsIvantiNeurons(*AssetsIvantiNeurons) error
 	VisitAssetsIvantiNeuronsMock(*AssetsIvantiNeuronsMock) error
 	VisitAssetsNozomiVantage(*AssetsNozomiVantage) error
@@ -15560,6 +15618,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.AssetsCrowdstrikeMock != nil {
 		return visitor.VisitAssetsCrowdstrikeMock(p.AssetsCrowdstrikeMock)
+	}
+	if p.AssetsDefender != nil {
+		return visitor.VisitAssetsDefender(p.AssetsDefender)
 	}
 	if p.AssetsIvantiNeurons != nil {
 		return visitor.VisitAssetsIvantiNeurons(p.AssetsIvantiNeurons)
@@ -15880,6 +15941,8 @@ const (
 	ProviderConfigIdAssetsCrowdStrike ProviderConfigId = "assets_crowdstrike"
 	// [MOCK] CrowdStrike Falcon Spotlight
 	ProviderConfigIdAssetsCrowdStrikeMock ProviderConfigId = "assets_crowdstrike_mock"
+	// Microsoft Defender for Endpoint
+	ProviderConfigIdAssetsDefender ProviderConfigId = "assets_defender"
 	// Ivanti Neurons
 	ProviderConfigIdAssetsIvantiNeurons ProviderConfigId = "assets_ivanti_neurons"
 	// [MOCK] Ivanti Neurons
@@ -16104,6 +16167,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdAssetsCrowdStrike, nil
 	case "assets_crowdstrike_mock":
 		return ProviderConfigIdAssetsCrowdStrikeMock, nil
+	case "assets_defender":
+		return ProviderConfigIdAssetsDefender, nil
 	case "assets_ivanti_neurons":
 		return ProviderConfigIdAssetsIvantiNeurons, nil
 	case "assets_ivanti_neurons_mock":
