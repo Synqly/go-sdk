@@ -7662,6 +7662,50 @@ func (a ApiRegion) Ptr() *ApiRegion {
 	return &a
 }
 
+type ApiConfig struct {
+	// Authenticates calls to the Panther APIs.
+	Credential *PantherApiCredential `json:"credential" url:"credential"`
+	// Base URL for your Panther instance APIs.
+	Url string `json:"url" url:"url"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (a *ApiConfig) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
+}
+
+func (a *ApiConfig) UnmarshalJSON(data []byte) error {
+	type unmarshaler ApiConfig
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*a = ApiConfig(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+
+	a._rawJSON = nil
+	return nil
+}
+
+func (a *ApiConfig) String() string {
+	if len(a._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(a); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", a)
+}
+
 // Configuration for Snyk as an application security provider.
 //
 // [Configuration guide](https://docs.synqly.com/guides/provider-configuration/snyk-appsec-setup)
@@ -11811,6 +11855,50 @@ func (h HclAppScanOnCloudUrl) Ptr() *HclAppScanOnCloudUrl {
 	return &h
 }
 
+type HttpIngest struct {
+	// Authenticates calls to your HTTP Ingest log source.
+	Credential *PantherIngestionCredential `json:"credential" url:"credential"`
+	// The URL for your HTTP Log Source.
+	Url string `json:"url" url:"url"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (h *HttpIngest) GetExtraProperties() map[string]interface{} {
+	return h.extraProperties
+}
+
+func (h *HttpIngest) UnmarshalJSON(data []byte) error {
+	type unmarshaler HttpIngest
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*h = HttpIngest(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *h)
+	if err != nil {
+		return err
+	}
+	h.extraProperties = extraProperties
+
+	h._rawJSON = nil
+	return nil
+}
+
+func (h *HttpIngest) String() string {
+	if len(h._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(h._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(h); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", h)
+}
+
 type HttpReceiverAuthConfig struct {
 	Type              string
 	BasicConfig       *HttpReceiverBasicAuthConfig
@@ -13879,15 +13967,15 @@ func (p *PaloAltoCredential) Accept(visitor PaloAltoCredentialVisitor) error {
 	return fmt.Errorf("type %T does not define a non-empty union type", p)
 }
 
-type PantherBearerCredential struct {
+type PantherApiCredential struct {
 	Type string
-	// Bearer token for authenticating with your Panther HTTP source. Generate this token in your Panther instance with appropriate write permissions.
+	// Configuration when creating new Token.
 	Token *TokenCredential
 	// Reference to existing Token.
 	TokenId TokenCredentialId
 }
 
-func (p *PantherBearerCredential) UnmarshalJSON(data []byte) error {
+func (p *PantherApiCredential) UnmarshalJSON(data []byte) error {
 	var unmarshaler struct {
 		Type string `json:"type"`
 	}
@@ -13917,7 +14005,7 @@ func (p *PantherBearerCredential) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (p PantherBearerCredential) MarshalJSON() ([]byte, error) {
+func (p PantherApiCredential) MarshalJSON() ([]byte, error) {
 	if p.Token != nil {
 		return core.MarshalJSONWithExtraProperty(p.Token, "type", "token")
 	}
@@ -13934,12 +14022,82 @@ func (p PantherBearerCredential) MarshalJSON() ([]byte, error) {
 	return nil, fmt.Errorf("type %T does not define a non-empty union type", p)
 }
 
-type PantherBearerCredentialVisitor interface {
+type PantherApiCredentialVisitor interface {
 	VisitToken(*TokenCredential) error
 	VisitTokenId(TokenCredentialId) error
 }
 
-func (p *PantherBearerCredential) Accept(visitor PantherBearerCredentialVisitor) error {
+func (p *PantherApiCredential) Accept(visitor PantherApiCredentialVisitor) error {
+	if p.Token != nil {
+		return visitor.VisitToken(p.Token)
+	}
+	if p.TokenId != "" {
+		return visitor.VisitTokenId(p.TokenId)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", p)
+}
+
+type PantherIngestionCredential struct {
+	Type string
+	// Configuration when creating new Token.
+	Token *TokenCredential
+	// Reference to existing Token.
+	TokenId TokenCredentialId
+}
+
+func (p *PantherIngestionCredential) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	p.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", p)
+	}
+	switch unmarshaler.Type {
+	case "token":
+		value := new(TokenCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.Token = value
+	case "token_id":
+		var valueUnmarshaler struct {
+			TokenId TokenCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		p.TokenId = valueUnmarshaler.TokenId
+	}
+	return nil
+}
+
+func (p PantherIngestionCredential) MarshalJSON() ([]byte, error) {
+	if p.Token != nil {
+		return core.MarshalJSONWithExtraProperty(p.Token, "type", "token")
+	}
+	if p.TokenId != "" {
+		var marshaler = struct {
+			Type    string            `json:"type"`
+			TokenId TokenCredentialId `json:"value"`
+		}{
+			Type:    "token_id",
+			TokenId: p.TokenId,
+		}
+		return json.Marshal(marshaler)
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", p)
+}
+
+type PantherIngestionCredentialVisitor interface {
+	VisitToken(*TokenCredential) error
+	VisitTokenId(TokenCredentialId) error
+}
+
+func (p *PantherIngestionCredential) Accept(visitor PantherIngestionCredentialVisitor) error {
 	if p.Token != nil {
 		return visitor.VisitToken(p.Token)
 	}
@@ -14278,6 +14436,10 @@ type ProviderConfig struct {
 	SiemMockSiem *SiemMock
 	// Configuration for OpenSearch search and analytics engine. Supports both managed and self-hosted OpenSearch deployments
 	SiemOpensearch *SiemOpenSearch
+	// Configuration for Panther SIEM.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/panther-siem-setup)
+	SiemPanther *SiemPanther
 	// Configuration for IBM QRadar SIEM.
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/qradar-setup)
@@ -14338,7 +14500,9 @@ type ProviderConfig struct {
 	SinkMockSink *SinkMock
 	// Configuration for OpenSearch search and analytics engine. Supports both managed and self-hosted OpenSearch deployments
 	SinkOpensearch *SinkOpenSearch
-	// Configuration for Panther SIEM as a Sink Provider. Supports sending security events to Panther instances via HTTP ingestion.
+	// Configuration for Panther Sink.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/panther-sink-setup)
 	SinkPanther *SinkPanther
 	// Configuration for IBM QRadar Sink.
 	//
@@ -14810,6 +14974,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.SiemOpensearch = value
+	case "siem_panther":
+		value := new(SiemPanther)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.SiemPanther = value
 	case "siem_q_radar":
 		value := new(SiemQRadar)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -15301,6 +15471,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.SiemOpensearch != nil {
 		return core.MarshalJSONWithExtraProperty(p.SiemOpensearch, "type", "siem_opensearch")
 	}
+	if p.SiemPanther != nil {
+		return core.MarshalJSONWithExtraProperty(p.SiemPanther, "type", "siem_panther")
+	}
 	if p.SiemQRadar != nil {
 		return core.MarshalJSONWithExtraProperty(p.SiemQRadar, "type", "siem_q_radar")
 	}
@@ -15519,6 +15692,7 @@ type ProviderConfigVisitor interface {
 	VisitSiemGoogleSecurityOperations(*SiemGoogleSecurityOperations) error
 	VisitSiemMockSiem(*SiemMock) error
 	VisitSiemOpensearch(*SiemOpenSearch) error
+	VisitSiemPanther(*SiemPanther) error
 	VisitSiemQRadar(*SiemQRadar) error
 	VisitSiemRapid7Insightidr(*SiemRapid7InsightIdr) error
 	VisitSiemSentinel(*SiemSentinel) error
@@ -15747,6 +15921,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.SiemOpensearch != nil {
 		return visitor.VisitSiemOpensearch(p.SiemOpensearch)
+	}
+	if p.SiemPanther != nil {
+		return visitor.VisitSiemPanther(p.SiemPanther)
 	}
 	if p.SiemQRadar != nil {
 		return visitor.VisitSiemQRadar(p.SiemQRadar)
@@ -16027,6 +16204,8 @@ const (
 	ProviderConfigIdSiemMock ProviderConfigId = "siem_mock_siem"
 	// OpenSearch SIEM
 	ProviderConfigIdSiemOpenSearch ProviderConfigId = "siem_opensearch"
+	// Panther SIEM
+	ProviderConfigIdSiemPanther ProviderConfigId = "siem_panther"
 	// IBM QRadar SIEM
 	ProviderConfigIdSiemQRadar ProviderConfigId = "siem_q_radar"
 	// Rapid7 InsightIDR
@@ -16063,7 +16242,7 @@ const (
 	ProviderConfigIdSinkMock ProviderConfigId = "sink_mock_sink"
 	// OpenSearch
 	ProviderConfigIdSinkOpenSearch ProviderConfigId = "sink_opensearch"
-	// Panther SIEM
+	// Panther Sink
 	ProviderConfigIdSinkPanther ProviderConfigId = "sink_panther"
 	// IBM QRadar Sink
 	ProviderConfigIdSinkQRadar ProviderConfigId = "sink_q_radar"
@@ -16253,6 +16432,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdSiemMock, nil
 	case "siem_opensearch":
 		return ProviderConfigIdSiemOpenSearch, nil
+	case "siem_panther":
+		return ProviderConfigIdSiemPanther, nil
 	case "siem_q_radar":
 		return ProviderConfigIdSiemQRadar, nil
 	case "siem_rapid7_insightidr":
@@ -16872,6 +17053,53 @@ func (s *SiemOpenSearch) UnmarshalJSON(data []byte) error {
 }
 
 func (s *SiemOpenSearch) String() string {
+	if len(s._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(s); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", s)
+}
+
+// Configuration for Panther SIEM.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/panther-siem-setup)
+type SiemPanther struct {
+	// Configuration required to connect to Panther SIEM APIs.
+	ApiConfig *ApiConfig `json:"api_config" url:"api_config"`
+	// Configuration for event ingestion. Only necessary when writing events to Panther.
+	HttpIngest *HttpIngest `json:"http_ingest,omitempty" url:"http_ingest,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (s *SiemPanther) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
+}
+
+func (s *SiemPanther) UnmarshalJSON(data []byte) error {
+	type unmarshaler SiemPanther
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*s = SiemPanther(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+
+	s._rawJSON = nil
+	return nil
+}
+
+func (s *SiemPanther) String() string {
 	if len(s._rawJSON) > 0 {
 		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
 			return value
@@ -18201,10 +18429,13 @@ func (s *SinkOpenSearch) String() string {
 	return fmt.Sprintf("%#v", s)
 }
 
-// Configuration for Panther SIEM as a Sink Provider. Supports sending security events to Panther instances via HTTP ingestion.
+// Configuration for Panther Sink.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/panther-sink-setup)
 type SinkPanther struct {
-	Credential *PantherBearerCredential `json:"credential" url:"credential"`
-	// Webhook URL provided by your Panther HTTP source. This endpoint receives events for ingestion into your Panther instance.
+	// Authenticates calls to your HTTP Ingest log source.
+	Credential *PantherIngestionCredential `json:"credential" url:"credential"`
+	// The URL for your HTTP Log Source.
 	Url string `json:"url" url:"url"`
 
 	extraProperties map[string]interface{}
