@@ -14612,6 +14612,8 @@ type ProviderConfig struct {
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/tenable-vulns-setup)
 	VulnerabilitiesTenableCloud *VulnerabilitiesTenableCloud
+	// Configuration for Tenable Security Center.
+	VulnerabilitiesTenableSc *VulnerabilitiesTenableSc
 }
 
 func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
@@ -15292,6 +15294,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.VulnerabilitiesTenableCloud = value
+	case "vulnerabilities_tenable_sc":
+		value := new(VulnerabilitiesTenableSc)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.VulnerabilitiesTenableSc = value
 	}
 	return nil
 }
@@ -15630,6 +15638,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.VulnerabilitiesTenableCloud != nil {
 		return core.MarshalJSONWithExtraProperty(p.VulnerabilitiesTenableCloud, "type", "vulnerabilities_tenable_cloud")
 	}
+	if p.VulnerabilitiesTenableSc != nil {
+		return core.MarshalJSONWithExtraProperty(p.VulnerabilitiesTenableSc, "type", "vulnerabilities_tenable_sc")
+	}
 	return nil, fmt.Errorf("type %T does not define a non-empty union type", p)
 }
 
@@ -15745,6 +15756,7 @@ type ProviderConfigVisitor interface {
 	VisitVulnerabilitiesTaniumCloud(*VulnerabilitiesTaniumCloud) error
 	VisitVulnerabilitiesTaniumCloudMock(*VulnerabilitiesTaniumCloudMock) error
 	VisitVulnerabilitiesTenableCloud(*VulnerabilitiesTenableCloud) error
+	VisitVulnerabilitiesTenableSc(*VulnerabilitiesTenableSc) error
 }
 
 func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
@@ -16081,6 +16093,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	if p.VulnerabilitiesTenableCloud != nil {
 		return visitor.VisitVulnerabilitiesTenableCloud(p.VulnerabilitiesTenableCloud)
 	}
+	if p.VulnerabilitiesTenableSc != nil {
+		return visitor.VisitVulnerabilitiesTenableSc(p.VulnerabilitiesTenableSc)
+	}
 	return fmt.Errorf("type %T does not define a non-empty union type", p)
 }
 
@@ -16310,6 +16325,8 @@ const (
 	ProviderConfigIdVulnerabilitiesTaniumCloudMock ProviderConfigId = "vulnerabilities_tanium_cloud_mock"
 	// Tenable Vulnerability Management
 	ProviderConfigIdVulnerabilitiesTenableCloud ProviderConfigId = "vulnerabilities_tenable_cloud"
+	// Tenable Security Center
+	ProviderConfigIdVulnerabilitiesTenableSc ProviderConfigId = "vulnerabilities_tenable_sc"
 	// Any provider config type.
 	ProviderConfigIdAll ProviderConfigId = "*"
 )
@@ -16538,6 +16555,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdVulnerabilitiesTaniumCloudMock, nil
 	case "vulnerabilities_tenable_cloud":
 		return ProviderConfigIdVulnerabilitiesTenableCloud, nil
+	case "vulnerabilities_tenable_sc":
+		return ProviderConfigIdVulnerabilitiesTenableSc, nil
 	case "*":
 		return ProviderConfigIdAll, nil
 	}
@@ -19695,6 +19714,76 @@ func (t *TenableCloudCredential) Accept(visitor TenableCloudCredentialVisitor) e
 	return fmt.Errorf("type %T does not define a non-empty union type", t)
 }
 
+type TenableScCredential struct {
+	Type string
+	// Configuration when creating new API Keys.
+	Token *TokenCredential
+	// Reference to existing API Keys.
+	TokenId TokenCredentialId
+}
+
+func (t *TenableScCredential) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	t.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", t)
+	}
+	switch unmarshaler.Type {
+	case "token":
+		value := new(TokenCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		t.Token = value
+	case "token_id":
+		var valueUnmarshaler struct {
+			TokenId TokenCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		t.TokenId = valueUnmarshaler.TokenId
+	}
+	return nil
+}
+
+func (t TenableScCredential) MarshalJSON() ([]byte, error) {
+	if t.Token != nil {
+		return core.MarshalJSONWithExtraProperty(t.Token, "type", "token")
+	}
+	if t.TokenId != "" {
+		var marshaler = struct {
+			Type    string            `json:"type"`
+			TokenId TokenCredentialId `json:"value"`
+		}{
+			Type:    "token_id",
+			TokenId: t.TokenId,
+		}
+		return json.Marshal(marshaler)
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", t)
+}
+
+type TenableScCredentialVisitor interface {
+	VisitToken(*TokenCredential) error
+	VisitTokenId(TokenCredentialId) error
+}
+
+func (t *TenableScCredential) Accept(visitor TenableScCredentialVisitor) error {
+	if t.Token != nil {
+		return visitor.VisitToken(t.Token)
+	}
+	if t.TokenId != "" {
+		return visitor.VisitTokenId(t.TokenId)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", t)
+}
+
 type TicketingIvantiDataset string
 
 const (
@@ -21087,6 +21176,50 @@ func (v *VulnerabilitiesTenableCloud) UnmarshalJSON(data []byte) error {
 }
 
 func (v *VulnerabilitiesTenableCloud) String() string {
+	if len(v._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(v._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(v); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", v)
+}
+
+// Configuration for Tenable Security Center.
+type VulnerabilitiesTenableSc struct {
+	Credential *TenableScCredential `json:"credential" url:"credential"`
+	// Base URL for the Tenable Security Center API.
+	Url string `json:"url" url:"url"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (v *VulnerabilitiesTenableSc) GetExtraProperties() map[string]interface{} {
+	return v.extraProperties
+}
+
+func (v *VulnerabilitiesTenableSc) UnmarshalJSON(data []byte) error {
+	type unmarshaler VulnerabilitiesTenableSc
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*v = VulnerabilitiesTenableSc(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *v)
+	if err != nil {
+		return err
+	}
+	v.extraProperties = extraProperties
+
+	v._rawJSON = nil
+	return nil
+}
+
+func (v *VulnerabilitiesTenableSc) String() string {
 	if len(v._rawJSON) > 0 {
 		if value, err := core.StringifyJSON(v._rawJSON); err == nil {
 			return value
