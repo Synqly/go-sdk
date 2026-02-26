@@ -416,6 +416,22 @@ const KillChainPhase_Phase_ActionsonObjectives KillChainPhasePhaseId = 7
 // Other. The kill chain phase is not mapped. See the <code>phase</code> attribute, which contains a data source specific value.
 const KillChainPhase_Phase_Other KillChainPhasePhaseId = 99
 
+// LdapPersonEmploymentStatusId Values
+// Employment Status ID. The normalized identifier of the user's employment status.
+
+// Unknown. The employment status is unknown.
+const LdapPerson_EmploymentStatus_Unknown LdapPersonEmploymentStatusId = 0
+// Applicant. The user is a job applicant or candidate who has not yet been hired.
+const LdapPerson_EmploymentStatus_Applicant LdapPersonEmploymentStatusId = 1
+// Active. The user is currently employed and actively working.
+const LdapPerson_EmploymentStatus_Active LdapPersonEmploymentStatusId = 2
+// Terminated. The user's employment has been terminated.
+const LdapPerson_EmploymentStatus_Terminated LdapPersonEmploymentStatusId = 3
+// Retired. The user has retired from the organization.
+const LdapPerson_EmploymentStatus_Retired LdapPersonEmploymentStatusId = 4
+// Other. The employment status is not mapped. See the <code>employment_status</code> attribute, which contains a data source specific value.
+const LdapPerson_EmploymentStatus_Other LdapPersonEmploymentStatusId = 99
+
 // MalwareClassificationIds Values
 // Classification IDs. The list of normalized identifiers of the malware classifications. Reference: <a target='_blank' href='https://docs.oasis-open.org/cti/stix/v2.1/os/stix-v2.1-os.html#_oxlc4df65spl'>STIX Malware Types</a> 
 

@@ -12711,6 +12711,54 @@ func (i *IdentityPingOne) String() string {
 	return fmt.Sprintf("%#v", i)
 }
 
+// Configuration for Workday Identity.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/workday-identity-setup)
+type IdentityWorkday struct {
+	Credential *WorkdayCredential `json:"credential" url:"credential"`
+	// Workday tenant identifier.
+	Tenant string `json:"tenant" url:"tenant"`
+	// Base URL for the Workday API.
+	Url string `json:"url" url:"url"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (i *IdentityWorkday) GetExtraProperties() map[string]interface{} {
+	return i.extraProperties
+}
+
+func (i *IdentityWorkday) UnmarshalJSON(data []byte) error {
+	type unmarshaler IdentityWorkday
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*i = IdentityWorkday(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *i)
+	if err != nil {
+		return err
+	}
+	i.extraProperties = extraProperties
+
+	i._rawJSON = nil
+	return nil
+}
+
+func (i *IdentityWorkday) String() string {
+	if len(i._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(i._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(i); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", i)
+}
+
 type IncidentIoCredential struct {
 	Type string
 	// Configuration when creating new Token.
@@ -14441,6 +14489,10 @@ type ProviderConfig struct {
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/ping-identity-setup)
 	IdentityPingone *IdentityPingOne
+	// Configuration for Workday Identity.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/workday-identity-setup)
+	IdentityWorkday *IdentityWorkday
 	// Configuration for incident.io as an Incident Response Provider.
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/incident-io-incident-response-setup)
@@ -14954,6 +15006,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.IdentityPingone = value
+	case "identity_workday":
+		value := new(IdentityWorkday)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.IdentityWorkday = value
 	case "incidentresponse_incidentio":
 		value := new(IncidentResponseIncidentIo)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -15499,6 +15557,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.IdentityPingone != nil {
 		return core.MarshalJSONWithExtraProperty(p.IdentityPingone, "type", "identity_pingone")
 	}
+	if p.IdentityWorkday != nil {
+		return core.MarshalJSONWithExtraProperty(p.IdentityWorkday, "type", "identity_workday")
+	}
 	if p.IncidentresponseIncidentio != nil {
 		return core.MarshalJSONWithExtraProperty(p.IncidentresponseIncidentio, "type", "incidentresponse_incidentio")
 	}
@@ -15750,6 +15811,7 @@ type ProviderConfigVisitor interface {
 	VisitIdentityGoogle(*IdentityGoogle) error
 	VisitIdentityOkta(*IdentityOkta) error
 	VisitIdentityPingone(*IdentityPingOne) error
+	VisitIdentityWorkday(*IdentityWorkday) error
 	VisitIncidentresponseIncidentio(*IncidentResponseIncidentIo) error
 	VisitIncidentresponsePagerduty(*IncidentResponsePagerDuty) error
 	VisitNotificationsJira(*NotificationsJira) error
@@ -15957,6 +16019,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.IdentityPingone != nil {
 		return visitor.VisitIdentityPingone(p.IdentityPingone)
+	}
+	if p.IdentityWorkday != nil {
+		return visitor.VisitIdentityWorkday(p.IdentityWorkday)
 	}
 	if p.IncidentresponseIncidentio != nil {
 		return visitor.VisitIncidentresponseIncidentio(p.IncidentresponseIncidentio)
@@ -16258,6 +16323,8 @@ const (
 	ProviderConfigIdIdentityOkta ProviderConfigId = "identity_okta"
 	// PingOne Cloud Platform
 	ProviderConfigIdIdentityPingOne ProviderConfigId = "identity_pingone"
+	// Workday Identity
+	ProviderConfigIdIdentityWorkday ProviderConfigId = "identity_workday"
 	// incident.io
 	ProviderConfigIdIncidentResponseIncidentIo ProviderConfigId = "incidentresponse_incidentio"
 	// PagerDuty Operations Cloud
@@ -16490,6 +16557,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdIdentityOkta, nil
 	case "identity_pingone":
 		return ProviderConfigIdIdentityPingOne, nil
+	case "identity_workday":
+		return ProviderConfigIdIdentityWorkday, nil
 	case "incidentresponse_incidentio":
 		return ProviderConfigIdIncidentResponseIncidentIo, nil
 	case "incidentresponse_pagerduty":
@@ -21296,6 +21365,76 @@ func (v *VulnerabilitiesTenableSc) String() string {
 		return value
 	}
 	return fmt.Sprintf("%#v", v)
+}
+
+type WorkdayCredential struct {
+	Type string
+	// OAuth 2.0 Client ID, Client Secret, Refresh Token, and Token URL for Workday API access.
+	OAuthClient *OAuthClientCredential
+	// Reference to existing Client Credentials.
+	OAuthClientId OAuthClientCredentialId
+}
+
+func (w *WorkdayCredential) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	w.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", w)
+	}
+	switch unmarshaler.Type {
+	case "o_auth_client":
+		value := new(OAuthClientCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		w.OAuthClient = value
+	case "o_auth_client_id":
+		var valueUnmarshaler struct {
+			OAuthClientId OAuthClientCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		w.OAuthClientId = valueUnmarshaler.OAuthClientId
+	}
+	return nil
+}
+
+func (w WorkdayCredential) MarshalJSON() ([]byte, error) {
+	if w.OAuthClient != nil {
+		return core.MarshalJSONWithExtraProperty(w.OAuthClient, "type", "o_auth_client")
+	}
+	if w.OAuthClientId != "" {
+		var marshaler = struct {
+			Type          string                  `json:"type"`
+			OAuthClientId OAuthClientCredentialId `json:"value"`
+		}{
+			Type:          "o_auth_client_id",
+			OAuthClientId: w.OAuthClientId,
+		}
+		return json.Marshal(marshaler)
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", w)
+}
+
+type WorkdayCredentialVisitor interface {
+	VisitOAuthClient(*OAuthClientCredential) error
+	VisitOAuthClientId(OAuthClientCredentialId) error
+}
+
+func (w *WorkdayCredential) Accept(visitor WorkdayCredentialVisitor) error {
+	if w.OAuthClient != nil {
+		return visitor.VisitOAuthClient(w.OAuthClient)
+	}
+	if w.OAuthClientId != "" {
+		return visitor.VisitOAuthClientId(w.OAuthClientId)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", w)
 }
 
 type ZendeskCredential struct {

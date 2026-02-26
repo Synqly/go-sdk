@@ -2557,10 +2557,20 @@ type LdapPerson struct {
 	DeletedTime *Timestamp `json:"deleted_time,omitempty" url:"deleted_time,omitempty"`
 	// The timestamp when the user was deleted. In Active Directory (AD), when a user is deleted they are moved to a temporary container and then removed after 30 days. So, this field can be populated even after a user is deleted for the next 30 days.
 	DeletedTimeDt *time.Time `json:"deleted_time_dt,omitempty" url:"deleted_time_dt,omitempty"`
+	// Indicates whether the user is eligible for rehire. This typically applies to terminated or retired employees.
+	EligibleForRehire *bool `json:"eligible_for_rehire,omitempty" url:"eligible_for_rehire,omitempty"`
 	// A list of additional email addresses for the user.
 	EmailAddrs []EmailAddress `json:"email_addrs,omitempty" url:"email_addrs,omitempty"`
 	// The employee identifier assigned to the user by the organization.
 	EmployeeUid *string `json:"employee_uid,omitempty" url:"employee_uid,omitempty"`
+	// The employment status, normalized to the caption of the employment_status_id value. In the case of 'Other', it is defined by the data source.
+	EmploymentStatus *string `json:"employment_status,omitempty" url:"employment_status,omitempty"`
+	// The timestamp when the employment status was last changed.
+	EmploymentStatusDate *Timestamp `json:"employment_status_date,omitempty" url:"employment_status_date,omitempty"`
+	// The timestamp when the employment status was last changed.
+	EmploymentStatusDateDt *time.Time `json:"employment_status_date_dt,omitempty" url:"employment_status_date_dt,omitempty"`
+	// The normalized identifier of the user's employment status.
+	EmploymentStatusId *LdapPersonEmploymentStatusId `json:"employment_status_id,omitempty" url:"employment_status_id,omitempty"`
 	// The given or first name of the user.
 	GivenName *string `json:"given_name,omitempty" url:"given_name,omitempty"`
 	// The timestamp when the user was or will be hired by the organization.
@@ -2593,6 +2603,10 @@ type LdapPerson struct {
 	ModifiedTimeDt *time.Time `json:"modified_time_dt,omitempty" url:"modified_time_dt,omitempty"`
 	// The primary office location associated with the user. This could be any string and isn't a specific address. For example, <code>South East Virtual</code>.
 	OfficeLocation *string `json:"office_location,omitempty" url:"office_location,omitempty"`
+	// Indicates whether a termination is considered regrettable by the organization (i.e., loss of a valued employee). This is typically only populated for terminated employees.
+	RegrettableTermination *bool `json:"regrettable_termination,omitempty" url:"regrettable_termination,omitempty"`
+	// The user's direct reports. This is the inverse of the manager relationship, representing users who report directly to this user in the organizational hierarchy. This field only includes immediate/direct reports, not transitive reports.
+	Reports []Object `json:"reports,omitempty" url:"reports,omitempty"`
 	// The last or family name for the user.
 	Surname *string `json:"surname,omitempty" url:"surname,omitempty"`
 
@@ -2608,12 +2622,13 @@ func (l *LdapPerson) UnmarshalJSON(data []byte) error {
 	type embed LdapPerson
 	var unmarshaler = struct {
 		embed
-		CreatedTimeDt   *core.DateTime `json:"created_time_dt,omitempty"`
-		DeletedTimeDt   *core.DateTime `json:"deleted_time_dt,omitempty"`
-		HireTimeDt      *core.DateTime `json:"hire_time_dt,omitempty"`
-		LastLoginTimeDt *core.DateTime `json:"last_login_time_dt,omitempty"`
-		LeaveTimeDt     *core.DateTime `json:"leave_time_dt,omitempty"`
-		ModifiedTimeDt  *core.DateTime `json:"modified_time_dt,omitempty"`
+		CreatedTimeDt          *core.DateTime `json:"created_time_dt,omitempty"`
+		DeletedTimeDt          *core.DateTime `json:"deleted_time_dt,omitempty"`
+		EmploymentStatusDateDt *core.DateTime `json:"employment_status_date_dt,omitempty"`
+		HireTimeDt             *core.DateTime `json:"hire_time_dt,omitempty"`
+		LastLoginTimeDt        *core.DateTime `json:"last_login_time_dt,omitempty"`
+		LeaveTimeDt            *core.DateTime `json:"leave_time_dt,omitempty"`
+		ModifiedTimeDt         *core.DateTime `json:"modified_time_dt,omitempty"`
 	}{
 		embed: embed(*l),
 	}
@@ -2623,6 +2638,7 @@ func (l *LdapPerson) UnmarshalJSON(data []byte) error {
 	*l = LdapPerson(unmarshaler.embed)
 	l.CreatedTimeDt = unmarshaler.CreatedTimeDt.TimePtr()
 	l.DeletedTimeDt = unmarshaler.DeletedTimeDt.TimePtr()
+	l.EmploymentStatusDateDt = unmarshaler.EmploymentStatusDateDt.TimePtr()
 	l.HireTimeDt = unmarshaler.HireTimeDt.TimePtr()
 	l.LastLoginTimeDt = unmarshaler.LastLoginTimeDt.TimePtr()
 	l.LeaveTimeDt = unmarshaler.LeaveTimeDt.TimePtr()
@@ -2642,20 +2658,22 @@ func (l *LdapPerson) MarshalJSON() ([]byte, error) {
 	type embed LdapPerson
 	var marshaler = struct {
 		embed
-		CreatedTimeDt   *core.DateTime `json:"created_time_dt,omitempty"`
-		DeletedTimeDt   *core.DateTime `json:"deleted_time_dt,omitempty"`
-		HireTimeDt      *core.DateTime `json:"hire_time_dt,omitempty"`
-		LastLoginTimeDt *core.DateTime `json:"last_login_time_dt,omitempty"`
-		LeaveTimeDt     *core.DateTime `json:"leave_time_dt,omitempty"`
-		ModifiedTimeDt  *core.DateTime `json:"modified_time_dt,omitempty"`
+		CreatedTimeDt          *core.DateTime `json:"created_time_dt,omitempty"`
+		DeletedTimeDt          *core.DateTime `json:"deleted_time_dt,omitempty"`
+		EmploymentStatusDateDt *core.DateTime `json:"employment_status_date_dt,omitempty"`
+		HireTimeDt             *core.DateTime `json:"hire_time_dt,omitempty"`
+		LastLoginTimeDt        *core.DateTime `json:"last_login_time_dt,omitempty"`
+		LeaveTimeDt            *core.DateTime `json:"leave_time_dt,omitempty"`
+		ModifiedTimeDt         *core.DateTime `json:"modified_time_dt,omitempty"`
 	}{
-		embed:           embed(*l),
-		CreatedTimeDt:   core.NewOptionalDateTime(l.CreatedTimeDt),
-		DeletedTimeDt:   core.NewOptionalDateTime(l.DeletedTimeDt),
-		HireTimeDt:      core.NewOptionalDateTime(l.HireTimeDt),
-		LastLoginTimeDt: core.NewOptionalDateTime(l.LastLoginTimeDt),
-		LeaveTimeDt:     core.NewOptionalDateTime(l.LeaveTimeDt),
-		ModifiedTimeDt:  core.NewOptionalDateTime(l.ModifiedTimeDt),
+		embed:                  embed(*l),
+		CreatedTimeDt:          core.NewOptionalDateTime(l.CreatedTimeDt),
+		DeletedTimeDt:          core.NewOptionalDateTime(l.DeletedTimeDt),
+		EmploymentStatusDateDt: core.NewOptionalDateTime(l.EmploymentStatusDateDt),
+		HireTimeDt:             core.NewOptionalDateTime(l.HireTimeDt),
+		LastLoginTimeDt:        core.NewOptionalDateTime(l.LastLoginTimeDt),
+		LeaveTimeDt:            core.NewOptionalDateTime(l.LeaveTimeDt),
+		ModifiedTimeDt:         core.NewOptionalDateTime(l.ModifiedTimeDt),
 	}
 	return json.Marshal(marshaler)
 }
@@ -2671,6 +2689,15 @@ func (l *LdapPerson) String() string {
 	}
 	return fmt.Sprintf("%#v", l)
 }
+
+// LdapPersonEmploymentStatusId is an enum, and the following values are allowed.
+// 0 - Unknown: The employment status is unknown.
+// 1 - Applicant: The user is a job applicant or candidate who has not yet been hired.
+// 2 - Active: The user is currently employed and actively working.
+// 3 - Terminated: The user's employment has been terminated.
+// 4 - Retired: The user has retired from the organization.
+// 99 - Other: The employment status is not mapped. See the <code>employment_status</code> attribute, which contains a data source specific value.
+type LdapPersonEmploymentStatusId = int
 
 // The Geo Location object describes a geographical location, usually associated with an IP address. Defined by D3FEND <a target='_blank' href='https://d3fend.mitre.org/dao/artifact/d3f:PhysicalLocation/'>d3f:PhysicalLocation</a>.
 type Location struct {
