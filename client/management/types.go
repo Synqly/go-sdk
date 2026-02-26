@@ -5103,26 +5103,27 @@ func (o *OperationSchedule) String() string {
 type ScheduledOperationId string
 
 const (
-	ScheduledOperationIdAssetsQueryDevices             ScheduledOperationId = "assets_query_devices"
-	ScheduledOperationIdEdrQueryAlerts                 ScheduledOperationId = "edr_query_alerts"
-	ScheduledOperationIdEdrQueryApplications           ScheduledOperationId = "edr_query_applications"
-	ScheduledOperationIdEdrQueryEndpoints              ScheduledOperationId = "edr_query_endpoints"
-	ScheduledOperationIdEdrQueryIocs                   ScheduledOperationId = "edr_query_iocs"
-	ScheduledOperationIdEdrQueryPostureScore           ScheduledOperationId = "edr_query_posture_score"
-	ScheduledOperationIdEdrQueryThreatevents           ScheduledOperationId = "edr_query_threatevents"
-	ScheduledOperationIdIdentityQueryAuditLog          ScheduledOperationId = "identity_query_audit_log"
-	ScheduledOperationIdIdentityQueryGroups            ScheduledOperationId = "identity_query_groups"
-	ScheduledOperationIdIdentityQueryGroupsEnriched    ScheduledOperationId = "identity_query_groups_enriched"
-	ScheduledOperationIdIdentityQueryUsers             ScheduledOperationId = "identity_query_users"
-	ScheduledOperationIdIdentityQueryUsersEnriched     ScheduledOperationId = "identity_query_users_enriched"
-	ScheduledOperationIdSiemQueryEvents                ScheduledOperationId = "siem_query_events"
-	ScheduledOperationIdSiemQueryInvestigations        ScheduledOperationId = "siem_query_investigations"
-	ScheduledOperationIdVulnerabilitiesQueryAssets     ScheduledOperationId = "vulnerabilities_query_assets"
-	ScheduledOperationIdVulnerabilitiesQueryFindings   ScheduledOperationId = "vulnerabilities_query_findings"
-	ScheduledOperationIdVulnerabilitiesQueryScans      ScheduledOperationId = "vulnerabilities_query_scans"
-	ScheduledOperationIdAppsecQueryApplications        ScheduledOperationId = "appsec_query_applications"
-	ScheduledOperationIdAppsecQueryApplicationFindings ScheduledOperationId = "appsec_query_application_findings"
-	ScheduledOperationIdAppsecQueryFindings            ScheduledOperationId = "appsec_query_findings"
+	ScheduledOperationIdAssetsQueryDevices                   ScheduledOperationId = "assets_query_devices"
+	ScheduledOperationIdEdrQueryAlerts                       ScheduledOperationId = "edr_query_alerts"
+	ScheduledOperationIdEdrQueryApplications                 ScheduledOperationId = "edr_query_applications"
+	ScheduledOperationIdEdrQueryEndpoints                    ScheduledOperationId = "edr_query_endpoints"
+	ScheduledOperationIdEdrQueryIocs                         ScheduledOperationId = "edr_query_iocs"
+	ScheduledOperationIdEdrQueryPostureScore                 ScheduledOperationId = "edr_query_posture_score"
+	ScheduledOperationIdEdrQueryThreatevents                 ScheduledOperationId = "edr_query_threatevents"
+	ScheduledOperationIdIdentityQueryAuditLog                ScheduledOperationId = "identity_query_audit_log"
+	ScheduledOperationIdIdentityQueryGroups                  ScheduledOperationId = "identity_query_groups"
+	ScheduledOperationIdIdentityQueryGroupsEnriched          ScheduledOperationId = "identity_query_groups_enriched"
+	ScheduledOperationIdIdentityQueryUsers                   ScheduledOperationId = "identity_query_users"
+	ScheduledOperationIdIdentityQueryUsersEnriched           ScheduledOperationId = "identity_query_users_enriched"
+	ScheduledOperationIdSiemQueryEvents                      ScheduledOperationId = "siem_query_events"
+	ScheduledOperationIdSiemQueryInvestigations              ScheduledOperationId = "siem_query_investigations"
+	ScheduledOperationIdVulnerabilitiesQueryAssets           ScheduledOperationId = "vulnerabilities_query_assets"
+	ScheduledOperationIdVulnerabilitiesQueryFindings         ScheduledOperationId = "vulnerabilities_query_findings"
+	ScheduledOperationIdVulnerabilitiesQueryScans            ScheduledOperationId = "vulnerabilities_query_scans"
+	ScheduledOperationIdAppsecQueryApplications              ScheduledOperationId = "appsec_query_applications"
+	ScheduledOperationIdAppsecQueryApplicationFindings       ScheduledOperationId = "appsec_query_application_findings"
+	ScheduledOperationIdAppsecQueryFindings                  ScheduledOperationId = "appsec_query_findings"
+	ScheduledOperationIdCloudsecurityQueryComplianceFindings ScheduledOperationId = "cloudsecurity_query_compliance_findings"
 )
 
 func NewScheduledOperationIdFromString(s string) (ScheduledOperationId, error) {
@@ -5167,6 +5168,8 @@ func NewScheduledOperationIdFromString(s string) (ScheduledOperationId, error) {
 		return ScheduledOperationIdAppsecQueryApplicationFindings, nil
 	case "appsec_query_findings":
 		return ScheduledOperationIdAppsecQueryFindings, nil
+	case "cloudsecurity_query_compliance_findings":
+		return ScheduledOperationIdCloudsecurityQueryComplianceFindings, nil
 	}
 	var t ScheduledOperationId
 	return "", fmt.Errorf("%s is not a valid %T", s, t)
@@ -9685,6 +9688,51 @@ func (c *CloudSecurityAws) UnmarshalJSON(data []byte) error {
 }
 
 func (c *CloudSecurityAws) String() string {
+	if len(c._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
+// Configuration for the AWS EventBridge SQS Provider that reads security events from an SQS queue populated by EventBridge (e.g. from GuardDuty and SecurityHub).
+type CloudSecurityAwsEventBridgeSqs struct {
+	// AWS credentials with access to the configured SQS queue.
+	Credential *AwsProviderCredential `json:"credential" url:"credential"`
+	// URL of the SQS queue where EventBridge sends GuardDuty and SecurityHub events.
+	QueueUrl string `json:"queue_url" url:"queue_url"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *CloudSecurityAwsEventBridgeSqs) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
+}
+
+func (c *CloudSecurityAwsEventBridgeSqs) UnmarshalJSON(data []byte) error {
+	type unmarshaler CloudSecurityAwsEventBridgeSqs
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = CloudSecurityAwsEventBridgeSqs(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
+	c._rawJSON = nil
+	return nil
+}
+
+func (c *CloudSecurityAwsEventBridgeSqs) String() string {
 	if len(c._rawJSON) > 0 {
 		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
 			return value
@@ -14339,6 +14387,8 @@ type ProviderConfig struct {
 	AssetsTaniumCloudMock *AssetsTaniumCloudMock
 	// Configuration for the AWS Cloud Security Provider
 	CloudsecurityAws *CloudSecurityAws
+	// Configuration for the AWS EventBridge SQS Provider that reads security events from an SQS queue populated by EventBridge (e.g. from GuardDuty and SecurityHub).
+	CloudsecurityAwseventbridgesqs *CloudSecurityAwsEventBridgeSqs
 	// Configuration for the CrowdStrike Cloud Security Provider
 	CloudsecurityCrowdstrike *CloudSecurityCrowdStrike
 	// Configuration for the Microsoft Defender for Cloud Provider
@@ -14802,6 +14852,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.CloudsecurityAws = value
+	case "cloudsecurity_awseventbridgesqs":
+		value := new(CloudSecurityAwsEventBridgeSqs)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.CloudsecurityAwseventbridgesqs = value
 	case "cloudsecurity_crowdstrike":
 		value := new(CloudSecurityCrowdStrike)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -15392,6 +15448,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.CloudsecurityAws != nil {
 		return core.MarshalJSONWithExtraProperty(p.CloudsecurityAws, "type", "cloudsecurity_aws")
 	}
+	if p.CloudsecurityAwseventbridgesqs != nil {
+		return core.MarshalJSONWithExtraProperty(p.CloudsecurityAwseventbridgesqs, "type", "cloudsecurity_awseventbridgesqs")
+	}
 	if p.CloudsecurityCrowdstrike != nil {
 		return core.MarshalJSONWithExtraProperty(p.CloudsecurityCrowdstrike, "type", "cloudsecurity_crowdstrike")
 	}
@@ -15674,6 +15733,7 @@ type ProviderConfigVisitor interface {
 	VisitAssetsTaniumCloud(*AssetsTaniumCloud) error
 	VisitAssetsTaniumCloudMock(*AssetsTaniumCloudMock) error
 	VisitCloudsecurityAws(*CloudSecurityAws) error
+	VisitCloudsecurityAwseventbridgesqs(*CloudSecurityAwsEventBridgeSqs) error
 	VisitCloudsecurityCrowdstrike(*CloudSecurityCrowdStrike) error
 	VisitCloudsecurityDefender(*CloudSecurityDefender) error
 	VisitCloudsecurityPaloalto(*CloudSecurityPaloAlto) error
@@ -15846,6 +15906,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.CloudsecurityAws != nil {
 		return visitor.VisitCloudsecurityAws(p.CloudsecurityAws)
+	}
+	if p.CloudsecurityAwseventbridgesqs != nil {
+		return visitor.VisitCloudsecurityAwseventbridgesqs(p.CloudsecurityAwseventbridgesqs)
 	}
 	if p.CloudsecurityCrowdstrike != nil {
 		return visitor.VisitCloudsecurityCrowdstrike(p.CloudsecurityCrowdstrike)
@@ -16161,6 +16224,8 @@ const (
 	ProviderConfigIdAssetsTaniumCloudMock ProviderConfigId = "assets_tanium_cloud_mock"
 	// AWS Cloud Security
 	ProviderConfigIdCloudSecurityAws ProviderConfigId = "cloudsecurity_aws"
+	// AWS EventBridge SQS
+	ProviderConfigIdCloudSecurityAwsEventBridgeSqs ProviderConfigId = "cloudsecurity_awseventbridgesqs"
 	// CrowdStrike Falcon® Insight EDR
 	ProviderConfigIdCloudSecurityCrowdStrike ProviderConfigId = "cloudsecurity_crowdstrike"
 	// Microsoft Defender for Cloud
@@ -16391,6 +16456,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdAssetsTaniumCloudMock, nil
 	case "cloudsecurity_aws":
 		return ProviderConfigIdCloudSecurityAws, nil
+	case "cloudsecurity_awseventbridgesqs":
+		return ProviderConfigIdCloudSecurityAwsEventBridgeSqs, nil
 	case "cloudsecurity_crowdstrike":
 		return ProviderConfigIdCloudSecurityCrowdStrike, nil
 	case "cloudsecurity_defender":
