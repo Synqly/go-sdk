@@ -9654,6 +9654,25 @@ func (c *ClarotyCredential) Accept(visitor ClarotyCredentialVisitor) error {
 	return fmt.Errorf("type %T does not define a non-empty union type", c)
 }
 
+type CloudSecurityCrowdStrikeDataset string
+
+const (
+	CloudSecurityCrowdStrikeDatasetBasicVer0 CloudSecurityCrowdStrikeDataset = "basic_v0"
+)
+
+func NewCloudSecurityCrowdStrikeDatasetFromString(s string) (CloudSecurityCrowdStrikeDataset, error) {
+	switch s {
+	case "basic_v0":
+		return CloudSecurityCrowdStrikeDatasetBasicVer0, nil
+	}
+	var t CloudSecurityCrowdStrikeDataset
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (c CloudSecurityCrowdStrikeDataset) Ptr() *CloudSecurityCrowdStrikeDataset {
+	return &c
+}
+
 // Configuration for the AWS Cloud Security Provider
 type CloudSecurityAws struct {
 	// AWS credentials with access to [Amazon Security Hub](https://docs.aws.amazon.com/securityhub/latest/userguide/what-are-securityhub-services.html).
@@ -9777,6 +9796,48 @@ func (c *CloudSecurityCrowdStrike) UnmarshalJSON(data []byte) error {
 }
 
 func (c *CloudSecurityCrowdStrike) String() string {
+	if len(c._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
+// Configuration for a mock CrowdStrike Cloud Security Provider
+type CloudSecurityCrowdStrikeMock struct {
+	Dataset CloudSecurityCrowdStrikeDataset `json:"dataset" url:"dataset"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *CloudSecurityCrowdStrikeMock) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
+}
+
+func (c *CloudSecurityCrowdStrikeMock) UnmarshalJSON(data []byte) error {
+	type unmarshaler CloudSecurityCrowdStrikeMock
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = CloudSecurityCrowdStrikeMock(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
+	c._rawJSON = nil
+	return nil
+}
+
+func (c *CloudSecurityCrowdStrikeMock) String() string {
 	if len(c._rawJSON) > 0 {
 		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
 			return value
@@ -14439,6 +14500,8 @@ type ProviderConfig struct {
 	CloudsecurityAwseventbridgesqs *CloudSecurityAwsEventBridgeSqs
 	// Configuration for the CrowdStrike Cloud Security Provider
 	CloudsecurityCrowdstrike *CloudSecurityCrowdStrike
+	// Configuration for a mock CrowdStrike Cloud Security Provider
+	CloudsecurityCrowdstrikeMock *CloudSecurityCrowdStrikeMock
 	// Configuration for the Microsoft Defender for Cloud Provider
 	CloudsecurityDefender *CloudSecurityDefender
 	// Configuration for Palo Alto Networks Cortex Cloud Security
@@ -14916,6 +14979,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.CloudsecurityCrowdstrike = value
+	case "cloudsecurity_crowdstrike_mock":
+		value := new(CloudSecurityCrowdStrikeMock)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.CloudsecurityCrowdstrikeMock = value
 	case "cloudsecurity_defender":
 		value := new(CloudSecurityDefender)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -15512,6 +15581,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.CloudsecurityCrowdstrike != nil {
 		return core.MarshalJSONWithExtraProperty(p.CloudsecurityCrowdstrike, "type", "cloudsecurity_crowdstrike")
 	}
+	if p.CloudsecurityCrowdstrikeMock != nil {
+		return core.MarshalJSONWithExtraProperty(p.CloudsecurityCrowdstrikeMock, "type", "cloudsecurity_crowdstrike_mock")
+	}
 	if p.CloudsecurityDefender != nil {
 		return core.MarshalJSONWithExtraProperty(p.CloudsecurityDefender, "type", "cloudsecurity_defender")
 	}
@@ -15796,6 +15868,7 @@ type ProviderConfigVisitor interface {
 	VisitCloudsecurityAws(*CloudSecurityAws) error
 	VisitCloudsecurityAwseventbridgesqs(*CloudSecurityAwsEventBridgeSqs) error
 	VisitCloudsecurityCrowdstrike(*CloudSecurityCrowdStrike) error
+	VisitCloudsecurityCrowdstrikeMock(*CloudSecurityCrowdStrikeMock) error
 	VisitCloudsecurityDefender(*CloudSecurityDefender) error
 	VisitCloudsecurityPaloalto(*CloudSecurityPaloAlto) error
 	VisitCustomSynqly(*CustomSynqly) error
@@ -15974,6 +16047,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.CloudsecurityCrowdstrike != nil {
 		return visitor.VisitCloudsecurityCrowdstrike(p.CloudsecurityCrowdstrike)
+	}
+	if p.CloudsecurityCrowdstrikeMock != nil {
+		return visitor.VisitCloudsecurityCrowdstrikeMock(p.CloudsecurityCrowdstrikeMock)
 	}
 	if p.CloudsecurityDefender != nil {
 		return visitor.VisitCloudsecurityDefender(p.CloudsecurityDefender)
@@ -16293,6 +16369,8 @@ const (
 	ProviderConfigIdCloudSecurityAwsEventBridgeSqs ProviderConfigId = "cloudsecurity_awseventbridgesqs"
 	// CrowdStrike Falcon® Insight EDR
 	ProviderConfigIdCloudSecurityCrowdStrike ProviderConfigId = "cloudsecurity_crowdstrike"
+	// [MOCK] CrowdStrike Falcon® Insight EDR
+	ProviderConfigIdCloudSecurityCrowdStrikeMock ProviderConfigId = "cloudsecurity_crowdstrike_mock"
 	// Microsoft Defender for Cloud
 	ProviderConfigIdCloudSecurityDefender ProviderConfigId = "cloudsecurity_defender"
 	// Palo Alto Networks Cortex Cloud Security
@@ -16527,6 +16605,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdCloudSecurityAwsEventBridgeSqs, nil
 	case "cloudsecurity_crowdstrike":
 		return ProviderConfigIdCloudSecurityCrowdStrike, nil
+	case "cloudsecurity_crowdstrike_mock":
+		return ProviderConfigIdCloudSecurityCrowdStrikeMock, nil
 	case "cloudsecurity_defender":
 		return ProviderConfigIdCloudSecurityDefender, nil
 	case "cloudsecurity_paloalto":
