@@ -3047,8 +3047,10 @@ type Operation struct {
 	Errors []*OperationError `json:"errors,omitempty" url:"errors,omitempty"`
 	// Cpu time in microseconds
 	CpuTime int64 `json:"cpu_time" url:"cpu_time"`
-	// Number of bytes sent to sink integration
+	// Total number of bytes sent to the output integration.
 	InBytes int64 `json:"in_bytes" url:"in_bytes"`
+	// ID of the integration receiving operation output.
+	OutputIntegrationId *string `json:"output_integration_id,omitempty" url:"output_integration_id,omitempty"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
