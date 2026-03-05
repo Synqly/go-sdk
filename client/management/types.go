@@ -2469,13 +2469,14 @@ func (c *CredentialBase) String() string {
 }
 
 type CredentialConfig struct {
-	Type        string
-	Aws         *AwsCredential
-	AwsRole     *AwsRoleCredential
-	Token       *TokenCredential
-	Basic       *BasicCredential
-	Secret      *SecretCredential
-	OAuthClient *OAuthClientCredential
+	Type           string
+	Aws            *AwsCredential
+	AwsRole        *AwsRoleCredential
+	Token          *TokenCredential
+	Basic          *BasicCredential
+	Secret         *SecretCredential
+	OAuthClient    *OAuthClientCredential
+	TlsCertificate *TlsCertificateCredential
 }
 
 func (c *CredentialConfig) UnmarshalJSON(data []byte) error {
@@ -2526,6 +2527,12 @@ func (c *CredentialConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		c.OAuthClient = value
+	case "tls_certificate":
+		value := new(TlsCertificateCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		c.TlsCertificate = value
 	}
 	return nil
 }
@@ -2549,6 +2556,9 @@ func (c CredentialConfig) MarshalJSON() ([]byte, error) {
 	if c.OAuthClient != nil {
 		return core.MarshalJSONWithExtraProperty(c.OAuthClient, "type", "o_auth_client")
 	}
+	if c.TlsCertificate != nil {
+		return core.MarshalJSONWithExtraProperty(c.TlsCertificate, "type", "tls_certificate")
+	}
 	return nil, fmt.Errorf("type %T does not define a non-empty union type", c)
 }
 
@@ -2559,6 +2569,7 @@ type CredentialConfigVisitor interface {
 	VisitBasic(*BasicCredential) error
 	VisitSecret(*SecretCredential) error
 	VisitOAuthClient(*OAuthClientCredential) error
+	VisitTlsCertificate(*TlsCertificateCredential) error
 }
 
 func (c *CredentialConfig) Accept(visitor CredentialConfigVisitor) error {
@@ -2579,6 +2590,9 @@ func (c *CredentialConfig) Accept(visitor CredentialConfigVisitor) error {
 	}
 	if c.OAuthClient != nil {
 		return visitor.VisitOAuthClient(c.OAuthClient)
+	}
+	if c.TlsCertificate != nil {
+		return visitor.VisitTlsCertificate(c.TlsCertificate)
 	}
 	return fmt.Errorf("type %T does not define a non-empty union type", c)
 }
@@ -2718,12 +2732,13 @@ func (c *CredentialResponse) String() string {
 type CredentialType string
 
 const (
-	CredentialTypeAws         CredentialType = "aws"
-	CredentialTypeAwsRole     CredentialType = "aws_role"
-	CredentialTypeToken       CredentialType = "token"
-	CredentialTypeBasic       CredentialType = "basic"
-	CredentialTypeSecret      CredentialType = "secret"
-	CredentialTypeOAuthClient CredentialType = "o_auth_client"
+	CredentialTypeAws            CredentialType = "aws"
+	CredentialTypeAwsRole        CredentialType = "aws_role"
+	CredentialTypeToken          CredentialType = "token"
+	CredentialTypeBasic          CredentialType = "basic"
+	CredentialTypeSecret         CredentialType = "secret"
+	CredentialTypeOAuthClient    CredentialType = "o_auth_client"
+	CredentialTypeTlsCertificate CredentialType = "tls_certificate"
 )
 
 func NewCredentialTypeFromString(s string) (CredentialType, error) {
@@ -2740,6 +2755,8 @@ func NewCredentialTypeFromString(s string) (CredentialType, error) {
 		return CredentialTypeSecret, nil
 	case "o_auth_client":
 		return CredentialTypeOAuthClient, nil
+	case "tls_certificate":
+		return CredentialTypeTlsCertificate, nil
 	}
 	var t CredentialType
 	return "", fmt.Errorf("%s is not a valid %T", s, t)
@@ -2896,6 +2913,51 @@ func (s *SecretCredential) String() string {
 
 // Unique identifier for a Secret Credential
 type SecretCredentialId = CredentialId
+
+// A PEM-encoded certificate and private key pair. Used for TLS client authentication (mutual TLS), server identity, or other cryptographic operations requiring a certificate with its associated private key.
+type TlsCertificateCredential struct {
+	// PEM-encoded certificate.
+	Certificate string `json:"certificate" url:"certificate"`
+	// PEM-encoded private key corresponding to the certificate.
+	PrivateKey string `json:"private_key" url:"private_key"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (t *TlsCertificateCredential) GetExtraProperties() map[string]interface{} {
+	return t.extraProperties
+}
+
+func (t *TlsCertificateCredential) UnmarshalJSON(data []byte) error {
+	type unmarshaler TlsCertificateCredential
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*t = TlsCertificateCredential(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *t)
+	if err != nil {
+		return err
+	}
+	t.extraProperties = extraProperties
+
+	t._rawJSON = nil
+	return nil
+}
+
+func (t *TlsCertificateCredential) String() string {
+	if len(t._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(t._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(t); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", t)
+}
 
 // Token used to authenticate with an external service.
 type TokenCredential struct {
