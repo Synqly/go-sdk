@@ -3237,8 +3237,10 @@ const (
 	OperationIdAppsecQueryApplications                          OperationId = "appsec_query_applications"
 	OperationIdAppsecQueryFindings                              OperationId = "appsec_query_findings"
 	OperationIdAssetsCreateAsset                                OperationId = "assets_create_asset"
+	OperationIdAssetsCreateDevices                              OperationId = "assets_create_devices"
 	OperationIdAssetsGetLabels                                  OperationId = "assets_get_labels"
 	OperationIdAssetsQueryDevices                               OperationId = "assets_query_devices"
+	OperationIdAssetsUpdateDeviceProperties                     OperationId = "assets_update_device_properties"
 	OperationIdCloudsecurityQueryCloudResourceInventory         OperationId = "cloudsecurity_query_cloud_resource_inventory"
 	OperationIdCloudsecurityQueryComplianceFindings             OperationId = "cloudsecurity_query_compliance_findings"
 	OperationIdCloudsecurityQueryEvents                         OperationId = "cloudsecurity_query_events"
@@ -3335,10 +3337,14 @@ func NewOperationIdFromString(s string) (OperationId, error) {
 		return OperationIdAppsecQueryFindings, nil
 	case "assets_create_asset":
 		return OperationIdAssetsCreateAsset, nil
+	case "assets_create_devices":
+		return OperationIdAssetsCreateDevices, nil
 	case "assets_get_labels":
 		return OperationIdAssetsGetLabels, nil
 	case "assets_query_devices":
 		return OperationIdAssetsQueryDevices, nil
+	case "assets_update_device_properties":
+		return OperationIdAssetsUpdateDeviceProperties, nil
 	case "cloudsecurity_query_cloud_resource_inventory":
 		return OperationIdCloudsecurityQueryCloudResourceInventory, nil
 	case "cloudsecurity_query_compliance_findings":

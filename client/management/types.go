@@ -4690,8 +4690,10 @@ const (
 	OperationIdAppsecQueryApplications                          OperationId = "appsec_query_applications"
 	OperationIdAppsecQueryFindings                              OperationId = "appsec_query_findings"
 	OperationIdAssetsCreateAsset                                OperationId = "assets_create_asset"
+	OperationIdAssetsCreateDevices                              OperationId = "assets_create_devices"
 	OperationIdAssetsGetLabels                                  OperationId = "assets_get_labels"
 	OperationIdAssetsQueryDevices                               OperationId = "assets_query_devices"
+	OperationIdAssetsUpdateDeviceProperties                     OperationId = "assets_update_device_properties"
 	OperationIdCloudsecurityQueryCloudResourceInventory         OperationId = "cloudsecurity_query_cloud_resource_inventory"
 	OperationIdCloudsecurityQueryComplianceFindings             OperationId = "cloudsecurity_query_compliance_findings"
 	OperationIdCloudsecurityQueryEvents                         OperationId = "cloudsecurity_query_events"
@@ -4788,10 +4790,14 @@ func NewOperationIdFromString(s string) (OperationId, error) {
 		return OperationIdAppsecQueryFindings, nil
 	case "assets_create_asset":
 		return OperationIdAssetsCreateAsset, nil
+	case "assets_create_devices":
+		return OperationIdAssetsCreateDevices, nil
 	case "assets_get_labels":
 		return OperationIdAssetsGetLabels, nil
 	case "assets_query_devices":
 		return OperationIdAssetsQueryDevices, nil
+	case "assets_update_device_properties":
+		return OperationIdAssetsUpdateDeviceProperties, nil
 	case "cloudsecurity_query_cloud_resource_inventory":
 		return OperationIdCloudsecurityQueryCloudResourceInventory, nil
 	case "cloudsecurity_query_compliance_findings":
@@ -7890,6 +7896,10 @@ func (a *AppsecAmazonInspector) String() string {
 
 type ArmisCredential struct {
 	Type string
+	// Configuration when creating new Client Credentials.
+	OAuthClient *OAuthClientCredential
+	// Reference to existing Client Credentials.
+	OAuthClientId OAuthClientCredentialId
 	// Configuration when creating new API Key.
 	Token *TokenCredential
 	// Reference to existing API Key.
@@ -7908,6 +7918,20 @@ func (a *ArmisCredential) UnmarshalJSON(data []byte) error {
 		return fmt.Errorf("%T did not include discriminant type", a)
 	}
 	switch unmarshaler.Type {
+	case "o_auth_client":
+		value := new(OAuthClientCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		a.OAuthClient = value
+	case "o_auth_client_id":
+		var valueUnmarshaler struct {
+			OAuthClientId OAuthClientCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		a.OAuthClientId = valueUnmarshaler.OAuthClientId
 	case "token":
 		value := new(TokenCredential)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -7927,6 +7951,19 @@ func (a *ArmisCredential) UnmarshalJSON(data []byte) error {
 }
 
 func (a ArmisCredential) MarshalJSON() ([]byte, error) {
+	if a.OAuthClient != nil {
+		return core.MarshalJSONWithExtraProperty(a.OAuthClient, "type", "o_auth_client")
+	}
+	if a.OAuthClientId != "" {
+		var marshaler = struct {
+			Type          string                  `json:"type"`
+			OAuthClientId OAuthClientCredentialId `json:"value"`
+		}{
+			Type:          "o_auth_client_id",
+			OAuthClientId: a.OAuthClientId,
+		}
+		return json.Marshal(marshaler)
+	}
 	if a.Token != nil {
 		return core.MarshalJSONWithExtraProperty(a.Token, "type", "token")
 	}
@@ -7944,11 +7981,19 @@ func (a ArmisCredential) MarshalJSON() ([]byte, error) {
 }
 
 type ArmisCredentialVisitor interface {
+	VisitOAuthClient(*OAuthClientCredential) error
+	VisitOAuthClientId(OAuthClientCredentialId) error
 	VisitToken(*TokenCredential) error
 	VisitTokenId(TokenCredentialId) error
 }
 
 func (a *ArmisCredential) Accept(visitor ArmisCredentialVisitor) error {
+	if a.OAuthClient != nil {
+		return visitor.VisitOAuthClient(a.OAuthClient)
+	}
+	if a.OAuthClientId != "" {
+		return visitor.VisitOAuthClientId(a.OAuthClientId)
+	}
 	if a.Token != nil {
 		return visitor.VisitToken(a.Token)
 	}
