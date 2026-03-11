@@ -4692,7 +4692,10 @@ const (
 	OperationIdAssetsCreateAsset                                OperationId = "assets_create_asset"
 	OperationIdAssetsCreateDevices                              OperationId = "assets_create_devices"
 	OperationIdAssetsGetLabels                                  OperationId = "assets_get_labels"
+	OperationIdAssetsQueryAlerts                                OperationId = "assets_query_alerts"
 	OperationIdAssetsQueryDevices                               OperationId = "assets_query_devices"
+	OperationIdAssetsQueryUtilization                           OperationId = "assets_query_utilization"
+	OperationIdAssetsQueryVulnerabilities                       OperationId = "assets_query_vulnerabilities"
 	OperationIdAssetsUpdateDeviceProperties                     OperationId = "assets_update_device_properties"
 	OperationIdCloudsecurityQueryCloudResourceInventory         OperationId = "cloudsecurity_query_cloud_resource_inventory"
 	OperationIdCloudsecurityQueryComplianceFindings             OperationId = "cloudsecurity_query_compliance_findings"
@@ -4794,8 +4797,14 @@ func NewOperationIdFromString(s string) (OperationId, error) {
 		return OperationIdAssetsCreateDevices, nil
 	case "assets_get_labels":
 		return OperationIdAssetsGetLabels, nil
+	case "assets_query_alerts":
+		return OperationIdAssetsQueryAlerts, nil
 	case "assets_query_devices":
 		return OperationIdAssetsQueryDevices, nil
+	case "assets_query_utilization":
+		return OperationIdAssetsQueryUtilization, nil
+	case "assets_query_vulnerabilities":
+		return OperationIdAssetsQueryVulnerabilities, nil
 	case "assets_update_device_properties":
 		return OperationIdAssetsUpdateDeviceProperties, nil
 	case "cloudsecurity_query_cloud_resource_inventory":
@@ -5174,6 +5183,9 @@ type ScheduledOperationId string
 
 const (
 	ScheduledOperationIdAssetsQueryDevices                   ScheduledOperationId = "assets_query_devices"
+	ScheduledOperationIdAssetsQueryAlerts                    ScheduledOperationId = "assets_query_alerts"
+	ScheduledOperationIdAssetsQueryUtilization               ScheduledOperationId = "assets_query_utilization"
+	ScheduledOperationIdAssetsQueryVulnerabilities           ScheduledOperationId = "assets_query_vulnerabilities"
 	ScheduledOperationIdEdrQueryAlerts                       ScheduledOperationId = "edr_query_alerts"
 	ScheduledOperationIdEdrQueryApplications                 ScheduledOperationId = "edr_query_applications"
 	ScheduledOperationIdEdrQueryEndpoints                    ScheduledOperationId = "edr_query_endpoints"
@@ -5200,6 +5212,12 @@ func NewScheduledOperationIdFromString(s string) (ScheduledOperationId, error) {
 	switch s {
 	case "assets_query_devices":
 		return ScheduledOperationIdAssetsQueryDevices, nil
+	case "assets_query_alerts":
+		return ScheduledOperationIdAssetsQueryAlerts, nil
+	case "assets_query_utilization":
+		return ScheduledOperationIdAssetsQueryUtilization, nil
+	case "assets_query_vulnerabilities":
+		return ScheduledOperationIdAssetsQueryVulnerabilities, nil
 	case "edr_query_alerts":
 		return ScheduledOperationIdEdrQueryAlerts, nil
 	case "edr_query_applications":
@@ -14790,6 +14808,8 @@ type ProviderConfig struct {
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/sumo-logic-sink-setup)
 	SinkSumoLogic *SinkSumoLogic
+	// Configuration for Trimedx Sink.
+	SinkTrimedx *SinkTrimedx
 	// Configuration for Amazon S3.
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/aws-s3-storage-setup)
@@ -15406,6 +15426,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.SinkSumoLogic = value
+	case "sink_trimedx":
+		value := new(SinkTrimedx)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.SinkTrimedx = value
 	case "storage_aws_s3":
 		value := new(StorageAwsS3)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -15849,6 +15875,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.SinkSumoLogic != nil {
 		return core.MarshalJSONWithExtraProperty(p.SinkSumoLogic, "type", "sink_sumo_logic")
 	}
+	if p.SinkTrimedx != nil {
+		return core.MarshalJSONWithExtraProperty(p.SinkTrimedx, "type", "sink_trimedx")
+	}
 	if p.StorageAwsS3 != nil {
 		return core.MarshalJSONWithExtraProperty(p.StorageAwsS3, "type", "storage_aws_s3")
 	}
@@ -16030,6 +16059,7 @@ type ProviderConfigVisitor interface {
 	VisitSinkQRadar(*SinkQRadar) error
 	VisitSinkSplunk(*SinkSplunk) error
 	VisitSinkSumoLogic(*SinkSumoLogic) error
+	VisitSinkTrimedx(*SinkTrimedx) error
 	VisitStorageAwsS3(*StorageAwsS3) error
 	VisitStorageAzureBlob(*StorageAzureBlob) error
 	VisitStorageGcs(*StorageGcs) error
@@ -16316,6 +16346,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	if p.SinkSumoLogic != nil {
 		return visitor.VisitSinkSumoLogic(p.SinkSumoLogic)
 	}
+	if p.SinkTrimedx != nil {
+		return visitor.VisitSinkTrimedx(p.SinkTrimedx)
+	}
 	if p.StorageAwsS3 != nil {
 		return visitor.VisitStorageAwsS3(p.StorageAwsS3)
 	}
@@ -16584,6 +16617,8 @@ const (
 	ProviderConfigIdSinkSplunk ProviderConfigId = "sink_splunk"
 	// Sumo Logic Sink
 	ProviderConfigIdSinkSumoLogic ProviderConfigId = "sink_sumo_logic"
+	// Trimedx Sink
+	ProviderConfigIdSinkTrimedx ProviderConfigId = "sink_trimedx"
 	// Amazon S3
 	ProviderConfigIdStorageAwsS3 ProviderConfigId = "storage_aws_s3"
 	// Microsoft Azure Blob Storage
@@ -16820,6 +16855,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdSinkSplunk, nil
 	case "sink_sumo_logic":
 		return ProviderConfigIdSinkSumoLogic, nil
+	case "sink_trimedx":
+		return ProviderConfigIdSinkTrimedx, nil
 	case "storage_aws_s3":
 		return ProviderConfigIdStorageAwsS3, nil
 	case "storage_azure_blob":
@@ -18969,6 +19006,53 @@ func (s *SinkSumoLogic) String() string {
 	return fmt.Sprintf("%#v", s)
 }
 
+// Configuration for Trimedx Sink.
+type SinkTrimedx struct {
+	Credential *TrimedxCredential `json:"credential" url:"credential"`
+	// The customer ID for the Trimedx instance.
+	CustomerId string `json:"customer_id" url:"customer_id"`
+	// The subscription key for the Trimedx instance.
+	SubscriptionKey string `json:"subscription_key" url:"subscription_key"`
+	Username        string `json:"username" url:"username"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (s *SinkTrimedx) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
+}
+
+func (s *SinkTrimedx) UnmarshalJSON(data []byte) error {
+	type unmarshaler SinkTrimedx
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*s = SinkTrimedx(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+
+	s._rawJSON = nil
+	return nil
+}
+
+func (s *SinkTrimedx) String() string {
+	if len(s._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(s); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", s)
+}
+
 type SlackCredential struct {
 	Type string
 	// Follow [this guide to generate a bot token](https://api.slack.com/concepts/token-types#bot). The token must have access to the configured channel.
@@ -20842,6 +20926,76 @@ type TorqCredentialVisitor interface {
 }
 
 func (t *TorqCredential) Accept(visitor TorqCredentialVisitor) error {
+	if t.OAuthClient != nil {
+		return visitor.VisitOAuthClient(t.OAuthClient)
+	}
+	if t.OAuthClientId != "" {
+		return visitor.VisitOAuthClientId(t.OAuthClientId)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", t)
+}
+
+type TrimedxCredential struct {
+	Type string
+	// Configuration when creating new Client Credentials.
+	OAuthClient *OAuthClientCredential
+	// Reference to existing Client Credentials.
+	OAuthClientId OAuthClientCredentialId
+}
+
+func (t *TrimedxCredential) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	t.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", t)
+	}
+	switch unmarshaler.Type {
+	case "o_auth_client":
+		value := new(OAuthClientCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		t.OAuthClient = value
+	case "o_auth_client_id":
+		var valueUnmarshaler struct {
+			OAuthClientId OAuthClientCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		t.OAuthClientId = valueUnmarshaler.OAuthClientId
+	}
+	return nil
+}
+
+func (t TrimedxCredential) MarshalJSON() ([]byte, error) {
+	if t.OAuthClient != nil {
+		return core.MarshalJSONWithExtraProperty(t.OAuthClient, "type", "o_auth_client")
+	}
+	if t.OAuthClientId != "" {
+		var marshaler = struct {
+			Type          string                  `json:"type"`
+			OAuthClientId OAuthClientCredentialId `json:"value"`
+		}{
+			Type:          "o_auth_client_id",
+			OAuthClientId: t.OAuthClientId,
+		}
+		return json.Marshal(marshaler)
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", t)
+}
+
+type TrimedxCredentialVisitor interface {
+	VisitOAuthClient(*OAuthClientCredential) error
+	VisitOAuthClientId(OAuthClientCredentialId) error
+}
+
+func (t *TrimedxCredential) Accept(visitor TrimedxCredentialVisitor) error {
 	if t.OAuthClient != nil {
 		return visitor.VisitOAuthClient(t.OAuthClient)
 	}
