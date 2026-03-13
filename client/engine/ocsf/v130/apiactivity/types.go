@@ -2893,6 +2893,10 @@ type LdapPerson struct {
 	ModifiedTimeDt *time.Time `json:"modified_time_dt,omitempty" url:"modified_time_dt,omitempty"`
 	// The primary office location associated with the user. This could be any string and isn't a specific address. For example, <code>South East Virtual</code>.
 	OfficeLocation *string `json:"office_location,omitempty" url:"office_location,omitempty"`
+	// The date the user first started work in their current position. For employees who have not changed positions, this equals the hire date. For employees who have transferred or been promoted, this reflects when they entered their current role.
+	PositionStartTime *Timestamp `json:"position_start_time,omitempty" url:"position_start_time,omitempty"`
+	// The date the user first started work in their current position. For employees who have not changed positions, this equals the hire date. For employees who have transferred or been promoted, this reflects when they entered their current role.
+	PositionStartTimeDt *time.Time `json:"position_start_time_dt,omitempty" url:"position_start_time_dt,omitempty"`
 	// Indicates whether a termination is considered regrettable by the organization (i.e., loss of a valued employee). This is typically only populated for terminated employees.
 	RegrettableTermination *bool `json:"regrettable_termination,omitempty" url:"regrettable_termination,omitempty"`
 	// The user's direct reports. This is the inverse of the manager relationship, representing users who report directly to this user in the organizational hierarchy. This field only includes immediate/direct reports, not transitive reports.
@@ -2919,6 +2923,7 @@ func (l *LdapPerson) UnmarshalJSON(data []byte) error {
 		LastLoginTimeDt        *core.DateTime `json:"last_login_time_dt,omitempty"`
 		LeaveTimeDt            *core.DateTime `json:"leave_time_dt,omitempty"`
 		ModifiedTimeDt         *core.DateTime `json:"modified_time_dt,omitempty"`
+		PositionStartTimeDt    *core.DateTime `json:"position_start_time_dt,omitempty"`
 	}{
 		embed: embed(*l),
 	}
@@ -2933,6 +2938,7 @@ func (l *LdapPerson) UnmarshalJSON(data []byte) error {
 	l.LastLoginTimeDt = unmarshaler.LastLoginTimeDt.TimePtr()
 	l.LeaveTimeDt = unmarshaler.LeaveTimeDt.TimePtr()
 	l.ModifiedTimeDt = unmarshaler.ModifiedTimeDt.TimePtr()
+	l.PositionStartTimeDt = unmarshaler.PositionStartTimeDt.TimePtr()
 
 	extraProperties, err := core.ExtractExtraProperties(data, *l)
 	if err != nil {
@@ -2955,6 +2961,7 @@ func (l *LdapPerson) MarshalJSON() ([]byte, error) {
 		LastLoginTimeDt        *core.DateTime `json:"last_login_time_dt,omitempty"`
 		LeaveTimeDt            *core.DateTime `json:"leave_time_dt,omitempty"`
 		ModifiedTimeDt         *core.DateTime `json:"modified_time_dt,omitempty"`
+		PositionStartTimeDt    *core.DateTime `json:"position_start_time_dt,omitempty"`
 	}{
 		embed:                  embed(*l),
 		CreatedTimeDt:          core.NewOptionalDateTime(l.CreatedTimeDt),
@@ -2964,6 +2971,7 @@ func (l *LdapPerson) MarshalJSON() ([]byte, error) {
 		LastLoginTimeDt:        core.NewOptionalDateTime(l.LastLoginTimeDt),
 		LeaveTimeDt:            core.NewOptionalDateTime(l.LeaveTimeDt),
 		ModifiedTimeDt:         core.NewOptionalDateTime(l.ModifiedTimeDt),
+		PositionStartTimeDt:    core.NewOptionalDateTime(l.PositionStartTimeDt),
 	}
 	return json.Marshal(marshaler)
 }

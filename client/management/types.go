@@ -12904,10 +12904,6 @@ func (i *IdentityPingOne) String() string {
 // [Configuration guide](https://docs.synqly.com/guides/provider-configuration/workday-identity-setup)
 type IdentityWorkday struct {
 	Credential *WorkdayCredential `json:"credential" url:"credential"`
-	// Workday tenant identifier.
-	Tenant string `json:"tenant" url:"tenant"`
-	// Base URL for the Workday API.
-	Url string `json:"url" url:"url"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
