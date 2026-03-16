@@ -10574,6 +10574,76 @@ func (c *CustomSynqly) String() string {
 	return fmt.Sprintf("%#v", c)
 }
 
+type DatadogCredential struct {
+	Type string
+	// The Datadog API key value used for log ingestion authentication.
+	Token *TokenCredential
+	// Reference to existing API Key.
+	TokenId TokenCredentialId
+}
+
+func (d *DatadogCredential) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	d.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", d)
+	}
+	switch unmarshaler.Type {
+	case "token":
+		value := new(TokenCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		d.Token = value
+	case "token_id":
+		var valueUnmarshaler struct {
+			TokenId TokenCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		d.TokenId = valueUnmarshaler.TokenId
+	}
+	return nil
+}
+
+func (d DatadogCredential) MarshalJSON() ([]byte, error) {
+	if d.Token != nil {
+		return core.MarshalJSONWithExtraProperty(d.Token, "type", "token")
+	}
+	if d.TokenId != "" {
+		var marshaler = struct {
+			Type    string            `json:"type"`
+			TokenId TokenCredentialId `json:"value"`
+		}{
+			Type:    "token_id",
+			TokenId: d.TokenId,
+		}
+		return json.Marshal(marshaler)
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", d)
+}
+
+type DatadogCredentialVisitor interface {
+	VisitToken(*TokenCredential) error
+	VisitTokenId(TokenCredentialId) error
+}
+
+func (d *DatadogCredential) Accept(visitor DatadogCredentialVisitor) error {
+	if d.Token != nil {
+		return visitor.VisitToken(d.Token)
+	}
+	if d.TokenId != "" {
+		return visitor.VisitTokenId(d.TokenId)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", d)
+}
+
 type DefenderCredential struct {
 	Type string
 	// Microsoft Defender OAuth client credentials.
@@ -14768,6 +14838,10 @@ type ProviderConfig struct {
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/crowdstrike-sink-setup)
 	SinkCrowdstrikeHec *SinkCrowdstrikeHec
+	// Configuration for Datadog.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/datadog-sink-setup)
+	SinkDatadog *SinkDatadog
 	// Configuration for Elasticsearch.
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/elastic-setup)
@@ -15356,6 +15430,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.SinkCrowdstrikeHec = value
+	case "sink_datadog":
+		value := new(SinkDatadog)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.SinkDatadog = value
 	case "sink_elasticsearch":
 		value := new(SinkElasticsearch)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -15838,6 +15918,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.SinkCrowdstrikeHec != nil {
 		return core.MarshalJSONWithExtraProperty(p.SinkCrowdstrikeHec, "type", "sink_crowdstrike_hec")
 	}
+	if p.SinkDatadog != nil {
+		return core.MarshalJSONWithExtraProperty(p.SinkDatadog, "type", "sink_datadog")
+	}
 	if p.SinkElasticsearch != nil {
 		return core.MarshalJSONWithExtraProperty(p.SinkElasticsearch, "type", "sink_elasticsearch")
 	}
@@ -16044,6 +16127,7 @@ type ProviderConfigVisitor interface {
 	VisitSinkAzureBlob(*SinkAzureBlob) error
 	VisitSinkAzureMonitorLogs(*SinkAzureMonitorLogs) error
 	VisitSinkCrowdstrikeHec(*SinkCrowdstrikeHec) error
+	VisitSinkDatadog(*SinkDatadog) error
 	VisitSinkElasticsearch(*SinkElasticsearch) error
 	VisitSinkGcs(*SinkGcs) error
 	VisitSinkGoogleSecOps(*SinkGoogleSecOps) error
@@ -16308,6 +16392,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.SinkCrowdstrikeHec != nil {
 		return visitor.VisitSinkCrowdstrikeHec(p.SinkCrowdstrikeHec)
+	}
+	if p.SinkDatadog != nil {
+		return visitor.VisitSinkDatadog(p.SinkDatadog)
 	}
 	if p.SinkElasticsearch != nil {
 		return visitor.VisitSinkElasticsearch(p.SinkElasticsearch)
@@ -16591,6 +16678,8 @@ const (
 	ProviderConfigIdSinkAzureMonitorLogs ProviderConfigId = "sink_azure_monitor_logs"
 	// CrowdStrike Falcon® Next-Gen SIEM (HEC)
 	ProviderConfigIdSinkCrowdstrikeHec ProviderConfigId = "sink_crowdstrike_hec"
+	// Datadog
+	ProviderConfigIdSinkDatadog ProviderConfigId = "sink_datadog"
 	// Elasticsearch
 	ProviderConfigIdSinkElasticsearch ProviderConfigId = "sink_elasticsearch"
 	// Google Cloud Storage
@@ -16829,6 +16918,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdSinkAzureMonitorLogs, nil
 	case "sink_crowdstrike_hec":
 		return ProviderConfigIdSinkCrowdstrikeHec, nil
+	case "sink_datadog":
+		return ProviderConfigIdSinkDatadog, nil
 	case "sink_elasticsearch":
 		return ProviderConfigIdSinkElasticsearch, nil
 	case "sink_gcs":
@@ -18443,6 +18534,53 @@ func (s *SinkCrowdstrikeHec) UnmarshalJSON(data []byte) error {
 }
 
 func (s *SinkCrowdstrikeHec) String() string {
+	if len(s._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(s); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", s)
+}
+
+// Configuration for Datadog.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/datadog-sink-setup)
+type SinkDatadog struct {
+	// API key used to authenticate log ingestion requests.
+	Credential *DatadogCredential `json:"credential" url:"credential"`
+	// Datadog site or full logs intake URL. Defaults to `datadoghq.com`.
+	Site *string `json:"site,omitempty" url:"site,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (s *SinkDatadog) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
+}
+
+func (s *SinkDatadog) UnmarshalJSON(data []byte) error {
+	type unmarshaler SinkDatadog
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*s = SinkDatadog(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+
+	s._rawJSON = nil
+	return nil
+}
+
+func (s *SinkDatadog) String() string {
 	if len(s._rawJSON) > 0 {
 		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
 			return value
