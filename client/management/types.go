@@ -14878,6 +14878,10 @@ type ProviderConfig struct {
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/sumo-logic-sink-setup)
 	SinkSumoLogic *SinkSumoLogic
+	// Configuration for Swimlane Turbine Sink.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/swimlane-turbine-sink-setup)
+	SinkSwimlane *SinkSwimlane
 	// Configuration for Trimedx Sink.
 	SinkTrimedx *SinkTrimedx
 	// Configuration for Amazon S3.
@@ -15502,6 +15506,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.SinkSumoLogic = value
+	case "sink_swimlane":
+		value := new(SinkSwimlane)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.SinkSwimlane = value
 	case "sink_trimedx":
 		value := new(SinkTrimedx)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -15954,6 +15964,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.SinkSumoLogic != nil {
 		return core.MarshalJSONWithExtraProperty(p.SinkSumoLogic, "type", "sink_sumo_logic")
 	}
+	if p.SinkSwimlane != nil {
+		return core.MarshalJSONWithExtraProperty(p.SinkSwimlane, "type", "sink_swimlane")
+	}
 	if p.SinkTrimedx != nil {
 		return core.MarshalJSONWithExtraProperty(p.SinkTrimedx, "type", "sink_trimedx")
 	}
@@ -16139,6 +16152,7 @@ type ProviderConfigVisitor interface {
 	VisitSinkQRadar(*SinkQRadar) error
 	VisitSinkSplunk(*SinkSplunk) error
 	VisitSinkSumoLogic(*SinkSumoLogic) error
+	VisitSinkSwimlane(*SinkSwimlane) error
 	VisitSinkTrimedx(*SinkTrimedx) error
 	VisitStorageAwsS3(*StorageAwsS3) error
 	VisitStorageAzureBlob(*StorageAzureBlob) error
@@ -16429,6 +16443,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	if p.SinkSumoLogic != nil {
 		return visitor.VisitSinkSumoLogic(p.SinkSumoLogic)
 	}
+	if p.SinkSwimlane != nil {
+		return visitor.VisitSinkSwimlane(p.SinkSwimlane)
+	}
 	if p.SinkTrimedx != nil {
 		return visitor.VisitSinkTrimedx(p.SinkTrimedx)
 	}
@@ -16702,6 +16719,8 @@ const (
 	ProviderConfigIdSinkSplunk ProviderConfigId = "sink_splunk"
 	// Sumo Logic Sink
 	ProviderConfigIdSinkSumoLogic ProviderConfigId = "sink_sumo_logic"
+	// Swimlane Turbine Sink
+	ProviderConfigIdSinkSwimlane ProviderConfigId = "sink_swimlane"
 	// Trimedx Sink
 	ProviderConfigIdSinkTrimedx ProviderConfigId = "sink_trimedx"
 	// Amazon S3
@@ -16942,6 +16961,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdSinkSplunk, nil
 	case "sink_sumo_logic":
 		return ProviderConfigIdSinkSumoLogic, nil
+	case "sink_swimlane":
+		return ProviderConfigIdSinkSwimlane, nil
 	case "sink_trimedx":
 		return ProviderConfigIdSinkTrimedx, nil
 	case "storage_aws_s3":
@@ -19140,6 +19161,53 @@ func (s *SinkSumoLogic) String() string {
 	return fmt.Sprintf("%#v", s)
 }
 
+// Configuration for Swimlane Turbine Sink.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/swimlane-turbine-sink-setup)
+type SinkSwimlane struct {
+	// Authenticates calls to your Swimlane Turbine webhook.
+	Credential *SwimlaneCredential `json:"credential" url:"credential"`
+	// The full Swimlane Turbine webhook URL.
+	Url string `json:"url" url:"url"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (s *SinkSwimlane) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
+}
+
+func (s *SinkSwimlane) UnmarshalJSON(data []byte) error {
+	type unmarshaler SinkSwimlane
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*s = SinkSwimlane(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+
+	s._rawJSON = nil
+	return nil
+}
+
+func (s *SinkSwimlane) String() string {
+	if len(s._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(s); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", s)
+}
+
 // Configuration for Trimedx Sink.
 type SinkTrimedx struct {
 	Credential *TrimedxCredential `json:"credential" url:"credential"`
@@ -20004,6 +20072,76 @@ func (s *SumoLogicCredential) Accept(visitor SumoLogicCredentialVisitor) error {
 	}
 	if s.BasicId != "" {
 		return visitor.VisitBasicId(s.BasicId)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", s)
+}
+
+type SwimlaneCredential struct {
+	Type string
+	// Configuration when creating new Token.
+	Token *TokenCredential
+	// Reference to existing Token.
+	TokenId TokenCredentialId
+}
+
+func (s *SwimlaneCredential) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	s.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", s)
+	}
+	switch unmarshaler.Type {
+	case "token":
+		value := new(TokenCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		s.Token = value
+	case "token_id":
+		var valueUnmarshaler struct {
+			TokenId TokenCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		s.TokenId = valueUnmarshaler.TokenId
+	}
+	return nil
+}
+
+func (s SwimlaneCredential) MarshalJSON() ([]byte, error) {
+	if s.Token != nil {
+		return core.MarshalJSONWithExtraProperty(s.Token, "type", "token")
+	}
+	if s.TokenId != "" {
+		var marshaler = struct {
+			Type    string            `json:"type"`
+			TokenId TokenCredentialId `json:"value"`
+		}{
+			Type:    "token_id",
+			TokenId: s.TokenId,
+		}
+		return json.Marshal(marshaler)
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", s)
+}
+
+type SwimlaneCredentialVisitor interface {
+	VisitToken(*TokenCredential) error
+	VisitTokenId(TokenCredentialId) error
+}
+
+func (s *SwimlaneCredential) Accept(visitor SwimlaneCredentialVisitor) error {
+	if s.Token != nil {
+		return visitor.VisitToken(s.Token)
+	}
+	if s.TokenId != "" {
+		return visitor.VisitTokenId(s.TokenId)
 	}
 	return fmt.Errorf("type %T does not define a non-empty union type", s)
 }
