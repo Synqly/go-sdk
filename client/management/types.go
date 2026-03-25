@@ -1453,6 +1453,7 @@ const (
 	CategoryIdCloudsecurity    CategoryId = "cloudsecurity"
 	CategoryIdCustom           CategoryId = "custom"
 	CategoryIdEdr              CategoryId = "edr"
+	CategoryIdEmailsecurity    CategoryId = "emailsecurity"
 	CategoryIdIdentity         CategoryId = "identity"
 	CategoryIdIncidentresponse CategoryId = "incidentresponse"
 	CategoryIdNotifications    CategoryId = "notifications"
@@ -1475,6 +1476,8 @@ func NewCategoryIdFromString(s string) (CategoryId, error) {
 		return CategoryIdCustom, nil
 	case "edr":
 		return CategoryIdEdr, nil
+	case "emailsecurity":
+		return CategoryIdEmailsecurity, nil
 	case "identity":
 		return CategoryIdIdentity, nil
 	case "incidentresponse":
@@ -4719,6 +4722,8 @@ const (
 	OperationIdEdrQueryIocs                                     OperationId = "edr_query_iocs"
 	OperationIdEdrQueryPostureScore                             OperationId = "edr_query_posture_score"
 	OperationIdEdrQueryThreatevents                             OperationId = "edr_query_threatevents"
+	OperationIdEmailsecurityGetThreatDetails                    OperationId = "emailsecurity_get_threat_details"
+	OperationIdEmailsecurityQueryThreats                        OperationId = "emailsecurity_query_threats"
 	OperationIdIdentityDisableUser                              OperationId = "identity_disable_user"
 	OperationIdIdentityEnableUser                               OperationId = "identity_enable_user"
 	OperationIdIdentityExpireAllUserSessions                    OperationId = "identity_expire_all_user_sessions"
@@ -4851,6 +4856,10 @@ func NewOperationIdFromString(s string) (OperationId, error) {
 		return OperationIdEdrQueryPostureScore, nil
 	case "edr_query_threatevents":
 		return OperationIdEdrQueryThreatevents, nil
+	case "emailsecurity_get_threat_details":
+		return OperationIdEmailsecurityGetThreatDetails, nil
+	case "emailsecurity_query_threats":
+		return OperationIdEmailsecurityQueryThreats, nil
 	case "identity_disable_user":
 		return OperationIdIdentityDisableUser, nil
 	case "identity_enable_user":
@@ -11439,6 +11448,53 @@ func (e *ElasticsearchSharedSecret) Accept(visitor ElasticsearchSharedSecretVisi
 	return fmt.Errorf("type %T does not define a non-empty union type", e)
 }
 
+// Configuration for Mimecast Cloud Gateway as an email security provider.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/mimecast-cloud-gateway-setup)
+type EmailSecurityMimecastCloudGateway struct {
+	// Option to override the Mimecast Cloud Gateway API region. If not specified this defaults to the `global` region. For more information, see the [Mimecast API Gateway documentation](https://developer.services.mimecast.com/api-overview#api-gateway-options).
+	ApiGateway *MimecastApiGateway `json:"api_gateway,omitempty" url:"api_gateway,omitempty"`
+	// Credentials for the Mimecast Cloud Gateway API.
+	Credential *MimecastCloudGatewayCredential `json:"credential" url:"credential"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (e *EmailSecurityMimecastCloudGateway) GetExtraProperties() map[string]interface{} {
+	return e.extraProperties
+}
+
+func (e *EmailSecurityMimecastCloudGateway) UnmarshalJSON(data []byte) error {
+	type unmarshaler EmailSecurityMimecastCloudGateway
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*e = EmailSecurityMimecastCloudGateway(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *e)
+	if err != nil {
+		return err
+	}
+	e.extraProperties = extraProperties
+
+	e._rawJSON = nil
+	return nil
+}
+
+func (e *EmailSecurityMimecastCloudGateway) String() string {
+	if len(e._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(e._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(e); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", e)
+}
+
 type EntraIdCredential struct {
 	Type string
 	// Azure Client ID and Client Secret for a service principal. The application must be configured with permissions to access the user, group, and audit log graph APIs.
@@ -13452,6 +13508,154 @@ func (m *MalwarebytesCredential) Accept(visitor MalwarebytesCredentialVisitor) e
 	return fmt.Errorf("type %T does not define a non-empty union type", m)
 }
 
+type MimecastApiGateway struct {
+	Region MimecastApiGatewayRegion `json:"region" url:"region"`
+	// Base URL for the Mimecast Cloud Gateway API. This field is intended for advanced use cases where the default API Gateways are not sufficient. The base URL is ignored when **Region** is set to anything but `custom`.
+	Url *string `json:"url,omitempty" url:"url,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (m *MimecastApiGateway) GetExtraProperties() map[string]interface{} {
+	return m.extraProperties
+}
+
+func (m *MimecastApiGateway) UnmarshalJSON(data []byte) error {
+	type unmarshaler MimecastApiGateway
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*m = MimecastApiGateway(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *m)
+	if err != nil {
+		return err
+	}
+	m.extraProperties = extraProperties
+
+	m._rawJSON = nil
+	return nil
+}
+
+func (m *MimecastApiGateway) String() string {
+	if len(m._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(m._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(m); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", m)
+}
+
+type MimecastApiGatewayRegion string
+
+const (
+	// Global API Gateway.
+	// This value maps to the `https://api.services.mimecast.com` endpoint.
+	MimecastApiGatewayRegionGlobal MimecastApiGatewayRegion = "global"
+	// US API Gateway.
+	// This value maps to the `https://us-api.services.mimecast.com` endpoint.
+	MimecastApiGatewayRegionUs MimecastApiGatewayRegion = "us"
+	// UK API Gateway.
+	// This value maps to the `https://uk-api.services.mimecast.com` endpoint.
+	MimecastApiGatewayRegionUk MimecastApiGatewayRegion = "uk"
+	// Custom API Gateway. Requires setting the **Base URL** field.
+	MimecastApiGatewayRegionCustom MimecastApiGatewayRegion = "custom"
+)
+
+func NewMimecastApiGatewayRegionFromString(s string) (MimecastApiGatewayRegion, error) {
+	switch s {
+	case "global":
+		return MimecastApiGatewayRegionGlobal, nil
+	case "us":
+		return MimecastApiGatewayRegionUs, nil
+	case "uk":
+		return MimecastApiGatewayRegionUk, nil
+	case "custom":
+		return MimecastApiGatewayRegionCustom, nil
+	}
+	var t MimecastApiGatewayRegion
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (m MimecastApiGatewayRegion) Ptr() *MimecastApiGatewayRegion {
+	return &m
+}
+
+type MimecastCloudGatewayCredential struct {
+	Type string
+	// Configuration when creating new Client Credentials.
+	OAuthClient *OAuthClientCredential
+	// Reference to existing Client Credentials.
+	OAuthClientId OAuthClientCredentialId
+}
+
+func (m *MimecastCloudGatewayCredential) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	m.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", m)
+	}
+	switch unmarshaler.Type {
+	case "o_auth_client":
+		value := new(OAuthClientCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		m.OAuthClient = value
+	case "o_auth_client_id":
+		var valueUnmarshaler struct {
+			OAuthClientId OAuthClientCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		m.OAuthClientId = valueUnmarshaler.OAuthClientId
+	}
+	return nil
+}
+
+func (m MimecastCloudGatewayCredential) MarshalJSON() ([]byte, error) {
+	if m.OAuthClient != nil {
+		return core.MarshalJSONWithExtraProperty(m.OAuthClient, "type", "o_auth_client")
+	}
+	if m.OAuthClientId != "" {
+		var marshaler = struct {
+			Type          string                  `json:"type"`
+			OAuthClientId OAuthClientCredentialId `json:"value"`
+		}{
+			Type:          "o_auth_client_id",
+			OAuthClientId: m.OAuthClientId,
+		}
+		return json.Marshal(marshaler)
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", m)
+}
+
+type MimecastCloudGatewayCredentialVisitor interface {
+	VisitOAuthClient(*OAuthClientCredential) error
+	VisitOAuthClientId(OAuthClientCredentialId) error
+}
+
+func (m *MimecastCloudGatewayCredential) Accept(visitor MimecastCloudGatewayCredentialVisitor) error {
+	if m.OAuthClient != nil {
+		return visitor.VisitOAuthClient(m.OAuthClient)
+	}
+	if m.OAuthClientId != "" {
+		return visitor.VisitOAuthClientId(m.OAuthClientId)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", m)
+}
+
 // Configuration for Atlassian Jira.
 //
 // [Configuration guide](https://docs.synqly.com/guides/provider-configuration/jira-notification-setup)
@@ -14729,6 +14933,10 @@ type ProviderConfig struct {
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/tanium-setup)
 	EdrTanium *EdrTanium
+	// Configuration for Mimecast Cloud Gateway as an email security provider.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/mimecast-cloud-gateway-setup)
+	EmailsecurityMimecastCloudGateway *EmailSecurityMimecastCloudGateway
 	// Configuration for Microsoft Entra ID.
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/entra-id-setup)
@@ -15254,6 +15462,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.EdrTanium = value
+	case "emailsecurity_mimecast_cloud_gateway":
+		value := new(EmailSecurityMimecastCloudGateway)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.EmailsecurityMimecastCloudGateway = value
 	case "identity_entra_id":
 		value := new(IdentityEntraId)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -15838,6 +16052,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.EdrTanium != nil {
 		return core.MarshalJSONWithExtraProperty(p.EdrTanium, "type", "edr_tanium")
 	}
+	if p.EmailsecurityMimecastCloudGateway != nil {
+		return core.MarshalJSONWithExtraProperty(p.EmailsecurityMimecastCloudGateway, "type", "emailsecurity_mimecast_cloud_gateway")
+	}
 	if p.IdentityEntraId != nil {
 		return core.MarshalJSONWithExtraProperty(p.IdentityEntraId, "type", "identity_entra_id")
 	}
@@ -16110,6 +16327,7 @@ type ProviderConfigVisitor interface {
 	VisitEdrSentinelone(*EdrSentinelOne) error
 	VisitEdrSophos(*EdrSophos) error
 	VisitEdrTanium(*EdrTanium) error
+	VisitEmailsecurityMimecastCloudGateway(*EmailSecurityMimecastCloudGateway) error
 	VisitIdentityEntraId(*IdentityEntraId) error
 	VisitIdentityGoogle(*IdentityGoogle) error
 	VisitIdentityOkta(*IdentityOkta) error
@@ -16316,6 +16534,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.EdrTanium != nil {
 		return visitor.VisitEdrTanium(p.EdrTanium)
+	}
+	if p.EmailsecurityMimecastCloudGateway != nil {
+		return visitor.VisitEmailsecurityMimecastCloudGateway(p.EmailsecurityMimecastCloudGateway)
 	}
 	if p.IdentityEntraId != nil {
 		return visitor.VisitIdentityEntraId(p.IdentityEntraId)
@@ -16635,6 +16856,8 @@ const (
 	ProviderConfigIdEdrSophos ProviderConfigId = "edr_sophos"
 	// Tanium EDR
 	ProviderConfigIdEdrTanium ProviderConfigId = "edr_tanium"
+	// Mimecast Cloud Gateway
+	ProviderConfigIdEmailSecurityMimecastCloudGateway ProviderConfigId = "emailsecurity_mimecast_cloud_gateway"
 	// Microsoft Entra ID
 	ProviderConfigIdIdentityEntraId ProviderConfigId = "identity_entra_id"
 	// Google Workspace
@@ -16877,6 +17100,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdEdrSophos, nil
 	case "edr_tanium":
 		return ProviderConfigIdEdrTanium, nil
+	case "emailsecurity_mimecast_cloud_gateway":
+		return ProviderConfigIdEmailSecurityMimecastCloudGateway, nil
 	case "identity_entra_id":
 		return ProviderConfigIdIdentityEntraId, nil
 	case "identity_google":

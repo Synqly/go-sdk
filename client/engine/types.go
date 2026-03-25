@@ -38,6 +38,7 @@ import (
 	emailactivity "github.com/synqly/go-sdk/client/engine/ocsf/v160/emailactivity"
 	filehostingactivity "github.com/synqly/go-sdk/client/engine/ocsf/v160/filehostingactivity"
 	httpactivity "github.com/synqly/go-sdk/client/engine/ocsf/v160/httpactivity"
+	v180detectionfinding "github.com/synqly/go-sdk/client/engine/ocsf/v180/detectionfinding"
 	time "time"
 )
 
@@ -1043,6 +1044,9 @@ type PostureScore = *configstate.ConfigState
 
 // Threat event information represented by OCSF Threat object. The Threat object describes characteristics of a threat event.
 type ThreatEvent = *detectionfinding.DetectionFinding
+
+// Email security connector threat object. Represented by OCSF Detection Finding class (class_uid 2004) using the OCSF Synqly extension, the OCSF Security Control profile, and the OCSF Date/Time profile.
+type EmailSecurityThreat = *v180detectionfinding.DetectionFinding
 
 type ApiHasStatus struct {
 	// If the provider supports asynchronous queries and the query is still running, this field will be `PENDING` until the query is complete. In this case, the client should retry using the provided cursor.
@@ -3266,6 +3270,8 @@ const (
 	OperationIdEdrQueryIocs                                     OperationId = "edr_query_iocs"
 	OperationIdEdrQueryPostureScore                             OperationId = "edr_query_posture_score"
 	OperationIdEdrQueryThreatevents                             OperationId = "edr_query_threatevents"
+	OperationIdEmailsecurityGetThreatDetails                    OperationId = "emailsecurity_get_threat_details"
+	OperationIdEmailsecurityQueryThreats                        OperationId = "emailsecurity_query_threats"
 	OperationIdIdentityDisableUser                              OperationId = "identity_disable_user"
 	OperationIdIdentityEnableUser                               OperationId = "identity_enable_user"
 	OperationIdIdentityExpireAllUserSessions                    OperationId = "identity_expire_all_user_sessions"
@@ -3398,6 +3404,10 @@ func NewOperationIdFromString(s string) (OperationId, error) {
 		return OperationIdEdrQueryPostureScore, nil
 	case "edr_query_threatevents":
 		return OperationIdEdrQueryThreatevents, nil
+	case "emailsecurity_get_threat_details":
+		return OperationIdEmailsecurityGetThreatDetails, nil
+	case "emailsecurity_query_threats":
+		return OperationIdEmailsecurityQueryThreats, nil
 	case "identity_disable_user":
 		return OperationIdIdentityDisableUser, nil
 	case "identity_enable_user":

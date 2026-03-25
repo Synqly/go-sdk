@@ -9,6 +9,7 @@ import (
 	core "github.com/synqly/go-sdk/client/engine/core"
 	custom "github.com/synqly/go-sdk/client/engine/custom"
 	edr "github.com/synqly/go-sdk/client/engine/edr"
+	emailsecurity "github.com/synqly/go-sdk/client/engine/emailsecurity"
 	hooks "github.com/synqly/go-sdk/client/engine/hooks"
 	identity "github.com/synqly/go-sdk/client/engine/identity"
 	incidentresponse "github.com/synqly/go-sdk/client/engine/incidentresponse"
@@ -34,6 +35,7 @@ type Client struct {
 	Cloudsecurity       *cloudsecurity.Client
 	Custom              *custom.Client
 	Edr                 *edr.Client
+	Emailsecurity       *emailsecurity.Client
 	Hooks               *hooks.Client
 	Identity            *identity.Client
 	Incidentresponse    *incidentresponse.Client
@@ -63,6 +65,7 @@ func NewClient(opts ...option.RequestOption) *Client {
 		Cloudsecurity:       cloudsecurity.NewClient(opts...),
 		Custom:              custom.NewClient(opts...),
 		Edr:                 edr.NewClient(opts...),
+		Emailsecurity:       emailsecurity.NewClient(opts...),
 		Hooks:               hooks.NewClient(opts...),
 		Identity:            identity.NewClient(opts...),
 		Incidentresponse:    incidentresponse.NewClient(opts...),
