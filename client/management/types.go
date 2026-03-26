@@ -15152,6 +15152,10 @@ type ProviderConfig struct {
 	TicketingZendesk *TicketingZendesk
 	// Configuration for Amazon Inspector as a vulnerabilities provider.
 	VulnerabilitiesAmazonInspector *VulnerabilitiesAmazonInspector
+	// Configuration for the Axonius Vulnerabilities Provider
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/axonius-asset-setup)
+	VulnerabilitiesAxonius *VulnerabilitiesAxonius
 	// Configuration for CrowdStrike Falcon® Spotlight.
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/crowdstrike-vulns-setup)
@@ -15840,6 +15844,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.VulnerabilitiesAmazonInspector = value
+	case "vulnerabilities_axonius":
+		value := new(VulnerabilitiesAxonius)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.VulnerabilitiesAxonius = value
 	case "vulnerabilities_crowdstrike":
 		value := new(VulnerabilitiesCrowdStrike)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -16241,6 +16251,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.VulnerabilitiesAmazonInspector != nil {
 		return core.MarshalJSONWithExtraProperty(p.VulnerabilitiesAmazonInspector, "type", "vulnerabilities_amazon_inspector")
 	}
+	if p.VulnerabilitiesAxonius != nil {
+		return core.MarshalJSONWithExtraProperty(p.VulnerabilitiesAxonius, "type", "vulnerabilities_axonius")
+	}
 	if p.VulnerabilitiesCrowdstrike != nil {
 		return core.MarshalJSONWithExtraProperty(p.VulnerabilitiesCrowdstrike, "type", "vulnerabilities_crowdstrike")
 	}
@@ -16390,6 +16403,7 @@ type ProviderConfigVisitor interface {
 	VisitTicketingTorq(*TicketingTorq) error
 	VisitTicketingZendesk(*TicketingZendesk) error
 	VisitVulnerabilitiesAmazonInspector(*VulnerabilitiesAmazonInspector) error
+	VisitVulnerabilitiesAxonius(*VulnerabilitiesAxonius) error
 	VisitVulnerabilitiesCrowdstrike(*VulnerabilitiesCrowdStrike) error
 	VisitVulnerabilitiesCrowdstrikeMock(*VulnerabilitiesCrowdStrikeMock) error
 	VisitVulnerabilitiesDefender(*VulnerabilitiesDefender) error
@@ -16724,6 +16738,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	if p.VulnerabilitiesAmazonInspector != nil {
 		return visitor.VisitVulnerabilitiesAmazonInspector(p.VulnerabilitiesAmazonInspector)
 	}
+	if p.VulnerabilitiesAxonius != nil {
+		return visitor.VisitVulnerabilitiesAxonius(p.VulnerabilitiesAxonius)
+	}
 	if p.VulnerabilitiesCrowdstrike != nil {
 		return visitor.VisitVulnerabilitiesCrowdstrike(p.VulnerabilitiesCrowdstrike)
 	}
@@ -16982,6 +16999,8 @@ const (
 	ProviderConfigIdTicketingZendesk ProviderConfigId = "ticketing_zendesk"
 	// Amazon Inspector
 	ProviderConfigIdVulnerabilitiesAmazonInspector ProviderConfigId = "vulnerabilities_amazon_inspector"
+	// Axonius
+	ProviderConfigIdVulnerabilitiesAxonius ProviderConfigId = "vulnerabilities_axonius"
 	// CrowdStrike Falcon® Spotlight
 	ProviderConfigIdVulnerabilitiesCrowdStrike ProviderConfigId = "vulnerabilities_crowdstrike"
 	// [MOCK] CrowdStrike Falcon® Spotlight
@@ -17226,6 +17245,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdTicketingZendesk, nil
 	case "vulnerabilities_amazon_inspector":
 		return ProviderConfigIdVulnerabilitiesAmazonInspector, nil
+	case "vulnerabilities_axonius":
+		return ProviderConfigIdVulnerabilitiesAxonius, nil
 	case "vulnerabilities_crowdstrike":
 		return ProviderConfigIdVulnerabilitiesCrowdStrike, nil
 	case "vulnerabilities_crowdstrike_mock":
@@ -21615,6 +21636,52 @@ func (v *VulnerabilitiesAmazonInspector) UnmarshalJSON(data []byte) error {
 }
 
 func (v *VulnerabilitiesAmazonInspector) String() string {
+	if len(v._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(v._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(v); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", v)
+}
+
+// Configuration for the Axonius Vulnerabilities Provider
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/axonius-asset-setup)
+type VulnerabilitiesAxonius struct {
+	Credential *AxoniusCredential `json:"credential" url:"credential"`
+	// Base URL for the Axonius API.
+	Url string `json:"url" url:"url"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (v *VulnerabilitiesAxonius) GetExtraProperties() map[string]interface{} {
+	return v.extraProperties
+}
+
+func (v *VulnerabilitiesAxonius) UnmarshalJSON(data []byte) error {
+	type unmarshaler VulnerabilitiesAxonius
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*v = VulnerabilitiesAxonius(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *v)
+	if err != nil {
+		return err
+	}
+	v.extraProperties = extraProperties
+
+	v._rawJSON = nil
+	return nil
+}
+
+func (v *VulnerabilitiesAxonius) String() string {
 	if len(v._rawJSON) > 0 {
 		if value, err := core.StringifyJSON(v._rawJSON); err == nil {
 			return value
