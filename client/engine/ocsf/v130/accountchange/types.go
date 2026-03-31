@@ -3015,6 +3015,79 @@ func (l *LdapPerson) String() string {
 // 99 - Other: The employment status is not mapped. See the <code>employment_status</code> attribute, which contains a data source specific value.
 type LdapPersonEmploymentStatusId = int
 
+// A leave of absence event for a person. May represent a current, past, or future leave.
+type LeaveEvent struct {
+	// The description that pertains to the object or event. See specific usage.
+	Desc *string `json:"desc,omitempty" url:"desc,omitempty"`
+	// The date on which the leave of absence ends.
+	LeaveEndDate *Timestamp `json:"leave_end_date,omitempty" url:"leave_end_date,omitempty"`
+	// The date on which the leave of absence ends.
+	LeaveEndDateDt *time.Time `json:"leave_end_date_dt,omitempty" url:"leave_end_date_dt,omitempty"`
+	// The date on which the leave of absence begins.
+	LeaveStartDate *Timestamp `json:"leave_start_date,omitempty" url:"leave_start_date,omitempty"`
+	// The date on which the leave of absence begins.
+	LeaveStartDateDt *time.Time `json:"leave_start_date_dt,omitempty" url:"leave_start_date_dt,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (l *LeaveEvent) GetExtraProperties() map[string]interface{} {
+	return l.extraProperties
+}
+
+func (l *LeaveEvent) UnmarshalJSON(data []byte) error {
+	type embed LeaveEvent
+	var unmarshaler = struct {
+		embed
+		LeaveEndDateDt   *core.DateTime `json:"leave_end_date_dt,omitempty"`
+		LeaveStartDateDt *core.DateTime `json:"leave_start_date_dt,omitempty"`
+	}{
+		embed: embed(*l),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*l = LeaveEvent(unmarshaler.embed)
+	l.LeaveEndDateDt = unmarshaler.LeaveEndDateDt.TimePtr()
+	l.LeaveStartDateDt = unmarshaler.LeaveStartDateDt.TimePtr()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *l)
+	if err != nil {
+		return err
+	}
+	l.extraProperties = extraProperties
+
+	l._rawJSON = nil
+	return nil
+}
+
+func (l *LeaveEvent) MarshalJSON() ([]byte, error) {
+	type embed LeaveEvent
+	var marshaler = struct {
+		embed
+		LeaveEndDateDt   *core.DateTime `json:"leave_end_date_dt,omitempty"`
+		LeaveStartDateDt *core.DateTime `json:"leave_start_date_dt,omitempty"`
+	}{
+		embed:            embed(*l),
+		LeaveEndDateDt:   core.NewOptionalDateTime(l.LeaveEndDateDt),
+		LeaveStartDateDt: core.NewOptionalDateTime(l.LeaveStartDateDt),
+	}
+	return json.Marshal(marshaler)
+}
+
+func (l *LeaveEvent) String() string {
+	if len(l._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(l._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(l); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", l)
+}
+
 // The Geo Location object describes a geographical location, usually associated with an IP address. Defined by D3FEND <a target='_blank' href='https://d3fend.mitre.org/dao/artifact/d3f:PhysicalLocation/'>d3f:PhysicalLocation</a>.
 type Location struct {
 	// The name of the city.
@@ -5015,12 +5088,16 @@ type User struct {
 	HasMfa *bool `json:"has_mfa,omitempty" url:"has_mfa,omitempty"`
 	// The additional LDAP attributes that describe a person.
 	LdapPerson *LdapPerson `json:"ldap_person,omitempty" url:"ldap_person,omitempty"`
+	// Leave of absence events associated with the person. May include current, past, and future leaves.
+	LeaveEvents []*LeaveEvent `json:"leave_events,omitempty" url:"leave_events,omitempty"`
 	// The multi-factor authentication status, normalized to the caption of the mfa_status_id value. In the case of 'Other', it is defined by the data source.
 	MfaStatus *string `json:"mfa_status,omitempty" url:"mfa_status,omitempty"`
 	// The normalized identifier of the user's multi-factor authentication status.
 	MfaStatusId *UserMfaStatusId `json:"mfa_status_id,omitempty" url:"mfa_status_id,omitempty"`
 	// The username. For example, <code>janedoe1</code>.
 	Name *UserName `json:"name,omitempty" url:"name,omitempty"`
+	// True if the person is currently on a leave of absence.
+	OnLeave *bool `json:"on_leave,omitempty" url:"on_leave,omitempty"`
 	// Organization and org unit related to the user.
 	Org *Organization `json:"org,omitempty" url:"org,omitempty"`
 	// The user's privileges.
