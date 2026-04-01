@@ -9813,6 +9813,8 @@ func (c CloudSecurityCrowdStrikeDataset) Ptr() *CloudSecurityCrowdStrikeDataset 
 type CloudSecurityAws struct {
 	// AWS credentials with access to [Amazon Security Hub](https://docs.aws.amazon.com/securityhub/latest/userguide/what-are-securityhub-services.html).
 	Credential *AwsProviderCredential `json:"credential" url:"credential"`
+	// Optional configuration for querying security events (e.g. CloudTrail Lake). When configured, enables query_events for this integration.
+	Events *CloudSecurityAwsEvents `json:"events,omitempty" url:"events,omitempty"`
 	// The [AWS region](https://docs.aws.amazon.com/global-infrastructure/latest/regions/aws-regions.html) to use for the AWS Cloud Security Provider.
 	Region AwsRegion `json:"region" url:"region"`
 
@@ -9897,6 +9899,98 @@ func (c *CloudSecurityAwsEventBridgeSqs) String() string {
 		return value
 	}
 	return fmt.Sprintf("%#v", c)
+}
+
+// CloudTrail Lake event data store IDs.
+type CloudSecurityAwsCloudTrailLakeEvents struct {
+	// UUID of the event data store for Management, Data, and NetworkActivity events.
+	EventDataStoreId string `json:"event_data_store_id" url:"event_data_store_id"`
+	// UUID of the event data store for Insight events (optional).
+	InsightsEventDataStoreId *string `json:"insights_event_data_store_id,omitempty" url:"insights_event_data_store_id,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *CloudSecurityAwsCloudTrailLakeEvents) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
+}
+
+func (c *CloudSecurityAwsCloudTrailLakeEvents) UnmarshalJSON(data []byte) error {
+	type unmarshaler CloudSecurityAwsCloudTrailLakeEvents
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = CloudSecurityAwsCloudTrailLakeEvents(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
+	c._rawJSON = nil
+	return nil
+}
+
+func (c *CloudSecurityAwsCloudTrailLakeEvents) String() string {
+	if len(c._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
+// Union of event source configurations for AWS Cloud Security.
+type CloudSecurityAwsEvents struct {
+	Type string
+	// CloudTrail Lake event data stores for querying Management, Data, Network activity, and Insight events.
+	CloudtrailLake *CloudSecurityAwsCloudTrailLakeEvents
+}
+
+func (c *CloudSecurityAwsEvents) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	c.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", c)
+	}
+	switch unmarshaler.Type {
+	case "cloudtrail_lake":
+		value := new(CloudSecurityAwsCloudTrailLakeEvents)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		c.CloudtrailLake = value
+	}
+	return nil
+}
+
+func (c CloudSecurityAwsEvents) MarshalJSON() ([]byte, error) {
+	if c.CloudtrailLake != nil {
+		return core.MarshalJSONWithExtraProperty(c.CloudtrailLake, "type", "cloudtrail_lake")
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", c)
+}
+
+type CloudSecurityAwsEventsVisitor interface {
+	VisitCloudtrailLake(*CloudSecurityAwsCloudTrailLakeEvents) error
+}
+
+func (c *CloudSecurityAwsEvents) Accept(visitor CloudSecurityAwsEventsVisitor) error {
+	if c.CloudtrailLake != nil {
+		return visitor.VisitCloudtrailLake(c.CloudtrailLake)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", c)
 }
 
 // Configuration for the CrowdStrike Cloud Security Provider
