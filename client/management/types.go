@@ -10171,6 +10171,53 @@ func (c *CloudSecurityPaloAlto) String() string {
 	return fmt.Sprintf("%#v", c)
 }
 
+// Configuration for the Upwind Cloud Security provider.
+type CloudSecurityUpwind struct {
+	// Upwind OAuth client credentials.
+	Credential *UpwindCredential `json:"credential" url:"credential"`
+	// Organization ID used in the Upwind API path.
+	OrganizationId string `json:"organization_id" url:"organization_id"`
+	// Region used to determine the OAuth audience for token requests.
+	Region UpwindRegion `json:"region" url:"region"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *CloudSecurityUpwind) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
+}
+
+func (c *CloudSecurityUpwind) UnmarshalJSON(data []byte) error {
+	type unmarshaler CloudSecurityUpwind
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = CloudSecurityUpwind(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
+	c._rawJSON = nil
+	return nil
+}
+
+func (c *CloudSecurityUpwind) String() string {
+	if len(c._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
 type CrowdStrikeCredential struct {
 	Type string
 	// Configuration when creating new Client Credentials.
@@ -14997,6 +15044,8 @@ type ProviderConfig struct {
 	CloudsecurityDefender *CloudSecurityDefender
 	// Configuration for Palo Alto Networks Cortex Cloud Security
 	CloudsecurityPaloalto *CloudSecurityPaloAlto
+	// Configuration for the Upwind Cloud Security provider.
+	CloudsecurityUpwind *CloudSecurityUpwind
 	// Configuration for Synqly Custom Provider.
 	CustomSynqly *CustomSynqly
 	// Configuration for CrowdStrike Falcon® Insight EDR.
@@ -15506,6 +15555,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.CloudsecurityPaloalto = value
+	case "cloudsecurity_upwind":
+		value := new(CloudSecurityUpwind)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.CloudsecurityUpwind = value
 	case "custom_synqly":
 		value := new(CustomSynqly)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -16129,6 +16184,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.CloudsecurityPaloalto != nil {
 		return core.MarshalJSONWithExtraProperty(p.CloudsecurityPaloalto, "type", "cloudsecurity_paloalto")
 	}
+	if p.CloudsecurityUpwind != nil {
+		return core.MarshalJSONWithExtraProperty(p.CloudsecurityUpwind, "type", "cloudsecurity_upwind")
+	}
 	if p.CustomSynqly != nil {
 		return core.MarshalJSONWithExtraProperty(p.CustomSynqly, "type", "custom_synqly")
 	}
@@ -16425,6 +16483,7 @@ type ProviderConfigVisitor interface {
 	VisitCloudsecurityCrowdstrikeMock(*CloudSecurityCrowdStrikeMock) error
 	VisitCloudsecurityDefender(*CloudSecurityDefender) error
 	VisitCloudsecurityPaloalto(*CloudSecurityPaloAlto) error
+	VisitCloudsecurityUpwind(*CloudSecurityUpwind) error
 	VisitCustomSynqly(*CustomSynqly) error
 	VisitEdrCrowdstrike(*EdrCrowdStrike) error
 	VisitEdrCrowdstrikeMock(*EdrCrowdStrikeMock) error
@@ -16615,6 +16674,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.CloudsecurityPaloalto != nil {
 		return visitor.VisitCloudsecurityPaloalto(p.CloudsecurityPaloalto)
+	}
+	if p.CloudsecurityUpwind != nil {
+		return visitor.VisitCloudsecurityUpwind(p.CloudsecurityUpwind)
 	}
 	if p.CustomSynqly != nil {
 		return visitor.VisitCustomSynqly(p.CustomSynqly)
@@ -16949,6 +17011,8 @@ const (
 	ProviderConfigIdCloudSecurityDefender ProviderConfigId = "cloudsecurity_defender"
 	// Palo Alto Networks Cortex Cloud Security
 	ProviderConfigIdCloudSecurityPaloAlto ProviderConfigId = "cloudsecurity_paloalto"
+	// Upwind Cloud Security
+	ProviderConfigIdCloudSecurityUpwind ProviderConfigId = "cloudsecurity_upwind"
 	// Synqly Custom Provider
 	ProviderConfigIdCustomSynqly ProviderConfigId = "custom_synqly"
 	// CrowdStrike Falcon® Insight EDR
@@ -17195,6 +17259,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdCloudSecurityDefender, nil
 	case "cloudsecurity_paloalto":
 		return ProviderConfigIdCloudSecurityPaloAlto, nil
+	case "cloudsecurity_upwind":
+		return ProviderConfigIdCloudSecurityUpwind, nil
 	case "custom_synqly":
 		return ProviderConfigIdCustomSynqly, nil
 	case "edr_crowdstrike":
@@ -21615,6 +21681,104 @@ func (t *TrimedxCredential) Accept(visitor TrimedxCredentialVisitor) error {
 		return visitor.VisitOAuthClientId(t.OAuthClientId)
 	}
 	return fmt.Errorf("type %T does not define a non-empty union type", t)
+}
+
+type UpwindCredential struct {
+	Type string
+	// Client ID and Client Secret for Upwind OAuth 2.0.
+	OAuthClient *OAuthClientCredential
+	// Reference to existing Client Credentials.
+	OAuthClientId OAuthClientCredentialId
+}
+
+func (u *UpwindCredential) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	u.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", u)
+	}
+	switch unmarshaler.Type {
+	case "o_auth_client":
+		value := new(OAuthClientCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		u.OAuthClient = value
+	case "o_auth_client_id":
+		var valueUnmarshaler struct {
+			OAuthClientId OAuthClientCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		u.OAuthClientId = valueUnmarshaler.OAuthClientId
+	}
+	return nil
+}
+
+func (u UpwindCredential) MarshalJSON() ([]byte, error) {
+	if u.OAuthClient != nil {
+		return core.MarshalJSONWithExtraProperty(u.OAuthClient, "type", "o_auth_client")
+	}
+	if u.OAuthClientId != "" {
+		var marshaler = struct {
+			Type          string                  `json:"type"`
+			OAuthClientId OAuthClientCredentialId `json:"value"`
+		}{
+			Type:          "o_auth_client_id",
+			OAuthClientId: u.OAuthClientId,
+		}
+		return json.Marshal(marshaler)
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", u)
+}
+
+type UpwindCredentialVisitor interface {
+	VisitOAuthClient(*OAuthClientCredential) error
+	VisitOAuthClientId(OAuthClientCredentialId) error
+}
+
+func (u *UpwindCredential) Accept(visitor UpwindCredentialVisitor) error {
+	if u.OAuthClient != nil {
+		return visitor.VisitOAuthClient(u.OAuthClient)
+	}
+	if u.OAuthClientId != "" {
+		return visitor.VisitOAuthClientId(u.OAuthClientId)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", u)
+}
+
+type UpwindRegion string
+
+const (
+	// US Region `https://api.upwind.io`.
+	UpwindRegionUs UpwindRegion = "US"
+	// EU Region `https://api.eu.upwind.io`.
+	UpwindRegionEu UpwindRegion = "EU"
+	// ME Region `https://api.me.upwind.io`.
+	UpwindRegionMe UpwindRegion = "ME"
+)
+
+func NewUpwindRegionFromString(s string) (UpwindRegion, error) {
+	switch s {
+	case "US":
+		return UpwindRegionUs, nil
+	case "EU":
+		return UpwindRegionEu, nil
+	case "ME":
+		return UpwindRegionMe, nil
+	}
+	var t UpwindRegion
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (u UpwindRegion) Ptr() *UpwindRegion {
+	return &u
 }
 
 type VulnerabilitiesCrowdStrikeDataset string
