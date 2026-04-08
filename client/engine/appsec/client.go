@@ -484,6 +484,7 @@ func (c *Client) GetApplicationFindingDetails(
 	ctx context.Context,
 	applicationId engine.ApplicationId,
 	findingId engine.FindingId,
+	request *engine.AppSecGetApplicationFindingDetailsRequest,
 	opts ...option.RequestOption,
 ) (*engine.AppSecGetApplicationFindingDetailsResponse, error) {
 	options := core.NewRequestOptions(opts...)
@@ -500,6 +501,14 @@ func (c *Client) GetApplicationFindingDetails(
 		applicationId,
 		findingId,
 	)
+
+	queryParams, err := core.QueryValues(request)
+	if err != nil {
+		return nil, err
+	}
+	if len(queryParams) > 0 {
+		endpointURL += "?" + queryParams.Encode()
+	}
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
