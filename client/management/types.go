@@ -11133,6 +11133,52 @@ func (e *EdrEsetConnect) String() string {
 	return fmt.Sprintf("%#v", e)
 }
 
+// Configuration for Iru as a EDR Provider
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/iru-setup)
+type EdrIru struct {
+	Credential *IruCredential `json:"credential" url:"credential"`
+	// Base URL for the Iru API.
+	Url string `json:"url" url:"url"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (e *EdrIru) GetExtraProperties() map[string]interface{} {
+	return e.extraProperties
+}
+
+func (e *EdrIru) UnmarshalJSON(data []byte) error {
+	type unmarshaler EdrIru
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*e = EdrIru(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *e)
+	if err != nil {
+		return err
+	}
+	e.extraProperties = extraProperties
+
+	e._rawJSON = nil
+	return nil
+}
+
+func (e *EdrIru) String() string {
+	if len(e._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(e._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(e); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", e)
+}
+
 // Configuration for ThreatDown Endpoint Detection & Response.
 //
 // [Configuration guide](https://docs.synqly.com/guides/provider-configuration/malwarebytes-setup)
@@ -13369,6 +13415,76 @@ func (i *IncidentResponsePagerDuty) String() string {
 	return fmt.Sprintf("%#v", i)
 }
 
+type IruCredential struct {
+	Type string
+	// Configuration when creating new API Token.
+	Token *TokenCredential
+	// Reference to existing API Token.
+	TokenId TokenCredentialId
+}
+
+func (i *IruCredential) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	i.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", i)
+	}
+	switch unmarshaler.Type {
+	case "token":
+		value := new(TokenCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		i.Token = value
+	case "token_id":
+		var valueUnmarshaler struct {
+			TokenId TokenCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		i.TokenId = valueUnmarshaler.TokenId
+	}
+	return nil
+}
+
+func (i IruCredential) MarshalJSON() ([]byte, error) {
+	if i.Token != nil {
+		return core.MarshalJSONWithExtraProperty(i.Token, "type", "token")
+	}
+	if i.TokenId != "" {
+		var marshaler = struct {
+			Type    string            `json:"type"`
+			TokenId TokenCredentialId `json:"value"`
+		}{
+			Type:    "token_id",
+			TokenId: i.TokenId,
+		}
+		return json.Marshal(marshaler)
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", i)
+}
+
+type IruCredentialVisitor interface {
+	VisitToken(*TokenCredential) error
+	VisitTokenId(TokenCredentialId) error
+}
+
+func (i *IruCredential) Accept(visitor IruCredentialVisitor) error {
+	if i.Token != nil {
+		return visitor.VisitToken(i.Token)
+	}
+	if i.TokenId != "" {
+		return visitor.VisitTokenId(i.TokenId)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", i)
+}
+
 type IvantiCredential struct {
 	Type string
 	// Configuration when creating new Token URL.
@@ -15060,6 +15176,10 @@ type ProviderConfig struct {
 	EdrDefender *EdrDefender
 	// Configuration for ESET Connect as a EDR Provider
 	EdrEsetConnect *EdrEsetConnect
+	// Configuration for Iru as a EDR Provider
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/iru-setup)
+	EdrIru *EdrIru
 	// Configuration for ThreatDown Endpoint Detection & Response.
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/malwarebytes-setup)
@@ -15591,6 +15711,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.EdrEsetConnect = value
+	case "edr_iru":
+		value := new(EdrIru)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.EdrIru = value
 	case "edr_malwarebytes":
 		value := new(EdrMalwarebytes)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -16202,6 +16328,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.EdrEsetConnect != nil {
 		return core.MarshalJSONWithExtraProperty(p.EdrEsetConnect, "type", "edr_eset_connect")
 	}
+	if p.EdrIru != nil {
+		return core.MarshalJSONWithExtraProperty(p.EdrIru, "type", "edr_iru")
+	}
 	if p.EdrMalwarebytes != nil {
 		return core.MarshalJSONWithExtraProperty(p.EdrMalwarebytes, "type", "edr_malwarebytes")
 	}
@@ -16489,6 +16618,7 @@ type ProviderConfigVisitor interface {
 	VisitEdrCrowdstrikeMock(*EdrCrowdStrikeMock) error
 	VisitEdrDefender(*EdrDefender) error
 	VisitEdrEsetConnect(*EdrEsetConnect) error
+	VisitEdrIru(*EdrIru) error
 	VisitEdrMalwarebytes(*EdrMalwarebytes) error
 	VisitEdrSentinelone(*EdrSentinelOne) error
 	VisitEdrSophos(*EdrSophos) error
@@ -16692,6 +16822,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.EdrEsetConnect != nil {
 		return visitor.VisitEdrEsetConnect(p.EdrEsetConnect)
+	}
+	if p.EdrIru != nil {
+		return visitor.VisitEdrIru(p.EdrIru)
 	}
 	if p.EdrMalwarebytes != nil {
 		return visitor.VisitEdrMalwarebytes(p.EdrMalwarebytes)
@@ -17023,6 +17156,8 @@ const (
 	ProviderConfigIdEdrDefender ProviderConfigId = "edr_defender"
 	// ESET Connect
 	ProviderConfigIdEdrEsetConnect ProviderConfigId = "edr_eset_connect"
+	// Iru
+	ProviderConfigIdEdrIru ProviderConfigId = "edr_iru"
 	// ThreatDown Endpoint Detection & Response
 	ProviderConfigIdEdrMalwarebytes ProviderConfigId = "edr_malwarebytes"
 	// SentinelOne Singularity™ Endpoint
@@ -17271,6 +17406,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdEdrDefender, nil
 	case "edr_eset_connect":
 		return ProviderConfigIdEdrEsetConnect, nil
+	case "edr_iru":
+		return ProviderConfigIdEdrIru, nil
 	case "edr_malwarebytes":
 		return ProviderConfigIdEdrMalwarebytes, nil
 	case "edr_sentinelone":
