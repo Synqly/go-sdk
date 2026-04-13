@@ -10724,15 +10724,15 @@ func (c *CustomSynqly) String() string {
 	return fmt.Sprintf("%#v", c)
 }
 
-type DatadogCredential struct {
+type DatadogApiKeyCredential struct {
 	Type string
-	// The Datadog API key value used for log ingestion authentication.
+	// Datadog API key.
 	Token *TokenCredential
 	// Reference to existing API Key.
 	TokenId TokenCredentialId
 }
 
-func (d *DatadogCredential) UnmarshalJSON(data []byte) error {
+func (d *DatadogApiKeyCredential) UnmarshalJSON(data []byte) error {
 	var unmarshaler struct {
 		Type string `json:"type"`
 	}
@@ -10762,7 +10762,7 @@ func (d *DatadogCredential) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (d DatadogCredential) MarshalJSON() ([]byte, error) {
+func (d DatadogApiKeyCredential) MarshalJSON() ([]byte, error) {
 	if d.Token != nil {
 		return core.MarshalJSONWithExtraProperty(d.Token, "type", "token")
 	}
@@ -10779,12 +10779,82 @@ func (d DatadogCredential) MarshalJSON() ([]byte, error) {
 	return nil, fmt.Errorf("type %T does not define a non-empty union type", d)
 }
 
-type DatadogCredentialVisitor interface {
+type DatadogApiKeyCredentialVisitor interface {
 	VisitToken(*TokenCredential) error
 	VisitTokenId(TokenCredentialId) error
 }
 
-func (d *DatadogCredential) Accept(visitor DatadogCredentialVisitor) error {
+func (d *DatadogApiKeyCredential) Accept(visitor DatadogApiKeyCredentialVisitor) error {
+	if d.Token != nil {
+		return visitor.VisitToken(d.Token)
+	}
+	if d.TokenId != "" {
+		return visitor.VisitTokenId(d.TokenId)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", d)
+}
+
+type DatadogApplicationKeyCredential struct {
+	Type string
+	// Datadog application key.
+	Token *TokenCredential
+	// Reference to existing Application Key.
+	TokenId TokenCredentialId
+}
+
+func (d *DatadogApplicationKeyCredential) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	d.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", d)
+	}
+	switch unmarshaler.Type {
+	case "token":
+		value := new(TokenCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		d.Token = value
+	case "token_id":
+		var valueUnmarshaler struct {
+			TokenId TokenCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		d.TokenId = valueUnmarshaler.TokenId
+	}
+	return nil
+}
+
+func (d DatadogApplicationKeyCredential) MarshalJSON() ([]byte, error) {
+	if d.Token != nil {
+		return core.MarshalJSONWithExtraProperty(d.Token, "type", "token")
+	}
+	if d.TokenId != "" {
+		var marshaler = struct {
+			Type    string            `json:"type"`
+			TokenId TokenCredentialId `json:"value"`
+		}{
+			Type:    "token_id",
+			TokenId: d.TokenId,
+		}
+		return json.Marshal(marshaler)
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", d)
+}
+
+type DatadogApplicationKeyCredentialVisitor interface {
+	VisitToken(*TokenCredential) error
+	VisitTokenId(TokenCredentialId) error
+}
+
+func (d *DatadogApplicationKeyCredential) Accept(visitor DatadogApplicationKeyCredentialVisitor) error {
 	if d.Token != nil {
 		return visitor.VisitToken(d.Token)
 	}
@@ -15249,6 +15319,10 @@ type ProviderConfig struct {
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/crowdstrike-siem-setup)
 	SiemCrowdstrike *SiemCrowdstrike
+	// Configuration for Datadog Cloud SIEM.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/datadog-siem-setup)
+	SiemDatadog *SiemDatadog
 	// Configuration for Elastic SIEM.
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/elastic-setup)
@@ -15309,7 +15383,7 @@ type ProviderConfig struct {
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/crowdstrike-sink-setup)
 	SinkCrowdstrikeHec *SinkCrowdstrikeHec
-	// Configuration for Datadog.
+	// Configuration for Datadog Logs.
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/datadog-sink-setup)
 	SinkDatadog *SinkDatadog
@@ -15825,6 +15899,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.SiemCrowdstrike = value
+	case "siem_datadog":
+		value := new(SiemDatadog)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.SiemDatadog = value
 	case "siem_elasticsearch":
 		value := new(SiemElasticsearch)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -16385,6 +16465,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.SiemCrowdstrike != nil {
 		return core.MarshalJSONWithExtraProperty(p.SiemCrowdstrike, "type", "siem_crowdstrike")
 	}
+	if p.SiemDatadog != nil {
+		return core.MarshalJSONWithExtraProperty(p.SiemDatadog, "type", "siem_datadog")
+	}
 	if p.SiemElasticsearch != nil {
 		return core.MarshalJSONWithExtraProperty(p.SiemElasticsearch, "type", "siem_elasticsearch")
 	}
@@ -16637,6 +16720,7 @@ type ProviderConfigVisitor interface {
 	VisitNotificationsSlackWebhook(*NotificationsSlackWebhook) error
 	VisitNotificationsTeams(*NotificationsTeams) error
 	VisitSiemCrowdstrike(*SiemCrowdstrike) error
+	VisitSiemDatadog(*SiemDatadog) error
 	VisitSiemElasticsearch(*SiemElasticsearch) error
 	VisitSiemGoogleChronicle(*SiemGoogleChronicle) error
 	VisitSiemGoogleSecurityOperations(*SiemGoogleSecurityOperations) error
@@ -16879,6 +16963,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.SiemCrowdstrike != nil {
 		return visitor.VisitSiemCrowdstrike(p.SiemCrowdstrike)
+	}
+	if p.SiemDatadog != nil {
+		return visitor.VisitSiemDatadog(p.SiemDatadog)
 	}
 	if p.SiemElasticsearch != nil {
 		return visitor.VisitSiemElasticsearch(p.SiemElasticsearch)
@@ -17194,6 +17281,8 @@ const (
 	ProviderConfigIdNotificationsTeams ProviderConfigId = "notifications_teams"
 	// CrowdStrike Falcon® Next-Gen SIEM
 	ProviderConfigIdSiemCrowdstrike ProviderConfigId = "siem_crowdstrike"
+	// Datadog Cloud SIEM
+	ProviderConfigIdSiemDatadog ProviderConfigId = "siem_datadog"
 	// Elastic SIEM
 	ProviderConfigIdSiemElasticsearch ProviderConfigId = "siem_elasticsearch"
 	// Google Security Operations (Chronicle Compatibility)
@@ -17228,7 +17317,7 @@ const (
 	ProviderConfigIdSinkAzureMonitorLogs ProviderConfigId = "sink_azure_monitor_logs"
 	// CrowdStrike Falcon® Next-Gen SIEM (HEC)
 	ProviderConfigIdSinkCrowdstrikeHec ProviderConfigId = "sink_crowdstrike_hec"
-	// Datadog
+	// Datadog Logs
 	ProviderConfigIdSinkDatadog ProviderConfigId = "sink_datadog"
 	// Elasticsearch
 	ProviderConfigIdSinkElasticsearch ProviderConfigId = "sink_elasticsearch"
@@ -17444,6 +17533,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdNotificationsTeams, nil
 	case "siem_crowdstrike":
 		return ProviderConfigIdSiemCrowdstrike, nil
+	case "siem_datadog":
+		return ProviderConfigIdSiemDatadog, nil
 	case "siem_elasticsearch":
 		return ProviderConfigIdSiemElasticsearch, nil
 	case "siem_google_chronicle":
@@ -17831,6 +17922,55 @@ func (s *SiemCrowdstrike) UnmarshalJSON(data []byte) error {
 }
 
 func (s *SiemCrowdstrike) String() string {
+	if len(s._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(s); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", s)
+}
+
+// Configuration for Datadog Cloud SIEM.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/datadog-siem-setup)
+type SiemDatadog struct {
+	// Datadog application key.
+	ApplicationKeyCredential *DatadogApplicationKeyCredential `json:"application_key_credential" url:"application_key_credential"`
+	// Datadog API key.
+	Credential *DatadogApiKeyCredential `json:"credential" url:"credential"`
+	// Datadog site identifier or full URL for custom deployments.
+	Site *string `json:"site,omitempty" url:"site,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (s *SiemDatadog) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
+}
+
+func (s *SiemDatadog) UnmarshalJSON(data []byte) error {
+	type unmarshaler SiemDatadog
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*s = SiemDatadog(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+
+	s._rawJSON = nil
+	return nil
+}
+
+func (s *SiemDatadog) String() string {
 	if len(s._rawJSON) > 0 {
 		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
 			return value
@@ -19109,13 +19249,13 @@ func (s *SinkCrowdstrikeHec) String() string {
 	return fmt.Sprintf("%#v", s)
 }
 
-// Configuration for Datadog.
+// Configuration for Datadog Logs.
 //
 // [Configuration guide](https://docs.synqly.com/guides/provider-configuration/datadog-sink-setup)
 type SinkDatadog struct {
-	// API key used to authenticate log ingestion requests.
-	Credential *DatadogCredential `json:"credential" url:"credential"`
-	// Datadog site or full logs intake URL. Defaults to `datadoghq.com`.
+	// Datadog API key.
+	Credential *DatadogApiKeyCredential `json:"credential" url:"credential"`
+	// Datadog site identifier or full URL for custom deployments.
 	Site *string `json:"site,omitempty" url:"site,omitempty"`
 
 	extraProperties map[string]interface{}
