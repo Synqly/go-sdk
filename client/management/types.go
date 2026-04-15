@@ -7855,6 +7855,53 @@ func (a *AppSecSnyk) String() string {
 	return fmt.Sprintf("%#v", a)
 }
 
+// Configuration for Tenable Web Application Scanner as an application security provider.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/tenable-appsec-setup)
+type AppSecTenable struct {
+	// Credentials used for accessing the Tenable Cloud API.
+	Credential *TenableCloudCredential `json:"credential" url:"credential"`
+	// Base URL for the Tenable Cloud API.
+	Url *string `json:"url,omitempty" url:"url,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (a *AppSecTenable) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
+}
+
+func (a *AppSecTenable) UnmarshalJSON(data []byte) error {
+	type unmarshaler AppSecTenable
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*a = AppSecTenable(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+
+	a._rawJSON = nil
+	return nil
+}
+
+func (a *AppSecTenable) String() string {
+	if len(a._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(a); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", a)
+}
+
 type AppsecOpentextCoreApplicationSecurityDataset string
 
 const (
@@ -15164,6 +15211,10 @@ type ProviderConfig struct {
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/snyk-appsec-setup)
 	AppsecSnyk *AppSecSnyk
+	// Configuration for Tenable Web Application Scanner as an application security provider.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/tenable-appsec-setup)
+	AppsecTenable *AppSecTenable
 	// Configuration for Armis Centrix™ for Asset Management and Security.
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/armis-centrix-setup)
@@ -15593,6 +15644,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.AppsecSnyk = value
+	case "appsec_tenable":
+		value := new(AppSecTenable)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.AppsecTenable = value
 	case "assets_armis_centrix":
 		value := new(AssetsArmisCentrix)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -16312,6 +16369,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.AppsecSnyk != nil {
 		return core.MarshalJSONWithExtraProperty(p.AppsecSnyk, "type", "appsec_snyk")
 	}
+	if p.AppsecTenable != nil {
+		return core.MarshalJSONWithExtraProperty(p.AppsecTenable, "type", "appsec_tenable")
+	}
 	if p.AssetsArmisCentrix != nil {
 		return core.MarshalJSONWithExtraProperty(p.AssetsArmisCentrix, "type", "assets_armis_centrix")
 	}
@@ -16669,6 +16729,7 @@ type ProviderConfigVisitor interface {
 	VisitAppsecOpentextCoreApplicationSecurity(*AppsecOpenTextCoreApplicationSecurity) error
 	VisitAppsecOpentextCoreApplicationSecurityMock(*AppsecOpenTextCoreApplicationSecurityMock) error
 	VisitAppsecSnyk(*AppSecSnyk) error
+	VisitAppsecTenable(*AppSecTenable) error
 	VisitAssetsArmisCentrix(*AssetsArmisCentrix) error
 	VisitAssetsArmisCentrixMock(*AssetsArmisCentrixMock) error
 	VisitAssetsAxonius(*AssetsAxonius) error
@@ -16810,6 +16871,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.AppsecSnyk != nil {
 		return visitor.VisitAppsecSnyk(p.AppsecSnyk)
+	}
+	if p.AppsecTenable != nil {
+		return visitor.VisitAppsecTenable(p.AppsecTenable)
 	}
 	if p.AssetsArmisCentrix != nil {
 		return visitor.VisitAssetsArmisCentrix(p.AssetsArmisCentrix)
@@ -17179,6 +17243,8 @@ const (
 	ProviderConfigIdAppsecOpenTextCoreApplicationSecurityMock ProviderConfigId = "appsec_opentext_core_application_security_mock"
 	// Snyk
 	ProviderConfigIdAppSecSnyk ProviderConfigId = "appsec_snyk"
+	// Tenable Web Application Scanner
+	ProviderConfigIdAppSecTenable ProviderConfigId = "appsec_tenable"
 	// Armis Centrix™ for Asset Management and Security
 	ProviderConfigIdAssetsArmisCentrix ProviderConfigId = "assets_armis_centrix"
 	// [MOCK] Armis Centrix™ for Asset Management and Security
@@ -17431,6 +17497,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdAppsecOpenTextCoreApplicationSecurityMock, nil
 	case "appsec_snyk":
 		return ProviderConfigIdAppSecSnyk, nil
+	case "appsec_tenable":
+		return ProviderConfigIdAppSecTenable, nil
 	case "assets_armis_centrix":
 		return ProviderConfigIdAssetsArmisCentrix, nil
 	case "assets_armis_centrix_mock":
