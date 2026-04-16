@@ -24,7 +24,7 @@ type ListMembersRequest struct {
 }
 
 type CreateMemberRequest struct {
-	// Email name to use for this Member. Also used for duplicate detection and default sort order.
+	// Name for this Member. For personal accounts this must be a unique email address. For service accounts this can be any unique identifier (e.g. "ci-pipeline"). Used for duplicate detection and default sort order.
 	Name string `json:"name" url:"name"`
 	// User's full display name. Defaults to the same value as the 'name' field if not specified.
 	Fullname *string `json:"fullname,omitempty" url:"fullname,omitempty"`
@@ -37,6 +37,8 @@ type CreateMemberRequest struct {
 	// Roles granted to this member. Tokens inherit this access. Defaults to `member`.
 	RoleBinding []RoleName     `json:"role_binding,omitempty" url:"role_binding,omitempty"`
 	Options     *MemberOptions `json:"options,omitempty" url:"options,omitempty"`
+	// Member type. Defaults to 'personal' if not specified.
+	Type *MemberType `json:"type,omitempty" url:"type,omitempty"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage

@@ -4172,6 +4172,7 @@ type Member struct {
 	PinExpires time.Time `json:"pin_expires" url:"pin_expires"`
 	// Roles granted to this member. Tokens inherit this access.
 	RoleBinding []RoleName `json:"role_binding" url:"role_binding"`
+	Type        MemberType `json:"type" url:"type"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
@@ -4246,11 +4247,11 @@ func (m *Member) String() string {
 }
 
 type MemberOptions struct {
-	// Optional member time-to-live duration. After a member expires, system requires a change password to re-enable member. Minimum 1 day, Maximum 1 year, Default 180 days.
+	// Optional member time-to-live duration. After a member expires, system requires a change password to re-enable member. Minimum 1 day, Maximum 10 years. Defaults to 10 years.
 	Ttl *string `json:"ttl,omitempty" url:"ttl,omitempty"`
 	// Options: "expired" will force change password on first logon.
 	Options []Options `json:"options,omitempty" url:"options,omitempty"`
-	// Optional token time-to-live duration. Tokens are created for this member with this duration as their TTL. Minimum 10 miniutes, Maximum 1 week, Defaults 1 hour.
+	// Optional token time-to-live duration. Tokens are created for this member with this duration as their TTL. Minimum 1 minute. For personal accounts this is a maximum 24 hours and defaults to 1 hour. For service accounts this is a maximum 90 days and defaults to 1 hour.
 	TokenTtl *string `json:"token_ttl,omitempty" url:"token_ttl,omitempty"`
 
 	extraProperties map[string]interface{}
@@ -4289,6 +4290,30 @@ func (m *MemberOptions) String() string {
 		return value
 	}
 	return fmt.Sprintf("%#v", m)
+}
+
+type MemberType string
+
+const (
+	// A human user. The name of the member must be a unique email address.
+	MemberTypePersonal MemberType = "personal"
+	// A service account representing a machine user.
+	MemberTypeService MemberType = "service"
+)
+
+func NewMemberTypeFromString(s string) (MemberType, error) {
+	switch s {
+	case "personal":
+		return MemberTypePersonal, nil
+	case "service":
+		return MemberTypeService, nil
+	}
+	var t MemberType
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (m MemberType) Ptr() *MemberType {
+	return &m
 }
 
 type Options string
