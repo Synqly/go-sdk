@@ -9881,7 +9881,58 @@ func (c CloudSecurityCrowdStrikeDataset) Ptr() *CloudSecurityCrowdStrikeDataset 
 	return &c
 }
 
+// SQS queue URLs per cloud security operation. Each EventBridge pipeline (for example, compliance, threats, inventory, or events) uses a different queue.
+type CloudSecurityEventBridgeSqsQueues struct {
+	// URL of the SQS queue for cloud resource inventory events.
+	QueryCloudResourceInventory *string `json:"query_cloud_resource_inventory,omitempty" url:"query_cloud_resource_inventory,omitempty"`
+	// URL of the SQS queue for Security Hub compliance findings.
+	QueryComplianceFindings *string `json:"query_compliance_findings,omitempty" url:"query_compliance_findings,omitempty"`
+	// URL of the SQS queue for cloud security event activity.
+	QueryEvents *string `json:"query_events,omitempty" url:"query_events,omitempty"`
+	// URL of the SQS queue for Security Hub detection findings and/or GuardDuty threat events.
+	QueryThreats *string `json:"query_threats,omitempty" url:"query_threats,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *CloudSecurityEventBridgeSqsQueues) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
+}
+
+func (c *CloudSecurityEventBridgeSqsQueues) UnmarshalJSON(data []byte) error {
+	type unmarshaler CloudSecurityEventBridgeSqsQueues
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = CloudSecurityEventBridgeSqsQueues(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
+	c._rawJSON = nil
+	return nil
+}
+
+func (c *CloudSecurityEventBridgeSqsQueues) String() string {
+	if len(c._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
 // Configuration for the AWS Cloud Security Provider
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/aws-cloudsecurity-setup)
 type CloudSecurityAws struct {
 	// AWS credentials with access to [Amazon Security Hub](https://docs.aws.amazon.com/securityhub/latest/userguide/what-are-securityhub-services.html).
 	Credential *AwsProviderCredential `json:"credential" url:"credential"`
@@ -9928,12 +9979,16 @@ func (c *CloudSecurityAws) String() string {
 	return fmt.Sprintf("%#v", c)
 }
 
-// Configuration for the AWS EventBridge SQS Provider that reads security events from an SQS queue populated by EventBridge (e.g. from GuardDuty and SecurityHub).
+// Configuration for the AWS EventBridge SQS Provider that reads operation-specific SQS queues populated by EventBridge.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/aws-eventbridge-sqs-setup)
 type CloudSecurityAwsEventBridgeSqs struct {
 	// AWS credentials with access to the configured SQS queue.
 	Credential *AwsProviderCredential `json:"credential" url:"credential"`
-	// URL of the SQS queue where EventBridge sends GuardDuty and SecurityHub events.
-	QueueUrl string `json:"queue_url" url:"queue_url"`
+	// URL of the SQS queue for compliance findings (Security Hub compliance findings). When both queue_url and queues are present, queues takes precedence for the corresponding operation.
+	QueueUrl *string `json:"queue_url,omitempty" url:"queue_url,omitempty"`
+	// SQS queue URLs per operation. Each EventBridge pipeline uses a different queue. At least one of queue_url or queues.query_compliance_findings must be set for query_compliance_findings. Add more entries as you enable additional operations.
+	Queues *CloudSecurityEventBridgeSqsQueues `json:"queues,omitempty" url:"queues,omitempty"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
@@ -15295,8 +15350,12 @@ type ProviderConfig struct {
 	// Configuration for a mocked Tanium Cloud as an Assets Provider
 	AssetsTaniumCloudMock *AssetsTaniumCloudMock
 	// Configuration for the AWS Cloud Security Provider
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/aws-cloudsecurity-setup)
 	CloudsecurityAws *CloudSecurityAws
-	// Configuration for the AWS EventBridge SQS Provider that reads security events from an SQS queue populated by EventBridge (e.g. from GuardDuty and SecurityHub).
+	// Configuration for the AWS EventBridge SQS Provider that reads operation-specific SQS queues populated by EventBridge.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/aws-eventbridge-sqs-setup)
 	CloudsecurityAwseventbridgesqs *CloudSecurityAwsEventBridgeSqs
 	// Configuration for the CrowdStrike Cloud Security Provider
 	CloudsecurityCrowdstrike *CloudSecurityCrowdStrike
