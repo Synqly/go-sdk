@@ -39,6 +39,7 @@ import (
 	filehostingactivity "github.com/synqly/go-sdk/client/engine/ocsf/v160/filehostingactivity"
 	httpactivity "github.com/synqly/go-sdk/client/engine/ocsf/v160/httpactivity"
 	v180detectionfinding "github.com/synqly/go-sdk/client/engine/ocsf/v180/detectionfinding"
+	v180vulnerabilityfinding "github.com/synqly/go-sdk/client/engine/ocsf/v180/vulnerabilityfinding"
 	time "time"
 )
 
@@ -3329,6 +3330,7 @@ const (
 	OperationIdVulnerabilitiesGetScanStatus                     OperationId = "vulnerabilities_get_scan_status"
 	OperationIdVulnerabilitiesQueryAssets                       OperationId = "vulnerabilities_query_assets"
 	OperationIdVulnerabilitiesQueryFindings                     OperationId = "vulnerabilities_query_findings"
+	OperationIdVulnerabilitiesQueryScanFindings                 OperationId = "vulnerabilities_query_scan_findings"
 	OperationIdVulnerabilitiesQueryScans                        OperationId = "vulnerabilities_query_scans"
 	OperationIdVulnerabilitiesUpdateAsset                       OperationId = "vulnerabilities_update_asset"
 	OperationIdVulnerabilitiesUpdateFinding                     OperationId = "vulnerabilities_update_finding"
@@ -3523,6 +3525,8 @@ func NewOperationIdFromString(s string) (OperationId, error) {
 		return OperationIdVulnerabilitiesQueryAssets, nil
 	case "vulnerabilities_query_findings":
 		return OperationIdVulnerabilitiesQueryFindings, nil
+	case "vulnerabilities_query_scan_findings":
+		return OperationIdVulnerabilitiesQueryScanFindings, nil
 	case "vulnerabilities_query_scans":
 		return OperationIdVulnerabilitiesQueryScans, nil
 	case "vulnerabilities_update_asset":
@@ -5391,6 +5395,9 @@ func (u *User) String() string {
 	}
 	return fmt.Sprintf("%#v", u)
 }
+
+// Vulnerabilities connector finding object. Represented by OCSF v1.8.0 Vulnerability Finding class (class_uid 2002) using the OCSF Synqly extension and the OCSF Date/Time profile.
+type VulnerabilitiesFinding = *v180vulnerabilityfinding.VulnerabilityFinding
 
 // Values supported by using severity as a filter. Supports `[eq]` and `[in]` operators. For example, `severity[eq]critical` or `severity[in]critical, high`.
 type VulnerabilitySeverityFilterValue string

@@ -4806,6 +4806,7 @@ const (
 	OperationIdVulnerabilitiesGetScanStatus                     OperationId = "vulnerabilities_get_scan_status"
 	OperationIdVulnerabilitiesQueryAssets                       OperationId = "vulnerabilities_query_assets"
 	OperationIdVulnerabilitiesQueryFindings                     OperationId = "vulnerabilities_query_findings"
+	OperationIdVulnerabilitiesQueryScanFindings                 OperationId = "vulnerabilities_query_scan_findings"
 	OperationIdVulnerabilitiesQueryScans                        OperationId = "vulnerabilities_query_scans"
 	OperationIdVulnerabilitiesUpdateAsset                       OperationId = "vulnerabilities_update_asset"
 	OperationIdVulnerabilitiesUpdateFinding                     OperationId = "vulnerabilities_update_finding"
@@ -5000,6 +5001,8 @@ func NewOperationIdFromString(s string) (OperationId, error) {
 		return OperationIdVulnerabilitiesQueryAssets, nil
 	case "vulnerabilities_query_findings":
 		return OperationIdVulnerabilitiesQueryFindings, nil
+	case "vulnerabilities_query_scan_findings":
+		return OperationIdVulnerabilitiesQueryScanFindings, nil
 	case "vulnerabilities_query_scans":
 		return OperationIdVulnerabilitiesQueryScans, nil
 	case "vulnerabilities_update_asset":
@@ -12604,6 +12607,106 @@ func (h HclAppScanOnCloudUrl) Ptr() *HclAppScanOnCloudUrl {
 	return &h
 }
 
+type Horizon3Credential struct {
+	Type string
+	// Horizon3 NodeZero API Key.
+	Token *TokenCredential
+	// Reference to existing API Key.
+	TokenId TokenCredentialId
+}
+
+func (h *Horizon3Credential) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	h.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", h)
+	}
+	switch unmarshaler.Type {
+	case "token":
+		value := new(TokenCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		h.Token = value
+	case "token_id":
+		var valueUnmarshaler struct {
+			TokenId TokenCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		h.TokenId = valueUnmarshaler.TokenId
+	}
+	return nil
+}
+
+func (h Horizon3Credential) MarshalJSON() ([]byte, error) {
+	if h.Token != nil {
+		return core.MarshalJSONWithExtraProperty(h.Token, "type", "token")
+	}
+	if h.TokenId != "" {
+		var marshaler = struct {
+			Type    string            `json:"type"`
+			TokenId TokenCredentialId `json:"value"`
+		}{
+			Type:    "token_id",
+			TokenId: h.TokenId,
+		}
+		return json.Marshal(marshaler)
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", h)
+}
+
+type Horizon3CredentialVisitor interface {
+	VisitToken(*TokenCredential) error
+	VisitTokenId(TokenCredentialId) error
+}
+
+func (h *Horizon3Credential) Accept(visitor Horizon3CredentialVisitor) error {
+	if h.Token != nil {
+		return visitor.VisitToken(h.Token)
+	}
+	if h.TokenId != "" {
+		return visitor.VisitTokenId(h.TokenId)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", h)
+}
+
+type Horizon3Region string
+
+const (
+	// US Region
+	//
+	// Use this value if the Horizon3 Portal is hosted in the US.
+	// This is the case when the Login URL is https://portal.horizon3ai.com
+	Horizon3RegionUs Horizon3Region = "us"
+	// EU Region
+	//
+	// Use this value if the Horizon3 Portal is hosted in the EU.
+	// This is the case when the Login URL is https://portal.horizon3ai.eu
+	Horizon3RegionEu Horizon3Region = "eu"
+)
+
+func NewHorizon3RegionFromString(s string) (Horizon3Region, error) {
+	switch s {
+	case "us":
+		return Horizon3RegionUs, nil
+	case "eu":
+		return Horizon3RegionEu, nil
+	}
+	var t Horizon3Region
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (h Horizon3Region) Ptr() *Horizon3Region {
+	return &h
+}
+
 type HttpIngest struct {
 	// Authenticates calls to your HTTP Ingest log source.
 	Credential *PantherIngestionCredential `json:"credential" url:"credential"`
@@ -15639,6 +15742,8 @@ type ProviderConfig struct {
 	VulnerabilitiesCrowdstrikeMock *VulnerabilitiesCrowdStrikeMock
 	// Configuration for Microsoft Defender for Endpoint.
 	VulnerabilitiesDefender *VulnerabilitiesDefender
+	// Configuration for Horizon3 NodeZero as a Vulnerabilities Provider
+	VulnerabilitiesHorizon3 *VulnerabilitiesHorizon3
 	// Configuration for Nucleus Vulnerability Management.
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/nucleus-vulns-setup)
@@ -16367,6 +16472,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.VulnerabilitiesDefender = value
+	case "vulnerabilities_horizon3":
+		value := new(VulnerabilitiesHorizon3)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.VulnerabilitiesHorizon3 = value
 	case "vulnerabilities_nucleus":
 		value := new(VulnerabilitiesNucleus)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -16774,6 +16885,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.VulnerabilitiesDefender != nil {
 		return core.MarshalJSONWithExtraProperty(p.VulnerabilitiesDefender, "type", "vulnerabilities_defender")
 	}
+	if p.VulnerabilitiesHorizon3 != nil {
+		return core.MarshalJSONWithExtraProperty(p.VulnerabilitiesHorizon3, "type", "vulnerabilities_horizon3")
+	}
 	if p.VulnerabilitiesNucleus != nil {
 		return core.MarshalJSONWithExtraProperty(p.VulnerabilitiesNucleus, "type", "vulnerabilities_nucleus")
 	}
@@ -16922,6 +17036,7 @@ type ProviderConfigVisitor interface {
 	VisitVulnerabilitiesCrowdstrike(*VulnerabilitiesCrowdStrike) error
 	VisitVulnerabilitiesCrowdstrikeMock(*VulnerabilitiesCrowdStrikeMock) error
 	VisitVulnerabilitiesDefender(*VulnerabilitiesDefender) error
+	VisitVulnerabilitiesHorizon3(*VulnerabilitiesHorizon3) error
 	VisitVulnerabilitiesNucleus(*VulnerabilitiesNucleus) error
 	VisitVulnerabilitiesQualysCloud(*VulnerabilitiesQualysCloud) error
 	VisitVulnerabilitiesQualysCloudMock(*VulnerabilitiesQualysCloudMock) error
@@ -17277,6 +17392,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	if p.VulnerabilitiesDefender != nil {
 		return visitor.VisitVulnerabilitiesDefender(p.VulnerabilitiesDefender)
 	}
+	if p.VulnerabilitiesHorizon3 != nil {
+		return visitor.VisitVulnerabilitiesHorizon3(p.VulnerabilitiesHorizon3)
+	}
 	if p.VulnerabilitiesNucleus != nil {
 		return visitor.VisitVulnerabilitiesNucleus(p.VulnerabilitiesNucleus)
 	}
@@ -17542,6 +17660,8 @@ const (
 	ProviderConfigIdVulnerabilitiesCrowdStrikeMock ProviderConfigId = "vulnerabilities_crowdstrike_mock"
 	// Microsoft Defender for Endpoint
 	ProviderConfigIdVulnerabilitiesDefender ProviderConfigId = "vulnerabilities_defender"
+	// NodeZero
+	ProviderConfigIdVulnerabilitiesHorizon3 ProviderConfigId = "vulnerabilities_horizon3"
 	// Nucleus Vulnerability Management
 	ProviderConfigIdVulnerabilitiesNucleus ProviderConfigId = "vulnerabilities_nucleus"
 	// Qualys Vulnerability Management, Detection & Response (VMDR)
@@ -17796,6 +17916,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdVulnerabilitiesCrowdStrikeMock, nil
 	case "vulnerabilities_defender":
 		return ProviderConfigIdVulnerabilitiesDefender, nil
+	case "vulnerabilities_horizon3":
+		return ProviderConfigIdVulnerabilitiesHorizon3, nil
 	case "vulnerabilities_nucleus":
 		return ProviderConfigIdVulnerabilitiesNucleus, nil
 	case "vulnerabilities_qualys_cloud":
@@ -22507,6 +22629,51 @@ func (v *VulnerabilitiesDefender) UnmarshalJSON(data []byte) error {
 }
 
 func (v *VulnerabilitiesDefender) String() string {
+	if len(v._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(v._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(v); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", v)
+}
+
+// Configuration for Horizon3 NodeZero as a Vulnerabilities Provider
+type VulnerabilitiesHorizon3 struct {
+	// Credentials for the Horizon3 NodeZero GraphQL API.
+	Credential *Horizon3Credential `json:"credential" url:"credential"`
+	// Region of the Horizon3 Portal.
+	Region Horizon3Region `json:"region" url:"region"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (v *VulnerabilitiesHorizon3) GetExtraProperties() map[string]interface{} {
+	return v.extraProperties
+}
+
+func (v *VulnerabilitiesHorizon3) UnmarshalJSON(data []byte) error {
+	type unmarshaler VulnerabilitiesHorizon3
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*v = VulnerabilitiesHorizon3(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *v)
+	if err != nil {
+		return err
+	}
+	v.extraProperties = extraProperties
+
+	v._rawJSON = nil
+	return nil
+}
+
+func (v *VulnerabilitiesHorizon3) String() string {
 	if len(v._rawJSON) > 0 {
 		if value, err := core.StringifyJSON(v._rawJSON); err == nil {
 			return value
