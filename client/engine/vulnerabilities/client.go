@@ -761,7 +761,7 @@ func (c *Client) UpdateAsset(
 	assetId string,
 	request *engine.CreateAssetRequest,
 	opts ...option.RequestOption,
-) (engine.Asset, error) {
+) (*engine.Asset, error) {
 	options := core.NewRequestOptions(opts...)
 
 	baseURL := "https://api.synqly.com"
@@ -878,18 +878,19 @@ func (c *Client) UpdateAsset(
 		return apiError
 	}
 
-	var response engine.Asset
+	var response *engine.Asset
 	if err := c.caller.Call(
 		ctx,
 		&core.CallParams{
-			URL:          endpointURL,
-			Method:       http.MethodPut,
-			MaxAttempts:  options.MaxAttempts,
-			Headers:      headers,
-			Client:       options.HTTPClient,
-			Request:      request,
-			Response:     &response,
-			ErrorDecoder: errorDecoder,
+			URL:                endpointURL,
+			Method:             http.MethodPut,
+			MaxAttempts:        options.MaxAttempts,
+			Headers:            headers,
+			Client:             options.HTTPClient,
+			Request:            request,
+			Response:           &response,
+			ResponseIsOptional: true,
+			ErrorDecoder:       errorDecoder,
 		},
 	); err != nil {
 		return nil, err
