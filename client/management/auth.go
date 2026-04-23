@@ -6,6 +6,7 @@ import (
 	json "encoding/json"
 	fmt "fmt"
 	core "github.com/synqly/go-sdk/client/management/core"
+	time "time"
 )
 
 type ChangePasswordRequest struct {
@@ -50,6 +51,284 @@ func (c *ChangePasswordRequest) String() string {
 		return value
 	}
 	return fmt.Sprintf("%#v", c)
+}
+
+// Request to create an SSO configuration
+type CreateSsoRequest struct {
+	// Display name for the configuration, used on authentication screens.
+	// **Note:** To avoid confusion this name must be unique, however it cannot be used
+	// as an identifier in API calls.
+	Fullname string `json:"fullname" url:"fullname"`
+	// Identity provider configuration. The type discriminator determines the SSO provider type.
+	Config *CreateSsoConfiguration `json:"config" url:"config"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *CreateSsoRequest) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
+}
+
+func (c *CreateSsoRequest) UnmarshalJSON(data []byte) error {
+	type unmarshaler CreateSsoRequest
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = CreateSsoRequest(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
+	c._rawJSON = nil
+	return nil
+}
+
+func (c *CreateSsoRequest) String() string {
+	if len(c._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
+type CreateSsoResponse struct {
+	Result *SsoConfiguration `json:"result" url:"result"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *CreateSsoResponse) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
+}
+
+func (c *CreateSsoResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler CreateSsoResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = CreateSsoResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
+	c._rawJSON = nil
+	return nil
+}
+
+func (c *CreateSsoResponse) String() string {
+	if len(c._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
+type GetSsoResponse struct {
+	Result *SsoConfiguration `json:"result" url:"result"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (g *GetSsoResponse) GetExtraProperties() map[string]interface{} {
+	return g.extraProperties
+}
+
+func (g *GetSsoResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler GetSsoResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*g = GetSsoResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	if err != nil {
+		return err
+	}
+	g.extraProperties = extraProperties
+
+	g._rawJSON = nil
+	return nil
+}
+
+func (g *GetSsoResponse) String() string {
+	if len(g._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(g._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(g); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", g)
+}
+
+type ListSsoResponse struct {
+	Result []*SsoConfiguration `json:"result" url:"result"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (l *ListSsoResponse) GetExtraProperties() map[string]interface{} {
+	return l.extraProperties
+}
+
+func (l *ListSsoResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler ListSsoResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*l = ListSsoResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *l)
+	if err != nil {
+		return err
+	}
+	l.extraProperties = extraProperties
+
+	l._rawJSON = nil
+	return nil
+}
+
+func (l *ListSsoResponse) String() string {
+	if len(l._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(l._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(l); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", l)
+}
+
+// Request to update an SSO configuration
+type UpdateSsoRequest struct {
+	// Display name for the configuration, used on authentication screens.
+	// **Note:** To avoid confusion this name must be unique, however it cannot be used
+	// as an identifier in API calls.
+	Fullname string `json:"fullname" url:"fullname"`
+	// Identity provider configuration. The type discriminator determines the SSO provider type.
+	Config *UpdateSsoConfiguration `json:"config" url:"config"`
+	// Used for optimistic locking to prevent concurrent updates.
+	UpdatedAt *time.Time `json:"updated_at,omitempty" url:"updated_at,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (u *UpdateSsoRequest) GetExtraProperties() map[string]interface{} {
+	return u.extraProperties
+}
+
+func (u *UpdateSsoRequest) UnmarshalJSON(data []byte) error {
+	type embed UpdateSsoRequest
+	var unmarshaler = struct {
+		embed
+		UpdatedAt *core.DateTime `json:"updated_at,omitempty"`
+	}{
+		embed: embed(*u),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*u = UpdateSsoRequest(unmarshaler.embed)
+	u.UpdatedAt = unmarshaler.UpdatedAt.TimePtr()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *u)
+	if err != nil {
+		return err
+	}
+	u.extraProperties = extraProperties
+
+	u._rawJSON = nil
+	return nil
+}
+
+func (u *UpdateSsoRequest) MarshalJSON() ([]byte, error) {
+	type embed UpdateSsoRequest
+	var marshaler = struct {
+		embed
+		UpdatedAt *core.DateTime `json:"updated_at,omitempty"`
+	}{
+		embed:     embed(*u),
+		UpdatedAt: core.NewOptionalDateTime(u.UpdatedAt),
+	}
+	return json.Marshal(marshaler)
+}
+
+func (u *UpdateSsoRequest) String() string {
+	if len(u._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(u._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(u); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", u)
+}
+
+type UpdateSsoResponse struct {
+	Result *SsoConfiguration `json:"result" url:"result"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (u *UpdateSsoResponse) GetExtraProperties() map[string]interface{} {
+	return u.extraProperties
+}
+
+func (u *UpdateSsoResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler UpdateSsoResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*u = UpdateSsoResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *u)
+	if err != nil {
+		return err
+	}
+	u.extraProperties = extraProperties
+
+	u._rawJSON = nil
+	return nil
+}
+
+func (u *UpdateSsoResponse) String() string {
+	if len(u._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(u._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(u); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", u)
 }
 
 type ChangePasswordResponse struct {
@@ -177,3 +456,6 @@ func (l *LogonResponse) String() string {
 	}
 	return fmt.Sprintf("%#v", l)
 }
+
+// Unique identifier for this SSO configuration
+type SsoConfigurationId = Id

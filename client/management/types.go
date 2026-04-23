@@ -263,6 +263,190 @@ func (h HttpMethod) Ptr() *HttpMethod {
 	return &h
 }
 
+// Configuration for an OpenID Connect (OIDC) compliant Identity Provider.
+type CreateOidcSsoConfiguration struct {
+	// Issuer URL used to automatically obtain the OpenID Connect discovery document.
+	IssuerUrl string `json:"issuer_url" url:"issuer_url"`
+	// Client ID registered with the identity provider.
+	ClientId string `json:"client_id" url:"client_id"`
+	// Client secret registered with the identity provider.
+	ClientSecret string `json:"client_secret" url:"client_secret"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *CreateOidcSsoConfiguration) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
+}
+
+func (c *CreateOidcSsoConfiguration) UnmarshalJSON(data []byte) error {
+	type unmarshaler CreateOidcSsoConfiguration
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = CreateOidcSsoConfiguration(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
+	c._rawJSON = nil
+	return nil
+}
+
+func (c *CreateOidcSsoConfiguration) String() string {
+	if len(c._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
+type CreateSsoConfiguration struct {
+	Type string
+	Oidc *CreateOidcSsoConfiguration
+}
+
+func (c *CreateSsoConfiguration) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	c.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", c)
+	}
+	switch unmarshaler.Type {
+	case "oidc":
+		value := new(CreateOidcSsoConfiguration)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		c.Oidc = value
+	}
+	return nil
+}
+
+func (c CreateSsoConfiguration) MarshalJSON() ([]byte, error) {
+	if c.Oidc != nil {
+		return core.MarshalJSONWithExtraProperty(c.Oidc, "type", "oidc")
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", c)
+}
+
+type CreateSsoConfigurationVisitor interface {
+	VisitOidc(*CreateOidcSsoConfiguration) error
+}
+
+func (c *CreateSsoConfiguration) Accept(visitor CreateSsoConfigurationVisitor) error {
+	if c.Oidc != nil {
+		return visitor.VisitOidc(c.Oidc)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", c)
+}
+
+// Configuration for an OpenID Connect (OIDC) compliant Identity Provider.
+type UpdateOidcSsoConfiguration struct {
+	// Issuer URL used to automatically obtain the OpenID Connect discovery document.
+	IssuerUrl string `json:"issuer_url" url:"issuer_url"`
+	// Client ID registered with the identity provider.
+	ClientId string `json:"client_id" url:"client_id"`
+	// Client secret. Include only when rotating the secret.
+	ClientSecret *string `json:"client_secret,omitempty" url:"client_secret,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (u *UpdateOidcSsoConfiguration) GetExtraProperties() map[string]interface{} {
+	return u.extraProperties
+}
+
+func (u *UpdateOidcSsoConfiguration) UnmarshalJSON(data []byte) error {
+	type unmarshaler UpdateOidcSsoConfiguration
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*u = UpdateOidcSsoConfiguration(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *u)
+	if err != nil {
+		return err
+	}
+	u.extraProperties = extraProperties
+
+	u._rawJSON = nil
+	return nil
+}
+
+func (u *UpdateOidcSsoConfiguration) String() string {
+	if len(u._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(u._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(u); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", u)
+}
+
+type UpdateSsoConfiguration struct {
+	Type string
+	Oidc *UpdateOidcSsoConfiguration
+}
+
+func (u *UpdateSsoConfiguration) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	u.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", u)
+	}
+	switch unmarshaler.Type {
+	case "oidc":
+		value := new(UpdateOidcSsoConfiguration)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		u.Oidc = value
+	}
+	return nil
+}
+
+func (u UpdateSsoConfiguration) MarshalJSON() ([]byte, error) {
+	if u.Oidc != nil {
+		return core.MarshalJSONWithExtraProperty(u.Oidc, "type", "oidc")
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", u)
+}
+
+type UpdateSsoConfigurationVisitor interface {
+	VisitOidc(*UpdateOidcSsoConfiguration) error
+}
+
+func (u *UpdateSsoConfiguration) Accept(visitor UpdateSsoConfigurationVisitor) error {
+	if u.Oidc != nil {
+		return visitor.VisitOidc(u.Oidc)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", u)
+}
+
 type AuthCode string
 
 const (
@@ -341,6 +525,51 @@ func (c *ChangePasswordResponseResult) String() string {
 	return fmt.Sprintf("%#v", c)
 }
 
+type IdPConfiguration struct {
+	Type string
+	Oidc *OidcConfiguration
+}
+
+func (i *IdPConfiguration) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	i.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", i)
+	}
+	switch unmarshaler.Type {
+	case "oidc":
+		value := new(OidcConfiguration)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		i.Oidc = value
+	}
+	return nil
+}
+
+func (i IdPConfiguration) MarshalJSON() ([]byte, error) {
+	if i.Oidc != nil {
+		return core.MarshalJSONWithExtraProperty(i.Oidc, "type", "oidc")
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", i)
+}
+
+type IdPConfigurationVisitor interface {
+	VisitOidc(*OidcConfiguration) error
+}
+
+func (i *IdPConfiguration) Accept(visitor IdPConfigurationVisitor) error {
+	if i.Oidc != nil {
+		return visitor.VisitOidc(i.Oidc)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", i)
+}
+
 type LogonResponseResult struct {
 	// Authentication result
 	AuthCode AuthCode `json:"auth_code" url:"auth_code"`
@@ -387,6 +616,129 @@ func (l *LogonResponseResult) String() string {
 		return value
 	}
 	return fmt.Sprintf("%#v", l)
+}
+
+// Configuration for an OpenID Connect (OIDC) compliant Identity Provider.
+type OidcConfiguration struct {
+	// Issuer URL used to automatically obtain the OpenID Connect discovery document.
+	IssuerUrl string `json:"issuer_url" url:"issuer_url"`
+	// Client ID registered with the identity provider.
+	ClientId string `json:"client_id" url:"client_id"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (o *OidcConfiguration) GetExtraProperties() map[string]interface{} {
+	return o.extraProperties
+}
+
+func (o *OidcConfiguration) UnmarshalJSON(data []byte) error {
+	type unmarshaler OidcConfiguration
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*o = OidcConfiguration(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *o)
+	if err != nil {
+		return err
+	}
+	o.extraProperties = extraProperties
+
+	o._rawJSON = nil
+	return nil
+}
+
+func (o *OidcConfiguration) String() string {
+	if len(o._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(o._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(o); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", o)
+}
+
+// Single Sign-On (SSO) configuration for an Organization. This describes how to connect
+// to an Identity Provider (IdP) for the purpose of signing in to the Organization.
+// Additionally this describes how to map identities from the IdP to Member accounts
+// of the Organization.
+type SsoConfiguration struct {
+	// Human-readable name for this resource
+	Name string `json:"name" url:"name"`
+	// Time object was originally created
+	CreatedAt time.Time `json:"created_at" url:"created_at"`
+	// Last time object was updated
+	UpdatedAt time.Time          `json:"updated_at" url:"updated_at"`
+	Id        SsoConfigurationId `json:"id" url:"id"`
+	// Display name for the configuration, used on authentication screens.
+	// **Note:** To avoid confusion this name must be unique, however it cannot be used
+	// as an identifier in API calls.
+	Fullname         string            `json:"fullname" url:"fullname"`
+	IdentityProvider *IdPConfiguration `json:"identity_provider" url:"identity_provider"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (s *SsoConfiguration) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
+}
+
+func (s *SsoConfiguration) UnmarshalJSON(data []byte) error {
+	type embed SsoConfiguration
+	var unmarshaler = struct {
+		embed
+		CreatedAt *core.DateTime `json:"created_at"`
+		UpdatedAt *core.DateTime `json:"updated_at"`
+	}{
+		embed: embed(*s),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*s = SsoConfiguration(unmarshaler.embed)
+	s.CreatedAt = unmarshaler.CreatedAt.Time()
+	s.UpdatedAt = unmarshaler.UpdatedAt.Time()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+
+	s._rawJSON = nil
+	return nil
+}
+
+func (s *SsoConfiguration) MarshalJSON() ([]byte, error) {
+	type embed SsoConfiguration
+	var marshaler = struct {
+		embed
+		CreatedAt *core.DateTime `json:"created_at"`
+		UpdatedAt *core.DateTime `json:"updated_at"`
+	}{
+		embed:     embed(*s),
+		CreatedAt: core.NewDateTime(s.CreatedAt),
+		UpdatedAt: core.NewDateTime(s.UpdatedAt),
+	}
+	return json.Marshal(marshaler)
+}
+
+func (s *SsoConfiguration) String() string {
+	if len(s._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(s); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", s)
 }
 
 // Billing report covering total usage for a specific month.
@@ -6137,6 +6489,7 @@ type ApiPermissionMap struct {
 	Tokens            *TokensPermissions            `json:"tokens,omitempty" url:"tokens,omitempty"`
 	Transforms        *TransformsPermissions        `json:"transforms,omitempty" url:"transforms,omitempty"`
 	Webhooks          *WebhooksPermissions          `json:"webhooks,omitempty" url:"webhooks,omitempty"`
+	Idp               *IdpPermissions               `json:"idp,omitempty" url:"idp,omitempty"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
@@ -6618,6 +6971,79 @@ func (c *CustomsPermissions) String() string {
 		return value
 	}
 	return fmt.Sprintf("%#v", c)
+}
+
+type IdpActions string
+
+const (
+	IdpActionsGet    IdpActions = "get"
+	IdpActionsCreate IdpActions = "create"
+	IdpActionsUpdate IdpActions = "update"
+	IdpActionsDelete IdpActions = "delete"
+	IdpActionsAll    IdpActions = "*"
+)
+
+func NewIdpActionsFromString(s string) (IdpActions, error) {
+	switch s {
+	case "get":
+		return IdpActionsGet, nil
+	case "create":
+		return IdpActionsCreate, nil
+	case "update":
+		return IdpActionsUpdate, nil
+	case "delete":
+		return IdpActionsDelete, nil
+	case "*":
+		return IdpActionsAll, nil
+	}
+	var t IdpActions
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (i IdpActions) Ptr() *IdpActions {
+	return &i
+}
+
+// Permissions for the IdP configuration API
+type IdpPermissions struct {
+	Actions []IdpActions `json:"actions" url:"actions"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (i *IdpPermissions) GetExtraProperties() map[string]interface{} {
+	return i.extraProperties
+}
+
+func (i *IdpPermissions) UnmarshalJSON(data []byte) error {
+	type unmarshaler IdpPermissions
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*i = IdpPermissions(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *i)
+	if err != nil {
+		return err
+	}
+	i.extraProperties = extraProperties
+
+	i._rawJSON = nil
+	return nil
+}
+
+func (i *IdpPermissions) String() string {
+	if len(i._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(i._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(i); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", i)
 }
 
 type IntegrationPointsActions string
