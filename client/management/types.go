@@ -10777,6 +10777,52 @@ func (c *CloudSecurityUpwind) String() string {
 	return fmt.Sprintf("%#v", c)
 }
 
+// Configuration for the Wiz Cloud Security Provider
+type CloudSecurityWiz struct {
+	// Wiz GraphQL API endpoint URL. Copy this from the Wiz tenant's **API Endpoint URL** field.
+	ApiEndpointUrl string         `json:"api_endpoint_url" url:"api_endpoint_url"`
+	Credential     *WizCredential `json:"credential" url:"credential"`
+	// Region/deployment used to determine the Wiz OAuth token endpoint.
+	Region WizRegion `json:"region" url:"region"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *CloudSecurityWiz) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
+}
+
+func (c *CloudSecurityWiz) UnmarshalJSON(data []byte) error {
+	type unmarshaler CloudSecurityWiz
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = CloudSecurityWiz(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
+	c._rawJSON = nil
+	return nil
+}
+
+func (c *CloudSecurityWiz) String() string {
+	if len(c._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
 type CrowdStrikeCredential struct {
 	Type string
 	// Configuration when creating new Client Credentials.
@@ -15899,6 +15945,8 @@ type ProviderConfig struct {
 	CloudsecurityPaloalto *CloudSecurityPaloAlto
 	// Configuration for the Upwind Cloud Security provider.
 	CloudsecurityUpwind *CloudSecurityUpwind
+	// Configuration for the Wiz Cloud Security Provider
+	CloudsecurityWiz *CloudSecurityWiz
 	// Configuration for Synqly Custom Provider.
 	CustomSynqly *CustomSynqly
 	// Configuration for CrowdStrike Falcon® Insight EDR.
@@ -16430,6 +16478,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.CloudsecurityUpwind = value
+	case "cloudsecurity_wiz":
+		value := new(CloudSecurityWiz)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.CloudsecurityWiz = value
 	case "custom_synqly":
 		value := new(CustomSynqly)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -17077,6 +17131,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.CloudsecurityUpwind != nil {
 		return core.MarshalJSONWithExtraProperty(p.CloudsecurityUpwind, "type", "cloudsecurity_upwind")
 	}
+	if p.CloudsecurityWiz != nil {
+		return core.MarshalJSONWithExtraProperty(p.CloudsecurityWiz, "type", "cloudsecurity_wiz")
+	}
 	if p.CustomSynqly != nil {
 		return core.MarshalJSONWithExtraProperty(p.CustomSynqly, "type", "custom_synqly")
 	}
@@ -17384,6 +17441,7 @@ type ProviderConfigVisitor interface {
 	VisitCloudsecurityDefender(*CloudSecurityDefender) error
 	VisitCloudsecurityPaloalto(*CloudSecurityPaloAlto) error
 	VisitCloudsecurityUpwind(*CloudSecurityUpwind) error
+	VisitCloudsecurityWiz(*CloudSecurityWiz) error
 	VisitCustomSynqly(*CustomSynqly) error
 	VisitEdrCrowdstrike(*EdrCrowdStrike) error
 	VisitEdrCrowdstrikeMock(*EdrCrowdStrikeMock) error
@@ -17583,6 +17641,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.CloudsecurityUpwind != nil {
 		return visitor.VisitCloudsecurityUpwind(p.CloudsecurityUpwind)
+	}
+	if p.CloudsecurityWiz != nil {
+		return visitor.VisitCloudsecurityWiz(p.CloudsecurityWiz)
 	}
 	if p.CustomSynqly != nil {
 		return visitor.VisitCustomSynqly(p.CustomSynqly)
@@ -17930,6 +17991,8 @@ const (
 	ProviderConfigIdCloudSecurityPaloAlto ProviderConfigId = "cloudsecurity_paloalto"
 	// Upwind Cloud Security
 	ProviderConfigIdCloudSecurityUpwind ProviderConfigId = "cloudsecurity_upwind"
+	// Wiz
+	ProviderConfigIdCloudSecurityWiz ProviderConfigId = "cloudsecurity_wiz"
 	// Synqly Custom Provider
 	ProviderConfigIdCustomSynqly ProviderConfigId = "custom_synqly"
 	// CrowdStrike Falcon® Insight EDR
@@ -18186,6 +18249,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdCloudSecurityPaloAlto, nil
 	case "cloudsecurity_upwind":
 		return ProviderConfigIdCloudSecurityUpwind, nil
+	case "cloudsecurity_wiz":
+		return ProviderConfigIdCloudSecurityWiz, nil
 	case "custom_synqly":
 		return ProviderConfigIdCustomSynqly, nil
 	case "edr_crowdstrike":
@@ -23555,6 +23620,107 @@ func (v *VulnerabilitiesTenableSc) String() string {
 		return value
 	}
 	return fmt.Sprintf("%#v", v)
+}
+
+type WizCredential struct {
+	Type string
+	// OAuth 2.0 Client ID and Client Secret for Wiz API access.
+	OAuthClient *OAuthClientCredential
+	// Reference to existing Client Credentials.
+	OAuthClientId OAuthClientCredentialId
+}
+
+func (w *WizCredential) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	w.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", w)
+	}
+	switch unmarshaler.Type {
+	case "o_auth_client":
+		value := new(OAuthClientCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		w.OAuthClient = value
+	case "o_auth_client_id":
+		var valueUnmarshaler struct {
+			OAuthClientId OAuthClientCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		w.OAuthClientId = valueUnmarshaler.OAuthClientId
+	}
+	return nil
+}
+
+func (w WizCredential) MarshalJSON() ([]byte, error) {
+	if w.OAuthClient != nil {
+		return core.MarshalJSONWithExtraProperty(w.OAuthClient, "type", "o_auth_client")
+	}
+	if w.OAuthClientId != "" {
+		var marshaler = struct {
+			Type          string                  `json:"type"`
+			OAuthClientId OAuthClientCredentialId `json:"value"`
+		}{
+			Type:          "o_auth_client_id",
+			OAuthClientId: w.OAuthClientId,
+		}
+		return json.Marshal(marshaler)
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", w)
+}
+
+type WizCredentialVisitor interface {
+	VisitOAuthClient(*OAuthClientCredential) error
+	VisitOAuthClientId(OAuthClientCredentialId) error
+}
+
+func (w *WizCredential) Accept(visitor WizCredentialVisitor) error {
+	if w.OAuthClient != nil {
+		return visitor.VisitOAuthClient(w.OAuthClient)
+	}
+	if w.OAuthClientId != "" {
+		return visitor.VisitOAuthClientId(w.OAuthClientId)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", w)
+}
+
+type WizRegion string
+
+const (
+	// Wiz Commercial.
+	// Uses auth endpoint `https://auth.app.wiz.io/oauth/token`.
+	WizRegionCommercial WizRegion = "commercial"
+	// Wiz for Gov (FedRAMP).
+	// Uses auth endpoint `https://auth.app.wiz.us/oauth/token`.
+	WizRegionGov WizRegion = "gov"
+	// Wiz Commercial hosted on AWS GovCloud.
+	// Uses auth endpoint `https://auth.gov.wiz.io/oauth/token`.
+	WizRegionGovcloud WizRegion = "govcloud"
+)
+
+func NewWizRegionFromString(s string) (WizRegion, error) {
+	switch s {
+	case "commercial":
+		return WizRegionCommercial, nil
+	case "gov":
+		return WizRegionGov, nil
+	case "govcloud":
+		return WizRegionGovcloud, nil
+	}
+	var t WizRegion
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (w WizRegion) Ptr() *WizRegion {
+	return &w
 }
 
 type WorkdayCredential struct {
