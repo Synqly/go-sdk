@@ -310,9 +310,63 @@ func (c *CreateOidcSsoConfiguration) String() string {
 	return fmt.Sprintf("%#v", c)
 }
 
+// Configuration for creating a SAML 2.0 Identity Provider.
+type CreateSamlssoConfiguration struct {
+	// Entity ID of the SAML Identity Provider.
+	IdpEntityId string `json:"idp_entity_id" url:"idp_entity_id"`
+	// Single Sign-On URL of the SAML Identity Provider (HTTPS required).
+	IdpSsoUrl string `json:"idp_sso_url" url:"idp_sso_url"`
+	// PEM-encoded X.509 certificate for verifying SAML assertion signatures.
+	IdpCertificate string `json:"idp_certificate" url:"idp_certificate"`
+	// Entity ID of the Service Provider.
+	SpEntityId string `json:"sp_entity_id" url:"sp_entity_id"`
+	// URL to the IdP's SAML metadata document (informational).
+	IdpMetadataUrl *string `json:"idp_metadata_url,omitempty" url:"idp_metadata_url,omitempty"`
+	// NameID format. Defaults to urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress.
+	NameIdFormat *string `json:"name_id_format,omitempty" url:"name_id_format,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *CreateSamlssoConfiguration) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
+}
+
+func (c *CreateSamlssoConfiguration) UnmarshalJSON(data []byte) error {
+	type unmarshaler CreateSamlssoConfiguration
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = CreateSamlssoConfiguration(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
+	c._rawJSON = nil
+	return nil
+}
+
+func (c *CreateSamlssoConfiguration) String() string {
+	if len(c._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
 type CreateSsoConfiguration struct {
 	Type string
 	Oidc *CreateOidcSsoConfiguration
+	Saml *CreateSamlssoConfiguration
 }
 
 func (c *CreateSsoConfiguration) UnmarshalJSON(data []byte) error {
@@ -333,6 +387,12 @@ func (c *CreateSsoConfiguration) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		c.Oidc = value
+	case "saml":
+		value := new(CreateSamlssoConfiguration)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		c.Saml = value
 	}
 	return nil
 }
@@ -341,18 +401,161 @@ func (c CreateSsoConfiguration) MarshalJSON() ([]byte, error) {
 	if c.Oidc != nil {
 		return core.MarshalJSONWithExtraProperty(c.Oidc, "type", "oidc")
 	}
+	if c.Saml != nil {
+		return core.MarshalJSONWithExtraProperty(c.Saml, "type", "saml")
+	}
 	return nil, fmt.Errorf("type %T does not define a non-empty union type", c)
 }
 
 type CreateSsoConfigurationVisitor interface {
 	VisitOidc(*CreateOidcSsoConfiguration) error
+	VisitSaml(*CreateSamlssoConfiguration) error
 }
 
 func (c *CreateSsoConfiguration) Accept(visitor CreateSsoConfigurationVisitor) error {
 	if c.Oidc != nil {
 		return visitor.VisitOidc(c.Oidc)
 	}
+	if c.Saml != nil {
+		return visitor.VisitSaml(c.Saml)
+	}
 	return fmt.Errorf("type %T does not define a non-empty union type", c)
+}
+
+// Values the user needs to enter into their OIDC Identity Provider.
+type OidcUserConfiguration struct {
+	// The redirect URI to register with the Identity Provider.
+	RedirectUri string `json:"redirect_uri" url:"redirect_uri"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (o *OidcUserConfiguration) GetExtraProperties() map[string]interface{} {
+	return o.extraProperties
+}
+
+func (o *OidcUserConfiguration) UnmarshalJSON(data []byte) error {
+	type unmarshaler OidcUserConfiguration
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*o = OidcUserConfiguration(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *o)
+	if err != nil {
+		return err
+	}
+	o.extraProperties = extraProperties
+
+	o._rawJSON = nil
+	return nil
+}
+
+func (o *OidcUserConfiguration) String() string {
+	if len(o._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(o._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(o); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", o)
+}
+
+// Values the user needs to enter into their SAML Identity Provider.
+type SamlUserConfiguration struct {
+	// Assertion Consumer Service URL to register with the Identity Provider.
+	AcsUrl string `json:"acs_url" url:"acs_url"`
+	// Service Provider Entity ID to register with the Identity Provider.
+	SpEntityId string `json:"sp_entity_id" url:"sp_entity_id"`
+	// Supported NameID formats.
+	SupportedNameIdFormats []string `json:"supported_name_id_formats" url:"supported_name_id_formats"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (s *SamlUserConfiguration) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
+}
+
+func (s *SamlUserConfiguration) UnmarshalJSON(data []byte) error {
+	type unmarshaler SamlUserConfiguration
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*s = SamlUserConfiguration(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+
+	s._rawJSON = nil
+	return nil
+}
+
+func (s *SamlUserConfiguration) String() string {
+	if len(s._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(s); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", s)
+}
+
+// SP-side configuration values the user needs to enter into their Identity Provider.
+// Only the fields relevant to the configured protocol are populated.
+type SsoUserConfiguration struct {
+	// OIDC configuration values. Present when the SSO configuration uses OIDC.
+	Oidc *OidcUserConfiguration `json:"oidc,omitempty" url:"oidc,omitempty"`
+	// SAML configuration values. Present when the SSO configuration uses SAML.
+	Saml *SamlUserConfiguration `json:"saml,omitempty" url:"saml,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (s *SsoUserConfiguration) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
+}
+
+func (s *SsoUserConfiguration) UnmarshalJSON(data []byte) error {
+	type unmarshaler SsoUserConfiguration
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*s = SsoUserConfiguration(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+
+	s._rawJSON = nil
+	return nil
+}
+
+func (s *SsoUserConfiguration) String() string {
+	if len(s._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(s); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", s)
 }
 
 // Configuration for an OpenID Connect (OIDC) compliant Identity Provider.
@@ -402,9 +605,63 @@ func (u *UpdateOidcSsoConfiguration) String() string {
 	return fmt.Sprintf("%#v", u)
 }
 
+// Configuration for updating a SAML 2.0 Identity Provider.
+type UpdateSamlssoConfiguration struct {
+	// Entity ID of the SAML Identity Provider.
+	IdpEntityId string `json:"idp_entity_id" url:"idp_entity_id"`
+	// Single Sign-On URL of the SAML Identity Provider (HTTPS required).
+	IdpSsoUrl string `json:"idp_sso_url" url:"idp_sso_url"`
+	// PEM-encoded X.509 certificate. Omit to keep existing certificate.
+	IdpCertificate *string `json:"idp_certificate,omitempty" url:"idp_certificate,omitempty"`
+	// Entity ID of the Service Provider.
+	SpEntityId string `json:"sp_entity_id" url:"sp_entity_id"`
+	// URL to the IdP's SAML metadata document (informational).
+	IdpMetadataUrl *string `json:"idp_metadata_url,omitempty" url:"idp_metadata_url,omitempty"`
+	// NameID format. Defaults to urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress.
+	NameIdFormat *string `json:"name_id_format,omitempty" url:"name_id_format,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (u *UpdateSamlssoConfiguration) GetExtraProperties() map[string]interface{} {
+	return u.extraProperties
+}
+
+func (u *UpdateSamlssoConfiguration) UnmarshalJSON(data []byte) error {
+	type unmarshaler UpdateSamlssoConfiguration
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*u = UpdateSamlssoConfiguration(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *u)
+	if err != nil {
+		return err
+	}
+	u.extraProperties = extraProperties
+
+	u._rawJSON = nil
+	return nil
+}
+
+func (u *UpdateSamlssoConfiguration) String() string {
+	if len(u._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(u._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(u); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", u)
+}
+
 type UpdateSsoConfiguration struct {
 	Type string
 	Oidc *UpdateOidcSsoConfiguration
+	Saml *UpdateSamlssoConfiguration
 }
 
 func (u *UpdateSsoConfiguration) UnmarshalJSON(data []byte) error {
@@ -425,6 +682,12 @@ func (u *UpdateSsoConfiguration) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		u.Oidc = value
+	case "saml":
+		value := new(UpdateSamlssoConfiguration)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		u.Saml = value
 	}
 	return nil
 }
@@ -433,16 +696,23 @@ func (u UpdateSsoConfiguration) MarshalJSON() ([]byte, error) {
 	if u.Oidc != nil {
 		return core.MarshalJSONWithExtraProperty(u.Oidc, "type", "oidc")
 	}
+	if u.Saml != nil {
+		return core.MarshalJSONWithExtraProperty(u.Saml, "type", "saml")
+	}
 	return nil, fmt.Errorf("type %T does not define a non-empty union type", u)
 }
 
 type UpdateSsoConfigurationVisitor interface {
 	VisitOidc(*UpdateOidcSsoConfiguration) error
+	VisitSaml(*UpdateSamlssoConfiguration) error
 }
 
 func (u *UpdateSsoConfiguration) Accept(visitor UpdateSsoConfigurationVisitor) error {
 	if u.Oidc != nil {
 		return visitor.VisitOidc(u.Oidc)
+	}
+	if u.Saml != nil {
+		return visitor.VisitSaml(u.Saml)
 	}
 	return fmt.Errorf("type %T does not define a non-empty union type", u)
 }
@@ -528,6 +798,7 @@ func (c *ChangePasswordResponseResult) String() string {
 type IdPConfiguration struct {
 	Type string
 	Oidc *OidcConfiguration
+	Saml *SamlConfiguration
 }
 
 func (i *IdPConfiguration) UnmarshalJSON(data []byte) error {
@@ -548,6 +819,12 @@ func (i *IdPConfiguration) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		i.Oidc = value
+	case "saml":
+		value := new(SamlConfiguration)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		i.Saml = value
 	}
 	return nil
 }
@@ -556,16 +833,23 @@ func (i IdPConfiguration) MarshalJSON() ([]byte, error) {
 	if i.Oidc != nil {
 		return core.MarshalJSONWithExtraProperty(i.Oidc, "type", "oidc")
 	}
+	if i.Saml != nil {
+		return core.MarshalJSONWithExtraProperty(i.Saml, "type", "saml")
+	}
 	return nil, fmt.Errorf("type %T does not define a non-empty union type", i)
 }
 
 type IdPConfigurationVisitor interface {
 	VisitOidc(*OidcConfiguration) error
+	VisitSaml(*SamlConfiguration) error
 }
 
 func (i *IdPConfiguration) Accept(visitor IdPConfigurationVisitor) error {
 	if i.Oidc != nil {
 		return visitor.VisitOidc(i.Oidc)
+	}
+	if i.Saml != nil {
+		return visitor.VisitSaml(i.Saml)
 	}
 	return fmt.Errorf("type %T does not define a non-empty union type", i)
 }
@@ -661,6 +945,55 @@ func (o *OidcConfiguration) String() string {
 		return value
 	}
 	return fmt.Sprintf("%#v", o)
+}
+
+// Configuration for a SAML 2.0 Identity Provider.
+type SamlConfiguration struct {
+	// Entity ID of the SAML Identity Provider.
+	IdpEntityId string `json:"idp_entity_id" url:"idp_entity_id"`
+	// Single Sign-On URL of the SAML Identity Provider.
+	IdpSsoUrl string `json:"idp_sso_url" url:"idp_sso_url"`
+	// Entity ID of the Service Provider (this service).
+	SpEntityId string `json:"sp_entity_id" url:"sp_entity_id"`
+	// NameID format. Defaults to emailAddress.
+	NameIdFormat *string `json:"name_id_format,omitempty" url:"name_id_format,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (s *SamlConfiguration) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
+}
+
+func (s *SamlConfiguration) UnmarshalJSON(data []byte) error {
+	type unmarshaler SamlConfiguration
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*s = SamlConfiguration(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+
+	s._rawJSON = nil
+	return nil
+}
+
+func (s *SamlConfiguration) String() string {
+	if len(s._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(s); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", s)
 }
 
 // Single Sign-On (SSO) configuration for an Organization. This describes how to connect

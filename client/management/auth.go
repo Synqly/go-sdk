@@ -141,6 +141,48 @@ func (c *CreateSsoResponse) String() string {
 	return fmt.Sprintf("%#v", c)
 }
 
+type GetSsoMetadataResponse struct {
+	// Information the user needs to configure their Identity Provider.
+	Result *SsoUserConfiguration `json:"result" url:"result"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (g *GetSsoMetadataResponse) GetExtraProperties() map[string]interface{} {
+	return g.extraProperties
+}
+
+func (g *GetSsoMetadataResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler GetSsoMetadataResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*g = GetSsoMetadataResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	if err != nil {
+		return err
+	}
+	g.extraProperties = extraProperties
+
+	g._rawJSON = nil
+	return nil
+}
+
+func (g *GetSsoMetadataResponse) String() string {
+	if len(g._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(g._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(g); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", g)
+}
+
 type GetSsoResponse struct {
 	Result *SsoConfiguration `json:"result" url:"result"`
 
