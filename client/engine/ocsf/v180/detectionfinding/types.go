@@ -2597,6 +2597,8 @@ func (e *Edge) String() string {
 
 // The Email object describes the email metadata such as sender, recipients, and direction, and can include embedded URLs and files.
 type Email struct {
+	// The number of attachments in the email as reported by the event source.
+	AttachmentCount *int `json:"attachment_count,omitempty" url:"attachment_count,omitempty"`
 	// The machine-readable email header Cc values, as defined by RFC 5322. For example <code>example.user@usersdomain.com</code>.
 	Cc []EmailAddress `json:"cc,omitempty" url:"cc,omitempty"`
 	// The human-readable email header Cc Mailbox values. For example <code>'Example User &lt;example.user@usersdomain.com&gt;'</code>.
@@ -2617,6 +2619,8 @@ type Email struct {
 	FromMailboxes []EmailAddress `json:"from_mailboxes,omitempty" url:"from_mailboxes,omitempty"`
 	// Additional HTTP headers of an HTTP request or response.
 	HttpHeaders []*HttpHeader `json:"http_headers,omitempty" url:"http_headers,omitempty"`
+	// The indication of whether the email was delivered to the recipient as reported by the event source.
+	IsDelivered *bool `json:"is_delivered,omitempty" url:"is_delivered,omitempty"`
 	// The indication of whether the email has been read.
 	IsRead *bool `json:"is_read,omitempty" url:"is_read,omitempty"`
 	// The email header Message-ID value, as defined by RFC 5322.
@@ -2649,6 +2653,8 @@ type Email struct {
 	ToMailboxes []string `json:"to_mailboxes,omitempty" url:"to_mailboxes,omitempty"`
 	// The unique identifier of the email thread.
 	Uid *string `json:"uid,omitempty" url:"uid,omitempty"`
+	// The number of URLs embedded in the email as reported by the event source.
+	UrlCount *int `json:"url_count,omitempty" url:"url_count,omitempty"`
 	// The URLs embedded in the email.
 	Urls []*Url `json:"urls,omitempty" url:"urls,omitempty"`
 	// The X-Originating-IP header identifying the emails originating IP address(es).

@@ -5433,6 +5433,7 @@ const (
 	OperationIdEdrQueryPostureScore                             OperationId = "edr_query_posture_score"
 	OperationIdEdrQueryThreatevents                             OperationId = "edr_query_threatevents"
 	OperationIdEmailsecurityGetThreatDetails                    OperationId = "emailsecurity_get_threat_details"
+	OperationIdEmailsecurityQueryEmailEvents                    OperationId = "emailsecurity_query_email_events"
 	OperationIdEmailsecurityQueryThreats                        OperationId = "emailsecurity_query_threats"
 	OperationIdIdentityDisableUser                              OperationId = "identity_disable_user"
 	OperationIdIdentityEnableUser                               OperationId = "identity_enable_user"
@@ -5570,6 +5571,8 @@ func NewOperationIdFromString(s string) (OperationId, error) {
 		return OperationIdEdrQueryThreatevents, nil
 	case "emailsecurity_get_threat_details":
 		return OperationIdEmailsecurityGetThreatDetails, nil
+	case "emailsecurity_query_email_events":
+		return OperationIdEmailsecurityQueryEmailEvents, nil
 	case "emailsecurity_query_threats":
 		return OperationIdEmailsecurityQueryThreats, nil
 	case "identity_disable_user":
@@ -12643,6 +12646,52 @@ func (e *ElasticsearchSharedSecret) Accept(visitor ElasticsearchSharedSecretVisi
 	return fmt.Errorf("type %T does not define a non-empty union type", e)
 }
 
+// Configuration for Microsoft Defender for Office 365.
+type EmailSecurityDefenderForOffice struct {
+	Credential *DefenderCredential `json:"credential" url:"credential"`
+	// Region used to determine the API endpoint. Defaults to `global`.
+	Region *MicrosoftDefenderRegion `json:"region,omitempty" url:"region,omitempty"`
+	// Tenant ID for the Microsoft Defender Management Console.
+	TenantId string `json:"tenant_id" url:"tenant_id"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (e *EmailSecurityDefenderForOffice) GetExtraProperties() map[string]interface{} {
+	return e.extraProperties
+}
+
+func (e *EmailSecurityDefenderForOffice) UnmarshalJSON(data []byte) error {
+	type unmarshaler EmailSecurityDefenderForOffice
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*e = EmailSecurityDefenderForOffice(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *e)
+	if err != nil {
+		return err
+	}
+	e.extraProperties = extraProperties
+
+	e._rawJSON = nil
+	return nil
+}
+
+func (e *EmailSecurityDefenderForOffice) String() string {
+	if len(e._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(e._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(e); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", e)
+}
+
 // Configuration for Mimecast Cloud Gateway as an email security provider.
 //
 // [Configuration guide](https://docs.synqly.com/guides/provider-configuration/mimecast-cloud-gateway-setup)
@@ -14873,6 +14922,71 @@ func (m *MalwarebytesCredential) Accept(visitor MalwarebytesCredentialVisitor) e
 	return fmt.Errorf("type %T does not define a non-empty union type", m)
 }
 
+type MicrosoftDefenderRegion string
+
+const (
+	// Global region.
+	//
+	// For the Microsoft Defender XDR API, this value maps to the `https://api.security.microsoft.com` endpoint.
+	// For the Microsoft Graph API, this value maps to the `https://graph.microsoft.com` endpoint.
+	MicrosoftDefenderRegionGlobal MicrosoftDefenderRegion = "global"
+	// US region.
+	//
+	// For the Microsoft Defender XDR API, this value maps to the `https://api-us.security.microsoft.com` endpoint.
+	// For the Microsoft Graph API, this value maps to the `https://graph.microsoft.com` endpoint.
+	MicrosoftDefenderRegionUs MicrosoftDefenderRegion = "us"
+	// UK region.
+	//
+	// For the Microsoft Defender XDR API, this value maps to the `https://api-uk.security.microsoft.com` endpoint.
+	// For the Microsoft Graph API, this value maps to the `https://graph.microsoft.com` endpoint.
+	MicrosoftDefenderRegionUk MicrosoftDefenderRegion = "uk"
+	// Europe region.
+	//
+	// For the Microsoft Defender XDR API, this value maps to the `https://api-eu.security.microsoft.com` endpoint.
+	// For the Microsoft Graph API, this value maps to the `https://graph.microsoft.com` endpoint.
+	MicrosoftDefenderRegionEu MicrosoftDefenderRegion = "eu"
+	// GCC (Government Community Cloud) region.
+	//
+	// For the Microsoft Defender XDR API, this value maps to the `https://api-gcc.security.microsoft.us` endpoint.
+	// For the Microsoft Graph API, this value maps to the `https://graph.microsoft.com` endpoint.
+	MicrosoftDefenderRegionGcc MicrosoftDefenderRegion = "gcc"
+	// GCC (Government Community Cloud) High region.
+	//
+	// For the Microsoft Defender XDR API, this value maps to the `https://api-gov.security.microsoft.us` endpoint.
+	// For the Microsoft Graph API, this value maps to the `https://graph.microsoft.us` endpoint.
+	MicrosoftDefenderRegionGccHigh MicrosoftDefenderRegion = "gcc_high"
+	// DoD (Department of Defense) region.
+	//
+	// For the Microsoft Defender XDR API, this value maps to the `https://api-gov.security.microsoft.us` endpoint.
+	// For the Microsoft Graph API, this value maps to the `https://dod-graph.microsoft.us` endpoint.
+	MicrosoftDefenderRegionDoD MicrosoftDefenderRegion = "dod"
+)
+
+func NewMicrosoftDefenderRegionFromString(s string) (MicrosoftDefenderRegion, error) {
+	switch s {
+	case "global":
+		return MicrosoftDefenderRegionGlobal, nil
+	case "us":
+		return MicrosoftDefenderRegionUs, nil
+	case "uk":
+		return MicrosoftDefenderRegionUk, nil
+	case "eu":
+		return MicrosoftDefenderRegionEu, nil
+	case "gcc":
+		return MicrosoftDefenderRegionGcc, nil
+	case "gcc_high":
+		return MicrosoftDefenderRegionGccHigh, nil
+	case "dod":
+		return MicrosoftDefenderRegionDoD, nil
+	}
+	var t MicrosoftDefenderRegion
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (m MicrosoftDefenderRegion) Ptr() *MicrosoftDefenderRegion {
+	return &m
+}
+
 type MimecastApiGateway struct {
 	Region MimecastApiGatewayRegion `json:"region" url:"region"`
 	// Base URL for the Mimecast Cloud Gateway API. This field is intended for advanced use cases where the default API Gateways are not sufficient. The base URL is ignored when **Region** is set to anything but `custom`.
@@ -16314,6 +16428,8 @@ type ProviderConfig struct {
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/tanium-setup)
 	EdrTanium *EdrTanium
+	// Configuration for Microsoft Defender for Office 365.
+	EmailsecurityDefenderForOffice *EmailSecurityDefenderForOffice
 	// Configuration for Mimecast Cloud Gateway as an email security provider.
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/mimecast-cloud-gateway-setup)
@@ -16877,6 +16993,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.EdrTanium = value
+	case "emailsecurity_defender_for_office":
+		value := new(EmailSecurityDefenderForOffice)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.EmailsecurityDefenderForOffice = value
 	case "emailsecurity_mimecast_cloud_gateway":
 		value := new(EmailSecurityMimecastCloudGateway)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -17497,6 +17619,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.EdrTanium != nil {
 		return core.MarshalJSONWithExtraProperty(p.EdrTanium, "type", "edr_tanium")
 	}
+	if p.EmailsecurityDefenderForOffice != nil {
+		return core.MarshalJSONWithExtraProperty(p.EmailsecurityDefenderForOffice, "type", "emailsecurity_defender_for_office")
+	}
 	if p.EmailsecurityMimecastCloudGateway != nil {
 		return core.MarshalJSONWithExtraProperty(p.EmailsecurityMimecastCloudGateway, "type", "emailsecurity_mimecast_cloud_gateway")
 	}
@@ -17785,6 +17910,7 @@ type ProviderConfigVisitor interface {
 	VisitEdrSentinelone(*EdrSentinelOne) error
 	VisitEdrSophos(*EdrSophos) error
 	VisitEdrTanium(*EdrTanium) error
+	VisitEmailsecurityDefenderForOffice(*EmailSecurityDefenderForOffice) error
 	VisitEmailsecurityMimecastCloudGateway(*EmailSecurityMimecastCloudGateway) error
 	VisitIdentityEntraId(*IdentityEntraId) error
 	VisitIdentityGoogle(*IdentityGoogle) error
@@ -18007,6 +18133,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.EdrTanium != nil {
 		return visitor.VisitEdrTanium(p.EdrTanium)
+	}
+	if p.EmailsecurityDefenderForOffice != nil {
+		return visitor.VisitEmailsecurityDefenderForOffice(p.EmailsecurityDefenderForOffice)
 	}
 	if p.EmailsecurityMimecastCloudGateway != nil {
 		return visitor.VisitEmailsecurityMimecastCloudGateway(p.EmailsecurityMimecastCloudGateway)
@@ -18346,6 +18475,8 @@ const (
 	ProviderConfigIdEdrSophos ProviderConfigId = "edr_sophos"
 	// Tanium EDR
 	ProviderConfigIdEdrTanium ProviderConfigId = "edr_tanium"
+	// Microsoft Defender for Office 365
+	ProviderConfigIdEmailSecurityDefenderForOffice ProviderConfigId = "emailsecurity_defender_for_office"
 	// Mimecast Cloud Gateway
 	ProviderConfigIdEmailSecurityMimecastCloudGateway ProviderConfigId = "emailsecurity_mimecast_cloud_gateway"
 	// Microsoft Entra ID
@@ -18604,6 +18735,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdEdrSophos, nil
 	case "edr_tanium":
 		return ProviderConfigIdEdrTanium, nil
+	case "emailsecurity_defender_for_office":
+		return ProviderConfigIdEmailSecurityDefenderForOffice, nil
 	case "emailsecurity_mimecast_cloud_gateway":
 		return ProviderConfigIdEmailSecurityMimecastCloudGateway, nil
 	case "identity_entra_id":

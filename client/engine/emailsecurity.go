@@ -13,6 +13,17 @@ type EmailSecurityGetThreatDetailsRequest struct {
 	Meta []*string `json:"-" url:"meta,omitempty"`
 }
 
+type EmailSecurityQueryEmailEventsRequest struct {
+	// Add metadata to the response by invoking meta functions. Documentation for meta functions is available at https://docs.synqly.com/api-reference/meta-functions. Not all meta function are available at every endpoint.
+	Meta []*string `json:"-" url:"meta,omitempty"`
+	// Number of email events to return. Defaults to 1000 with a maximum of 5000. If a provider has a maximum limit lower than 5000, the provider's maximum limit will be used instead.
+	Limit *int `json:"-" url:"limit,omitempty"`
+	// Filter results by this query. For more information on filtering, refer to our Filtering Guide. Defaults to no filter. If used more than once, the queries are ANDed together.
+	Filter []*string `json:"-" url:"filter,omitempty"`
+	// Start search from cursor position.
+	Cursor *string `json:"-" url:"cursor,omitempty"`
+}
+
 type EmailSecurityQueryThreatsRequest struct {
 	// Add metadata to the response by invoking meta functions. Documentation for meta functions is available at https://docs.synqly.com/api-reference/meta-functions. Not all meta function are available at every endpoint.
 	Meta []*string `json:"-" url:"meta,omitempty"`
@@ -59,6 +70,54 @@ func (e *EmailSecurityGetThreatDetailsResponse) UnmarshalJSON(data []byte) error
 }
 
 func (e *EmailSecurityGetThreatDetailsResponse) String() string {
+	if len(e._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(e._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(e); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", e)
+}
+
+type EmailSecurityQueryEmailEventsResponse struct {
+	// Additional messages from the service response that may be helpful to the client.
+	Messages *MessagesResponse `json:"messages,omitempty" url:"messages,omitempty"`
+	// Various metadata about the results organized by group, then type, then field.
+	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
+	// Cursor to use to retrieve the next page of results
+	Cursor string `json:"cursor" url:"cursor"`
+	// List of email events
+	Result []EmailSecurityEmailEvent `json:"result" url:"result"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (e *EmailSecurityQueryEmailEventsResponse) GetExtraProperties() map[string]interface{} {
+	return e.extraProperties
+}
+
+func (e *EmailSecurityQueryEmailEventsResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler EmailSecurityQueryEmailEventsResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*e = EmailSecurityQueryEmailEventsResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *e)
+	if err != nil {
+		return err
+	}
+	e.extraProperties = extraProperties
+
+	e._rawJSON = nil
+	return nil
+}
+
+func (e *EmailSecurityQueryEmailEventsResponse) String() string {
 	if len(e._rawJSON) > 0 {
 		if value, err := core.StringifyJSON(e._rawJSON); err == nil {
 			return value

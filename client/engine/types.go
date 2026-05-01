@@ -35,10 +35,11 @@ import (
 	webresourceaccessactivity "github.com/synqly/go-sdk/client/engine/ocsf/v130/webresourceaccessactivity"
 	cloudresourcesinventoryinfo "github.com/synqly/go-sdk/client/engine/ocsf/v140/cloudresourcesinventoryinfo"
 	applicationsecurityposturefinding "github.com/synqly/go-sdk/client/engine/ocsf/v150/applicationsecurityposturefinding"
-	emailactivity "github.com/synqly/go-sdk/client/engine/ocsf/v160/emailactivity"
+	v160emailactivity "github.com/synqly/go-sdk/client/engine/ocsf/v160/emailactivity"
 	filehostingactivity "github.com/synqly/go-sdk/client/engine/ocsf/v160/filehostingactivity"
 	httpactivity "github.com/synqly/go-sdk/client/engine/ocsf/v160/httpactivity"
 	v180detectionfinding "github.com/synqly/go-sdk/client/engine/ocsf/v180/detectionfinding"
+	emailactivity "github.com/synqly/go-sdk/client/engine/ocsf/v180/emailactivity"
 	v180vulnerabilityfinding "github.com/synqly/go-sdk/client/engine/ocsf/v180/vulnerabilityfinding"
 	time "time"
 )
@@ -1046,6 +1047,9 @@ type PostureScore = *configstate.ConfigState
 // Threat event information represented by OCSF Threat object. The Threat object describes characteristics of a threat event.
 type ThreatEvent = *detectionfinding.DetectionFinding
 
+// Email security connector email event object. Represented by OCSF Email Activity class (class_uid 4009) using the OCSF Synqly extension, the OCSF Security Control profile, and the OCSF Date/Time profile.
+type EmailSecurityEmailEvent = *emailactivity.EmailActivity
+
 // Email security connector threat object. Represented by OCSF Detection Finding class (class_uid 2004) using the OCSF Synqly extension, the OCSF Security Control profile, and the OCSF Date/Time profile.
 type EmailSecurityThreat = *v180detectionfinding.DetectionFinding
 
@@ -1646,7 +1650,7 @@ type Event struct {
 	WebResourceAccessActivity         *webresourceaccessactivity.WebResourceAccessActivity
 	ApplicationLifecycle              *applicationlifecycle.ApplicationLifecycle
 	FileHostingActivity               *filehostingactivity.FileHosting
-	EmailActivity                     *emailactivity.EmailActivity
+	EmailActivity                     *v160emailactivity.EmailActivity
 	CloudActivity                     *cloudactivity.CloudActivity
 	CloudResourcesInventoryInfo       *cloudresourcesinventoryinfo.CloudResourcesInventoryInfo
 }
@@ -1832,7 +1836,7 @@ func (e *Event) UnmarshalJSON(data []byte) error {
 		}
 		e.FileHostingActivity = value
 	case "Email Activity":
-		value := new(emailactivity.EmailActivity)
+		value := new(v160emailactivity.EmailActivity)
 		if err := json.Unmarshal(data, &value); err != nil {
 			return err
 		}
@@ -1979,7 +1983,7 @@ type EventVisitor interface {
 	VisitWebResourceAccessActivity(*webresourceaccessactivity.WebResourceAccessActivity) error
 	VisitApplicationLifecycle(*applicationlifecycle.ApplicationLifecycle) error
 	VisitFileHostingActivity(*filehostingactivity.FileHosting) error
-	VisitEmailActivity(*emailactivity.EmailActivity) error
+	VisitEmailActivity(*v160emailactivity.EmailActivity) error
 	VisitCloudActivity(*cloudactivity.CloudActivity) error
 	VisitCloudResourcesInventoryInfo(*cloudresourcesinventoryinfo.CloudResourcesInventoryInfo) error
 }
@@ -3272,6 +3276,7 @@ const (
 	OperationIdEdrQueryPostureScore                             OperationId = "edr_query_posture_score"
 	OperationIdEdrQueryThreatevents                             OperationId = "edr_query_threatevents"
 	OperationIdEmailsecurityGetThreatDetails                    OperationId = "emailsecurity_get_threat_details"
+	OperationIdEmailsecurityQueryEmailEvents                    OperationId = "emailsecurity_query_email_events"
 	OperationIdEmailsecurityQueryThreats                        OperationId = "emailsecurity_query_threats"
 	OperationIdIdentityDisableUser                              OperationId = "identity_disable_user"
 	OperationIdIdentityEnableUser                               OperationId = "identity_enable_user"
@@ -3409,6 +3414,8 @@ func NewOperationIdFromString(s string) (OperationId, error) {
 		return OperationIdEdrQueryThreatevents, nil
 	case "emailsecurity_get_threat_details":
 		return OperationIdEmailsecurityGetThreatDetails, nil
+	case "emailsecurity_query_email_events":
+		return OperationIdEmailsecurityQueryEmailEvents, nil
 	case "emailsecurity_query_threats":
 		return OperationIdEmailsecurityQueryThreats, nil
 	case "identity_disable_user":
