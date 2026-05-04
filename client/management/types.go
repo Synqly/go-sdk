@@ -16698,6 +16698,8 @@ type ProviderConfig struct {
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/tenable-vulns-setup)
 	VulnerabilitiesTenableCloud *VulnerabilitiesTenableCloud
 	// Configuration for Tenable Security Center.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/tenable-sc-vulns-setup)
 	VulnerabilitiesTenableSc *VulnerabilitiesTenableSc
 }
 
@@ -24049,6 +24051,8 @@ func (v *VulnerabilitiesTenableCloud) String() string {
 }
 
 // Configuration for Tenable Security Center.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/tenable-sc-vulns-setup)
 type VulnerabilitiesTenableSc struct {
 	Credential *TenableScCredential `json:"credential" url:"credential"`
 	// Base URL for the Tenable Security Center API.
