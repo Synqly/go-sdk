@@ -16650,6 +16650,8 @@ type ProviderConfig struct {
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/torq-ticketing-setup)
 	TicketingTorq *TicketingTorq
 	// Configuration for Zendesk as a Ticketing Provider
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/zendesk-ticketing-setup)
 	TicketingZendesk *TicketingZendesk
 	// Configuration for Amazon Inspector as a vulnerabilities provider.
 	VulnerabilitiesAmazonInspector *VulnerabilitiesAmazonInspector
@@ -23011,6 +23013,8 @@ func (t *TicketingTorq) String() string {
 }
 
 // Configuration for Zendesk as a Ticketing Provider
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/zendesk-ticketing-setup)
 type TicketingZendesk struct {
 	Credential *ZendeskCredential `json:"credential" url:"credential"`
 	// Base URL for your Zendesk tenant.
