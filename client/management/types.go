@@ -11087,6 +11087,8 @@ func (c *CloudSecurityDefender) String() string {
 }
 
 // Configuration for Palo Alto Networks Cortex Cloud Security
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/paloalto-cloudsecurity-setup)
 type CloudSecurityPaloAlto struct {
 	Credential *PaloAltoCredential `json:"credential" url:"credential"`
 	// Base URL for the Palo Alto Networks Cortex Cloud Security API.
@@ -11131,6 +11133,8 @@ func (c *CloudSecurityPaloAlto) String() string {
 }
 
 // Configuration for the Upwind Cloud Security provider.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/upwind-setup)
 type CloudSecurityUpwind struct {
 	// Upwind OAuth client credentials.
 	Credential *UpwindCredential `json:"credential" url:"credential"`
@@ -12711,6 +12715,8 @@ func (e *ElasticsearchSharedSecret) Accept(visitor ElasticsearchSharedSecretVisi
 }
 
 // Configuration for Microsoft Defender for Office 365.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/microsoft-defender-for-office-emailsecurity-setup)
 type EmailSecurityDefenderForOffice struct {
 	Credential *DefenderCredential `json:"credential" url:"credential"`
 	// Region used to determine the API endpoint. Defaults to `global`.
@@ -16571,8 +16577,12 @@ type ProviderConfig struct {
 	// Configuration for the Microsoft Defender for Cloud Provider
 	CloudsecurityDefender *CloudSecurityDefender
 	// Configuration for Palo Alto Networks Cortex Cloud Security
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/paloalto-cloudsecurity-setup)
 	CloudsecurityPaloalto *CloudSecurityPaloAlto
 	// Configuration for the Upwind Cloud Security provider.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/upwind-setup)
 	CloudsecurityUpwind *CloudSecurityUpwind
 	// Configuration for the Wiz Cloud Security Provider
 	CloudsecurityWiz *CloudSecurityWiz
@@ -16611,6 +16621,8 @@ type ProviderConfig struct {
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/tanium-setup)
 	EdrTanium *EdrTanium
 	// Configuration for Microsoft Defender for Office 365.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/microsoft-defender-for-office-emailsecurity-setup)
 	EmailsecurityDefenderForOffice *EmailSecurityDefenderForOffice
 	// Configuration for Mimecast Cloud Gateway as an email security provider.
 	//
@@ -16840,6 +16852,8 @@ type ProviderConfig struct {
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/zendesk-ticketing-setup)
 	TicketingZendesk *TicketingZendesk
 	// Configuration for Amazon Inspector as a vulnerabilities provider.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/amazon-inspector-vulnerabilities-setup)
 	VulnerabilitiesAmazonInspector *VulnerabilitiesAmazonInspector
 	// Configuration for the Axonius Vulnerabilities Provider
 	//
@@ -23581,6 +23595,8 @@ func (v VulnerabilitiesTaniumCloudDataset) Ptr() *VulnerabilitiesTaniumCloudData
 }
 
 // Configuration for Amazon Inspector as a vulnerabilities provider.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/amazon-inspector-vulnerabilities-setup)
 type VulnerabilitiesAmazonInspector struct {
 	// AWS credentials with access to [Amazon Inspector](https://docs.aws.amazon.com/inspector/latest/user/what-is-inspector.html).
 	Credential *AwsProviderCredential `json:"credential" url:"credential"`
