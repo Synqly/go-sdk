@@ -818,6 +818,51 @@ func (a *Agent) String() string {
 // 99 - Other: The type is not mapped. See the <code>type</code> attribute, which contains a data source specific value.
 type AgentTypeId = int
 
+// The analysis target defines the scope of monitored activities, specifying what entity, system or process is analyzed for activity patterns.
+type AnalysisTarget struct {
+	// The specific name or identifier of the analysis target, such as the username of a User Account, the name of a Kubernetes Cluster, the identifier of a Network Namespace, or the name of an Application Component.
+	Name string `json:"name" url:"name"`
+	// The category of the analysis target, such as User Account, Kubernetes Cluster, Network Namespace, or Application Component.
+	Type *string `json:"type,omitempty" url:"type,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (a *AnalysisTarget) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
+}
+
+func (a *AnalysisTarget) UnmarshalJSON(data []byte) error {
+	type unmarshaler AnalysisTarget
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*a = AnalysisTarget(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+
+	a._rawJSON = nil
+	return nil
+}
+
+func (a *AnalysisTarget) String() string {
+	if len(a._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(a); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", a)
+}
+
 // The Analytic object contains details about the analytic technique used to analyze and derive insights from the data or information that led to the creation of a finding or conclusion.
 type Analytic struct {
 	// The algorithm used by the underlying analytic to generate the finding.
@@ -905,14 +950,63 @@ type AnalyticStateId = int
 // 99 - Other: The type is not mapped. See the <code>type</code> attribute, which contains a data source specific value.
 type AnalyticTypeId = int
 
+// Describes an anomaly or deviation detected in a system. Anomalies are unexpected activity patterns that could indicate potential issues needing attention.
+type Anomaly struct {
+	// The specific parameter, metric or property where the anomaly was observed. Examples include: CPU usage percentage, API response time in milliseconds, HTTP error rate, memory utilization, network latency, transaction volume, etc. This helps identify the exact aspect of the system exhibiting anomalous behavior.
+	ObservationParameter string `json:"observation_parameter" url:"observation_parameter"`
+	// The type of analysis methodology used to detect the anomaly. This indicates how the anomaly was identified through different analytical approaches. Common types include: Frequency Analysis, Time Pattern Analysis, Volume Analysis, Sequence Analysis, Distribution Analysis, etc.
+	ObservationType *string `json:"observation_type,omitempty" url:"observation_type,omitempty"`
+	// Details about the observed anomaly or observations that were flagged as anomalous compared to expected baseline behavior.
+	Observations []*Observation `json:"observations" url:"observations"`
+	// The specific pattern identified within the observation type. For Frequency Analysis, this could be 'FREQUENT', 'INFREQUENT', 'RARE', or 'UNSEEN'. For Time Pattern Analysis, this could be 'BUSINESS_HOURS', 'OFF_HOURS', or 'UNUSUAL_TIME'. For Volume Analysis, this could be 'NORMAL_VOLUME', 'HIGH_VOLUME', or 'SURGE'. The pattern values are specific to each observation type and indicate how the observed behavior relates to the baseline.
+	ObservedPattern *string `json:"observed_pattern,omitempty" url:"observed_pattern,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (a *Anomaly) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
+}
+
+func (a *Anomaly) UnmarshalJSON(data []byte) error {
+	type unmarshaler Anomaly
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*a = Anomaly(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+
+	a._rawJSON = nil
+	return nil
+}
+
+func (a *Anomaly) String() string {
+	if len(a._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(a); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", a)
+}
+
 // Describes the analysis of activity patterns and anomalies of target entities to identify potential security threats, performance issues, or other deviations from established baselines. This includes monitoring and analyzing user interactions, API usage, resource utilization, access patterns and other measured indicators.
 type AnomalyAnalysis struct {
 	// The analysis targets define the scope of monitored activities, specifying what entities, systems or processes are analyzed for activity patterns.
-	AnalysisTargets interface{} `json:"analysis_targets" url:"analysis_targets"`
+	AnalysisTargets []*AnalysisTarget `json:"analysis_targets" url:"analysis_targets"`
 	// List of detected activities that significantly deviate from the established baselines. This can include unusual access patterns, unexpected user-agents, abnormal API usage, suspicious traffic spikes, unauthorized access attempts, and other activities that may indicate potential security threats or system issues.
-	Anomalies interface{} `json:"anomalies" url:"anomalies"`
+	Anomalies []*Anomaly `json:"anomalies" url:"anomalies"`
 	// List of established patterns representing normal activity that serve as reference points for anomaly detection. This includes typical user interaction patterns like common user-agents, expected API access frequencies and patterns, standard resource utilization levels, and regular traffic flows. These baselines help establish what constitutes 'normal' activity in the system.
-	Baselines interface{} `json:"baselines,omitempty" url:"baselines,omitempty"`
+	Baselines []*Baseline `json:"baselines,omitempty" url:"baselines,omitempty"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
@@ -1223,6 +1317,55 @@ func (a *AutonomousSystem) String() string {
 		return value
 	}
 	return fmt.Sprintf("%#v", a)
+}
+
+// Describes the baseline or expected behavior of a system, service, or component based on historical observations and measurements. It establishes reference points for comparison to detect anomalies, trends, and deviations from typical patterns.
+type Baseline struct {
+	// The specific parameter or property being monitored. Examples include: CPU usage percentage, API response time in milliseconds, HTTP error rate, memory utilization, network latency, transaction volume, etc.
+	ObservationParameter string `json:"observation_parameter" url:"observation_parameter"`
+	// The type of analysis being performed to establish baseline behavior. Common types include: Frequency Analysis, Time Pattern Analysis, Volume Analysis, Sequence Analysis, Distribution Analysis, etc.
+	ObservationType *string `json:"observation_type,omitempty" url:"observation_type,omitempty"`
+	// Collection of actual measured values, data points and observations recorded for this baseline.
+	Observations []*Observation `json:"observations" url:"observations"`
+	// The specific pattern identified within the observation type. For Frequency Analysis, this could be 'FREQUENT', 'INFREQUENT', 'RARE', or 'UNSEEN'. For Time Pattern Analysis, this could be 'BUSINESS_HOURS', 'OFF_HOURS', or 'UNUSUAL_TIME'. For Volume Analysis, this could be 'NORMAL_VOLUME', 'HIGH_VOLUME', or 'SURGE'. The pattern values are specific to each observation type and indicate the baseline behavior.
+	ObservedPattern *string `json:"observed_pattern,omitempty" url:"observed_pattern,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (b *Baseline) GetExtraProperties() map[string]interface{} {
+	return b.extraProperties
+}
+
+func (b *Baseline) UnmarshalJSON(data []byte) error {
+	type unmarshaler Baseline
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*b = Baseline(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *b)
+	if err != nil {
+		return err
+	}
+	b.extraProperties = extraProperties
+
+	b._rawJSON = nil
+	return nil
+}
+
+func (b *Baseline) String() string {
+	if len(b._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(b._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(b); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", b)
 }
 
 // The Digital Certificate, also known as a Public Key Certificate, object contains information about the ownership and usage of a public key. It serves as a means to establish trust in the authenticity and integrity of the public key and the associated entity.
@@ -5909,6 +6052,53 @@ func (o *Observable) String() string {
 // 45 - FilePath: The full path to the file. For example: For example:<br><code>c:\windows\system32\svchost.exe</code>.
 // 99 - Other: The observable data type is not mapped. See the <code>type</code> attribute, which may contain data source specific value.
 type ObservableTypeId = int
+
+// A record of an observed value or event that captures the timing and frequency of its occurrence. Used to track when values/events were first detected, last detected, and their total occurrence count.
+type Observation struct {
+	// Integer representing the total number of times this specific value/event was observed across all occurrences. Helps establish prevalence and patterns.
+	Count *int `json:"count,omitempty" url:"count,omitempty"`
+	// The time window when the value or event was first observed. It is used to analyze activity patterns, detect trends, or correlate events within a specific timeframe.
+	Timespan *Timespan `json:"timespan,omitempty" url:"timespan,omitempty"`
+	// The specific value, event, indicator or data point that was observed and recorded. This is the core piece of information being tracked.
+	Value string `json:"value" url:"value"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (o *Observation) GetExtraProperties() map[string]interface{} {
+	return o.extraProperties
+}
+
+func (o *Observation) UnmarshalJSON(data []byte) error {
+	type unmarshaler Observation
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*o = Observation(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *o)
+	if err != nil {
+		return err
+	}
+	o.extraProperties = extraProperties
+
+	o._rawJSON = nil
+	return nil
+}
+
+func (o *Observation) String() string {
+	if len(o._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(o._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(o); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", o)
+}
 
 // The Organization object describes characteristics of an organization or company and its division if any. Additionally, it also describes cloud and Software-as-a-Service (SaaS) logical hierarchies such as AWS Organizations, Google Cloud Organizations, Oracle Cloud Tenancies, and similar constructs.
 type Organization struct {

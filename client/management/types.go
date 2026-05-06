@@ -5474,8 +5474,10 @@ const (
 	OperationIdCustomPostBatch                                  OperationId = "custom_post_batch"
 	OperationIdCustomQuery                                      OperationId = "custom_query"
 	OperationIdEdrCreateIocs                                    OperationId = "edr_create_iocs"
+	OperationIdEdrCreateThreatNote                              OperationId = "edr_create_threat_note"
 	OperationIdEdrDeleteIocs                                    OperationId = "edr_delete_iocs"
 	OperationIdEdrGetEndpoint                                   OperationId = "edr_get_endpoint"
+	OperationIdEdrGetThreatNotes                                OperationId = "edr_get_threat_notes"
 	OperationIdEdrNetworkQuarantine                             OperationId = "edr_network_quarantine"
 	OperationIdEdrQueryAlerts                                   OperationId = "edr_query_alerts"
 	OperationIdEdrQueryApplications                             OperationId = "edr_query_applications"
@@ -5605,10 +5607,14 @@ func NewOperationIdFromString(s string) (OperationId, error) {
 		return OperationIdCustomQuery, nil
 	case "edr_create_iocs":
 		return OperationIdEdrCreateIocs, nil
+	case "edr_create_threat_note":
+		return OperationIdEdrCreateThreatNote, nil
 	case "edr_delete_iocs":
 		return OperationIdEdrDeleteIocs, nil
 	case "edr_get_endpoint":
 		return OperationIdEdrGetEndpoint, nil
+	case "edr_get_threat_notes":
+		return OperationIdEdrGetThreatNotes, nil
 	case "edr_network_quarantine":
 		return OperationIdEdrNetworkQuarantine, nil
 	case "edr_query_alerts":

@@ -40,6 +40,7 @@ import (
 	httpactivity "github.com/synqly/go-sdk/client/engine/ocsf/v160/httpactivity"
 	v180detectionfinding "github.com/synqly/go-sdk/client/engine/ocsf/v180/detectionfinding"
 	emailactivity "github.com/synqly/go-sdk/client/engine/ocsf/v180/emailactivity"
+	noteactivity "github.com/synqly/go-sdk/client/engine/ocsf/v180/noteactivity"
 	v180vulnerabilityfinding "github.com/synqly/go-sdk/client/engine/ocsf/v180/vulnerabilityfinding"
 	time "time"
 )
@@ -1659,6 +1660,7 @@ type Event struct {
 	EmailActivity                     *v160emailactivity.EmailActivity
 	CloudActivity                     *cloudactivity.CloudActivity
 	CloudResourcesInventoryInfo       *cloudresourcesinventoryinfo.CloudResourcesInventoryInfo
+	NoteActivity                      *noteactivity.NoteActivity
 }
 
 func (e *Event) UnmarshalJSON(data []byte) error {
@@ -1859,6 +1861,12 @@ func (e *Event) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		e.CloudResourcesInventoryInfo = value
+	case "Note Activity":
+		value := new(noteactivity.NoteActivity)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.NoteActivity = value
 	}
 	return nil
 }
@@ -1957,6 +1965,9 @@ func (e Event) MarshalJSON() ([]byte, error) {
 	if e.CloudResourcesInventoryInfo != nil {
 		return core.MarshalJSONWithExtraProperty(e.CloudResourcesInventoryInfo, "class_name", "Cloud Resources Inventory Info")
 	}
+	if e.NoteActivity != nil {
+		return core.MarshalJSONWithExtraProperty(e.NoteActivity, "class_name", "Note Activity")
+	}
 	return nil, fmt.Errorf("type %T does not define a non-empty union type", e)
 }
 
@@ -1992,6 +2003,7 @@ type EventVisitor interface {
 	VisitEmailActivity(*v160emailactivity.EmailActivity) error
 	VisitCloudActivity(*cloudactivity.CloudActivity) error
 	VisitCloudResourcesInventoryInfo(*cloudresourcesinventoryinfo.CloudResourcesInventoryInfo) error
+	VisitNoteActivity(*noteactivity.NoteActivity) error
 }
 
 func (e *Event) Accept(visitor EventVisitor) error {
@@ -2087,6 +2099,9 @@ func (e *Event) Accept(visitor EventVisitor) error {
 	}
 	if e.CloudResourcesInventoryInfo != nil {
 		return visitor.VisitCloudResourcesInventoryInfo(e.CloudResourcesInventoryInfo)
+	}
+	if e.NoteActivity != nil {
+		return visitor.VisitNoteActivity(e.NoteActivity)
 	}
 	return fmt.Errorf("type %T does not define a non-empty union type", e)
 }
@@ -3271,8 +3286,10 @@ const (
 	OperationIdCustomPostBatch                                  OperationId = "custom_post_batch"
 	OperationIdCustomQuery                                      OperationId = "custom_query"
 	OperationIdEdrCreateIocs                                    OperationId = "edr_create_iocs"
+	OperationIdEdrCreateThreatNote                              OperationId = "edr_create_threat_note"
 	OperationIdEdrDeleteIocs                                    OperationId = "edr_delete_iocs"
 	OperationIdEdrGetEndpoint                                   OperationId = "edr_get_endpoint"
+	OperationIdEdrGetThreatNotes                                OperationId = "edr_get_threat_notes"
 	OperationIdEdrNetworkQuarantine                             OperationId = "edr_network_quarantine"
 	OperationIdEdrQueryAlerts                                   OperationId = "edr_query_alerts"
 	OperationIdEdrQueryApplications                             OperationId = "edr_query_applications"
@@ -3402,10 +3419,14 @@ func NewOperationIdFromString(s string) (OperationId, error) {
 		return OperationIdCustomQuery, nil
 	case "edr_create_iocs":
 		return OperationIdEdrCreateIocs, nil
+	case "edr_create_threat_note":
+		return OperationIdEdrCreateThreatNote, nil
 	case "edr_delete_iocs":
 		return OperationIdEdrDeleteIocs, nil
 	case "edr_get_endpoint":
 		return OperationIdEdrGetEndpoint, nil
+	case "edr_get_threat_notes":
+		return OperationIdEdrGetThreatNotes, nil
 	case "edr_network_quarantine":
 		return OperationIdEdrNetworkQuarantine, nil
 	case "edr_query_alerts":
