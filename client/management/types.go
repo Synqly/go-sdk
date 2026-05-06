@@ -12857,6 +12857,52 @@ func (e *EndpointmanagementIntune) String() string {
 	return fmt.Sprintf("%#v", e)
 }
 
+// Configuration for Jamf Pro.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/jamf-endpointmanagement-setup)
+type EndpointmanagementJamf struct {
+	Credential *JamfCredential `json:"credential" url:"credential"`
+	// Base URL for the Jamf Pro instance.
+	Url string `json:"url" url:"url"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (e *EndpointmanagementJamf) GetExtraProperties() map[string]interface{} {
+	return e.extraProperties
+}
+
+func (e *EndpointmanagementJamf) UnmarshalJSON(data []byte) error {
+	type unmarshaler EndpointmanagementJamf
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*e = EndpointmanagementJamf(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *e)
+	if err != nil {
+		return err
+	}
+	e.extraProperties = extraProperties
+
+	e._rawJSON = nil
+	return nil
+}
+
+func (e *EndpointmanagementJamf) String() string {
+	if len(e._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(e._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(e); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", e)
+}
+
 type EntraIdCredential struct {
 	Type string
 	// Azure Client ID and Client Secret for a service principal. The application must be configured with permissions to access the user, group, and audit log graph APIs.
@@ -14970,6 +15016,76 @@ func (i *IvantiCredentialTicketing) Accept(visitor IvantiCredentialTicketingVisi
 	return fmt.Errorf("type %T does not define a non-empty union type", i)
 }
 
+type JamfCredential struct {
+	Type string
+	// OAuth2 client credentials for Jamf Pro API access.
+	OAuthClient *OAuthClientCredential
+	// Reference to existing Client Credentials.
+	OAuthClientId OAuthClientCredentialId
+}
+
+func (j *JamfCredential) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	j.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", j)
+	}
+	switch unmarshaler.Type {
+	case "o_auth_client":
+		value := new(OAuthClientCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		j.OAuthClient = value
+	case "o_auth_client_id":
+		var valueUnmarshaler struct {
+			OAuthClientId OAuthClientCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		j.OAuthClientId = valueUnmarshaler.OAuthClientId
+	}
+	return nil
+}
+
+func (j JamfCredential) MarshalJSON() ([]byte, error) {
+	if j.OAuthClient != nil {
+		return core.MarshalJSONWithExtraProperty(j.OAuthClient, "type", "o_auth_client")
+	}
+	if j.OAuthClientId != "" {
+		var marshaler = struct {
+			Type          string                  `json:"type"`
+			OAuthClientId OAuthClientCredentialId `json:"value"`
+		}{
+			Type:          "o_auth_client_id",
+			OAuthClientId: j.OAuthClientId,
+		}
+		return json.Marshal(marshaler)
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", j)
+}
+
+type JamfCredentialVisitor interface {
+	VisitOAuthClient(*OAuthClientCredential) error
+	VisitOAuthClientId(OAuthClientCredentialId) error
+}
+
+func (j *JamfCredential) Accept(visitor JamfCredentialVisitor) error {
+	if j.OAuthClient != nil {
+		return visitor.VisitOAuthClient(j.OAuthClient)
+	}
+	if j.OAuthClientId != "" {
+		return visitor.VisitOAuthClientId(j.OAuthClientId)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", j)
+}
+
 type JiraCredential struct {
 	Type string
 	// Configuration when creating new Basic Credentials.
@@ -16632,6 +16748,10 @@ type ProviderConfig struct {
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/intune-endpointmanagement-setup)
 	EndpointmanagementIntune *EndpointmanagementIntune
+	// Configuration for Jamf Pro.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/jamf-endpointmanagement-setup)
+	EndpointmanagementJamf *EndpointmanagementJamf
 	// Configuration for Microsoft Entra ID.
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/entra-id-setup)
@@ -17215,6 +17335,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.EndpointmanagementIntune = value
+	case "endpointmanagement_jamf":
+		value := new(EndpointmanagementJamf)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.EndpointmanagementJamf = value
 	case "identity_entra_id":
 		value := new(IdentityEntraId)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -17838,6 +17964,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.EndpointmanagementIntune != nil {
 		return core.MarshalJSONWithExtraProperty(p.EndpointmanagementIntune, "type", "endpointmanagement_intune")
 	}
+	if p.EndpointmanagementJamf != nil {
+		return core.MarshalJSONWithExtraProperty(p.EndpointmanagementJamf, "type", "endpointmanagement_jamf")
+	}
 	if p.IdentityEntraId != nil {
 		return core.MarshalJSONWithExtraProperty(p.IdentityEntraId, "type", "identity_entra_id")
 	}
@@ -18126,6 +18255,7 @@ type ProviderConfigVisitor interface {
 	VisitEmailsecurityDefenderForOffice(*EmailSecurityDefenderForOffice) error
 	VisitEmailsecurityMimecastCloudGateway(*EmailSecurityMimecastCloudGateway) error
 	VisitEndpointmanagementIntune(*EndpointmanagementIntune) error
+	VisitEndpointmanagementJamf(*EndpointmanagementJamf) error
 	VisitIdentityEntraId(*IdentityEntraId) error
 	VisitIdentityGoogle(*IdentityGoogle) error
 	VisitIdentityOkta(*IdentityOkta) error
@@ -18356,6 +18486,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.EndpointmanagementIntune != nil {
 		return visitor.VisitEndpointmanagementIntune(p.EndpointmanagementIntune)
+	}
+	if p.EndpointmanagementJamf != nil {
+		return visitor.VisitEndpointmanagementJamf(p.EndpointmanagementJamf)
 	}
 	if p.IdentityEntraId != nil {
 		return visitor.VisitIdentityEntraId(p.IdentityEntraId)
@@ -18698,6 +18831,8 @@ const (
 	ProviderConfigIdEmailSecurityMimecastCloudGateway ProviderConfigId = "emailsecurity_mimecast_cloud_gateway"
 	// Microsoft Intune
 	ProviderConfigIdEndpointmanagementIntune ProviderConfigId = "endpointmanagement_intune"
+	// Jamf Pro
+	ProviderConfigIdEndpointmanagementJamf ProviderConfigId = "endpointmanagement_jamf"
 	// Microsoft Entra ID
 	ProviderConfigIdIdentityEntraId ProviderConfigId = "identity_entra_id"
 	// Google Workspace
@@ -18960,6 +19095,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdEmailSecurityMimecastCloudGateway, nil
 	case "endpointmanagement_intune":
 		return ProviderConfigIdEndpointmanagementIntune, nil
+	case "endpointmanagement_jamf":
+		return ProviderConfigIdEndpointmanagementJamf, nil
 	case "identity_entra_id":
 		return ProviderConfigIdIdentityEntraId, nil
 	case "identity_google":
