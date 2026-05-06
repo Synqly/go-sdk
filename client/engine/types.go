@@ -1053,6 +1053,12 @@ type EmailSecurityEmailEvent = *emailactivity.EmailActivity
 // Email security connector threat object. Represented by OCSF Detection Finding class (class_uid 2004) using the OCSF Synqly extension, the OCSF Security Control profile, and the OCSF Date/Time profile.
 type EmailSecurityThreat = *v180detectionfinding.DetectionFinding
 
+// Compliance finding represented by OCSF Compliance Finding class (class_uid 2003).
+type ComplianceFinding = *compliancefinding.ComplianceFinding
+
+// Device inventory information represented by OCSF Device Inventory Info class (class_uid 5001).
+type EndpointManagementDevice = *inventoryinfo.InventoryInfo
+
 type ApiHasStatus struct {
 	// If the provider supports asynchronous queries and the query is still running, this field will be `PENDING` until the query is complete. In this case, the client should retry using the provided cursor.
 	Status QueryStatus `json:"status" url:"status"`
@@ -3278,6 +3284,10 @@ const (
 	OperationIdEmailsecurityGetThreatDetails                    OperationId = "emailsecurity_get_threat_details"
 	OperationIdEmailsecurityQueryEmailEvents                    OperationId = "emailsecurity_query_email_events"
 	OperationIdEmailsecurityQueryThreats                        OperationId = "emailsecurity_query_threats"
+	OperationIdEndpointmanagementGetDevice                      OperationId = "endpointmanagement_get_device"
+	OperationIdEndpointmanagementQueryComplianceFindings        OperationId = "endpointmanagement_query_compliance_findings"
+	OperationIdEndpointmanagementQueryDevices                   OperationId = "endpointmanagement_query_devices"
+	OperationIdEndpointmanagementRemediateDevice                OperationId = "endpointmanagement_remediate_device"
 	OperationIdIdentityDisableUser                              OperationId = "identity_disable_user"
 	OperationIdIdentityEnableUser                               OperationId = "identity_enable_user"
 	OperationIdIdentityExpireAllUserSessions                    OperationId = "identity_expire_all_user_sessions"
@@ -3418,6 +3428,14 @@ func NewOperationIdFromString(s string) (OperationId, error) {
 		return OperationIdEmailsecurityQueryEmailEvents, nil
 	case "emailsecurity_query_threats":
 		return OperationIdEmailsecurityQueryThreats, nil
+	case "endpointmanagement_get_device":
+		return OperationIdEndpointmanagementGetDevice, nil
+	case "endpointmanagement_query_compliance_findings":
+		return OperationIdEndpointmanagementQueryComplianceFindings, nil
+	case "endpointmanagement_query_devices":
+		return OperationIdEndpointmanagementQueryDevices, nil
+	case "endpointmanagement_remediate_device":
+		return OperationIdEndpointmanagementRemediateDevice, nil
 	case "identity_disable_user":
 		return OperationIdIdentityDisableUser, nil
 	case "identity_enable_user":

@@ -1722,6 +1722,51 @@ func (o OrderDirection) Ptr() *OrderDirection {
 	return &o
 }
 
+// Describes a supported action within an operation.
+type ProviderActionSpec struct {
+	// Fields required when using this action.
+	RequiredFields []string `json:"required_fields,omitempty" url:"required_fields,omitempty"`
+	// Description of what this action does for this provider.
+	Docs *string `json:"docs,omitempty" url:"docs,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (p *ProviderActionSpec) GetExtraProperties() map[string]interface{} {
+	return p.extraProperties
+}
+
+func (p *ProviderActionSpec) UnmarshalJSON(data []byte) error {
+	type unmarshaler ProviderActionSpec
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*p = ProviderActionSpec(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *p)
+	if err != nil {
+		return err
+	}
+	p.extraProperties = extraProperties
+
+	p._rawJSON = nil
+	return nil
+}
+
+func (p *ProviderActionSpec) String() string {
+	if len(p._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(p._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(p); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", p)
+}
+
 type ProviderCapabilities struct {
 	// Unique identifier for the Provider.
 	Id ProviderId `json:"id" url:"id"`
@@ -1953,6 +1998,10 @@ type ProviderOperations struct {
 	// This field is only available if the operation supports a request
 	// body. Describes the request body and its schema.
 	RequestBody *RequestBody `json:"request_body,omitempty" url:"request_body,omitempty"`
+	// Supported actions for this operation, keyed by Synqly-unified
+	// action name. Use the capabilities API to discover which actions
+	// each provider supports.
+	Actions map[string]*ProviderActionSpec `json:"actions,omitempty" url:"actions,omitempty"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
@@ -2133,20 +2182,21 @@ func (r *RequestBody) String() string {
 type CategoryId string
 
 const (
-	CategoryIdAppsec           CategoryId = "appsec"
-	CategoryIdAssets           CategoryId = "assets"
-	CategoryIdCloudsecurity    CategoryId = "cloudsecurity"
-	CategoryIdCustom           CategoryId = "custom"
-	CategoryIdEdr              CategoryId = "edr"
-	CategoryIdEmailsecurity    CategoryId = "emailsecurity"
-	CategoryIdIdentity         CategoryId = "identity"
-	CategoryIdIncidentresponse CategoryId = "incidentresponse"
-	CategoryIdNotifications    CategoryId = "notifications"
-	CategoryIdSiem             CategoryId = "siem"
-	CategoryIdSink             CategoryId = "sink"
-	CategoryIdStorage          CategoryId = "storage"
-	CategoryIdTicketing        CategoryId = "ticketing"
-	CategoryIdVulnerabilities  CategoryId = "vulnerabilities"
+	CategoryIdAppsec             CategoryId = "appsec"
+	CategoryIdAssets             CategoryId = "assets"
+	CategoryIdCloudsecurity      CategoryId = "cloudsecurity"
+	CategoryIdCustom             CategoryId = "custom"
+	CategoryIdEdr                CategoryId = "edr"
+	CategoryIdEmailsecurity      CategoryId = "emailsecurity"
+	CategoryIdEndpointmanagement CategoryId = "endpointmanagement"
+	CategoryIdIdentity           CategoryId = "identity"
+	CategoryIdIncidentresponse   CategoryId = "incidentresponse"
+	CategoryIdNotifications      CategoryId = "notifications"
+	CategoryIdSiem               CategoryId = "siem"
+	CategoryIdSink               CategoryId = "sink"
+	CategoryIdStorage            CategoryId = "storage"
+	CategoryIdTicketing          CategoryId = "ticketing"
+	CategoryIdVulnerabilities    CategoryId = "vulnerabilities"
 )
 
 func NewCategoryIdFromString(s string) (CategoryId, error) {
@@ -2163,6 +2213,8 @@ func NewCategoryIdFromString(s string) (CategoryId, error) {
 		return CategoryIdEdr, nil
 	case "emailsecurity":
 		return CategoryIdEmailsecurity, nil
+	case "endpointmanagement":
+		return CategoryIdEndpointmanagement, nil
 	case "identity":
 		return CategoryIdIdentity, nil
 	case "incidentresponse":
@@ -5435,6 +5487,10 @@ const (
 	OperationIdEmailsecurityGetThreatDetails                    OperationId = "emailsecurity_get_threat_details"
 	OperationIdEmailsecurityQueryEmailEvents                    OperationId = "emailsecurity_query_email_events"
 	OperationIdEmailsecurityQueryThreats                        OperationId = "emailsecurity_query_threats"
+	OperationIdEndpointmanagementGetDevice                      OperationId = "endpointmanagement_get_device"
+	OperationIdEndpointmanagementQueryComplianceFindings        OperationId = "endpointmanagement_query_compliance_findings"
+	OperationIdEndpointmanagementQueryDevices                   OperationId = "endpointmanagement_query_devices"
+	OperationIdEndpointmanagementRemediateDevice                OperationId = "endpointmanagement_remediate_device"
 	OperationIdIdentityDisableUser                              OperationId = "identity_disable_user"
 	OperationIdIdentityEnableUser                               OperationId = "identity_enable_user"
 	OperationIdIdentityExpireAllUserSessions                    OperationId = "identity_expire_all_user_sessions"
@@ -5575,6 +5631,14 @@ func NewOperationIdFromString(s string) (OperationId, error) {
 		return OperationIdEmailsecurityQueryEmailEvents, nil
 	case "emailsecurity_query_threats":
 		return OperationIdEmailsecurityQueryThreats, nil
+	case "endpointmanagement_get_device":
+		return OperationIdEndpointmanagementGetDevice, nil
+	case "endpointmanagement_query_compliance_findings":
+		return OperationIdEndpointmanagementQueryComplianceFindings, nil
+	case "endpointmanagement_query_devices":
+		return OperationIdEndpointmanagementQueryDevices, nil
+	case "endpointmanagement_remediate_device":
+		return OperationIdEndpointmanagementRemediateDevice, nil
 	case "identity_disable_user":
 		return OperationIdIdentityDisableUser, nil
 	case "identity_enable_user":
@@ -12739,6 +12803,54 @@ func (e *EmailSecurityMimecastCloudGateway) String() string {
 	return fmt.Sprintf("%#v", e)
 }
 
+// Configuration for Microsoft Intune.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/intune-endpointmanagement-setup)
+type EndpointmanagementIntune struct {
+	Credential *IntuneCredential `json:"credential" url:"credential"`
+	// Azure Directory (tenant) identifier.
+	TenantId string `json:"tenant_id" url:"tenant_id"`
+	// Base URL for the Microsoft Graph API. Override for national cloud deployments.
+	Url *string `json:"url,omitempty" url:"url,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (e *EndpointmanagementIntune) GetExtraProperties() map[string]interface{} {
+	return e.extraProperties
+}
+
+func (e *EndpointmanagementIntune) UnmarshalJSON(data []byte) error {
+	type unmarshaler EndpointmanagementIntune
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*e = EndpointmanagementIntune(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *e)
+	if err != nil {
+		return err
+	}
+	e.extraProperties = extraProperties
+
+	e._rawJSON = nil
+	return nil
+}
+
+func (e *EndpointmanagementIntune) String() string {
+	if len(e._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(e._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(e); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", e)
+}
+
 type EntraIdCredential struct {
 	Type string
 	// Azure Client ID and Client Secret for a service principal. The application must be configured with permissions to access the user, group, and audit log graph APIs.
@@ -14570,6 +14682,76 @@ func (i *IncidentResponsePagerDuty) String() string {
 		return value
 	}
 	return fmt.Sprintf("%#v", i)
+}
+
+type IntuneCredential struct {
+	Type string
+	// Azure Client ID and Client Secret for a service principal with Intune device management permissions.
+	OAuthClient *OAuthClientCredential
+	// Reference to existing Client Credentials.
+	OAuthClientId OAuthClientCredentialId
+}
+
+func (i *IntuneCredential) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	i.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", i)
+	}
+	switch unmarshaler.Type {
+	case "o_auth_client":
+		value := new(OAuthClientCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		i.OAuthClient = value
+	case "o_auth_client_id":
+		var valueUnmarshaler struct {
+			OAuthClientId OAuthClientCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		i.OAuthClientId = valueUnmarshaler.OAuthClientId
+	}
+	return nil
+}
+
+func (i IntuneCredential) MarshalJSON() ([]byte, error) {
+	if i.OAuthClient != nil {
+		return core.MarshalJSONWithExtraProperty(i.OAuthClient, "type", "o_auth_client")
+	}
+	if i.OAuthClientId != "" {
+		var marshaler = struct {
+			Type          string                  `json:"type"`
+			OAuthClientId OAuthClientCredentialId `json:"value"`
+		}{
+			Type:          "o_auth_client_id",
+			OAuthClientId: i.OAuthClientId,
+		}
+		return json.Marshal(marshaler)
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", i)
+}
+
+type IntuneCredentialVisitor interface {
+	VisitOAuthClient(*OAuthClientCredential) error
+	VisitOAuthClientId(OAuthClientCredentialId) error
+}
+
+func (i *IntuneCredential) Accept(visitor IntuneCredentialVisitor) error {
+	if i.OAuthClient != nil {
+		return visitor.VisitOAuthClient(i.OAuthClient)
+	}
+	if i.OAuthClientId != "" {
+		return visitor.VisitOAuthClientId(i.OAuthClientId)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", i)
 }
 
 type IruCredential struct {
@@ -16434,6 +16616,10 @@ type ProviderConfig struct {
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/mimecast-cloud-gateway-setup)
 	EmailsecurityMimecastCloudGateway *EmailSecurityMimecastCloudGateway
+	// Configuration for Microsoft Intune.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/intune-endpointmanagement-setup)
+	EndpointmanagementIntune *EndpointmanagementIntune
 	// Configuration for Microsoft Entra ID.
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/entra-id-setup)
@@ -17009,6 +17195,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.EmailsecurityMimecastCloudGateway = value
+	case "endpointmanagement_intune":
+		value := new(EndpointmanagementIntune)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.EndpointmanagementIntune = value
 	case "identity_entra_id":
 		value := new(IdentityEntraId)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -17629,6 +17821,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.EmailsecurityMimecastCloudGateway != nil {
 		return core.MarshalJSONWithExtraProperty(p.EmailsecurityMimecastCloudGateway, "type", "emailsecurity_mimecast_cloud_gateway")
 	}
+	if p.EndpointmanagementIntune != nil {
+		return core.MarshalJSONWithExtraProperty(p.EndpointmanagementIntune, "type", "endpointmanagement_intune")
+	}
 	if p.IdentityEntraId != nil {
 		return core.MarshalJSONWithExtraProperty(p.IdentityEntraId, "type", "identity_entra_id")
 	}
@@ -17916,6 +18111,7 @@ type ProviderConfigVisitor interface {
 	VisitEdrTanium(*EdrTanium) error
 	VisitEmailsecurityDefenderForOffice(*EmailSecurityDefenderForOffice) error
 	VisitEmailsecurityMimecastCloudGateway(*EmailSecurityMimecastCloudGateway) error
+	VisitEndpointmanagementIntune(*EndpointmanagementIntune) error
 	VisitIdentityEntraId(*IdentityEntraId) error
 	VisitIdentityGoogle(*IdentityGoogle) error
 	VisitIdentityOkta(*IdentityOkta) error
@@ -18143,6 +18339,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.EmailsecurityMimecastCloudGateway != nil {
 		return visitor.VisitEmailsecurityMimecastCloudGateway(p.EmailsecurityMimecastCloudGateway)
+	}
+	if p.EndpointmanagementIntune != nil {
+		return visitor.VisitEndpointmanagementIntune(p.EndpointmanagementIntune)
 	}
 	if p.IdentityEntraId != nil {
 		return visitor.VisitIdentityEntraId(p.IdentityEntraId)
@@ -18483,6 +18682,8 @@ const (
 	ProviderConfigIdEmailSecurityDefenderForOffice ProviderConfigId = "emailsecurity_defender_for_office"
 	// Mimecast Cloud Gateway
 	ProviderConfigIdEmailSecurityMimecastCloudGateway ProviderConfigId = "emailsecurity_mimecast_cloud_gateway"
+	// Microsoft Intune
+	ProviderConfigIdEndpointmanagementIntune ProviderConfigId = "endpointmanagement_intune"
 	// Microsoft Entra ID
 	ProviderConfigIdIdentityEntraId ProviderConfigId = "identity_entra_id"
 	// Google Workspace
@@ -18743,6 +18944,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdEmailSecurityDefenderForOffice, nil
 	case "emailsecurity_mimecast_cloud_gateway":
 		return ProviderConfigIdEmailSecurityMimecastCloudGateway, nil
+	case "endpointmanagement_intune":
+		return ProviderConfigIdEndpointmanagementIntune, nil
 	case "identity_entra_id":
 		return ProviderConfigIdIdentityEntraId, nil
 	case "identity_google":
