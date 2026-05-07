@@ -9466,6 +9466,52 @@ func (a *AssetsDefender) String() string {
 	return fmt.Sprintf("%#v", a)
 }
 
+// Configuration for Iru.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/iru-assets-setup)
+type AssetsIru struct {
+	Credential *IruCredential `json:"credential" url:"credential"`
+	// Base URL for the Iru API.
+	Url string `json:"url" url:"url"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (a *AssetsIru) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
+}
+
+func (a *AssetsIru) UnmarshalJSON(data []byte) error {
+	type unmarshaler AssetsIru
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*a = AssetsIru(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+
+	a._rawJSON = nil
+	return nil
+}
+
+func (a *AssetsIru) String() string {
+	if len(a._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(a); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", a)
+}
+
 // Configuration for Ivanti Neurons as an Assets Provider
 //
 // [Configuration guide](https://docs.synqly.com/guides/provider-configuration/ivanti-asset-setup)
@@ -12863,6 +12909,52 @@ func (e *EndpointmanagementIntune) String() string {
 	return fmt.Sprintf("%#v", e)
 }
 
+// Configuration for Iru.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/iru-endpointmanagement-setup)
+type EndpointmanagementIru struct {
+	Credential *IruCredential `json:"credential" url:"credential"`
+	// Base URL for the Iru API.
+	Url string `json:"url" url:"url"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (e *EndpointmanagementIru) GetExtraProperties() map[string]interface{} {
+	return e.extraProperties
+}
+
+func (e *EndpointmanagementIru) UnmarshalJSON(data []byte) error {
+	type unmarshaler EndpointmanagementIru
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*e = EndpointmanagementIru(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *e)
+	if err != nil {
+		return err
+	}
+	e.extraProperties = extraProperties
+
+	e._rawJSON = nil
+	return nil
+}
+
+func (e *EndpointmanagementIru) String() string {
+	if len(e._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(e._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(e); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", e)
+}
+
 // Configuration for Jamf Pro.
 //
 // [Configuration guide](https://docs.synqly.com/guides/provider-configuration/jamf-endpointmanagement-setup)
@@ -14814,9 +14906,9 @@ func (i *IntuneCredential) Accept(visitor IntuneCredentialVisitor) error {
 
 type IruCredential struct {
 	Type string
-	// Configuration when creating new API Token.
+	// Configuration when creating new Token.
 	Token *TokenCredential
-	// Reference to existing API Token.
+	// Reference to existing Token.
 	TokenId TokenCredentialId
 }
 
@@ -16652,6 +16744,10 @@ type ProviderConfig struct {
 	AssetsCrowdstrikeMock *AssetsCrowdStrikeMock
 	// Configuration for Microsoft Defender for Endpoint as an Assets Provider
 	AssetsDefender *AssetsDefender
+	// Configuration for Iru.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/iru-assets-setup)
+	AssetsIru *AssetsIru
 	// Configuration for Ivanti Neurons as an Assets Provider
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/ivanti-asset-setup)
@@ -16754,6 +16850,10 @@ type ProviderConfig struct {
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/intune-endpointmanagement-setup)
 	EndpointmanagementIntune *EndpointmanagementIntune
+	// Configuration for Iru.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/iru-endpointmanagement-setup)
+	EndpointmanagementIru *EndpointmanagementIru
 	// Configuration for Jamf Pro.
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/jamf-endpointmanagement-setup)
@@ -16995,6 +17095,10 @@ type ProviderConfig struct {
 	VulnerabilitiesDefender *VulnerabilitiesDefender
 	// Configuration for Horizon3 NodeZero as a Vulnerabilities Provider
 	VulnerabilitiesHorizon3 *VulnerabilitiesHorizon3
+	// Configuration for Iru as a Vulnerabilities Provider
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/iru-vulnerabilities-setup)
+	VulnerabilitiesIru *VulnerabilitiesIru
 	// Configuration for Nucleus Vulnerability Management.
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/nucleus-vulns-setup)
@@ -17143,6 +17247,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.AssetsDefender = value
+	case "assets_iru":
+		value := new(AssetsIru)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.AssetsIru = value
 	case "assets_ivanti_neurons":
 		value := new(AssetsIvantiNeurons)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -17341,6 +17451,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.EndpointmanagementIntune = value
+	case "endpointmanagement_iru":
+		value := new(EndpointmanagementIru)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.EndpointmanagementIru = value
 	case "endpointmanagement_jamf":
 		value := new(EndpointmanagementJamf)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -17755,6 +17871,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.VulnerabilitiesHorizon3 = value
+	case "vulnerabilities_iru":
+		value := new(VulnerabilitiesIru)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.VulnerabilitiesIru = value
 	case "vulnerabilities_nucleus":
 		value := new(VulnerabilitiesNucleus)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -17871,6 +17993,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.AssetsDefender != nil {
 		return core.MarshalJSONWithExtraProperty(p.AssetsDefender, "type", "assets_defender")
 	}
+	if p.AssetsIru != nil {
+		return core.MarshalJSONWithExtraProperty(p.AssetsIru, "type", "assets_iru")
+	}
 	if p.AssetsIvantiNeurons != nil {
 		return core.MarshalJSONWithExtraProperty(p.AssetsIvantiNeurons, "type", "assets_ivanti_neurons")
 	}
@@ -17969,6 +18094,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	}
 	if p.EndpointmanagementIntune != nil {
 		return core.MarshalJSONWithExtraProperty(p.EndpointmanagementIntune, "type", "endpointmanagement_intune")
+	}
+	if p.EndpointmanagementIru != nil {
+		return core.MarshalJSONWithExtraProperty(p.EndpointmanagementIru, "type", "endpointmanagement_iru")
 	}
 	if p.EndpointmanagementJamf != nil {
 		return core.MarshalJSONWithExtraProperty(p.EndpointmanagementJamf, "type", "endpointmanagement_jamf")
@@ -18177,6 +18305,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.VulnerabilitiesHorizon3 != nil {
 		return core.MarshalJSONWithExtraProperty(p.VulnerabilitiesHorizon3, "type", "vulnerabilities_horizon3")
 	}
+	if p.VulnerabilitiesIru != nil {
+		return core.MarshalJSONWithExtraProperty(p.VulnerabilitiesIru, "type", "vulnerabilities_iru")
+	}
 	if p.VulnerabilitiesNucleus != nil {
 		return core.MarshalJSONWithExtraProperty(p.VulnerabilitiesNucleus, "type", "vulnerabilities_nucleus")
 	}
@@ -18228,6 +18359,7 @@ type ProviderConfigVisitor interface {
 	VisitAssetsCrowdstrike(*AssetsCrowdStrike) error
 	VisitAssetsCrowdstrikeMock(*AssetsCrowdStrikeMock) error
 	VisitAssetsDefender(*AssetsDefender) error
+	VisitAssetsIru(*AssetsIru) error
 	VisitAssetsIvantiNeurons(*AssetsIvantiNeurons) error
 	VisitAssetsIvantiNeuronsMock(*AssetsIvantiNeuronsMock) error
 	VisitAssetsNozomiVantage(*AssetsNozomiVantage) error
@@ -18261,6 +18393,7 @@ type ProviderConfigVisitor interface {
 	VisitEmailsecurityDefenderForOffice(*EmailSecurityDefenderForOffice) error
 	VisitEmailsecurityMimecastCloudGateway(*EmailSecurityMimecastCloudGateway) error
 	VisitEndpointmanagementIntune(*EndpointmanagementIntune) error
+	VisitEndpointmanagementIru(*EndpointmanagementIru) error
 	VisitEndpointmanagementJamf(*EndpointmanagementJamf) error
 	VisitIdentityEntraId(*IdentityEntraId) error
 	VisitIdentityGoogle(*IdentityGoogle) error
@@ -18330,6 +18463,7 @@ type ProviderConfigVisitor interface {
 	VisitVulnerabilitiesCrowdstrikeMock(*VulnerabilitiesCrowdStrikeMock) error
 	VisitVulnerabilitiesDefender(*VulnerabilitiesDefender) error
 	VisitVulnerabilitiesHorizon3(*VulnerabilitiesHorizon3) error
+	VisitVulnerabilitiesIru(*VulnerabilitiesIru) error
 	VisitVulnerabilitiesNucleus(*VulnerabilitiesNucleus) error
 	VisitVulnerabilitiesQualysCloud(*VulnerabilitiesQualysCloud) error
 	VisitVulnerabilitiesQualysCloudMock(*VulnerabilitiesQualysCloudMock) error
@@ -18393,6 +18527,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.AssetsDefender != nil {
 		return visitor.VisitAssetsDefender(p.AssetsDefender)
+	}
+	if p.AssetsIru != nil {
+		return visitor.VisitAssetsIru(p.AssetsIru)
 	}
 	if p.AssetsIvantiNeurons != nil {
 		return visitor.VisitAssetsIvantiNeurons(p.AssetsIvantiNeurons)
@@ -18492,6 +18629,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.EndpointmanagementIntune != nil {
 		return visitor.VisitEndpointmanagementIntune(p.EndpointmanagementIntune)
+	}
+	if p.EndpointmanagementIru != nil {
+		return visitor.VisitEndpointmanagementIru(p.EndpointmanagementIru)
 	}
 	if p.EndpointmanagementJamf != nil {
 		return visitor.VisitEndpointmanagementJamf(p.EndpointmanagementJamf)
@@ -18700,6 +18840,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	if p.VulnerabilitiesHorizon3 != nil {
 		return visitor.VisitVulnerabilitiesHorizon3(p.VulnerabilitiesHorizon3)
 	}
+	if p.VulnerabilitiesIru != nil {
+		return visitor.VisitVulnerabilitiesIru(p.VulnerabilitiesIru)
+	}
 	if p.VulnerabilitiesNucleus != nil {
 		return visitor.VisitVulnerabilitiesNucleus(p.VulnerabilitiesNucleus)
 	}
@@ -18771,6 +18914,8 @@ const (
 	ProviderConfigIdAssetsCrowdStrikeMock ProviderConfigId = "assets_crowdstrike_mock"
 	// Microsoft Defender for Endpoint
 	ProviderConfigIdAssetsDefender ProviderConfigId = "assets_defender"
+	// Iru
+	ProviderConfigIdAssetsIru ProviderConfigId = "assets_iru"
 	// Ivanti Neurons
 	ProviderConfigIdAssetsIvantiNeurons ProviderConfigId = "assets_ivanti_neurons"
 	// [MOCK] Ivanti Neurons
@@ -18837,6 +18982,8 @@ const (
 	ProviderConfigIdEmailSecurityMimecastCloudGateway ProviderConfigId = "emailsecurity_mimecast_cloud_gateway"
 	// Microsoft Intune
 	ProviderConfigIdEndpointmanagementIntune ProviderConfigId = "endpointmanagement_intune"
+	// Iru
+	ProviderConfigIdEndpointmanagementIru ProviderConfigId = "endpointmanagement_iru"
 	// Jamf Pro
 	ProviderConfigIdEndpointmanagementJamf ProviderConfigId = "endpointmanagement_jamf"
 	// Microsoft Entra ID
@@ -18975,6 +19122,8 @@ const (
 	ProviderConfigIdVulnerabilitiesDefender ProviderConfigId = "vulnerabilities_defender"
 	// NodeZero
 	ProviderConfigIdVulnerabilitiesHorizon3 ProviderConfigId = "vulnerabilities_horizon3"
+	// Iru
+	ProviderConfigIdVulnerabilitiesIru ProviderConfigId = "vulnerabilities_iru"
 	// Nucleus Vulnerability Management
 	ProviderConfigIdVulnerabilitiesNucleus ProviderConfigId = "vulnerabilities_nucleus"
 	// Qualys Vulnerability Management, Detection & Response (VMDR)
@@ -19035,6 +19184,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdAssetsCrowdStrikeMock, nil
 	case "assets_defender":
 		return ProviderConfigIdAssetsDefender, nil
+	case "assets_iru":
+		return ProviderConfigIdAssetsIru, nil
 	case "assets_ivanti_neurons":
 		return ProviderConfigIdAssetsIvantiNeurons, nil
 	case "assets_ivanti_neurons_mock":
@@ -19101,6 +19252,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdEmailSecurityMimecastCloudGateway, nil
 	case "endpointmanagement_intune":
 		return ProviderConfigIdEndpointmanagementIntune, nil
+	case "endpointmanagement_iru":
+		return ProviderConfigIdEndpointmanagementIru, nil
 	case "endpointmanagement_jamf":
 		return ProviderConfigIdEndpointmanagementJamf, nil
 	case "identity_entra_id":
@@ -19239,6 +19392,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdVulnerabilitiesDefender, nil
 	case "vulnerabilities_horizon3":
 		return ProviderConfigIdVulnerabilitiesHorizon3, nil
+	case "vulnerabilities_iru":
+		return ProviderConfigIdVulnerabilitiesIru, nil
 	case "vulnerabilities_nucleus":
 		return ProviderConfigIdVulnerabilitiesNucleus, nil
 	case "vulnerabilities_qualys_cloud":
@@ -23999,6 +24154,52 @@ func (v *VulnerabilitiesHorizon3) UnmarshalJSON(data []byte) error {
 }
 
 func (v *VulnerabilitiesHorizon3) String() string {
+	if len(v._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(v._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(v); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", v)
+}
+
+// Configuration for Iru as a Vulnerabilities Provider
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/iru-vulnerabilities-setup)
+type VulnerabilitiesIru struct {
+	Credential *IruCredential `json:"credential" url:"credential"`
+	// Base URL for the Iru API.
+	Url string `json:"url" url:"url"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (v *VulnerabilitiesIru) GetExtraProperties() map[string]interface{} {
+	return v.extraProperties
+}
+
+func (v *VulnerabilitiesIru) UnmarshalJSON(data []byte) error {
+	type unmarshaler VulnerabilitiesIru
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*v = VulnerabilitiesIru(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *v)
+	if err != nil {
+		return err
+	}
+	v.extraProperties = extraProperties
+
+	v._rawJSON = nil
+	return nil
+}
+
+func (v *VulnerabilitiesIru) String() string {
 	if len(v._rawJSON) > 0 {
 		if value, err := core.StringifyJSON(v._rawJSON); err == nil {
 			return value
