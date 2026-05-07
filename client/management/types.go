@@ -10038,6 +10038,76 @@ func (a *AssetsTaniumCloudMock) String() string {
 	return fmt.Sprintf("%#v", a)
 }
 
+type AutomoxApiKeyCredential struct {
+	Type string
+	// Configuration when creating new Token.
+	Token *TokenCredential
+	// Reference to existing Token.
+	TokenId TokenCredentialId
+}
+
+func (a *AutomoxApiKeyCredential) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	a.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", a)
+	}
+	switch unmarshaler.Type {
+	case "token":
+		value := new(TokenCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		a.Token = value
+	case "token_id":
+		var valueUnmarshaler struct {
+			TokenId TokenCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		a.TokenId = valueUnmarshaler.TokenId
+	}
+	return nil
+}
+
+func (a AutomoxApiKeyCredential) MarshalJSON() ([]byte, error) {
+	if a.Token != nil {
+		return core.MarshalJSONWithExtraProperty(a.Token, "type", "token")
+	}
+	if a.TokenId != "" {
+		var marshaler = struct {
+			Type    string            `json:"type"`
+			TokenId TokenCredentialId `json:"value"`
+		}{
+			Type:    "token_id",
+			TokenId: a.TokenId,
+		}
+		return json.Marshal(marshaler)
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", a)
+}
+
+type AutomoxApiKeyCredentialVisitor interface {
+	VisitToken(*TokenCredential) error
+	VisitTokenId(TokenCredentialId) error
+}
+
+func (a *AutomoxApiKeyCredential) Accept(visitor AutomoxApiKeyCredentialVisitor) error {
+	if a.Token != nil {
+		return visitor.VisitToken(a.Token)
+	}
+	if a.TokenId != "" {
+		return visitor.VisitTokenId(a.TokenId)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", a)
+}
+
 type AutotaskApiIntegrationCodeCredential struct {
 	Type string
 	// Identifier used for individual tracking and management of API calls.
@@ -12850,6 +12920,54 @@ func (e *EmailSecurityMimecastCloudGateway) UnmarshalJSON(data []byte) error {
 }
 
 func (e *EmailSecurityMimecastCloudGateway) String() string {
+	if len(e._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(e._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(e); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", e)
+}
+
+// Configuration for Automox.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/automox-endpointmanagement-setup)
+type EndpointmanagementAutomox struct {
+	Credential *AutomoxApiKeyCredential `json:"credential" url:"credential"`
+	// Automox organization ID.
+	OrgId string `json:"org_id" url:"org_id"`
+	// Base URL for the Automox Console API. Override for proxied or custom environments.
+	Url *string `json:"url,omitempty" url:"url,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (e *EndpointmanagementAutomox) GetExtraProperties() map[string]interface{} {
+	return e.extraProperties
+}
+
+func (e *EndpointmanagementAutomox) UnmarshalJSON(data []byte) error {
+	type unmarshaler EndpointmanagementAutomox
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*e = EndpointmanagementAutomox(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *e)
+	if err != nil {
+		return err
+	}
+	e.extraProperties = extraProperties
+
+	e._rawJSON = nil
+	return nil
+}
+
+func (e *EndpointmanagementAutomox) String() string {
 	if len(e._rawJSON) > 0 {
 		if value, err := core.StringifyJSON(e._rawJSON); err == nil {
 			return value
@@ -16846,6 +16964,10 @@ type ProviderConfig struct {
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/mimecast-cloud-gateway-setup)
 	EmailsecurityMimecastCloudGateway *EmailSecurityMimecastCloudGateway
+	// Configuration for Automox.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/automox-endpointmanagement-setup)
+	EndpointmanagementAutomox *EndpointmanagementAutomox
 	// Configuration for Microsoft Intune.
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/intune-endpointmanagement-setup)
@@ -17445,6 +17567,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.EmailsecurityMimecastCloudGateway = value
+	case "endpointmanagement_automox":
+		value := new(EndpointmanagementAutomox)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.EndpointmanagementAutomox = value
 	case "endpointmanagement_intune":
 		value := new(EndpointmanagementIntune)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -18092,6 +18220,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.EmailsecurityMimecastCloudGateway != nil {
 		return core.MarshalJSONWithExtraProperty(p.EmailsecurityMimecastCloudGateway, "type", "emailsecurity_mimecast_cloud_gateway")
 	}
+	if p.EndpointmanagementAutomox != nil {
+		return core.MarshalJSONWithExtraProperty(p.EndpointmanagementAutomox, "type", "endpointmanagement_automox")
+	}
 	if p.EndpointmanagementIntune != nil {
 		return core.MarshalJSONWithExtraProperty(p.EndpointmanagementIntune, "type", "endpointmanagement_intune")
 	}
@@ -18392,6 +18523,7 @@ type ProviderConfigVisitor interface {
 	VisitEdrTanium(*EdrTanium) error
 	VisitEmailsecurityDefenderForOffice(*EmailSecurityDefenderForOffice) error
 	VisitEmailsecurityMimecastCloudGateway(*EmailSecurityMimecastCloudGateway) error
+	VisitEndpointmanagementAutomox(*EndpointmanagementAutomox) error
 	VisitEndpointmanagementIntune(*EndpointmanagementIntune) error
 	VisitEndpointmanagementIru(*EndpointmanagementIru) error
 	VisitEndpointmanagementJamf(*EndpointmanagementJamf) error
@@ -18626,6 +18758,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.EmailsecurityMimecastCloudGateway != nil {
 		return visitor.VisitEmailsecurityMimecastCloudGateway(p.EmailsecurityMimecastCloudGateway)
+	}
+	if p.EndpointmanagementAutomox != nil {
+		return visitor.VisitEndpointmanagementAutomox(p.EndpointmanagementAutomox)
 	}
 	if p.EndpointmanagementIntune != nil {
 		return visitor.VisitEndpointmanagementIntune(p.EndpointmanagementIntune)
@@ -18980,6 +19115,8 @@ const (
 	ProviderConfigIdEmailSecurityDefenderForOffice ProviderConfigId = "emailsecurity_defender_for_office"
 	// Mimecast Cloud Gateway
 	ProviderConfigIdEmailSecurityMimecastCloudGateway ProviderConfigId = "emailsecurity_mimecast_cloud_gateway"
+	// Automox
+	ProviderConfigIdEndpointmanagementAutomox ProviderConfigId = "endpointmanagement_automox"
 	// Microsoft Intune
 	ProviderConfigIdEndpointmanagementIntune ProviderConfigId = "endpointmanagement_intune"
 	// Iru
@@ -19250,6 +19387,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdEmailSecurityDefenderForOffice, nil
 	case "emailsecurity_mimecast_cloud_gateway":
 		return ProviderConfigIdEmailSecurityMimecastCloudGateway, nil
+	case "endpointmanagement_automox":
+		return ProviderConfigIdEndpointmanagementAutomox, nil
 	case "endpointmanagement_intune":
 		return ProviderConfigIdEndpointmanagementIntune, nil
 	case "endpointmanagement_iru":
