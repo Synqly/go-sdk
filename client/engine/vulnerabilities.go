@@ -11,6 +11,16 @@ import (
 	securityfinding "github.com/synqly/go-sdk/client/engine/ocsf/v130/securityfinding"
 )
 
+type VulnerabilitiesGetScanActivitiesRequest struct {
+	// Include the raw data from the provider in the response. Defaults to `false`.
+	IncludeRawData *bool `json:"-" url:"include_raw_data,omitempty"`
+}
+
+type VulnerabilitiesGetScanActivityRequest struct {
+	// Include the raw data from the provider in the response. Defaults to `false`.
+	IncludeRawData *bool `json:"-" url:"include_raw_data,omitempty"`
+}
+
 type QueryAssetsRequest struct {
 	// Add metadata to the response by invoking meta functions. Documentation for meta functions is available at https://docs.synqly.com/api-reference/meta-functions. Not all meta function are available at every endpoint.
 	Meta []*string `json:"-" url:"meta,omitempty"`
@@ -21,6 +31,8 @@ type QueryAssetsRequest struct {
 	// Filter results by this query. For more information on filtering, refer to the Vulnerability Filtering Guide.
 	// Defaults to no filter. If used more than once, the queries are ANDed together.
 	Filter []*string `json:"-" url:"filter,omitempty"`
+	// Include the raw data from the provider in the response. Defaults to `false`.
+	IncludeRawData *bool `json:"-" url:"include_raw_data,omitempty"`
 }
 
 type QueryFindingsRequest struct {
@@ -32,6 +44,8 @@ type QueryFindingsRequest struct {
 	Cursor *string `json:"-" url:"cursor,omitempty"`
 	// Filter results by this query. For more information on filtering, refer to the Vulnerability Filtering Guide. Defaults to no filter. If used more than once, the queries are ANDed together.
 	Filter []*string `json:"-" url:"filter,omitempty"`
+	// Include the raw data from the provider in the response. Defaults to `false`.
+	IncludeRawData *bool `json:"-" url:"include_raw_data,omitempty"`
 }
 
 type VulnerabilitiesQueryScanFindingsRequest struct {
@@ -43,6 +57,8 @@ type VulnerabilitiesQueryScanFindingsRequest struct {
 	Filter []*string `json:"-" url:"filter,omitempty"`
 	// Start search from cursor position.
 	Cursor *string `json:"-" url:"cursor,omitempty"`
+	// Include the raw data from the provider in the response. Defaults to `false`.
+	IncludeRawData *bool `json:"-" url:"include_raw_data,omitempty"`
 }
 
 type QueryScansRequest struct {

@@ -21,6 +21,8 @@ type QueryDevicesRequest struct {
 	// `[asc]` or `[desc]` to the field name. For example, `time[asc]` will sort the results by `time` in ascending order.
 	// The ordering defaults to `asc` if not specified.
 	Order *string `json:"-" url:"order,omitempty"`
+	// Include the raw data from the provider in the response. Defaults to `false`.
+	IncludeRawData *bool `json:"-" url:"include_raw_data,omitempty"`
 }
 
 type CreateDeviceRequest struct {

@@ -1051,6 +1051,7 @@ func (c *Client) GetScanActivity(
 	ctx context.Context,
 	// ID of the scan to get activity for (provider-specific; often scan definition or template id).
 	scanId string,
+	request *engine.VulnerabilitiesGetScanActivityRequest,
 	opts ...option.RequestOption,
 ) (*engine.GetScanActivityResponse, error) {
 	options := core.NewRequestOptions(opts...)
@@ -1063,6 +1064,14 @@ func (c *Client) GetScanActivity(
 		baseURL = options.BaseURL
 	}
 	endpointURL := core.EncodeURL(baseURL+"/v1/vulnerabilities/scans/%v/activity", scanId)
+
+	queryParams, err := core.QueryValues(request)
+	if err != nil {
+		return nil, err
+	}
+	if len(queryParams) > 0 {
+		endpointURL += "?" + queryParams.Encode()
+	}
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
@@ -1192,6 +1201,7 @@ func (c *Client) GetScanActivities(
 	ctx context.Context,
 	// ID of the scan definition whose execution history is requested.
 	scanId string,
+	request *engine.VulnerabilitiesGetScanActivitiesRequest,
 	opts ...option.RequestOption,
 ) (*engine.GetScanActivitiesResponse, error) {
 	options := core.NewRequestOptions(opts...)
@@ -1204,6 +1214,14 @@ func (c *Client) GetScanActivities(
 		baseURL = options.BaseURL
 	}
 	endpointURL := core.EncodeURL(baseURL+"/v1/vulnerabilities/scans/%v/activities", scanId)
+
+	queryParams, err := core.QueryValues(request)
+	if err != nil {
+		return nil, err
+	}
+	if len(queryParams) > 0 {
+		endpointURL += "?" + queryParams.Encode()
+	}
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
