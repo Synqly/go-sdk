@@ -8765,6 +8765,53 @@ func (a *AppSecTenable) String() string {
 	return fmt.Sprintf("%#v", a)
 }
 
+// Configuration for Veracode as an application security provider.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/veracode-appsec-setup)
+type AppSecVeracode struct {
+	// Credentials used for accessing the Veracode API.
+	Credential *VeracodeCredential `json:"credential" url:"credential"`
+	// The region that matches your Veracode account (US or EU).
+	Region VeracodeRegion `json:"region" url:"region"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (a *AppSecVeracode) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
+}
+
+func (a *AppSecVeracode) UnmarshalJSON(data []byte) error {
+	type unmarshaler AppSecVeracode
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*a = AppSecVeracode(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+
+	a._rawJSON = nil
+	return nil
+}
+
+func (a *AppSecVeracode) String() string {
+	if len(a._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(a); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", a)
+}
+
 type AppsecOpentextCoreApplicationSecurityDataset string
 
 const (
@@ -16840,6 +16887,10 @@ type ProviderConfig struct {
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/tenable-appsec-setup)
 	AppsecTenable *AppSecTenable
+	// Configuration for Veracode as an application security provider.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/veracode-appsec-setup)
+	AppsecVeracode *AppSecVeracode
 	// Configuration for Armis Centrix™ for Asset Management and Security.
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/armis-centrix-setup)
@@ -17321,6 +17372,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.AppsecTenable = value
+	case "appsec_veracode":
+		value := new(AppSecVeracode)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.AppsecVeracode = value
 	case "assets_armis_centrix":
 		value := new(AssetsArmisCentrix)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -18097,6 +18154,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.AppsecTenable != nil {
 		return core.MarshalJSONWithExtraProperty(p.AppsecTenable, "type", "appsec_tenable")
 	}
+	if p.AppsecVeracode != nil {
+		return core.MarshalJSONWithExtraProperty(p.AppsecVeracode, "type", "appsec_veracode")
+	}
 	if p.AssetsArmisCentrix != nil {
 		return core.MarshalJSONWithExtraProperty(p.AssetsArmisCentrix, "type", "assets_armis_centrix")
 	}
@@ -18482,6 +18542,7 @@ type ProviderConfigVisitor interface {
 	VisitAppsecOpentextCoreApplicationSecurityMock(*AppsecOpenTextCoreApplicationSecurityMock) error
 	VisitAppsecSnyk(*AppSecSnyk) error
 	VisitAppsecTenable(*AppSecTenable) error
+	VisitAppsecVeracode(*AppSecVeracode) error
 	VisitAssetsArmisCentrix(*AssetsArmisCentrix) error
 	VisitAssetsArmisCentrixMock(*AssetsArmisCentrixMock) error
 	VisitAssetsAxonius(*AssetsAxonius) error
@@ -18635,6 +18696,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.AppsecTenable != nil {
 		return visitor.VisitAppsecTenable(p.AppsecTenable)
+	}
+	if p.AppsecVeracode != nil {
+		return visitor.VisitAppsecVeracode(p.AppsecVeracode)
 	}
 	if p.AssetsArmisCentrix != nil {
 		return visitor.VisitAssetsArmisCentrix(p.AssetsArmisCentrix)
@@ -19033,6 +19097,8 @@ const (
 	ProviderConfigIdAppSecSnyk ProviderConfigId = "appsec_snyk"
 	// Tenable Web Application Scanner
 	ProviderConfigIdAppSecTenable ProviderConfigId = "appsec_tenable"
+	// Veracode
+	ProviderConfigIdAppSecVeracode ProviderConfigId = "appsec_veracode"
 	// Armis Centrix™ for Asset Management and Security
 	ProviderConfigIdAssetsArmisCentrix ProviderConfigId = "assets_armis_centrix"
 	// [MOCK] Armis Centrix™ for Asset Management and Security
@@ -19305,6 +19371,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdAppSecSnyk, nil
 	case "appsec_tenable":
 		return ProviderConfigIdAppSecTenable, nil
+	case "appsec_veracode":
+		return ProviderConfigIdAppSecVeracode, nil
 	case "assets_armis_centrix":
 		return ProviderConfigIdAssetsArmisCentrix, nil
 	case "assets_armis_centrix_mock":
@@ -23950,6 +24018,100 @@ func NewUpwindRegionFromString(s string) (UpwindRegion, error) {
 
 func (u UpwindRegion) Ptr() *UpwindRegion {
 	return &u
+}
+
+type VeracodeCredential struct {
+	Type string
+	// Configuration when creating new Client Credentials.
+	OAuthClient *OAuthClientCredential
+	// Reference to existing Client Credentials.
+	OAuthClientId OAuthClientCredentialId
+}
+
+func (v *VeracodeCredential) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	v.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", v)
+	}
+	switch unmarshaler.Type {
+	case "o_auth_client":
+		value := new(OAuthClientCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		v.OAuthClient = value
+	case "o_auth_client_id":
+		var valueUnmarshaler struct {
+			OAuthClientId OAuthClientCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		v.OAuthClientId = valueUnmarshaler.OAuthClientId
+	}
+	return nil
+}
+
+func (v VeracodeCredential) MarshalJSON() ([]byte, error) {
+	if v.OAuthClient != nil {
+		return core.MarshalJSONWithExtraProperty(v.OAuthClient, "type", "o_auth_client")
+	}
+	if v.OAuthClientId != "" {
+		var marshaler = struct {
+			Type          string                  `json:"type"`
+			OAuthClientId OAuthClientCredentialId `json:"value"`
+		}{
+			Type:          "o_auth_client_id",
+			OAuthClientId: v.OAuthClientId,
+		}
+		return json.Marshal(marshaler)
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", v)
+}
+
+type VeracodeCredentialVisitor interface {
+	VisitOAuthClient(*OAuthClientCredential) error
+	VisitOAuthClientId(OAuthClientCredentialId) error
+}
+
+func (v *VeracodeCredential) Accept(visitor VeracodeCredentialVisitor) error {
+	if v.OAuthClient != nil {
+		return visitor.VisitOAuthClient(v.OAuthClient)
+	}
+	if v.OAuthClientId != "" {
+		return visitor.VisitOAuthClientId(v.OAuthClientId)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", v)
+}
+
+type VeracodeRegion string
+
+const (
+	// Veracode US region (api.veracode.com)
+	VeracodeRegionUs VeracodeRegion = "us"
+	// Veracode EU region (api.veracode.eu)
+	VeracodeRegionEu VeracodeRegion = "eu"
+)
+
+func NewVeracodeRegionFromString(s string) (VeracodeRegion, error) {
+	switch s {
+	case "us":
+		return VeracodeRegionUs, nil
+	case "eu":
+		return VeracodeRegionEu, nil
+	}
+	var t VeracodeRegion
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (v VeracodeRegion) Ptr() *VeracodeRegion {
+	return &v
 }
 
 type VulnerabilitiesCrowdStrikeDataset string
