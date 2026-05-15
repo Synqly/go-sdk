@@ -476,7 +476,7 @@ func (a *Actor) String() string {
 // 99 - Other: The actor type is not mapped. See the actor_type attribute, which contains a data source specific value.
 type ActorActorTypeId = int
 
-// The Advisory object represents publicly disclosed cybersecurity vulnerabilities defined in a Secruity advisory. e.g. <code> Microsoft KB Article, Apple Security Advisory</code>
+// The Advisory object represents publicly disclosed cybersecurity vulnerabilities defined in a Security advisory. e.g. <code> Microsoft KB Article, Apple Security Advisory</code>
 type Advisory struct {
 	// The average time to patch.
 	AvgTimespan *Timespan `json:"avg_timespan,omitempty" url:"avg_timespan,omitempty"`

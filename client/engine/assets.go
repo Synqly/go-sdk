@@ -27,6 +27,9 @@ type QueryDevicesRequest struct {
 
 type CreateDeviceRequest struct {
 	Device Device `json:"device" url:"device"`
+	// Optional connector hint (for example ServiceNow discovery_source with Identify & Reconcile).
+	// Omit or leave empty when the integration does not use it; some integrations require it.
+	SourceName *string `json:"source_name,omitempty" url:"source_name,omitempty"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage

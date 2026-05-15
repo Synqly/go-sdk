@@ -513,7 +513,7 @@ func (a *Actor) String() string {
 // 99 - Other: The actor type is not mapped. See the actor_type attribute, which contains a data source specific value.
 type ActorActorTypeId = int
 
-// The Advisory object represents publicly disclosed cybersecurity vulnerabilities defined in a Security advisory. e.g. <code> Microsoft KB Article</code>, <code>Apple Security Advisory</code>, or a <code>GitHub Security Advisory (GHSA)</code>
+// The Advisory object represents publicly disclosed cybersecurity vulnerabilities defined in a Security advisory. e.g. <code> Microsoft KB Article, Apple Security Advisory</code>
 type Advisory struct {
 	// The average time to patch.
 	AvgTimespan *Timespan `json:"avg_timespan,omitempty" url:"avg_timespan,omitempty"`
@@ -553,7 +553,7 @@ type Advisory struct {
 	SrcUrl *UrlString `json:"src_url,omitempty" url:"src_url,omitempty"`
 	// A title or a brief phrase summarizing the Advisory.
 	Title *string `json:"title,omitempty" url:"title,omitempty"`
-	// The unique identifier assigned to the advisory or disclosed vulnerability, e.g, <code>GHSA-5mrr-rgp6-x4gr</code>.
+	// The unique number assigned to the disclosed vulnerability.
 	Uid string `json:"uid" url:"uid"`
 
 	extraProperties map[string]interface{}
@@ -2090,7 +2090,7 @@ type DeviceHwInfo struct {
 	RamSize *int `json:"ram_size,omitempty" url:"ram_size,omitempty"`
 	// The device manufacturer serial number.
 	SerialNumber *string `json:"serial_number,omitempty" url:"serial_number,omitempty"`
-	// The device manufacturer assigned universally unique hardware identifier. For SMBIOS compatible devices such as those running Linux and Windows, it is the UUID member of the System Information structure in the SMBIOS information. For macOS devices, it is the Hardware UUID (also known as IOPlatformUUID in the I/O Registry).
+	// The device manufacturer assigned universally unique hardware identifier. For example: The BIOS System UUID or the Apple IOPlatformUUID.
 	Uuid *string `json:"uuid,omitempty" url:"uuid,omitempty"`
 	// The device manufacturer.
 	VendorName *string `json:"vendor_name,omitempty" url:"vendor_name,omitempty"`

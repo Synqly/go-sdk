@@ -1512,6 +1512,10 @@ type DeviceHwInfo struct {
 	RamSize *int `json:"ram_size,omitempty" url:"ram_size,omitempty"`
 	// The device manufacturer serial number.
 	SerialNumber *string `json:"serial_number,omitempty" url:"serial_number,omitempty"`
+	// The device manufacturer assigned universally unique hardware identifier. For example: The BIOS System UUID or the Apple IOPlatformUUID.
+	Uuid *string `json:"uuid,omitempty" url:"uuid,omitempty"`
+	// The device manufacturer.
+	VendorName *string `json:"vendor_name,omitempty" url:"vendor_name,omitempty"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
