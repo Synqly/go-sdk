@@ -28,6 +28,20 @@ const Account_Type_AWSAccount AccountTypeId = 10
 // Other. The account type is not mapped.
 const Account_Type_Other AccountTypeId = 99
 
+// AdvisoryInstallStateId Values
+// Install State ID. The normalized install state ID of the Advisory.
+
+// Unknown. The normalized install state is unknown.
+const Advisory_InstallState_Unknown AdvisoryInstallStateId = 0
+// Installed. The item is installed.
+const Advisory_InstallState_Installed AdvisoryInstallStateId = 1
+// NotInstalled. The item is not installed.
+const Advisory_InstallState_NotInstalled AdvisoryInstallStateId = 2
+// InstalledPendingReboot. The item is installed pending reboot operation.
+const Advisory_InstallState_InstalledPendingReboot AdvisoryInstallStateId = 3
+// Other. The install state is not mapped. See the <code>install_state</code> attribute, which contains a data source specific value.
+const Advisory_InstallState_Other AdvisoryInstallStateId = 99
+
 // AffectedPackageTypeId Values
 // Type ID. The type of software package.
 

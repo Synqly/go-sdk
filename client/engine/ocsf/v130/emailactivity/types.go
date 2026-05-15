@@ -443,6 +443,117 @@ func (a *Actor) String() string {
 // 99 - Other: The actor type is not mapped. See the actor_type attribute, which contains a data source specific value.
 type ActorActorTypeId = int
 
+// The Advisory object represents publicly disclosed cybersecurity vulnerabilities defined in a Security advisory. e.g. <code> Microsoft KB Article, Apple Security Advisory</code>
+type Advisory struct {
+	// The average time to patch.
+	AvgTimespan *Timespan `json:"avg_timespan,omitempty" url:"avg_timespan,omitempty"`
+	// The Advisory bulletin identifier.
+	Bulletin *string `json:"bulletin,omitempty" url:"bulletin,omitempty"`
+	// The vendors classification of the Advisory.
+	Classification *string `json:"classification,omitempty" url:"classification,omitempty"`
+	// The time when the Advisory record was created.
+	CreatedTime *Timestamp `json:"created_time,omitempty" url:"created_time,omitempty"`
+	// The time when the Advisory record was created.
+	CreatedTimeDt *time.Time `json:"created_time_dt,omitempty" url:"created_time_dt,omitempty"`
+	// A brief description of the Advisory Record.
+	Desc *string `json:"desc,omitempty" url:"desc,omitempty"`
+	// The install state of the Advisory.
+	InstallState *string `json:"install_state,omitempty" url:"install_state,omitempty"`
+	// The normalized install state ID of the Advisory.
+	InstallStateId *AdvisoryInstallStateId `json:"install_state_id,omitempty" url:"install_state_id,omitempty"`
+	// The Advisory has been replaced by another.
+	IsSuperseded *bool `json:"is_superseded,omitempty" url:"is_superseded,omitempty"`
+	// The time when the Advisory record was last updated.
+	ModifiedTime *Timestamp `json:"modified_time,omitempty" url:"modified_time,omitempty"`
+	// The time when the Advisory record was last updated.
+	ModifiedTimeDt *time.Time `json:"modified_time_dt,omitempty" url:"modified_time_dt,omitempty"`
+	// The operating system the Advisory applies to.
+	Os *Os `json:"os,omitempty" url:"os,omitempty"`
+	// The product where the vulnerability was discovered.
+	Product *Product `json:"product,omitempty" url:"product,omitempty"`
+	// A list of reference URLs with additional information about the vulnerabilities disclosed in the Advisory.
+	References []string `json:"references,omitempty" url:"references,omitempty"`
+	// A list of Common Vulnerabilities and Exposures <a target='_blank' href='https://cve.mitre.org/'>(CVE)</a> identifiers related to the vulnerabilities disclosed in the Advisory.
+	RelatedCves []*Cve `json:"related_cves,omitempty" url:"related_cves,omitempty"`
+	// A list of Common Weakness Enumeration <a target='_blank' href='https://cwe.mitre.org/'>(CWE)</a> identifiers related to the vulnerabilities disclosed in the Advisory.
+	RelatedCwes []*Cwe `json:"related_cwes,omitempty" url:"related_cwes,omitempty"`
+	// The size in bytes for the Advisory. Usually populated for a KB Article patch.
+	Size *int `json:"size,omitempty" url:"size,omitempty"`
+	// The Advisory link from the source vendor.
+	SrcUrl *UrlString `json:"src_url,omitempty" url:"src_url,omitempty"`
+	// A title or a brief phrase summarizing the Advisory.
+	Title *string `json:"title,omitempty" url:"title,omitempty"`
+	// The unique number assigned to the disclosed vulnerability.
+	Uid string `json:"uid" url:"uid"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (a *Advisory) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
+}
+
+func (a *Advisory) UnmarshalJSON(data []byte) error {
+	type embed Advisory
+	var unmarshaler = struct {
+		embed
+		CreatedTimeDt  *core.DateTime `json:"created_time_dt,omitempty"`
+		ModifiedTimeDt *core.DateTime `json:"modified_time_dt,omitempty"`
+	}{
+		embed: embed(*a),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*a = Advisory(unmarshaler.embed)
+	a.CreatedTimeDt = unmarshaler.CreatedTimeDt.TimePtr()
+	a.ModifiedTimeDt = unmarshaler.ModifiedTimeDt.TimePtr()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+
+	a._rawJSON = nil
+	return nil
+}
+
+func (a *Advisory) MarshalJSON() ([]byte, error) {
+	type embed Advisory
+	var marshaler = struct {
+		embed
+		CreatedTimeDt  *core.DateTime `json:"created_time_dt,omitempty"`
+		ModifiedTimeDt *core.DateTime `json:"modified_time_dt,omitempty"`
+	}{
+		embed:          embed(*a),
+		CreatedTimeDt:  core.NewOptionalDateTime(a.CreatedTimeDt),
+		ModifiedTimeDt: core.NewOptionalDateTime(a.ModifiedTimeDt),
+	}
+	return json.Marshal(marshaler)
+}
+
+func (a *Advisory) String() string {
+	if len(a._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(a); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", a)
+}
+
+// AdvisoryInstallStateId is an enum, and the following values are allowed.
+// 0 - Unknown: The normalized install state is unknown.
+// 1 - Installed: The item is installed.
+// 2 - NotInstalled: The item is not installed.
+// 3 - InstalledPendingReboot: The item is installed pending reboot operation.
+// 99 - Other: The install state is not mapped. See the <code>install_state</code> attribute, which contains a data source specific value.
+type AdvisoryInstallStateId = int
+
 // The Affected Code object describes details about a code block identified as vulnerable.
 type AffectedCode struct {
 	// The line number of the last line of code block identified as vulnerable.
@@ -5278,6 +5389,8 @@ type UserUserStatusId = int
 
 // The vulnerability is an unintended characteristic of a computing component or system configuration that multiplies the risk of an adverse event or a loss occurring either due to accidental exposure, deliberate attack, or conflict with new system components.
 type Vulnerability struct {
+	// Detail about the security advisory, that is used to publicly disclose cybersecurity vulnerabilities by a vendor.
+	Advisory *Advisory `json:"advisory,omitempty" url:"advisory,omitempty"`
 	// List of Affected Code objects that describe details about code blocks identified as vulnerable.
 	AffectedCode []*AffectedCode `json:"affected_code,omitempty" url:"affected_code,omitempty"`
 	// List of software packages identified as affected by a vulnerability/vulnerabilities.
