@@ -17099,6 +17099,8 @@ type ProviderConfig struct {
 	// Configuration for the Synqly mock in-memory SIEM Provider. This provider is for testing purposes only and does not retain events pushed to it.
 	SiemMockSiem *SiemMock
 	// Configuration for OpenSearch search and analytics engine. Supports both managed and self-hosted OpenSearch deployments
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/opensearch-siem-setup)
 	SiemOpensearch *SiemOpenSearch
 	// Configuration for Panther SIEM.
 	//
@@ -17125,6 +17127,8 @@ type ProviderConfig struct {
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/sumo-logic-setup)
 	SiemSumoLogic *SiemSumoLogic
 	// Configuration for Amazon S3 as a Sink provider. Events are written directly to an AWS S3 bucket in compressed JSON format.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/aws-s3-sink-setup)
 	SinkAwsS3 *SinkAwsS3
 	// Configuration for Amazon Security Lake as a Sink provider. Events are written directly to an AWS S3 bucket in Apache Parquet format.
 	//
@@ -17135,6 +17139,8 @@ type ProviderConfig struct {
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/aws-sqs-sink-setup)
 	SinkAwsSqs *SinkAwsSqs
 	// Configuration for Azure Blob Storage as a Sink provider. Events are written directly to an Azure Blob Storage container in compressed JSON format.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/azure-blob-sink-setup)
 	SinkAzureBlob *SinkAzureBlob
 	// Configuration for Azure Monitor Logs as a Sink Provider. Azure Monitor Logs is a feature of Azure Monitor that collects and organizes log and performance data from monitored resources.
 	//
@@ -17153,6 +17159,8 @@ type ProviderConfig struct {
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/elastic-setup)
 	SinkElasticsearch *SinkElasticsearch
 	// Configuration for Google Cloud Storage as a Sink provider. Events are written directly to a GCS bucket in compressed JSON format.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/gcs-sink-setup)
 	SinkGcs *SinkGcs
 	// Configuration for Google Security Operations (formerly Google Chronicle) as a Sink Provider connecting via the older Malachite API.
 	//
@@ -17163,10 +17171,14 @@ type ProviderConfig struct {
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/google-security-operations-sink-setup)
 	SinkGoogleSecurityOperations *SinkGoogleSecurityOperations
 	// Generic Sink provider for sending events to any HTTP endpoint. Ideal for integrating with log aggregators, SIEM platforms, custom webhooks, data lakes, and any HTTP-based event ingestion system.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/http-sink-setup)
 	SinkHttp *SinkHttp
 	// Configuration for the Synqly mock in-memory Sink Provider. This provider is for testing purposes only and does not retain events pushed to it.
 	SinkMockSink *SinkMock
 	// Configuration for OpenSearch search and analytics engine. Supports both managed and self-hosted OpenSearch deployments
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/opensearch-sink-setup)
 	SinkOpensearch *SinkOpenSearch
 	// Configuration for Panther Sink.
 	//
@@ -17195,6 +17207,8 @@ type ProviderConfig struct {
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/aws-s3-storage-setup)
 	StorageAwsS3 *StorageAwsS3
 	// Configuration for Azure Blob Storage as a Storage Provider
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/azure-blob-storage-setup)
 	StorageAzureBlob *StorageAzureBlob
 	// Configuration for Google Cloud Storage for storing unstructured data
 	//
@@ -20147,6 +20161,8 @@ func (s *SiemMock) String() string {
 }
 
 // Configuration for OpenSearch search and analytics engine. Supports both managed and self-hosted OpenSearch deployments
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/opensearch-siem-setup)
 type SiemOpenSearch struct {
 	// The index or data stream to use when writing events. Defaults to the 'index' setting if not set.
 	CreateIndex *string               `json:"create_index,omitempty" url:"create_index,omitempty"`
@@ -20915,6 +20931,8 @@ func (s *SevcoCredential) Accept(visitor SevcoCredentialVisitor) error {
 }
 
 // Configuration for Amazon S3 as a Sink provider. Events are written directly to an AWS S3 bucket in compressed JSON format.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/aws-s3-sink-setup)
 type SinkAwsS3 struct {
 	// Name of the Amazon S3 bucket
 	Bucket string `json:"bucket" url:"bucket"`
@@ -21062,6 +21080,8 @@ func (s *SinkAwsSecurityLake) String() string {
 }
 
 // Configuration for Azure Blob Storage as a Sink provider. Events are written directly to an Azure Blob Storage container in compressed JSON format.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/azure-blob-sink-setup)
 type SinkAzureBlob struct {
 	// Name of the Azure Blob Storage container
 	Bucket string `json:"bucket" url:"bucket"`
@@ -21308,6 +21328,8 @@ func (s *SinkElasticsearch) String() string {
 }
 
 // Configuration for Google Cloud Storage as a Sink provider. Events are written directly to a GCS bucket in compressed JSON format.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/gcs-sink-setup)
 type SinkGcs struct {
 	// Name of the GCS bucket
 	Bucket string `json:"bucket" url:"bucket"`
@@ -21457,6 +21479,8 @@ func (s *SinkGoogleSecurityOperations) String() string {
 }
 
 // Generic Sink provider for sending events to any HTTP endpoint. Ideal for integrating with log aggregators, SIEM platforms, custom webhooks, data lakes, and any HTTP-based event ingestion system.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/http-sink-setup)
 type SinkHttp struct {
 	// HTTP status codes that indicate successful event delivery. Defaults to standard success codes. Configure if receiving endpoint uses different response codes (e.g. `207 Multi-Status`).
 	AcceptedResponseCodes []int `json:"accepted_response_codes,omitempty" url:"accepted_response_codes,omitempty"`
@@ -21561,6 +21585,8 @@ func (s *SinkMock) String() string {
 }
 
 // Configuration for OpenSearch search and analytics engine. Supports both managed and self-hosted OpenSearch deployments
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/opensearch-sink-setup)
 type SinkOpenSearch struct {
 	// The index or data stream to use when writing events.
 	CreateIndex string                `json:"create_index" url:"create_index"`
@@ -22445,6 +22471,8 @@ func (s *StorageAwsS3) String() string {
 }
 
 // Configuration for Azure Blob Storage as a Storage Provider
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/azure-blob-storage-setup)
 type StorageAzureBlob struct {
 	// Name of the blob container where files are stored.
 	Bucket     string               `json:"bucket" url:"bucket"`
