@@ -38,6 +38,8 @@ import (
 	v160emailactivity "github.com/synqly/go-sdk/client/engine/ocsf/v160/emailactivity"
 	filehostingactivity "github.com/synqly/go-sdk/client/engine/ocsf/v160/filehostingactivity"
 	httpactivity "github.com/synqly/go-sdk/client/engine/ocsf/v160/httpactivity"
+	chatmessageactivity "github.com/synqly/go-sdk/client/engine/ocsf/v180/chatmessageactivity"
+	conversationactivity "github.com/synqly/go-sdk/client/engine/ocsf/v180/conversationactivity"
 	v180detectionfinding "github.com/synqly/go-sdk/client/engine/ocsf/v180/detectionfinding"
 	emailactivity "github.com/synqly/go-sdk/client/engine/ocsf/v180/emailactivity"
 	noteactivity "github.com/synqly/go-sdk/client/engine/ocsf/v180/noteactivity"
@@ -1661,6 +1663,8 @@ type Event struct {
 	CloudActivity                     *cloudactivity.CloudActivity
 	CloudResourcesInventoryInfo       *cloudresourcesinventoryinfo.CloudResourcesInventoryInfo
 	NoteActivity                      *noteactivity.NoteActivity
+	ChatMessageActivity               *chatmessageactivity.ChatMessageActivity
+	ConversationActivity              *conversationactivity.ConversationActivity
 }
 
 func (e *Event) UnmarshalJSON(data []byte) error {
@@ -1867,6 +1871,18 @@ func (e *Event) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		e.NoteActivity = value
+	case "Chat Message Activity":
+		value := new(chatmessageactivity.ChatMessageActivity)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.ChatMessageActivity = value
+	case "Conversation Activity":
+		value := new(conversationactivity.ConversationActivity)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.ConversationActivity = value
 	}
 	return nil
 }
@@ -1968,6 +1984,12 @@ func (e Event) MarshalJSON() ([]byte, error) {
 	if e.NoteActivity != nil {
 		return core.MarshalJSONWithExtraProperty(e.NoteActivity, "class_name", "Note Activity")
 	}
+	if e.ChatMessageActivity != nil {
+		return core.MarshalJSONWithExtraProperty(e.ChatMessageActivity, "class_name", "Chat Message Activity")
+	}
+	if e.ConversationActivity != nil {
+		return core.MarshalJSONWithExtraProperty(e.ConversationActivity, "class_name", "Conversation Activity")
+	}
 	return nil, fmt.Errorf("type %T does not define a non-empty union type", e)
 }
 
@@ -2004,6 +2026,8 @@ type EventVisitor interface {
 	VisitCloudActivity(*cloudactivity.CloudActivity) error
 	VisitCloudResourcesInventoryInfo(*cloudresourcesinventoryinfo.CloudResourcesInventoryInfo) error
 	VisitNoteActivity(*noteactivity.NoteActivity) error
+	VisitChatMessageActivity(*chatmessageactivity.ChatMessageActivity) error
+	VisitConversationActivity(*conversationactivity.ConversationActivity) error
 }
 
 func (e *Event) Accept(visitor EventVisitor) error {
@@ -2102,6 +2126,12 @@ func (e *Event) Accept(visitor EventVisitor) error {
 	}
 	if e.NoteActivity != nil {
 		return visitor.VisitNoteActivity(e.NoteActivity)
+	}
+	if e.ChatMessageActivity != nil {
+		return visitor.VisitChatMessageActivity(e.ChatMessageActivity)
+	}
+	if e.ConversationActivity != nil {
+		return visitor.VisitConversationActivity(e.ConversationActivity)
 	}
 	return fmt.Errorf("type %T does not define a non-empty union type", e)
 }
@@ -3274,6 +3304,13 @@ const (
 	OperationIdAssetsQueryUtilization                           OperationId = "assets_query_utilization"
 	OperationIdAssetsQueryVulnerabilities                       OperationId = "assets_query_vulnerabilities"
 	OperationIdAssetsUpdateDeviceProperties                     OperationId = "assets_update_device_properties"
+	OperationIdChatQueryConversationMembers                     OperationId = "chat_query_conversation_members"
+	OperationIdChatQueryConversationMessages                    OperationId = "chat_query_conversation_messages"
+	OperationIdChatQueryConversations                           OperationId = "chat_query_conversations"
+	OperationIdChatQueryUserConversationMembers                 OperationId = "chat_query_user_conversation_members"
+	OperationIdChatQueryUserConversationMessages                OperationId = "chat_query_user_conversation_messages"
+	OperationIdChatQueryUserConversations                       OperationId = "chat_query_user_conversations"
+	OperationIdChatQueryUsers                                   OperationId = "chat_query_users"
 	OperationIdCloudsecurityQueryCloudResourceInventory         OperationId = "cloudsecurity_query_cloud_resource_inventory"
 	OperationIdCloudsecurityQueryComplianceFindings             OperationId = "cloudsecurity_query_compliance_findings"
 	OperationIdCloudsecurityQueryEvents                         OperationId = "cloudsecurity_query_events"
@@ -3395,6 +3432,20 @@ func NewOperationIdFromString(s string) (OperationId, error) {
 		return OperationIdAssetsQueryVulnerabilities, nil
 	case "assets_update_device_properties":
 		return OperationIdAssetsUpdateDeviceProperties, nil
+	case "chat_query_conversation_members":
+		return OperationIdChatQueryConversationMembers, nil
+	case "chat_query_conversation_messages":
+		return OperationIdChatQueryConversationMessages, nil
+	case "chat_query_conversations":
+		return OperationIdChatQueryConversations, nil
+	case "chat_query_user_conversation_members":
+		return OperationIdChatQueryUserConversationMembers, nil
+	case "chat_query_user_conversation_messages":
+		return OperationIdChatQueryUserConversationMessages, nil
+	case "chat_query_user_conversations":
+		return OperationIdChatQueryUserConversations, nil
+	case "chat_query_users":
+		return OperationIdChatQueryUsers, nil
 	case "cloudsecurity_query_cloud_resource_inventory":
 		return OperationIdCloudsecurityQueryCloudResourceInventory, nil
 	case "cloudsecurity_query_compliance_findings":

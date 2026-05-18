@@ -2184,6 +2184,7 @@ type CategoryId string
 const (
 	CategoryIdAppsec             CategoryId = "appsec"
 	CategoryIdAssets             CategoryId = "assets"
+	CategoryIdChat               CategoryId = "chat"
 	CategoryIdCloudsecurity      CategoryId = "cloudsecurity"
 	CategoryIdCustom             CategoryId = "custom"
 	CategoryIdEdr                CategoryId = "edr"
@@ -2205,6 +2206,8 @@ func NewCategoryIdFromString(s string) (CategoryId, error) {
 		return CategoryIdAppsec, nil
 	case "assets":
 		return CategoryIdAssets, nil
+	case "chat":
+		return CategoryIdChat, nil
 	case "cloudsecurity":
 		return CategoryIdCloudsecurity, nil
 	case "custom":
@@ -5462,6 +5465,13 @@ const (
 	OperationIdAssetsQueryUtilization                           OperationId = "assets_query_utilization"
 	OperationIdAssetsQueryVulnerabilities                       OperationId = "assets_query_vulnerabilities"
 	OperationIdAssetsUpdateDeviceProperties                     OperationId = "assets_update_device_properties"
+	OperationIdChatQueryConversationMembers                     OperationId = "chat_query_conversation_members"
+	OperationIdChatQueryConversationMessages                    OperationId = "chat_query_conversation_messages"
+	OperationIdChatQueryConversations                           OperationId = "chat_query_conversations"
+	OperationIdChatQueryUserConversationMembers                 OperationId = "chat_query_user_conversation_members"
+	OperationIdChatQueryUserConversationMessages                OperationId = "chat_query_user_conversation_messages"
+	OperationIdChatQueryUserConversations                       OperationId = "chat_query_user_conversations"
+	OperationIdChatQueryUsers                                   OperationId = "chat_query_users"
 	OperationIdCloudsecurityQueryCloudResourceInventory         OperationId = "cloudsecurity_query_cloud_resource_inventory"
 	OperationIdCloudsecurityQueryComplianceFindings             OperationId = "cloudsecurity_query_compliance_findings"
 	OperationIdCloudsecurityQueryEvents                         OperationId = "cloudsecurity_query_events"
@@ -5583,6 +5593,20 @@ func NewOperationIdFromString(s string) (OperationId, error) {
 		return OperationIdAssetsQueryVulnerabilities, nil
 	case "assets_update_device_properties":
 		return OperationIdAssetsUpdateDeviceProperties, nil
+	case "chat_query_conversation_members":
+		return OperationIdChatQueryConversationMembers, nil
+	case "chat_query_conversation_messages":
+		return OperationIdChatQueryConversationMessages, nil
+	case "chat_query_conversations":
+		return OperationIdChatQueryConversations, nil
+	case "chat_query_user_conversation_members":
+		return OperationIdChatQueryUserConversationMembers, nil
+	case "chat_query_user_conversation_messages":
+		return OperationIdChatQueryUserConversationMessages, nil
+	case "chat_query_user_conversations":
+		return OperationIdChatQueryUserConversations, nil
+	case "chat_query_users":
+		return OperationIdChatQueryUsers, nil
 	case "cloudsecurity_query_cloud_resource_inventory":
 		return OperationIdCloudsecurityQueryCloudResourceInventory, nil
 	case "cloudsecurity_query_compliance_findings":
@@ -10762,6 +10786,172 @@ func (a *AzureMonitorLogsCredential) Accept(visitor AzureMonitorLogsCredentialVi
 	return fmt.Errorf("type %T does not define a non-empty union type", a)
 }
 
+type ChannelJoinBehavior string
+
+const (
+	// The bot automatically joins public channels on demand when interacting with channels it has not already been added to. Slack posts a "bot joined" system message that is visible to other channel members.
+	ChannelJoinBehaviorAuto ChannelJoinBehavior = "auto"
+	// The bot must be manually added to channels (e.g. via `/invite`). Queries against channels the bot has not joined surface the upstream `not_in_channel` error rather than performing a state-changing `conversations.join` API call.
+	ChannelJoinBehaviorManual ChannelJoinBehavior = "manual"
+)
+
+func NewChannelJoinBehaviorFromString(s string) (ChannelJoinBehavior, error) {
+	switch s {
+	case "auto":
+		return ChannelJoinBehaviorAuto, nil
+	case "manual":
+		return ChannelJoinBehaviorManual, nil
+	}
+	var t ChannelJoinBehavior
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (c ChannelJoinBehavior) Ptr() *ChannelJoinBehavior {
+	return &c
+}
+
+// Configuration for Microsoft 365 Copilot.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/microsoft-copilot-chat-setup)
+type ChatMicrosoftCopilot struct {
+	Credential *CopilotChatCredential `json:"credential" url:"credential"`
+	// Azure Directory tenant identifier.
+	TenantId string `json:"tenant_id" url:"tenant_id"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *ChatMicrosoftCopilot) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
+}
+
+func (c *ChatMicrosoftCopilot) UnmarshalJSON(data []byte) error {
+	type unmarshaler ChatMicrosoftCopilot
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = ChatMicrosoftCopilot(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
+	c._rawJSON = nil
+	return nil
+}
+
+func (c *ChatMicrosoftCopilot) String() string {
+	if len(c._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
+// Configuration for Microsoft Teams.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/teams-chat-setup)
+type ChatMicrosoftTeams struct {
+	Credential *TeamsGraphChatCredential `json:"credential" url:"credential"`
+	// Team identifier, required for querying team channels. If omitted, only user-scoped chats (DMs and group chats) can be queried.
+	TeamId *string `json:"team_id,omitempty" url:"team_id,omitempty"`
+	// Azure Directory (tenant) identifier.
+	TenantId string `json:"tenant_id" url:"tenant_id"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *ChatMicrosoftTeams) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
+}
+
+func (c *ChatMicrosoftTeams) UnmarshalJSON(data []byte) error {
+	type unmarshaler ChatMicrosoftTeams
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = ChatMicrosoftTeams(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
+	c._rawJSON = nil
+	return nil
+}
+
+func (c *ChatMicrosoftTeams) String() string {
+	if len(c._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
+// Configuration for Slack.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/slack-chat-setup)
+type ChatSlack struct {
+	// When set to `auto`, the bot automatically joins public channels on demand when interacting with channels it has not already been added to. When set to `manual`, the bot must be manually added to the channels, and will not automatically join a channel where it is mentioned or otherwise interacted with.
+	Channels   *ChannelJoinBehavior `json:"channels,omitempty" url:"channels,omitempty"`
+	Credential *SlackCredential     `json:"credential" url:"credential"`
+	// Base URL for the Slack API.
+	Url *string `json:"url,omitempty" url:"url,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *ChatSlack) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
+}
+
+func (c *ChatSlack) UnmarshalJSON(data []byte) error {
+	type unmarshaler ChatSlack
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = ChatSlack(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
+	c._rawJSON = nil
+	return nil
+}
+
+func (c *ChatSlack) String() string {
+	if len(c._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
 type ClarotyApiurl string
 
 const (
@@ -11394,6 +11584,76 @@ func (c *CloudSecurityWiz) String() string {
 		return value
 	}
 	return fmt.Sprintf("%#v", c)
+}
+
+type CopilotChatCredential struct {
+	Type string
+	// Azure Client ID and Client Secret for a service principal.
+	OAuthClient *OAuthClientCredential
+	// Reference to existing Client Credentials.
+	OAuthClientId OAuthClientCredentialId
+}
+
+func (c *CopilotChatCredential) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	c.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", c)
+	}
+	switch unmarshaler.Type {
+	case "o_auth_client":
+		value := new(OAuthClientCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		c.OAuthClient = value
+	case "o_auth_client_id":
+		var valueUnmarshaler struct {
+			OAuthClientId OAuthClientCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		c.OAuthClientId = valueUnmarshaler.OAuthClientId
+	}
+	return nil
+}
+
+func (c CopilotChatCredential) MarshalJSON() ([]byte, error) {
+	if c.OAuthClient != nil {
+		return core.MarshalJSONWithExtraProperty(c.OAuthClient, "type", "o_auth_client")
+	}
+	if c.OAuthClientId != "" {
+		var marshaler = struct {
+			Type          string                  `json:"type"`
+			OAuthClientId OAuthClientCredentialId `json:"value"`
+		}{
+			Type:          "o_auth_client_id",
+			OAuthClientId: c.OAuthClientId,
+		}
+		return json.Marshal(marshaler)
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", c)
+}
+
+type CopilotChatCredentialVisitor interface {
+	VisitOAuthClient(*OAuthClientCredential) error
+	VisitOAuthClientId(OAuthClientCredentialId) error
+}
+
+func (c *CopilotChatCredential) Accept(visitor CopilotChatCredentialVisitor) error {
+	if c.OAuthClient != nil {
+		return visitor.VisitOAuthClient(c.OAuthClient)
+	}
+	if c.OAuthClientId != "" {
+		return visitor.VisitOAuthClientId(c.OAuthClientId)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", c)
 }
 
 type CrowdStrikeCredential struct {
@@ -16949,6 +17209,18 @@ type ProviderConfig struct {
 	AssetsTaniumCloud *AssetsTaniumCloud
 	// Configuration for a mocked Tanium Cloud as an Assets Provider
 	AssetsTaniumCloudMock *AssetsTaniumCloudMock
+	// Configuration for Microsoft 365 Copilot.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/microsoft-copilot-chat-setup)
+	ChatMicrosoftCopilot *ChatMicrosoftCopilot
+	// Configuration for Microsoft Teams.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/teams-chat-setup)
+	ChatMicrosoftTeams *ChatMicrosoftTeams
+	// Configuration for Slack.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/slack-chat-setup)
+	ChatSlack *ChatSlack
 	// Configuration for the AWS Cloud Security Provider
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/aws-cloudsecurity-setup)
@@ -17518,6 +17790,24 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.AssetsTaniumCloudMock = value
+	case "chat_microsoft_copilot":
+		value := new(ChatMicrosoftCopilot)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.ChatMicrosoftCopilot = value
+	case "chat_microsoft_teams":
+		value := new(ChatMicrosoftTeams)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.ChatMicrosoftTeams = value
+	case "chat_slack":
+		value := new(ChatSlack)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.ChatSlack = value
 	case "cloudsecurity_aws":
 		value := new(CloudSecurityAws)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -18234,6 +18524,15 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.AssetsTaniumCloudMock != nil {
 		return core.MarshalJSONWithExtraProperty(p.AssetsTaniumCloudMock, "type", "assets_tanium_cloud_mock")
 	}
+	if p.ChatMicrosoftCopilot != nil {
+		return core.MarshalJSONWithExtraProperty(p.ChatMicrosoftCopilot, "type", "chat_microsoft_copilot")
+	}
+	if p.ChatMicrosoftTeams != nil {
+		return core.MarshalJSONWithExtraProperty(p.ChatMicrosoftTeams, "type", "chat_microsoft_teams")
+	}
+	if p.ChatSlack != nil {
+		return core.MarshalJSONWithExtraProperty(p.ChatSlack, "type", "chat_slack")
+	}
 	if p.CloudsecurityAws != nil {
 		return core.MarshalJSONWithExtraProperty(p.CloudsecurityAws, "type", "cloudsecurity_aws")
 	}
@@ -18578,6 +18877,9 @@ type ProviderConfigVisitor interface {
 	VisitAssetsSevcoMock(*AssetsSevcoMock) error
 	VisitAssetsTaniumCloud(*AssetsTaniumCloud) error
 	VisitAssetsTaniumCloudMock(*AssetsTaniumCloudMock) error
+	VisitChatMicrosoftCopilot(*ChatMicrosoftCopilot) error
+	VisitChatMicrosoftTeams(*ChatMicrosoftTeams) error
+	VisitChatSlack(*ChatSlack) error
 	VisitCloudsecurityAws(*CloudSecurityAws) error
 	VisitCloudsecurityAwseventbridgesqs(*CloudSecurityAwsEventBridgeSqs) error
 	VisitCloudsecurityCrowdstrike(*CloudSecurityCrowdStrike) error
@@ -18776,6 +19078,15 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.AssetsTaniumCloudMock != nil {
 		return visitor.VisitAssetsTaniumCloudMock(p.AssetsTaniumCloudMock)
+	}
+	if p.ChatMicrosoftCopilot != nil {
+		return visitor.VisitChatMicrosoftCopilot(p.ChatMicrosoftCopilot)
+	}
+	if p.ChatMicrosoftTeams != nil {
+		return visitor.VisitChatMicrosoftTeams(p.ChatMicrosoftTeams)
+	}
+	if p.ChatSlack != nil {
+		return visitor.VisitChatSlack(p.ChatSlack)
 	}
 	if p.CloudsecurityAws != nil {
 		return visitor.VisitCloudsecurityAws(p.CloudsecurityAws)
@@ -19155,6 +19466,12 @@ const (
 	ProviderConfigIdAssetsTaniumCloud ProviderConfigId = "assets_tanium_cloud"
 	// [MOCK] Tanium Vulnerability Management
 	ProviderConfigIdAssetsTaniumCloudMock ProviderConfigId = "assets_tanium_cloud_mock"
+	// Microsoft 365 Copilot
+	ProviderConfigIdChatMicrosoftCopilot ProviderConfigId = "chat_microsoft_copilot"
+	// Microsoft Teams
+	ProviderConfigIdChatMicrosoftTeams ProviderConfigId = "chat_microsoft_teams"
+	// Slack
+	ProviderConfigIdChatSlack ProviderConfigId = "chat_slack"
 	// AWS Cloud Security
 	ProviderConfigIdCloudSecurityAws ProviderConfigId = "cloudsecurity_aws"
 	// AWS EventBridge SQS
@@ -19429,6 +19746,12 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdAssetsTaniumCloud, nil
 	case "assets_tanium_cloud_mock":
 		return ProviderConfigIdAssetsTaniumCloudMock, nil
+	case "chat_microsoft_copilot":
+		return ProviderConfigIdChatMicrosoftCopilot, nil
+	case "chat_microsoft_teams":
+		return ProviderConfigIdChatMicrosoftTeams, nil
+	case "chat_slack":
+		return ProviderConfigIdChatSlack, nil
 	case "cloudsecurity_aws":
 		return ProviderConfigIdCloudSecurityAws, nil
 	case "cloudsecurity_awseventbridgesqs":
@@ -21926,7 +22249,7 @@ func (s *SinkTrimedx) String() string {
 
 type SlackCredential struct {
 	Type string
-	// Follow [this guide to generate a bot token](https://api.slack.com/concepts/token-types#bot). The token must have access to the configured channel.
+	// Follow [this guide to generate a bot token](https://api.slack.com/concepts/token-types#bot). The token must have the OAuth scopes required by the operations the integration performs; see the provider configuration guide for details.
 	Token *TokenCredential
 	// Reference to existing Bot Token.
 	TokenId TokenCredentialId
@@ -22992,6 +23315,76 @@ func (t *TeamsCredential) Accept(visitor TeamsCredentialVisitor) error {
 	}
 	if t.WebhookUrlId != "" {
 		return visitor.VisitWebhookUrlId(t.WebhookUrlId)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", t)
+}
+
+type TeamsGraphChatCredential struct {
+	Type string
+	// Azure Client ID and Client Secret for a service principal.
+	OAuthClient *OAuthClientCredential
+	// Reference to existing Client Credentials.
+	OAuthClientId OAuthClientCredentialId
+}
+
+func (t *TeamsGraphChatCredential) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	t.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", t)
+	}
+	switch unmarshaler.Type {
+	case "o_auth_client":
+		value := new(OAuthClientCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		t.OAuthClient = value
+	case "o_auth_client_id":
+		var valueUnmarshaler struct {
+			OAuthClientId OAuthClientCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		t.OAuthClientId = valueUnmarshaler.OAuthClientId
+	}
+	return nil
+}
+
+func (t TeamsGraphChatCredential) MarshalJSON() ([]byte, error) {
+	if t.OAuthClient != nil {
+		return core.MarshalJSONWithExtraProperty(t.OAuthClient, "type", "o_auth_client")
+	}
+	if t.OAuthClientId != "" {
+		var marshaler = struct {
+			Type          string                  `json:"type"`
+			OAuthClientId OAuthClientCredentialId `json:"value"`
+		}{
+			Type:          "o_auth_client_id",
+			OAuthClientId: t.OAuthClientId,
+		}
+		return json.Marshal(marshaler)
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", t)
+}
+
+type TeamsGraphChatCredentialVisitor interface {
+	VisitOAuthClient(*OAuthClientCredential) error
+	VisitOAuthClientId(OAuthClientCredentialId) error
+}
+
+func (t *TeamsGraphChatCredential) Accept(visitor TeamsGraphChatCredentialVisitor) error {
+	if t.OAuthClient != nil {
+		return visitor.VisitOAuthClient(t.OAuthClient)
+	}
+	if t.OAuthClientId != "" {
+		return visitor.VisitOAuthClientId(t.OAuthClientId)
 	}
 	return fmt.Errorf("type %T does not define a non-empty union type", t)
 }
