@@ -115,7 +115,8 @@ func (c *CreateDeviceResponse) String() string {
 }
 
 type CreateDevicesRequest struct {
-	Devices []Device `json:"devices" url:"devices"`
+	Devices          []Device          `json:"devices" url:"devices"`
+	CustomProperties map[string]string `json:"custom_properties,omitempty" url:"custom_properties,omitempty"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
