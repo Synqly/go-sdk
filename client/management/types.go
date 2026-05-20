@@ -11445,6 +11445,53 @@ func (c *CloudSecurityDefender) String() string {
 	return fmt.Sprintf("%#v", c)
 }
 
+// Configuration for the Google Security Command Center Cloud Security Provider.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/google-security-command-center-cloudsecurity-setup)
+type CloudSecurityGoogle struct {
+	// Credentials used for accessing Google Security Command Center.
+	Credential *GoogleServiceAccountCredential `json:"credential" url:"credential"`
+	// The Google Cloud scope path whose Security Command Center findings and Cloud Asset Inventory assets should be queried. Must be formatted as `organizations/{id}` or `projects/{id}`.
+	ScopePath string `json:"scope_path" url:"scope_path"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *CloudSecurityGoogle) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
+}
+
+func (c *CloudSecurityGoogle) UnmarshalJSON(data []byte) error {
+	type unmarshaler CloudSecurityGoogle
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = CloudSecurityGoogle(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
+	c._rawJSON = nil
+	return nil
+}
+
+func (c *CloudSecurityGoogle) String() string {
+	if len(c._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
 // Configuration for Palo Alto Networks Cortex Cloud Security
 //
 // [Configuration guide](https://docs.synqly.com/guides/provider-configuration/paloalto-cloudsecurity-setup)
@@ -17235,6 +17282,10 @@ type ProviderConfig struct {
 	CloudsecurityCrowdstrikeMock *CloudSecurityCrowdStrikeMock
 	// Configuration for the Microsoft Defender for Cloud Provider
 	CloudsecurityDefender *CloudSecurityDefender
+	// Configuration for the Google Security Command Center Cloud Security Provider.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/google-security-command-center-cloudsecurity-setup)
+	CloudsecurityGoogle *CloudSecurityGoogle
 	// Configuration for Palo Alto Networks Cortex Cloud Security
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/paloalto-cloudsecurity-setup)
@@ -17840,6 +17891,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.CloudsecurityDefender = value
+	case "cloudsecurity_google":
+		value := new(CloudSecurityGoogle)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.CloudsecurityGoogle = value
 	case "cloudsecurity_paloalto":
 		value := new(CloudSecurityPaloAlto)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -18556,6 +18613,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.CloudsecurityDefender != nil {
 		return core.MarshalJSONWithExtraProperty(p.CloudsecurityDefender, "type", "cloudsecurity_defender")
 	}
+	if p.CloudsecurityGoogle != nil {
+		return core.MarshalJSONWithExtraProperty(p.CloudsecurityGoogle, "type", "cloudsecurity_google")
+	}
 	if p.CloudsecurityPaloalto != nil {
 		return core.MarshalJSONWithExtraProperty(p.CloudsecurityPaloalto, "type", "cloudsecurity_paloalto")
 	}
@@ -18896,6 +18956,7 @@ type ProviderConfigVisitor interface {
 	VisitCloudsecurityCrowdstrike(*CloudSecurityCrowdStrike) error
 	VisitCloudsecurityCrowdstrikeMock(*CloudSecurityCrowdStrikeMock) error
 	VisitCloudsecurityDefender(*CloudSecurityDefender) error
+	VisitCloudsecurityGoogle(*CloudSecurityGoogle) error
 	VisitCloudsecurityPaloalto(*CloudSecurityPaloAlto) error
 	VisitCloudsecurityUpwind(*CloudSecurityUpwind) error
 	VisitCloudsecurityWiz(*CloudSecurityWiz) error
@@ -19114,6 +19175,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.CloudsecurityDefender != nil {
 		return visitor.VisitCloudsecurityDefender(p.CloudsecurityDefender)
+	}
+	if p.CloudsecurityGoogle != nil {
+		return visitor.VisitCloudsecurityGoogle(p.CloudsecurityGoogle)
 	}
 	if p.CloudsecurityPaloalto != nil {
 		return visitor.VisitCloudsecurityPaloalto(p.CloudsecurityPaloalto)
@@ -19497,6 +19561,8 @@ const (
 	ProviderConfigIdCloudSecurityCrowdStrikeMock ProviderConfigId = "cloudsecurity_crowdstrike_mock"
 	// Microsoft Defender for Cloud
 	ProviderConfigIdCloudSecurityDefender ProviderConfigId = "cloudsecurity_defender"
+	// Google Security Command Center
+	ProviderConfigIdCloudSecurityGoogle ProviderConfigId = "cloudsecurity_google"
 	// Palo Alto Networks Cortex Cloud Security
 	ProviderConfigIdCloudSecurityPaloAlto ProviderConfigId = "cloudsecurity_paloalto"
 	// Upwind Cloud Security
@@ -19779,6 +19845,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdCloudSecurityCrowdStrikeMock, nil
 	case "cloudsecurity_defender":
 		return ProviderConfigIdCloudSecurityDefender, nil
+	case "cloudsecurity_google":
+		return ProviderConfigIdCloudSecurityGoogle, nil
 	case "cloudsecurity_paloalto":
 		return ProviderConfigIdCloudSecurityPaloAlto, nil
 	case "cloudsecurity_upwind":
