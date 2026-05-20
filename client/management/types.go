@@ -17544,6 +17544,8 @@ type ProviderConfig struct {
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/axonius-asset-setup)
 	VulnerabilitiesAxonius *VulnerabilitiesAxonius
+	// Configuration for a mocked Axonius as a Vulnerabilities Provider
+	VulnerabilitiesAxoniusMock *VulnerabilitiesAxoniusMock
 	// Configuration for CrowdStrike Falcon® Spotlight.
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/crowdstrike-vulns-setup)
@@ -18336,6 +18338,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.VulnerabilitiesAxonius = value
+	case "vulnerabilities_axonius_mock":
+		value := new(VulnerabilitiesAxoniusMock)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.VulnerabilitiesAxoniusMock = value
 	case "vulnerabilities_crowdstrike":
 		value := new(VulnerabilitiesCrowdStrike)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -18797,6 +18805,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.VulnerabilitiesAxonius != nil {
 		return core.MarshalJSONWithExtraProperty(p.VulnerabilitiesAxonius, "type", "vulnerabilities_axonius")
 	}
+	if p.VulnerabilitiesAxoniusMock != nil {
+		return core.MarshalJSONWithExtraProperty(p.VulnerabilitiesAxoniusMock, "type", "vulnerabilities_axonius_mock")
+	}
 	if p.VulnerabilitiesCrowdstrike != nil {
 		return core.MarshalJSONWithExtraProperty(p.VulnerabilitiesCrowdstrike, "type", "vulnerabilities_crowdstrike")
 	}
@@ -18968,6 +18979,7 @@ type ProviderConfigVisitor interface {
 	VisitTicketingZendesk(*TicketingZendesk) error
 	VisitVulnerabilitiesAmazonInspector(*VulnerabilitiesAmazonInspector) error
 	VisitVulnerabilitiesAxonius(*VulnerabilitiesAxonius) error
+	VisitVulnerabilitiesAxoniusMock(*VulnerabilitiesAxoniusMock) error
 	VisitVulnerabilitiesCrowdstrike(*VulnerabilitiesCrowdStrike) error
 	VisitVulnerabilitiesCrowdstrikeMock(*VulnerabilitiesCrowdStrikeMock) error
 	VisitVulnerabilitiesDefender(*VulnerabilitiesDefender) error
@@ -19352,6 +19364,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	if p.VulnerabilitiesAxonius != nil {
 		return visitor.VisitVulnerabilitiesAxonius(p.VulnerabilitiesAxonius)
 	}
+	if p.VulnerabilitiesAxoniusMock != nil {
+		return visitor.VisitVulnerabilitiesAxoniusMock(p.VulnerabilitiesAxoniusMock)
+	}
 	if p.VulnerabilitiesCrowdstrike != nil {
 		return visitor.VisitVulnerabilitiesCrowdstrike(p.VulnerabilitiesCrowdstrike)
 	}
@@ -19648,6 +19663,8 @@ const (
 	ProviderConfigIdVulnerabilitiesAmazonInspector ProviderConfigId = "vulnerabilities_amazon_inspector"
 	// Axonius
 	ProviderConfigIdVulnerabilitiesAxonius ProviderConfigId = "vulnerabilities_axonius"
+	// [MOCK] Axonius
+	ProviderConfigIdVulnerabilitiesAxoniusMock ProviderConfigId = "vulnerabilities_axonius_mock"
 	// CrowdStrike Falcon® Spotlight
 	ProviderConfigIdVulnerabilitiesCrowdStrike ProviderConfigId = "vulnerabilities_crowdstrike"
 	// [MOCK] CrowdStrike Falcon® Spotlight
@@ -19928,6 +19945,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdVulnerabilitiesAmazonInspector, nil
 	case "vulnerabilities_axonius":
 		return ProviderConfigIdVulnerabilitiesAxonius, nil
+	case "vulnerabilities_axonius_mock":
+		return ProviderConfigIdVulnerabilitiesAxoniusMock, nil
 	case "vulnerabilities_crowdstrike":
 		return ProviderConfigIdVulnerabilitiesCrowdStrike, nil
 	case "vulnerabilities_crowdstrike_mock":
@@ -24535,6 +24554,25 @@ func (v VeracodeRegion) Ptr() *VeracodeRegion {
 	return &v
 }
 
+type VulnerabilitiesAxoniusDataset string
+
+const (
+	VulnerabilitiesAxoniusDatasetBasicVer0 VulnerabilitiesAxoniusDataset = "basic_v0"
+)
+
+func NewVulnerabilitiesAxoniusDatasetFromString(s string) (VulnerabilitiesAxoniusDataset, error) {
+	switch s {
+	case "basic_v0":
+		return VulnerabilitiesAxoniusDatasetBasicVer0, nil
+	}
+	var t VulnerabilitiesAxoniusDataset
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (v VulnerabilitiesAxoniusDataset) Ptr() *VulnerabilitiesAxoniusDataset {
+	return &v
+}
+
 type VulnerabilitiesCrowdStrikeDataset string
 
 const (
@@ -24696,6 +24734,48 @@ func (v *VulnerabilitiesAxonius) UnmarshalJSON(data []byte) error {
 }
 
 func (v *VulnerabilitiesAxonius) String() string {
+	if len(v._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(v._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(v); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", v)
+}
+
+// Configuration for a mocked Axonius as a Vulnerabilities Provider
+type VulnerabilitiesAxoniusMock struct {
+	Dataset VulnerabilitiesAxoniusDataset `json:"dataset" url:"dataset"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (v *VulnerabilitiesAxoniusMock) GetExtraProperties() map[string]interface{} {
+	return v.extraProperties
+}
+
+func (v *VulnerabilitiesAxoniusMock) UnmarshalJSON(data []byte) error {
+	type unmarshaler VulnerabilitiesAxoniusMock
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*v = VulnerabilitiesAxoniusMock(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *v)
+	if err != nil {
+		return err
+	}
+	v.extraProperties = extraProperties
+
+	v._rawJSON = nil
+	return nil
+}
+
+func (v *VulnerabilitiesAxoniusMock) String() string {
 	if len(v._rawJSON) > 0 {
 		if value, err := core.StringifyJSON(v._rawJSON); err == nil {
 			return value
