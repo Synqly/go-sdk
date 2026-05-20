@@ -1699,6 +1699,10 @@ type Databucket struct {
 	TypeId DatabucketTypeId `json:"type_id" url:"type_id"`
 	// The unique identifier of the databucket.
 	Uid *string `json:"uid,omitempty" url:"uid,omitempty"`
+	// The name of the vendor.
+	VendorName *string `json:"vendor_name,omitempty" url:"vendor_name,omitempty"`
+	// The UUID of the vendor.
+	VendorUuid *string `json:"vendor_uuid,omitempty" url:"vendor_uuid,omitempty"`
 	// The version of the resource. For example 1.2.3.
 	Version *string `json:"version,omitempty" url:"version,omitempty"`
 
@@ -5395,6 +5399,10 @@ type ResourceDetails struct {
 	Type *string `json:"type,omitempty" url:"type,omitempty"`
 	// The unique identifier of the resource.
 	Uid *string `json:"uid,omitempty" url:"uid,omitempty"`
+	// The name of the vendor.
+	VendorName *string `json:"vendor_name,omitempty" url:"vendor_name,omitempty"`
+	// The UUID of the vendor.
+	VendorUuid *string `json:"vendor_uuid,omitempty" url:"vendor_uuid,omitempty"`
 	// The version of the resource. For example 1.2.3.
 	Version *string `json:"version,omitempty" url:"version,omitempty"`
 
