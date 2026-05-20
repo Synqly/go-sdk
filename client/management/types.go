@@ -14909,6 +14909,51 @@ func (h HttpRequestBodyFormat) Ptr() *HttpRequestBodyFormat {
 	return &h
 }
 
+// Lists IAM users and groups, and queries CloudTrail management events for audit logs.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/aws-iam-identity-setup)
+type IdentityAwsIam struct {
+	Credential *AwsProviderCredential `json:"credential" url:"credential"`
+	Region     AwsRegion              `json:"region" url:"region"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (i *IdentityAwsIam) GetExtraProperties() map[string]interface{} {
+	return i.extraProperties
+}
+
+func (i *IdentityAwsIam) UnmarshalJSON(data []byte) error {
+	type unmarshaler IdentityAwsIam
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*i = IdentityAwsIam(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *i)
+	if err != nil {
+		return err
+	}
+	i.extraProperties = extraProperties
+
+	i._rawJSON = nil
+	return nil
+}
+
+func (i *IdentityAwsIam) String() string {
+	if len(i._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(i._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(i); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", i)
+}
+
 // Configuration for Microsoft Entra ID.
 //
 // [Configuration guide](https://docs.synqly.com/guides/provider-configuration/entra-id-setup)
@@ -17354,6 +17399,10 @@ type ProviderConfig struct {
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/jamf-endpointmanagement-setup)
 	EndpointmanagementJamf *EndpointmanagementJamf
+	// Lists IAM users and groups, and queries CloudTrail management events for audit logs.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/aws-iam-identity-setup)
+	IdentityAwsIam *IdentityAwsIam
 	// Configuration for Microsoft Entra ID.
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/entra-id-setup)
@@ -18011,6 +18060,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.EndpointmanagementJamf = value
+	case "identity_aws_iam":
+		value := new(IdentityAwsIam)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.IdentityAwsIam = value
 	case "identity_entra_id":
 		value := new(IdentityEntraId)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -18673,6 +18728,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.EndpointmanagementJamf != nil {
 		return core.MarshalJSONWithExtraProperty(p.EndpointmanagementJamf, "type", "endpointmanagement_jamf")
 	}
+	if p.IdentityAwsIam != nil {
+		return core.MarshalJSONWithExtraProperty(p.IdentityAwsIam, "type", "identity_aws_iam")
+	}
 	if p.IdentityEntraId != nil {
 		return core.MarshalJSONWithExtraProperty(p.IdentityEntraId, "type", "identity_entra_id")
 	}
@@ -18976,6 +19034,7 @@ type ProviderConfigVisitor interface {
 	VisitEndpointmanagementIntune(*EndpointmanagementIntune) error
 	VisitEndpointmanagementIru(*EndpointmanagementIru) error
 	VisitEndpointmanagementJamf(*EndpointmanagementJamf) error
+	VisitIdentityAwsIam(*IdentityAwsIam) error
 	VisitIdentityEntraId(*IdentityEntraId) error
 	VisitIdentityGoogle(*IdentityGoogle) error
 	VisitIdentityOkta(*IdentityOkta) error
@@ -19235,6 +19294,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.EndpointmanagementJamf != nil {
 		return visitor.VisitEndpointmanagementJamf(p.EndpointmanagementJamf)
+	}
+	if p.IdentityAwsIam != nil {
+		return visitor.VisitIdentityAwsIam(p.IdentityAwsIam)
 	}
 	if p.IdentityEntraId != nil {
 		return visitor.VisitIdentityEntraId(p.IdentityEntraId)
@@ -19601,6 +19663,8 @@ const (
 	ProviderConfigIdEndpointmanagementIru ProviderConfigId = "endpointmanagement_iru"
 	// Jamf Pro
 	ProviderConfigIdEndpointmanagementJamf ProviderConfigId = "endpointmanagement_jamf"
+	// AWS IAM Identity
+	ProviderConfigIdIdentityAwsIam ProviderConfigId = "identity_aws_iam"
 	// Microsoft Entra ID
 	ProviderConfigIdIdentityEntraId ProviderConfigId = "identity_entra_id"
 	// Google Workspace
@@ -19885,6 +19949,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdEndpointmanagementIru, nil
 	case "endpointmanagement_jamf":
 		return ProviderConfigIdEndpointmanagementJamf, nil
+	case "identity_aws_iam":
+		return ProviderConfigIdIdentityAwsIam, nil
 	case "identity_entra_id":
 		return ProviderConfigIdIdentityEntraId, nil
 	case "identity_google":
