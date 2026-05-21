@@ -14909,6 +14909,25 @@ func (h HttpRequestBodyFormat) Ptr() *HttpRequestBodyFormat {
 	return &h
 }
 
+type IdentityEntraIdDataset string
+
+const (
+	IdentityEntraIdDatasetBasicVer0 IdentityEntraIdDataset = "basic_v0"
+)
+
+func NewIdentityEntraIdDatasetFromString(s string) (IdentityEntraIdDataset, error) {
+	switch s {
+	case "basic_v0":
+		return IdentityEntraIdDatasetBasicVer0, nil
+	}
+	var t IdentityEntraIdDataset
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (i IdentityEntraIdDataset) Ptr() *IdentityEntraIdDataset {
+	return &i
+}
+
 // Lists IAM users and groups, and queries CloudTrail management events for audit logs.
 //
 // [Configuration guide](https://docs.synqly.com/guides/provider-configuration/aws-iam-identity-setup)
@@ -14991,6 +15010,48 @@ func (i *IdentityEntraId) UnmarshalJSON(data []byte) error {
 }
 
 func (i *IdentityEntraId) String() string {
+	if len(i._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(i._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(i); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", i)
+}
+
+// Configuration for [MOCK] Microsoft Entra ID.
+type IdentityEntraIdMock struct {
+	Dataset IdentityEntraIdDataset `json:"dataset" url:"dataset"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (i *IdentityEntraIdMock) GetExtraProperties() map[string]interface{} {
+	return i.extraProperties
+}
+
+func (i *IdentityEntraIdMock) UnmarshalJSON(data []byte) error {
+	type unmarshaler IdentityEntraIdMock
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*i = IdentityEntraIdMock(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *i)
+	if err != nil {
+		return err
+	}
+	i.extraProperties = extraProperties
+
+	i._rawJSON = nil
+	return nil
+}
+
+func (i *IdentityEntraIdMock) String() string {
 	if len(i._rawJSON) > 0 {
 		if value, err := core.StringifyJSON(i._rawJSON); err == nil {
 			return value
@@ -17407,6 +17468,8 @@ type ProviderConfig struct {
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/entra-id-setup)
 	IdentityEntraId *IdentityEntraId
+	// Configuration for [MOCK] Microsoft Entra ID.
+	IdentityEntraIdMock *IdentityEntraIdMock
 	// Configuration for Google Workspace.
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/google-workspace-setup)
@@ -18072,6 +18135,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.IdentityEntraId = value
+	case "identity_entra_id_mock":
+		value := new(IdentityEntraIdMock)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.IdentityEntraIdMock = value
 	case "identity_google":
 		value := new(IdentityGoogle)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -18734,6 +18803,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.IdentityEntraId != nil {
 		return core.MarshalJSONWithExtraProperty(p.IdentityEntraId, "type", "identity_entra_id")
 	}
+	if p.IdentityEntraIdMock != nil {
+		return core.MarshalJSONWithExtraProperty(p.IdentityEntraIdMock, "type", "identity_entra_id_mock")
+	}
 	if p.IdentityGoogle != nil {
 		return core.MarshalJSONWithExtraProperty(p.IdentityGoogle, "type", "identity_google")
 	}
@@ -19036,6 +19108,7 @@ type ProviderConfigVisitor interface {
 	VisitEndpointmanagementJamf(*EndpointmanagementJamf) error
 	VisitIdentityAwsIam(*IdentityAwsIam) error
 	VisitIdentityEntraId(*IdentityEntraId) error
+	VisitIdentityEntraIdMock(*IdentityEntraIdMock) error
 	VisitIdentityGoogle(*IdentityGoogle) error
 	VisitIdentityOkta(*IdentityOkta) error
 	VisitIdentityPingone(*IdentityPingOne) error
@@ -19300,6 +19373,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.IdentityEntraId != nil {
 		return visitor.VisitIdentityEntraId(p.IdentityEntraId)
+	}
+	if p.IdentityEntraIdMock != nil {
+		return visitor.VisitIdentityEntraIdMock(p.IdentityEntraIdMock)
 	}
 	if p.IdentityGoogle != nil {
 		return visitor.VisitIdentityGoogle(p.IdentityGoogle)
@@ -19667,6 +19743,8 @@ const (
 	ProviderConfigIdIdentityAwsIam ProviderConfigId = "identity_aws_iam"
 	// Microsoft Entra ID
 	ProviderConfigIdIdentityEntraId ProviderConfigId = "identity_entra_id"
+	// [MOCK] Microsoft Entra ID
+	ProviderConfigIdIdentityEntraIdMock ProviderConfigId = "identity_entra_id_mock"
 	// Google Workspace
 	ProviderConfigIdIdentityGoogle ProviderConfigId = "identity_google"
 	// Okta Identity
@@ -19953,6 +20031,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdIdentityAwsIam, nil
 	case "identity_entra_id":
 		return ProviderConfigIdIdentityEntraId, nil
+	case "identity_entra_id_mock":
+		return ProviderConfigIdIdentityEntraIdMock, nil
 	case "identity_google":
 		return ProviderConfigIdIdentityGoogle, nil
 	case "identity_okta":
