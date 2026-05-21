@@ -13190,6 +13190,25 @@ func (e *ElasticsearchSharedSecret) Accept(visitor ElasticsearchSharedSecretVisi
 	return fmt.Errorf("type %T does not define a non-empty union type", e)
 }
 
+type EmailSecurityMimecastCloudGatewayDataset string
+
+const (
+	EmailSecurityMimecastCloudGatewayDatasetBasicVer0 EmailSecurityMimecastCloudGatewayDataset = "basic_v0"
+)
+
+func NewEmailSecurityMimecastCloudGatewayDatasetFromString(s string) (EmailSecurityMimecastCloudGatewayDataset, error) {
+	switch s {
+	case "basic_v0":
+		return EmailSecurityMimecastCloudGatewayDatasetBasicVer0, nil
+	}
+	var t EmailSecurityMimecastCloudGatewayDataset
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (e EmailSecurityMimecastCloudGatewayDataset) Ptr() *EmailSecurityMimecastCloudGatewayDataset {
+	return &e
+}
+
 // Configuration for Microsoft Defender for Office 365.
 //
 // [Configuration guide](https://docs.synqly.com/guides/provider-configuration/microsoft-defender-for-office-emailsecurity-setup)
@@ -13274,6 +13293,48 @@ func (e *EmailSecurityMimecastCloudGateway) UnmarshalJSON(data []byte) error {
 }
 
 func (e *EmailSecurityMimecastCloudGateway) String() string {
+	if len(e._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(e._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(e); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", e)
+}
+
+// Configuration for [MOCK] Mimecast Cloud Gateway.
+type EmailSecurityMimecastCloudGatewayMock struct {
+	Dataset EmailSecurityMimecastCloudGatewayDataset `json:"dataset" url:"dataset"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (e *EmailSecurityMimecastCloudGatewayMock) GetExtraProperties() map[string]interface{} {
+	return e.extraProperties
+}
+
+func (e *EmailSecurityMimecastCloudGatewayMock) UnmarshalJSON(data []byte) error {
+	type unmarshaler EmailSecurityMimecastCloudGatewayMock
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*e = EmailSecurityMimecastCloudGatewayMock(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *e)
+	if err != nil {
+		return err
+	}
+	e.extraProperties = extraProperties
+
+	e._rawJSON = nil
+	return nil
+}
+
+func (e *EmailSecurityMimecastCloudGatewayMock) String() string {
 	if len(e._rawJSON) > 0 {
 		if value, err := core.StringifyJSON(e._rawJSON); err == nil {
 			return value
@@ -17444,6 +17505,8 @@ type ProviderConfig struct {
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/mimecast-cloud-gateway-setup)
 	EmailsecurityMimecastCloudGateway *EmailSecurityMimecastCloudGateway
+	// Configuration for [MOCK] Mimecast Cloud Gateway.
+	EmailsecurityMimecastCloudGatewayMock *EmailSecurityMimecastCloudGatewayMock
 	// Configuration for Automox.
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/automox-endpointmanagement-setup)
@@ -18099,6 +18162,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.EmailsecurityMimecastCloudGateway = value
+	case "emailsecurity_mimecast_cloud_gateway_mock":
+		value := new(EmailSecurityMimecastCloudGatewayMock)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.EmailsecurityMimecastCloudGatewayMock = value
 	case "endpointmanagement_automox":
 		value := new(EndpointmanagementAutomox)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -18785,6 +18854,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.EmailsecurityMimecastCloudGateway != nil {
 		return core.MarshalJSONWithExtraProperty(p.EmailsecurityMimecastCloudGateway, "type", "emailsecurity_mimecast_cloud_gateway")
 	}
+	if p.EmailsecurityMimecastCloudGatewayMock != nil {
+		return core.MarshalJSONWithExtraProperty(p.EmailsecurityMimecastCloudGatewayMock, "type", "emailsecurity_mimecast_cloud_gateway_mock")
+	}
 	if p.EndpointmanagementAutomox != nil {
 		return core.MarshalJSONWithExtraProperty(p.EndpointmanagementAutomox, "type", "endpointmanagement_automox")
 	}
@@ -19102,6 +19174,7 @@ type ProviderConfigVisitor interface {
 	VisitEdrTanium(*EdrTanium) error
 	VisitEmailsecurityDefenderForOffice(*EmailSecurityDefenderForOffice) error
 	VisitEmailsecurityMimecastCloudGateway(*EmailSecurityMimecastCloudGateway) error
+	VisitEmailsecurityMimecastCloudGatewayMock(*EmailSecurityMimecastCloudGatewayMock) error
 	VisitEndpointmanagementAutomox(*EndpointmanagementAutomox) error
 	VisitEndpointmanagementIntune(*EndpointmanagementIntune) error
 	VisitEndpointmanagementIru(*EndpointmanagementIru) error
@@ -19355,6 +19428,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.EmailsecurityMimecastCloudGateway != nil {
 		return visitor.VisitEmailsecurityMimecastCloudGateway(p.EmailsecurityMimecastCloudGateway)
+	}
+	if p.EmailsecurityMimecastCloudGatewayMock != nil {
+		return visitor.VisitEmailsecurityMimecastCloudGatewayMock(p.EmailsecurityMimecastCloudGatewayMock)
 	}
 	if p.EndpointmanagementAutomox != nil {
 		return visitor.VisitEndpointmanagementAutomox(p.EndpointmanagementAutomox)
@@ -19731,6 +19807,8 @@ const (
 	ProviderConfigIdEmailSecurityDefenderForOffice ProviderConfigId = "emailsecurity_defender_for_office"
 	// Mimecast Cloud Gateway
 	ProviderConfigIdEmailSecurityMimecastCloudGateway ProviderConfigId = "emailsecurity_mimecast_cloud_gateway"
+	// [MOCK] Mimecast Cloud Gateway
+	ProviderConfigIdEmailSecurityMimecastCloudGatewayMock ProviderConfigId = "emailsecurity_mimecast_cloud_gateway_mock"
 	// Automox
 	ProviderConfigIdEndpointmanagementAutomox ProviderConfigId = "endpointmanagement_automox"
 	// Microsoft Intune
@@ -20019,6 +20097,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdEmailSecurityDefenderForOffice, nil
 	case "emailsecurity_mimecast_cloud_gateway":
 		return ProviderConfigIdEmailSecurityMimecastCloudGateway, nil
+	case "emailsecurity_mimecast_cloud_gateway_mock":
+		return ProviderConfigIdEmailSecurityMimecastCloudGatewayMock, nil
 	case "endpointmanagement_automox":
 		return ProviderConfigIdEndpointmanagementAutomox, nil
 	case "endpointmanagement_intune":
