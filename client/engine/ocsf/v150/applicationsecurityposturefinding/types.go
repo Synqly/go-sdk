@@ -961,6 +961,8 @@ type Application struct {
 	Name *string `json:"name,omitempty" url:"name,omitempty"`
 	// The identity of the service or user account that owns the application.
 	Owner *User `json:"owner,omitempty" url:"owner,omitempty"`
+	// The raw event/finding data as received from the source.
+	RawData *string `json:"raw_data,omitempty" url:"raw_data,omitempty"`
 	// The cloud region of the resource.
 	Region *string `json:"region,omitempty" url:"region,omitempty"`
 	// A graph representation showing how this application relates to and interacts with other entities in the environment. This can include parent/child relationships, dependencies, or other connections.

@@ -11,6 +11,8 @@ import (
 type AppSecGetApplicationFindingDetailsRequest struct {
 	// Add metadata to the response by invoking meta functions. Documentation for meta functions is available at https://docs.synqly.com/api-reference/meta-functions. Not all meta function are available at every endpoint.
 	Meta []*string `json:"-" url:"meta,omitempty"`
+	// Include the raw data from the provider in the response. Defaults to `false`.
+	IncludeRawData *bool `json:"-" url:"include_raw_data,omitempty"`
 }
 
 type AppSecQueryApplicationFindingsRequest struct {
@@ -22,6 +24,8 @@ type AppSecQueryApplicationFindingsRequest struct {
 	Filter []*string `json:"-" url:"filter,omitempty"`
 	// Start search from cursor position.
 	Cursor *string `json:"-" url:"cursor,omitempty"`
+	// Include the raw data from the provider in the response. Defaults to `false`.
+	IncludeRawData *bool `json:"-" url:"include_raw_data,omitempty"`
 }
 
 type AppSecQueryApplicationsRequest struct {
@@ -33,6 +37,8 @@ type AppSecQueryApplicationsRequest struct {
 	Filter []*string `json:"-" url:"filter,omitempty"`
 	// Start search from cursor position.
 	Cursor *string `json:"-" url:"cursor,omitempty"`
+	// Include the raw data from the provider in the response. Defaults to `false`.
+	IncludeRawData *bool `json:"-" url:"include_raw_data,omitempty"`
 }
 
 type AppSecQueryFindingsRequest struct {
@@ -44,6 +50,8 @@ type AppSecQueryFindingsRequest struct {
 	Filter []*string `json:"-" url:"filter,omitempty"`
 	// Start search from cursor position.
 	Cursor *string `json:"-" url:"cursor,omitempty"`
+	// Include the raw data from the provider in the response. Defaults to `false`.
+	IncludeRawData *bool `json:"-" url:"include_raw_data,omitempty"`
 }
 
 type AppSecGetApplicationFindingDetailsResponse struct {
