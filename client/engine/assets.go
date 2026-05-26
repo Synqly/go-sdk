@@ -117,6 +117,8 @@ func (c *CreateDeviceResponse) String() string {
 type CreateDevicesRequest struct {
 	Devices          []Device          `json:"devices" url:"devices"`
 	CustomProperties map[string]string `json:"custom_properties,omitempty" url:"custom_properties,omitempty"`
+	// Connector hint passed to the integration (for example ServiceNow discovery_source with Identify & Reconcile).
+	SourceName string `json:"source_name" url:"source_name"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
