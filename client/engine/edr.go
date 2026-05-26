@@ -17,6 +17,13 @@ type DeleteIocsRequest struct {
 	Ids *string `json:"-" url:"ids,omitempty"`
 }
 
+type GetThreatNotesRequest struct {
+	// Maximum number of notes to return. Defaults to 100.
+	Limit *int `json:"-" url:"limit,omitempty"`
+	// Cursor from a previous response to retrieve the next page of notes.
+	Cursor *string `json:"-" url:"cursor,omitempty"`
+}
+
 type QueryAlertsRequest struct {
 	// Add metadata to the response by invoking meta functions. Documentation for meta functions is available at https://docs.synqly.com/api-reference/meta-functions. Not all meta function are available at every endpoint.
 	Meta []*string `json:"-" url:"meta,omitempty"`
@@ -397,7 +404,9 @@ type GetThreatNotesResponse struct {
 	// Additional messages from the service response that may be helpful to the client.
 	Messages *MessagesResponse `json:"messages,omitempty" url:"messages,omitempty"`
 	// Various metadata about the results organized by group, then type, then field.
-	Meta   *MetaResponse                `json:"meta,omitempty" url:"meta,omitempty"`
+	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
+	// Cursor to use to retrieve the next page of results
+	Cursor string                       `json:"cursor" url:"cursor"`
 	Result []*noteactivity.NoteActivity `json:"result" url:"result"`
 
 	extraProperties map[string]interface{}

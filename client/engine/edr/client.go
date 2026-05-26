@@ -1567,6 +1567,7 @@ func (c *Client) QueryEdrEvents(
 func (c *Client) GetThreatNotes(
 	ctx context.Context,
 	threatId string,
+	request *engine.GetThreatNotesRequest,
 	opts ...option.RequestOption,
 ) (*engine.GetThreatNotesResponse, error) {
 	options := core.NewRequestOptions(opts...)
@@ -1579,6 +1580,14 @@ func (c *Client) GetThreatNotes(
 		baseURL = options.BaseURL
 	}
 	endpointURL := core.EncodeURL(baseURL+"/v1/edr/threats/%v/notes", threatId)
+
+	queryParams, err := core.QueryValues(request)
+	if err != nil {
+		return nil, err
+	}
+	if len(queryParams) > 0 {
+		endpointURL += "?" + queryParams.Encode()
+	}
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
