@@ -22136,6 +22136,8 @@ type SinkHttp struct {
 	SkipTlsVerify *bool `json:"skip_tls_verify,omitempty" url:"skip_tls_verify,omitempty"`
 	// Additional HTTP headers to include on every request. Use for non-sensitive metadata like source system identifiers, API versioning, or custom routing headers that don't change per request.
 	StaticHeaders map[string]string `json:"static_headers,omitempty" url:"static_headers,omitempty"`
+	// Maximum timeout in seconds to wait for the receiving endpoint to respond. A value of `0` (default) means no explicit timeout is set.
+	TimeoutSeconds *int `json:"timeout_seconds,omitempty" url:"timeout_seconds,omitempty"`
 	// Receiving endpoint where events will be sent.
 	Url string `json:"url" url:"url"`
 
