@@ -51,6 +51,36 @@ type QueryGroupRequest struct {
 	Filter []*string `json:"-" url:"filter,omitempty"`
 }
 
+type QueryIdentityRiskEventsRequest struct {
+	// Add metadata to the response by invoking meta functions. Documentation for meta functions is available at https://docs.synqly.com/api-reference/meta-functions. Not all meta function are available at every endpoint.
+	Meta []*string `json:"-" url:"meta,omitempty"`
+	// Number of events to return. Defaults to 100.
+	Limit *int `json:"-" url:"limit,omitempty"`
+	// Start search from cursor position.
+	Cursor *string `json:"-" url:"cursor,omitempty"`
+	// Select a field to order the results by. Defaults to `time`. To control the direction of the sorting, append `[asc]` or `[desc]` to the field name. For example, `time[asc]` will sort the results by `time` in ascending order. The ordering defaults to `asc` if not specified.
+	Order []*string `json:"-" url:"order,omitempty"`
+	// Filter results by this query. For more information on filtering, refer to our Filtering Guide. Defaults to no filter. If used more than once, the queries are ANDed together.
+	Filter []*string `json:"-" url:"filter,omitempty"`
+	// Include the raw data from the identity provider in the response. Defaults to `false`.
+	IncludeRawData *bool `json:"-" url:"include_raw_data,omitempty"`
+}
+
+type QueryIdentityRiskyUsersRequest struct {
+	// Add metadata to the response by invoking meta functions. Documentation for meta functions is available at https://docs.synqly.com/api-reference/meta-functions. Not all meta function are available at every endpoint.
+	Meta []*string `json:"-" url:"meta,omitempty"`
+	// Number of users to return. Defaults to 100.
+	Limit *int `json:"-" url:"limit,omitempty"`
+	// Start search from cursor position.
+	Cursor *string `json:"-" url:"cursor,omitempty"`
+	// Select a field to order the results by. Defaults to `time`. To control the direction of the sorting, append `[asc]` or `[desc]` to the field name. For example, `time[asc]` will sort the results by `time` in ascending order. The ordering defaults to `asc` if not specified.
+	Order []*string `json:"-" url:"order,omitempty"`
+	// Filter results by this query. For more information on filtering, refer to our Filtering Guide. Defaults to no filter. If used more than once, the queries are ANDed together.
+	Filter []*string `json:"-" url:"filter,omitempty"`
+	// Include the raw data from the identity provider in the response. Defaults to `false`.
+	IncludeRawData *bool `json:"-" url:"include_raw_data,omitempty"`
+}
+
 type QueryUserRequest struct {
 	// Add metadata to the response by invoking meta functions. Documentation for meta functions is available at https://docs.synqly.com/api-reference/meta-functions. Not all meta function are available at every endpoint.
 	Meta []*string `json:"-" url:"meta,omitempty"`
@@ -290,6 +320,102 @@ func (q *QueryIdentityAuditLogResponse) UnmarshalJSON(data []byte) error {
 }
 
 func (q *QueryIdentityAuditLogResponse) String() string {
+	if len(q._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(q._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(q); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", q)
+}
+
+type QueryIdentityRiskEventsResponse struct {
+	// Additional messages from the service response that may be helpful to the client.
+	Messages *MessagesResponse `json:"messages,omitempty" url:"messages,omitempty"`
+	// Various metadata about the results organized by group, then type, then field.
+	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
+	// Cursor to use to retrieve the next page of results
+	Cursor string `json:"cursor" url:"cursor"`
+	// Identity threat / risk events (for example Microsoft Entra Identity Protection risk detections) normalized to OCSF.
+	Result []*Event `json:"result" url:"result"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (q *QueryIdentityRiskEventsResponse) GetExtraProperties() map[string]interface{} {
+	return q.extraProperties
+}
+
+func (q *QueryIdentityRiskEventsResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler QueryIdentityRiskEventsResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*q = QueryIdentityRiskEventsResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *q)
+	if err != nil {
+		return err
+	}
+	q.extraProperties = extraProperties
+
+	q._rawJSON = nil
+	return nil
+}
+
+func (q *QueryIdentityRiskEventsResponse) String() string {
+	if len(q._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(q._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(q); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", q)
+}
+
+type QueryIdentityRiskyUsersResponse struct {
+	// Additional messages from the service response that may be helpful to the client.
+	Messages *MessagesResponse `json:"messages,omitempty" url:"messages,omitempty"`
+	// Various metadata about the results organized by group, then type, then field.
+	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
+	// Cursor to use to retrieve the next page of results
+	Cursor string `json:"cursor" url:"cursor"`
+	// Risky users from the identity provider (for example Microsoft Entra Identity Protection rolled-up user risk), each wrapped in an OCSF Entity Management Read event.
+	Result []latest.EntityManagement `json:"result" url:"result"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (q *QueryIdentityRiskyUsersResponse) GetExtraProperties() map[string]interface{} {
+	return q.extraProperties
+}
+
+func (q *QueryIdentityRiskyUsersResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler QueryIdentityRiskyUsersResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*q = QueryIdentityRiskyUsersResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *q)
+	if err != nil {
+		return err
+	}
+	q.extraProperties = extraProperties
+
+	q._rawJSON = nil
+	return nil
+}
+
+func (q *QueryIdentityRiskyUsersResponse) String() string {
 	if len(q._rawJSON) > 0 {
 		if value, err := core.StringifyJSON(q._rawJSON); err == nil {
 			return value
