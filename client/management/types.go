@@ -12653,9 +12653,11 @@ func (e *EdrCrowdStrikeMock) String() string {
 // [Configuration guide](https://docs.synqly.com/guides/provider-configuration/defender-setup)
 type EdrDefender struct {
 	Credential *DefenderCredential `json:"credential" url:"credential"`
+	// Base URL for the Microsoft Defender for Endpoint API (the api.security.microsoft.com host). US Government and regional tenants use a different host.
+	SecurityUrl string `json:"security_url" url:"security_url"`
 	// Tenant ID for the Microsoft Defender Management Console.
 	TenantId string `json:"tenant_id" url:"tenant_id"`
-	// Base URL for the Microsoft Defender API.
+	// Base URL for the Microsoft Defender for Endpoint API (the legacy api.securitycenter host).
 	Url string `json:"url" url:"url"`
 
 	extraProperties map[string]interface{}
