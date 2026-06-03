@@ -354,6 +354,100 @@ func (d *DeleteIocsResponse) String() string {
 	return fmt.Sprintf("%#v", d)
 }
 
+type ExecuteCommandRequest struct {
+	// The command string to execute on the remote endpoint.
+	Command string `json:"command" url:"command"`
+	// Opaque cursor returned from a previous pending response, used to continue polling the in-flight provider command.
+	Cursor *string `json:"cursor,omitempty" url:"cursor,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (e *ExecuteCommandRequest) GetExtraProperties() map[string]interface{} {
+	return e.extraProperties
+}
+
+func (e *ExecuteCommandRequest) UnmarshalJSON(data []byte) error {
+	type unmarshaler ExecuteCommandRequest
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*e = ExecuteCommandRequest(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *e)
+	if err != nil {
+		return err
+	}
+	e.extraProperties = extraProperties
+
+	e._rawJSON = nil
+	return nil
+}
+
+func (e *ExecuteCommandRequest) String() string {
+	if len(e._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(e._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(e); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", e)
+}
+
+type ExecuteCommandResponse struct {
+	// Additional messages from the service response that may be helpful to the client.
+	Messages *MessagesResponse `json:"messages,omitempty" url:"messages,omitempty"`
+	// Various metadata about the results organized by group, then type, then field.
+	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
+	// Cursor to use to retrieve the next page of results
+	Cursor string `json:"cursor" url:"cursor"`
+	// If the provider supports asynchronous queries and the query is still running, this field will be `PENDING` until the query is complete. In this case, the client should retry using the provided cursor.
+	Status QueryStatus `json:"status" url:"status"`
+	// The normalized command result. This may be omitted while the command is still pending and no output is yet available.
+	Result *ExecuteCommandResult `json:"result,omitempty" url:"result,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (e *ExecuteCommandResponse) GetExtraProperties() map[string]interface{} {
+	return e.extraProperties
+}
+
+func (e *ExecuteCommandResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler ExecuteCommandResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*e = ExecuteCommandResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *e)
+	if err != nil {
+		return err
+	}
+	e.extraProperties = extraProperties
+
+	e._rawJSON = nil
+	return nil
+}
+
+func (e *ExecuteCommandResponse) String() string {
+	if len(e._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(e._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(e); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", e)
+}
+
 type GetEndpointResponse struct {
 	// Additional messages from the service response that may be helpful to the client.
 	Messages *MessagesResponse `json:"messages,omitempty" url:"messages,omitempty"`
@@ -873,4 +967,46 @@ func (q *QueryThreatsResponse) String() string {
 		return value
 	}
 	return fmt.Sprintf("%#v", q)
+}
+
+type RetrieveFileRequest struct {
+	// The remote file path to retrieve from the endpoint.
+	Path string `json:"path" url:"path"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (r *RetrieveFileRequest) GetExtraProperties() map[string]interface{} {
+	return r.extraProperties
+}
+
+func (r *RetrieveFileRequest) UnmarshalJSON(data []byte) error {
+	type unmarshaler RetrieveFileRequest
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*r = RetrieveFileRequest(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *r)
+	if err != nil {
+		return err
+	}
+	r.extraProperties = extraProperties
+
+	r._rawJSON = nil
+	return nil
+}
+
+func (r *RetrieveFileRequest) String() string {
+	if len(r._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(r._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(r); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", r)
 }

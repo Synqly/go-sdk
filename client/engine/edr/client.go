@@ -322,6 +322,290 @@ func (c *Client) GetEndpoint(
 	return response, nil
 }
 
+// Runs a provider-backed command on the endpoint identified by `{uid}` and returns normalized stdout and stderr without exposing provider session details.
+func (c *Client) ExecuteCommand(
+	ctx context.Context,
+	uid engine.Id,
+	request *engine.ExecuteCommandRequest,
+	opts ...option.RequestOption,
+) (*engine.ExecuteCommandResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
+	baseURL := "https://api.synqly.com"
+	if c.baseURL != "" {
+		baseURL = c.baseURL
+	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
+	endpointURL := core.EncodeURL(baseURL+"/v1/edr/endpoints/%v/actions/execute-command", uid)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
+
+	errorDecoder := func(statusCode int, body io.Reader) error {
+		raw, err := io.ReadAll(body)
+		if err != nil {
+			return err
+		}
+		apiError := core.NewAPIError(statusCode, errors.New(string(raw)))
+		decoder := json.NewDecoder(bytes.NewReader(raw))
+		switch statusCode {
+		case 400:
+			value := new(engine.BadRequestError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 401:
+			value := new(engine.UnauthorizedError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 403:
+			value := new(engine.ForbiddenError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 404:
+			value := new(engine.NotFoundError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 405:
+			value := new(engine.MethodNotAllowedError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 409:
+			value := new(engine.ConflictError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 415:
+			value := new(engine.UnsupportedMediaTypeError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 429:
+			value := new(engine.TooManyRequestsError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 500:
+			value := new(engine.InternalServerError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 501:
+			value := new(engine.NotImplementedError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 502:
+			value := new(engine.BadGatewayError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 503:
+			value := new(engine.ServiceUnavailableError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 504:
+			value := new(engine.GatewayTimeoutError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		}
+		return apiError
+	}
+
+	var response *engine.ExecuteCommandResponse
+	if err := c.caller.Call(
+		ctx,
+		&core.CallParams{
+			URL:          endpointURL,
+			Method:       http.MethodPost,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
+			Request:      request,
+			Response:     &response,
+			ErrorDecoder: errorDecoder,
+		},
+	); err != nil {
+		return nil, err
+	}
+	return response, nil
+}
+
+// Retrieves a file from the endpoint identified by `{uid}` and returns the provider artifact as a binary file response.
+func (c *Client) RetrieveFile(
+	ctx context.Context,
+	uid engine.Id,
+	request *engine.RetrieveFileRequest,
+	opts ...option.RequestOption,
+) (io.Reader, error) {
+	options := core.NewRequestOptions(opts...)
+
+	baseURL := "https://api.synqly.com"
+	if c.baseURL != "" {
+		baseURL = c.baseURL
+	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
+	endpointURL := core.EncodeURL(baseURL+"/v1/edr/endpoints/%v/actions/retrieve-file", uid)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
+
+	errorDecoder := func(statusCode int, body io.Reader) error {
+		raw, err := io.ReadAll(body)
+		if err != nil {
+			return err
+		}
+		apiError := core.NewAPIError(statusCode, errors.New(string(raw)))
+		decoder := json.NewDecoder(bytes.NewReader(raw))
+		switch statusCode {
+		case 400:
+			value := new(engine.BadRequestError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 401:
+			value := new(engine.UnauthorizedError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 403:
+			value := new(engine.ForbiddenError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 404:
+			value := new(engine.NotFoundError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 405:
+			value := new(engine.MethodNotAllowedError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 409:
+			value := new(engine.ConflictError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 415:
+			value := new(engine.UnsupportedMediaTypeError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 429:
+			value := new(engine.TooManyRequestsError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 500:
+			value := new(engine.InternalServerError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 501:
+			value := new(engine.NotImplementedError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 502:
+			value := new(engine.BadGatewayError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 503:
+			value := new(engine.ServiceUnavailableError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 504:
+			value := new(engine.GatewayTimeoutError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		}
+		return apiError
+	}
+
+	response := bytes.NewBuffer(nil)
+	if err := c.caller.Call(
+		ctx,
+		&core.CallParams{
+			URL:          endpointURL,
+			Method:       http.MethodPost,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
+			Request:      request,
+			Response:     response,
+			ErrorDecoder: errorDecoder,
+		},
+	); err != nil {
+		return nil, err
+	}
+	return response, nil
+}
+
 // Returns a list of applications matching the query from the token-linked EDR source.
 func (c *Client) QueryApplications(
 	ctx context.Context,

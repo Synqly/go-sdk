@@ -804,6 +804,54 @@ func (c ConnectionState) Ptr() *ConnectionState {
 	return &c
 }
 
+type ExecuteCommandResult struct {
+	// The OCSF `device.uid` of the endpoint the command ran on.
+	DeviceUid string `json:"device_uid" url:"device_uid"`
+	// The normalized command string that Synqly executed.
+	Command string `json:"command" url:"command"`
+	// The command stdout collected during the synchronous polling window.
+	Stdout *string `json:"stdout,omitempty" url:"stdout,omitempty"`
+	// The command stderr collected during the synchronous polling window.
+	Stderr *string `json:"stderr,omitempty" url:"stderr,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (e *ExecuteCommandResult) GetExtraProperties() map[string]interface{} {
+	return e.extraProperties
+}
+
+func (e *ExecuteCommandResult) UnmarshalJSON(data []byte) error {
+	type unmarshaler ExecuteCommandResult
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*e = ExecuteCommandResult(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *e)
+	if err != nil {
+		return err
+	}
+	e.extraProperties = extraProperties
+
+	e._rawJSON = nil
+	return nil
+}
+
+func (e *ExecuteCommandResult) String() string {
+	if len(e._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(e._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(e); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", e)
+}
+
 // The posture score of an endpoint asset.
 type PostureScore = *configstate.ConfigState
 
@@ -3085,6 +3133,7 @@ const (
 	OperationIdEdrCreateIocs                                    OperationId = "edr_create_iocs"
 	OperationIdEdrCreateThreatNote                              OperationId = "edr_create_threat_note"
 	OperationIdEdrDeleteIocs                                    OperationId = "edr_delete_iocs"
+	OperationIdEdrExecuteCommand                                OperationId = "edr_execute_command"
 	OperationIdEdrGetEndpoint                                   OperationId = "edr_get_endpoint"
 	OperationIdEdrGetThreatNotes                                OperationId = "edr_get_threat_notes"
 	OperationIdEdrNetworkQuarantine                             OperationId = "edr_network_quarantine"
@@ -3095,6 +3144,7 @@ const (
 	OperationIdEdrQueryIocs                                     OperationId = "edr_query_iocs"
 	OperationIdEdrQueryPostureScore                             OperationId = "edr_query_posture_score"
 	OperationIdEdrQueryThreatevents                             OperationId = "edr_query_threatevents"
+	OperationIdEdrRetrieveFile                                  OperationId = "edr_retrieve_file"
 	OperationIdEmailsecurityGetThreatDetails                    OperationId = "emailsecurity_get_threat_details"
 	OperationIdEmailsecurityQueryEmailEvents                    OperationId = "emailsecurity_query_email_events"
 	OperationIdEmailsecurityQueryThreats                        OperationId = "emailsecurity_query_threats"
@@ -3236,6 +3286,8 @@ func NewOperationIdFromString(s string) (OperationId, error) {
 		return OperationIdEdrCreateThreatNote, nil
 	case "edr_delete_iocs":
 		return OperationIdEdrDeleteIocs, nil
+	case "edr_execute_command":
+		return OperationIdEdrExecuteCommand, nil
 	case "edr_get_endpoint":
 		return OperationIdEdrGetEndpoint, nil
 	case "edr_get_threat_notes":
@@ -3256,6 +3308,8 @@ func NewOperationIdFromString(s string) (OperationId, error) {
 		return OperationIdEdrQueryPostureScore, nil
 	case "edr_query_threatevents":
 		return OperationIdEdrQueryThreatevents, nil
+	case "edr_retrieve_file":
+		return OperationIdEdrRetrieveFile, nil
 	case "emailsecurity_get_threat_details":
 		return OperationIdEmailsecurityGetThreatDetails, nil
 	case "emailsecurity_query_email_events":

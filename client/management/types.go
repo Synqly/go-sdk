@@ -5486,6 +5486,7 @@ const (
 	OperationIdEdrCreateIocs                                    OperationId = "edr_create_iocs"
 	OperationIdEdrCreateThreatNote                              OperationId = "edr_create_threat_note"
 	OperationIdEdrDeleteIocs                                    OperationId = "edr_delete_iocs"
+	OperationIdEdrExecuteCommand                                OperationId = "edr_execute_command"
 	OperationIdEdrGetEndpoint                                   OperationId = "edr_get_endpoint"
 	OperationIdEdrGetThreatNotes                                OperationId = "edr_get_threat_notes"
 	OperationIdEdrNetworkQuarantine                             OperationId = "edr_network_quarantine"
@@ -5496,6 +5497,7 @@ const (
 	OperationIdEdrQueryIocs                                     OperationId = "edr_query_iocs"
 	OperationIdEdrQueryPostureScore                             OperationId = "edr_query_posture_score"
 	OperationIdEdrQueryThreatevents                             OperationId = "edr_query_threatevents"
+	OperationIdEdrRetrieveFile                                  OperationId = "edr_retrieve_file"
 	OperationIdEmailsecurityGetThreatDetails                    OperationId = "emailsecurity_get_threat_details"
 	OperationIdEmailsecurityQueryEmailEvents                    OperationId = "emailsecurity_query_email_events"
 	OperationIdEmailsecurityQueryThreats                        OperationId = "emailsecurity_query_threats"
@@ -5637,6 +5639,8 @@ func NewOperationIdFromString(s string) (OperationId, error) {
 		return OperationIdEdrCreateThreatNote, nil
 	case "edr_delete_iocs":
 		return OperationIdEdrDeleteIocs, nil
+	case "edr_execute_command":
+		return OperationIdEdrExecuteCommand, nil
 	case "edr_get_endpoint":
 		return OperationIdEdrGetEndpoint, nil
 	case "edr_get_threat_notes":
@@ -5657,6 +5661,8 @@ func NewOperationIdFromString(s string) (OperationId, error) {
 		return OperationIdEdrQueryPostureScore, nil
 	case "edr_query_threatevents":
 		return OperationIdEdrQueryThreatevents, nil
+	case "edr_retrieve_file":
+		return OperationIdEdrRetrieveFile, nil
 	case "emailsecurity_get_threat_details":
 		return OperationIdEmailsecurityGetThreatDetails, nil
 	case "emailsecurity_query_email_events":
