@@ -547,7 +547,8 @@ func (c *Client) ListSso(
 	return response, nil
 }
 
-// Retrieve a specific SSO configuration. The client secret is not included.
+// Retrieve a specific Single Sign-On (SSO) configuration. Client
+// secrets are not included.
 func (c *Client) GetSso(
 	ctx context.Context,
 	ssoId management.SsoConfigurationId,
@@ -631,9 +632,9 @@ func (c *Client) GetSso(
 	return response, nil
 }
 
-// Returns the SP-side configuration values the user needs to enter into their
-// Identity Provider. Includes the OIDC redirect URI or SAML ACS URL and SP
-// entity ID depending on the protocols configured for the organization.
+// Returns configuration that must be used when configuring Identity
+// Providers, such as the OIDC redirect URI or SAML ACS URL and SP
+// entity ID.
 func (c *Client) GetSsoMetadata(
 	ctx context.Context,
 	opts ...option.RequestOption,
