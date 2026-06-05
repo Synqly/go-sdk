@@ -4350,7 +4350,7 @@ func (i *Integration) String() string {
 }
 
 type IntegrationMessagesResponse struct {
-	// Warnings or issues that occurred during integration creation that did not prevent the request from returning, but may indicate a problem with the integration configuration.
+	// Warnings or issues that occurred during integration creation or verification that did not prevent the request from returning, but may indicate a problem with the integration configuration.
 	Problems []*Problem `json:"problems,omitempty" url:"problems,omitempty"`
 
 	extraProperties map[string]interface{}

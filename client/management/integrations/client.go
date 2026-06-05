@@ -546,7 +546,7 @@ func (c *Client) Verify(
 	accountId management.AccountId,
 	request *management.VerifyIntegrationRequest,
 	opts ...option.RequestOption,
-) error {
+) (*management.VerifyIntegrationResponse, error) {
 	options := core.NewRequestOptions(opts...)
 
 	baseURL := "https://api.synqly.com"
@@ -663,6 +663,7 @@ func (c *Client) Verify(
 		return apiError
 	}
 
+	var response *management.VerifyIntegrationResponse
 	if err := c.caller.Call(
 		ctx,
 		&core.CallParams{
@@ -672,12 +673,13 @@ func (c *Client) Verify(
 			Headers:      headers,
 			Client:       options.HTTPClient,
 			Request:      request,
+			Response:     &response,
 			ErrorDecoder: errorDecoder,
 		},
 	); err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+	return response, nil
 }
 
 // Updates the `Integration` object matching `{integrationId}`, where the

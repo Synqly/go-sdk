@@ -425,3 +425,45 @@ func (v *VerifyIntegrationRequest) String() string {
 	}
 	return fmt.Sprintf("%#v", v)
 }
+
+type VerifyIntegrationResponse struct {
+	// Warnings or issues that occurred during integration verification, such as invalid provider configuration fields. Omitted when there are no warnings.
+	Messages *IntegrationMessagesResponse `json:"messages,omitempty" url:"messages,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (v *VerifyIntegrationResponse) GetExtraProperties() map[string]interface{} {
+	return v.extraProperties
+}
+
+func (v *VerifyIntegrationResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler VerifyIntegrationResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*v = VerifyIntegrationResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *v)
+	if err != nil {
+		return err
+	}
+	v.extraProperties = extraProperties
+
+	v._rawJSON = nil
+	return nil
+}
+
+func (v *VerifyIntegrationResponse) String() string {
+	if len(v._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(v._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(v); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", v)
+}
