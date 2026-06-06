@@ -12986,6 +12986,55 @@ func (e *EdrTanium) String() string {
 	return fmt.Sprintf("%#v", e)
 }
 
+// Configuration for Trellix ePolicy Orchestrator as an EDR provider. A tenant with only the Trellix EDR product enabled cannot use ePO-backed device queries.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/trellix-edr-setup)
+type EdrTrellix struct {
+	// Tenant-scoped Trellix API key.
+	ApiKey *TrellixApiKeyCredential `json:"api_key" url:"api_key"`
+	// OAuth client credentials for a Trellix IAM client.
+	Credential *TrellixCredential `json:"credential" url:"credential"`
+	// Trellix tenant GUID for the customer tenancy you want to query.
+	TenantId string `json:"tenant_id" url:"tenant_id"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (e *EdrTrellix) GetExtraProperties() map[string]interface{} {
+	return e.extraProperties
+}
+
+func (e *EdrTrellix) UnmarshalJSON(data []byte) error {
+	type unmarshaler EdrTrellix
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*e = EdrTrellix(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *e)
+	if err != nil {
+		return err
+	}
+	e.extraProperties = extraProperties
+
+	e._rawJSON = nil
+	return nil
+}
+
+func (e *EdrTrellix) String() string {
+	if len(e._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(e._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(e); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", e)
+}
+
 // Options used to control how requests are made to Elasticsearch when different authentication types are used.
 type ElasticsearchAuthOptions struct {
 	// Submit API requests as a specific user, with all of their roles and permissions. When populated, this option will send the `es-security-runas-user` header with every request made to the Elasticsearch API.
@@ -17561,6 +17610,10 @@ type ProviderConfig struct {
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/tanium-setup)
 	EdrTanium *EdrTanium
+	// Configuration for Trellix ePolicy Orchestrator as an EDR provider. A tenant with only the Trellix EDR product enabled cannot use ePO-backed device queries.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/trellix-edr-setup)
+	EdrTrellix *EdrTrellix
 	// Configuration for Microsoft Defender for Office 365.
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/microsoft-defender-for-office-emailsecurity-setup)
@@ -18220,6 +18273,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.EdrTanium = value
+	case "edr_trellix":
+		value := new(EdrTrellix)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.EdrTrellix = value
 	case "emailsecurity_defender_for_office":
 		value := new(EmailSecurityDefenderForOffice)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -18921,6 +18980,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.EdrTanium != nil {
 		return core.MarshalJSONWithExtraProperty(p.EdrTanium, "type", "edr_tanium")
 	}
+	if p.EdrTrellix != nil {
+		return core.MarshalJSONWithExtraProperty(p.EdrTrellix, "type", "edr_trellix")
+	}
 	if p.EmailsecurityDefenderForOffice != nil {
 		return core.MarshalJSONWithExtraProperty(p.EmailsecurityDefenderForOffice, "type", "emailsecurity_defender_for_office")
 	}
@@ -19246,6 +19308,7 @@ type ProviderConfigVisitor interface {
 	VisitEdrSentinelone(*EdrSentinelOne) error
 	VisitEdrSophos(*EdrSophos) error
 	VisitEdrTanium(*EdrTanium) error
+	VisitEdrTrellix(*EdrTrellix) error
 	VisitEmailsecurityDefenderForOffice(*EmailSecurityDefenderForOffice) error
 	VisitEmailsecurityMimecastCloudGateway(*EmailSecurityMimecastCloudGateway) error
 	VisitEmailsecurityMimecastCloudGatewayMock(*EmailSecurityMimecastCloudGatewayMock) error
@@ -19499,6 +19562,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.EdrTanium != nil {
 		return visitor.VisitEdrTanium(p.EdrTanium)
+	}
+	if p.EdrTrellix != nil {
+		return visitor.VisitEdrTrellix(p.EdrTrellix)
 	}
 	if p.EmailsecurityDefenderForOffice != nil {
 		return visitor.VisitEmailsecurityDefenderForOffice(p.EmailsecurityDefenderForOffice)
@@ -19882,6 +19948,8 @@ const (
 	ProviderConfigIdEdrSophos ProviderConfigId = "edr_sophos"
 	// Tanium EDR
 	ProviderConfigIdEdrTanium ProviderConfigId = "edr_tanium"
+	// Trellix ePolicy Orchestrator
+	ProviderConfigIdEdrTrellix ProviderConfigId = "edr_trellix"
 	// Microsoft Defender for Office 365
 	ProviderConfigIdEmailSecurityDefenderForOffice ProviderConfigId = "emailsecurity_defender_for_office"
 	// Mimecast Cloud Gateway
@@ -20174,6 +20242,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdEdrSophos, nil
 	case "edr_tanium":
 		return ProviderConfigIdEdrTanium, nil
+	case "edr_trellix":
+		return ProviderConfigIdEdrTrellix, nil
 	case "emailsecurity_defender_for_office":
 		return ProviderConfigIdEmailSecurityDefenderForOffice, nil
 	case "emailsecurity_mimecast_cloud_gateway":
@@ -24660,6 +24730,146 @@ type TorqCredentialVisitor interface {
 }
 
 func (t *TorqCredential) Accept(visitor TorqCredentialVisitor) error {
+	if t.OAuthClient != nil {
+		return visitor.VisitOAuthClient(t.OAuthClient)
+	}
+	if t.OAuthClientId != "" {
+		return visitor.VisitOAuthClientId(t.OAuthClientId)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", t)
+}
+
+type TrellixApiKeyCredential struct {
+	Type string
+	// Tenant-scoped Trellix API key used for ePO API requests.
+	Token *TokenCredential
+	// Reference to existing API Key.
+	TokenId TokenCredentialId
+}
+
+func (t *TrellixApiKeyCredential) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	t.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", t)
+	}
+	switch unmarshaler.Type {
+	case "token":
+		value := new(TokenCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		t.Token = value
+	case "token_id":
+		var valueUnmarshaler struct {
+			TokenId TokenCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		t.TokenId = valueUnmarshaler.TokenId
+	}
+	return nil
+}
+
+func (t TrellixApiKeyCredential) MarshalJSON() ([]byte, error) {
+	if t.Token != nil {
+		return core.MarshalJSONWithExtraProperty(t.Token, "type", "token")
+	}
+	if t.TokenId != "" {
+		var marshaler = struct {
+			Type    string            `json:"type"`
+			TokenId TokenCredentialId `json:"value"`
+		}{
+			Type:    "token_id",
+			TokenId: t.TokenId,
+		}
+		return json.Marshal(marshaler)
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", t)
+}
+
+type TrellixApiKeyCredentialVisitor interface {
+	VisitToken(*TokenCredential) error
+	VisitTokenId(TokenCredentialId) error
+}
+
+func (t *TrellixApiKeyCredential) Accept(visitor TrellixApiKeyCredentialVisitor) error {
+	if t.Token != nil {
+		return visitor.VisitToken(t.Token)
+	}
+	if t.TokenId != "" {
+		return visitor.VisitTokenId(t.TokenId)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", t)
+}
+
+type TrellixCredential struct {
+	Type string
+	// Trellix IAM client credentials.
+	OAuthClient *OAuthClientCredential
+	// Reference to existing OAuth Client Credentials.
+	OAuthClientId OAuthClientCredentialId
+}
+
+func (t *TrellixCredential) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	t.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", t)
+	}
+	switch unmarshaler.Type {
+	case "o_auth_client":
+		value := new(OAuthClientCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		t.OAuthClient = value
+	case "o_auth_client_id":
+		var valueUnmarshaler struct {
+			OAuthClientId OAuthClientCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		t.OAuthClientId = valueUnmarshaler.OAuthClientId
+	}
+	return nil
+}
+
+func (t TrellixCredential) MarshalJSON() ([]byte, error) {
+	if t.OAuthClient != nil {
+		return core.MarshalJSONWithExtraProperty(t.OAuthClient, "type", "o_auth_client")
+	}
+	if t.OAuthClientId != "" {
+		var marshaler = struct {
+			Type          string                  `json:"type"`
+			OAuthClientId OAuthClientCredentialId `json:"value"`
+		}{
+			Type:          "o_auth_client_id",
+			OAuthClientId: t.OAuthClientId,
+		}
+		return json.Marshal(marshaler)
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", t)
+}
+
+type TrellixCredentialVisitor interface {
+	VisitOAuthClient(*OAuthClientCredential) error
+	VisitOAuthClientId(OAuthClientCredentialId) error
+}
+
+func (t *TrellixCredential) Accept(visitor TrellixCredentialVisitor) error {
 	if t.OAuthClient != nil {
 		return visitor.VisitOAuthClient(t.OAuthClient)
 	}
