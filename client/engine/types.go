@@ -3150,6 +3150,7 @@ const (
 	OperationIdEmailsecurityQueryThreats                        OperationId = "emailsecurity_query_threats"
 	OperationIdEndpointmanagementGetDevice                      OperationId = "endpointmanagement_get_device"
 	OperationIdEndpointmanagementQueryComplianceFindings        OperationId = "endpointmanagement_query_compliance_findings"
+	OperationIdEndpointmanagementQueryDeviceApplications        OperationId = "endpointmanagement_query_device_applications"
 	OperationIdEndpointmanagementQueryDevices                   OperationId = "endpointmanagement_query_devices"
 	OperationIdEndpointmanagementRemediateDevice                OperationId = "endpointmanagement_remediate_device"
 	OperationIdIdentityDisableUser                              OperationId = "identity_disable_user"
@@ -3320,6 +3321,8 @@ func NewOperationIdFromString(s string) (OperationId, error) {
 		return OperationIdEndpointmanagementGetDevice, nil
 	case "endpointmanagement_query_compliance_findings":
 		return OperationIdEndpointmanagementQueryComplianceFindings, nil
+	case "endpointmanagement_query_device_applications":
+		return OperationIdEndpointmanagementQueryDeviceApplications, nil
 	case "endpointmanagement_query_devices":
 		return OperationIdEndpointmanagementQueryDevices, nil
 	case "endpointmanagement_remediate_device":
