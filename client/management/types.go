@@ -9029,6 +9029,76 @@ func (a *ArmisCredential) Accept(visitor ArmisCredentialVisitor) error {
 	return fmt.Errorf("type %T does not define a non-empty union type", a)
 }
 
+type AshbyCredential struct {
+	Type string
+	// API key for Ashby with at minimum Organization Read permission.
+	Token *TokenCredential
+	// Reference to existing Token.
+	TokenId TokenCredentialId
+}
+
+func (a *AshbyCredential) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	a.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", a)
+	}
+	switch unmarshaler.Type {
+	case "token":
+		value := new(TokenCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		a.Token = value
+	case "token_id":
+		var valueUnmarshaler struct {
+			TokenId TokenCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		a.TokenId = valueUnmarshaler.TokenId
+	}
+	return nil
+}
+
+func (a AshbyCredential) MarshalJSON() ([]byte, error) {
+	if a.Token != nil {
+		return core.MarshalJSONWithExtraProperty(a.Token, "type", "token")
+	}
+	if a.TokenId != "" {
+		var marshaler = struct {
+			Type    string            `json:"type"`
+			TokenId TokenCredentialId `json:"value"`
+		}{
+			Type:    "token_id",
+			TokenId: a.TokenId,
+		}
+		return json.Marshal(marshaler)
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", a)
+}
+
+type AshbyCredentialVisitor interface {
+	VisitToken(*TokenCredential) error
+	VisitTokenId(TokenCredentialId) error
+}
+
+func (a *AshbyCredential) Accept(visitor AshbyCredentialVisitor) error {
+	if a.Token != nil {
+		return visitor.VisitToken(a.Token)
+	}
+	if a.TokenId != "" {
+		return visitor.VisitTokenId(a.TokenId)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", a)
+}
+
 type AssetsArmisDataset string
 
 const (
@@ -15104,6 +15174,50 @@ func (i IdentityEntraIdDataset) Ptr() *IdentityEntraIdDataset {
 	return &i
 }
 
+// Configuration for Ashby Identity.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/ashby-identity-setup)
+type IdentityAshby struct {
+	Credential *AshbyCredential `json:"credential" url:"credential"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (i *IdentityAshby) GetExtraProperties() map[string]interface{} {
+	return i.extraProperties
+}
+
+func (i *IdentityAshby) UnmarshalJSON(data []byte) error {
+	type unmarshaler IdentityAshby
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*i = IdentityAshby(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *i)
+	if err != nil {
+		return err
+	}
+	i.extraProperties = extraProperties
+
+	i._rawJSON = nil
+	return nil
+}
+
+func (i *IdentityAshby) String() string {
+	if len(i._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(i._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(i); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", i)
+}
+
 // Lists IAM users and groups, and queries CloudTrail management events for audit logs.
 //
 // [Configuration guide](https://docs.synqly.com/guides/provider-configuration/aws-iam-identity-setup)
@@ -17646,6 +17760,10 @@ type ProviderConfig struct {
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/jamf-endpointmanagement-setup)
 	EndpointmanagementJamf *EndpointmanagementJamf
+	// Configuration for Ashby Identity.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/ashby-identity-setup)
+	IdentityAshby *IdentityAshby
 	// Lists IAM users and groups, and queries CloudTrail management events for audit logs.
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/aws-iam-identity-setup)
@@ -18327,6 +18445,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.EndpointmanagementJamf = value
+	case "identity_ashby":
+		value := new(IdentityAshby)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.IdentityAshby = value
 	case "identity_aws_iam":
 		value := new(IdentityAwsIam)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -19010,6 +19134,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.EndpointmanagementJamf != nil {
 		return core.MarshalJSONWithExtraProperty(p.EndpointmanagementJamf, "type", "endpointmanagement_jamf")
 	}
+	if p.IdentityAshby != nil {
+		return core.MarshalJSONWithExtraProperty(p.IdentityAshby, "type", "identity_ashby")
+	}
 	if p.IdentityAwsIam != nil {
 		return core.MarshalJSONWithExtraProperty(p.IdentityAwsIam, "type", "identity_aws_iam")
 	}
@@ -19322,6 +19449,7 @@ type ProviderConfigVisitor interface {
 	VisitEndpointmanagementIntune(*EndpointmanagementIntune) error
 	VisitEndpointmanagementIru(*EndpointmanagementIru) error
 	VisitEndpointmanagementJamf(*EndpointmanagementJamf) error
+	VisitIdentityAshby(*IdentityAshby) error
 	VisitIdentityAwsIam(*IdentityAwsIam) error
 	VisitIdentityEntraId(*IdentityEntraId) error
 	VisitIdentityEntraIdMock(*IdentityEntraIdMock) error
@@ -19592,6 +19720,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.EndpointmanagementJamf != nil {
 		return visitor.VisitEndpointmanagementJamf(p.EndpointmanagementJamf)
+	}
+	if p.IdentityAshby != nil {
+		return visitor.VisitIdentityAshby(p.IdentityAshby)
 	}
 	if p.IdentityAwsIam != nil {
 		return visitor.VisitIdentityAwsIam(p.IdentityAwsIam)
@@ -19970,6 +20101,8 @@ const (
 	ProviderConfigIdEndpointmanagementIru ProviderConfigId = "endpointmanagement_iru"
 	// Jamf Pro
 	ProviderConfigIdEndpointmanagementJamf ProviderConfigId = "endpointmanagement_jamf"
+	// Ashby Identity
+	ProviderConfigIdIdentityAshby ProviderConfigId = "identity_ashby"
 	// AWS IAM Identity
 	ProviderConfigIdIdentityAwsIam ProviderConfigId = "identity_aws_iam"
 	// Microsoft Entra ID
@@ -20264,6 +20397,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdEndpointmanagementIru, nil
 	case "endpointmanagement_jamf":
 		return ProviderConfigIdEndpointmanagementJamf, nil
+	case "identity_ashby":
+		return ProviderConfigIdIdentityAshby, nil
 	case "identity_aws_iam":
 		return ProviderConfigIdIdentityAwsIam, nil
 	case "identity_entra_id":
