@@ -5459,9 +5459,11 @@ const (
 	OperationIdAppsecQueryFindings                              OperationId = "appsec_query_findings"
 	OperationIdAssetsCreateAsset                                OperationId = "assets_create_asset"
 	OperationIdAssetsCreateDevices                              OperationId = "assets_create_devices"
+	OperationIdAssetsCreateSoftware                             OperationId = "assets_create_software"
 	OperationIdAssetsGetLabels                                  OperationId = "assets_get_labels"
 	OperationIdAssetsQueryAlerts                                OperationId = "assets_query_alerts"
 	OperationIdAssetsQueryDevices                               OperationId = "assets_query_devices"
+	OperationIdAssetsQuerySoftware                              OperationId = "assets_query_software"
 	OperationIdAssetsQueryUtilization                           OperationId = "assets_query_utilization"
 	OperationIdAssetsQueryVulnerabilities                       OperationId = "assets_query_vulnerabilities"
 	OperationIdAssetsUpdateDeviceProperties                     OperationId = "assets_update_device_properties"
@@ -5586,12 +5588,16 @@ func NewOperationIdFromString(s string) (OperationId, error) {
 		return OperationIdAssetsCreateAsset, nil
 	case "assets_create_devices":
 		return OperationIdAssetsCreateDevices, nil
+	case "assets_create_software":
+		return OperationIdAssetsCreateSoftware, nil
 	case "assets_get_labels":
 		return OperationIdAssetsGetLabels, nil
 	case "assets_query_alerts":
 		return OperationIdAssetsQueryAlerts, nil
 	case "assets_query_devices":
 		return OperationIdAssetsQueryDevices, nil
+	case "assets_query_software":
+		return OperationIdAssetsQuerySoftware, nil
 	case "assets_query_utilization":
 		return OperationIdAssetsQueryUtilization, nil
 	case "assets_query_vulnerabilities":
@@ -9273,6 +9279,25 @@ func (a AssetsTaniumCloudDataset) Ptr() *AssetsTaniumCloudDataset {
 	return &a
 }
 
+type AssetsTenableCloudDataset string
+
+const (
+	AssetsTenableCloudDatasetBasicVer0 AssetsTenableCloudDataset = "basic_v0"
+)
+
+func NewAssetsTenableCloudDatasetFromString(s string) (AssetsTenableCloudDataset, error) {
+	switch s {
+	case "basic_v0":
+		return AssetsTenableCloudDatasetBasicVer0, nil
+	}
+	var t AssetsTenableCloudDataset
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (a AssetsTenableCloudDataset) Ptr() *AssetsTenableCloudDataset {
+	return &a
+}
+
 // Configuration for Armis Centrix™ for Asset Management and Security.
 //
 // [Configuration guide](https://docs.synqly.com/guides/provider-configuration/armis-centrix-setup)
@@ -10235,6 +10260,48 @@ func (a *AssetsTenableCloud) UnmarshalJSON(data []byte) error {
 }
 
 func (a *AssetsTenableCloud) String() string {
+	if len(a._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(a); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", a)
+}
+
+// Configuration for a mock Tenable Cloud Assets provider
+type AssetsTenableCloudMock struct {
+	Dataset AssetsTenableCloudDataset `json:"dataset" url:"dataset"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (a *AssetsTenableCloudMock) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
+}
+
+func (a *AssetsTenableCloudMock) UnmarshalJSON(data []byte) error {
+	type unmarshaler AssetsTenableCloudMock
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*a = AssetsTenableCloudMock(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+
+	a._rawJSON = nil
+	return nil
+}
+
+func (a *AssetsTenableCloudMock) String() string {
 	if len(a._rawJSON) > 0 {
 		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
 			return value
@@ -17659,6 +17726,8 @@ type ProviderConfig struct {
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/tenable-setup)
 	AssetsTenableCloud *AssetsTenableCloud
+	// Configuration for a mock Tenable Cloud Assets provider
+	AssetsTenableCloudMock *AssetsTenableCloudMock
 	// Configuration for Microsoft 365 Copilot.
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/microsoft-copilot-chat-setup)
@@ -18268,6 +18337,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.AssetsTenableCloud = value
+	case "assets_tenable_cloud_mock":
+		value := new(AssetsTenableCloudMock)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.AssetsTenableCloudMock = value
 	case "chat_microsoft_copilot":
 		value := new(ChatMicrosoftCopilot)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -19047,6 +19122,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.AssetsTenableCloud != nil {
 		return core.MarshalJSONWithExtraProperty(p.AssetsTenableCloud, "type", "assets_tenable_cloud")
 	}
+	if p.AssetsTenableCloudMock != nil {
+		return core.MarshalJSONWithExtraProperty(p.AssetsTenableCloudMock, "type", "assets_tenable_cloud_mock")
+	}
 	if p.ChatMicrosoftCopilot != nil {
 		return core.MarshalJSONWithExtraProperty(p.ChatMicrosoftCopilot, "type", "chat_microsoft_copilot")
 	}
@@ -19422,6 +19500,7 @@ type ProviderConfigVisitor interface {
 	VisitAssetsTaniumCloud(*AssetsTaniumCloud) error
 	VisitAssetsTaniumCloudMock(*AssetsTaniumCloudMock) error
 	VisitAssetsTenableCloud(*AssetsTenableCloud) error
+	VisitAssetsTenableCloudMock(*AssetsTenableCloudMock) error
 	VisitChatMicrosoftCopilot(*ChatMicrosoftCopilot) error
 	VisitChatMicrosoftTeams(*ChatMicrosoftTeams) error
 	VisitChatSlack(*ChatSlack) error
@@ -19633,6 +19712,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.AssetsTenableCloud != nil {
 		return visitor.VisitAssetsTenableCloud(p.AssetsTenableCloud)
+	}
+	if p.AssetsTenableCloudMock != nil {
+		return visitor.VisitAssetsTenableCloudMock(p.AssetsTenableCloudMock)
 	}
 	if p.ChatMicrosoftCopilot != nil {
 		return visitor.VisitChatMicrosoftCopilot(p.ChatMicrosoftCopilot)
@@ -20044,6 +20126,8 @@ const (
 	ProviderConfigIdAssetsTaniumCloudMock ProviderConfigId = "assets_tanium_cloud_mock"
 	// Tenable Cloud
 	ProviderConfigIdAssetsTenableCloud ProviderConfigId = "assets_tenable_cloud"
+	// [MOCK] Tenable Cloud
+	ProviderConfigIdAssetsTenableCloudMock ProviderConfigId = "assets_tenable_cloud_mock"
 	// Microsoft 365 Copilot
 	ProviderConfigIdChatMicrosoftCopilot ProviderConfigId = "chat_microsoft_copilot"
 	// Microsoft Teams
@@ -20340,6 +20424,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdAssetsTaniumCloudMock, nil
 	case "assets_tenable_cloud":
 		return ProviderConfigIdAssetsTenableCloud, nil
+	case "assets_tenable_cloud_mock":
+		return ProviderConfigIdAssetsTenableCloudMock, nil
 	case "chat_microsoft_copilot":
 		return ProviderConfigIdChatMicrosoftCopilot, nil
 	case "chat_microsoft_teams":

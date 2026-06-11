@@ -25,6 +25,23 @@ type QueryDevicesRequest struct {
 	IncludeRawData *bool `json:"-" url:"include_raw_data,omitempty"`
 }
 
+type QuerySoftwareInventoryRequest struct {
+	// Add metadata to the response by invoking meta functions. Documentation for meta functions is available at https://docs.synqly.com/api-reference/meta-functions. Not all meta function are available at every endpoint.
+	Meta []*string `json:"-" url:"meta,omitempty"`
+	// Number of software inventory records to return. Defaults to 50.
+	Limit *int `json:"-" url:"limit,omitempty"`
+	// Start search from cursor position.
+	Cursor *string `json:"-" url:"cursor,omitempty"`
+	// Filter results by this query. For more information on filtering, refer to the Assets Filtering Guide. Defaults to no filter. If used more than once, the queries are ANDed together.
+	Filter []*string `json:"-" url:"filter,omitempty"`
+	// Select a field to order the results by. Defaults to `package.name`. To control the direction of the sorting, append
+	// `[asc]` or `[desc]` to the field name. For example, `package.name[asc]` will sort the results by package name in ascending order.
+	// The ordering defaults to `asc` if not specified.
+	Order *string `json:"-" url:"order,omitempty"`
+	// Include the raw data from the provider in the response. Defaults to `false`.
+	IncludeRawData *bool `json:"-" url:"include_raw_data,omitempty"`
+}
+
 type CreateDeviceRequest struct {
 	Device Device `json:"device" url:"device"`
 	// Optional connector hint (for example ServiceNow discovery_source with Identify & Reconcile).
@@ -206,6 +223,95 @@ func (c *CreateDevicesResponse) String() string {
 	return fmt.Sprintf("%#v", c)
 }
 
+type CreateSoftwareInventoryRequest struct {
+	SoftwareInventory SoftwareInventory `json:"software_inventory" url:"software_inventory"`
+	// Optional connector hint (for example ServiceNow discovery_source with Identify & Reconcile).
+	// Omit or leave empty when the integration does not use it; some integrations require it.
+	SourceName *string `json:"source_name,omitempty" url:"source_name,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *CreateSoftwareInventoryRequest) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
+}
+
+func (c *CreateSoftwareInventoryRequest) UnmarshalJSON(data []byte) error {
+	type unmarshaler CreateSoftwareInventoryRequest
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = CreateSoftwareInventoryRequest(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
+	c._rawJSON = nil
+	return nil
+}
+
+func (c *CreateSoftwareInventoryRequest) String() string {
+	if len(c._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
+type CreateSoftwareInventoryResponse struct {
+	// Additional messages from the service response that may be helpful to the client.
+	Messages *MessagesResponse `json:"messages,omitempty" url:"messages,omitempty"`
+	// Various metadata about the results organized by group, then type, then field.
+	Meta              *MetaResponse     `json:"meta,omitempty" url:"meta,omitempty"`
+	SoftwareInventory SoftwareInventory `json:"software_inventory" url:"software_inventory"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *CreateSoftwareInventoryResponse) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
+}
+
+func (c *CreateSoftwareInventoryResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler CreateSoftwareInventoryResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = CreateSoftwareInventoryResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
+	c._rawJSON = nil
+	return nil
+}
+
+func (c *CreateSoftwareInventoryResponse) String() string {
+	if len(c._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
 type QueryDevicesResponse struct {
 	// Additional messages from the service response that may be helpful to the client.
 	Messages *MessagesResponse `json:"messages,omitempty" url:"messages,omitempty"`
@@ -242,6 +348,53 @@ func (q *QueryDevicesResponse) UnmarshalJSON(data []byte) error {
 }
 
 func (q *QueryDevicesResponse) String() string {
+	if len(q._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(q._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(q); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", q)
+}
+
+type QuerySoftwareInventoryResponse struct {
+	// Additional messages from the service response that may be helpful to the client.
+	Messages *MessagesResponse `json:"messages,omitempty" url:"messages,omitempty"`
+	// Various metadata about the results organized by group, then type, then field.
+	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
+	// Cursor to use to retrieve the next page of results
+	Cursor string              `json:"cursor" url:"cursor"`
+	Result []SoftwareInventory `json:"result" url:"result"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (q *QuerySoftwareInventoryResponse) GetExtraProperties() map[string]interface{} {
+	return q.extraProperties
+}
+
+func (q *QuerySoftwareInventoryResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler QuerySoftwareInventoryResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*q = QuerySoftwareInventoryResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *q)
+	if err != nil {
+		return err
+	}
+	q.extraProperties = extraProperties
+
+	q._rawJSON = nil
+	return nil
+}
+
+func (q *QuerySoftwareInventoryResponse) String() string {
 	if len(q._rawJSON) > 0 {
 		if value, err := core.StringifyJSON(q._rawJSON); err == nil {
 			return value

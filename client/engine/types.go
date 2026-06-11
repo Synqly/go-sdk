@@ -43,6 +43,7 @@ import (
 	v180detectionfinding "github.com/synqly/go-sdk/client/engine/ocsf/v180/detectionfinding"
 	emailactivity "github.com/synqly/go-sdk/client/engine/ocsf/v180/emailactivity"
 	noteactivity "github.com/synqly/go-sdk/client/engine/ocsf/v180/noteactivity"
+	softwareinventoryinfo "github.com/synqly/go-sdk/client/engine/ocsf/v180/softwareinventoryinfo"
 	v180vulnerabilityfinding "github.com/synqly/go-sdk/client/engine/ocsf/v180/vulnerabilityfinding"
 	time "time"
 )
@@ -144,6 +145,9 @@ func (l *Label) String() string {
 	}
 	return fmt.Sprintf("%#v", l)
 }
+
+// Software inventory information for an asset management system. Represented by OCSF v1.8.0 Software Inventory Info (class_uid 5020) using the OCSF Synqly extension and the OCSF Date/Time profile. The `package` or `sbom` object describes installed software; `device` links the record to a host or configuration item.
+type SoftwareInventory = *softwareinventoryinfo.SoftwareInfo
 
 type ActionId string
 
@@ -1471,6 +1475,7 @@ type Event struct {
 	CloudActivity                     *cloudactivity.CloudActivity
 	CloudResourcesInventoryInfo       *cloudresourcesinventoryinfo.CloudResourcesInventoryInfo
 	NoteActivity                      *noteactivity.NoteActivity
+	SoftwareInventoryInfo             *softwareinventoryinfo.SoftwareInfo
 	ChatMessageActivity               *chatmessageactivity.ChatMessageActivity
 	ConversationActivity              *conversationactivity.ConversationActivity
 }
@@ -1679,6 +1684,12 @@ func (e *Event) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		e.NoteActivity = value
+	case "Software Inventory Info":
+		value := new(softwareinventoryinfo.SoftwareInfo)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.SoftwareInventoryInfo = value
 	case "Chat Message Activity":
 		value := new(chatmessageactivity.ChatMessageActivity)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -1792,6 +1803,9 @@ func (e Event) MarshalJSON() ([]byte, error) {
 	if e.NoteActivity != nil {
 		return core.MarshalJSONWithExtraProperty(e.NoteActivity, "class_name", "Note Activity")
 	}
+	if e.SoftwareInventoryInfo != nil {
+		return core.MarshalJSONWithExtraProperty(e.SoftwareInventoryInfo, "class_name", "Software Inventory Info")
+	}
 	if e.ChatMessageActivity != nil {
 		return core.MarshalJSONWithExtraProperty(e.ChatMessageActivity, "class_name", "Chat Message Activity")
 	}
@@ -1834,6 +1848,7 @@ type EventVisitor interface {
 	VisitCloudActivity(*cloudactivity.CloudActivity) error
 	VisitCloudResourcesInventoryInfo(*cloudresourcesinventoryinfo.CloudResourcesInventoryInfo) error
 	VisitNoteActivity(*noteactivity.NoteActivity) error
+	VisitSoftwareInventoryInfo(*softwareinventoryinfo.SoftwareInfo) error
 	VisitChatMessageActivity(*chatmessageactivity.ChatMessageActivity) error
 	VisitConversationActivity(*conversationactivity.ConversationActivity) error
 }
@@ -1934,6 +1949,9 @@ func (e *Event) Accept(visitor EventVisitor) error {
 	}
 	if e.NoteActivity != nil {
 		return visitor.VisitNoteActivity(e.NoteActivity)
+	}
+	if e.SoftwareInventoryInfo != nil {
+		return visitor.VisitSoftwareInventoryInfo(e.SoftwareInventoryInfo)
 	}
 	if e.ChatMessageActivity != nil {
 		return visitor.VisitChatMessageActivity(e.ChatMessageActivity)
@@ -3106,9 +3124,11 @@ const (
 	OperationIdAppsecQueryFindings                              OperationId = "appsec_query_findings"
 	OperationIdAssetsCreateAsset                                OperationId = "assets_create_asset"
 	OperationIdAssetsCreateDevices                              OperationId = "assets_create_devices"
+	OperationIdAssetsCreateSoftware                             OperationId = "assets_create_software"
 	OperationIdAssetsGetLabels                                  OperationId = "assets_get_labels"
 	OperationIdAssetsQueryAlerts                                OperationId = "assets_query_alerts"
 	OperationIdAssetsQueryDevices                               OperationId = "assets_query_devices"
+	OperationIdAssetsQuerySoftware                              OperationId = "assets_query_software"
 	OperationIdAssetsQueryUtilization                           OperationId = "assets_query_utilization"
 	OperationIdAssetsQueryVulnerabilities                       OperationId = "assets_query_vulnerabilities"
 	OperationIdAssetsUpdateDeviceProperties                     OperationId = "assets_update_device_properties"
@@ -3233,12 +3253,16 @@ func NewOperationIdFromString(s string) (OperationId, error) {
 		return OperationIdAssetsCreateAsset, nil
 	case "assets_create_devices":
 		return OperationIdAssetsCreateDevices, nil
+	case "assets_create_software":
+		return OperationIdAssetsCreateSoftware, nil
 	case "assets_get_labels":
 		return OperationIdAssetsGetLabels, nil
 	case "assets_query_alerts":
 		return OperationIdAssetsQueryAlerts, nil
 	case "assets_query_devices":
 		return OperationIdAssetsQueryDevices, nil
+	case "assets_query_software":
+		return OperationIdAssetsQuerySoftware, nil
 	case "assets_query_utilization":
 		return OperationIdAssetsQueryUtilization, nil
 	case "assets_query_vulnerabilities":
