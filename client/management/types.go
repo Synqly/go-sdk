@@ -14419,6 +14419,76 @@ func (g *GoogleServiceAccountCredential) Accept(visitor GoogleServiceAccountCred
 	return fmt.Errorf("type %T does not define a non-empty union type", g)
 }
 
+type GreenhouseCredential struct {
+	Type string
+	// Greenhouse Harvest v3 OAuth client credentials.
+	OAuthClient *OAuthClientCredential
+	// Reference to existing Client Credentials.
+	OAuthClientId OAuthClientCredentialId
+}
+
+func (g *GreenhouseCredential) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	g.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", g)
+	}
+	switch unmarshaler.Type {
+	case "o_auth_client":
+		value := new(OAuthClientCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		g.OAuthClient = value
+	case "o_auth_client_id":
+		var valueUnmarshaler struct {
+			OAuthClientId OAuthClientCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		g.OAuthClientId = valueUnmarshaler.OAuthClientId
+	}
+	return nil
+}
+
+func (g GreenhouseCredential) MarshalJSON() ([]byte, error) {
+	if g.OAuthClient != nil {
+		return core.MarshalJSONWithExtraProperty(g.OAuthClient, "type", "o_auth_client")
+	}
+	if g.OAuthClientId != "" {
+		var marshaler = struct {
+			Type          string                  `json:"type"`
+			OAuthClientId OAuthClientCredentialId `json:"value"`
+		}{
+			Type:          "o_auth_client_id",
+			OAuthClientId: g.OAuthClientId,
+		}
+		return json.Marshal(marshaler)
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", g)
+}
+
+type GreenhouseCredentialVisitor interface {
+	VisitOAuthClient(*OAuthClientCredential) error
+	VisitOAuthClientId(OAuthClientCredentialId) error
+}
+
+func (g *GreenhouseCredential) Accept(visitor GreenhouseCredentialVisitor) error {
+	if g.OAuthClient != nil {
+		return visitor.VisitOAuthClient(g.OAuthClient)
+	}
+	if g.OAuthClientId != "" {
+		return visitor.VisitOAuthClientId(g.OAuthClientId)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", g)
+}
+
 type HclAppScanOnCloudCredential struct {
 	Type string
 	// Configuration when creating new Client Credentials.
@@ -15460,6 +15530,50 @@ func (i *IdentityGoogle) UnmarshalJSON(data []byte) error {
 }
 
 func (i *IdentityGoogle) String() string {
+	if len(i._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(i._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(i); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", i)
+}
+
+// Configuration for Greenhouse Identity.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/greenhouse-identity-setup)
+type IdentityGreenhouse struct {
+	Credential *GreenhouseCredential `json:"credential" url:"credential"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (i *IdentityGreenhouse) GetExtraProperties() map[string]interface{} {
+	return i.extraProperties
+}
+
+func (i *IdentityGreenhouse) UnmarshalJSON(data []byte) error {
+	type unmarshaler IdentityGreenhouse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*i = IdentityGreenhouse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *i)
+	if err != nil {
+		return err
+	}
+	i.extraProperties = extraProperties
+
+	i._rawJSON = nil
+	return nil
+}
+
+func (i *IdentityGreenhouse) String() string {
 	if len(i._rawJSON) > 0 {
 		if value, err := core.StringifyJSON(i._rawJSON); err == nil {
 			return value
@@ -17850,6 +17964,10 @@ type ProviderConfig struct {
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/google-workspace-setup)
 	IdentityGoogle *IdentityGoogle
+	// Configuration for Greenhouse Identity.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/greenhouse-identity-setup)
+	IdentityGreenhouse *IdentityGreenhouse
 	// Configuration for Okta Identity.
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/okta-identity-setup)
@@ -18553,6 +18671,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.IdentityGoogle = value
+	case "identity_greenhouse":
+		value := new(IdentityGreenhouse)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.IdentityGreenhouse = value
 	case "identity_okta":
 		value := new(IdentityOkta)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -19230,6 +19354,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.IdentityGoogle != nil {
 		return core.MarshalJSONWithExtraProperty(p.IdentityGoogle, "type", "identity_google")
 	}
+	if p.IdentityGreenhouse != nil {
+		return core.MarshalJSONWithExtraProperty(p.IdentityGreenhouse, "type", "identity_greenhouse")
+	}
 	if p.IdentityOkta != nil {
 		return core.MarshalJSONWithExtraProperty(p.IdentityOkta, "type", "identity_okta")
 	}
@@ -19536,6 +19663,7 @@ type ProviderConfigVisitor interface {
 	VisitIdentityEntraId(*IdentityEntraId) error
 	VisitIdentityEntraIdMock(*IdentityEntraIdMock) error
 	VisitIdentityGoogle(*IdentityGoogle) error
+	VisitIdentityGreenhouse(*IdentityGreenhouse) error
 	VisitIdentityOkta(*IdentityOkta) error
 	VisitIdentityPingone(*IdentityPingOne) error
 	VisitIdentityWorkday(*IdentityWorkday) error
@@ -19820,6 +19948,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.IdentityGoogle != nil {
 		return visitor.VisitIdentityGoogle(p.IdentityGoogle)
+	}
+	if p.IdentityGreenhouse != nil {
+		return visitor.VisitIdentityGreenhouse(p.IdentityGreenhouse)
 	}
 	if p.IdentityOkta != nil {
 		return visitor.VisitIdentityOkta(p.IdentityOkta)
@@ -20198,6 +20329,8 @@ const (
 	ProviderConfigIdIdentityEntraIdMock ProviderConfigId = "identity_entra_id_mock"
 	// Google Workspace
 	ProviderConfigIdIdentityGoogle ProviderConfigId = "identity_google"
+	// Greenhouse Identity
+	ProviderConfigIdIdentityGreenhouse ProviderConfigId = "identity_greenhouse"
 	// Okta Identity
 	ProviderConfigIdIdentityOkta ProviderConfigId = "identity_okta"
 	// PingOne Cloud Platform
@@ -20496,6 +20629,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdIdentityEntraIdMock, nil
 	case "identity_google":
 		return ProviderConfigIdIdentityGoogle, nil
+	case "identity_greenhouse":
+		return ProviderConfigIdIdentityGreenhouse, nil
 	case "identity_okta":
 		return ProviderConfigIdIdentityOkta, nil
 	case "identity_pingone":
