@@ -15,7 +15,7 @@ type QueryDevicesRequest struct {
 	Limit *int `json:"-" url:"limit,omitempty"`
 	// Start search from cursor position.
 	Cursor *string `json:"-" url:"cursor,omitempty"`
-	// Filter results by this query. For more information on filtering, refer to the Assets Filtering Guide. Defaults to no filter. If used more than once, the queries are ANDed together.
+	// Filter results by this query. For more information on filtering, refer to our [Filtering Guide](https://docs.synqly.com/guides/connectors/assets/query-filters). Defaults to no filter. If used more than once, the queries are ANDed together.
 	Filter []*string `json:"-" url:"filter,omitempty"`
 	// Select a field to order the results by. Defaults to `time`. To control the direction of the sorting, append
 	// `[asc]` or `[desc]` to the field name. For example, `time[asc]` will sort the results by `time` in ascending order.
@@ -32,7 +32,7 @@ type QuerySoftwareInventoryRequest struct {
 	Limit *int `json:"-" url:"limit,omitempty"`
 	// Start search from cursor position.
 	Cursor *string `json:"-" url:"cursor,omitempty"`
-	// Filter results by this query. For more information on filtering, refer to the Assets Filtering Guide. Defaults to no filter. If used more than once, the queries are ANDed together.
+	// Filter results by this query. For more information on filtering, refer to the [Assets Filtering Guide](https://docs.synqly.com/guides/connectors/assets/query-filters). Defaults to no filter. If used more than once, the queries are ANDed together.
 	Filter []*string `json:"-" url:"filter,omitempty"`
 	// Select a field to order the results by. Defaults to `package.name`. To control the direction of the sorting, append
 	// `[asc]` or `[desc]` to the field name. For example, `package.name[asc]` will sort the results by package name in ascending order.

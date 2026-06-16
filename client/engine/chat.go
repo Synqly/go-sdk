@@ -78,7 +78,7 @@ type QueryChatUsers struct {
 	Meta []*string `json:"-" url:"meta,omitempty"`
 	// Number of users to return. Defaults to 100.
 	Limit *int `json:"-" url:"limit,omitempty"`
-	// Filter results by this query. For more information on filtering, refer to our Filtering Guide. Defaults to no filter. If used more than once, the queries are ANDed together.
+	// Filter results by this query. For more information on filtering, refer to our [Filtering Guide](https://docs.synqly.com/guides/connectors/chat/query-filters). Defaults to no filter. If used more than once, the queries are ANDed together.
 	Filter []*string `json:"-" url:"filter,omitempty"`
 	// Start search from cursor position.
 	Cursor *string `json:"-" url:"cursor,omitempty"`

@@ -28,8 +28,7 @@ type QueryAssetsRequest struct {
 	Limit *int `json:"-" url:"limit,omitempty"`
 	// Start search from cursor position.
 	Cursor *string `json:"-" url:"cursor,omitempty"`
-	// Filter results by this query. For more information on filtering, refer to the Vulnerability Filtering Guide.
-	// Defaults to no filter. If used more than once, the queries are ANDed together.
+	// Filter results by this query. For more information on filtering, refer to our [Filtering Guide](https://docs.synqly.com/guides/connectors/vulnerabilities/query-filters). Defaults to no filter. If used more than once, the queries are ANDed together.
 	Filter []*string `json:"-" url:"filter,omitempty"`
 	// Include the raw data from the provider in the response. Defaults to `false`.
 	IncludeRawData *bool `json:"-" url:"include_raw_data,omitempty"`
@@ -42,7 +41,7 @@ type QueryFindingsRequest struct {
 	Limit *int `json:"-" url:"limit,omitempty"`
 	// Start search from cursor position.
 	Cursor *string `json:"-" url:"cursor,omitempty"`
-	// Filter results by this query. For more information on filtering, refer to the Vulnerability Filtering Guide. Defaults to no filter. If used more than once, the queries are ANDed together.
+	// Filter results by this query. For more information on filtering, refer to our [Filtering Guide](https://docs.synqly.com/guides/connectors/vulnerabilities/query-filters). Defaults to no filter. If used more than once, the queries are ANDed together.
 	Filter []*string `json:"-" url:"filter,omitempty"`
 	// Include the raw data from the provider in the response. Defaults to `false`.
 	IncludeRawData *bool `json:"-" url:"include_raw_data,omitempty"`
@@ -53,7 +52,7 @@ type VulnerabilitiesQueryScanFindingsRequest struct {
 	Meta []*string `json:"-" url:"meta,omitempty"`
 	// Number of findings to return. Defaults to 50 with a maximum of 5000. If a provider has a maximum limit lower than 5000, the provider's maximum limit will be used instead.
 	Limit *int `json:"-" url:"limit,omitempty"`
-	// Filter results by this query. For more information on filtering, refer to our Filtering Guide. Defaults to no filter. If used more than once, the queries are ANDed together.
+	// Filter results by this query. For more information on filtering, refer to our [Filtering Guide](https://docs.synqly.com/guides/connectors/vulnerabilities/query-filters). Defaults to no filter. If used more than once, the queries are ANDed together.
 	Filter []*string `json:"-" url:"filter,omitempty"`
 	// Start search from cursor position.
 	Cursor *string `json:"-" url:"cursor,omitempty"`
@@ -68,8 +67,7 @@ type QueryScansRequest struct {
 	Limit *int `json:"-" url:"limit,omitempty"`
 	// Start search from cursor position.
 	Cursor *string `json:"-" url:"cursor,omitempty"`
-	// Filter results by this query. For more information on filtering, refer to the Vulnerability Filtering Guide.
-	// Defaults to no filter. If used more than once, the queries are ANDed together.
+	// Filter results by this query. For more information on filtering, refer to our [Filtering Guide](https://docs.synqly.com/guides/connectors/vulnerabilities/query-filters). Defaults to no filter. If used more than once, the queries are ANDed together.
 	Filter []*string `json:"-" url:"filter,omitempty"`
 }
 

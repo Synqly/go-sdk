@@ -15,7 +15,7 @@ type ListAuditEventsRequest struct {
 	StartAfter *string `json:"-" url:"start_after,omitempty"`
 	// The order defaults to created_at[asc] and can changed to descending order by specifying created_at[desc].
 	Order *string `json:"-" url:"order,omitempty"`
-	// Filter results by this query. For more information on filtering, refer to our Filtering Guide. Defaults to no filter.
+	// Filter results by this query. For more information on filtering, refer to our [Filtering Guide](https://docs.synqly.com/guides/getting-started/management-api-filtering). Defaults to no filter.
 	// If used more than once, the queries are ANDed together.
 	Filter []*string `json:"-" url:"filter,omitempty"`
 }

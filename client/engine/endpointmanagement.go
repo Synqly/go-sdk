@@ -16,7 +16,7 @@ type QueryDeviceComplianceRequest struct {
 	Limit *int `json:"-" url:"limit,omitempty"`
 	// Start search from cursor position.
 	Cursor *string `json:"-" url:"cursor,omitempty"`
-	// Filter results by this query. For more information on filtering, refer to our Filtering Guide. Defaults to no filter. If used more than once, the queries are ANDed together.
+	// Filter results by this query. For more information on filtering, refer to our [Filtering Guide](https://docs.synqly.com/guides/connectors/endpointmanagement/query-filters). Defaults to no filter. If used more than once, the queries are ANDed together.
 	Filter []*string `json:"-" url:"filter,omitempty"`
 }
 
@@ -29,7 +29,7 @@ type QueryDeviceApplicationsRequest struct {
 	Cursor *string `json:"-" url:"cursor,omitempty"`
 	// Select a field to order the results by. To control the direction of the sorting, append `[asc]` or `[desc]` to the field name. For example, `product.name[asc]` will sort the results by `product.name` in ascending order. The ordering defaults to `asc` if not specified.
 	Order []*string `json:"-" url:"order,omitempty"`
-	// Filter results by this query. For more information on filtering, refer to our Filtering Guide. Defaults to no filter. If used more than once, the queries are ANDed together.
+	// Filter results by this query. For more information on filtering, refer to our [Filtering Guide](https://docs.synqly.com/guides/connectors/endpointmanagement/query-filters). Defaults to no filter. If used more than once, the queries are ANDed together.
 	Filter []*string `json:"-" url:"filter,omitempty"`
 }
 
@@ -42,7 +42,7 @@ type QueryEndpointManagementDevicesRequest struct {
 	Cursor *string `json:"-" url:"cursor,omitempty"`
 	// Select a field to order the results by. To control the direction of the sorting, append `[asc]` or `[desc]` to the field name. For example, `device.name[asc]` will sort the results by `device.name` in ascending order. The ordering defaults to `asc` if not specified.
 	Order []*string `json:"-" url:"order,omitempty"`
-	// Filter results by this query. For more information on filtering, refer to our Filtering Guide. Defaults to no filter. If used more than once, the queries are ANDed together.
+	// Filter results by this query. For more information on filtering, refer to our [Filtering Guide](https://docs.synqly.com/guides/connectors/endpointmanagement/query-filters). Defaults to no filter. If used more than once, the queries are ANDed together.
 	Filter []*string `json:"-" url:"filter,omitempty"`
 }
 
