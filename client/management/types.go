@@ -15359,6 +15359,25 @@ func (i IdentityEntraIdDataset) Ptr() *IdentityEntraIdDataset {
 	return &i
 }
 
+type IdentityOktaDataset string
+
+const (
+	IdentityOktaDatasetBasicVer0 IdentityOktaDataset = "basic_v0"
+)
+
+func NewIdentityOktaDatasetFromString(s string) (IdentityOktaDataset, error) {
+	switch s {
+	case "basic_v0":
+		return IdentityOktaDatasetBasicVer0, nil
+	}
+	var t IdentityOktaDataset
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (i IdentityOktaDataset) Ptr() *IdentityOktaDataset {
+	return &i
+}
+
 // Configuration for Ashby Identity.
 //
 // [Configuration guide](https://docs.synqly.com/guides/provider-configuration/ashby-identity-setup)
@@ -15665,6 +15684,48 @@ func (i *IdentityOkta) UnmarshalJSON(data []byte) error {
 }
 
 func (i *IdentityOkta) String() string {
+	if len(i._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(i._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(i); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", i)
+}
+
+// Configuration for [MOCK] Okta Identity.
+type IdentityOktaMock struct {
+	Dataset IdentityOktaDataset `json:"dataset" url:"dataset"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (i *IdentityOktaMock) GetExtraProperties() map[string]interface{} {
+	return i.extraProperties
+}
+
+func (i *IdentityOktaMock) UnmarshalJSON(data []byte) error {
+	type unmarshaler IdentityOktaMock
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*i = IdentityOktaMock(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *i)
+	if err != nil {
+		return err
+	}
+	i.extraProperties = extraProperties
+
+	i._rawJSON = nil
+	return nil
+}
+
+func (i *IdentityOktaMock) String() string {
 	if len(i._rawJSON) > 0 {
 		if value, err := core.StringifyJSON(i._rawJSON); err == nil {
 			return value
@@ -18017,6 +18078,8 @@ type ProviderConfig struct {
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/okta-identity-setup)
 	IdentityOkta *IdentityOkta
+	// Configuration for [MOCK] Okta Identity.
+	IdentityOktaMock *IdentityOktaMock
 	// Configuration for PingOne Cloud Platform.
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/ping-identity-setup)
@@ -18734,6 +18797,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.IdentityOkta = value
+	case "identity_okta_mock":
+		value := new(IdentityOktaMock)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.IdentityOktaMock = value
 	case "identity_pingone":
 		value := new(IdentityPingOne)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -19414,6 +19483,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.IdentityOkta != nil {
 		return core.MarshalJSONWithExtraProperty(p.IdentityOkta, "type", "identity_okta")
 	}
+	if p.IdentityOktaMock != nil {
+		return core.MarshalJSONWithExtraProperty(p.IdentityOktaMock, "type", "identity_okta_mock")
+	}
 	if p.IdentityPingone != nil {
 		return core.MarshalJSONWithExtraProperty(p.IdentityPingone, "type", "identity_pingone")
 	}
@@ -19720,6 +19792,7 @@ type ProviderConfigVisitor interface {
 	VisitIdentityGoogle(*IdentityGoogle) error
 	VisitIdentityGreenhouse(*IdentityGreenhouse) error
 	VisitIdentityOkta(*IdentityOkta) error
+	VisitIdentityOktaMock(*IdentityOktaMock) error
 	VisitIdentityPingone(*IdentityPingOne) error
 	VisitIdentityWorkday(*IdentityWorkday) error
 	VisitIncidentresponseIncidentio(*IncidentResponseIncidentIo) error
@@ -20012,6 +20085,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.IdentityOkta != nil {
 		return visitor.VisitIdentityOkta(p.IdentityOkta)
+	}
+	if p.IdentityOktaMock != nil {
+		return visitor.VisitIdentityOktaMock(p.IdentityOktaMock)
 	}
 	if p.IdentityPingone != nil {
 		return visitor.VisitIdentityPingone(p.IdentityPingone)
@@ -20393,6 +20469,8 @@ const (
 	ProviderConfigIdIdentityGreenhouse ProviderConfigId = "identity_greenhouse"
 	// Okta Identity
 	ProviderConfigIdIdentityOkta ProviderConfigId = "identity_okta"
+	// [MOCK] Okta Identity
+	ProviderConfigIdIdentityOktaMock ProviderConfigId = "identity_okta_mock"
 	// PingOne Cloud Platform
 	ProviderConfigIdIdentityPingOne ProviderConfigId = "identity_pingone"
 	// Workday Identity
@@ -20695,6 +20773,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdIdentityGreenhouse, nil
 	case "identity_okta":
 		return ProviderConfigIdIdentityOkta, nil
+	case "identity_okta_mock":
+		return ProviderConfigIdIdentityOktaMock, nil
 	case "identity_pingone":
 		return ProviderConfigIdIdentityPingOne, nil
 	case "identity_workday":
