@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"examples/common"
+
 	koanfyaml "github.com/knadh/koanf/parsers/yaml"
 	"github.com/knadh/koanf/providers/env"
 	"github.com/knadh/koanf/providers/file"
@@ -143,11 +144,12 @@ func (s *sentinelOneProvider) demoActions(orgToken string, sentinelOneConf *sent
 	// Quarantine an endpoint, uncomment to execute
 
 	// consoleLogger.Printf("Quarantining endpoint %s", *endpointRes.Result[0].Device.Uid)
-	// endpointId := *endpointRes.Result[0].Device.Uid
-	// t.Synqly.EngineClients[mgmt.CategoryIdEdr].Edr.NetworkQuarantine(ctx, &engine.NetworkQuarantineRequest{
-	// 	EndpointIds: []string{endpointId},
-	// 	State:       engine.ConnectionStateDisconnect,
-	// })
+	endpointId := *endpointRes.Result[0].Device.Uid
+	t.Synqly.EngineClients[mgmt.CategoryIdEdr].Edr.NetworkQuarantine(ctx, &engine.NetworkQuarantineRequest{
+		EndpointIds: []string{endpointId},
+		State:       engine.ConnectionStateDisconnect,
+		//IsolationType: engine.IsolationTypeSelective.Ptr(),
+	})
 
 	// t.Synqly.EngineClients[mgmt.CategoryIdEdr].Edr.NetworkQuarantine(ctx, &engine.NetworkQuarantineRequest{
 	// 	EndpointIds: []string{endpointId},
