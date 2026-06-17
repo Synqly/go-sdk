@@ -856,6 +856,28 @@ func (e *ExecuteCommandResult) String() string {
 	return fmt.Sprintf("%#v", e)
 }
 
+type IsolationType string
+
+const (
+	IsolationTypeFull      IsolationType = "Full"
+	IsolationTypeSelective IsolationType = "Selective"
+)
+
+func NewIsolationTypeFromString(s string) (IsolationType, error) {
+	switch s {
+	case "Full":
+		return IsolationTypeFull, nil
+	case "Selective":
+		return IsolationTypeSelective, nil
+	}
+	var t IsolationType
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (i IsolationType) Ptr() *IsolationType {
+	return &i
+}
+
 // The posture score of an endpoint asset.
 type PostureScore = *configstate.ConfigState
 

@@ -548,6 +548,8 @@ type NetworkQuarantineRequest struct {
 	EndpointIds []string `json:"endpoint_ids" url:"endpoint_ids"`
 	// A comment to include with the quarantine action.
 	Comment *string `json:"comment,omitempty" url:"comment,omitempty"`
+	// The isolation type for the quarantine action. Defaults to Full. Currently only Microsoft Defender honors Selective; other providers always perform full isolation and ignore this field.
+	IsolationType *IsolationType `json:"isolation_type,omitempty" url:"isolation_type,omitempty"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
