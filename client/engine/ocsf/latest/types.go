@@ -23,16 +23,18 @@ import (
 	vulnerabilityfinding "github.com/synqly/go-sdk/client/engine/ocsf/v130/vulnerabilityfinding"
 	webresourceaccessactivity "github.com/synqly/go-sdk/client/engine/ocsf/v130/webresourceaccessactivity"
 	cloudresourcesinventoryinfo "github.com/synqly/go-sdk/client/engine/ocsf/v140/cloudresourcesinventoryinfo"
-	v150applicationsecurityposturefinding "github.com/synqly/go-sdk/client/engine/ocsf/v150/applicationsecurityposturefinding"
 	emailactivity "github.com/synqly/go-sdk/client/engine/ocsf/v160/emailactivity"
 	filehostingactivity "github.com/synqly/go-sdk/client/engine/ocsf/v160/filehostingactivity"
 	httpactivity "github.com/synqly/go-sdk/client/engine/ocsf/v160/httpactivity"
+	applicationinventoryinfo "github.com/synqly/go-sdk/client/engine/ocsf/v180/applicationinventoryinfo"
 	applicationsecurityposturefinding "github.com/synqly/go-sdk/client/engine/ocsf/v180/applicationsecurityposturefinding"
 )
 
 type AccountChange = *accountchange.AccountChange
 
 type ApiActivity = *apiactivity.ApiActivity
+
+type ApplicationInventoryInfo = *applicationinventoryinfo.ApplicationInventoryInfo
 
 type ApplicationSecurityPostureFinding = *applicationsecurityposturefinding.ApplicationSecurityPostureFinding
 
@@ -77,5 +79,3 @@ type SecurityFinding = *securityfinding.SecurityFinding
 type VulnerabilityFinding = *vulnerabilityfinding.VulnerabilityFinding
 
 type WebResourceAccessActivity = *webresourceaccessactivity.WebResourceAccessActivity
-
-type Ocsf150Application = *v150applicationsecurityposturefinding.Application

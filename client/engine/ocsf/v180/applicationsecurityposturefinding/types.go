@@ -835,18 +835,34 @@ type AnalyticTypeId = int
 
 // An Application describes the details for an inventoried application as reported by an Application Security tool or other Developer-centric tooling. Applications can be defined as Kubernetes resources, Containerized resources, or application hosting-specific cloud sources such as AWS Elastic BeanStalk, AWS Lightsail, or Azure Logic Apps.
 type Application struct {
+	// The time when the application was known to have been created.
+	CreatedTime *Timestamp `json:"created_time,omitempty" url:"created_time,omitempty"`
+	// The time when the application was known to have been created.
+	CreatedTimeDt *time.Time `json:"created_time_dt,omitempty" url:"created_time_dt,omitempty"`
 	// The criticality of the application as defined by the event source.
 	Criticality *string `json:"criticality,omitempty" url:"criticality,omitempty"`
 	// Additional data describing the application.
 	Data interface{} `json:"data,omitempty" url:"data,omitempty"`
 	// A description or commentary for an application, usually retrieved from an upstream system.
 	Desc *string `json:"desc,omitempty" url:"desc,omitempty"`
+	// The initial discovery time of the application.
+	FirstSeenTime *Timestamp `json:"first_seen_time,omitempty" url:"first_seen_time,omitempty"`
+	// The initial discovery time of the application.
+	FirstSeenTimeDt *time.Time `json:"first_seen_time_dt,omitempty" url:"first_seen_time_dt,omitempty"`
 	// The name of the related application or associated resource group.
 	Group *Group `json:"group,omitempty" url:"group,omitempty"`
 	// The fully qualified name of the application.
 	Hostname *Hostname `json:"hostname,omitempty" url:"hostname,omitempty"`
 	// The list of labels associated to the application.
 	Labels []string `json:"labels,omitempty" url:"labels,omitempty"`
+	// The most recent discovery time of the application.
+	LastSeenTime *Timestamp `json:"last_seen_time,omitempty" url:"last_seen_time,omitempty"`
+	// The most recent discovery time of the application.
+	LastSeenTimeDt *time.Time `json:"last_seen_time_dt,omitempty" url:"last_seen_time_dt,omitempty"`
+	// The time when the application was last known to have been modified.
+	ModifiedTime *Timestamp `json:"modified_time,omitempty" url:"modified_time,omitempty"`
+	// The time when the application was last known to have been modified.
+	ModifiedTimeDt *time.Time `json:"modified_time_dt,omitempty" url:"modified_time_dt,omitempty"`
 	// The name of the application.
 	Name *string `json:"name,omitempty" url:"name,omitempty"`
 	// The identity of the service or user account that owns the application.
@@ -863,6 +879,8 @@ type Application struct {
 	RiskScore *int `json:"risk_score,omitempty" url:"risk_score,omitempty"`
 	// The Software Bill of Materials (SBOM) associated with the application
 	Sbom *Sbom `json:"sbom,omitempty" url:"sbom,omitempty"`
+	// URL pointing to the source of the application in the event source.
+	SrcUrl *UrlString `json:"src_url,omitempty" url:"src_url,omitempty"`
 	// The list of tags; <code>{key:value}</code> pairs associated to the application.
 	Tags []*KeyValueObject `json:"tags,omitempty" url:"tags,omitempty"`
 	// The type of application as defined by the event source, e.g., <code>GitHub</code>, <code>Azure Logic App</code>, or <code>Amazon Elastic BeanStalk</code>.
@@ -885,12 +903,24 @@ func (a *Application) GetExtraProperties() map[string]interface{} {
 }
 
 func (a *Application) UnmarshalJSON(data []byte) error {
-	type unmarshaler Application
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
+	type embed Application
+	var unmarshaler = struct {
+		embed
+		CreatedTimeDt   *core.DateTime `json:"created_time_dt,omitempty"`
+		FirstSeenTimeDt *core.DateTime `json:"first_seen_time_dt,omitempty"`
+		LastSeenTimeDt  *core.DateTime `json:"last_seen_time_dt,omitempty"`
+		ModifiedTimeDt  *core.DateTime `json:"modified_time_dt,omitempty"`
+	}{
+		embed: embed(*a),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
 		return err
 	}
-	*a = Application(value)
+	*a = Application(unmarshaler.embed)
+	a.CreatedTimeDt = unmarshaler.CreatedTimeDt.TimePtr()
+	a.FirstSeenTimeDt = unmarshaler.FirstSeenTimeDt.TimePtr()
+	a.LastSeenTimeDt = unmarshaler.LastSeenTimeDt.TimePtr()
+	a.ModifiedTimeDt = unmarshaler.ModifiedTimeDt.TimePtr()
 
 	extraProperties, err := core.ExtractExtraProperties(data, *a)
 	if err != nil {
@@ -900,6 +930,24 @@ func (a *Application) UnmarshalJSON(data []byte) error {
 
 	a._rawJSON = nil
 	return nil
+}
+
+func (a *Application) MarshalJSON() ([]byte, error) {
+	type embed Application
+	var marshaler = struct {
+		embed
+		CreatedTimeDt   *core.DateTime `json:"created_time_dt,omitempty"`
+		FirstSeenTimeDt *core.DateTime `json:"first_seen_time_dt,omitempty"`
+		LastSeenTimeDt  *core.DateTime `json:"last_seen_time_dt,omitempty"`
+		ModifiedTimeDt  *core.DateTime `json:"modified_time_dt,omitempty"`
+	}{
+		embed:           embed(*a),
+		CreatedTimeDt:   core.NewOptionalDateTime(a.CreatedTimeDt),
+		FirstSeenTimeDt: core.NewOptionalDateTime(a.FirstSeenTimeDt),
+		LastSeenTimeDt:  core.NewOptionalDateTime(a.LastSeenTimeDt),
+		ModifiedTimeDt:  core.NewOptionalDateTime(a.ModifiedTimeDt),
+	}
+	return json.Marshal(marshaler)
 }
 
 func (a *Application) String() string {

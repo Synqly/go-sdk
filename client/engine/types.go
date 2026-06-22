@@ -37,6 +37,7 @@ import (
 	v160emailactivity "github.com/synqly/go-sdk/client/engine/ocsf/v160/emailactivity"
 	filehostingactivity "github.com/synqly/go-sdk/client/engine/ocsf/v160/filehostingactivity"
 	httpactivity "github.com/synqly/go-sdk/client/engine/ocsf/v160/httpactivity"
+	applicationinventoryinfo "github.com/synqly/go-sdk/client/engine/ocsf/v180/applicationinventoryinfo"
 	applicationsecurityposturefinding "github.com/synqly/go-sdk/client/engine/ocsf/v180/applicationsecurityposturefinding"
 	chatmessageactivity "github.com/synqly/go-sdk/client/engine/ocsf/v180/chatmessageactivity"
 	conversationactivity "github.com/synqly/go-sdk/client/engine/ocsf/v180/conversationactivity"
@@ -48,8 +49,8 @@ import (
 	time "time"
 )
 
-// An application describes the details for an inventoried application as reported by an Application Security tool or other Developer-centric tooling. Applications can be defined as Github repositories or other code-centric resources.
-type AppSecApplication = latest.Ocsf150Application
+// An application security application.
+type AppSecApplication = latest.ApplicationInventoryInfo
 
 // An application security posture finding
 type AppSecPostureFinding = latest.ApplicationSecurityPostureFinding
@@ -1500,6 +1501,7 @@ type Event struct {
 	SoftwareInventoryInfo             *softwareinventoryinfo.SoftwareInfo
 	ChatMessageActivity               *chatmessageactivity.ChatMessageActivity
 	ConversationActivity              *conversationactivity.ConversationActivity
+	ApplicationInventoryInfo          *applicationinventoryinfo.ApplicationInventoryInfo
 }
 
 func (e *Event) UnmarshalJSON(data []byte) error {
@@ -1724,6 +1726,12 @@ func (e *Event) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		e.ConversationActivity = value
+	case "Application Inventory Info":
+		value := new(applicationinventoryinfo.ApplicationInventoryInfo)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.ApplicationInventoryInfo = value
 	}
 	return nil
 }
@@ -1834,6 +1842,9 @@ func (e Event) MarshalJSON() ([]byte, error) {
 	if e.ConversationActivity != nil {
 		return core.MarshalJSONWithExtraProperty(e.ConversationActivity, "class_name", "Conversation Activity")
 	}
+	if e.ApplicationInventoryInfo != nil {
+		return core.MarshalJSONWithExtraProperty(e.ApplicationInventoryInfo, "class_name", "Application Inventory Info")
+	}
 	return nil, fmt.Errorf("type %T does not define a non-empty union type", e)
 }
 
@@ -1873,6 +1884,7 @@ type EventVisitor interface {
 	VisitSoftwareInventoryInfo(*softwareinventoryinfo.SoftwareInfo) error
 	VisitChatMessageActivity(*chatmessageactivity.ChatMessageActivity) error
 	VisitConversationActivity(*conversationactivity.ConversationActivity) error
+	VisitApplicationInventoryInfo(*applicationinventoryinfo.ApplicationInventoryInfo) error
 }
 
 func (e *Event) Accept(visitor EventVisitor) error {
@@ -1980,6 +1992,9 @@ func (e *Event) Accept(visitor EventVisitor) error {
 	}
 	if e.ConversationActivity != nil {
 		return visitor.VisitConversationActivity(e.ConversationActivity)
+	}
+	if e.ApplicationInventoryInfo != nil {
+		return visitor.VisitApplicationInventoryInfo(e.ApplicationInventoryInfo)
 	}
 	return fmt.Errorf("type %T does not define a non-empty union type", e)
 }
