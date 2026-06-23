@@ -8720,6 +8720,53 @@ func (a *ApiConfig) String() string {
 	return fmt.Sprintf("%#v", a)
 }
 
+// Configuration for ServiceNow Application Vulnerability Response (AVR) as an application security provider.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/appsec-servicenow-setup)
+type AppSecServiceNow struct {
+	// Credentials used to access ServiceNow AVR.
+	Credential *ServiceNowCredential `json:"credential" url:"credential"`
+	// HTTPS base URL for the ServiceNow API.
+	Url string `json:"url" url:"url"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (a *AppSecServiceNow) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
+}
+
+func (a *AppSecServiceNow) UnmarshalJSON(data []byte) error {
+	type unmarshaler AppSecServiceNow
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*a = AppSecServiceNow(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+
+	a._rawJSON = nil
+	return nil
+}
+
+func (a *AppSecServiceNow) String() string {
+	if len(a._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(a); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", a)
+}
+
 // Configuration for Snyk as an application security provider.
 //
 // [Configuration guide](https://docs.synqly.com/guides/provider-configuration/snyk-appsec-setup)
@@ -17872,6 +17919,10 @@ type ProviderConfig struct {
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/opentext-core-applicationsecurity-appsec-setup)
 	AppsecOpentextCoreApplicationSecurityMock *AppsecOpenTextCoreApplicationSecurityMock
+	// Configuration for ServiceNow Application Vulnerability Response (AVR) as an application security provider.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/appsec-servicenow-setup)
+	AppsecServicenow *AppSecServiceNow
 	// Configuration for Snyk as an application security provider.
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/snyk-appsec-setup)
@@ -18413,6 +18464,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.AppsecOpentextCoreApplicationSecurityMock = value
+	case "appsec_servicenow":
+		value := new(AppSecServiceNow)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.AppsecServicenow = value
 	case "appsec_snyk":
 		value := new(AppSecSnyk)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -19291,6 +19348,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.AppsecOpentextCoreApplicationSecurityMock != nil {
 		return core.MarshalJSONWithExtraProperty(p.AppsecOpentextCoreApplicationSecurityMock, "type", "appsec_opentext_core_application_security_mock")
 	}
+	if p.AppsecServicenow != nil {
+		return core.MarshalJSONWithExtraProperty(p.AppsecServicenow, "type", "appsec_servicenow")
+	}
 	if p.AppsecSnyk != nil {
 		return core.MarshalJSONWithExtraProperty(p.AppsecSnyk, "type", "appsec_snyk")
 	}
@@ -19728,6 +19788,7 @@ type ProviderConfigVisitor interface {
 	VisitAppsecOpentextApplicationSecurity(*AppsecOpenTextApplicationSecurity) error
 	VisitAppsecOpentextCoreApplicationSecurity(*AppsecOpenTextCoreApplicationSecurity) error
 	VisitAppsecOpentextCoreApplicationSecurityMock(*AppsecOpenTextCoreApplicationSecurityMock) error
+	VisitAppsecServicenow(*AppSecServiceNow) error
 	VisitAppsecSnyk(*AppSecSnyk) error
 	VisitAppsecTenable(*AppSecTenable) error
 	VisitAppsecVeracode(*AppSecVeracode) error
@@ -19893,6 +19954,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.AppsecOpentextCoreApplicationSecurityMock != nil {
 		return visitor.VisitAppsecOpentextCoreApplicationSecurityMock(p.AppsecOpentextCoreApplicationSecurityMock)
+	}
+	if p.AppsecServicenow != nil {
+		return visitor.VisitAppsecServicenow(p.AppsecServicenow)
 	}
 	if p.AppsecSnyk != nil {
 		return visitor.VisitAppsecSnyk(p.AppsecSnyk)
@@ -20341,6 +20405,8 @@ const (
 	ProviderConfigIdAppsecOpenTextCoreApplicationSecurity ProviderConfigId = "appsec_opentext_core_application_security"
 	// [MOCK] OpenText Core Application Security
 	ProviderConfigIdAppsecOpenTextCoreApplicationSecurityMock ProviderConfigId = "appsec_opentext_core_application_security_mock"
+	// ServiceNow Application Vulnerability Response
+	ProviderConfigIdAppSecServiceNow ProviderConfigId = "appsec_servicenow"
 	// Snyk
 	ProviderConfigIdAppSecSnyk ProviderConfigId = "appsec_snyk"
 	// Tenable Web Application Scanner
@@ -20645,6 +20711,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdAppsecOpenTextCoreApplicationSecurity, nil
 	case "appsec_opentext_core_application_security_mock":
 		return ProviderConfigIdAppsecOpenTextCoreApplicationSecurityMock, nil
+	case "appsec_servicenow":
+		return ProviderConfigIdAppSecServiceNow, nil
 	case "appsec_snyk":
 		return ProviderConfigIdAppSecSnyk, nil
 	case "appsec_tenable":
