@@ -11,7 +11,7 @@ import (
 )
 
 type DeleteIocsRequest struct {
-	// Add metadata to the response by invoking meta functions. Documentation for meta functions is available at https://docs.synqly.com/api-reference/meta-functions. Not all meta function are available at every endpoint.
+	// Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
 	Meta []*string `json:"-" url:"meta,omitempty"`
 	// list of ids to delete
 	Ids *string `json:"-" url:"ids,omitempty"`
@@ -25,7 +25,7 @@ type GetThreatNotesRequest struct {
 }
 
 type QueryAlertsRequest struct {
-	// Add metadata to the response by invoking meta functions. Documentation for meta functions is available at https://docs.synqly.com/api-reference/meta-functions. Not all meta function are available at every endpoint.
+	// Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
 	Meta []*string `json:"-" url:"meta,omitempty"`
 	// Number of threats to return. Defaults to 50.
 	Limit *int `json:"-" url:"limit,omitempty"`
@@ -40,7 +40,7 @@ type QueryAlertsRequest struct {
 }
 
 type QueryApplicationsRequest struct {
-	// Add metadata to the response by invoking meta functions. Documentation for meta functions is available at https://docs.synqly.com/api-reference/meta-functions. Not all meta function are available at every endpoint.
+	// Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
 	Meta []*string `json:"-" url:"meta,omitempty"`
 	// Number of applications to return. Defaults to 50.
 	Limit *int `json:"-" url:"limit,omitempty"`
@@ -55,7 +55,7 @@ type QueryApplicationsRequest struct {
 }
 
 type QueryEdrEventsRequest struct {
-	// Add metadata to the response by invoking meta functions. Documentation for meta functions is available at https://docs.synqly.com/api-reference/meta-functions. Not all meta function are available at every endpoint.
+	// Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
 	Meta []*string `json:"-" url:"meta,omitempty"`
 	// Provider-specific query to pass through to the EDR. This is useful for advanced queries that require additional filtering.
 	PassthroughParam []*string `json:"-" url:"passthrough-param,omitempty"`
@@ -74,7 +74,7 @@ type QueryEdrEventsRequest struct {
 }
 
 type QueryEndpointsRequest struct {
-	// Add metadata to the response by invoking meta functions. Documentation for meta functions is available at https://docs.synqly.com/api-reference/meta-functions. Not all meta function are available at every endpoint.
+	// Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
 	Meta []*string `json:"-" url:"meta,omitempty"`
 	// Number of endpoint assets to return. Defaults to 50.
 	Limit *int `json:"-" url:"limit,omitempty"`
@@ -89,7 +89,7 @@ type QueryEndpointsRequest struct {
 }
 
 type QueryIocsRequest struct {
-	// Add metadata to the response by invoking meta functions. Documentation for meta functions is available at https://docs.synqly.com/api-reference/meta-functions. Not all meta function are available at every endpoint.
+	// Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
 	Meta []*string `json:"-" url:"meta,omitempty"`
 	// Number of threats to return. Defaults to 50.
 	Limit *int `json:"-" url:"limit,omitempty"`
@@ -104,7 +104,7 @@ type QueryIocsRequest struct {
 }
 
 type QueryPostureScoreRequest struct {
-	// Add metadata to the response by invoking meta functions. Documentation for meta functions is available at https://docs.synqly.com/api-reference/meta-functions. Not all meta function are available at every endpoint.
+	// Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
 	Meta []*string `json:"-" url:"meta,omitempty"`
 	// Number of scores for endpoints to return. Defaults to 50.
 	Limit *int `json:"-" url:"limit,omitempty"`
@@ -119,7 +119,7 @@ type QueryPostureScoreRequest struct {
 }
 
 type QueryThreatsRequest struct {
-	// Add metadata to the response by invoking meta functions. Documentation for meta functions is available at https://docs.synqly.com/api-reference/meta-functions. Not all meta function are available at every endpoint.
+	// Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
 	Meta []*string `json:"-" url:"meta,omitempty"`
 	// Number of threats to return. Defaults to 50.
 	Limit *int `json:"-" url:"limit,omitempty"`

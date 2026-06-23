@@ -10,7 +10,7 @@ import (
 )
 
 type GetGroupMembersRequest struct {
-	// Add metadata to the response by invoking meta functions. Documentation for meta functions is available at https://docs.synqly.com/api-reference/meta-functions. Not all meta function are available at every endpoint.
+	// Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
 	Meta []*string `json:"-" url:"meta,omitempty"`
 	// Number of users to return. Defaults to 100.
 	Limit *int `json:"-" url:"limit,omitempty"`
@@ -19,12 +19,12 @@ type GetGroupMembersRequest struct {
 }
 
 type GetUserRequest struct {
-	// Add metadata to the response by invoking meta functions. Documentation for meta functions is available at https://docs.synqly.com/api-reference/meta-functions. Not all meta function are available at every endpoint.
+	// Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
 	Meta []*string `json:"-" url:"meta,omitempty"`
 }
 
 type QueryIdentityAuditLogRequest struct {
-	// Add metadata to the response by invoking meta functions. Documentation for meta functions is available at https://docs.synqly.com/api-reference/meta-functions. Not all meta function are available at every endpoint.
+	// Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
 	Meta []*string `json:"-" url:"meta,omitempty"`
 	// Number of events to return. Defaults to 100.
 	Limit *int `json:"-" url:"limit,omitempty"`
@@ -39,7 +39,7 @@ type QueryIdentityAuditLogRequest struct {
 }
 
 type QueryGroupRequest struct {
-	// Add metadata to the response by invoking meta functions. Documentation for meta functions is available at https://docs.synqly.com/api-reference/meta-functions. Not all meta function are available at every endpoint.
+	// Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
 	Meta []*string `json:"-" url:"meta,omitempty"`
 	// Number of users to return. Defaults to 100.
 	Limit *int `json:"-" url:"limit,omitempty"`
@@ -52,7 +52,7 @@ type QueryGroupRequest struct {
 }
 
 type QueryIdentityRiskEventsRequest struct {
-	// Add metadata to the response by invoking meta functions. Documentation for meta functions is available at https://docs.synqly.com/api-reference/meta-functions. Not all meta function are available at every endpoint.
+	// Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
 	Meta []*string `json:"-" url:"meta,omitempty"`
 	// Number of events to return. Defaults to 100.
 	Limit *int `json:"-" url:"limit,omitempty"`
@@ -67,7 +67,7 @@ type QueryIdentityRiskEventsRequest struct {
 }
 
 type QueryIdentityRiskyUsersRequest struct {
-	// Add metadata to the response by invoking meta functions. Documentation for meta functions is available at https://docs.synqly.com/api-reference/meta-functions. Not all meta function are available at every endpoint.
+	// Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
 	Meta []*string `json:"-" url:"meta,omitempty"`
 	// Number of users to return. Defaults to 100.
 	Limit *int `json:"-" url:"limit,omitempty"`
@@ -82,7 +82,7 @@ type QueryIdentityRiskyUsersRequest struct {
 }
 
 type QueryUserRequest struct {
-	// Add metadata to the response by invoking meta functions. Documentation for meta functions is available at https://docs.synqly.com/api-reference/meta-functions. Not all meta function are available at every endpoint.
+	// Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
 	Meta []*string `json:"-" url:"meta,omitempty"`
 	// Number of users to return. Defaults to 100.
 	Limit *int `json:"-" url:"limit,omitempty"`

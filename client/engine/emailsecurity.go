@@ -9,12 +9,12 @@ import (
 )
 
 type EmailSecurityGetThreatDetailsRequest struct {
-	// Add metadata to the response by invoking meta functions. Documentation for meta functions is available at https://docs.synqly.com/api-reference/meta-functions. Not all meta function are available at every endpoint.
+	// Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
 	Meta []*string `json:"-" url:"meta,omitempty"`
 }
 
 type EmailSecurityQueryEmailEventsRequest struct {
-	// Add metadata to the response by invoking meta functions. Documentation for meta functions is available at https://docs.synqly.com/api-reference/meta-functions. Not all meta function are available at every endpoint.
+	// Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
 	Meta []*string `json:"-" url:"meta,omitempty"`
 	// Number of email events to return. Defaults to 1000 with a maximum of 5000. If a provider has a maximum limit lower than 5000, the provider's maximum limit will be used instead.
 	Limit *int `json:"-" url:"limit,omitempty"`
@@ -25,7 +25,7 @@ type EmailSecurityQueryEmailEventsRequest struct {
 }
 
 type EmailSecurityQueryThreatsRequest struct {
-	// Add metadata to the response by invoking meta functions. Documentation for meta functions is available at https://docs.synqly.com/api-reference/meta-functions. Not all meta function are available at every endpoint.
+	// Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
 	Meta []*string `json:"-" url:"meta,omitempty"`
 	// Number of threats to return. Defaults to 1000 with a maximum of 5000. If a provider has a maximum limit lower than 5000, the provider's maximum limit will be used instead.
 	Limit *int `json:"-" url:"limit,omitempty"`

@@ -10,7 +10,7 @@ import (
 )
 
 type ListOnCallRequest struct {
-	// Add metadata to the response by invoking meta functions. Documentation for meta functions is available at https://docs.synqly.com/api-reference/meta-functions. Not all meta function are available at every endpoint.
+	// Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
 	Meta []*string `json:"-" url:"meta,omitempty"`
 }
 
@@ -22,7 +22,7 @@ type ListProjectsRequest struct {
 }
 
 type QueryEscalationPoliciesRequest struct {
-	// Add metadata to the response by invoking meta functions. Documentation for meta functions is available at https://docs.synqly.com/api-reference/meta-functions. Not all meta function are available at every endpoint.
+	// Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
 	Meta []*string `json:"-" url:"meta,omitempty"`
 	// Number of escalation policies to return. Defaults to 50.
 	Limit *int `json:"-" url:"limit,omitempty"`
@@ -33,7 +33,7 @@ type QueryEscalationPoliciesRequest struct {
 }
 
 type QueryTicketsRequest struct {
-	// Add metadata to the response by invoking meta functions. Documentation for meta functions is available at https://docs.synqly.com/api-reference/meta-functions. Not all meta function are available at every endpoint.
+	// Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
 	Meta []*string `json:"-" url:"meta,omitempty"`
 	// Cursor to use to retrieve the next page of results.
 	Cursor *string `json:"-" url:"cursor,omitempty"`

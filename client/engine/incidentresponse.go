@@ -9,7 +9,7 @@ import (
 )
 
 type IncidentResponseQueryEscalationPoliciesRequest struct {
-	// Add metadata to the response by invoking meta functions. Documentation for meta functions is available at https://docs.synqly.com/api-reference/meta-functions. Not all meta function are available at every endpoint.
+	// Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
 	Meta []*string `json:"-" url:"meta,omitempty"`
 	// Number of escalation policies to return. Defaults to 100.
 	Limit *int `json:"-" url:"limit,omitempty"`
@@ -18,7 +18,7 @@ type IncidentResponseQueryEscalationPoliciesRequest struct {
 }
 
 type IncidentResponseQueryEscalationPolicyUsersOnCallRequest struct {
-	// Add metadata to the response by invoking meta functions. Documentation for meta functions is available at https://docs.synqly.com/api-reference/meta-functions. Not all meta function are available at every endpoint.
+	// Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
 	Meta []*string `json:"-" url:"meta,omitempty"`
 }
 

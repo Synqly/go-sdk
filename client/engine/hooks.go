@@ -7,7 +7,7 @@ import (
 )
 
 type PostProxyHook struct {
-	// Add metadata to the response by invoking meta functions. Documentation for meta functions is available at https://docs.synqly.com/api-reference/meta-functions. Not all meta function are available at every endpoint.
+	// Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
 	Meta []*string `json:"-" url:"meta,omitempty"`
 	// Optional: if you can't use the HTTP Authorization Bearer, specify integration access token here.
 	Token string      `json:"-" url:"token"`

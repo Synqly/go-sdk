@@ -9,7 +9,7 @@ import (
 )
 
 type QueryDevicesRequest struct {
-	// Add metadata to the response by invoking meta functions. Documentation for meta functions is available at https://docs.synqly.com/api-reference/meta-functions. Not all meta function are available at every endpoint.
+	// Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
 	Meta []*string `json:"-" url:"meta,omitempty"`
 	// Number of finding reports to return. Defaults to 50.
 	Limit *int `json:"-" url:"limit,omitempty"`
@@ -26,7 +26,7 @@ type QueryDevicesRequest struct {
 }
 
 type QuerySoftwareInventoryRequest struct {
-	// Add metadata to the response by invoking meta functions. Documentation for meta functions is available at https://docs.synqly.com/api-reference/meta-functions. Not all meta function are available at every endpoint.
+	// Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
 	Meta []*string `json:"-" url:"meta,omitempty"`
 	// Number of software inventory records to return. Defaults to 50.
 	Limit *int `json:"-" url:"limit,omitempty"`

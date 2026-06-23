@@ -10,21 +10,21 @@ import (
 )
 
 type GetAlertRequest struct {
-	// Add metadata to the response by invoking meta functions. Documentation for meta functions is available at https://docs.synqly.com/api-reference/meta-functions. Not all meta function are available at every endpoint.
+	// Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
 	Meta []*string `json:"-" url:"meta,omitempty"`
 	// Include the raw data from the SIEM in the response. Defaults to `false`.
 	IncludeRawData *bool `json:"-" url:"include_raw_data,omitempty"`
 }
 
 type GetInvestigationEvidenceRequest struct {
-	// Add metadata to the response by invoking meta functions. Documentation for meta functions is available at https://docs.synqly.com/api-reference/meta-functions. Not all meta function are available at every endpoint.
+	// Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
 	Meta []*string `json:"-" url:"meta,omitempty"`
 	// Include the raw data from the SIEM in the response. Defaults to `false`.
 	IncludeRawData *bool `json:"-" url:"include_raw_data,omitempty"`
 }
 
 type GetInvestigationRequest struct {
-	// Add metadata to the response by invoking meta functions. Documentation for meta functions is available at https://docs.synqly.com/api-reference/meta-functions. Not all meta function are available at every endpoint.
+	// Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
 	Meta []*string `json:"-" url:"meta,omitempty"`
 	// Include the raw data from the SIEM in the response. Defaults to `false`.
 	IncludeRawData *bool `json:"-" url:"include_raw_data,omitempty"`
@@ -39,7 +39,7 @@ type QuerySiemAlertsRequest struct {
 	Order []*string `json:"-" url:"order,omitempty"`
 	// Filter results by this query. For more information on filtering, refer to our [Filtering Guide](https://docs.synqly.com/guides/connectors/siem/query-filters). Defaults to no filter. If used more than once, the queries are ANDed together.
 	Filter []*string `json:"-" url:"filter,omitempty"`
-	// Add metadata to the response by invoking meta functions. Documentation for meta functions is available at https://docs.synqly.com/api-reference/meta-functions. Not all meta function are available at every endpoint.
+	// Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
 	Meta []*string `json:"-" url:"meta,omitempty"`
 	// Include the raw data from the SIEM in the response. This is useful for debugging and troubleshooting. Defaults to `false`.
 	IncludeRawData *bool `json:"-" url:"include_raw_data,omitempty"`
@@ -54,7 +54,7 @@ type QuerySiemEventsRequest struct {
 	Order []*string `json:"-" url:"order,omitempty"`
 	// Filter results by this query. For more information on filtering, refer to our [Filtering Guide](https://docs.synqly.com/guides/connectors/siem/query-filters). Defaults to no filter. If used more than once, the queries are ANDed together.
 	Filter []*string `json:"-" url:"filter,omitempty"`
-	// Add metadata to the response by invoking meta functions. Documentation for meta functions is available at https://docs.synqly.com/api-reference/meta-functions. Not all meta function are available at every endpoint.
+	// Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
 	Meta []*string `json:"-" url:"meta,omitempty"`
 	// Provider-specific query to pass through to the SIEM. This is useful for advanced queries that are not
 	// supported by the API. The keys and values are provider-specific. For example, to perform a specific
@@ -65,7 +65,7 @@ type QuerySiemEventsRequest struct {
 }
 
 type QueryInvestigationsRequest struct {
-	// Add metadata to the response by invoking meta functions. Documentation for meta functions is available at https://docs.synqly.com/api-reference/meta-functions. Not all meta function are available at every endpoint.
+	// Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
 	Meta []*string `json:"-" url:"meta,omitempty"`
 	// Cursor to use to retrieve the next page of results.
 	Cursor *string `json:"-" url:"cursor,omitempty"`
@@ -80,7 +80,7 @@ type QueryInvestigationsRequest struct {
 }
 
 type QueryLogProvidersRequest struct {
-	// Add metadata to the response by invoking meta functions. Documentation for meta functions is available at https://docs.synqly.com/api-reference/meta-functions. Not all meta function are available at every endpoint.
+	// Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
 	Meta []*string `json:"-" url:"meta,omitempty"`
 	// Cursor to use to retrieve the next page of results.
 	Cursor *string `json:"-" url:"cursor,omitempty"`

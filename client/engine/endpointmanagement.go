@@ -10,7 +10,7 @@ import (
 )
 
 type QueryDeviceComplianceRequest struct {
-	// Add metadata to the response by invoking meta functions. Documentation for meta functions is available at https://docs.synqly.com/api-reference/meta-functions. Not all meta function are available at every endpoint.
+	// Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
 	Meta []*string `json:"-" url:"meta,omitempty"`
 	// Number of compliance findings to return. Defaults to 50.
 	Limit *int `json:"-" url:"limit,omitempty"`
@@ -21,7 +21,7 @@ type QueryDeviceComplianceRequest struct {
 }
 
 type QueryDeviceApplicationsRequest struct {
-	// Add metadata to the response by invoking meta functions. Documentation for meta functions is available at https://docs.synqly.com/api-reference/meta-functions. Not all meta function are available at every endpoint.
+	// Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
 	Meta []*string `json:"-" url:"meta,omitempty"`
 	// Number of applications to return. Defaults to 50.
 	Limit *int `json:"-" url:"limit,omitempty"`
@@ -34,7 +34,7 @@ type QueryDeviceApplicationsRequest struct {
 }
 
 type QueryEndpointManagementDevicesRequest struct {
-	// Add metadata to the response by invoking meta functions. Documentation for meta functions is available at https://docs.synqly.com/api-reference/meta-functions. Not all meta function are available at every endpoint.
+	// Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
 	Meta []*string `json:"-" url:"meta,omitempty"`
 	// Number of devices to return. Defaults to 50.
 	Limit *int `json:"-" url:"limit,omitempty"`

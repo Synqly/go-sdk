@@ -10,7 +10,7 @@ import (
 )
 
 type QueryCloudResourceInventory struct {
-	// Add metadata to the response by invoking meta functions. Documentation for meta functions is available at https://docs.synqly.com/api-reference/meta-functions. Not all meta function are available at every endpoint.
+	// Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
 	Meta []*string `json:"-" url:"meta,omitempty"`
 	// Number of cloud resources to return. Defaults to 500.
 	Limit *int `json:"-" url:"limit,omitempty"`
@@ -25,7 +25,7 @@ type QueryCloudResourceInventory struct {
 }
 
 type QueryComplianceFindings struct {
-	// Add metadata to the response by invoking meta functions. Documentation for meta functions is available at https://docs.synqly.com/api-reference/meta-functions. Not all meta function are available at every endpoint.
+	// Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
 	Meta []*string `json:"-" url:"meta,omitempty"`
 	// Number of compliance findings to return. Defaults to 50.
 	Limit *int `json:"-" url:"limit,omitempty"`
@@ -40,7 +40,7 @@ type QueryComplianceFindings struct {
 }
 
 type QueryEvents struct {
-	// Add metadata to the response by invoking meta functions. Documentation for meta functions is available at https://docs.synqly.com/api-reference/meta-functions. Not all meta function are available at every endpoint.
+	// Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
 	Meta []*string `json:"-" url:"meta,omitempty"`
 	// Number of events to return. Defaults to 100.
 	Limit *int `json:"-" url:"limit,omitempty"`
@@ -53,7 +53,7 @@ type QueryEvents struct {
 }
 
 type QueryIoms struct {
-	// Add metadata to the response by invoking meta functions. Documentation for meta functions is available at https://docs.synqly.com/api-reference/meta-functions. Not all meta function are available at every endpoint.
+	// Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
 	Meta []*string `json:"-" url:"meta,omitempty"`
 	// Number of cloud resources to return. Defaults to 500.
 	Limit *int `json:"-" url:"limit,omitempty"`
@@ -68,7 +68,7 @@ type QueryIoms struct {
 }
 
 type QueryCloudSecurityThreats struct {
-	// Add metadata to the response by invoking meta functions. Documentation for meta functions is available at https://docs.synqly.com/api-reference/meta-functions. Not all meta function are available at every endpoint.
+	// Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
 	Meta []*string `json:"-" url:"meta,omitempty"`
 	// Number of threats to return. Defaults to 100.
 	Limit *int `json:"-" url:"limit,omitempty"`
