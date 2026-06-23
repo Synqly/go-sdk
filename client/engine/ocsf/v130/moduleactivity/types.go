@@ -2595,6 +2595,8 @@ type Group struct {
 	Desc *string `json:"desc,omitempty" url:"desc,omitempty"`
 	// The domain where the group is defined. For example: the LDAP or Active Directory domain.
 	Domain *string `json:"domain,omitempty" url:"domain,omitempty"`
+	// The group's email address. For example, a Google Group email address.
+	EmailAddr *EmailAddress `json:"email_addr,omitempty" url:"email_addr,omitempty"`
 	// The group name.
 	Name *string `json:"name,omitempty" url:"name,omitempty"`
 	// The group privileges.
