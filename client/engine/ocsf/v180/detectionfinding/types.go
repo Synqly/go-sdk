@@ -3208,6 +3208,51 @@ func (e *Evidences) String() string {
 // 99 - Other: The type is not mapped. See the <code>type</code> attribute, which contains a data source specific value.
 type EvidencesVerdictId = int
 
+// The maturity level object describes the CVSS maturity level of an exploit for a vulnerability.
+type ExploitMaturityLevel struct {
+	// The CVSS version used to assign the maturity level of the exploit.
+	CvssVersion *string `json:"cvss_version,omitempty" url:"cvss_version,omitempty"`
+	// The CVSS maturity level of the exploit. For example: <code>Not Defined</code> or <code>Proof of Concept</code>.
+	Value string `json:"value" url:"value"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (e *ExploitMaturityLevel) GetExtraProperties() map[string]interface{} {
+	return e.extraProperties
+}
+
+func (e *ExploitMaturityLevel) UnmarshalJSON(data []byte) error {
+	type unmarshaler ExploitMaturityLevel
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*e = ExploitMaturityLevel(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *e)
+	if err != nil {
+		return err
+	}
+	e.extraProperties = extraProperties
+
+	e._rawJSON = nil
+	return nil
+}
+
+func (e *ExploitMaturityLevel) String() string {
+	if len(e._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(e._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(e); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", e)
+}
+
 // The OCSF Schema Extension object provides detailed information about the schema extension used to construct the event. The schema extensions are registered in the <a target='_blank' href='https://github.com/ocsf/ocsf-schema/blob/main/extensions.md'>extensions.md</a> file.
 type Extension struct {
 	// The schema extension name. For example: <code>dev</code>.
@@ -8787,6 +8832,8 @@ type Vulnerability struct {
 	ExploitLastSeenTime *Timestamp `json:"exploit_last_seen_time,omitempty" url:"exploit_last_seen_time,omitempty"`
 	// The time when the exploit was most recently observed.
 	ExploitLastSeenTimeDt *time.Time `json:"exploit_last_seen_time_dt,omitempty" url:"exploit_last_seen_time_dt,omitempty"`
+	// The list of exploit maturity levels for the vulnerability.
+	ExploitMaturityLevels []*ExploitMaturityLevel `json:"exploit_maturity_levels,omitempty" url:"exploit_maturity_levels,omitempty"`
 	// The URL of the exploit code or Proof-of-Concept (PoC).
 	ExploitRefUrl *UrlString `json:"exploit_ref_url,omitempty" url:"exploit_ref_url,omitempty"`
 	// The requirement description related to any constraints around exploit execution.
@@ -8807,6 +8854,8 @@ type Vulnerability struct {
 	IsExploitAvailable *bool `json:"is_exploit_available,omitempty" url:"is_exploit_available,omitempty"`
 	// Indicates if a fix is available for the reported vulnerability.
 	IsFixAvailable *bool `json:"is_fix_available,omitempty" url:"is_fix_available,omitempty"`
+	// Indicates if the vulnerability is known to be reachable. When the vulnerability is located inside of an application security posture finding event, a vulnerability is considered reachable if there is a direct or indirect path from the applications code to the vulnerable code.
+	IsReachable *bool `json:"is_reachable,omitempty" url:"is_reachable,omitempty"`
 	// A list of KB articles or patches related to an endpoint. A KB Article contains metadata that describes the patch or an update.
 	KbArticleList []*KbArticle `json:"kb_article_list,omitempty" url:"kb_article_list,omitempty"`
 	// The KB article/s related to the entity. A KB Article contains metadata that describes the patch or an update.
