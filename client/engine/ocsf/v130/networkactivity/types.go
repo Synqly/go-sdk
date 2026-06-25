@@ -1472,6 +1472,8 @@ type Device struct {
 	UidAlt *string `json:"uid_alt,omitempty" url:"uid_alt,omitempty"`
 	// The product vendor that created the device.
 	Vendor *Organization `json:"vendor,omitempty" url:"vendor,omitempty"`
+	// The vendor for the device. For example <code>Dell</code> or <code>Lenovo</code>.
+	VendorName *string `json:"vendor_name,omitempty" url:"vendor_name,omitempty"`
 	// The Virtual LAN identifier.
 	VlanUid *string `json:"vlan_uid,omitempty" url:"vlan_uid,omitempty"`
 	// The unique identifier of the Virtual Private Cloud (VPC).
