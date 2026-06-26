@@ -15425,6 +15425,25 @@ func (i IdentityOktaDataset) Ptr() *IdentityOktaDataset {
 	return &i
 }
 
+type IdentityPingOneDataset string
+
+const (
+	IdentityPingOneDatasetBasicVer0 IdentityPingOneDataset = "basic_v0"
+)
+
+func NewIdentityPingOneDatasetFromString(s string) (IdentityPingOneDataset, error) {
+	switch s {
+	case "basic_v0":
+		return IdentityPingOneDatasetBasicVer0, nil
+	}
+	var t IdentityPingOneDataset
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (i IdentityPingOneDataset) Ptr() *IdentityPingOneDataset {
+	return &i
+}
+
 // Configuration for Ashby Identity.
 //
 // [Configuration guide](https://docs.synqly.com/guides/provider-configuration/ashby-identity-setup)
@@ -15825,6 +15844,48 @@ func (i *IdentityPingOne) UnmarshalJSON(data []byte) error {
 }
 
 func (i *IdentityPingOne) String() string {
+	if len(i._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(i._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(i); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", i)
+}
+
+// Configuration for [MOCK] PingOne Cloud Platform.
+type IdentityPingOneMock struct {
+	Dataset IdentityPingOneDataset `json:"dataset" url:"dataset"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (i *IdentityPingOneMock) GetExtraProperties() map[string]interface{} {
+	return i.extraProperties
+}
+
+func (i *IdentityPingOneMock) UnmarshalJSON(data []byte) error {
+	type unmarshaler IdentityPingOneMock
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*i = IdentityPingOneMock(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *i)
+	if err != nil {
+		return err
+	}
+	i.extraProperties = extraProperties
+
+	i._rawJSON = nil
+	return nil
+}
+
+func (i *IdentityPingOneMock) String() string {
 	if len(i._rawJSON) > 0 {
 		if value, err := core.StringifyJSON(i._rawJSON); err == nil {
 			return value
@@ -18135,6 +18196,8 @@ type ProviderConfig struct {
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/ping-identity-setup)
 	IdentityPingone *IdentityPingOne
+	// Configuration for [MOCK] PingOne Cloud Platform.
+	IdentityPingoneMock *IdentityPingOneMock
 	// Configuration for Workday Identity.
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/workday-identity-setup)
@@ -18866,6 +18929,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.IdentityPingone = value
+	case "identity_pingone_mock":
+		value := new(IdentityPingOneMock)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.IdentityPingoneMock = value
 	case "identity_workday":
 		value := new(IdentityWorkday)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -19549,6 +19618,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.IdentityPingone != nil {
 		return core.MarshalJSONWithExtraProperty(p.IdentityPingone, "type", "identity_pingone")
 	}
+	if p.IdentityPingoneMock != nil {
+		return core.MarshalJSONWithExtraProperty(p.IdentityPingoneMock, "type", "identity_pingone_mock")
+	}
 	if p.IdentityWorkday != nil {
 		return core.MarshalJSONWithExtraProperty(p.IdentityWorkday, "type", "identity_workday")
 	}
@@ -19855,6 +19927,7 @@ type ProviderConfigVisitor interface {
 	VisitIdentityOkta(*IdentityOkta) error
 	VisitIdentityOktaMock(*IdentityOktaMock) error
 	VisitIdentityPingone(*IdentityPingOne) error
+	VisitIdentityPingoneMock(*IdentityPingOneMock) error
 	VisitIdentityWorkday(*IdentityWorkday) error
 	VisitIncidentresponseIncidentio(*IncidentResponseIncidentIo) error
 	VisitIncidentresponsePagerduty(*IncidentResponsePagerDuty) error
@@ -20155,6 +20228,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.IdentityPingone != nil {
 		return visitor.VisitIdentityPingone(p.IdentityPingone)
+	}
+	if p.IdentityPingoneMock != nil {
+		return visitor.VisitIdentityPingoneMock(p.IdentityPingoneMock)
 	}
 	if p.IdentityWorkday != nil {
 		return visitor.VisitIdentityWorkday(p.IdentityWorkday)
@@ -20539,6 +20615,8 @@ const (
 	ProviderConfigIdIdentityOktaMock ProviderConfigId = "identity_okta_mock"
 	// PingOne Cloud Platform
 	ProviderConfigIdIdentityPingOne ProviderConfigId = "identity_pingone"
+	// [MOCK] PingOne Cloud Platform
+	ProviderConfigIdIdentityPingOneMock ProviderConfigId = "identity_pingone_mock"
 	// Workday Identity
 	ProviderConfigIdIdentityWorkday ProviderConfigId = "identity_workday"
 	// incident.io
@@ -20845,6 +20923,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdIdentityOktaMock, nil
 	case "identity_pingone":
 		return ProviderConfigIdIdentityPingOne, nil
+	case "identity_pingone_mock":
+		return ProviderConfigIdIdentityPingOneMock, nil
 	case "identity_workday":
 		return ProviderConfigIdIdentityWorkday, nil
 	case "incidentresponse_incidentio":
