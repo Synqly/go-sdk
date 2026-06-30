@@ -15406,6 +15406,25 @@ func (i IdentityEntraIdDataset) Ptr() *IdentityEntraIdDataset {
 	return &i
 }
 
+type IdentityGoogleDataset string
+
+const (
+	IdentityGoogleDatasetBasicVer0 IdentityGoogleDataset = "basic_v0"
+)
+
+func NewIdentityGoogleDatasetFromString(s string) (IdentityGoogleDataset, error) {
+	switch s {
+	case "basic_v0":
+		return IdentityGoogleDatasetBasicVer0, nil
+	}
+	var t IdentityGoogleDataset
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (i IdentityGoogleDataset) Ptr() *IdentityGoogleDataset {
+	return &i
+}
+
 type IdentityOktaDataset string
 
 const (
@@ -15660,6 +15679,48 @@ func (i *IdentityGoogle) UnmarshalJSON(data []byte) error {
 }
 
 func (i *IdentityGoogle) String() string {
+	if len(i._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(i._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(i); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", i)
+}
+
+// Configuration for [MOCK] Google Workspace.
+type IdentityGoogleMock struct {
+	Dataset IdentityGoogleDataset `json:"dataset" url:"dataset"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (i *IdentityGoogleMock) GetExtraProperties() map[string]interface{} {
+	return i.extraProperties
+}
+
+func (i *IdentityGoogleMock) UnmarshalJSON(data []byte) error {
+	type unmarshaler IdentityGoogleMock
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*i = IdentityGoogleMock(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *i)
+	if err != nil {
+		return err
+	}
+	i.extraProperties = extraProperties
+
+	i._rawJSON = nil
+	return nil
+}
+
+func (i *IdentityGoogleMock) String() string {
 	if len(i._rawJSON) > 0 {
 		if value, err := core.StringifyJSON(i._rawJSON); err == nil {
 			return value
@@ -18182,6 +18243,8 @@ type ProviderConfig struct {
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/google-workspace-setup)
 	IdentityGoogle *IdentityGoogle
+	// Configuration for [MOCK] Google Workspace.
+	IdentityGoogleMock *IdentityGoogleMock
 	// Configuration for Greenhouse Identity.
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/greenhouse-identity-setup)
@@ -18905,6 +18968,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.IdentityGoogle = value
+	case "identity_google_mock":
+		value := new(IdentityGoogleMock)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.IdentityGoogleMock = value
 	case "identity_greenhouse":
 		value := new(IdentityGreenhouse)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -19606,6 +19675,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.IdentityGoogle != nil {
 		return core.MarshalJSONWithExtraProperty(p.IdentityGoogle, "type", "identity_google")
 	}
+	if p.IdentityGoogleMock != nil {
+		return core.MarshalJSONWithExtraProperty(p.IdentityGoogleMock, "type", "identity_google_mock")
+	}
 	if p.IdentityGreenhouse != nil {
 		return core.MarshalJSONWithExtraProperty(p.IdentityGreenhouse, "type", "identity_greenhouse")
 	}
@@ -19923,6 +19995,7 @@ type ProviderConfigVisitor interface {
 	VisitIdentityEntraId(*IdentityEntraId) error
 	VisitIdentityEntraIdMock(*IdentityEntraIdMock) error
 	VisitIdentityGoogle(*IdentityGoogle) error
+	VisitIdentityGoogleMock(*IdentityGoogleMock) error
 	VisitIdentityGreenhouse(*IdentityGreenhouse) error
 	VisitIdentityOkta(*IdentityOkta) error
 	VisitIdentityOktaMock(*IdentityOktaMock) error
@@ -20216,6 +20289,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.IdentityGoogle != nil {
 		return visitor.VisitIdentityGoogle(p.IdentityGoogle)
+	}
+	if p.IdentityGoogleMock != nil {
+		return visitor.VisitIdentityGoogleMock(p.IdentityGoogleMock)
 	}
 	if p.IdentityGreenhouse != nil {
 		return visitor.VisitIdentityGreenhouse(p.IdentityGreenhouse)
@@ -20607,6 +20683,8 @@ const (
 	ProviderConfigIdIdentityEntraIdMock ProviderConfigId = "identity_entra_id_mock"
 	// Google Workspace
 	ProviderConfigIdIdentityGoogle ProviderConfigId = "identity_google"
+	// [MOCK] Google Workspace
+	ProviderConfigIdIdentityGoogleMock ProviderConfigId = "identity_google_mock"
 	// Greenhouse Identity
 	ProviderConfigIdIdentityGreenhouse ProviderConfigId = "identity_greenhouse"
 	// Okta Identity
@@ -20915,6 +20993,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdIdentityEntraIdMock, nil
 	case "identity_google":
 		return ProviderConfigIdIdentityGoogle, nil
+	case "identity_google_mock":
+		return ProviderConfigIdIdentityGoogleMock, nil
 	case "identity_greenhouse":
 		return ProviderConfigIdIdentityGreenhouse, nil
 	case "identity_okta":
