@@ -1279,6 +1279,8 @@ type Device struct {
 	RiskLevelId *DeviceRiskLevelId `json:"risk_level_id,omitempty" url:"risk_level_id,omitempty"`
 	// The risk score as reported by the event source.
 	RiskScore *int `json:"risk_score,omitempty" url:"risk_score,omitempty"`
+	// The URL of the device in the event sources system.
+	SrcUrl *UrlString `json:"src_url,omitempty" url:"src_url,omitempty"`
 	// The subnet mask.
 	Subnet *Subnet `json:"subnet,omitempty" url:"subnet,omitempty"`
 	// The unique identifier of a virtual subnet.
@@ -2250,6 +2252,8 @@ type FindingInfo struct {
 	Uid string `json:"uid" url:"uid"`
 	// The alternative unique identifier of the reported finding.
 	UidAlt *string `json:"uid_alt,omitempty" url:"uid_alt,omitempty"`
+	// An unordered collection of zero or more name/value pairs that represent a finding's extended attributes and are specific to the event source.
+	Xattributes *Object `json:"xattributes,omitempty" url:"xattributes,omitempty"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage

@@ -1957,6 +1957,8 @@ type Device struct {
 	RiskLevelId *DeviceRiskLevelId `json:"risk_level_id,omitempty" url:"risk_level_id,omitempty"`
 	// The risk score as reported by the event source.
 	RiskScore *int `json:"risk_score,omitempty" url:"risk_score,omitempty"`
+	// The URL of the device in the event sources system.
+	SrcUrl *UrlString `json:"src_url,omitempty" url:"src_url,omitempty"`
 	// The subnet mask.
 	Subnet *Subnet `json:"subnet,omitempty" url:"subnet,omitempty"`
 	// The unique identifier of a virtual subnet.
@@ -7481,6 +7483,8 @@ type Vulnerability struct {
 	Title *string `json:"title,omitempty" url:"title,omitempty"`
 	// The name of the vendor that identified the vulnerability.
 	VendorName *string `json:"vendor_name,omitempty" url:"vendor_name,omitempty"`
+	// An unordered collection of zero or more name/value pairs that represent a vulnerability's extended attributes and are specific to the event source.
+	Xattributes *Object `json:"xattributes,omitempty" url:"xattributes,omitempty"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage

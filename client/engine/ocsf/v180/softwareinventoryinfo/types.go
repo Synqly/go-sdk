@@ -1247,6 +1247,8 @@ type Device struct {
 	RiskLevelId *DeviceRiskLevelId `json:"risk_level_id,omitempty" url:"risk_level_id,omitempty"`
 	// The risk score as reported by the event source.
 	RiskScore *int `json:"risk_score,omitempty" url:"risk_score,omitempty"`
+	// The URL of the device in the event sources system.
+	SrcUrl *UrlString `json:"src_url,omitempty" url:"src_url,omitempty"`
 	// The subnet mask.
 	Subnet *Subnet `json:"subnet,omitempty" url:"subnet,omitempty"`
 	// The unique identifier of a virtual subnet.

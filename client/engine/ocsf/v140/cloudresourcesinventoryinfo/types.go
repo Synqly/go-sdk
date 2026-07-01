@@ -1693,6 +1693,8 @@ type Databucket struct {
 	Region *string `json:"region,omitempty" url:"region,omitempty"`
 	// The size of the databucket in bytes.
 	Size *int `json:"size,omitempty" url:"size,omitempty"`
+	// The URL of the resource in the event sources system.
+	SrcUrl *UrlString `json:"src_url,omitempty" url:"src_url,omitempty"`
 	// The databucket type.
 	Type *string `json:"type,omitempty" url:"type,omitempty"`
 	// The normalized identifier of the databucket type.
@@ -1878,6 +1880,8 @@ type Device struct {
 	RiskLevelId *DeviceRiskLevelId `json:"risk_level_id,omitempty" url:"risk_level_id,omitempty"`
 	// The risk score as reported by the event source.
 	RiskScore *int `json:"risk_score,omitempty" url:"risk_score,omitempty"`
+	// The URL of the device in the event sources system.
+	SrcUrl *UrlString `json:"src_url,omitempty" url:"src_url,omitempty"`
 	// The subnet mask.
 	Subnet *Subnet `json:"subnet,omitempty" url:"subnet,omitempty"`
 	// The unique identifier of a virtual subnet.
@@ -5397,6 +5401,8 @@ type ResourceDetails struct {
 	Owner *User `json:"owner,omitempty" url:"owner,omitempty"`
 	// The cloud region of the resource.
 	Region *string `json:"region,omitempty" url:"region,omitempty"`
+	// The URL of the resource in the event sources system.
+	SrcUrl *UrlString `json:"src_url,omitempty" url:"src_url,omitempty"`
 	// The resource type as defined by the event source.
 	Type *string `json:"type,omitempty" url:"type,omitempty"`
 	// The unique identifier of the resource.
@@ -6613,6 +6619,8 @@ type Vulnerability struct {
 	AffectedCode []*AffectedCode `json:"affected_code,omitempty" url:"affected_code,omitempty"`
 	// List of software packages identified as affected by a vulnerability/vulnerabilities.
 	AffectedPackages []*AffectedPackage `json:"affected_packages,omitempty" url:"affected_packages,omitempty"`
+	// The category of a vulnerability or weakness, as reported by the source tool, such as <code>Container Security</code> or <code>Open Source Security</code>.
+	Category *string `json:"category,omitempty" url:"category,omitempty"`
 	// Describes the Common Vulnerabilities and Exposures <a target='_blank' href='https://cve.mitre.org/'>(CVE)</a> details related to the vulnerability.
 	Cve *Cve `json:"cve,omitempty" url:"cve,omitempty"`
 	// Describes the Common Weakness Enumeration <a target='_blank' href='https://cwe.mitre.org/'>(CWE)</a> details related to the vulnerability.
@@ -6655,6 +6663,8 @@ type Vulnerability struct {
 	Title *string `json:"title,omitempty" url:"title,omitempty"`
 	// The name of the vendor that identified the vulnerability.
 	VendorName *string `json:"vendor_name,omitempty" url:"vendor_name,omitempty"`
+	// An unordered collection of zero or more name/value pairs that represent a vulnerability's extended attributes and are specific to the event source.
+	Xattributes *Object `json:"xattributes,omitempty" url:"xattributes,omitempty"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
