@@ -10967,6 +10967,76 @@ func (a *AzureBlobCredential) Accept(visitor AzureBlobCredentialVisitor) error {
 	return fmt.Errorf("type %T does not define a non-empty union type", a)
 }
 
+type AzureDevOpsTicketingCredential struct {
+	Type string
+	// Personal Access Token (PAT) for authenticating with the Azure DevOps REST API. Requires vso.work and vso.work_write scopes.
+	Token *TokenCredential
+	// Reference to existing Personal Access Token.
+	TokenId TokenCredentialId
+}
+
+func (a *AzureDevOpsTicketingCredential) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	a.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", a)
+	}
+	switch unmarshaler.Type {
+	case "token":
+		value := new(TokenCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		a.Token = value
+	case "token_id":
+		var valueUnmarshaler struct {
+			TokenId TokenCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		a.TokenId = valueUnmarshaler.TokenId
+	}
+	return nil
+}
+
+func (a AzureDevOpsTicketingCredential) MarshalJSON() ([]byte, error) {
+	if a.Token != nil {
+		return core.MarshalJSONWithExtraProperty(a.Token, "type", "token")
+	}
+	if a.TokenId != "" {
+		var marshaler = struct {
+			Type    string            `json:"type"`
+			TokenId TokenCredentialId `json:"value"`
+		}{
+			Type:    "token_id",
+			TokenId: a.TokenId,
+		}
+		return json.Marshal(marshaler)
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", a)
+}
+
+type AzureDevOpsTicketingCredentialVisitor interface {
+	VisitToken(*TokenCredential) error
+	VisitTokenId(TokenCredentialId) error
+}
+
+func (a *AzureDevOpsTicketingCredential) Accept(visitor AzureDevOpsTicketingCredentialVisitor) error {
+	if a.Token != nil {
+		return visitor.VisitToken(a.Token)
+	}
+	if a.TokenId != "" {
+		return visitor.VisitTokenId(a.TokenId)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", a)
+}
+
 type AzureMonitorLogsCredential struct {
 	Type string
 	// Configuration when creating new Client Secret.
@@ -18434,6 +18504,10 @@ type ProviderConfig struct {
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/autotask-ticketing-setup)
 	TicketingAutotask *TicketingAutotask
+	// Configuration for Azure DevOps Boards.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/azuredevops-ticketing-setup)
+	TicketingAzureDevops *TicketingAzureDevOps
 	// Configuration for Freshdesk.
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/freshdesk-ticketing-setup)
@@ -19280,6 +19354,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.TicketingAutotask = value
+	case "ticketing_azure_devops":
+		value := new(TicketingAzureDevOps)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.TicketingAzureDevops = value
 	case "ticketing_freshdesk":
 		value := new(TicketingFreshdesk)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -19831,6 +19911,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.TicketingAutotask != nil {
 		return core.MarshalJSONWithExtraProperty(p.TicketingAutotask, "type", "ticketing_autotask")
 	}
+	if p.TicketingAzureDevops != nil {
+		return core.MarshalJSONWithExtraProperty(p.TicketingAzureDevops, "type", "ticketing_azure_devops")
+	}
 	if p.TicketingFreshdesk != nil {
 		return core.MarshalJSONWithExtraProperty(p.TicketingFreshdesk, "type", "ticketing_freshdesk")
 	}
@@ -20047,6 +20130,7 @@ type ProviderConfigVisitor interface {
 	VisitStorageGcs(*StorageGcs) error
 	VisitStorageMockStorage(*StorageMock) error
 	VisitTicketingAutotask(*TicketingAutotask) error
+	VisitTicketingAzureDevops(*TicketingAzureDevOps) error
 	VisitTicketingFreshdesk(*TicketingFreshdesk) error
 	VisitTicketingIvanti(*TicketingIvanti) error
 	VisitTicketingIvantiMock(*TicketingIvantiMock) error
@@ -20446,6 +20530,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	if p.TicketingAutotask != nil {
 		return visitor.VisitTicketingAutotask(p.TicketingAutotask)
 	}
+	if p.TicketingAzureDevops != nil {
+		return visitor.VisitTicketingAzureDevops(p.TicketingAzureDevops)
+	}
 	if p.TicketingFreshdesk != nil {
 		return visitor.VisitTicketingFreshdesk(p.TicketingFreshdesk)
 	}
@@ -20787,6 +20874,8 @@ const (
 	ProviderConfigIdStorageMock ProviderConfigId = "storage_mock_storage"
 	// Autotask Operations Cloud
 	ProviderConfigIdTicketingAutotask ProviderConfigId = "ticketing_autotask"
+	// Azure DevOps Boards
+	ProviderConfigIdTicketingAzureDevOps ProviderConfigId = "ticketing_azure_devops"
 	// Freshdesk
 	ProviderConfigIdTicketingFreshdesk ProviderConfigId = "ticketing_freshdesk"
 	// Ivanti Neurons Ticketing
@@ -21097,6 +21186,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdStorageMock, nil
 	case "ticketing_autotask":
 		return ProviderConfigIdTicketingAutotask, nil
+	case "ticketing_azure_devops":
+		return ProviderConfigIdTicketingAzureDevOps, nil
 	case "ticketing_freshdesk":
 		return ProviderConfigIdTicketingFreshdesk, nil
 	case "ticketing_ivanti":
@@ -24815,6 +24906,58 @@ func (t *TicketingAutotask) UnmarshalJSON(data []byte) error {
 }
 
 func (t *TicketingAutotask) String() string {
+	if len(t._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(t._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(t); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", t)
+}
+
+// Configuration for Azure DevOps Boards.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/azuredevops-ticketing-setup)
+type TicketingAzureDevOps struct {
+	Credential *AzureDevOpsTicketingCredential `json:"credential" url:"credential"`
+	// Default work item type for ticket creation (e.g., "Issue", "Task", "Bug"). If provided, the issue_type field becomes optional in ticket creation requests.
+	DefaultIssueType *string `json:"default_issue_type,omitempty" url:"default_issue_type,omitempty"`
+	// Azure DevOps organization name.
+	Organization string `json:"organization" url:"organization"`
+	// Azure DevOps project name. Used as the default project scope for work item queries.
+	Project string `json:"project" url:"project"`
+	// Base URL for the Azure DevOps API.
+	Url string `json:"url" url:"url"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (t *TicketingAzureDevOps) GetExtraProperties() map[string]interface{} {
+	return t.extraProperties
+}
+
+func (t *TicketingAzureDevOps) UnmarshalJSON(data []byte) error {
+	type unmarshaler TicketingAzureDevOps
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*t = TicketingAzureDevOps(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *t)
+	if err != nil {
+		return err
+	}
+	t.extraProperties = extraProperties
+
+	t._rawJSON = nil
+	return nil
+}
+
+func (t *TicketingAzureDevOps) String() string {
 	if len(t._rawJSON) > 0 {
 		if value, err := core.StringifyJSON(t._rawJSON); err == nil {
 			return value
