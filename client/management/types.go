@@ -16651,6 +16651,76 @@ func (j *JiraCredential) Accept(visitor JiraCredentialVisitor) error {
 	return fmt.Errorf("type %T does not define a non-empty union type", j)
 }
 
+type LinearCredential struct {
+	Type string
+	// A personal API key.
+	Token *TokenCredential
+	// Reference to existing API Key.
+	TokenId TokenCredentialId
+}
+
+func (l *LinearCredential) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	l.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", l)
+	}
+	switch unmarshaler.Type {
+	case "token":
+		value := new(TokenCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		l.Token = value
+	case "token_id":
+		var valueUnmarshaler struct {
+			TokenId TokenCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		l.TokenId = valueUnmarshaler.TokenId
+	}
+	return nil
+}
+
+func (l LinearCredential) MarshalJSON() ([]byte, error) {
+	if l.Token != nil {
+		return core.MarshalJSONWithExtraProperty(l.Token, "type", "token")
+	}
+	if l.TokenId != "" {
+		var marshaler = struct {
+			Type    string            `json:"type"`
+			TokenId TokenCredentialId `json:"value"`
+		}{
+			Type:    "token_id",
+			TokenId: l.TokenId,
+		}
+		return json.Marshal(marshaler)
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", l)
+}
+
+type LinearCredentialVisitor interface {
+	VisitToken(*TokenCredential) error
+	VisitTokenId(TokenCredentialId) error
+}
+
+func (l *LinearCredential) Accept(visitor LinearCredentialVisitor) error {
+	if l.Token != nil {
+		return visitor.VisitToken(l.Token)
+	}
+	if l.TokenId != "" {
+		return visitor.VisitTokenId(l.TokenId)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", l)
+}
+
 type MalwarebytesCredential struct {
 	Type string
 	// Configuration when creating new Client Credentials.
@@ -18526,6 +18596,10 @@ type ProviderConfig struct {
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/jira-service-management-ticketing-setup)
 	TicketingJiraServiceManagement *TicketingJiraServiceManagement
+	// Configuration for Linear.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/linear-ticketing-setup)
+	TicketingLinear *TicketingLinear
 	// Configuration for the Synqly mock in-memory ticketing Provider. This provider is for testing purposes only. It retains tickets for a limited time and does not persist them for long-term usage.
 	TicketingMockTicketing *TicketingMock
 	// Configuration for PagerDuty Operations Cloud.
@@ -19390,6 +19464,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.TicketingJiraServiceManagement = value
+	case "ticketing_linear":
+		value := new(TicketingLinear)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.TicketingLinear = value
 	case "ticketing_mock_ticketing":
 		value := new(TicketingMock)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -19929,6 +20009,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.TicketingJiraServiceManagement != nil {
 		return core.MarshalJSONWithExtraProperty(p.TicketingJiraServiceManagement, "type", "ticketing_jira_service_management")
 	}
+	if p.TicketingLinear != nil {
+		return core.MarshalJSONWithExtraProperty(p.TicketingLinear, "type", "ticketing_linear")
+	}
 	if p.TicketingMockTicketing != nil {
 		return core.MarshalJSONWithExtraProperty(p.TicketingMockTicketing, "type", "ticketing_mock_ticketing")
 	}
@@ -20136,6 +20219,7 @@ type ProviderConfigVisitor interface {
 	VisitTicketingIvantiMock(*TicketingIvantiMock) error
 	VisitTicketingJira(*TicketingJira) error
 	VisitTicketingJiraServiceManagement(*TicketingJiraServiceManagement) error
+	VisitTicketingLinear(*TicketingLinear) error
 	VisitTicketingMockTicketing(*TicketingMock) error
 	VisitTicketingPagerduty(*TicketingPagerDuty) error
 	VisitTicketingPagerdutyMock(*TicketingPagerDutyMock) error
@@ -20548,6 +20632,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	if p.TicketingJiraServiceManagement != nil {
 		return visitor.VisitTicketingJiraServiceManagement(p.TicketingJiraServiceManagement)
 	}
+	if p.TicketingLinear != nil {
+		return visitor.VisitTicketingLinear(p.TicketingLinear)
+	}
 	if p.TicketingMockTicketing != nil {
 		return visitor.VisitTicketingMockTicketing(p.TicketingMockTicketing)
 	}
@@ -20886,6 +20973,8 @@ const (
 	ProviderConfigIdTicketingJira ProviderConfigId = "ticketing_jira"
 	// Jira Service Management
 	ProviderConfigIdTicketingJiraServiceManagement ProviderConfigId = "ticketing_jira_service_management"
+	// Linear
+	ProviderConfigIdTicketingLinear ProviderConfigId = "ticketing_linear"
 	// Synqly Test Provider
 	ProviderConfigIdTicketingMock ProviderConfigId = "ticketing_mock_ticketing"
 	// PagerDuty Operations Cloud
@@ -21198,6 +21287,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdTicketingJira, nil
 	case "ticketing_jira_service_management":
 		return ProviderConfigIdTicketingJiraServiceManagement, nil
+	case "ticketing_linear":
+		return ProviderConfigIdTicketingLinear, nil
 	case "ticketing_mock_ticketing":
 		return ProviderConfigIdTicketingMock, nil
 	case "ticketing_pagerduty":
@@ -25200,6 +25291,54 @@ func (t *TicketingJiraServiceManagement) UnmarshalJSON(data []byte) error {
 }
 
 func (t *TicketingJiraServiceManagement) String() string {
+	if len(t._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(t._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(t); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", t)
+}
+
+// Configuration for Linear.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/linear-ticketing-setup)
+type TicketingLinear struct {
+	Credential *LinearCredential `json:"credential" url:"credential"`
+	// Default Linear team ID for issue creation. If not provided, a team must be specified in each create request.
+	DefaultTeamId *string `json:"default_team_id,omitempty" url:"default_team_id,omitempty"`
+	// Base URL for the Linear API.
+	Url *string `json:"url,omitempty" url:"url,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (t *TicketingLinear) GetExtraProperties() map[string]interface{} {
+	return t.extraProperties
+}
+
+func (t *TicketingLinear) UnmarshalJSON(data []byte) error {
+	type unmarshaler TicketingLinear
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*t = TicketingLinear(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *t)
+	if err != nil {
+		return err
+	}
+	t.extraProperties = extraProperties
+
+	t._rawJSON = nil
+	return nil
+}
+
+func (t *TicketingLinear) String() string {
 	if len(t._rawJSON) > 0 {
 		if value, err := core.StringifyJSON(t._rawJSON); err == nil {
 			return value
