@@ -13607,6 +13607,25 @@ func (e *ElasticsearchSharedSecret) Accept(visitor ElasticsearchSharedSecretVisi
 	return fmt.Errorf("type %T does not define a non-empty union type", e)
 }
 
+type EmailSecurityDefenderForOfficeDataset string
+
+const (
+	EmailSecurityDefenderForOfficeDatasetBasicVer0 EmailSecurityDefenderForOfficeDataset = "basic_v0"
+)
+
+func NewEmailSecurityDefenderForOfficeDatasetFromString(s string) (EmailSecurityDefenderForOfficeDataset, error) {
+	switch s {
+	case "basic_v0":
+		return EmailSecurityDefenderForOfficeDatasetBasicVer0, nil
+	}
+	var t EmailSecurityDefenderForOfficeDataset
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (e EmailSecurityDefenderForOfficeDataset) Ptr() *EmailSecurityDefenderForOfficeDataset {
+	return &e
+}
+
 type EmailSecurityMimecastCloudGatewayDataset string
 
 const (
@@ -13663,6 +13682,48 @@ func (e *EmailSecurityDefenderForOffice) UnmarshalJSON(data []byte) error {
 }
 
 func (e *EmailSecurityDefenderForOffice) String() string {
+	if len(e._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(e._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(e); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", e)
+}
+
+// Configuration for [MOCK] Microsoft Defender for Office 365.
+type EmailSecurityDefenderForOfficeMock struct {
+	Dataset EmailSecurityDefenderForOfficeDataset `json:"dataset" url:"dataset"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (e *EmailSecurityDefenderForOfficeMock) GetExtraProperties() map[string]interface{} {
+	return e.extraProperties
+}
+
+func (e *EmailSecurityDefenderForOfficeMock) UnmarshalJSON(data []byte) error {
+	type unmarshaler EmailSecurityDefenderForOfficeMock
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*e = EmailSecurityDefenderForOfficeMock(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *e)
+	if err != nil {
+		return err
+	}
+	e.extraProperties = extraProperties
+
+	e._rawJSON = nil
+	return nil
+}
+
+func (e *EmailSecurityDefenderForOfficeMock) String() string {
 	if len(e._rawJSON) > 0 {
 		if value, err := core.StringifyJSON(e._rawJSON); err == nil {
 			return value
@@ -18343,6 +18404,8 @@ type ProviderConfig struct {
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/microsoft-defender-for-office-emailsecurity-setup)
 	EmailsecurityDefenderForOffice *EmailSecurityDefenderForOffice
+	// Configuration for [MOCK] Microsoft Defender for Office 365.
+	EmailsecurityDefenderForOfficeMock *EmailSecurityDefenderForOfficeMock
 	// Configuration for Mimecast Cloud Gateway as an email security provider.
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/mimecast-cloud-gateway-setup)
@@ -19050,6 +19113,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.EmailsecurityDefenderForOffice = value
+	case "emailsecurity_defender_for_office_mock":
+		value := new(EmailSecurityDefenderForOfficeMock)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.EmailsecurityDefenderForOfficeMock = value
 	case "emailsecurity_mimecast_cloud_gateway":
 		value := new(EmailSecurityMimecastCloudGateway)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -19802,6 +19871,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.EmailsecurityDefenderForOffice != nil {
 		return core.MarshalJSONWithExtraProperty(p.EmailsecurityDefenderForOffice, "type", "emailsecurity_defender_for_office")
 	}
+	if p.EmailsecurityDefenderForOfficeMock != nil {
+		return core.MarshalJSONWithExtraProperty(p.EmailsecurityDefenderForOfficeMock, "type", "emailsecurity_defender_for_office_mock")
+	}
 	if p.EmailsecurityMimecastCloudGateway != nil {
 		return core.MarshalJSONWithExtraProperty(p.EmailsecurityMimecastCloudGateway, "type", "emailsecurity_mimecast_cloud_gateway")
 	}
@@ -20150,6 +20222,7 @@ type ProviderConfigVisitor interface {
 	VisitEdrTrellix(*EdrTrellix) error
 	VisitEdrTrellixEns(*EdrTrellixEns) error
 	VisitEmailsecurityDefenderForOffice(*EmailSecurityDefenderForOffice) error
+	VisitEmailsecurityDefenderForOfficeMock(*EmailSecurityDefenderForOfficeMock) error
 	VisitEmailsecurityMimecastCloudGateway(*EmailSecurityMimecastCloudGateway) error
 	VisitEmailsecurityMimecastCloudGatewayMock(*EmailSecurityMimecastCloudGatewayMock) error
 	VisitEndpointmanagementAutomox(*EndpointmanagementAutomox) error
@@ -20424,6 +20497,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.EmailsecurityDefenderForOffice != nil {
 		return visitor.VisitEmailsecurityDefenderForOffice(p.EmailsecurityDefenderForOffice)
+	}
+	if p.EmailsecurityDefenderForOfficeMock != nil {
+		return visitor.VisitEmailsecurityDefenderForOfficeMock(p.EmailsecurityDefenderForOfficeMock)
 	}
 	if p.EmailsecurityMimecastCloudGateway != nil {
 		return visitor.VisitEmailsecurityMimecastCloudGateway(p.EmailsecurityMimecastCloudGateway)
@@ -20835,6 +20911,8 @@ const (
 	ProviderConfigIdEdrTrellixEns ProviderConfigId = "edr_trellix_ens"
 	// Microsoft Defender for Office 365
 	ProviderConfigIdEmailSecurityDefenderForOffice ProviderConfigId = "emailsecurity_defender_for_office"
+	// [MOCK] Microsoft Defender for Office 365
+	ProviderConfigIdEmailSecurityDefenderForOfficeMock ProviderConfigId = "emailsecurity_defender_for_office_mock"
 	// Mimecast Cloud Gateway
 	ProviderConfigIdEmailSecurityMimecastCloudGateway ProviderConfigId = "emailsecurity_mimecast_cloud_gateway"
 	// [MOCK] Mimecast Cloud Gateway
@@ -21149,6 +21227,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdEdrTrellixEns, nil
 	case "emailsecurity_defender_for_office":
 		return ProviderConfigIdEmailSecurityDefenderForOffice, nil
+	case "emailsecurity_defender_for_office_mock":
+		return ProviderConfigIdEmailSecurityDefenderForOfficeMock, nil
 	case "emailsecurity_mimecast_cloud_gateway":
 		return ProviderConfigIdEmailSecurityMimecastCloudGateway, nil
 	case "emailsecurity_mimecast_cloud_gateway_mock":
