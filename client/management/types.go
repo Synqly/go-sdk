@@ -15688,6 +15688,8 @@ func (i *IdentityAwsIam) String() string {
 // [Configuration guide](https://docs.synqly.com/guides/provider-configuration/entra-id-setup)
 type IdentityEntraId struct {
 	Credential *EntraIdCredential `json:"credential" url:"credential"`
+	// Government cloud selector.
+	Region *MicrosoftDefenderRegion `json:"region,omitempty" url:"region,omitempty"`
 	// Azure Directory (tenant) identifier.
 	TenantId string `json:"tenant_id" url:"tenant_id"`
 	// Base URL for the the Microsoft Graph API.
