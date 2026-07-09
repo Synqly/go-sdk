@@ -13735,6 +13735,50 @@ func (e *EmailSecurityDefenderForOfficeMock) String() string {
 	return fmt.Sprintf("%#v", e)
 }
 
+// Configuration for Microsoft Exchange Online.
+type EmailSecurityExchangeOnline struct {
+	Credential *ExchangeOnlineCredential `json:"credential" url:"credential"`
+	// Microsoft Entra tenant ID for the Exchange Online organization.
+	TenantId string `json:"tenant_id" url:"tenant_id"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (e *EmailSecurityExchangeOnline) GetExtraProperties() map[string]interface{} {
+	return e.extraProperties
+}
+
+func (e *EmailSecurityExchangeOnline) UnmarshalJSON(data []byte) error {
+	type unmarshaler EmailSecurityExchangeOnline
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*e = EmailSecurityExchangeOnline(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *e)
+	if err != nil {
+		return err
+	}
+	e.extraProperties = extraProperties
+
+	e._rawJSON = nil
+	return nil
+}
+
+func (e *EmailSecurityExchangeOnline) String() string {
+	if len(e._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(e._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(e); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", e)
+}
+
 // Configuration for Mimecast Cloud Gateway as an email security provider.
 //
 // [Configuration guide](https://docs.synqly.com/guides/provider-configuration/mimecast-cloud-gateway-setup)
@@ -14073,6 +14117,76 @@ type EntraIdCredentialVisitor interface {
 }
 
 func (e *EntraIdCredential) Accept(visitor EntraIdCredentialVisitor) error {
+	if e.OAuthClient != nil {
+		return visitor.VisitOAuthClient(e.OAuthClient)
+	}
+	if e.OAuthClientId != "" {
+		return visitor.VisitOAuthClientId(e.OAuthClientId)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", e)
+}
+
+type ExchangeOnlineCredential struct {
+	Type string
+	// Microsoft Entra application (client) ID and secret for a service principal with the ExchangeMessageTrace.Read.All application permission.
+	OAuthClient *OAuthClientCredential
+	// Reference to existing Client Credentials.
+	OAuthClientId OAuthClientCredentialId
+}
+
+func (e *ExchangeOnlineCredential) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	e.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", e)
+	}
+	switch unmarshaler.Type {
+	case "o_auth_client":
+		value := new(OAuthClientCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.OAuthClient = value
+	case "o_auth_client_id":
+		var valueUnmarshaler struct {
+			OAuthClientId OAuthClientCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		e.OAuthClientId = valueUnmarshaler.OAuthClientId
+	}
+	return nil
+}
+
+func (e ExchangeOnlineCredential) MarshalJSON() ([]byte, error) {
+	if e.OAuthClient != nil {
+		return core.MarshalJSONWithExtraProperty(e.OAuthClient, "type", "o_auth_client")
+	}
+	if e.OAuthClientId != "" {
+		var marshaler = struct {
+			Type          string                  `json:"type"`
+			OAuthClientId OAuthClientCredentialId `json:"value"`
+		}{
+			Type:          "o_auth_client_id",
+			OAuthClientId: e.OAuthClientId,
+		}
+		return json.Marshal(marshaler)
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", e)
+}
+
+type ExchangeOnlineCredentialVisitor interface {
+	VisitOAuthClient(*OAuthClientCredential) error
+	VisitOAuthClientId(OAuthClientCredentialId) error
+}
+
+func (e *ExchangeOnlineCredential) Accept(visitor ExchangeOnlineCredentialVisitor) error {
 	if e.OAuthClient != nil {
 		return visitor.VisitOAuthClient(e.OAuthClient)
 	}
@@ -18408,6 +18522,8 @@ type ProviderConfig struct {
 	EmailsecurityDefenderForOffice *EmailSecurityDefenderForOffice
 	// Configuration for [MOCK] Microsoft Defender for Office 365.
 	EmailsecurityDefenderForOfficeMock *EmailSecurityDefenderForOfficeMock
+	// Configuration for Microsoft Exchange Online.
+	EmailsecurityExchangeOnline *EmailSecurityExchangeOnline
 	// Configuration for Mimecast Cloud Gateway as an email security provider.
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/mimecast-cloud-gateway-setup)
@@ -19121,6 +19237,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.EmailsecurityDefenderForOfficeMock = value
+	case "emailsecurity_exchange_online":
+		value := new(EmailSecurityExchangeOnline)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.EmailsecurityExchangeOnline = value
 	case "emailsecurity_mimecast_cloud_gateway":
 		value := new(EmailSecurityMimecastCloudGateway)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -19876,6 +19998,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.EmailsecurityDefenderForOfficeMock != nil {
 		return core.MarshalJSONWithExtraProperty(p.EmailsecurityDefenderForOfficeMock, "type", "emailsecurity_defender_for_office_mock")
 	}
+	if p.EmailsecurityExchangeOnline != nil {
+		return core.MarshalJSONWithExtraProperty(p.EmailsecurityExchangeOnline, "type", "emailsecurity_exchange_online")
+	}
 	if p.EmailsecurityMimecastCloudGateway != nil {
 		return core.MarshalJSONWithExtraProperty(p.EmailsecurityMimecastCloudGateway, "type", "emailsecurity_mimecast_cloud_gateway")
 	}
@@ -20225,6 +20350,7 @@ type ProviderConfigVisitor interface {
 	VisitEdrTrellixEns(*EdrTrellixEns) error
 	VisitEmailsecurityDefenderForOffice(*EmailSecurityDefenderForOffice) error
 	VisitEmailsecurityDefenderForOfficeMock(*EmailSecurityDefenderForOfficeMock) error
+	VisitEmailsecurityExchangeOnline(*EmailSecurityExchangeOnline) error
 	VisitEmailsecurityMimecastCloudGateway(*EmailSecurityMimecastCloudGateway) error
 	VisitEmailsecurityMimecastCloudGatewayMock(*EmailSecurityMimecastCloudGatewayMock) error
 	VisitEndpointmanagementAutomox(*EndpointmanagementAutomox) error
@@ -20502,6 +20628,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.EmailsecurityDefenderForOfficeMock != nil {
 		return visitor.VisitEmailsecurityDefenderForOfficeMock(p.EmailsecurityDefenderForOfficeMock)
+	}
+	if p.EmailsecurityExchangeOnline != nil {
+		return visitor.VisitEmailsecurityExchangeOnline(p.EmailsecurityExchangeOnline)
 	}
 	if p.EmailsecurityMimecastCloudGateway != nil {
 		return visitor.VisitEmailsecurityMimecastCloudGateway(p.EmailsecurityMimecastCloudGateway)
@@ -20915,6 +21044,8 @@ const (
 	ProviderConfigIdEmailSecurityDefenderForOffice ProviderConfigId = "emailsecurity_defender_for_office"
 	// [MOCK] Microsoft Defender for Office 365
 	ProviderConfigIdEmailSecurityDefenderForOfficeMock ProviderConfigId = "emailsecurity_defender_for_office_mock"
+	// Microsoft Exchange Online
+	ProviderConfigIdEmailSecurityExchangeOnline ProviderConfigId = "emailsecurity_exchange_online"
 	// Mimecast Cloud Gateway
 	ProviderConfigIdEmailSecurityMimecastCloudGateway ProviderConfigId = "emailsecurity_mimecast_cloud_gateway"
 	// [MOCK] Mimecast Cloud Gateway
@@ -21231,6 +21362,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdEmailSecurityDefenderForOffice, nil
 	case "emailsecurity_defender_for_office_mock":
 		return ProviderConfigIdEmailSecurityDefenderForOfficeMock, nil
+	case "emailsecurity_exchange_online":
+		return ProviderConfigIdEmailSecurityExchangeOnline, nil
 	case "emailsecurity_mimecast_cloud_gateway":
 		return ProviderConfigIdEmailSecurityMimecastCloudGateway, nil
 	case "emailsecurity_mimecast_cloud_gateway_mock":
