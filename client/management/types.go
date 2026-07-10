@@ -18883,6 +18883,8 @@ type ProviderConfig struct {
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/freshdesk-ticketing-setup)
 	TicketingFreshdesk *TicketingFreshdesk
+	// Configuration for GitHub Issues as a ticketing provider.
+	TicketingGithub *TicketingGitHub
 	// Configuration for the Ivanti Neurons Ticketing Provider
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/ivanti-ticketing-setup)
@@ -19759,6 +19761,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.TicketingFreshdesk = value
+	case "ticketing_github":
+		value := new(TicketingGitHub)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.TicketingGithub = value
 	case "ticketing_ivanti":
 		value := new(TicketingIvanti)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -20325,6 +20333,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.TicketingFreshdesk != nil {
 		return core.MarshalJSONWithExtraProperty(p.TicketingFreshdesk, "type", "ticketing_freshdesk")
 	}
+	if p.TicketingGithub != nil {
+		return core.MarshalJSONWithExtraProperty(p.TicketingGithub, "type", "ticketing_github")
+	}
 	if p.TicketingIvanti != nil {
 		return core.MarshalJSONWithExtraProperty(p.TicketingIvanti, "type", "ticketing_ivanti")
 	}
@@ -20546,6 +20557,7 @@ type ProviderConfigVisitor interface {
 	VisitTicketingAutotask(*TicketingAutotask) error
 	VisitTicketingAzureDevops(*TicketingAzureDevOps) error
 	VisitTicketingFreshdesk(*TicketingFreshdesk) error
+	VisitTicketingGithub(*TicketingGitHub) error
 	VisitTicketingIvanti(*TicketingIvanti) error
 	VisitTicketingIvantiMock(*TicketingIvantiMock) error
 	VisitTicketingJira(*TicketingJira) error
@@ -20960,6 +20972,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	if p.TicketingFreshdesk != nil {
 		return visitor.VisitTicketingFreshdesk(p.TicketingFreshdesk)
 	}
+	if p.TicketingGithub != nil {
+		return visitor.VisitTicketingGithub(p.TicketingGithub)
+	}
 	if p.TicketingIvanti != nil {
 		return visitor.VisitTicketingIvanti(p.TicketingIvanti)
 	}
@@ -21311,6 +21326,8 @@ const (
 	ProviderConfigIdTicketingAzureDevOps ProviderConfigId = "ticketing_azure_devops"
 	// Freshdesk
 	ProviderConfigIdTicketingFreshdesk ProviderConfigId = "ticketing_freshdesk"
+	// GitHub Issues
+	ProviderConfigIdTicketingGitHub ProviderConfigId = "ticketing_github"
 	// Ivanti Neurons Ticketing
 	ProviderConfigIdTicketingIvanti ProviderConfigId = "ticketing_ivanti"
 	// [MOCK] Ivanti Neurons Ticketing
@@ -21631,6 +21648,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdTicketingAzureDevOps, nil
 	case "ticketing_freshdesk":
 		return ProviderConfigIdTicketingFreshdesk, nil
+	case "ticketing_github":
+		return ProviderConfigIdTicketingGitHub, nil
 	case "ticketing_ivanti":
 		return ProviderConfigIdTicketingIvanti, nil
 	case "ticketing_ivanti_mock":
@@ -25451,6 +25470,53 @@ func (t *TicketingFreshdesk) UnmarshalJSON(data []byte) error {
 }
 
 func (t *TicketingFreshdesk) String() string {
+	if len(t._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(t._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(t); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", t)
+}
+
+// Configuration for GitHub Issues as a ticketing provider.
+type TicketingGitHub struct {
+	// Fine-grained Personal Access Token with Issues Read and Write permission.
+	Credential *GitHubCredential `json:"credential" url:"credential"`
+	// Target repository in owner/repo format. All issue operations are scoped to this repository.
+	Repository string `json:"repository" url:"repository"`
+	// Base URL for the GitHub environment. Only necessary with GitHub Enterprise Server deployments.
+	Url *string `json:"url,omitempty" url:"url,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (t *TicketingGitHub) GetExtraProperties() map[string]interface{} {
+	return t.extraProperties
+}
+
+func (t *TicketingGitHub) UnmarshalJSON(data []byte) error {
+	type unmarshaler TicketingGitHub
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*t = TicketingGitHub(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *t)
+	if err != nil {
+		return err
+	}
+	t.extraProperties = extraProperties
+
+	t._rawJSON = nil
+	return nil
+}
+
+func (t *TicketingGitHub) String() string {
 	if len(t._rawJSON) > 0 {
 		if value, err := core.StringifyJSON(t._rawJSON); err == nil {
 			return value
