@@ -11107,6 +11107,76 @@ func (a *AzureMonitorLogsCredential) Accept(visitor AzureMonitorLogsCredentialVi
 	return fmt.Errorf("type %T does not define a non-empty union type", a)
 }
 
+type BitdefenderCredential struct {
+	Type string
+	// Configuration when creating new Token.
+	Token *TokenCredential
+	// Reference to existing Token.
+	TokenId TokenCredentialId
+}
+
+func (b *BitdefenderCredential) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	b.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", b)
+	}
+	switch unmarshaler.Type {
+	case "token":
+		value := new(TokenCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		b.Token = value
+	case "token_id":
+		var valueUnmarshaler struct {
+			TokenId TokenCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		b.TokenId = valueUnmarshaler.TokenId
+	}
+	return nil
+}
+
+func (b BitdefenderCredential) MarshalJSON() ([]byte, error) {
+	if b.Token != nil {
+		return core.MarshalJSONWithExtraProperty(b.Token, "type", "token")
+	}
+	if b.TokenId != "" {
+		var marshaler = struct {
+			Type    string            `json:"type"`
+			TokenId TokenCredentialId `json:"value"`
+		}{
+			Type:    "token_id",
+			TokenId: b.TokenId,
+		}
+		return json.Marshal(marshaler)
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", b)
+}
+
+type BitdefenderCredentialVisitor interface {
+	VisitToken(*TokenCredential) error
+	VisitTokenId(TokenCredentialId) error
+}
+
+func (b *BitdefenderCredential) Accept(visitor BitdefenderCredentialVisitor) error {
+	if b.Token != nil {
+		return visitor.VisitToken(b.Token)
+	}
+	if b.TokenId != "" {
+		return visitor.VisitTokenId(b.TokenId)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", b)
+}
+
 type ChannelJoinBehavior string
 
 const (
@@ -12827,6 +12897,52 @@ func NewEdrCrowdStrikeDatasetFromString(s string) (EdrCrowdStrikeDataset, error)
 
 func (e EdrCrowdStrikeDataset) Ptr() *EdrCrowdStrikeDataset {
 	return &e
+}
+
+// Configuration for Bitdefender GravityZone EDR.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/bitdefender-edr-setup)
+type EdrBitdefender struct {
+	Credential *BitdefenderCredential `json:"credential" url:"credential"`
+	// The URL of your Bitdefender GravityZone Control Center.
+	Url string `json:"url" url:"url"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (e *EdrBitdefender) GetExtraProperties() map[string]interface{} {
+	return e.extraProperties
+}
+
+func (e *EdrBitdefender) UnmarshalJSON(data []byte) error {
+	type unmarshaler EdrBitdefender
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*e = EdrBitdefender(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *e)
+	if err != nil {
+		return err
+	}
+	e.extraProperties = extraProperties
+
+	e._rawJSON = nil
+	return nil
+}
+
+func (e *EdrBitdefender) String() string {
+	if len(e._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(e._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(e); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", e)
 }
 
 // Configuration for CrowdStrike Falcon® Insight EDR.
@@ -18480,6 +18596,10 @@ type ProviderConfig struct {
 	CloudsecurityWiz *CloudSecurityWiz
 	// Configuration for Synqly Custom Provider.
 	CustomSynqly *CustomSynqly
+	// Configuration for Bitdefender GravityZone EDR.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/bitdefender-edr-setup)
+	EdrBitdefender *EdrBitdefender
 	// Configuration for CrowdStrike Falcon® Insight EDR.
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/crowdstrike-edr-setup)
@@ -19159,6 +19279,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.CustomSynqly = value
+	case "edr_bitdefender":
+		value := new(EdrBitdefender)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.EdrBitdefender = value
 	case "edr_crowdstrike":
 		value := new(EdrCrowdStrike)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -19959,6 +20085,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.CustomSynqly != nil {
 		return core.MarshalJSONWithExtraProperty(p.CustomSynqly, "type", "custom_synqly")
 	}
+	if p.EdrBitdefender != nil {
+		return core.MarshalJSONWithExtraProperty(p.EdrBitdefender, "type", "edr_bitdefender")
+	}
 	if p.EdrCrowdstrike != nil {
 		return core.MarshalJSONWithExtraProperty(p.EdrCrowdstrike, "type", "edr_crowdstrike")
 	}
@@ -20337,6 +20466,7 @@ type ProviderConfigVisitor interface {
 	VisitCloudsecurityUpwind(*CloudSecurityUpwind) error
 	VisitCloudsecurityWiz(*CloudSecurityWiz) error
 	VisitCustomSynqly(*CustomSynqly) error
+	VisitEdrBitdefender(*EdrBitdefender) error
 	VisitEdrCrowdstrike(*EdrCrowdStrike) error
 	VisitEdrCrowdstrikeMock(*EdrCrowdStrikeMock) error
 	VisitEdrDefender(*EdrDefender) error
@@ -20589,6 +20719,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.CustomSynqly != nil {
 		return visitor.VisitCustomSynqly(p.CustomSynqly)
+	}
+	if p.EdrBitdefender != nil {
+		return visitor.VisitEdrBitdefender(p.EdrBitdefender)
 	}
 	if p.EdrCrowdstrike != nil {
 		return visitor.VisitEdrCrowdstrike(p.EdrCrowdstrike)
@@ -21018,6 +21151,8 @@ const (
 	ProviderConfigIdCloudSecurityWiz ProviderConfigId = "cloudsecurity_wiz"
 	// Synqly Custom Provider
 	ProviderConfigIdCustomSynqly ProviderConfigId = "custom_synqly"
+	// Bitdefender GravityZone EDR
+	ProviderConfigIdEdrBitdefender ProviderConfigId = "edr_bitdefender"
 	// CrowdStrike Falcon® Insight EDR
 	ProviderConfigIdEdrCrowdStrike ProviderConfigId = "edr_crowdstrike"
 	// [MOCK] CrowdStrike Falcon® Insight EDR
@@ -21336,6 +21471,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdCloudSecurityWiz, nil
 	case "custom_synqly":
 		return ProviderConfigIdCustomSynqly, nil
+	case "edr_bitdefender":
+		return ProviderConfigIdEdrBitdefender, nil
 	case "edr_crowdstrike":
 		return ProviderConfigIdEdrCrowdStrike, nil
 	case "edr_crowdstrike_mock":
