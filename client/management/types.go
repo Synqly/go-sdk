@@ -5504,10 +5504,14 @@ const (
 	OperationIdEmailsecurityQueryEmailEvents                    OperationId = "emailsecurity_query_email_events"
 	OperationIdEmailsecurityQueryThreats                        OperationId = "emailsecurity_query_threats"
 	OperationIdEndpointmanagementGetDevice                      OperationId = "endpointmanagement_get_device"
+	OperationIdEndpointmanagementLockDevice                     OperationId = "endpointmanagement_lock_device"
 	OperationIdEndpointmanagementQueryComplianceFindings        OperationId = "endpointmanagement_query_compliance_findings"
 	OperationIdEndpointmanagementQueryDeviceApplications        OperationId = "endpointmanagement_query_device_applications"
 	OperationIdEndpointmanagementQueryDevices                   OperationId = "endpointmanagement_query_devices"
 	OperationIdEndpointmanagementRemediateDevice                OperationId = "endpointmanagement_remediate_device"
+	OperationIdEndpointmanagementRestartDevice                  OperationId = "endpointmanagement_restart_device"
+	OperationIdEndpointmanagementUpdateDevice                   OperationId = "endpointmanagement_update_device"
+	OperationIdEndpointmanagementWipeDevice                     OperationId = "endpointmanagement_wipe_device"
 	OperationIdIdentityDisableUser                              OperationId = "identity_disable_user"
 	OperationIdIdentityEnableUser                               OperationId = "identity_enable_user"
 	OperationIdIdentityExpireAllUserSessions                    OperationId = "identity_expire_all_user_sessions"
@@ -5678,6 +5682,8 @@ func NewOperationIdFromString(s string) (OperationId, error) {
 		return OperationIdEmailsecurityQueryThreats, nil
 	case "endpointmanagement_get_device":
 		return OperationIdEndpointmanagementGetDevice, nil
+	case "endpointmanagement_lock_device":
+		return OperationIdEndpointmanagementLockDevice, nil
 	case "endpointmanagement_query_compliance_findings":
 		return OperationIdEndpointmanagementQueryComplianceFindings, nil
 	case "endpointmanagement_query_device_applications":
@@ -5686,6 +5692,12 @@ func NewOperationIdFromString(s string) (OperationId, error) {
 		return OperationIdEndpointmanagementQueryDevices, nil
 	case "endpointmanagement_remediate_device":
 		return OperationIdEndpointmanagementRemediateDevice, nil
+	case "endpointmanagement_restart_device":
+		return OperationIdEndpointmanagementRestartDevice, nil
+	case "endpointmanagement_update_device":
+		return OperationIdEndpointmanagementUpdateDevice, nil
+	case "endpointmanagement_wipe_device":
+		return OperationIdEndpointmanagementWipeDevice, nil
 	case "identity_disable_user":
 		return OperationIdIdentityDisableUser, nil
 	case "identity_enable_user":
