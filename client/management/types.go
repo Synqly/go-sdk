@@ -13864,6 +13864,8 @@ func (e *EmailSecurityDefenderForOfficeMock) String() string {
 }
 
 // Configuration for Microsoft Exchange Online.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/exchange-online-setup)
 type EmailSecurityExchangeOnline struct {
 	Credential *ExchangeOnlineCredential `json:"credential" url:"credential"`
 	// Microsoft Entra tenant ID for the Exchange Online organization.
@@ -18655,6 +18657,8 @@ type ProviderConfig struct {
 	// Configuration for [MOCK] Microsoft Defender for Office 365.
 	EmailsecurityDefenderForOfficeMock *EmailSecurityDefenderForOfficeMock
 	// Configuration for Microsoft Exchange Online.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/exchange-online-setup)
 	EmailsecurityExchangeOnline *EmailSecurityExchangeOnline
 	// Configuration for Mimecast Cloud Gateway as an email security provider.
 	//
