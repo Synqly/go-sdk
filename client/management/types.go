@@ -23085,7 +23085,7 @@ type SinkAwsSqs struct {
 	Credential *AwsProviderCredential `json:"credential" url:"credential"`
 	// Overrides the default AWS region. If not present, the region will be inferred from the URL.
 	Region *string `json:"region,omitempty" url:"region,omitempty"`
-	// URL of the SQS queue where events are sent.
+	// URL of the SQS queue where events are sent. Must be a valid AWS SQS queue URL.
 	Url string `json:"url" url:"url"`
 
 	extraProperties map[string]interface{}
