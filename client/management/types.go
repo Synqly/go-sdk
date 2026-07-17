@@ -21380,7 +21380,7 @@ const (
 	ProviderConfigIdVulnerabilitiesCrowdStrikeMock ProviderConfigId = "vulnerabilities_crowdstrike_mock"
 	// Microsoft Defender for Endpoint
 	ProviderConfigIdVulnerabilitiesDefender ProviderConfigId = "vulnerabilities_defender"
-	// NodeZero
+	// Horizon3 NodeZero
 	ProviderConfigIdVulnerabilitiesHorizon3 ProviderConfigId = "vulnerabilities_horizon3"
 	// Iru
 	ProviderConfigIdVulnerabilitiesIru ProviderConfigId = "vulnerabilities_iru"
