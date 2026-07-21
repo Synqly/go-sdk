@@ -8738,6 +8738,8 @@ func (a *ApiConfig) String() string {
 type AppSecServiceNow struct {
 	// Credentials used to access ServiceNow AVR.
 	Credential *ServiceNowCredential `json:"credential" url:"credential"`
+	// Optional scopes to request when authenticating with OAuth 2.0 client credentials. Leave empty when the ServiceNow Application Registry is set to `Broadly scoped` (recommended), which grants access based on the Application User's roles. Only set this when the registry is configured as `Securely scoped` and a specific Auth Scope is required.
+	OauthScopes []string `json:"oauth_scopes,omitempty" url:"oauth_scopes,omitempty"`
 	// HTTPS base URL for the ServiceNow API.
 	Url string `json:"url" url:"url"`
 
@@ -10027,6 +10029,8 @@ func (a *AssetsQualysCloudMock) String() string {
 // [Configuration guide](https://docs.synqly.com/guides/provider-configuration/servicenow-assets-setup)
 type AssetsServiceNow struct {
 	Credential *ServiceNowCredential `json:"credential" url:"credential"`
+	// Optional scopes to request when authenticating with OAuth 2.0 client credentials. Leave empty when the ServiceNow Application Registry is set to `Broadly scoped` (recommended), which grants access based on the Application User's roles. Only set this when the registry is configured as `Securely scoped` and a specific Auth Scope (e.g. `cmdb_ci_hardware`) is required.
+	OauthScopes []string `json:"oauth_scopes,omitempty" url:"oauth_scopes,omitempty"`
 	// Base URL for the ServiceNow API.
 	Url string `json:"url" url:"url"`
 
@@ -22848,6 +22852,10 @@ type ServiceNowCredential struct {
 	Basic *BasicCredential
 	// Reference to existing Basic Credentials.
 	BasicId BasicCredentialId
+	// OAuth 2.0 client credentials used to authenticate with ServiceNow. Requires ServiceNow `Washington D.C.` or later with the client credentials grant type enabled (`glide.oauth.inbound.client.credential.grant_type.enabled = true`). The OAuth Application Registry must have an Application User and Auth Scopes configured. Use `oauth_scopes` in the provider config to specify the scopes to request.
+	OAuthClient *OAuthClientCredential
+	// Reference to existing Client Credentials.
+	OAuthClientId OAuthClientCredentialId
 	// Token used to authenticate with ServiceNow. This token will be used with the authentication header `x-sn-apikey`. To use token authentication, the version of ServiceNow must be `Washington D.C.` or later.
 	Token *TokenCredential
 	// Reference to existing Token.
@@ -22880,6 +22888,20 @@ func (s *ServiceNowCredential) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		s.BasicId = valueUnmarshaler.BasicId
+	case "o_auth_client":
+		value := new(OAuthClientCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		s.OAuthClient = value
+	case "o_auth_client_id":
+		var valueUnmarshaler struct {
+			OAuthClientId OAuthClientCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		s.OAuthClientId = valueUnmarshaler.OAuthClientId
 	case "token":
 		value := new(TokenCredential)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -22912,6 +22934,19 @@ func (s ServiceNowCredential) MarshalJSON() ([]byte, error) {
 		}
 		return json.Marshal(marshaler)
 	}
+	if s.OAuthClient != nil {
+		return core.MarshalJSONWithExtraProperty(s.OAuthClient, "type", "o_auth_client")
+	}
+	if s.OAuthClientId != "" {
+		var marshaler = struct {
+			Type          string                  `json:"type"`
+			OAuthClientId OAuthClientCredentialId `json:"value"`
+		}{
+			Type:          "o_auth_client_id",
+			OAuthClientId: s.OAuthClientId,
+		}
+		return json.Marshal(marshaler)
+	}
 	if s.Token != nil {
 		return core.MarshalJSONWithExtraProperty(s.Token, "type", "token")
 	}
@@ -22931,6 +22966,8 @@ func (s ServiceNowCredential) MarshalJSON() ([]byte, error) {
 type ServiceNowCredentialVisitor interface {
 	VisitBasic(*BasicCredential) error
 	VisitBasicId(BasicCredentialId) error
+	VisitOAuthClient(*OAuthClientCredential) error
+	VisitOAuthClientId(OAuthClientCredentialId) error
 	VisitToken(*TokenCredential) error
 	VisitTokenId(TokenCredentialId) error
 }
@@ -22941,6 +22978,12 @@ func (s *ServiceNowCredential) Accept(visitor ServiceNowCredentialVisitor) error
 	}
 	if s.BasicId != "" {
 		return visitor.VisitBasicId(s.BasicId)
+	}
+	if s.OAuthClient != nil {
+		return visitor.VisitOAuthClient(s.OAuthClient)
+	}
+	if s.OAuthClientId != "" {
+		return visitor.VisitOAuthClientId(s.OAuthClientId)
 	}
 	if s.Token != nil {
 		return visitor.VisitToken(s.Token)
@@ -25934,6 +25977,8 @@ type TicketingServiceNow struct {
 	DefaultIssueType *string `json:"default_issue_type,omitempty" url:"default_issue_type,omitempty"`
 	// Default Project for the integration. This maps to the custom table for tickets. This table should be derived from Incident table. Defaults to the incident table if not specified.
 	DefaultProject *string `json:"default_project,omitempty" url:"default_project,omitempty"`
+	// Optional scopes to request when authenticating with OAuth 2.0 client credentials. Leave empty when the ServiceNow Application Registry is set to `Broadly scoped` (recommended), which grants access based on the Application User's roles. Only set this when the registry is configured as `Securely scoped` and a specific Auth Scope (e.g. `sn_incident`) is required.
+	OauthScopes []string `json:"oauth_scopes,omitempty" url:"oauth_scopes,omitempty"`
 	// Base URL for the ServiceNow API.
 	Url string `json:"url" url:"url"`
 
@@ -25988,6 +26033,8 @@ type TicketingServiceNowSir struct {
 	DefaultIssueType *string `json:"default_issue_type,omitempty" url:"default_issue_type,omitempty"`
 	// Default Project for the integration. This maps to the custom table for tickets. This table should be derived from Security Incident table. Defaults to the security incident table if not specified.
 	DefaultProject *string `json:"default_project,omitempty" url:"default_project,omitempty"`
+	// Optional scopes to request when authenticating with OAuth 2.0 client credentials. Leave empty when the ServiceNow Application Registry is set to `Broadly scoped` (recommended), which grants access based on the Application User's roles. Only set this when the registry is configured as `Securely scoped` and a specific Auth Scope (e.g. `sn_si`) is required.
+	OauthScopes []string `json:"oauth_scopes,omitempty" url:"oauth_scopes,omitempty"`
 	// Base URL for the ServiceNow API.
 	Url string `json:"url" url:"url"`
 
@@ -27423,6 +27470,8 @@ func (v *VulnerabilitiesRapid7InsightCloudMock) String() string {
 // Configuration for ServiceNow Vulnerability Response.
 type VulnerabilitiesServiceNow struct {
 	Credential *ServiceNowCredential `json:"credential" url:"credential"`
+	// Optional scopes to request when authenticating with OAuth 2.0 client credentials. Leave empty when the ServiceNow Application Registry is set to `Broadly scoped` (recommended), which grants access based on the Application User's roles. Only set this when the registry is configured as `Securely scoped` and a specific Auth Scope (e.g. `sn_vul`) is required.
+	OauthScopes []string `json:"oauth_scopes,omitempty" url:"oauth_scopes,omitempty"`
 	// Base URL for the ServiceNow API.
 	Url string `json:"url" url:"url"`
 
