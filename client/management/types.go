@@ -18968,6 +18968,8 @@ type ProviderConfig struct {
 	// Configuration for Microsoft Defender for Endpoint.
 	VulnerabilitiesDefender *VulnerabilitiesDefender
 	// Configuration for Horizon3 NodeZero as a Vulnerabilities Provider
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/horizon3-nodezero-vulnerabilities-setup)
 	VulnerabilitiesHorizon3 *VulnerabilitiesHorizon3
 	// Configuration for Iru as a Vulnerabilities Provider
 	//
@@ -27153,6 +27155,8 @@ func (v *VulnerabilitiesDefender) String() string {
 }
 
 // Configuration for Horizon3 NodeZero as a Vulnerabilities Provider
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/horizon3-nodezero-vulnerabilities-setup)
 type VulnerabilitiesHorizon3 struct {
 	// Credentials for the Horizon3 NodeZero GraphQL API.
 	Credential *Horizon3Credential `json:"credential" url:"credential"`
