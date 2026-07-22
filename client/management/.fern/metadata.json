@@ -1,0 +1,15 @@
+{
+  "cliVersion": "5.62.0",
+  "generatorName": "fernapi/fern-go-sdk",
+  "generatorVersion": "1.46.2",
+  "generatorConfig": {
+    "importPath": "github.com/synqly/go-sdk/client/management",
+    "union": "v1",
+    "includeLegacyClientOptions": true,
+    "alwaysSendRequiredProperties": true
+  },
+  "originGitCommit": "ae50c8dfb02e9c54ba1c6903098fd9b842169793",
+  "originGitCommitIsDirty": true,
+  "invokedBy": "ci",
+  "ciProvider": "github"
+}
