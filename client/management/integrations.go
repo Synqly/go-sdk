@@ -1524,11 +1524,14 @@ func (l *ListIntegrationsResponse) String() string {
 }
 
 var (
-	patchIntegrationResponseFieldResult = big.NewInt(1 << 0)
+	patchIntegrationResponseFieldResult             = big.NewInt(1 << 0)
+	patchIntegrationResponseFieldCredentialsCreated = big.NewInt(1 << 1)
 )
 
 type PatchIntegrationResponse struct {
 	Result *Integration `json:"result" url:"result"`
+	// Credentials created and attached to the integration as a result of this patch. Populated only when the request added a credential to an integration that previously had none; empty otherwise.
+	CredentialsCreated []*CredentialResponse `json:"credentials_created,omitempty" url:"credentials_created,omitempty"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -1542,6 +1545,13 @@ func (p *PatchIntegrationResponse) GetResult() *Integration {
 		return nil
 	}
 	return p.Result
+}
+
+func (p *PatchIntegrationResponse) GetCredentialsCreated() []*CredentialResponse {
+	if p == nil {
+		return nil
+	}
+	return p.CredentialsCreated
 }
 
 func (p *PatchIntegrationResponse) GetExtraProperties() map[string]interface{} {
@@ -1563,6 +1573,13 @@ func (p *PatchIntegrationResponse) require(field *big.Int) {
 func (p *PatchIntegrationResponse) SetResult(result *Integration) {
 	p.Result = result
 	p.require(patchIntegrationResponseFieldResult)
+}
+
+// SetCredentialsCreated sets the CredentialsCreated field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (p *PatchIntegrationResponse) SetCredentialsCreated(credentialsCreated []*CredentialResponse) {
+	p.CredentialsCreated = credentialsCreated
+	p.require(patchIntegrationResponseFieldCredentialsCreated)
 }
 
 func (p *PatchIntegrationResponse) UnmarshalJSON(data []byte) error {
@@ -1610,11 +1627,14 @@ func (p *PatchIntegrationResponse) String() string {
 type UpdateIntegrationRequest = *Integration
 
 var (
-	updateIntegrationResponseFieldResult = big.NewInt(1 << 0)
+	updateIntegrationResponseFieldResult             = big.NewInt(1 << 0)
+	updateIntegrationResponseFieldCredentialsCreated = big.NewInt(1 << 1)
 )
 
 type UpdateIntegrationResponse struct {
 	Result *Integration `json:"result" url:"result"`
+	// Credentials created and attached to the integration as a result of this update. Populated only when the request added a credential to an integration that previously had none; empty otherwise.
+	CredentialsCreated []*CredentialResponse `json:"credentials_created,omitempty" url:"credentials_created,omitempty"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -1628,6 +1648,13 @@ func (u *UpdateIntegrationResponse) GetResult() *Integration {
 		return nil
 	}
 	return u.Result
+}
+
+func (u *UpdateIntegrationResponse) GetCredentialsCreated() []*CredentialResponse {
+	if u == nil {
+		return nil
+	}
+	return u.CredentialsCreated
 }
 
 func (u *UpdateIntegrationResponse) GetExtraProperties() map[string]interface{} {
@@ -1649,6 +1676,13 @@ func (u *UpdateIntegrationResponse) require(field *big.Int) {
 func (u *UpdateIntegrationResponse) SetResult(result *Integration) {
 	u.Result = result
 	u.require(updateIntegrationResponseFieldResult)
+}
+
+// SetCredentialsCreated sets the CredentialsCreated field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (u *UpdateIntegrationResponse) SetCredentialsCreated(credentialsCreated []*CredentialResponse) {
+	u.CredentialsCreated = credentialsCreated
+	u.require(updateIntegrationResponseFieldCredentialsCreated)
 }
 
 func (u *UpdateIntegrationResponse) UnmarshalJSON(data []byte) error {
