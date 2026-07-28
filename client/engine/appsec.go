@@ -11,6 +11,46 @@ import (
 )
 
 var (
+	appSecCreateFindingsRequestFieldMeta = big.NewInt(1 << 0)
+)
+
+type AppSecCreateFindingsRequest struct {
+	// Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
+	Meta []*string              `json:"-" url:"meta,omitempty"`
+	Body []AppSecPostureFinding `json:"-" url:"-"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+}
+
+func (a *AppSecCreateFindingsRequest) require(field *big.Int) {
+	if a.explicitFields == nil {
+		a.explicitFields = big.NewInt(0)
+	}
+	a.explicitFields.Or(a.explicitFields, field)
+}
+
+// SetMeta sets the Meta field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (a *AppSecCreateFindingsRequest) SetMeta(meta []*string) {
+	a.Meta = meta
+	a.require(appSecCreateFindingsRequestFieldMeta)
+}
+
+func (a *AppSecCreateFindingsRequest) UnmarshalJSON(data []byte) error {
+	var body []AppSecPostureFinding
+	if err := json.Unmarshal(data, &body); err != nil {
+		return err
+	}
+	a.Body = body
+	return nil
+}
+
+func (a *AppSecCreateFindingsRequest) MarshalJSON() ([]byte, error) {
+	return json.Marshal(a.Body)
+}
+
+var (
 	appSecGetApplicationFindingDetailsRequestFieldMeta           = big.NewInt(1 << 0)
 	appSecGetApplicationFindingDetailsRequestFieldIncludeRawData = big.NewInt(1 << 1)
 )
@@ -246,6 +286,125 @@ func (a *AppSecQueryFindingsRequest) SetIncludeRawData(includeRawData *bool) {
 
 // An application security application.
 type AppSecApplication = latest.ApplicationInventoryInfo
+
+var (
+	appSecCreateFindingsResponseFieldMessages = big.NewInt(1 << 0)
+	appSecCreateFindingsResponseFieldMeta     = big.NewInt(1 << 1)
+	appSecCreateFindingsResponseFieldResult   = big.NewInt(1 << 2)
+)
+
+type AppSecCreateFindingsResponse struct {
+	// Additional messages from the service response that may be helpful to the client.
+	Messages *MessagesResponse `json:"messages,omitempty" url:"messages,omitempty"`
+	// Various metadata about the results organized by group, then type, then field.
+	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
+	// Created findings when the provider returns them synchronously. ServiceNow AVR import does not return created OCSF rows, so this is an empty list in that case. Review messages for per-row failure details.
+	Result []AppSecPostureFinding `json:"result" url:"result"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (a *AppSecCreateFindingsResponse) GetMessages() *MessagesResponse {
+	if a == nil {
+		return nil
+	}
+	return a.Messages
+}
+
+func (a *AppSecCreateFindingsResponse) GetMeta() *MetaResponse {
+	if a == nil {
+		return nil
+	}
+	return a.Meta
+}
+
+func (a *AppSecCreateFindingsResponse) GetResult() []AppSecPostureFinding {
+	if a == nil {
+		return nil
+	}
+	return a.Result
+}
+
+func (a *AppSecCreateFindingsResponse) GetExtraProperties() map[string]interface{} {
+	if a == nil {
+		return nil
+	}
+	return a.extraProperties
+}
+
+func (a *AppSecCreateFindingsResponse) require(field *big.Int) {
+	if a.explicitFields == nil {
+		a.explicitFields = big.NewInt(0)
+	}
+	a.explicitFields.Or(a.explicitFields, field)
+}
+
+// SetMessages sets the Messages field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (a *AppSecCreateFindingsResponse) SetMessages(messages *MessagesResponse) {
+	a.Messages = messages
+	a.require(appSecCreateFindingsResponseFieldMessages)
+}
+
+// SetMeta sets the Meta field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (a *AppSecCreateFindingsResponse) SetMeta(meta *MetaResponse) {
+	a.Meta = meta
+	a.require(appSecCreateFindingsResponseFieldMeta)
+}
+
+// SetResult sets the Result field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (a *AppSecCreateFindingsResponse) SetResult(result []AppSecPostureFinding) {
+	a.Result = result
+	a.require(appSecCreateFindingsResponseFieldResult)
+}
+
+func (a *AppSecCreateFindingsResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler AppSecCreateFindingsResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*a = AppSecCreateFindingsResponse(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+	a.rawJSON = nil
+	return nil
+}
+
+func (a *AppSecCreateFindingsResponse) MarshalJSON() ([]byte, error) {
+	type embed AppSecCreateFindingsResponse
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*a),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, a.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (a *AppSecCreateFindingsResponse) String() string {
+	if a == nil {
+		return "<nil>"
+	}
+	if len(a.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(a.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(a); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", a)
+}
 
 var (
 	appSecGetApplicationFindingDetailsResponseFieldMessages = big.NewInt(1 << 0)

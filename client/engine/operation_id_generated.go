@@ -9,6 +9,7 @@ import (
 type OperationId string
 
 const (
+	OperationIdAppsecCreateFindings                             OperationId = "appsec_create_findings"
 	OperationIdAppsecGetApplicationFindingDetails               OperationId = "appsec_get_application_finding_details"
 	OperationIdAppsecQueryApplicationFindings                   OperationId = "appsec_query_application_findings"
 	OperationIdAppsecQueryApplications                          OperationId = "appsec_query_applications"
@@ -136,6 +137,8 @@ const (
 
 func NewOperationIdFromString(s string) (OperationId, error) {
 	switch s {
+	case "appsec_create_findings":
+		return OperationIdAppsecCreateFindings, nil
 	case "appsec_get_application_finding_details":
 		return OperationIdAppsecGetApplicationFindingDetails, nil
 	case "appsec_query_application_findings":

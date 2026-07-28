@@ -282,6 +282,106 @@ client.Appsec.QueryFindings(
 </dl>
 </details>
 
+<details><summary><code>client.Appsec.CreateFindings(request) -> *engine.AppSecCreateFindingsResponse</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Create application security posture findings (bulk) in an application security provider.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```go
+request := &engine.AppSecCreateFindingsRequest{
+        Body: []engine.AppSecPostureFinding{
+            &applicationsecurityposturefinding.ApplicationSecurityPostureFinding{
+                ActivityId: 1,
+                CategoryUid: 1,
+                ClassUid: 1,
+                FindingInfo: &v180.FindingInfo{
+                    Uid: "uid",
+                },
+                Metadata: &v180.Metadata{
+                    Product: &v180.Product{},
+                    Version: "version",
+                },
+                SeverityId: 1,
+                Time: 1,
+                TypeUid: 1,
+            },
+            &applicationsecurityposturefinding.ApplicationSecurityPostureFinding{
+                ActivityId: 1,
+                CategoryUid: 1,
+                ClassUid: 1,
+                FindingInfo: &v180.FindingInfo{
+                    Uid: "uid",
+                },
+                Metadata: &v180.Metadata{
+                    Product: &v180.Product{},
+                    Version: "version",
+                },
+                SeverityId: 1,
+                Time: 1,
+                TypeUid: 1,
+            },
+        },
+    }
+client.Appsec.CreateFindings(
+        context.TODO(),
+        request,
+    )
+}
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**meta:** `*string` — Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request:** `[]engine.AppSecPostureFinding` — Application security posture findings to create.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
 <details><summary><code>client.Appsec.GetApplicationFindingDetails(ApplicationId, FindingId) -> *engine.AppSecGetApplicationFindingDetailsResponse</code></summary>
 <dl>
 <dd>
@@ -2054,7 +2154,7 @@ Queries operation
 request := &engine.QueryCustomRequest{}
 client.Custom.Query(
         context.TODO(),
-        engine.OperationIdAppsecGetApplicationFindingDetails.Ptr(),
+        engine.OperationIdAppsecCreateFindings.Ptr(),
         request,
     )
 }
@@ -2162,7 +2262,7 @@ Retrieves an Topic by ID.
 request := &engine.GetCustomRequest{}
 client.Custom.Get(
         context.TODO(),
-        engine.OperationIdAppsecGetApplicationFindingDetails.Ptr(),
+        engine.OperationIdAppsecCreateFindings.Ptr(),
         "id",
         request,
     )
@@ -2258,7 +2358,7 @@ request := &engine.PatchCustomRequestInput{
     }
 client.Custom.Patch(
         context.TODO(),
-        engine.OperationIdAppsecGetApplicationFindingDetails.Ptr(),
+        engine.OperationIdAppsecCreateFindings.Ptr(),
         "id",
         request,
     )
@@ -2343,7 +2443,7 @@ Deletes the object matching `id` for the operation matching `operation`.
 request := &engine.DeleteRequest{}
 client.Custom.Delete(
         context.TODO(),
-        engine.OperationIdAppsecGetApplicationFindingDetails.Ptr(),
+        engine.OperationIdAppsecCreateFindings.Ptr(),
         "id",
         request,
     )
@@ -2426,7 +2526,7 @@ request := &engine.PostCustomRequest{
     }
 client.Custom.Post(
         context.TODO(),
-        engine.OperationIdAppsecGetApplicationFindingDetails.Ptr(),
+        engine.OperationIdAppsecCreateFindings.Ptr(),
         request,
     )
 }
@@ -2515,7 +2615,7 @@ request := &engine.PostBatchCustomRequest{
     }
 client.Custom.PostBatch(
         context.TODO(),
-        engine.OperationIdAppsecGetApplicationFindingDetails.Ptr(),
+        engine.OperationIdAppsecCreateFindings.Ptr(),
         request,
     )
 }

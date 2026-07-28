@@ -34,8 +34,8 @@ import (
 
     engine "github.com/synqly/go-sdk/client/engine"
     client "github.com/synqly/go-sdk/client/engine/client"
-    v130 "github.com/synqly/go-sdk/client/engine/ocsf/v130"
-    inventoryinfo "github.com/synqly/go-sdk/client/engine/ocsf/v130/inventoryinfo"
+    v180 "github.com/synqly/go-sdk/client/engine/ocsf/v180"
+    applicationsecurityposturefinding "github.com/synqly/go-sdk/client/engine/ocsf/v180/applicationsecurityposturefinding"
     option "github.com/synqly/go-sdk/client/engine/option"
 )
 
@@ -45,17 +45,32 @@ func do() {
             "<token>",
         ),
     )
-    request := &engine.CreateDeviceRequestInput{
-        Body: &engine.CreateDeviceRequest{
-            Device: &inventoryinfo.InventoryInfo{
+    request := &engine.AppSecCreateFindingsRequest{
+        Body: []engine.AppSecPostureFinding{
+            &applicationsecurityposturefinding.ApplicationSecurityPostureFinding{
                 ActivityId: 1,
                 CategoryUid: 1,
                 ClassUid: 1,
-                Device: &v130.Device{
-                    TypeId: 1,
+                FindingInfo: &v180.FindingInfo{
+                    Uid: "uid",
                 },
-                Metadata: &v130.Metadata{
-                    Product: &v130.Product{},
+                Metadata: &v180.Metadata{
+                    Product: &v180.Product{},
+                    Version: "version",
+                },
+                SeverityId: 1,
+                Time: 1,
+                TypeUid: 1,
+            },
+            &applicationsecurityposturefinding.ApplicationSecurityPostureFinding{
+                ActivityId: 1,
+                CategoryUid: 1,
+                ClassUid: 1,
+                FindingInfo: &v180.FindingInfo{
+                    Uid: "uid",
+                },
+                Metadata: &v180.Metadata{
+                    Product: &v180.Product{},
                     Version: "version",
                 },
                 SeverityId: 1,
@@ -64,7 +79,7 @@ func do() {
             },
         },
     }
-    client.Assets.CreateAsset(
+    client.Appsec.CreateFindings(
         context.TODO(),
         request,
     )
@@ -88,7 +103,7 @@ Structured error types are returned from API calls that return non-success statu
 with the `errors.Is` and `errors.As` APIs, so you can access the error like so:
 
 ```go
-response, err := client.Assets.CreateAsset(...)
+response, err := client.Appsec.CreateFindings(...)
 if err != nil {
     var apiError *core.APIError
     if errors.As(err, apiError) {
@@ -122,7 +137,7 @@ client := client.NewClient(
 )
 
 // Specify options for an individual request.
-response, err := client.Assets.CreateAsset(
+response, err := client.Appsec.CreateFindings(
     ...,
     option.WithToken("<YOUR_API_KEY>"),
 )
@@ -137,7 +152,7 @@ when you need to examine the response headers received from the API call. (When 
 the raw HTTP response data will be included automatically in the Page response object.)
 
 ```go
-response, err := client.Assets.WithRawResponse.CreateAsset(...)
+response, err := client.Appsec.WithRawResponse.CreateFindings(...)
 if err != nil {
     return err
 }
@@ -175,7 +190,7 @@ client := client.NewClient(
     option.WithMaxAttempts(1),
 )
 
-response, err := client.Assets.CreateAsset(
+response, err := client.Appsec.CreateFindings(
     ...,
     option.WithMaxAttempts(1),
 )
@@ -189,7 +204,7 @@ Setting a timeout for each individual request is as simple as using the standard
 ctx, cancel := context.WithTimeout(ctx, time.Second)
 defer cancel()
 
-response, err := client.Assets.CreateAsset(ctx, ...)
+response, err := client.Appsec.CreateFindings(ctx, ...)
 ```
 
 ### Explicit Null
@@ -211,7 +226,7 @@ type ExampleRequest struct {
 request := &ExampleRequest{}
 request.SetName(nil)
 
-response, err := client.Assets.CreateAsset(ctx, request, ...)
+response, err := client.Appsec.CreateFindings(ctx, request, ...)
 ```
 
 ## Contributing

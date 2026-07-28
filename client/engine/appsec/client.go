@@ -88,6 +88,23 @@ func (c *Client) QueryFindings(
     return response.Body, nil
 }
 
+// Create application security posture findings (bulk) in an application security provider.
+func (c *Client) CreateFindings(
+    ctx context.Context,
+    request *engine.AppSecCreateFindingsRequest,
+    opts ...option.RequestOption,
+) (*engine.AppSecCreateFindingsResponse, error){
+    response, err := c.WithRawResponse.CreateFindings(
+        ctx,
+        request,
+        opts...,
+    )
+    if err != nil {
+        return nil, err
+    }
+    return response.Body, nil
+}
+
 // Returns the details of the finding matching `{findingId}` where the finding belongs to the application matching `{applicationId}` from the token-linked application security integration.
 func (c *Client) GetApplicationFindingDetails(
     ctx context.Context,
