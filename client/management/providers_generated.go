@@ -2341,6 +2341,125 @@ func (a *AssetsIvantiNeuronsMock) String() string {
 	return fmt.Sprintf("%#v", a)
 }
 
+// Configuration for the JupiterOne Assets Provider
+var (
+	assetsJupiterOneFieldAccountId  = big.NewInt(1 << 0)
+	assetsJupiterOneFieldCredential = big.NewInt(1 << 1)
+	assetsJupiterOneFieldUrl        = big.NewInt(1 << 2)
+)
+
+type AssetsJupiterOne struct {
+	// JupiterOne Account ID
+	AccountId  string                `json:"account_id" url:"account_id"`
+	Credential *JupiterOneCredential `json:"credential" url:"credential"`
+	// Base URL for the JupiterOne GraphQL API.
+	Url *string `json:"url,omitempty" url:"url,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (a *AssetsJupiterOne) GetAccountId() string {
+	if a == nil {
+		return ""
+	}
+	return a.AccountId
+}
+
+func (a *AssetsJupiterOne) GetCredential() *JupiterOneCredential {
+	if a == nil {
+		return nil
+	}
+	return a.Credential
+}
+
+func (a *AssetsJupiterOne) GetUrl() *string {
+	if a == nil {
+		return nil
+	}
+	return a.Url
+}
+
+func (a *AssetsJupiterOne) GetExtraProperties() map[string]interface{} {
+	if a == nil {
+		return nil
+	}
+	return a.extraProperties
+}
+
+func (a *AssetsJupiterOne) require(field *big.Int) {
+	if a.explicitFields == nil {
+		a.explicitFields = big.NewInt(0)
+	}
+	a.explicitFields.Or(a.explicitFields, field)
+}
+
+// SetAccountId sets the AccountId field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (a *AssetsJupiterOne) SetAccountId(accountId string) {
+	a.AccountId = accountId
+	a.require(assetsJupiterOneFieldAccountId)
+}
+
+// SetCredential sets the Credential field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (a *AssetsJupiterOne) SetCredential(credential *JupiterOneCredential) {
+	a.Credential = credential
+	a.require(assetsJupiterOneFieldCredential)
+}
+
+// SetUrl sets the Url field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (a *AssetsJupiterOne) SetUrl(url *string) {
+	a.Url = url
+	a.require(assetsJupiterOneFieldUrl)
+}
+
+func (a *AssetsJupiterOne) UnmarshalJSON(data []byte) error {
+	type unmarshaler AssetsJupiterOne
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*a = AssetsJupiterOne(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+	a.rawJSON = nil
+	return nil
+}
+
+func (a *AssetsJupiterOne) MarshalJSON() ([]byte, error) {
+	type embed AssetsJupiterOne
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*a),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, a.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (a *AssetsJupiterOne) String() string {
+	if a == nil {
+		return "<nil>"
+	}
+	if len(a.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(a.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(a); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", a)
+}
+
 // Configuration for Nozomi Vantage.
 //
 // [Configuration guide](https://docs.synqly.com/guides/provider-configuration/nozomi-vantage-setup)
@@ -16886,6 +17005,143 @@ func (j *JiraCredential) validate() error {
 	return nil
 }
 
+type JupiterOneCredential struct {
+	Type string
+	// This credential must be an API Key. For more details, see [Creating an API Key](https://docs.jupiterone.io/api-reference/creating-an-api-key/).
+	Token *TokenCredential
+	// Reference to existing Token.
+	TokenId TokenCredentialId
+
+	rawJSON json.RawMessage
+}
+
+func (j *JupiterOneCredential) GetType() string {
+	if j == nil {
+		return ""
+	}
+	return j.Type
+}
+
+func (j *JupiterOneCredential) GetToken() *TokenCredential {
+	if j == nil {
+		return nil
+	}
+	return j.Token
+}
+
+func (j *JupiterOneCredential) GetTokenId() TokenCredentialId {
+	if j == nil {
+		return ""
+	}
+	return j.TokenId
+}
+
+func (j *JupiterOneCredential) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	j.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", j)
+	}
+	switch unmarshaler.Type {
+	case "token":
+		value := new(TokenCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		j.Token = value
+	case "token_id":
+		var valueUnmarshaler struct {
+			TokenId TokenCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		j.TokenId = valueUnmarshaler.TokenId
+	}
+	j.rawJSON = nil
+	return nil
+}
+
+func (j JupiterOneCredential) MarshalJSON() ([]byte, error) {
+	if err := j.validate(); err != nil {
+		return nil, err
+	}
+	if j.Token != nil {
+		return internal.MarshalJSONWithExtraProperty(j.Token, "type", "token")
+	}
+	if j.TokenId != "" {
+		var marshaler = struct {
+			Type    string            `json:"type"`
+			TokenId TokenCredentialId `json:"value"`
+		}{
+			Type:    "token_id",
+			TokenId: j.TokenId,
+		}
+		return json.Marshal(marshaler)
+	}
+	if len(j.rawJSON) > 0 {
+		return j.rawJSON, nil
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", j)
+}
+
+type JupiterOneCredentialVisitor interface {
+	VisitToken(*TokenCredential) error
+	VisitTokenId(TokenCredentialId) error
+}
+
+func (j *JupiterOneCredential) Accept(visitor JupiterOneCredentialVisitor) error {
+	if j.Token != nil {
+		return visitor.VisitToken(j.Token)
+	}
+	if j.TokenId != "" {
+		return visitor.VisitTokenId(j.TokenId)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", j)
+}
+
+func (j *JupiterOneCredential) validate() error {
+	if j == nil {
+		return fmt.Errorf("type %T is nil", j)
+	}
+	var fields []string
+	if j.Token != nil {
+		fields = append(fields, "token")
+	}
+	if j.TokenId != "" {
+		fields = append(fields, "token_id")
+	}
+	if len(fields) == 0 {
+		if j.Type != "" {
+			if len(j.rawJSON) > 0 {
+				return nil
+			}
+			return fmt.Errorf("type %T defines a discriminant set to %q but the field is not set", j, j.Type)
+		}
+		return fmt.Errorf("type %T is empty", j)
+	}
+	if len(fields) > 1 {
+		return fmt.Errorf("type %T defines values for %s, but only one value is allowed", j, fields)
+	}
+	if j.Type != "" {
+		field := fields[0]
+		if j.Type != field {
+			return fmt.Errorf(
+				"type %T defines a discriminant set to %q, but it does not match the %T field; either remove or update the discriminant to match",
+				j,
+				j.Type,
+				j,
+			)
+		}
+	}
+	return nil
+}
+
 type LinearCredential struct {
 	Type string
 	// A personal API key.
@@ -19937,6 +20193,8 @@ type ProviderConfig struct {
 	AssetsIvantiNeurons *AssetsIvantiNeurons
 	// Configuration for a mocked Ivanti Neurons as an Assets Provider
 	AssetsIvantiNeuronsMock *AssetsIvantiNeuronsMock
+	// Configuration for the JupiterOne Assets Provider
+	AssetsJupiterone *AssetsJupiterOne
 	// Configuration for Nozomi Vantage.
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/nozomi-vantage-setup)
@@ -20569,6 +20827,13 @@ func (p *ProviderConfig) GetAssetsIvantiNeuronsMock() *AssetsIvantiNeuronsMock {
 		return nil
 	}
 	return p.AssetsIvantiNeuronsMock
+}
+
+func (p *ProviderConfig) GetAssetsJupiterone() *AssetsJupiterOne {
+	if p == nil {
+		return nil
+	}
+	return p.AssetsJupiterone
 }
 
 func (p *ProviderConfig) GetAssetsNozomiVantage() *AssetsNozomiVantage {
@@ -21674,6 +21939,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.AssetsIvantiNeuronsMock = value
+	case "assets_jupiterone":
+		value := new(AssetsJupiterOne)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.AssetsJupiterone = value
 	case "assets_nozomi_vantage":
 		value := new(AssetsNozomiVantage)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -22571,6 +22842,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.AssetsIvantiNeuronsMock != nil {
 		return internal.MarshalJSONWithExtraProperty(p.AssetsIvantiNeuronsMock, "type", "assets_ivanti_neurons_mock")
 	}
+	if p.AssetsJupiterone != nil {
+		return internal.MarshalJSONWithExtraProperty(p.AssetsJupiterone, "type", "assets_jupiterone")
+	}
 	if p.AssetsNozomiVantage != nil {
 		return internal.MarshalJSONWithExtraProperty(p.AssetsNozomiVantage, "type", "assets_nozomi_vantage")
 	}
@@ -23011,6 +23285,7 @@ type ProviderConfigVisitor interface {
 	VisitAssetsIru(*AssetsIru) error
 	VisitAssetsIvantiNeurons(*AssetsIvantiNeurons) error
 	VisitAssetsIvantiNeuronsMock(*AssetsIvantiNeuronsMock) error
+	VisitAssetsJupiterone(*AssetsJupiterOne) error
 	VisitAssetsNozomiVantage(*AssetsNozomiVantage) error
 	VisitAssetsNozomiVantageMock(*AssetsNozomiVantageMock) error
 	VisitAssetsQualysCloud(*AssetsQualysCloud) error
@@ -23216,6 +23491,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.AssetsIvantiNeuronsMock != nil {
 		return visitor.VisitAssetsIvantiNeuronsMock(p.AssetsIvantiNeuronsMock)
+	}
+	if p.AssetsJupiterone != nil {
+		return visitor.VisitAssetsJupiterone(p.AssetsJupiterone)
 	}
 	if p.AssetsNozomiVantage != nil {
 		return visitor.VisitAssetsNozomiVantage(p.AssetsNozomiVantage)
@@ -23702,6 +23980,9 @@ func (p *ProviderConfig) validate() error {
 	if p.AssetsIvantiNeuronsMock != nil {
 		fields = append(fields, "assets_ivanti_neurons_mock")
 	}
+	if p.AssetsJupiterone != nil {
+		fields = append(fields, "assets_jupiterone")
+	}
 	if p.AssetsNozomiVantage != nil {
 		fields = append(fields, "assets_nozomi_vantage")
 	}
@@ -24187,6 +24468,8 @@ const (
 	ProviderConfigIdAssetsIvantiNeurons ProviderConfigId = "assets_ivanti_neurons"
 	// [MOCK] Ivanti Neurons
 	ProviderConfigIdAssetsIvantiNeuronsMock ProviderConfigId = "assets_ivanti_neurons_mock"
+	// JupiterOne
+	ProviderConfigIdAssetsJupiterOne ProviderConfigId = "assets_jupiterone"
 	// Nozomi Vantage
 	ProviderConfigIdAssetsNozomiVantage ProviderConfigId = "assets_nozomi_vantage"
 	// [MOCK] Nozomi Vantage
@@ -24511,6 +24794,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdAssetsIvantiNeurons, nil
 	case "assets_ivanti_neurons_mock":
 		return ProviderConfigIdAssetsIvantiNeuronsMock, nil
+	case "assets_jupiterone":
+		return ProviderConfigIdAssetsJupiterOne, nil
 	case "assets_nozomi_vantage":
 		return ProviderConfigIdAssetsNozomiVantage, nil
 	case "assets_nozomi_vantage_mock":
