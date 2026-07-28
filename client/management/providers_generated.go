@@ -19513,6 +19513,143 @@ func (p *PantherIngestionCredential) validate() error {
 	return nil
 }
 
+type PenteraCredential struct {
+	Type string
+	// Configuration when creating new Basic Credentials.
+	Basic *BasicCredential
+	// Reference to existing Basic Credentials.
+	BasicId BasicCredentialId
+
+	rawJSON json.RawMessage
+}
+
+func (p *PenteraCredential) GetType() string {
+	if p == nil {
+		return ""
+	}
+	return p.Type
+}
+
+func (p *PenteraCredential) GetBasic() *BasicCredential {
+	if p == nil {
+		return nil
+	}
+	return p.Basic
+}
+
+func (p *PenteraCredential) GetBasicId() BasicCredentialId {
+	if p == nil {
+		return ""
+	}
+	return p.BasicId
+}
+
+func (p *PenteraCredential) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	p.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", p)
+	}
+	switch unmarshaler.Type {
+	case "basic":
+		value := new(BasicCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.Basic = value
+	case "basic_id":
+		var valueUnmarshaler struct {
+			BasicId BasicCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		p.BasicId = valueUnmarshaler.BasicId
+	}
+	p.rawJSON = nil
+	return nil
+}
+
+func (p PenteraCredential) MarshalJSON() ([]byte, error) {
+	if err := p.validate(); err != nil {
+		return nil, err
+	}
+	if p.Basic != nil {
+		return internal.MarshalJSONWithExtraProperty(p.Basic, "type", "basic")
+	}
+	if p.BasicId != "" {
+		var marshaler = struct {
+			Type    string            `json:"type"`
+			BasicId BasicCredentialId `json:"value"`
+		}{
+			Type:    "basic_id",
+			BasicId: p.BasicId,
+		}
+		return json.Marshal(marshaler)
+	}
+	if len(p.rawJSON) > 0 {
+		return p.rawJSON, nil
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", p)
+}
+
+type PenteraCredentialVisitor interface {
+	VisitBasic(*BasicCredential) error
+	VisitBasicId(BasicCredentialId) error
+}
+
+func (p *PenteraCredential) Accept(visitor PenteraCredentialVisitor) error {
+	if p.Basic != nil {
+		return visitor.VisitBasic(p.Basic)
+	}
+	if p.BasicId != "" {
+		return visitor.VisitBasicId(p.BasicId)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", p)
+}
+
+func (p *PenteraCredential) validate() error {
+	if p == nil {
+		return fmt.Errorf("type %T is nil", p)
+	}
+	var fields []string
+	if p.Basic != nil {
+		fields = append(fields, "basic")
+	}
+	if p.BasicId != "" {
+		fields = append(fields, "basic_id")
+	}
+	if len(fields) == 0 {
+		if p.Type != "" {
+			if len(p.rawJSON) > 0 {
+				return nil
+			}
+			return fmt.Errorf("type %T defines a discriminant set to %q but the field is not set", p, p.Type)
+		}
+		return fmt.Errorf("type %T is empty", p)
+	}
+	if len(fields) > 1 {
+		return fmt.Errorf("type %T defines values for %s, but only one value is allowed", p, fields)
+	}
+	if p.Type != "" {
+		field := fields[0]
+		if p.Type != field {
+			return fmt.Errorf(
+				"type %T defines a discriminant set to %q, but it does not match the %T field; either remove or update the discriminant to match",
+				p,
+				p.Type,
+				p,
+			)
+		}
+	}
+	return nil
+}
+
 type PingOneApiurl string
 
 const (
@@ -20239,6 +20376,8 @@ type ProviderConfig struct {
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/nucleus-vulns-setup)
 	VulnerabilitiesNucleus *VulnerabilitiesNucleus
+	// Configuration for Pentera as a Vulnerabilities Provider
+	VulnerabilitiesPentera *VulnerabilitiesPentera
 	// Configuration for Qualys Vulnerability Management, Detection & Response (VMDR).
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/qualys-vulns-setup)
@@ -21321,6 +21460,13 @@ func (p *ProviderConfig) GetVulnerabilitiesNucleus() *VulnerabilitiesNucleus {
 	return p.VulnerabilitiesNucleus
 }
 
+func (p *ProviderConfig) GetVulnerabilitiesPentera() *VulnerabilitiesPentera {
+	if p == nil {
+		return nil
+	}
+	return p.VulnerabilitiesPentera
+}
+
 func (p *ProviderConfig) GetVulnerabilitiesQualysCloud() *VulnerabilitiesQualysCloud {
 	if p == nil {
 		return nil
@@ -22290,6 +22436,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.VulnerabilitiesNucleus = value
+	case "vulnerabilities_pentera":
+		value := new(VulnerabilitiesPentera)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.VulnerabilitiesPentera = value
 	case "vulnerabilities_qualys_cloud":
 		value := new(VulnerabilitiesQualysCloud)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -22800,6 +22952,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.VulnerabilitiesNucleus != nil {
 		return internal.MarshalJSONWithExtraProperty(p.VulnerabilitiesNucleus, "type", "vulnerabilities_nucleus")
 	}
+	if p.VulnerabilitiesPentera != nil {
+		return internal.MarshalJSONWithExtraProperty(p.VulnerabilitiesPentera, "type", "vulnerabilities_pentera")
+	}
 	if p.VulnerabilitiesQualysCloud != nil {
 		return internal.MarshalJSONWithExtraProperty(p.VulnerabilitiesQualysCloud, "type", "vulnerabilities_qualys_cloud")
 	}
@@ -22983,6 +23138,7 @@ type ProviderConfigVisitor interface {
 	VisitVulnerabilitiesHorizon3(*VulnerabilitiesHorizon3) error
 	VisitVulnerabilitiesIru(*VulnerabilitiesIru) error
 	VisitVulnerabilitiesNucleus(*VulnerabilitiesNucleus) error
+	VisitVulnerabilitiesPentera(*VulnerabilitiesPentera) error
 	VisitVulnerabilitiesQualysCloud(*VulnerabilitiesQualysCloud) error
 	VisitVulnerabilitiesQualysCloudMock(*VulnerabilitiesQualysCloudMock) error
 	VisitVulnerabilitiesRapid7InsightCloud(*VulnerabilitiesRapid7InsightCloud) error
@@ -23441,6 +23597,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.VulnerabilitiesNucleus != nil {
 		return visitor.VisitVulnerabilitiesNucleus(p.VulnerabilitiesNucleus)
+	}
+	if p.VulnerabilitiesPentera != nil {
+		return visitor.VisitVulnerabilitiesPentera(p.VulnerabilitiesPentera)
 	}
 	if p.VulnerabilitiesQualysCloud != nil {
 		return visitor.VisitVulnerabilitiesQualysCloud(p.VulnerabilitiesQualysCloud)
@@ -23924,6 +24083,9 @@ func (p *ProviderConfig) validate() error {
 	if p.VulnerabilitiesNucleus != nil {
 		fields = append(fields, "vulnerabilities_nucleus")
 	}
+	if p.VulnerabilitiesPentera != nil {
+		fields = append(fields, "vulnerabilities_pentera")
+	}
 	if p.VulnerabilitiesQualysCloud != nil {
 		fields = append(fields, "vulnerabilities_qualys_cloud")
 	}
@@ -24279,6 +24441,8 @@ const (
 	ProviderConfigIdVulnerabilitiesIru ProviderConfigId = "vulnerabilities_iru"
 	// Nucleus Vulnerability Management
 	ProviderConfigIdVulnerabilitiesNucleus ProviderConfigId = "vulnerabilities_nucleus"
+	// Pentera
+	ProviderConfigIdVulnerabilitiesPentera ProviderConfigId = "vulnerabilities_pentera"
 	// Qualys Vulnerability Management, Detection & Response (VMDR)
 	ProviderConfigIdVulnerabilitiesQualysCloud ProviderConfigId = "vulnerabilities_qualys_cloud"
 	// [MOCK] Qualys Vulnerability Management, Detection & Response (VMDR)
@@ -24601,6 +24765,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdVulnerabilitiesIru, nil
 	case "vulnerabilities_nucleus":
 		return ProviderConfigIdVulnerabilitiesNucleus, nil
+	case "vulnerabilities_pentera":
+		return ProviderConfigIdVulnerabilitiesPentera, nil
 	case "vulnerabilities_qualys_cloud":
 		return ProviderConfigIdVulnerabilitiesQualysCloud, nil
 	case "vulnerabilities_qualys_cloud_mock":
@@ -37338,6 +37504,109 @@ func (v *VulnerabilitiesNucleus) MarshalJSON() ([]byte, error) {
 }
 
 func (v *VulnerabilitiesNucleus) String() string {
+	if v == nil {
+		return "<nil>"
+	}
+	if len(v.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(v.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(v); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", v)
+}
+
+// Configuration for Pentera as a Vulnerabilities Provider
+var (
+	vulnerabilitiesPenteraFieldCredential = big.NewInt(1 << 0)
+	vulnerabilitiesPenteraFieldUrl        = big.NewInt(1 << 1)
+)
+
+type VulnerabilitiesPentera struct {
+	// Credentials for the Pentera API.
+	Credential *PenteraCredential `json:"credential" url:"credential"`
+	// Base URL of the Pentera appliance.
+	Url string `json:"url" url:"url"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (v *VulnerabilitiesPentera) GetCredential() *PenteraCredential {
+	if v == nil {
+		return nil
+	}
+	return v.Credential
+}
+
+func (v *VulnerabilitiesPentera) GetUrl() string {
+	if v == nil {
+		return ""
+	}
+	return v.Url
+}
+
+func (v *VulnerabilitiesPentera) GetExtraProperties() map[string]interface{} {
+	if v == nil {
+		return nil
+	}
+	return v.extraProperties
+}
+
+func (v *VulnerabilitiesPentera) require(field *big.Int) {
+	if v.explicitFields == nil {
+		v.explicitFields = big.NewInt(0)
+	}
+	v.explicitFields.Or(v.explicitFields, field)
+}
+
+// SetCredential sets the Credential field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (v *VulnerabilitiesPentera) SetCredential(credential *PenteraCredential) {
+	v.Credential = credential
+	v.require(vulnerabilitiesPenteraFieldCredential)
+}
+
+// SetUrl sets the Url field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (v *VulnerabilitiesPentera) SetUrl(url string) {
+	v.Url = url
+	v.require(vulnerabilitiesPenteraFieldUrl)
+}
+
+func (v *VulnerabilitiesPentera) UnmarshalJSON(data []byte) error {
+	type unmarshaler VulnerabilitiesPentera
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*v = VulnerabilitiesPentera(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *v)
+	if err != nil {
+		return err
+	}
+	v.extraProperties = extraProperties
+	v.rawJSON = nil
+	return nil
+}
+
+func (v *VulnerabilitiesPentera) MarshalJSON() ([]byte, error) {
+	type embed VulnerabilitiesPentera
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*v),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, v.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (v *VulnerabilitiesPentera) String() string {
 	if v == nil {
 		return "<nil>"
 	}
