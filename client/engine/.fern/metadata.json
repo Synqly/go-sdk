@@ -8,7 +8,7 @@
     "includeLegacyClientOptions": true,
     "alwaysSendRequiredProperties": true
   },
-  "originGitCommit": "1af0bb8a1713d796eb13c131e6407006e65ea96d",
+  "originGitCommit": "9c38e709eab184d791058ee6280763030a810906",
   "originGitCommitIsDirty": true,
   "invokedBy": "ci",
   "ciProvider": "github"
