@@ -171,6 +171,46 @@ func (e *ExecuteCommandRequestInput) MarshalJSON() ([]byte, error) {
 }
 
 var (
+	executeRemoteScriptRequestInputFieldMeta = big.NewInt(1 << 0)
+)
+
+type ExecuteRemoteScriptRequestInput struct {
+	// Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
+	Meta []*string                   `json:"-" url:"meta,omitempty"`
+	Body *ExecuteRemoteScriptRequest `json:"-" url:"-"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+}
+
+func (e *ExecuteRemoteScriptRequestInput) require(field *big.Int) {
+	if e.explicitFields == nil {
+		e.explicitFields = big.NewInt(0)
+	}
+	e.explicitFields.Or(e.explicitFields, field)
+}
+
+// SetMeta sets the Meta field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (e *ExecuteRemoteScriptRequestInput) SetMeta(meta []*string) {
+	e.Meta = meta
+	e.require(executeRemoteScriptRequestInputFieldMeta)
+}
+
+func (e *ExecuteRemoteScriptRequestInput) UnmarshalJSON(data []byte) error {
+	body := new(ExecuteRemoteScriptRequest)
+	if err := json.Unmarshal(data, &body); err != nil {
+		return err
+	}
+	e.Body = body
+	return nil
+}
+
+func (e *ExecuteRemoteScriptRequestInput) MarshalJSON() ([]byte, error) {
+	return json.Marshal(e.Body)
+}
+
+var (
 	getEndpointRequestFieldMeta = big.NewInt(1 << 0)
 )
 
@@ -1754,6 +1794,397 @@ func (e *ExecuteCommandResult) MarshalJSON() ([]byte, error) {
 }
 
 func (e *ExecuteCommandResult) String() string {
+	if e == nil {
+		return "<nil>"
+	}
+	if len(e.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(e.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(e); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", e)
+}
+
+var (
+	executeRemoteScriptRequestFieldScript = big.NewInt(1 << 0)
+	executeRemoteScriptRequestFieldArgs   = big.NewInt(1 << 1)
+	executeRemoteScriptRequestFieldCursor = big.NewInt(1 << 2)
+)
+
+type ExecuteRemoteScriptRequest struct {
+	// The script content to run on the remote endpoint. The engine runs it via the provider's script-execution facility (for example CrowdStrike RTR `runscript`) and returns the captured stdout/stderr.
+	Script string `json:"script" url:"script"`
+	// Optional command-line arguments passed to the script.
+	Args *string `json:"args,omitempty" url:"args,omitempty"`
+	// Opaque cursor returned from a previous pending response, used to continue polling the in-flight execution.
+	Cursor *string `json:"cursor,omitempty" url:"cursor,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (e *ExecuteRemoteScriptRequest) GetScript() string {
+	if e == nil {
+		return ""
+	}
+	return e.Script
+}
+
+func (e *ExecuteRemoteScriptRequest) GetArgs() *string {
+	if e == nil {
+		return nil
+	}
+	return e.Args
+}
+
+func (e *ExecuteRemoteScriptRequest) GetCursor() *string {
+	if e == nil {
+		return nil
+	}
+	return e.Cursor
+}
+
+func (e *ExecuteRemoteScriptRequest) GetExtraProperties() map[string]interface{} {
+	if e == nil {
+		return nil
+	}
+	return e.extraProperties
+}
+
+func (e *ExecuteRemoteScriptRequest) require(field *big.Int) {
+	if e.explicitFields == nil {
+		e.explicitFields = big.NewInt(0)
+	}
+	e.explicitFields.Or(e.explicitFields, field)
+}
+
+// SetScript sets the Script field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (e *ExecuteRemoteScriptRequest) SetScript(script string) {
+	e.Script = script
+	e.require(executeRemoteScriptRequestFieldScript)
+}
+
+// SetArgs sets the Args field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (e *ExecuteRemoteScriptRequest) SetArgs(args *string) {
+	e.Args = args
+	e.require(executeRemoteScriptRequestFieldArgs)
+}
+
+// SetCursor sets the Cursor field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (e *ExecuteRemoteScriptRequest) SetCursor(cursor *string) {
+	e.Cursor = cursor
+	e.require(executeRemoteScriptRequestFieldCursor)
+}
+
+func (e *ExecuteRemoteScriptRequest) UnmarshalJSON(data []byte) error {
+	type unmarshaler ExecuteRemoteScriptRequest
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*e = ExecuteRemoteScriptRequest(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *e)
+	if err != nil {
+		return err
+	}
+	e.extraProperties = extraProperties
+	e.rawJSON = nil
+	return nil
+}
+
+func (e *ExecuteRemoteScriptRequest) MarshalJSON() ([]byte, error) {
+	type embed ExecuteRemoteScriptRequest
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*e),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, e.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (e *ExecuteRemoteScriptRequest) String() string {
+	if e == nil {
+		return "<nil>"
+	}
+	if len(e.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(e.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(e); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", e)
+}
+
+var (
+	executeRemoteScriptResponseFieldMessages = big.NewInt(1 << 0)
+	executeRemoteScriptResponseFieldMeta     = big.NewInt(1 << 1)
+	executeRemoteScriptResponseFieldCursor   = big.NewInt(1 << 2)
+	executeRemoteScriptResponseFieldStatus   = big.NewInt(1 << 3)
+	executeRemoteScriptResponseFieldResult   = big.NewInt(1 << 4)
+)
+
+type ExecuteRemoteScriptResponse struct {
+	// Additional messages from the service response that may be helpful to the client.
+	Messages *MessagesResponse `json:"messages,omitempty" url:"messages,omitempty"`
+	// Various metadata about the results organized by group, then type, then field.
+	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
+	// Cursor to use to retrieve the next page of results
+	Cursor string `json:"cursor" url:"cursor"`
+	// If the provider supports asynchronous queries and the query is still running, this field will be `PENDING` until the query is complete. In this case, the client should retry using the provided cursor.
+	Status QueryStatus `json:"status" url:"status"`
+	// The normalized script result. This may be omitted while the execution is still pending and no output is yet available.
+	Result *ExecuteRemoteScriptResult `json:"result,omitempty" url:"result,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (e *ExecuteRemoteScriptResponse) GetMessages() *MessagesResponse {
+	if e == nil {
+		return nil
+	}
+	return e.Messages
+}
+
+func (e *ExecuteRemoteScriptResponse) GetMeta() *MetaResponse {
+	if e == nil {
+		return nil
+	}
+	return e.Meta
+}
+
+func (e *ExecuteRemoteScriptResponse) GetCursor() string {
+	if e == nil {
+		return ""
+	}
+	return e.Cursor
+}
+
+func (e *ExecuteRemoteScriptResponse) GetStatus() QueryStatus {
+	if e == nil {
+		return ""
+	}
+	return e.Status
+}
+
+func (e *ExecuteRemoteScriptResponse) GetResult() *ExecuteRemoteScriptResult {
+	if e == nil {
+		return nil
+	}
+	return e.Result
+}
+
+func (e *ExecuteRemoteScriptResponse) GetExtraProperties() map[string]interface{} {
+	if e == nil {
+		return nil
+	}
+	return e.extraProperties
+}
+
+func (e *ExecuteRemoteScriptResponse) require(field *big.Int) {
+	if e.explicitFields == nil {
+		e.explicitFields = big.NewInt(0)
+	}
+	e.explicitFields.Or(e.explicitFields, field)
+}
+
+// SetMessages sets the Messages field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (e *ExecuteRemoteScriptResponse) SetMessages(messages *MessagesResponse) {
+	e.Messages = messages
+	e.require(executeRemoteScriptResponseFieldMessages)
+}
+
+// SetMeta sets the Meta field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (e *ExecuteRemoteScriptResponse) SetMeta(meta *MetaResponse) {
+	e.Meta = meta
+	e.require(executeRemoteScriptResponseFieldMeta)
+}
+
+// SetCursor sets the Cursor field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (e *ExecuteRemoteScriptResponse) SetCursor(cursor string) {
+	e.Cursor = cursor
+	e.require(executeRemoteScriptResponseFieldCursor)
+}
+
+// SetStatus sets the Status field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (e *ExecuteRemoteScriptResponse) SetStatus(status QueryStatus) {
+	e.Status = status
+	e.require(executeRemoteScriptResponseFieldStatus)
+}
+
+// SetResult sets the Result field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (e *ExecuteRemoteScriptResponse) SetResult(result *ExecuteRemoteScriptResult) {
+	e.Result = result
+	e.require(executeRemoteScriptResponseFieldResult)
+}
+
+func (e *ExecuteRemoteScriptResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler ExecuteRemoteScriptResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*e = ExecuteRemoteScriptResponse(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *e)
+	if err != nil {
+		return err
+	}
+	e.extraProperties = extraProperties
+	e.rawJSON = nil
+	return nil
+}
+
+func (e *ExecuteRemoteScriptResponse) MarshalJSON() ([]byte, error) {
+	type embed ExecuteRemoteScriptResponse
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*e),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, e.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (e *ExecuteRemoteScriptResponse) String() string {
+	if e == nil {
+		return "<nil>"
+	}
+	if len(e.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(e.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(e); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", e)
+}
+
+var (
+	executeRemoteScriptResultFieldDeviceUid = big.NewInt(1 << 0)
+	executeRemoteScriptResultFieldStdout    = big.NewInt(1 << 1)
+	executeRemoteScriptResultFieldStderr    = big.NewInt(1 << 2)
+)
+
+type ExecuteRemoteScriptResult struct {
+	// The OCSF `device.uid` of the endpoint the script ran on.
+	DeviceUid string `json:"device_uid" url:"device_uid"`
+	// The script stdout collected during the synchronous polling window.
+	Stdout *string `json:"stdout,omitempty" url:"stdout,omitempty"`
+	// The script stderr collected during the synchronous polling window.
+	Stderr *string `json:"stderr,omitempty" url:"stderr,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (e *ExecuteRemoteScriptResult) GetDeviceUid() string {
+	if e == nil {
+		return ""
+	}
+	return e.DeviceUid
+}
+
+func (e *ExecuteRemoteScriptResult) GetStdout() *string {
+	if e == nil {
+		return nil
+	}
+	return e.Stdout
+}
+
+func (e *ExecuteRemoteScriptResult) GetStderr() *string {
+	if e == nil {
+		return nil
+	}
+	return e.Stderr
+}
+
+func (e *ExecuteRemoteScriptResult) GetExtraProperties() map[string]interface{} {
+	if e == nil {
+		return nil
+	}
+	return e.extraProperties
+}
+
+func (e *ExecuteRemoteScriptResult) require(field *big.Int) {
+	if e.explicitFields == nil {
+		e.explicitFields = big.NewInt(0)
+	}
+	e.explicitFields.Or(e.explicitFields, field)
+}
+
+// SetDeviceUid sets the DeviceUid field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (e *ExecuteRemoteScriptResult) SetDeviceUid(deviceUid string) {
+	e.DeviceUid = deviceUid
+	e.require(executeRemoteScriptResultFieldDeviceUid)
+}
+
+// SetStdout sets the Stdout field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (e *ExecuteRemoteScriptResult) SetStdout(stdout *string) {
+	e.Stdout = stdout
+	e.require(executeRemoteScriptResultFieldStdout)
+}
+
+// SetStderr sets the Stderr field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (e *ExecuteRemoteScriptResult) SetStderr(stderr *string) {
+	e.Stderr = stderr
+	e.require(executeRemoteScriptResultFieldStderr)
+}
+
+func (e *ExecuteRemoteScriptResult) UnmarshalJSON(data []byte) error {
+	type unmarshaler ExecuteRemoteScriptResult
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*e = ExecuteRemoteScriptResult(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *e)
+	if err != nil {
+		return err
+	}
+	e.extraProperties = extraProperties
+	e.rawJSON = nil
+	return nil
+}
+
+func (e *ExecuteRemoteScriptResult) MarshalJSON() ([]byte, error) {
+	type embed ExecuteRemoteScriptResult
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*e),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, e.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (e *ExecuteRemoteScriptResult) String() string {
 	if e == nil {
 		return "<nil>"
 	}

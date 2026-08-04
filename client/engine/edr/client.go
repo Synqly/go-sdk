@@ -91,6 +91,25 @@ func (c *Client) ExecuteCommand(
     return response.Body, nil
 }
 
+// Runs a script on the endpoint identified by `{uid}` and returns normalized stdout and stderr without exposing provider session details. Long-running executions return a pending status with a cursor to resume polling.
+func (c *Client) ExecuteRemoteScript(
+    ctx context.Context,
+    uid engine.Id,
+    request *engine.ExecuteRemoteScriptRequestInput,
+    opts ...option.RequestOption,
+) (*engine.ExecuteRemoteScriptResponse, error){
+    response, err := c.WithRawResponse.ExecuteRemoteScript(
+        ctx,
+        uid,
+        request,
+        opts...,
+    )
+    if err != nil {
+        return nil, err
+    }
+    return response.Body, nil
+}
+
 // Retrieves a file from the endpoint identified by `{uid}` and returns the provider artifact as a binary file response.
 func (c *Client) RetrieveFile(
     ctx context.Context,

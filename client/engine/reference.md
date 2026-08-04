@@ -2909,6 +2909,86 @@ client.Edr.ExecuteCommand(
 </dl>
 </details>
 
+<details><summary><code>client.Edr.ExecuteRemoteScript(Uid, request) -> *engine.ExecuteRemoteScriptResponse</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Runs a script on the endpoint identified by `{uid}` and returns normalized stdout and stderr without exposing provider session details. Long-running executions return a pending status with a cursor to resume polling.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```go
+request := &engine.ExecuteRemoteScriptRequestInput{
+        Body: &engine.ExecuteRemoteScriptRequest{
+            Script: "script",
+        },
+    }
+client.Edr.ExecuteRemoteScript(
+        context.TODO(),
+        "uid",
+        request,
+    )
+}
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**uid:** `engine.Id` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**meta:** `*string` — Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request:** `*engine.ExecuteRemoteScriptRequest` 
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
 <details><summary><code>client.Edr.RetrieveFile(Uid, request) -> string</code></summary>
 <dl>
 <dd>

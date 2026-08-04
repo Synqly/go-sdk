@@ -191,6 +191,60 @@ func (r *RawClient) ExecuteCommand(
     }, nil
 }
 
+func (r *RawClient) ExecuteRemoteScript(
+    ctx context.Context,
+    uid engine.Id,
+    request *engine.ExecuteRemoteScriptRequestInput,
+    opts ...option.RequestOption,
+) (*core.Response[*engine.ExecuteRemoteScriptResponse], error){
+    options := core.NewRequestOptions(opts...)
+    baseURL := internal.ResolveBaseURL(
+        options.BaseURL,
+        r.baseURL,
+        "https://api.synqly.com",
+    )
+    endpointURL := internal.EncodeURL(
+        baseURL + "/v1/edr/endpoints/%v/actions/execute-remote-script",
+        uid,
+    )
+    queryParams, err := internal.QueryValues(request)
+    if err != nil {
+        return nil, err
+    }
+    if len(queryParams) > 0 {
+        endpointURL += "?" + queryParams.Encode()
+    }
+    headers := internal.MergeHeaders(
+        r.options.ToHeader(),
+        options.ToHeader(),
+    )
+    var response *engine.ExecuteRemoteScriptResponse
+    raw, err := r.caller.Call(
+        ctx,
+        &internal.CallParams{
+            URL: endpointURL,
+            Method: http.MethodPost,
+            Headers: headers,
+            MaxAttempts: options.MaxAttempts,
+            DisableRetries: options.DisableRetries,
+            BodyProperties: options.BodyProperties,
+            QueryParameters: options.QueryParameters,
+            Client: options.HTTPClient,
+            Request: request,
+            Response: &response,
+            ErrorDecoder: internal.NewErrorDecoder(engine.ErrorCodes),
+        },
+    )
+    if err != nil {
+        return nil, err
+    }
+    return &core.Response[*engine.ExecuteRemoteScriptResponse]{
+        StatusCode: raw.StatusCode,
+        Header: raw.Header,
+        Body: response,
+    }, nil
+}
+
 func (r *RawClient) RetrieveFile(
     ctx context.Context,
     uid engine.Id,

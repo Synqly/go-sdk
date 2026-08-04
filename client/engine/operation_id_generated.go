@@ -46,6 +46,7 @@ const (
 	OperationIdEdrCreateThreatNote                              OperationId = "edr_create_threat_note"
 	OperationIdEdrDeleteIocs                                    OperationId = "edr_delete_iocs"
 	OperationIdEdrExecuteCommand                                OperationId = "edr_execute_command"
+	OperationIdEdrExecuteRemoteScript                           OperationId = "edr_execute_remote_script"
 	OperationIdEdrGetEndpoint                                   OperationId = "edr_get_endpoint"
 	OperationIdEdrGetThreatNotes                                OperationId = "edr_get_threat_notes"
 	OperationIdEdrNetworkQuarantine                             OperationId = "edr_network_quarantine"
@@ -211,6 +212,8 @@ func NewOperationIdFromString(s string) (OperationId, error) {
 		return OperationIdEdrDeleteIocs, nil
 	case "edr_execute_command":
 		return OperationIdEdrExecuteCommand, nil
+	case "edr_execute_remote_script":
+		return OperationIdEdrExecuteRemoteScript, nil
 	case "edr_get_endpoint":
 		return OperationIdEdrGetEndpoint, nil
 	case "edr_get_threat_notes":
