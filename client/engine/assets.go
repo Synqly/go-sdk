@@ -795,6 +795,10 @@ type CreateSoftwareInventoryRequest struct {
 	SoftwareInventory SoftwareInventory `json:"software_inventory" url:"software_inventory"`
 	// Optional connector hint (for example ServiceNow discovery_source with Identify & Reconcile).
 	// Omit or leave empty when the integration does not use it; some integrations require it.
+	//
+	// **Tenable Cloud:** `source_name` is required. It scopes how imported software is merged
+	// on the asset; reuse the same value across syncs for a given data source. Software from
+	// other sources is not replaced or removed when you import under a different `source_name`.
 	SourceName *string `json:"source_name,omitempty" url:"source_name,omitempty"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
@@ -1516,3 +1520,267 @@ func (q *QuerySoftwareInventoryResponse) String() string {
 
 // Software inventory information for an asset management system. Represented by OCSF v1.8.0 Software Inventory Info (class_uid 5020) using the OCSF Synqly extension and the OCSF Date/Time profile. The `package` or `sbom` object describes installed software; `device` links the record to a host or configuration item.
 type SoftwareInventory = *softwareinventoryinfo.SoftwareInfo
+
+var (
+	updateSoftwareInventoryRequestFieldSoftwareInventory = big.NewInt(1 << 0)
+	updateSoftwareInventoryRequestFieldSourceName        = big.NewInt(1 << 1)
+)
+
+type UpdateSoftwareInventoryRequest struct {
+	SoftwareInventory SoftwareInventory `json:"software_inventory" url:"software_inventory"`
+	// Optional connector hint (for example ServiceNow discovery_source with Identify & Reconcile).
+	// Omit or leave empty when the integration does not use it; some integrations require it.
+	//
+	// **Tenable Cloud:** `source_name` is required. It scopes how imported software is merged
+	// on the asset; reuse the same value across syncs for a given data source. Software from
+	// other sources is not replaced or removed when you import under a different `source_name`.
+	SourceName *string `json:"source_name,omitempty" url:"source_name,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (u *UpdateSoftwareInventoryRequest) GetSoftwareInventory() SoftwareInventory {
+	if u == nil {
+		return nil
+	}
+	return u.SoftwareInventory
+}
+
+func (u *UpdateSoftwareInventoryRequest) GetSourceName() *string {
+	if u == nil {
+		return nil
+	}
+	return u.SourceName
+}
+
+func (u *UpdateSoftwareInventoryRequest) GetExtraProperties() map[string]interface{} {
+	if u == nil {
+		return nil
+	}
+	return u.extraProperties
+}
+
+func (u *UpdateSoftwareInventoryRequest) require(field *big.Int) {
+	if u.explicitFields == nil {
+		u.explicitFields = big.NewInt(0)
+	}
+	u.explicitFields.Or(u.explicitFields, field)
+}
+
+// SetSoftwareInventory sets the SoftwareInventory field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (u *UpdateSoftwareInventoryRequest) SetSoftwareInventory(softwareInventory SoftwareInventory) {
+	u.SoftwareInventory = softwareInventory
+	u.require(updateSoftwareInventoryRequestFieldSoftwareInventory)
+}
+
+// SetSourceName sets the SourceName field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (u *UpdateSoftwareInventoryRequest) SetSourceName(sourceName *string) {
+	u.SourceName = sourceName
+	u.require(updateSoftwareInventoryRequestFieldSourceName)
+}
+
+func (u *UpdateSoftwareInventoryRequest) UnmarshalJSON(data []byte) error {
+	type unmarshaler UpdateSoftwareInventoryRequest
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*u = UpdateSoftwareInventoryRequest(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *u)
+	if err != nil {
+		return err
+	}
+	u.extraProperties = extraProperties
+	u.rawJSON = nil
+	return nil
+}
+
+func (u *UpdateSoftwareInventoryRequest) MarshalJSON() ([]byte, error) {
+	type embed UpdateSoftwareInventoryRequest
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*u),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, u.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (u *UpdateSoftwareInventoryRequest) String() string {
+	if u == nil {
+		return "<nil>"
+	}
+	if len(u.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(u.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(u); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", u)
+}
+
+var (
+	updateSoftwareInventoryResponseFieldMessages          = big.NewInt(1 << 0)
+	updateSoftwareInventoryResponseFieldMeta              = big.NewInt(1 << 1)
+	updateSoftwareInventoryResponseFieldSoftwareInventory = big.NewInt(1 << 2)
+)
+
+type UpdateSoftwareInventoryResponse struct {
+	// Additional messages from the service response that may be helpful to the client.
+	Messages *MessagesResponse `json:"messages,omitempty" url:"messages,omitempty"`
+	// Various metadata about the results organized by group, then type, then field.
+	Meta              *MetaResponse     `json:"meta,omitempty" url:"meta,omitempty"`
+	SoftwareInventory SoftwareInventory `json:"software_inventory" url:"software_inventory"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (u *UpdateSoftwareInventoryResponse) GetMessages() *MessagesResponse {
+	if u == nil {
+		return nil
+	}
+	return u.Messages
+}
+
+func (u *UpdateSoftwareInventoryResponse) GetMeta() *MetaResponse {
+	if u == nil {
+		return nil
+	}
+	return u.Meta
+}
+
+func (u *UpdateSoftwareInventoryResponse) GetSoftwareInventory() SoftwareInventory {
+	if u == nil {
+		return nil
+	}
+	return u.SoftwareInventory
+}
+
+func (u *UpdateSoftwareInventoryResponse) GetExtraProperties() map[string]interface{} {
+	if u == nil {
+		return nil
+	}
+	return u.extraProperties
+}
+
+func (u *UpdateSoftwareInventoryResponse) require(field *big.Int) {
+	if u.explicitFields == nil {
+		u.explicitFields = big.NewInt(0)
+	}
+	u.explicitFields.Or(u.explicitFields, field)
+}
+
+// SetMessages sets the Messages field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (u *UpdateSoftwareInventoryResponse) SetMessages(messages *MessagesResponse) {
+	u.Messages = messages
+	u.require(updateSoftwareInventoryResponseFieldMessages)
+}
+
+// SetMeta sets the Meta field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (u *UpdateSoftwareInventoryResponse) SetMeta(meta *MetaResponse) {
+	u.Meta = meta
+	u.require(updateSoftwareInventoryResponseFieldMeta)
+}
+
+// SetSoftwareInventory sets the SoftwareInventory field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (u *UpdateSoftwareInventoryResponse) SetSoftwareInventory(softwareInventory SoftwareInventory) {
+	u.SoftwareInventory = softwareInventory
+	u.require(updateSoftwareInventoryResponseFieldSoftwareInventory)
+}
+
+func (u *UpdateSoftwareInventoryResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler UpdateSoftwareInventoryResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*u = UpdateSoftwareInventoryResponse(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *u)
+	if err != nil {
+		return err
+	}
+	u.extraProperties = extraProperties
+	u.rawJSON = nil
+	return nil
+}
+
+func (u *UpdateSoftwareInventoryResponse) MarshalJSON() ([]byte, error) {
+	type embed UpdateSoftwareInventoryResponse
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*u),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, u.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (u *UpdateSoftwareInventoryResponse) String() string {
+	if u == nil {
+		return "<nil>"
+	}
+	if len(u.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(u.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(u); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", u)
+}
+
+var (
+	updateSoftwareInventoryRequestInputFieldMeta = big.NewInt(1 << 0)
+)
+
+type UpdateSoftwareInventoryRequestInput struct {
+	// Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
+	Meta []*string                       `json:"-" url:"meta,omitempty"`
+	Body *UpdateSoftwareInventoryRequest `json:"-" url:"-"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+}
+
+func (u *UpdateSoftwareInventoryRequestInput) require(field *big.Int) {
+	if u.explicitFields == nil {
+		u.explicitFields = big.NewInt(0)
+	}
+	u.explicitFields.Or(u.explicitFields, field)
+}
+
+// SetMeta sets the Meta field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (u *UpdateSoftwareInventoryRequestInput) SetMeta(meta []*string) {
+	u.Meta = meta
+	u.require(updateSoftwareInventoryRequestInputFieldMeta)
+}
+
+func (u *UpdateSoftwareInventoryRequestInput) UnmarshalJSON(data []byte) error {
+	body := new(UpdateSoftwareInventoryRequest)
+	if err := json.Unmarshal(data, &body); err != nil {
+		return err
+	}
+	u.Body = body
+	return nil
+}
+
+func (u *UpdateSoftwareInventoryRequestInput) MarshalJSON() ([]byte, error) {
+	return json.Marshal(u.Body)
+}

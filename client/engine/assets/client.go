@@ -121,6 +121,26 @@ func (c *Client) QuerySoftware(
 }
 
 // Creates a software inventory record in the token-linked Integration.
+// 
+// **Tenable Cloud:** This is asset import enrichment, not full software-inventory CRUD. Each
+// request pushes one CPE onto an asset via Tenable `POST /import/assets` (`installed_software`
+// CPE 2.2 strings). The call blocks on the same asynchronous Tenable import job poll before
+// returning (typically seconds, up to the request deadline; may return gateway timeout if the
+// job does not complete in time). `query_software` reads from asset export and may lag briefly
+// after a successful create.
+// 
+// **When to use create:** First push or enrichment when you may only have hostname, IP, MAC, or
+// cloud instance identifiers. Use **update** when you already have `device.uid` and want to
+// refresh software on a known asset.
+// 
+// Provide `package.cpe_name` when possible; Synqly can synthesize
+// `cpe:/a:vendor:name:version` from `package.name`, `package.vendor_name`, and
+// `package.version`, but weak CPEs may not correlate in Tenable. `device.uid` (Tenable asset
+// UUID) is optional; hostname, IP, MAC, or cloud instance identifiers also work for asset
+// matching. Only one package CPE is sent per request. Software is merged additively per
+// `source_name` — entries from other sources are unaffected. This does not replace full
+// inventory, delete packages, or trigger vulnerability scans. Imported software expires if
+// not re-imported within Tenable's retention window (approximately 30 days).
 func (c *Client) CreateSoftware(
     ctx context.Context,
     request *engine.CreateSoftwareInventoryRequestInput,
@@ -128,6 +148,43 @@ func (c *Client) CreateSoftware(
 ) (*engine.CreateSoftwareInventoryResponse, error){
     response, err := c.WithRawResponse.CreateSoftware(
         ctx,
+        request,
+        opts...,
+    )
+    if err != nil {
+        return nil, err
+    }
+    return response.Body, nil
+}
+
+// Updates a software inventory record on a known device in the token-linked Integration.
+// 
+// **Tenable Cloud:** This re-imports software on an existing asset; it is not in-place PATCH
+// or delete. Each request uses the same `POST /import/assets` path as create and blocks on
+// the same asynchronous Tenable import job poll before returning (typically seconds, up to
+// the request deadline; may return gateway timeout if the job does not complete in time).
+// `query_software` may lag briefly after a successful update. Bulk refresh should batch CPEs
+// via create/import flows rather than serial single-row updates.
+// 
+// **When to use update:** You have `device.uid` (path `deviceUid`) and want to refresh or
+// re-affirm a known CPE under a stable `source_name`. Use **create** for first push when
+// matching by hostname, IP, MAC, or cloud identifiers.
+// 
+// `deviceUid` must be an existing Tenable asset UUID (`device.uid` in OCSF). Only one package
+// CPE is sent per request. Changing version means supplying a new CPE string; the previous CPE
+// is not removed automatically and ages out per Tenable rules. Does not support removal or
+// in-place CPE replacement. Software from other `source_name` values is unaffected.
+func (c *Client) UpdateSoftware(
+    ctx context.Context,
+    // Uid of the device. For Tenable Cloud this is the Tenable asset UUID (`device.uid` in OCSF),
+    // the same identifier returned by query devices and query software.
+    deviceUid string,
+    request *engine.UpdateSoftwareInventoryRequestInput,
+    opts ...option.RequestOption,
+) (*engine.UpdateSoftwareInventoryResponse, error){
+    response, err := c.WithRawResponse.UpdateSoftware(
+        ctx,
+        deviceUid,
         request,
         opts...,
     )

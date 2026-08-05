@@ -24,6 +24,7 @@ const (
 	OperationIdAssetsQueryUtilization                           OperationId = "assets_query_utilization"
 	OperationIdAssetsQueryVulnerabilities                       OperationId = "assets_query_vulnerabilities"
 	OperationIdAssetsUpdateDeviceProperties                     OperationId = "assets_update_device_properties"
+	OperationIdAssetsUpdateSoftware                             OperationId = "assets_update_software"
 	OperationIdChatQueryConversationMembers                     OperationId = "chat_query_conversation_members"
 	OperationIdChatQueryConversationMessages                    OperationId = "chat_query_conversation_messages"
 	OperationIdChatQueryConversations                           OperationId = "chat_query_conversations"
@@ -168,6 +169,8 @@ func NewOperationIdFromString(s string) (OperationId, error) {
 		return OperationIdAssetsQueryVulnerabilities, nil
 	case "assets_update_device_properties":
 		return OperationIdAssetsUpdateDeviceProperties, nil
+	case "assets_update_software":
+		return OperationIdAssetsUpdateSoftware, nil
 	case "chat_query_conversation_members":
 		return OperationIdChatQueryConversationMembers, nil
 	case "chat_query_conversation_messages":

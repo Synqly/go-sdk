@@ -330,3 +330,59 @@ func (r *RawClient) CreateSoftware(
     }, nil
 }
 
+func (r *RawClient) UpdateSoftware(
+    ctx context.Context,
+    // Uid of the device. For Tenable Cloud this is the Tenable asset UUID (`device.uid` in OCSF),
+    // the same identifier returned by query devices and query software.
+    deviceUid string,
+    request *engine.UpdateSoftwareInventoryRequestInput,
+    opts ...option.RequestOption,
+) (*core.Response[*engine.UpdateSoftwareInventoryResponse], error){
+    options := core.NewRequestOptions(opts...)
+    baseURL := internal.ResolveBaseURL(
+        options.BaseURL,
+        r.baseURL,
+        "https://api.synqly.com",
+    )
+    endpointURL := internal.EncodeURL(
+        baseURL + "/v1/assets/software/%v",
+        deviceUid,
+    )
+    queryParams, err := internal.QueryValues(request)
+    if err != nil {
+        return nil, err
+    }
+    if len(queryParams) > 0 {
+        endpointURL += "?" + queryParams.Encode()
+    }
+    headers := internal.MergeHeaders(
+        r.options.ToHeader(),
+        options.ToHeader(),
+    )
+    var response *engine.UpdateSoftwareInventoryResponse
+    raw, err := r.caller.Call(
+        ctx,
+        &internal.CallParams{
+            URL: endpointURL,
+            Method: http.MethodPut,
+            Headers: headers,
+            MaxAttempts: options.MaxAttempts,
+            DisableRetries: options.DisableRetries,
+            BodyProperties: options.BodyProperties,
+            QueryParameters: options.QueryParameters,
+            Client: options.HTTPClient,
+            Request: request,
+            Response: &response,
+            ErrorDecoder: internal.NewErrorDecoder(engine.ErrorCodes),
+        },
+    )
+    if err != nil {
+        return nil, err
+    }
+    return &core.Response[*engine.UpdateSoftwareInventoryResponse]{
+        StatusCode: raw.StatusCode,
+        Header: raw.Header,
+        Body: response,
+    }, nil
+}
+
