@@ -582,6 +582,7 @@ var (
 	organizationFieldReplyTo          = big.NewInt(1 << 8)
 	organizationFieldPicture          = big.NewInt(1 << 9)
 	organizationFieldOptions          = big.NewInt(1 << 10)
+	organizationFieldState            = big.NewInt(1 << 11)
 )
 
 type Organization struct {
@@ -606,6 +607,8 @@ type Organization struct {
 	Picture *string `json:"picture,omitempty" url:"picture,omitempty"`
 	// Organization options
 	Options *OrganizationOptions `json:"options,omitempty" url:"options,omitempty"`
+	// Organization state. Omitted when the organization is enabled. Can only be changed through the private organizations API.
+	State *OrganizationState `json:"state,omitempty" url:"state,omitempty"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -689,6 +692,13 @@ func (o *Organization) GetOptions() *OrganizationOptions {
 		return nil
 	}
 	return o.Options
+}
+
+func (o *Organization) GetState() *OrganizationState {
+	if o == nil {
+		return nil
+	}
+	return o.State
 }
 
 func (o *Organization) GetExtraProperties() map[string]interface{} {
@@ -780,6 +790,13 @@ func (o *Organization) SetPicture(picture *string) {
 func (o *Organization) SetOptions(options *OrganizationOptions) {
 	o.Options = options
 	o.require(organizationFieldOptions)
+}
+
+// SetState sets the State field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (o *Organization) SetState(state *OrganizationState) {
+	o.State = state
+	o.require(organizationFieldState)
 }
 
 func (o *Organization) UnmarshalJSON(data []byte) error {
@@ -973,6 +990,29 @@ func (o *OrganizationOptions) String() string {
 		return value
 	}
 	return fmt.Sprintf("%#v", o)
+}
+
+// Organization state. When `disabled`, all management and engine API requests for the organization return HTTP 402. An organization with no state set is enabled.
+type OrganizationState string
+
+const (
+	OrganizationStateEnabled  OrganizationState = "enabled"
+	OrganizationStateDisabled OrganizationState = "disabled"
+)
+
+func NewOrganizationStateFromString(s string) (OrganizationState, error) {
+	switch s {
+	case "enabled":
+		return OrganizationStateEnabled, nil
+	case "disabled":
+		return OrganizationStateDisabled, nil
+	}
+	var t OrganizationState
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (o OrganizationState) Ptr() *OrganizationState {
+	return &o
 }
 
 type OrganizationType string

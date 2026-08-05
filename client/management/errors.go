@@ -214,6 +214,29 @@ func (n *NotImplementedError) Unwrap() error {
 	return n.APIError
 }
 
+type PaymentRequiredError struct {
+	*core.APIError
+	Body *Problem
+}
+
+func (p *PaymentRequiredError) UnmarshalJSON(data []byte) error {
+	var body *Problem
+	if err := json.Unmarshal(data, &body); err != nil {
+		return err
+	}
+	p.StatusCode = 402
+	p.Body = body
+	return nil
+}
+
+func (p *PaymentRequiredError) MarshalJSON() ([]byte, error) {
+	return json.Marshal(p.Body)
+}
+
+func (p *PaymentRequiredError) Unwrap() error {
+	return p.APIError
+}
+
 type ServiceUnavailableError struct {
 	*core.APIError
 	Body *Problem
