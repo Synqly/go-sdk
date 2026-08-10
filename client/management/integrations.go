@@ -317,14 +317,15 @@ func (b *BridgeSelector) validate() error {
 }
 
 var (
-	createIntegrationRequestFieldName               = big.NewInt(1 << 0)
-	createIntegrationRequestFieldFullname           = big.NewInt(1 << 1)
-	createIntegrationRequestFieldProviderConfig     = big.NewInt(1 << 2)
-	createIntegrationRequestFieldIntegrationPointId = big.NewInt(1 << 3)
-	createIntegrationRequestFieldBridgeSelector     = big.NewInt(1 << 4)
-	createIntegrationRequestFieldWebhookConfig      = big.NewInt(1 << 5)
-	createIntegrationRequestFieldMappings           = big.NewInt(1 << 6)
-	createIntegrationRequestFieldAdditionalMappings = big.NewInt(1 << 7)
+	createIntegrationRequestFieldName                = big.NewInt(1 << 0)
+	createIntegrationRequestFieldFullname            = big.NewInt(1 << 1)
+	createIntegrationRequestFieldProviderConfig      = big.NewInt(1 << 2)
+	createIntegrationRequestFieldIntegrationPointId  = big.NewInt(1 << 3)
+	createIntegrationRequestFieldBridgeSelector      = big.NewInt(1 << 4)
+	createIntegrationRequestFieldWebhookConfig       = big.NewInt(1 << 5)
+	createIntegrationRequestFieldMappings            = big.NewInt(1 << 6)
+	createIntegrationRequestFieldAdditionalMappings  = big.NewInt(1 << 7)
+	createIntegrationRequestFieldScheduledOperations = big.NewInt(1 << 8)
 )
 
 type CreateIntegrationRequest struct {
@@ -344,6 +345,8 @@ type CreateIntegrationRequest struct {
 	Mappings []*MappingChain `json:"mappings,omitempty" url:"mappings,omitempty"`
 	// Additional data mappings for this integration. This allows for custom data to be mapped to the custom_fields portion of the response.
 	AdditionalMappings []*AdditionalMapping `json:"additional_mappings,omitempty" url:"additional_mappings,omitempty"`
+	// Scheduled operations owned by this integration. During creation, a non-empty list is used as supplied; otherwise, the integration point's current scheduled_operations template is copied onto the integration, if present. The stored list is an independent snapshot: later changes to the integration point never affect it. Clearing this field from an existing integration removes its schedules and does not restore the integration point template. The integration does not require an integration point for these schedules to run.
+	ScheduledOperations []*OperationSchedule `json:"scheduled_operations,omitempty" url:"scheduled_operations,omitempty"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -406,6 +409,13 @@ func (c *CreateIntegrationRequest) GetAdditionalMappings() []*AdditionalMapping 
 		return nil
 	}
 	return c.AdditionalMappings
+}
+
+func (c *CreateIntegrationRequest) GetScheduledOperations() []*OperationSchedule {
+	if c == nil {
+		return nil
+	}
+	return c.ScheduledOperations
 }
 
 func (c *CreateIntegrationRequest) GetExtraProperties() map[string]interface{} {
@@ -476,6 +486,13 @@ func (c *CreateIntegrationRequest) SetMappings(mappings []*MappingChain) {
 func (c *CreateIntegrationRequest) SetAdditionalMappings(additionalMappings []*AdditionalMapping) {
 	c.AdditionalMappings = additionalMappings
 	c.require(createIntegrationRequestFieldAdditionalMappings)
+}
+
+// SetScheduledOperations sets the ScheduledOperations field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CreateIntegrationRequest) SetScheduledOperations(scheduledOperations []*OperationSchedule) {
+	c.ScheduledOperations = scheduledOperations
+	c.require(createIntegrationRequestFieldScheduledOperations)
 }
 
 func (c *CreateIntegrationRequest) UnmarshalJSON(data []byte) error {
@@ -823,24 +840,25 @@ func (g *GetIntegrationResponse) String() string {
 
 // Connects an Account to an external service
 var (
-	integrationFieldName               = big.NewInt(1 << 0)
-	integrationFieldCreatedAt          = big.NewInt(1 << 1)
-	integrationFieldUpdatedAt          = big.NewInt(1 << 2)
-	integrationFieldId                 = big.NewInt(1 << 3)
-	integrationFieldFullname           = big.NewInt(1 << 4)
-	integrationFieldRefreshTokenId     = big.NewInt(1 << 5)
-	integrationFieldAccountId          = big.NewInt(1 << 6)
-	integrationFieldAccount            = big.NewInt(1 << 7)
-	integrationFieldCategory           = big.NewInt(1 << 8)
-	integrationFieldProviderConfig     = big.NewInt(1 << 9)
-	integrationFieldProviderFullname   = big.NewInt(1 << 10)
-	integrationFieldProviderType       = big.NewInt(1 << 11)
-	integrationFieldIntegrationPointId = big.NewInt(1 << 12)
-	integrationFieldIntegrationPoint   = big.NewInt(1 << 13)
-	integrationFieldBridgeSelector     = big.NewInt(1 << 14)
-	integrationFieldWebhookConfig      = big.NewInt(1 << 15)
-	integrationFieldMappings           = big.NewInt(1 << 16)
-	integrationFieldAdditionalMappings = big.NewInt(1 << 17)
+	integrationFieldName                = big.NewInt(1 << 0)
+	integrationFieldCreatedAt           = big.NewInt(1 << 1)
+	integrationFieldUpdatedAt           = big.NewInt(1 << 2)
+	integrationFieldId                  = big.NewInt(1 << 3)
+	integrationFieldFullname            = big.NewInt(1 << 4)
+	integrationFieldRefreshTokenId      = big.NewInt(1 << 5)
+	integrationFieldAccountId           = big.NewInt(1 << 6)
+	integrationFieldAccount             = big.NewInt(1 << 7)
+	integrationFieldCategory            = big.NewInt(1 << 8)
+	integrationFieldProviderConfig      = big.NewInt(1 << 9)
+	integrationFieldProviderFullname    = big.NewInt(1 << 10)
+	integrationFieldProviderType        = big.NewInt(1 << 11)
+	integrationFieldIntegrationPointId  = big.NewInt(1 << 12)
+	integrationFieldIntegrationPoint    = big.NewInt(1 << 13)
+	integrationFieldBridgeSelector      = big.NewInt(1 << 14)
+	integrationFieldWebhookConfig       = big.NewInt(1 << 15)
+	integrationFieldMappings            = big.NewInt(1 << 16)
+	integrationFieldAdditionalMappings  = big.NewInt(1 << 17)
+	integrationFieldScheduledOperations = big.NewInt(1 << 18)
 )
 
 type Integration struct {
@@ -879,6 +897,8 @@ type Integration struct {
 	Mappings []*MappingChain `json:"mappings,omitempty" url:"mappings,omitempty"`
 	// Additional data mappings for this integration. This allows for custom data to be mapped to the custom_fields portion of the response.
 	AdditionalMappings []*AdditionalMapping `json:"additional_mappings,omitempty" url:"additional_mappings,omitempty"`
+	// Scheduled operations owned by this integration. During creation, a non-empty list is used as supplied; otherwise, the integration point's current scheduled_operations template is copied onto the integration, if present. The stored list is an independent snapshot: later changes to the integration point never affect it. Clearing this field from an existing integration removes its schedules and does not restore the integration point template. The integration does not require an integration point for these schedules to run.
+	ScheduledOperations []*OperationSchedule `json:"scheduled_operations,omitempty" url:"scheduled_operations,omitempty"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -1011,6 +1031,13 @@ func (i *Integration) GetAdditionalMappings() []*AdditionalMapping {
 		return nil
 	}
 	return i.AdditionalMappings
+}
+
+func (i *Integration) GetScheduledOperations() []*OperationSchedule {
+	if i == nil {
+		return nil
+	}
+	return i.ScheduledOperations
 }
 
 func (i *Integration) GetExtraProperties() map[string]interface{} {
@@ -1151,6 +1178,13 @@ func (i *Integration) SetMappings(mappings []*MappingChain) {
 func (i *Integration) SetAdditionalMappings(additionalMappings []*AdditionalMapping) {
 	i.AdditionalMappings = additionalMappings
 	i.require(integrationFieldAdditionalMappings)
+}
+
+// SetScheduledOperations sets the ScheduledOperations field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (i *Integration) SetScheduledOperations(scheduledOperations []*OperationSchedule) {
+	i.ScheduledOperations = scheduledOperations
+	i.require(integrationFieldScheduledOperations)
 }
 
 func (i *Integration) UnmarshalJSON(data []byte) error {

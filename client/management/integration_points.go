@@ -340,9 +340,11 @@ type CreateIntegrationPointRequest struct {
 	Mappings []*MappingChainTemplate `json:"mappings,omitempty" url:"mappings,omitempty"`
 	// Additional data mappings for integrations added to this integration point. This allows for custom data to be mapped to the custom_fields portion of the response.
 	AdditionalMappings []*AdditionalMappingTemplate `json:"additional_mappings,omitempty" url:"additional_mappings,omitempty"`
-	// A list of operations that are scheduled to run for this integration point.
-	// Whenever an integration is created, these operations will automatically
-	// be scheduled to run based on the schedule defined for the operation.
+	// A creation template for integration scheduled operations. When an
+	// integration is created without a non-empty scheduled_operations list,
+	// this list is copied onto the integration and its operations are
+	// scheduled from that snapshot. Updating or clearing this template never
+	// changes integrations that already exist.
 	ScheduledOperations []*OperationSchedule `json:"scheduled_operations,omitempty" url:"scheduled_operations,omitempty"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
@@ -825,9 +827,11 @@ type IntegrationPoint struct {
 	Mappings []*MappingChainTemplate `json:"mappings,omitempty" url:"mappings,omitempty"`
 	// Additional data mappings for integrations added to this integration point. This allows for custom data to be mapped to the custom_fields portion of the response.
 	AdditionalMappings []*AdditionalMappingTemplate `json:"additional_mappings,omitempty" url:"additional_mappings,omitempty"`
-	// A list of operations that are scheduled to run for this integration point.
-	// Whenever an integration is created, these operations will automatically
-	// be scheduled to run based on the schedule defined for the operation.
+	// A creation template for integration scheduled operations. When an
+	// integration is created without a non-empty scheduled_operations list,
+	// this list is copied onto the integration and its operations are
+	// scheduled from that snapshot. Updating or clearing this template never
+	// changes integrations that already exist.
 	ScheduledOperations []*OperationSchedule `json:"scheduled_operations,omitempty" url:"scheduled_operations,omitempty"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted

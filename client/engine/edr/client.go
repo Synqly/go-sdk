@@ -248,6 +248,57 @@ func (c *Client) DeleteIocs(
     return response.Body, nil
 }
 
+// Returns a list of IOA rules that match the query from the token-linked EDR source.
+func (c *Client) QueryIoa(
+    ctx context.Context,
+    request *engine.QueryIoaRequest,
+    opts ...option.RequestOption,
+) (*engine.QueryIoaResponse, error){
+    response, err := c.WithRawResponse.QueryIoa(
+        ctx,
+        request,
+        opts...,
+    )
+    if err != nil {
+        return nil, err
+    }
+    return response.Body, nil
+}
+
+// Creates an IOA rule for the token-linked EDR source.
+func (c *Client) CreateIoa(
+    ctx context.Context,
+    request *engine.CreateIoaRequest,
+    opts ...option.RequestOption,
+) (*engine.CreateIoaResponse, error){
+    response, err := c.WithRawResponse.CreateIoa(
+        ctx,
+        request,
+        opts...,
+    )
+    if err != nil {
+        return nil, err
+    }
+    return response.Body, nil
+}
+
+// Deletes the IOA rules identified by the ids in the query params. Some providers scope rule ids to a rule group; for those providers `group_id` is required.
+func (c *Client) DeleteIoa(
+    ctx context.Context,
+    request *engine.DeleteIoaRequest,
+    opts ...option.RequestOption,
+) (*engine.DeleteIoaResponse, error){
+    response, err := c.WithRawResponse.DeleteIoa(
+        ctx,
+        request,
+        opts...,
+    )
+    if err != nil {
+        return nil, err
+    }
+    return response.Body, nil
+}
+
 // Returns the posture score of the endpoint assets that match the query from the token-linked EDR source.
 func (c *Client) QueryPostureScore(
     ctx context.Context,

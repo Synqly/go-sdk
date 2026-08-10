@@ -43,8 +43,10 @@ const (
 	OperationIdCustomPost                                       OperationId = "custom_post"
 	OperationIdCustomPostBatch                                  OperationId = "custom_post_batch"
 	OperationIdCustomQuery                                      OperationId = "custom_query"
+	OperationIdEdrCreateIoa                                     OperationId = "edr_create_ioa"
 	OperationIdEdrCreateIocs                                    OperationId = "edr_create_iocs"
 	OperationIdEdrCreateThreatNote                              OperationId = "edr_create_threat_note"
+	OperationIdEdrDeleteIoa                                     OperationId = "edr_delete_ioa"
 	OperationIdEdrDeleteIocs                                    OperationId = "edr_delete_iocs"
 	OperationIdEdrExecuteCommand                                OperationId = "edr_execute_command"
 	OperationIdEdrExecuteRemoteScript                           OperationId = "edr_execute_remote_script"
@@ -55,6 +57,7 @@ const (
 	OperationIdEdrQueryApplications                             OperationId = "edr_query_applications"
 	OperationIdEdrQueryEdrEvents                                OperationId = "edr_query_edr_events"
 	OperationIdEdrQueryEndpoints                                OperationId = "edr_query_endpoints"
+	OperationIdEdrQueryIoa                                      OperationId = "edr_query_ioa"
 	OperationIdEdrQueryIocs                                     OperationId = "edr_query_iocs"
 	OperationIdEdrQueryPostureScore                             OperationId = "edr_query_posture_score"
 	OperationIdEdrQueryThreatevents                             OperationId = "edr_query_threatevents"
@@ -207,10 +210,14 @@ func NewOperationIdFromString(s string) (OperationId, error) {
 		return OperationIdCustomPostBatch, nil
 	case "custom_query":
 		return OperationIdCustomQuery, nil
+	case "edr_create_ioa":
+		return OperationIdEdrCreateIoa, nil
 	case "edr_create_iocs":
 		return OperationIdEdrCreateIocs, nil
 	case "edr_create_threat_note":
 		return OperationIdEdrCreateThreatNote, nil
+	case "edr_delete_ioa":
+		return OperationIdEdrDeleteIoa, nil
 	case "edr_delete_iocs":
 		return OperationIdEdrDeleteIocs, nil
 	case "edr_execute_command":
@@ -231,6 +238,8 @@ func NewOperationIdFromString(s string) (OperationId, error) {
 		return OperationIdEdrQueryEdrEvents, nil
 	case "edr_query_endpoints":
 		return OperationIdEdrQueryEndpoints, nil
+	case "edr_query_ioa":
+		return OperationIdEdrQueryIoa, nil
 	case "edr_query_iocs":
 		return OperationIdEdrQueryIocs, nil
 	case "edr_query_posture_score":

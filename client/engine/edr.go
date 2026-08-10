@@ -12,6 +12,7 @@ import (
 	noteactivity "github.com/synqly/go-sdk/client/engine/ocsf/v180/noteactivity"
 	stix "github.com/synqly/go-sdk/client/engine/stix"
 	big "math/big"
+	time "time"
 )
 
 var (
@@ -92,6 +93,52 @@ func (c *CreateThreatNoteRequestInput) UnmarshalJSON(data []byte) error {
 
 func (c *CreateThreatNoteRequestInput) MarshalJSON() ([]byte, error) {
 	return json.Marshal(c.Body)
+}
+
+var (
+	deleteIoaRequestFieldMeta    = big.NewInt(1 << 0)
+	deleteIoaRequestFieldIds     = big.NewInt(1 << 1)
+	deleteIoaRequestFieldGroupId = big.NewInt(1 << 2)
+)
+
+type DeleteIoaRequest struct {
+	// Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
+	Meta []*string `json:"-" url:"meta,omitempty"`
+	// Comma-separated list of IOA rule ids to delete.
+	Ids *string `json:"-" url:"ids,omitempty"`
+	// The id of the provider rule group containing the rules. Required by providers that scope rule ids to a rule group (for example CrowdStrike).
+	GroupId *string `json:"-" url:"group_id,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+}
+
+func (d *DeleteIoaRequest) require(field *big.Int) {
+	if d.explicitFields == nil {
+		d.explicitFields = big.NewInt(0)
+	}
+	d.explicitFields.Or(d.explicitFields, field)
+}
+
+// SetMeta sets the Meta field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (d *DeleteIoaRequest) SetMeta(meta []*string) {
+	d.Meta = meta
+	d.require(deleteIoaRequestFieldMeta)
+}
+
+// SetIds sets the Ids field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (d *DeleteIoaRequest) SetIds(ids *string) {
+	d.Ids = ids
+	d.require(deleteIoaRequestFieldIds)
+}
+
+// SetGroupId sets the GroupId field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (d *DeleteIoaRequest) SetGroupId(groupId *string) {
+	d.GroupId = groupId
+	d.require(deleteIoaRequestFieldGroupId)
 }
 
 var (
@@ -639,6 +686,82 @@ func (q *QueryEndpointsRequest) SetIncludeRawData(includeRawData *bool) {
 }
 
 var (
+	queryIoaRequestFieldMeta           = big.NewInt(1 << 0)
+	queryIoaRequestFieldLimit          = big.NewInt(1 << 1)
+	queryIoaRequestFieldCursor         = big.NewInt(1 << 2)
+	queryIoaRequestFieldOrder          = big.NewInt(1 << 3)
+	queryIoaRequestFieldFilter         = big.NewInt(1 << 4)
+	queryIoaRequestFieldIncludeRawData = big.NewInt(1 << 5)
+)
+
+type QueryIoaRequest struct {
+	// Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
+	Meta []*string `json:"-" url:"meta,omitempty"`
+	// Number of IOA rules to return. Defaults to 50.
+	Limit *int `json:"-" url:"limit,omitempty"`
+	// Start search from cursor position.
+	Cursor *string `json:"-" url:"cursor,omitempty"`
+	// Select a field to order the results by. Defaults to `name`. To control the direction of the sorting, append `[asc]` or `[desc]` to the field name. For example, `name[asc]` will sort the results by `name` in ascending order. The ordering defaults to `asc` if not specified.
+	Order []*string `json:"-" url:"order,omitempty"`
+	// Filter results by this query. For more information on filtering, refer to our [Filtering Guide](https://docs.synqly.com/guides/connectors/edr/query-filters). Defaults to no filter. If used more than once, the queries are ANDed together.
+	Filter []*string `json:"-" url:"filter,omitempty"`
+	// Include the raw data from the EDR in the response. Defaults to `false`.
+	IncludeRawData *bool `json:"-" url:"include_raw_data,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+}
+
+func (q *QueryIoaRequest) require(field *big.Int) {
+	if q.explicitFields == nil {
+		q.explicitFields = big.NewInt(0)
+	}
+	q.explicitFields.Or(q.explicitFields, field)
+}
+
+// SetMeta sets the Meta field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryIoaRequest) SetMeta(meta []*string) {
+	q.Meta = meta
+	q.require(queryIoaRequestFieldMeta)
+}
+
+// SetLimit sets the Limit field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryIoaRequest) SetLimit(limit *int) {
+	q.Limit = limit
+	q.require(queryIoaRequestFieldLimit)
+}
+
+// SetCursor sets the Cursor field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryIoaRequest) SetCursor(cursor *string) {
+	q.Cursor = cursor
+	q.require(queryIoaRequestFieldCursor)
+}
+
+// SetOrder sets the Order field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryIoaRequest) SetOrder(order []*string) {
+	q.Order = order
+	q.require(queryIoaRequestFieldOrder)
+}
+
+// SetFilter sets the Filter field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryIoaRequest) SetFilter(filter []*string) {
+	q.Filter = filter
+	q.require(queryIoaRequestFieldFilter)
+}
+
+// SetIncludeRawData sets the IncludeRawData field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryIoaRequest) SetIncludeRawData(includeRawData *bool) {
+	q.IncludeRawData = includeRawData
+	q.require(queryIoaRequestFieldIncludeRawData)
+}
+
+var (
 	queryIocsRequestFieldMeta           = big.NewInt(1 << 0)
 	queryIocsRequestFieldLimit          = big.NewInt(1 << 1)
 	queryIocsRequestFieldCursor         = big.NewInt(1 << 2)
@@ -889,6 +1012,210 @@ func NewConnectionStateFromString(s string) (ConnectionState, error) {
 
 func (c ConnectionState) Ptr() *ConnectionState {
 	return &c
+}
+
+var (
+	createIoaRequestFieldIoa = big.NewInt(1 << 0)
+)
+
+type CreateIoaRequest struct {
+	// The IOA rule to create.
+	Ioa *Ioa `json:"ioa" url:"ioa"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (c *CreateIoaRequest) GetIoa() *Ioa {
+	if c == nil {
+		return nil
+	}
+	return c.Ioa
+}
+
+func (c *CreateIoaRequest) GetExtraProperties() map[string]interface{} {
+	if c == nil {
+		return nil
+	}
+	return c.extraProperties
+}
+
+func (c *CreateIoaRequest) require(field *big.Int) {
+	if c.explicitFields == nil {
+		c.explicitFields = big.NewInt(0)
+	}
+	c.explicitFields.Or(c.explicitFields, field)
+}
+
+// SetIoa sets the Ioa field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CreateIoaRequest) SetIoa(ioa *Ioa) {
+	c.Ioa = ioa
+	c.require(createIoaRequestFieldIoa)
+}
+
+func (c *CreateIoaRequest) UnmarshalJSON(data []byte) error {
+	type unmarshaler CreateIoaRequest
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = CreateIoaRequest(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+	c.rawJSON = nil
+	return nil
+}
+
+func (c *CreateIoaRequest) MarshalJSON() ([]byte, error) {
+	type embed CreateIoaRequest
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*c),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, c.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (c *CreateIoaRequest) String() string {
+	if c == nil {
+		return "<nil>"
+	}
+	if len(c.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(c.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
+var (
+	createIoaResponseFieldMessages = big.NewInt(1 << 0)
+	createIoaResponseFieldMeta     = big.NewInt(1 << 1)
+	createIoaResponseFieldResult   = big.NewInt(1 << 2)
+)
+
+type CreateIoaResponse struct {
+	// Additional messages from the service response that may be helpful to the client.
+	Messages *MessagesResponse `json:"messages,omitempty" url:"messages,omitempty"`
+	// Various metadata about the results organized by group, then type, then field.
+	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
+	// The IOA rule that was created.
+	Result *Ioa `json:"result" url:"result"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (c *CreateIoaResponse) GetMessages() *MessagesResponse {
+	if c == nil {
+		return nil
+	}
+	return c.Messages
+}
+
+func (c *CreateIoaResponse) GetMeta() *MetaResponse {
+	if c == nil {
+		return nil
+	}
+	return c.Meta
+}
+
+func (c *CreateIoaResponse) GetResult() *Ioa {
+	if c == nil {
+		return nil
+	}
+	return c.Result
+}
+
+func (c *CreateIoaResponse) GetExtraProperties() map[string]interface{} {
+	if c == nil {
+		return nil
+	}
+	return c.extraProperties
+}
+
+func (c *CreateIoaResponse) require(field *big.Int) {
+	if c.explicitFields == nil {
+		c.explicitFields = big.NewInt(0)
+	}
+	c.explicitFields.Or(c.explicitFields, field)
+}
+
+// SetMessages sets the Messages field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CreateIoaResponse) SetMessages(messages *MessagesResponse) {
+	c.Messages = messages
+	c.require(createIoaResponseFieldMessages)
+}
+
+// SetMeta sets the Meta field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CreateIoaResponse) SetMeta(meta *MetaResponse) {
+	c.Meta = meta
+	c.require(createIoaResponseFieldMeta)
+}
+
+// SetResult sets the Result field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CreateIoaResponse) SetResult(result *Ioa) {
+	c.Result = result
+	c.require(createIoaResponseFieldResult)
+}
+
+func (c *CreateIoaResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler CreateIoaResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = CreateIoaResponse(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+	c.rawJSON = nil
+	return nil
+}
+
+func (c *CreateIoaResponse) MarshalJSON() ([]byte, error) {
+	type embed CreateIoaResponse
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*c),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, c.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (c *CreateIoaResponse) String() string {
+	if c == nil {
+		return "<nil>"
+	}
+	if len(c.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(c.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
 }
 
 var (
@@ -1296,6 +1623,125 @@ func (c *CreateThreatNoteResponse) String() string {
 		return value
 	}
 	return fmt.Sprintf("%#v", c)
+}
+
+var (
+	deleteIoaResponseFieldMessages = big.NewInt(1 << 0)
+	deleteIoaResponseFieldMeta     = big.NewInt(1 << 1)
+	deleteIoaResponseFieldResult   = big.NewInt(1 << 2)
+)
+
+type DeleteIoaResponse struct {
+	// Additional messages from the service response that may be helpful to the client.
+	Messages *MessagesResponse `json:"messages,omitempty" url:"messages,omitempty"`
+	// Various metadata about the results organized by group, then type, then field.
+	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
+	// A list of ids of the IOA rules that were deleted.
+	Result []string `json:"result" url:"result"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (d *DeleteIoaResponse) GetMessages() *MessagesResponse {
+	if d == nil {
+		return nil
+	}
+	return d.Messages
+}
+
+func (d *DeleteIoaResponse) GetMeta() *MetaResponse {
+	if d == nil {
+		return nil
+	}
+	return d.Meta
+}
+
+func (d *DeleteIoaResponse) GetResult() []string {
+	if d == nil {
+		return nil
+	}
+	return d.Result
+}
+
+func (d *DeleteIoaResponse) GetExtraProperties() map[string]interface{} {
+	if d == nil {
+		return nil
+	}
+	return d.extraProperties
+}
+
+func (d *DeleteIoaResponse) require(field *big.Int) {
+	if d.explicitFields == nil {
+		d.explicitFields = big.NewInt(0)
+	}
+	d.explicitFields.Or(d.explicitFields, field)
+}
+
+// SetMessages sets the Messages field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (d *DeleteIoaResponse) SetMessages(messages *MessagesResponse) {
+	d.Messages = messages
+	d.require(deleteIoaResponseFieldMessages)
+}
+
+// SetMeta sets the Meta field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (d *DeleteIoaResponse) SetMeta(meta *MetaResponse) {
+	d.Meta = meta
+	d.require(deleteIoaResponseFieldMeta)
+}
+
+// SetResult sets the Result field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (d *DeleteIoaResponse) SetResult(result []string) {
+	d.Result = result
+	d.require(deleteIoaResponseFieldResult)
+}
+
+func (d *DeleteIoaResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler DeleteIoaResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*d = DeleteIoaResponse(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *d)
+	if err != nil {
+		return err
+	}
+	d.extraProperties = extraProperties
+	d.rawJSON = nil
+	return nil
+}
+
+func (d *DeleteIoaResponse) MarshalJSON() ([]byte, error) {
+	type embed DeleteIoaResponse
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*d),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, d.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (d *DeleteIoaResponse) String() string {
+	if d == nil {
+		return "<nil>"
+	}
+	if len(d.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(d.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(d); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", d)
 }
 
 var (
@@ -2453,6 +2899,1211 @@ func (g *GetThreatNotesResponse) String() string {
 	return fmt.Sprintf("%#v", g)
 }
 
+// An Indicator of Attack rule. IOA rules describe suspicious endpoint behavior (for example a process execution or network connection matching a pattern) and generate threat events when endpoint activity matches them.
+var (
+	ioaFieldId                = big.NewInt(1 << 0)
+	ioaFieldGroupId           = big.NewInt(1 << 1)
+	ioaFieldGroupName         = big.NewInt(1 << 2)
+	ioaFieldName              = big.NewInt(1 << 3)
+	ioaFieldDescription       = big.NewInt(1 << 4)
+	ioaFieldPlatform          = big.NewInt(1 << 5)
+	ioaFieldRuleType          = big.NewInt(1 << 6)
+	ioaFieldSeverityId        = big.NewInt(1 << 7)
+	ioaFieldAction            = big.NewInt(1 << 8)
+	ioaFieldEnabled           = big.NewInt(1 << 9)
+	ioaFieldDeleted           = big.NewInt(1 << 10)
+	ioaFieldComment           = big.NewInt(1 << 11)
+	ioaFieldConditions        = big.NewInt(1 << 12)
+	ioaFieldFieldValues       = big.NewInt(1 << 13)
+	ioaFieldQuery             = big.NewInt(1 << 14)
+	ioaFieldQueryLanguage     = big.NewInt(1 << 15)
+	ioaFieldQueryType         = big.NewInt(1 << 16)
+	ioaFieldScope             = big.NewInt(1 << 17)
+	ioaFieldExpirationMode    = big.NewInt(1 << 18)
+	ioaFieldExpiresTime       = big.NewInt(1 << 19)
+	ioaFieldNetworkQuarantine = big.NewInt(1 << 20)
+	ioaFieldProviderOptions   = big.NewInt(1 << 21)
+	ioaFieldCreatedTime       = big.NewInt(1 << 22)
+	ioaFieldCreatedBy         = big.NewInt(1 << 23)
+	ioaFieldModifiedTime      = big.NewInt(1 << 24)
+	ioaFieldModifiedBy        = big.NewInt(1 << 25)
+	ioaFieldRawData           = big.NewInt(1 << 26)
+)
+
+type Ioa struct {
+	// The provider-assigned id of the rule. Set by the provider on responses; ignored on create.
+	Id *string `json:"id,omitempty" url:"id,omitempty"`
+	// The id of the provider rule group the rule belongs to. Optional on create; when omitted, the rule is added to a Synqly-managed group for the rule's platform, creating the group if necessary.
+	GroupId *string `json:"group_id,omitempty" url:"group_id,omitempty"`
+	// The name of the provider rule group the rule belongs to.
+	GroupName *string `json:"group_name,omitempty" url:"group_name,omitempty"`
+	// The name of the rule.
+	Name string `json:"name" url:"name"`
+	// A description of the behavior the rule detects.
+	Description *string `json:"description,omitempty" url:"description,omitempty"`
+	// Required on create. May be absent on query responses when the provider rule uses a rule type Synqly does not model.
+	Platform *IoaPlatform `json:"platform,omitempty" url:"platform,omitempty"`
+	// Required on create. May be absent on query responses when the provider rule uses a rule type Synqly does not model.
+	RuleType *IoaRuleType `json:"rule_type,omitempty" url:"rule_type,omitempty"`
+	// OCSF severity id assigned to threat events generated by this rule. Supported values are 1 (Informational) through 5 (Critical); defaults to 3 (Medium). The OCSF ids 0 (Unknown), 6 (Fatal), and 99 (Other) are rejected because no supported EDR provider can represent them.
+	SeverityId *detectionfinding.SeverityId `json:"severity_id,omitempty" url:"severity_id,omitempty"`
+	// Action taken when the rule matches. Defaults to `detect`.
+	Action *IoaAction `json:"action,omitempty" url:"action,omitempty"`
+	// Whether the rule is enabled. On create this defaults to `true` and the provider enables the rule (and its rule group, where applicable) on your behalf; set `false` to create the rule disabled. Note that a rule may still require additional provider-side configuration (e.g. assigning its rule group to a prevention policy) before it takes effect.
+	Enabled *bool `json:"enabled,omitempty" url:"enabled,omitempty"`
+	// Whether the rule has been deleted. Set by the provider on responses.
+	Deleted *bool `json:"deleted,omitempty" url:"deleted,omitempty"`
+	// Audit log comment to associate with the rule.
+	Comment *string `json:"comment,omitempty" url:"comment,omitempty"`
+	// Provider-neutral match expressions (recommended on create). The engine compiles these into the provider-native rule: CrowdStrike field_values plus a derived rule_type, or a SentinelOne S1QL query. Mutually exclusive with `field_values` and `query`. `platform` is still required by providers that scope rules to a platform (for example CrowdStrike). Not populated on query responses.
+	Conditions []*IoaCondition `json:"conditions,omitempty" url:"conditions,omitempty"`
+	// The field match expressions that define the rule pattern (field_pattern paradigm, used by CrowdStrike). Required on create for those providers (a rule must declare at least one match expression) unless `conditions` is provided. Mutually exclusive with `conditions` and `query`; query-paradigm providers (for example SentinelOne) omit this.
+	FieldValues []*IoaFieldValue `json:"field_values,omitempty" url:"field_values,omitempty"`
+	// The rule query text (query paradigm, used by SentinelOne STAR and Microsoft Defender). Required on create for those providers unless `conditions` is provided. Mutually exclusive with `conditions` and `field_values`.
+	Query *string `json:"query,omitempty" url:"query,omitempty"`
+	// The query language/version, for example `2.0` for a SentinelOne STAR S1QL query.
+	QueryLanguage *string `json:"query_language,omitempty" url:"query_language,omitempty"`
+	// The kind of query the rule evaluates. Defaults to `event`.
+	QueryType *IoaQueryType `json:"query_type,omitempty" url:"query_type,omitempty"`
+	// The provider scope the rule applies to. Required on create by providers that scope rules to accounts/sites/groups (for example SentinelOne). When omitted, the provider adapter resolves a default scope from the credential where possible.
+	Scope *IoaScope `json:"scope,omitempty" url:"scope,omitempty"`
+	// Whether the rule is permanent or temporary. Defaults to `permanent`.
+	ExpirationMode *IoaExpirationMode `json:"expiration_mode,omitempty" url:"expiration_mode,omitempty"`
+	// When a temporary rule expires. Set by the provider on responses; required on create only when `expiration_mode` is `temporary`.
+	ExpiresTime *time.Time `json:"expires_time,omitempty" url:"expires_time,omitempty"`
+	// When true, the rule triggers an automated network isolation response on match, where the provider supports it. Defaults to `false`.
+	NetworkQuarantine *bool `json:"network_quarantine,omitempty" url:"network_quarantine,omitempty"`
+	// Provider-specific rule options that have no common representation (for example SentinelOne correlation parameters, or Defender response action detail). Passed through on create and populated from the provider on responses.
+	ProviderOptions map[string]any `json:"provider_options,omitempty" url:"provider_options,omitempty"`
+	// Time the rule was created. Set by the provider on responses.
+	CreatedTime *time.Time `json:"created_time,omitempty" url:"created_time,omitempty"`
+	// User that created the rule. Set by the provider on responses.
+	CreatedBy *string `json:"created_by,omitempty" url:"created_by,omitempty"`
+	// Time the rule was last modified. Set by the provider on responses.
+	ModifiedTime *time.Time `json:"modified_time,omitempty" url:"modified_time,omitempty"`
+	// User that last modified the rule. Set by the provider on responses.
+	ModifiedBy *string `json:"modified_by,omitempty" url:"modified_by,omitempty"`
+	// The rule data as received from the provider.
+	RawData *string `json:"raw_data,omitempty" url:"raw_data,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (i *Ioa) GetId() *string {
+	if i == nil {
+		return nil
+	}
+	return i.Id
+}
+
+func (i *Ioa) GetGroupId() *string {
+	if i == nil {
+		return nil
+	}
+	return i.GroupId
+}
+
+func (i *Ioa) GetGroupName() *string {
+	if i == nil {
+		return nil
+	}
+	return i.GroupName
+}
+
+func (i *Ioa) GetName() string {
+	if i == nil {
+		return ""
+	}
+	return i.Name
+}
+
+func (i *Ioa) GetDescription() *string {
+	if i == nil {
+		return nil
+	}
+	return i.Description
+}
+
+func (i *Ioa) GetPlatform() *IoaPlatform {
+	if i == nil {
+		return nil
+	}
+	return i.Platform
+}
+
+func (i *Ioa) GetRuleType() *IoaRuleType {
+	if i == nil {
+		return nil
+	}
+	return i.RuleType
+}
+
+func (i *Ioa) GetSeverityId() *detectionfinding.SeverityId {
+	if i == nil {
+		return nil
+	}
+	return i.SeverityId
+}
+
+func (i *Ioa) GetAction() *IoaAction {
+	if i == nil {
+		return nil
+	}
+	return i.Action
+}
+
+func (i *Ioa) GetEnabled() *bool {
+	if i == nil {
+		return nil
+	}
+	return i.Enabled
+}
+
+func (i *Ioa) GetDeleted() *bool {
+	if i == nil {
+		return nil
+	}
+	return i.Deleted
+}
+
+func (i *Ioa) GetComment() *string {
+	if i == nil {
+		return nil
+	}
+	return i.Comment
+}
+
+func (i *Ioa) GetConditions() []*IoaCondition {
+	if i == nil {
+		return nil
+	}
+	return i.Conditions
+}
+
+func (i *Ioa) GetFieldValues() []*IoaFieldValue {
+	if i == nil {
+		return nil
+	}
+	return i.FieldValues
+}
+
+func (i *Ioa) GetQuery() *string {
+	if i == nil {
+		return nil
+	}
+	return i.Query
+}
+
+func (i *Ioa) GetQueryLanguage() *string {
+	if i == nil {
+		return nil
+	}
+	return i.QueryLanguage
+}
+
+func (i *Ioa) GetQueryType() *IoaQueryType {
+	if i == nil {
+		return nil
+	}
+	return i.QueryType
+}
+
+func (i *Ioa) GetScope() *IoaScope {
+	if i == nil {
+		return nil
+	}
+	return i.Scope
+}
+
+func (i *Ioa) GetExpirationMode() *IoaExpirationMode {
+	if i == nil {
+		return nil
+	}
+	return i.ExpirationMode
+}
+
+func (i *Ioa) GetExpiresTime() *time.Time {
+	if i == nil {
+		return nil
+	}
+	return i.ExpiresTime
+}
+
+func (i *Ioa) GetNetworkQuarantine() *bool {
+	if i == nil {
+		return nil
+	}
+	return i.NetworkQuarantine
+}
+
+func (i *Ioa) GetProviderOptions() map[string]any {
+	if i == nil {
+		return nil
+	}
+	return i.ProviderOptions
+}
+
+func (i *Ioa) GetCreatedTime() *time.Time {
+	if i == nil {
+		return nil
+	}
+	return i.CreatedTime
+}
+
+func (i *Ioa) GetCreatedBy() *string {
+	if i == nil {
+		return nil
+	}
+	return i.CreatedBy
+}
+
+func (i *Ioa) GetModifiedTime() *time.Time {
+	if i == nil {
+		return nil
+	}
+	return i.ModifiedTime
+}
+
+func (i *Ioa) GetModifiedBy() *string {
+	if i == nil {
+		return nil
+	}
+	return i.ModifiedBy
+}
+
+func (i *Ioa) GetRawData() *string {
+	if i == nil {
+		return nil
+	}
+	return i.RawData
+}
+
+func (i *Ioa) GetExtraProperties() map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	return i.extraProperties
+}
+
+func (i *Ioa) require(field *big.Int) {
+	if i.explicitFields == nil {
+		i.explicitFields = big.NewInt(0)
+	}
+	i.explicitFields.Or(i.explicitFields, field)
+}
+
+// SetId sets the Id field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (i *Ioa) SetId(id *string) {
+	i.Id = id
+	i.require(ioaFieldId)
+}
+
+// SetGroupId sets the GroupId field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (i *Ioa) SetGroupId(groupId *string) {
+	i.GroupId = groupId
+	i.require(ioaFieldGroupId)
+}
+
+// SetGroupName sets the GroupName field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (i *Ioa) SetGroupName(groupName *string) {
+	i.GroupName = groupName
+	i.require(ioaFieldGroupName)
+}
+
+// SetName sets the Name field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (i *Ioa) SetName(name string) {
+	i.Name = name
+	i.require(ioaFieldName)
+}
+
+// SetDescription sets the Description field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (i *Ioa) SetDescription(description *string) {
+	i.Description = description
+	i.require(ioaFieldDescription)
+}
+
+// SetPlatform sets the Platform field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (i *Ioa) SetPlatform(platform *IoaPlatform) {
+	i.Platform = platform
+	i.require(ioaFieldPlatform)
+}
+
+// SetRuleType sets the RuleType field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (i *Ioa) SetRuleType(ruleType *IoaRuleType) {
+	i.RuleType = ruleType
+	i.require(ioaFieldRuleType)
+}
+
+// SetSeverityId sets the SeverityId field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (i *Ioa) SetSeverityId(severityId *detectionfinding.SeverityId) {
+	i.SeverityId = severityId
+	i.require(ioaFieldSeverityId)
+}
+
+// SetAction sets the Action field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (i *Ioa) SetAction(action *IoaAction) {
+	i.Action = action
+	i.require(ioaFieldAction)
+}
+
+// SetEnabled sets the Enabled field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (i *Ioa) SetEnabled(enabled *bool) {
+	i.Enabled = enabled
+	i.require(ioaFieldEnabled)
+}
+
+// SetDeleted sets the Deleted field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (i *Ioa) SetDeleted(deleted *bool) {
+	i.Deleted = deleted
+	i.require(ioaFieldDeleted)
+}
+
+// SetComment sets the Comment field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (i *Ioa) SetComment(comment *string) {
+	i.Comment = comment
+	i.require(ioaFieldComment)
+}
+
+// SetConditions sets the Conditions field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (i *Ioa) SetConditions(conditions []*IoaCondition) {
+	i.Conditions = conditions
+	i.require(ioaFieldConditions)
+}
+
+// SetFieldValues sets the FieldValues field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (i *Ioa) SetFieldValues(fieldValues []*IoaFieldValue) {
+	i.FieldValues = fieldValues
+	i.require(ioaFieldFieldValues)
+}
+
+// SetQuery sets the Query field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (i *Ioa) SetQuery(query *string) {
+	i.Query = query
+	i.require(ioaFieldQuery)
+}
+
+// SetQueryLanguage sets the QueryLanguage field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (i *Ioa) SetQueryLanguage(queryLanguage *string) {
+	i.QueryLanguage = queryLanguage
+	i.require(ioaFieldQueryLanguage)
+}
+
+// SetQueryType sets the QueryType field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (i *Ioa) SetQueryType(queryType *IoaQueryType) {
+	i.QueryType = queryType
+	i.require(ioaFieldQueryType)
+}
+
+// SetScope sets the Scope field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (i *Ioa) SetScope(scope *IoaScope) {
+	i.Scope = scope
+	i.require(ioaFieldScope)
+}
+
+// SetExpirationMode sets the ExpirationMode field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (i *Ioa) SetExpirationMode(expirationMode *IoaExpirationMode) {
+	i.ExpirationMode = expirationMode
+	i.require(ioaFieldExpirationMode)
+}
+
+// SetExpiresTime sets the ExpiresTime field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (i *Ioa) SetExpiresTime(expiresTime *time.Time) {
+	i.ExpiresTime = expiresTime
+	i.require(ioaFieldExpiresTime)
+}
+
+// SetNetworkQuarantine sets the NetworkQuarantine field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (i *Ioa) SetNetworkQuarantine(networkQuarantine *bool) {
+	i.NetworkQuarantine = networkQuarantine
+	i.require(ioaFieldNetworkQuarantine)
+}
+
+// SetProviderOptions sets the ProviderOptions field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (i *Ioa) SetProviderOptions(providerOptions map[string]any) {
+	i.ProviderOptions = providerOptions
+	i.require(ioaFieldProviderOptions)
+}
+
+// SetCreatedTime sets the CreatedTime field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (i *Ioa) SetCreatedTime(createdTime *time.Time) {
+	i.CreatedTime = createdTime
+	i.require(ioaFieldCreatedTime)
+}
+
+// SetCreatedBy sets the CreatedBy field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (i *Ioa) SetCreatedBy(createdBy *string) {
+	i.CreatedBy = createdBy
+	i.require(ioaFieldCreatedBy)
+}
+
+// SetModifiedTime sets the ModifiedTime field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (i *Ioa) SetModifiedTime(modifiedTime *time.Time) {
+	i.ModifiedTime = modifiedTime
+	i.require(ioaFieldModifiedTime)
+}
+
+// SetModifiedBy sets the ModifiedBy field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (i *Ioa) SetModifiedBy(modifiedBy *string) {
+	i.ModifiedBy = modifiedBy
+	i.require(ioaFieldModifiedBy)
+}
+
+// SetRawData sets the RawData field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (i *Ioa) SetRawData(rawData *string) {
+	i.RawData = rawData
+	i.require(ioaFieldRawData)
+}
+
+func (i *Ioa) UnmarshalJSON(data []byte) error {
+	type embed Ioa
+	var unmarshaler = struct {
+		embed
+		ExpiresTime  *internal.DateTime `json:"expires_time,omitempty"`
+		CreatedTime  *internal.DateTime `json:"created_time,omitempty"`
+		ModifiedTime *internal.DateTime `json:"modified_time,omitempty"`
+	}{
+		embed: embed(*i),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*i = Ioa(unmarshaler.embed)
+	i.ExpiresTime = unmarshaler.ExpiresTime.TimePtr()
+	i.CreatedTime = unmarshaler.CreatedTime.TimePtr()
+	i.ModifiedTime = unmarshaler.ModifiedTime.TimePtr()
+	extraProperties, err := internal.ExtractExtraProperties(data, *i)
+	if err != nil {
+		return err
+	}
+	i.extraProperties = extraProperties
+	i.rawJSON = nil
+	return nil
+}
+
+func (i *Ioa) MarshalJSON() ([]byte, error) {
+	type embed Ioa
+	var marshaler = struct {
+		embed
+		ExpiresTime  *internal.DateTime `json:"expires_time,omitempty"`
+		CreatedTime  *internal.DateTime `json:"created_time,omitempty"`
+		ModifiedTime *internal.DateTime `json:"modified_time,omitempty"`
+	}{
+		embed:        embed(*i),
+		ExpiresTime:  internal.NewOptionalDateTime(i.ExpiresTime),
+		CreatedTime:  internal.NewOptionalDateTime(i.CreatedTime),
+		ModifiedTime: internal.NewOptionalDateTime(i.ModifiedTime),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, i.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (i *Ioa) String() string {
+	if i == nil {
+		return "<nil>"
+	}
+	if len(i.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(i.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(i); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", i)
+}
+
+// The action the EDR takes when the IOA rule matches. `block` maps to the strongest enforcement the provider supports for the rule type (for example Block Execution or Kill Process).
+type IoaAction string
+
+const (
+	IoaActionMonitor IoaAction = "monitor"
+	IoaActionDetect  IoaAction = "detect"
+	IoaActionBlock   IoaAction = "block"
+)
+
+func NewIoaActionFromString(s string) (IoaAction, error) {
+	switch s {
+	case "monitor":
+		return IoaActionMonitor, nil
+	case "detect":
+		return IoaActionDetect, nil
+	case "block":
+		return IoaActionBlock, nil
+	}
+	var t IoaAction
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (i IoaAction) Ptr() *IoaAction {
+	return &i
+}
+
+// A provider-neutral match expression for an IOA rule. The engine compiles the conditions list into the provider-native rule body (for example CrowdStrike field_values and rule_type, or a SentinelOne S1QL event query). Conditions are ANDed together, and all conditions in a rule must target a single activity category (process, file, or domain).
+var (
+	ioaConditionFieldField    = big.NewInt(1 << 0)
+	ioaConditionFieldOperator = big.NewInt(1 << 1)
+	ioaConditionFieldValues   = big.NewInt(1 << 2)
+)
+
+type IoaCondition struct {
+	// Neutral field selector. Supported values: `process.image.name`, `process.command_line`, `parent_process.image.name`, `parent_process.command_line`, `file.path`, `network.domain`. Validated by the engine; kept as a string so new fields do not require an SDK regeneration.
+	Field string `json:"field" url:"field"`
+	// How the field is compared to the values.
+	Operator IoaConditionOperator `json:"operator" url:"operator"`
+	// Values to compare. Exactly one value unless the operator is `in`, which accepts one or more. For `matches` the value is a regular expression; for all other operators it is a literal.
+	Values []string `json:"values" url:"values"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (i *IoaCondition) GetField() string {
+	if i == nil {
+		return ""
+	}
+	return i.Field
+}
+
+func (i *IoaCondition) GetOperator() IoaConditionOperator {
+	if i == nil {
+		return ""
+	}
+	return i.Operator
+}
+
+func (i *IoaCondition) GetValues() []string {
+	if i == nil {
+		return nil
+	}
+	return i.Values
+}
+
+func (i *IoaCondition) GetExtraProperties() map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	return i.extraProperties
+}
+
+func (i *IoaCondition) require(field *big.Int) {
+	if i.explicitFields == nil {
+		i.explicitFields = big.NewInt(0)
+	}
+	i.explicitFields.Or(i.explicitFields, field)
+}
+
+// SetField sets the Field field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (i *IoaCondition) SetField(field string) {
+	i.Field = field
+	i.require(ioaConditionFieldField)
+}
+
+// SetOperator sets the Operator field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (i *IoaCondition) SetOperator(operator IoaConditionOperator) {
+	i.Operator = operator
+	i.require(ioaConditionFieldOperator)
+}
+
+// SetValues sets the Values field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (i *IoaCondition) SetValues(values []string) {
+	i.Values = values
+	i.require(ioaConditionFieldValues)
+}
+
+func (i *IoaCondition) UnmarshalJSON(data []byte) error {
+	type unmarshaler IoaCondition
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*i = IoaCondition(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *i)
+	if err != nil {
+		return err
+	}
+	i.extraProperties = extraProperties
+	i.rawJSON = nil
+	return nil
+}
+
+func (i *IoaCondition) MarshalJSON() ([]byte, error) {
+	type embed IoaCondition
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*i),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, i.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (i *IoaCondition) String() string {
+	if i == nil {
+		return "<nil>"
+	}
+	if len(i.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(i.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(i); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", i)
+}
+
+// How a condition field is compared to its values.
+type IoaConditionOperator string
+
+const (
+	IoaConditionOperatorEquals     IoaConditionOperator = "equals"
+	IoaConditionOperatorNotEquals  IoaConditionOperator = "not_equals"
+	IoaConditionOperatorContains   IoaConditionOperator = "contains"
+	IoaConditionOperatorStartsWith IoaConditionOperator = "starts_with"
+	IoaConditionOperatorEndsWith   IoaConditionOperator = "ends_with"
+	IoaConditionOperatorMatches    IoaConditionOperator = "matches"
+	IoaConditionOperatorIn         IoaConditionOperator = "in"
+)
+
+func NewIoaConditionOperatorFromString(s string) (IoaConditionOperator, error) {
+	switch s {
+	case "equals":
+		return IoaConditionOperatorEquals, nil
+	case "not_equals":
+		return IoaConditionOperatorNotEquals, nil
+	case "contains":
+		return IoaConditionOperatorContains, nil
+	case "starts_with":
+		return IoaConditionOperatorStartsWith, nil
+	case "ends_with":
+		return IoaConditionOperatorEndsWith, nil
+	case "matches":
+		return IoaConditionOperatorMatches, nil
+	case "in":
+		return IoaConditionOperatorIn, nil
+	}
+	var t IoaConditionOperator
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (i IoaConditionOperator) Ptr() *IoaConditionOperator {
+	return &i
+}
+
+// Whether a query-paradigm IOA rule is permanent or expires at a set time.
+type IoaExpirationMode string
+
+const (
+	IoaExpirationModePermanent IoaExpirationMode = "permanent"
+	IoaExpirationModeTemporary IoaExpirationMode = "temporary"
+)
+
+func NewIoaExpirationModeFromString(s string) (IoaExpirationMode, error) {
+	switch s {
+	case "permanent":
+		return IoaExpirationModePermanent, nil
+	case "temporary":
+		return IoaExpirationModeTemporary, nil
+	}
+	var t IoaExpirationMode
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (i IoaExpirationMode) Ptr() *IoaExpirationMode {
+	return &i
+}
+
+// A single field match expression for an IOA rule.
+var (
+	ioaFieldValueFieldName   = big.NewInt(1 << 0)
+	ioaFieldValueFieldLabel  = big.NewInt(1 << 1)
+	ioaFieldValueFieldType   = big.NewInt(1 << 2)
+	ioaFieldValueFieldValues = big.NewInt(1 << 3)
+)
+
+type IoaFieldValue struct {
+	// The provider field name to match on, for example `ImageFilename` or `CommandLine`.
+	Name string `json:"name" url:"name"`
+	// Human readable label for the field.
+	Label *string `json:"label,omitempty" url:"label,omitempty"`
+	// The provider field type, for example `excludable` or `set`.
+	Type *string `json:"type,omitempty" url:"type,omitempty"`
+	// The match options for this field.
+	Values []*IoaFieldValueOption `json:"values" url:"values"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (i *IoaFieldValue) GetName() string {
+	if i == nil {
+		return ""
+	}
+	return i.Name
+}
+
+func (i *IoaFieldValue) GetLabel() *string {
+	if i == nil {
+		return nil
+	}
+	return i.Label
+}
+
+func (i *IoaFieldValue) GetType() *string {
+	if i == nil {
+		return nil
+	}
+	return i.Type
+}
+
+func (i *IoaFieldValue) GetValues() []*IoaFieldValueOption {
+	if i == nil {
+		return nil
+	}
+	return i.Values
+}
+
+func (i *IoaFieldValue) GetExtraProperties() map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	return i.extraProperties
+}
+
+func (i *IoaFieldValue) require(field *big.Int) {
+	if i.explicitFields == nil {
+		i.explicitFields = big.NewInt(0)
+	}
+	i.explicitFields.Or(i.explicitFields, field)
+}
+
+// SetName sets the Name field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (i *IoaFieldValue) SetName(name string) {
+	i.Name = name
+	i.require(ioaFieldValueFieldName)
+}
+
+// SetLabel sets the Label field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (i *IoaFieldValue) SetLabel(label *string) {
+	i.Label = label
+	i.require(ioaFieldValueFieldLabel)
+}
+
+// SetType sets the Type field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (i *IoaFieldValue) SetType(type_ *string) {
+	i.Type = type_
+	i.require(ioaFieldValueFieldType)
+}
+
+// SetValues sets the Values field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (i *IoaFieldValue) SetValues(values []*IoaFieldValueOption) {
+	i.Values = values
+	i.require(ioaFieldValueFieldValues)
+}
+
+func (i *IoaFieldValue) UnmarshalJSON(data []byte) error {
+	type unmarshaler IoaFieldValue
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*i = IoaFieldValue(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *i)
+	if err != nil {
+		return err
+	}
+	i.extraProperties = extraProperties
+	i.rawJSON = nil
+	return nil
+}
+
+func (i *IoaFieldValue) MarshalJSON() ([]byte, error) {
+	type embed IoaFieldValue
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*i),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, i.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (i *IoaFieldValue) String() string {
+	if i == nil {
+		return "<nil>"
+	}
+	if len(i.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(i.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(i); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", i)
+}
+
+var (
+	ioaFieldValueOptionFieldLabel = big.NewInt(1 << 0)
+	ioaFieldValueOptionFieldValue = big.NewInt(1 << 1)
+)
+
+type IoaFieldValueOption struct {
+	// Option label. For excludable fields this is `include` or `exclude`; for set fields it is the option name.
+	Label string `json:"label" url:"label"`
+	// The value to match for this option. For excludable fields this is a regular expression.
+	Value string `json:"value" url:"value"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (i *IoaFieldValueOption) GetLabel() string {
+	if i == nil {
+		return ""
+	}
+	return i.Label
+}
+
+func (i *IoaFieldValueOption) GetValue() string {
+	if i == nil {
+		return ""
+	}
+	return i.Value
+}
+
+func (i *IoaFieldValueOption) GetExtraProperties() map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	return i.extraProperties
+}
+
+func (i *IoaFieldValueOption) require(field *big.Int) {
+	if i.explicitFields == nil {
+		i.explicitFields = big.NewInt(0)
+	}
+	i.explicitFields.Or(i.explicitFields, field)
+}
+
+// SetLabel sets the Label field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (i *IoaFieldValueOption) SetLabel(label string) {
+	i.Label = label
+	i.require(ioaFieldValueOptionFieldLabel)
+}
+
+// SetValue sets the Value field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (i *IoaFieldValueOption) SetValue(value string) {
+	i.Value = value
+	i.require(ioaFieldValueOptionFieldValue)
+}
+
+func (i *IoaFieldValueOption) UnmarshalJSON(data []byte) error {
+	type unmarshaler IoaFieldValueOption
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*i = IoaFieldValueOption(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *i)
+	if err != nil {
+		return err
+	}
+	i.extraProperties = extraProperties
+	i.rawJSON = nil
+	return nil
+}
+
+func (i *IoaFieldValueOption) MarshalJSON() ([]byte, error) {
+	type embed IoaFieldValueOption
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*i),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, i.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (i *IoaFieldValueOption) String() string {
+	if i == nil {
+		return "<nil>"
+	}
+	if len(i.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(i.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(i); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", i)
+}
+
+// The operating system platform an IOA rule applies to.
+type IoaPlatform string
+
+const (
+	IoaPlatformWindows IoaPlatform = "windows"
+	IoaPlatformMac     IoaPlatform = "mac"
+	IoaPlatformLinux   IoaPlatform = "linux"
+)
+
+func NewIoaPlatformFromString(s string) (IoaPlatform, error) {
+	switch s {
+	case "windows":
+		return IoaPlatformWindows, nil
+	case "mac":
+		return IoaPlatformMac, nil
+	case "linux":
+		return IoaPlatformLinux, nil
+	}
+	var t IoaPlatform
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (i IoaPlatform) Ptr() *IoaPlatform {
+	return &i
+}
+
+// The kind of query a query-paradigm IOA rule evaluates (for example a SentinelOne STAR rule). `event` matches a single event; `correlation` matches across multiple subqueries.
+type IoaQueryType string
+
+const (
+	IoaQueryTypeEvent       IoaQueryType = "event"
+	IoaQueryTypeCorrelation IoaQueryType = "correlation"
+)
+
+func NewIoaQueryTypeFromString(s string) (IoaQueryType, error) {
+	switch s {
+	case "event":
+		return IoaQueryTypeEvent, nil
+	case "correlation":
+		return IoaQueryTypeCorrelation, nil
+	}
+	var t IoaQueryType
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (i IoaQueryType) Ptr() *IoaQueryType {
+	return &i
+}
+
+// The kind of endpoint activity an IOA rule matches on.
+type IoaRuleType string
+
+const (
+	IoaRuleTypeProcessCreation   IoaRuleType = "process_creation"
+	IoaRuleTypeFileCreation      IoaRuleType = "file_creation"
+	IoaRuleTypeNetworkConnection IoaRuleType = "network_connection"
+	IoaRuleTypeDomainName        IoaRuleType = "domain_name"
+)
+
+func NewIoaRuleTypeFromString(s string) (IoaRuleType, error) {
+	switch s {
+	case "process_creation":
+		return IoaRuleTypeProcessCreation, nil
+	case "file_creation":
+		return IoaRuleTypeFileCreation, nil
+	case "network_connection":
+		return IoaRuleTypeNetworkConnection, nil
+	case "domain_name":
+		return IoaRuleTypeDomainName, nil
+	}
+	var t IoaRuleType
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (i IoaRuleType) Ptr() *IoaRuleType {
+	return &i
+}
+
+// The provider scope an IOA rule applies to. Required on create (and delete) by providers that scope rules to accounts, sites, or groups (for example SentinelOne). Ignored by providers that scope rules another way (for example CrowdStrike, which uses a rule group). When omitted, the provider adapter resolves a default scope from the credential where possible.
+var (
+	ioaScopeFieldAccountIds = big.NewInt(1 << 0)
+	ioaScopeFieldSiteIds    = big.NewInt(1 << 1)
+	ioaScopeFieldGroupIds   = big.NewInt(1 << 2)
+	ioaScopeFieldTenant     = big.NewInt(1 << 3)
+)
+
+type IoaScope struct {
+	// Account ids the rule is scoped to.
+	AccountIds []string `json:"account_ids,omitempty" url:"account_ids,omitempty"`
+	// Site ids the rule is scoped to.
+	SiteIds []string `json:"site_ids,omitempty" url:"site_ids,omitempty"`
+	// Group ids the rule is scoped to.
+	GroupIds []string `json:"group_ids,omitempty" url:"group_ids,omitempty"`
+	// When true, the rule is scoped to the entire tenant.
+	Tenant *bool `json:"tenant,omitempty" url:"tenant,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (i *IoaScope) GetAccountIds() []string {
+	if i == nil {
+		return nil
+	}
+	return i.AccountIds
+}
+
+func (i *IoaScope) GetSiteIds() []string {
+	if i == nil {
+		return nil
+	}
+	return i.SiteIds
+}
+
+func (i *IoaScope) GetGroupIds() []string {
+	if i == nil {
+		return nil
+	}
+	return i.GroupIds
+}
+
+func (i *IoaScope) GetTenant() *bool {
+	if i == nil {
+		return nil
+	}
+	return i.Tenant
+}
+
+func (i *IoaScope) GetExtraProperties() map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	return i.extraProperties
+}
+
+func (i *IoaScope) require(field *big.Int) {
+	if i.explicitFields == nil {
+		i.explicitFields = big.NewInt(0)
+	}
+	i.explicitFields.Or(i.explicitFields, field)
+}
+
+// SetAccountIds sets the AccountIds field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (i *IoaScope) SetAccountIds(accountIds []string) {
+	i.AccountIds = accountIds
+	i.require(ioaScopeFieldAccountIds)
+}
+
+// SetSiteIds sets the SiteIds field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (i *IoaScope) SetSiteIds(siteIds []string) {
+	i.SiteIds = siteIds
+	i.require(ioaScopeFieldSiteIds)
+}
+
+// SetGroupIds sets the GroupIds field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (i *IoaScope) SetGroupIds(groupIds []string) {
+	i.GroupIds = groupIds
+	i.require(ioaScopeFieldGroupIds)
+}
+
+// SetTenant sets the Tenant field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (i *IoaScope) SetTenant(tenant *bool) {
+	i.Tenant = tenant
+	i.require(ioaScopeFieldTenant)
+}
+
+func (i *IoaScope) UnmarshalJSON(data []byte) error {
+	type unmarshaler IoaScope
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*i = IoaScope(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *i)
+	if err != nil {
+		return err
+	}
+	i.extraProperties = extraProperties
+	i.rawJSON = nil
+	return nil
+}
+
+func (i *IoaScope) MarshalJSON() ([]byte, error) {
+	type embed IoaScope
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*i),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, i.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (i *IoaScope) String() string {
+	if i == nil {
+		return "<nil>"
+	}
+	if len(i.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(i.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(i); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", i)
+}
+
 type IsolationType string
 
 const (
@@ -3263,6 +4914,142 @@ func (q *QueryEndpointsResponse) MarshalJSON() ([]byte, error) {
 }
 
 func (q *QueryEndpointsResponse) String() string {
+	if q == nil {
+		return "<nil>"
+	}
+	if len(q.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(q.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(q); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", q)
+}
+
+var (
+	queryIoaResponseFieldMessages = big.NewInt(1 << 0)
+	queryIoaResponseFieldMeta     = big.NewInt(1 << 1)
+	queryIoaResponseFieldCursor   = big.NewInt(1 << 2)
+	queryIoaResponseFieldResult   = big.NewInt(1 << 3)
+)
+
+type QueryIoaResponse struct {
+	// Additional messages from the service response that may be helpful to the client.
+	Messages *MessagesResponse `json:"messages,omitempty" url:"messages,omitempty"`
+	// Various metadata about the results organized by group, then type, then field.
+	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
+	// Cursor to use to retrieve the next page of results
+	Cursor string `json:"cursor" url:"cursor"`
+	// List of IOA rules that match the query.
+	Result []*Ioa `json:"result" url:"result"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (q *QueryIoaResponse) GetMessages() *MessagesResponse {
+	if q == nil {
+		return nil
+	}
+	return q.Messages
+}
+
+func (q *QueryIoaResponse) GetMeta() *MetaResponse {
+	if q == nil {
+		return nil
+	}
+	return q.Meta
+}
+
+func (q *QueryIoaResponse) GetCursor() string {
+	if q == nil {
+		return ""
+	}
+	return q.Cursor
+}
+
+func (q *QueryIoaResponse) GetResult() []*Ioa {
+	if q == nil {
+		return nil
+	}
+	return q.Result
+}
+
+func (q *QueryIoaResponse) GetExtraProperties() map[string]interface{} {
+	if q == nil {
+		return nil
+	}
+	return q.extraProperties
+}
+
+func (q *QueryIoaResponse) require(field *big.Int) {
+	if q.explicitFields == nil {
+		q.explicitFields = big.NewInt(0)
+	}
+	q.explicitFields.Or(q.explicitFields, field)
+}
+
+// SetMessages sets the Messages field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryIoaResponse) SetMessages(messages *MessagesResponse) {
+	q.Messages = messages
+	q.require(queryIoaResponseFieldMessages)
+}
+
+// SetMeta sets the Meta field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryIoaResponse) SetMeta(meta *MetaResponse) {
+	q.Meta = meta
+	q.require(queryIoaResponseFieldMeta)
+}
+
+// SetCursor sets the Cursor field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryIoaResponse) SetCursor(cursor string) {
+	q.Cursor = cursor
+	q.require(queryIoaResponseFieldCursor)
+}
+
+// SetResult sets the Result field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryIoaResponse) SetResult(result []*Ioa) {
+	q.Result = result
+	q.require(queryIoaResponseFieldResult)
+}
+
+func (q *QueryIoaResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler QueryIoaResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*q = QueryIoaResponse(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *q)
+	if err != nil {
+		return err
+	}
+	q.extraProperties = extraProperties
+	q.rawJSON = nil
+	return nil
+}
+
+func (q *QueryIoaResponse) MarshalJSON() ([]byte, error) {
+	type embed QueryIoaResponse
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*q),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, q.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (q *QueryIoaResponse) String() string {
 	if q == nil {
 		return "<nil>"
 	}

@@ -138,7 +138,7 @@ type OperationExecutionEvent struct {
 	Operation string `json:"operation" url:"operation"`
 	// How this execution was triggered
 	TriggerType OperationTriggerType `json:"trigger_type" url:"trigger_type"`
-	// Source of trigger - "manual" for API calls, integration-point ID for scheduled
+	// Source of trigger - "manual" for API calls, integration-point ID for linked scheduled operations, or integration ID for point-less scheduled operations
 	TriggerSource string `json:"trigger_source" url:"trigger_source"`
 	// Final status of the execution
 	Status OperationStatus `json:"status" url:"status"`
