@@ -20153,6 +20153,10 @@ type ProviderConfig struct {
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/snyk-appsec-setup)
 	AppsecSnyk *AppSecSnyk
+	// Configuration for SonarQube Server as an application security provider.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/sonarqube-appsec-setup)
+	AppsecSonarqubeServer *AppsecSonarQubeServer
 	// Configuration for Tenable Web Application Scanner as an application security provider.
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/tenable-appsec-setup)
@@ -20736,6 +20740,13 @@ func (p *ProviderConfig) GetAppsecSnyk() *AppSecSnyk {
 		return nil
 	}
 	return p.AppsecSnyk
+}
+
+func (p *ProviderConfig) GetAppsecSonarqubeServer() *AppsecSonarQubeServer {
+	if p == nil {
+		return nil
+	}
+	return p.AppsecSonarqubeServer
 }
 
 func (p *ProviderConfig) GetAppsecTenable() *AppSecTenable {
@@ -21861,6 +21872,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.AppsecSnyk = value
+	case "appsec_sonarqube_server":
+		value := new(AppsecSonarQubeServer)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.AppsecSonarqubeServer = value
 	case "appsec_tenable":
 		value := new(AppSecTenable)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -22803,6 +22820,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.AppsecSnyk != nil {
 		return internal.MarshalJSONWithExtraProperty(p.AppsecSnyk, "type", "appsec_snyk")
 	}
+	if p.AppsecSonarqubeServer != nil {
+		return internal.MarshalJSONWithExtraProperty(p.AppsecSonarqubeServer, "type", "appsec_sonarqube_server")
+	}
 	if p.AppsecTenable != nil {
 		return internal.MarshalJSONWithExtraProperty(p.AppsecTenable, "type", "appsec_tenable")
 	}
@@ -23272,6 +23292,7 @@ type ProviderConfigVisitor interface {
 	VisitAppsecOpentextCoreApplicationSecurityMock(*AppsecOpenTextCoreApplicationSecurityMock) error
 	VisitAppsecServicenow(*AppSecServiceNow) error
 	VisitAppsecSnyk(*AppSecSnyk) error
+	VisitAppsecSonarqubeServer(*AppsecSonarQubeServer) error
 	VisitAppsecTenable(*AppSecTenable) error
 	VisitAppsecVeracode(*AppSecVeracode) error
 	VisitAssetsArmisCentrix(*AssetsArmisCentrix) error
@@ -23452,6 +23473,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.AppsecSnyk != nil {
 		return visitor.VisitAppsecSnyk(p.AppsecSnyk)
+	}
+	if p.AppsecSonarqubeServer != nil {
+		return visitor.VisitAppsecSonarqubeServer(p.AppsecSonarqubeServer)
 	}
 	if p.AppsecTenable != nil {
 		return visitor.VisitAppsecTenable(p.AppsecTenable)
@@ -23940,6 +23964,9 @@ func (p *ProviderConfig) validate() error {
 	}
 	if p.AppsecSnyk != nil {
 		fields = append(fields, "appsec_snyk")
+	}
+	if p.AppsecSonarqubeServer != nil {
+		fields = append(fields, "appsec_sonarqube_server")
 	}
 	if p.AppsecTenable != nil {
 		fields = append(fields, "appsec_tenable")
@@ -24442,6 +24469,8 @@ const (
 	ProviderConfigIdAppSecServiceNow ProviderConfigId = "appsec_servicenow"
 	// Snyk
 	ProviderConfigIdAppSecSnyk ProviderConfigId = "appsec_snyk"
+	// SonarQube Server
+	ProviderConfigIdAppsecSonarQubeServer ProviderConfigId = "appsec_sonarqube_server"
 	// Tenable Web Application Scanner
 	ProviderConfigIdAppSecTenable ProviderConfigId = "appsec_tenable"
 	// Veracode
@@ -24768,6 +24797,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdAppSecServiceNow, nil
 	case "appsec_snyk":
 		return ProviderConfigIdAppSecSnyk, nil
+	case "appsec_sonarqube_server":
+		return ProviderConfigIdAppsecSonarQubeServer, nil
 	case "appsec_tenable":
 		return ProviderConfigIdAppSecTenable, nil
 	case "appsec_veracode":
@@ -31433,6 +31464,143 @@ func NewSnykRegionFromString(s string) (SnykRegion, error) {
 
 func (s SnykRegion) Ptr() *SnykRegion {
 	return &s
+}
+
+type SonarQubeCredential struct {
+	Type string
+	// Configuration when creating new Token.
+	Token *TokenCredential
+	// Reference to existing Token.
+	TokenId TokenCredentialId
+
+	rawJSON json.RawMessage
+}
+
+func (s *SonarQubeCredential) GetType() string {
+	if s == nil {
+		return ""
+	}
+	return s.Type
+}
+
+func (s *SonarQubeCredential) GetToken() *TokenCredential {
+	if s == nil {
+		return nil
+	}
+	return s.Token
+}
+
+func (s *SonarQubeCredential) GetTokenId() TokenCredentialId {
+	if s == nil {
+		return ""
+	}
+	return s.TokenId
+}
+
+func (s *SonarQubeCredential) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	s.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", s)
+	}
+	switch unmarshaler.Type {
+	case "token":
+		value := new(TokenCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		s.Token = value
+	case "token_id":
+		var valueUnmarshaler struct {
+			TokenId TokenCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		s.TokenId = valueUnmarshaler.TokenId
+	}
+	s.rawJSON = nil
+	return nil
+}
+
+func (s SonarQubeCredential) MarshalJSON() ([]byte, error) {
+	if err := s.validate(); err != nil {
+		return nil, err
+	}
+	if s.Token != nil {
+		return internal.MarshalJSONWithExtraProperty(s.Token, "type", "token")
+	}
+	if s.TokenId != "" {
+		var marshaler = struct {
+			Type    string            `json:"type"`
+			TokenId TokenCredentialId `json:"value"`
+		}{
+			Type:    "token_id",
+			TokenId: s.TokenId,
+		}
+		return json.Marshal(marshaler)
+	}
+	if len(s.rawJSON) > 0 {
+		return s.rawJSON, nil
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", s)
+}
+
+type SonarQubeCredentialVisitor interface {
+	VisitToken(*TokenCredential) error
+	VisitTokenId(TokenCredentialId) error
+}
+
+func (s *SonarQubeCredential) Accept(visitor SonarQubeCredentialVisitor) error {
+	if s.Token != nil {
+		return visitor.VisitToken(s.Token)
+	}
+	if s.TokenId != "" {
+		return visitor.VisitTokenId(s.TokenId)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", s)
+}
+
+func (s *SonarQubeCredential) validate() error {
+	if s == nil {
+		return fmt.Errorf("type %T is nil", s)
+	}
+	var fields []string
+	if s.Token != nil {
+		fields = append(fields, "token")
+	}
+	if s.TokenId != "" {
+		fields = append(fields, "token_id")
+	}
+	if len(fields) == 0 {
+		if s.Type != "" {
+			if len(s.rawJSON) > 0 {
+				return nil
+			}
+			return fmt.Errorf("type %T defines a discriminant set to %q but the field is not set", s, s.Type)
+		}
+		return fmt.Errorf("type %T is empty", s)
+	}
+	if len(fields) > 1 {
+		return fmt.Errorf("type %T defines values for %s, but only one value is allowed", s, fields)
+	}
+	if s.Type != "" {
+		field := fields[0]
+		if s.Type != field {
+			return fmt.Errorf(
+				"type %T defines a discriminant set to %q, but it does not match the %T field; either remove or update the discriminant to match",
+				s,
+				s.Type,
+				s,
+			)
+		}
+	}
+	return nil
 }
 
 type SophosCredential struct {
@@ -39867,6 +40035,111 @@ func (a *AppsecOpenTextCoreApplicationSecurityMock) MarshalJSON() ([]byte, error
 }
 
 func (a *AppsecOpenTextCoreApplicationSecurityMock) String() string {
+	if a == nil {
+		return "<nil>"
+	}
+	if len(a.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(a.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(a); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", a)
+}
+
+// Configuration for SonarQube Server as an application security provider.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/sonarqube-appsec-setup)
+var (
+	appsecSonarQubeServerFieldCredential = big.NewInt(1 << 0)
+	appsecSonarQubeServerFieldUrl        = big.NewInt(1 << 1)
+)
+
+type AppsecSonarQubeServer struct {
+	// Credentials used for accessing the SonarQube API.
+	Credential *SonarQubeCredential `json:"credential" url:"credential"`
+	// Base URL for the SonarQube Server instance.
+	Url string `json:"url" url:"url"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (a *AppsecSonarQubeServer) GetCredential() *SonarQubeCredential {
+	if a == nil {
+		return nil
+	}
+	return a.Credential
+}
+
+func (a *AppsecSonarQubeServer) GetUrl() string {
+	if a == nil {
+		return ""
+	}
+	return a.Url
+}
+
+func (a *AppsecSonarQubeServer) GetExtraProperties() map[string]interface{} {
+	if a == nil {
+		return nil
+	}
+	return a.extraProperties
+}
+
+func (a *AppsecSonarQubeServer) require(field *big.Int) {
+	if a.explicitFields == nil {
+		a.explicitFields = big.NewInt(0)
+	}
+	a.explicitFields.Or(a.explicitFields, field)
+}
+
+// SetCredential sets the Credential field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (a *AppsecSonarQubeServer) SetCredential(credential *SonarQubeCredential) {
+	a.Credential = credential
+	a.require(appsecSonarQubeServerFieldCredential)
+}
+
+// SetUrl sets the Url field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (a *AppsecSonarQubeServer) SetUrl(url string) {
+	a.Url = url
+	a.require(appsecSonarQubeServerFieldUrl)
+}
+
+func (a *AppsecSonarQubeServer) UnmarshalJSON(data []byte) error {
+	type unmarshaler AppsecSonarQubeServer
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*a = AppsecSonarQubeServer(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+	a.rawJSON = nil
+	return nil
+}
+
+func (a *AppsecSonarQubeServer) MarshalJSON() ([]byte, error) {
+	type embed AppsecSonarQubeServer
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*a),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, a.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (a *AppsecSonarQubeServer) String() string {
 	if a == nil {
 		return "<nil>"
 	}
