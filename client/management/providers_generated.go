@@ -8520,6 +8520,143 @@ func (d *DefenderCredential) validate() error {
 	return nil
 }
 
+type DefenderEasmCredential struct {
+	Type string
+	// Microsoft Entra ID service principal credentials (client ID and client secret) with Reader permissions on the EASM workspace.
+	OAuthClient *OAuthClientCredential
+	// Reference to existing Client Credentials.
+	OAuthClientId OAuthClientCredentialId
+
+	rawJSON json.RawMessage
+}
+
+func (d *DefenderEasmCredential) GetType() string {
+	if d == nil {
+		return ""
+	}
+	return d.Type
+}
+
+func (d *DefenderEasmCredential) GetOAuthClient() *OAuthClientCredential {
+	if d == nil {
+		return nil
+	}
+	return d.OAuthClient
+}
+
+func (d *DefenderEasmCredential) GetOAuthClientId() OAuthClientCredentialId {
+	if d == nil {
+		return ""
+	}
+	return d.OAuthClientId
+}
+
+func (d *DefenderEasmCredential) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	d.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", d)
+	}
+	switch unmarshaler.Type {
+	case "o_auth_client":
+		value := new(OAuthClientCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		d.OAuthClient = value
+	case "o_auth_client_id":
+		var valueUnmarshaler struct {
+			OAuthClientId OAuthClientCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		d.OAuthClientId = valueUnmarshaler.OAuthClientId
+	}
+	d.rawJSON = nil
+	return nil
+}
+
+func (d DefenderEasmCredential) MarshalJSON() ([]byte, error) {
+	if err := d.validate(); err != nil {
+		return nil, err
+	}
+	if d.OAuthClient != nil {
+		return internal.MarshalJSONWithExtraProperty(d.OAuthClient, "type", "o_auth_client")
+	}
+	if d.OAuthClientId != "" {
+		var marshaler = struct {
+			Type          string                  `json:"type"`
+			OAuthClientId OAuthClientCredentialId `json:"value"`
+		}{
+			Type:          "o_auth_client_id",
+			OAuthClientId: d.OAuthClientId,
+		}
+		return json.Marshal(marshaler)
+	}
+	if len(d.rawJSON) > 0 {
+		return d.rawJSON, nil
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", d)
+}
+
+type DefenderEasmCredentialVisitor interface {
+	VisitOAuthClient(*OAuthClientCredential) error
+	VisitOAuthClientId(OAuthClientCredentialId) error
+}
+
+func (d *DefenderEasmCredential) Accept(visitor DefenderEasmCredentialVisitor) error {
+	if d.OAuthClient != nil {
+		return visitor.VisitOAuthClient(d.OAuthClient)
+	}
+	if d.OAuthClientId != "" {
+		return visitor.VisitOAuthClientId(d.OAuthClientId)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", d)
+}
+
+func (d *DefenderEasmCredential) validate() error {
+	if d == nil {
+		return fmt.Errorf("type %T is nil", d)
+	}
+	var fields []string
+	if d.OAuthClient != nil {
+		fields = append(fields, "o_auth_client")
+	}
+	if d.OAuthClientId != "" {
+		fields = append(fields, "o_auth_client_id")
+	}
+	if len(fields) == 0 {
+		if d.Type != "" {
+			if len(d.rawJSON) > 0 {
+				return nil
+			}
+			return fmt.Errorf("type %T defines a discriminant set to %q but the field is not set", d, d.Type)
+		}
+		return fmt.Errorf("type %T is empty", d)
+	}
+	if len(fields) > 1 {
+		return fmt.Errorf("type %T defines values for %s, but only one value is allowed", d, fields)
+	}
+	if d.Type != "" {
+		field := fields[0]
+		if d.Type != field {
+			return fmt.Errorf(
+				"type %T defines a discriminant set to %q, but it does not match the %T field; either remove or update the discriminant to match",
+				d,
+				d.Type,
+				d,
+			)
+		}
+	}
+	return nil
+}
+
 type EsetCredential struct {
 	Type string
 	// Configuration when creating new Client Credentials.
@@ -20626,6 +20763,8 @@ type ProviderConfig struct {
 	VulnerabilitiesCrowdstrikeMock *VulnerabilitiesCrowdStrikeMock
 	// Configuration for Microsoft Defender for Endpoint.
 	VulnerabilitiesDefender *VulnerabilitiesDefender
+	// Configuration for Microsoft Defender External Attack Surface Management.
+	VulnerabilitiesDefenderEasm *VulnerabilitiesDefenderEasm
 	// Configuration for Horizon3 NodeZero as a Vulnerabilities Provider
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/horizon3-nodezero-vulnerabilities-setup)
@@ -21715,6 +21854,13 @@ func (p *ProviderConfig) GetVulnerabilitiesDefender() *VulnerabilitiesDefender {
 	return p.VulnerabilitiesDefender
 }
 
+func (p *ProviderConfig) GetVulnerabilitiesDefenderEasm() *VulnerabilitiesDefenderEasm {
+	if p == nil {
+		return nil
+	}
+	return p.VulnerabilitiesDefenderEasm
+}
+
 func (p *ProviderConfig) GetVulnerabilitiesHorizon3() *VulnerabilitiesHorizon3 {
 	if p == nil {
 		return nil
@@ -22706,6 +22852,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.VulnerabilitiesDefender = value
+	case "vulnerabilities_defender_easm":
+		value := new(VulnerabilitiesDefenderEasm)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.VulnerabilitiesDefenderEasm = value
 	case "vulnerabilities_horizon3":
 		value := new(VulnerabilitiesHorizon3)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -23237,6 +23389,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.VulnerabilitiesDefender != nil {
 		return internal.MarshalJSONWithExtraProperty(p.VulnerabilitiesDefender, "type", "vulnerabilities_defender")
 	}
+	if p.VulnerabilitiesDefenderEasm != nil {
+		return internal.MarshalJSONWithExtraProperty(p.VulnerabilitiesDefenderEasm, "type", "vulnerabilities_defender_easm")
+	}
 	if p.VulnerabilitiesHorizon3 != nil {
 		return internal.MarshalJSONWithExtraProperty(p.VulnerabilitiesHorizon3, "type", "vulnerabilities_horizon3")
 	}
@@ -23431,6 +23586,7 @@ type ProviderConfigVisitor interface {
 	VisitVulnerabilitiesCrowdstrike(*VulnerabilitiesCrowdStrike) error
 	VisitVulnerabilitiesCrowdstrikeMock(*VulnerabilitiesCrowdStrikeMock) error
 	VisitVulnerabilitiesDefender(*VulnerabilitiesDefender) error
+	VisitVulnerabilitiesDefenderEasm(*VulnerabilitiesDefenderEasm) error
 	VisitVulnerabilitiesHorizon3(*VulnerabilitiesHorizon3) error
 	VisitVulnerabilitiesIru(*VulnerabilitiesIru) error
 	VisitVulnerabilitiesNucleus(*VulnerabilitiesNucleus) error
@@ -23890,6 +24046,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.VulnerabilitiesDefender != nil {
 		return visitor.VisitVulnerabilitiesDefender(p.VulnerabilitiesDefender)
+	}
+	if p.VulnerabilitiesDefenderEasm != nil {
+		return visitor.VisitVulnerabilitiesDefenderEasm(p.VulnerabilitiesDefenderEasm)
 	}
 	if p.VulnerabilitiesHorizon3 != nil {
 		return visitor.VisitVulnerabilitiesHorizon3(p.VulnerabilitiesHorizon3)
@@ -24382,6 +24541,9 @@ func (p *ProviderConfig) validate() error {
 	if p.VulnerabilitiesDefender != nil {
 		fields = append(fields, "vulnerabilities_defender")
 	}
+	if p.VulnerabilitiesDefenderEasm != nil {
+		fields = append(fields, "vulnerabilities_defender_easm")
+	}
 	if p.VulnerabilitiesHorizon3 != nil {
 		fields = append(fields, "vulnerabilities_horizon3")
 	}
@@ -24747,6 +24909,8 @@ const (
 	ProviderConfigIdVulnerabilitiesCrowdStrikeMock ProviderConfigId = "vulnerabilities_crowdstrike_mock"
 	// Microsoft Defender for Endpoint
 	ProviderConfigIdVulnerabilitiesDefender ProviderConfigId = "vulnerabilities_defender"
+	// Microsoft Defender External Attack Surface Management
+	ProviderConfigIdVulnerabilitiesDefenderEasm ProviderConfigId = "vulnerabilities_defender_easm"
 	// Horizon3 NodeZero
 	ProviderConfigIdVulnerabilitiesHorizon3 ProviderConfigId = "vulnerabilities_horizon3"
 	// Iru
@@ -25075,6 +25239,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdVulnerabilitiesCrowdStrikeMock, nil
 	case "vulnerabilities_defender":
 		return ProviderConfigIdVulnerabilitiesDefender, nil
+	case "vulnerabilities_defender_easm":
+		return ProviderConfigIdVulnerabilitiesDefenderEasm, nil
 	case "vulnerabilities_horizon3":
 		return ProviderConfigIdVulnerabilitiesHorizon3, nil
 	case "vulnerabilities_iru":
@@ -37627,6 +37793,176 @@ func (v *VulnerabilitiesDefender) MarshalJSON() ([]byte, error) {
 }
 
 func (v *VulnerabilitiesDefender) String() string {
+	if v == nil {
+		return "<nil>"
+	}
+	if len(v.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(v.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(v); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", v)
+}
+
+// Configuration for Microsoft Defender External Attack Surface Management.
+var (
+	vulnerabilitiesDefenderEasmFieldCredential     = big.NewInt(1 << 0)
+	vulnerabilitiesDefenderEasmFieldRegion         = big.NewInt(1 << 1)
+	vulnerabilitiesDefenderEasmFieldResourceGroup  = big.NewInt(1 << 2)
+	vulnerabilitiesDefenderEasmFieldSubscriptionId = big.NewInt(1 << 3)
+	vulnerabilitiesDefenderEasmFieldTenantId       = big.NewInt(1 << 4)
+	vulnerabilitiesDefenderEasmFieldWorkspaceName  = big.NewInt(1 << 5)
+)
+
+type VulnerabilitiesDefenderEasm struct {
+	Credential *DefenderEasmCredential `json:"credential" url:"credential"`
+	// Azure region for the EASM workspace (e.g. `eastus`, `westus2`). This is the region prefix in the EASM API hostname.
+	Region string `json:"region" url:"region"`
+	// Azure resource group name that contains the EASM workspace.
+	ResourceGroup string `json:"resource_group" url:"resource_group"`
+	// Azure subscription ID that contains the EASM workspace.
+	SubscriptionId string `json:"subscription_id" url:"subscription_id"`
+	// Azure AD tenant ID for the Microsoft Defender EASM service principal.
+	TenantId string `json:"tenant_id" url:"tenant_id"`
+	// Name of the Microsoft Defender EASM workspace.
+	WorkspaceName string `json:"workspace_name" url:"workspace_name"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (v *VulnerabilitiesDefenderEasm) GetCredential() *DefenderEasmCredential {
+	if v == nil {
+		return nil
+	}
+	return v.Credential
+}
+
+func (v *VulnerabilitiesDefenderEasm) GetRegion() string {
+	if v == nil {
+		return ""
+	}
+	return v.Region
+}
+
+func (v *VulnerabilitiesDefenderEasm) GetResourceGroup() string {
+	if v == nil {
+		return ""
+	}
+	return v.ResourceGroup
+}
+
+func (v *VulnerabilitiesDefenderEasm) GetSubscriptionId() string {
+	if v == nil {
+		return ""
+	}
+	return v.SubscriptionId
+}
+
+func (v *VulnerabilitiesDefenderEasm) GetTenantId() string {
+	if v == nil {
+		return ""
+	}
+	return v.TenantId
+}
+
+func (v *VulnerabilitiesDefenderEasm) GetWorkspaceName() string {
+	if v == nil {
+		return ""
+	}
+	return v.WorkspaceName
+}
+
+func (v *VulnerabilitiesDefenderEasm) GetExtraProperties() map[string]interface{} {
+	if v == nil {
+		return nil
+	}
+	return v.extraProperties
+}
+
+func (v *VulnerabilitiesDefenderEasm) require(field *big.Int) {
+	if v.explicitFields == nil {
+		v.explicitFields = big.NewInt(0)
+	}
+	v.explicitFields.Or(v.explicitFields, field)
+}
+
+// SetCredential sets the Credential field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (v *VulnerabilitiesDefenderEasm) SetCredential(credential *DefenderEasmCredential) {
+	v.Credential = credential
+	v.require(vulnerabilitiesDefenderEasmFieldCredential)
+}
+
+// SetRegion sets the Region field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (v *VulnerabilitiesDefenderEasm) SetRegion(region string) {
+	v.Region = region
+	v.require(vulnerabilitiesDefenderEasmFieldRegion)
+}
+
+// SetResourceGroup sets the ResourceGroup field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (v *VulnerabilitiesDefenderEasm) SetResourceGroup(resourceGroup string) {
+	v.ResourceGroup = resourceGroup
+	v.require(vulnerabilitiesDefenderEasmFieldResourceGroup)
+}
+
+// SetSubscriptionId sets the SubscriptionId field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (v *VulnerabilitiesDefenderEasm) SetSubscriptionId(subscriptionId string) {
+	v.SubscriptionId = subscriptionId
+	v.require(vulnerabilitiesDefenderEasmFieldSubscriptionId)
+}
+
+// SetTenantId sets the TenantId field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (v *VulnerabilitiesDefenderEasm) SetTenantId(tenantId string) {
+	v.TenantId = tenantId
+	v.require(vulnerabilitiesDefenderEasmFieldTenantId)
+}
+
+// SetWorkspaceName sets the WorkspaceName field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (v *VulnerabilitiesDefenderEasm) SetWorkspaceName(workspaceName string) {
+	v.WorkspaceName = workspaceName
+	v.require(vulnerabilitiesDefenderEasmFieldWorkspaceName)
+}
+
+func (v *VulnerabilitiesDefenderEasm) UnmarshalJSON(data []byte) error {
+	type unmarshaler VulnerabilitiesDefenderEasm
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*v = VulnerabilitiesDefenderEasm(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *v)
+	if err != nil {
+		return err
+	}
+	v.extraProperties = extraProperties
+	v.rawJSON = nil
+	return nil
+}
+
+func (v *VulnerabilitiesDefenderEasm) MarshalJSON() ([]byte, error) {
+	type embed VulnerabilitiesDefenderEasm
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*v),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, v.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (v *VulnerabilitiesDefenderEasm) String() string {
 	if v == nil {
 		return "<nil>"
 	}
