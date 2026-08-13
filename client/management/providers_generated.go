@@ -6851,15 +6851,12 @@ func (c *CloudSecurityUpwind) String() string {
 var (
 	cloudSecurityWizFieldApiEndpointUrl = big.NewInt(1 << 0)
 	cloudSecurityWizFieldCredential     = big.NewInt(1 << 1)
-	cloudSecurityWizFieldRegion         = big.NewInt(1 << 2)
 )
 
 type CloudSecurityWiz struct {
-	// Wiz GraphQL API endpoint URL. Copy this from the Wiz tenant's **API Endpoint URL** field.
+	// Wiz GraphQL API endpoint URL. Copy this from the Wiz tenant's **API Endpoint URL** field (for example https://api.us17.app.wiz.io/graphql). The OAuth token endpoint is inferred from the environment in this URL (app.wiz.io, app.wiz.us, or gov.wiz.io).
 	ApiEndpointUrl string         `json:"api_endpoint_url" url:"api_endpoint_url"`
 	Credential     *WizCredential `json:"credential" url:"credential"`
-	// Region/deployment used to determine the Wiz OAuth token endpoint.
-	Region WizRegion `json:"region" url:"region"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -6880,13 +6877,6 @@ func (c *CloudSecurityWiz) GetCredential() *WizCredential {
 		return nil
 	}
 	return c.Credential
-}
-
-func (c *CloudSecurityWiz) GetRegion() WizRegion {
-	if c == nil {
-		return ""
-	}
-	return c.Region
 }
 
 func (c *CloudSecurityWiz) GetExtraProperties() map[string]interface{} {
@@ -6915,13 +6905,6 @@ func (c *CloudSecurityWiz) SetApiEndpointUrl(apiEndpointUrl string) {
 func (c *CloudSecurityWiz) SetCredential(credential *WizCredential) {
 	c.Credential = credential
 	c.require(cloudSecurityWizFieldCredential)
-}
-
-// SetRegion sets the Region field and marks it as non-optional;
-// this prevents an empty or null value for this field from being omitted during serialization.
-func (c *CloudSecurityWiz) SetRegion(region WizRegion) {
-	c.Region = region
-	c.require(cloudSecurityWizFieldRegion)
 }
 
 func (c *CloudSecurityWiz) UnmarshalJSON(data []byte) error {
@@ -20807,6 +20790,8 @@ type ProviderConfig struct {
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/tenable-sc-vulns-setup)
 	VulnerabilitiesTenableSc *VulnerabilitiesTenableSc
+	// Configuration for the Wiz Vulnerabilities Provider
+	VulnerabilitiesWiz *VulnerabilitiesWiz
 
 	rawJSON json.RawMessage
 }
@@ -21952,6 +21937,13 @@ func (p *ProviderConfig) GetVulnerabilitiesTenableSc() *VulnerabilitiesTenableSc
 	return p.VulnerabilitiesTenableSc
 }
 
+func (p *ProviderConfig) GetVulnerabilitiesWiz() *VulnerabilitiesWiz {
+	if p == nil {
+		return nil
+	}
+	return p.VulnerabilitiesWiz
+}
+
 func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 	var unmarshaler struct {
 		Type string `json:"type"`
@@ -22936,6 +22928,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.VulnerabilitiesTenableSc = value
+	case "vulnerabilities_wiz":
+		value := new(VulnerabilitiesWiz)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.VulnerabilitiesWiz = value
 	}
 	p.rawJSON = nil
 	return nil
@@ -23431,6 +23429,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.VulnerabilitiesTenableSc != nil {
 		return internal.MarshalJSONWithExtraProperty(p.VulnerabilitiesTenableSc, "type", "vulnerabilities_tenable_sc")
 	}
+	if p.VulnerabilitiesWiz != nil {
+		return internal.MarshalJSONWithExtraProperty(p.VulnerabilitiesWiz, "type", "vulnerabilities_wiz")
+	}
 	if len(p.rawJSON) > 0 {
 		return p.rawJSON, nil
 	}
@@ -23600,6 +23601,7 @@ type ProviderConfigVisitor interface {
 	VisitVulnerabilitiesTaniumCloudMock(*VulnerabilitiesTaniumCloudMock) error
 	VisitVulnerabilitiesTenableCloud(*VulnerabilitiesTenableCloud) error
 	VisitVulnerabilitiesTenableSc(*VulnerabilitiesTenableSc) error
+	VisitVulnerabilitiesWiz(*VulnerabilitiesWiz) error
 }
 
 func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
@@ -24088,6 +24090,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.VulnerabilitiesTenableSc != nil {
 		return visitor.VisitVulnerabilitiesTenableSc(p.VulnerabilitiesTenableSc)
+	}
+	if p.VulnerabilitiesWiz != nil {
+		return visitor.VisitVulnerabilitiesWiz(p.VulnerabilitiesWiz)
 	}
 	return fmt.Errorf("type %T does not define a non-empty union type", p)
 }
@@ -24583,6 +24588,9 @@ func (p *ProviderConfig) validate() error {
 	if p.VulnerabilitiesTenableSc != nil {
 		fields = append(fields, "vulnerabilities_tenable_sc")
 	}
+	if p.VulnerabilitiesWiz != nil {
+		fields = append(fields, "vulnerabilities_wiz")
+	}
 	if len(fields) == 0 {
 		if p.Type != "" {
 			if len(p.rawJSON) > 0 {
@@ -24937,6 +24945,8 @@ const (
 	ProviderConfigIdVulnerabilitiesTenableCloud ProviderConfigId = "vulnerabilities_tenable_cloud"
 	// Tenable Security Center
 	ProviderConfigIdVulnerabilitiesTenableSc ProviderConfigId = "vulnerabilities_tenable_sc"
+	// Wiz
+	ProviderConfigIdVulnerabilitiesWiz ProviderConfigId = "vulnerabilities_wiz"
 	// Any provider config type.
 	ProviderConfigIdAll ProviderConfigId = "*"
 )
@@ -25267,6 +25277,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdVulnerabilitiesTenableCloud, nil
 	case "vulnerabilities_tenable_sc":
 		return ProviderConfigIdVulnerabilitiesTenableSc, nil
+	case "vulnerabilities_wiz":
+		return ProviderConfigIdVulnerabilitiesWiz, nil
 	case "*":
 		return ProviderConfigIdAll, nil
 	}
@@ -39304,6 +39316,108 @@ func (v *VulnerabilitiesTenableSc) String() string {
 	return fmt.Sprintf("%#v", v)
 }
 
+// Configuration for the Wiz Vulnerabilities Provider
+var (
+	vulnerabilitiesWizFieldApiEndpointUrl = big.NewInt(1 << 0)
+	vulnerabilitiesWizFieldCredential     = big.NewInt(1 << 1)
+)
+
+type VulnerabilitiesWiz struct {
+	// Wiz GraphQL API endpoint URL.
+	ApiEndpointUrl string         `json:"api_endpoint_url" url:"api_endpoint_url"`
+	Credential     *WizCredential `json:"credential" url:"credential"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (v *VulnerabilitiesWiz) GetApiEndpointUrl() string {
+	if v == nil {
+		return ""
+	}
+	return v.ApiEndpointUrl
+}
+
+func (v *VulnerabilitiesWiz) GetCredential() *WizCredential {
+	if v == nil {
+		return nil
+	}
+	return v.Credential
+}
+
+func (v *VulnerabilitiesWiz) GetExtraProperties() map[string]interface{} {
+	if v == nil {
+		return nil
+	}
+	return v.extraProperties
+}
+
+func (v *VulnerabilitiesWiz) require(field *big.Int) {
+	if v.explicitFields == nil {
+		v.explicitFields = big.NewInt(0)
+	}
+	v.explicitFields.Or(v.explicitFields, field)
+}
+
+// SetApiEndpointUrl sets the ApiEndpointUrl field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (v *VulnerabilitiesWiz) SetApiEndpointUrl(apiEndpointUrl string) {
+	v.ApiEndpointUrl = apiEndpointUrl
+	v.require(vulnerabilitiesWizFieldApiEndpointUrl)
+}
+
+// SetCredential sets the Credential field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (v *VulnerabilitiesWiz) SetCredential(credential *WizCredential) {
+	v.Credential = credential
+	v.require(vulnerabilitiesWizFieldCredential)
+}
+
+func (v *VulnerabilitiesWiz) UnmarshalJSON(data []byte) error {
+	type unmarshaler VulnerabilitiesWiz
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*v = VulnerabilitiesWiz(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *v)
+	if err != nil {
+		return err
+	}
+	v.extraProperties = extraProperties
+	v.rawJSON = nil
+	return nil
+}
+
+func (v *VulnerabilitiesWiz) MarshalJSON() ([]byte, error) {
+	type embed VulnerabilitiesWiz
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*v),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, v.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (v *VulnerabilitiesWiz) String() string {
+	if v == nil {
+		return "<nil>"
+	}
+	if len(v.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(v.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(v); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", v)
+}
+
 type WizCredential struct {
 	Type string
 	// OAuth 2.0 Client ID and Client Secret for Wiz API access.
@@ -39439,37 +39553,6 @@ func (w *WizCredential) validate() error {
 		}
 	}
 	return nil
-}
-
-type WizRegion string
-
-const (
-	// Wiz Commercial.
-	// Uses auth endpoint `https://auth.app.wiz.io/oauth/token`.
-	WizRegionCommercial WizRegion = "commercial"
-	// Wiz for Gov (FedRAMP).
-	// Uses auth endpoint `https://auth.app.wiz.us/oauth/token`.
-	WizRegionGov WizRegion = "gov"
-	// Wiz Commercial hosted on AWS GovCloud.
-	// Uses auth endpoint `https://auth.gov.wiz.io/oauth/token`.
-	WizRegionGovcloud WizRegion = "govcloud"
-)
-
-func NewWizRegionFromString(s string) (WizRegion, error) {
-	switch s {
-	case "commercial":
-		return WizRegionCommercial, nil
-	case "gov":
-		return WizRegionGov, nil
-	case "govcloud":
-		return WizRegionGovcloud, nil
-	}
-	var t WizRegion
-	return "", fmt.Errorf("%s is not a valid %T", s, t)
-}
-
-func (w WizRegion) Ptr() *WizRegion {
-	return &w
 }
 
 type WorkdayCredential struct {
