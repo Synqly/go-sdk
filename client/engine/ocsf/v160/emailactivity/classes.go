@@ -5,8 +5,8 @@ package emailactivity
 import (
 	json "encoding/json"
 	fmt "fmt"
-	internal "github.com/synqly/go-sdk/client/engine/internal"
-	v160 "github.com/synqly/go-sdk/client/engine/ocsf/v160"
+	internal "github.com/synqly/go-sdk/v2/client/engine/internal"
+	v160 "github.com/synqly/go-sdk/v2/client/engine/ocsf/v160"
 	big "math/big"
 	time "time"
 )

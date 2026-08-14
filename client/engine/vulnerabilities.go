@@ -5,11 +5,11 @@ package engine
 import (
 	json "encoding/json"
 	fmt "fmt"
-	internal "github.com/synqly/go-sdk/client/engine/internal"
-	inventoryinfo "github.com/synqly/go-sdk/client/engine/ocsf/v130/inventoryinfo"
-	scanactivity "github.com/synqly/go-sdk/client/engine/ocsf/v130/scanactivity"
-	securityfinding "github.com/synqly/go-sdk/client/engine/ocsf/v130/securityfinding"
-	vulnerabilityfinding "github.com/synqly/go-sdk/client/engine/ocsf/v180/vulnerabilityfinding"
+	internal "github.com/synqly/go-sdk/v2/client/engine/internal"
+	inventoryinfo "github.com/synqly/go-sdk/v2/client/engine/ocsf/v130/inventoryinfo"
+	scanactivity "github.com/synqly/go-sdk/v2/client/engine/ocsf/v130/scanactivity"
+	securityfinding "github.com/synqly/go-sdk/v2/client/engine/ocsf/v130/securityfinding"
+	vulnerabilityfinding "github.com/synqly/go-sdk/v2/client/engine/ocsf/v180/vulnerabilityfinding"
 	big "math/big"
 	time "time"
 )

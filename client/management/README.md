@@ -32,9 +32,9 @@ package example
 import (
     context "context"
 
-    management "github.com/synqly/go-sdk/client/management"
-    client "github.com/synqly/go-sdk/client/management/client"
-    option "github.com/synqly/go-sdk/client/management/option"
+    management "github.com/synqly/go-sdk/v2/client/management"
+    client "github.com/synqly/go-sdk/v2/client/management/client"
+    option "github.com/synqly/go-sdk/v2/client/management/option"
 )
 
 func do() {

@@ -5,12 +5,12 @@ package engine
 import (
 	json "encoding/json"
 	fmt "fmt"
-	internal "github.com/synqly/go-sdk/client/engine/internal"
-	configstate "github.com/synqly/go-sdk/client/engine/ocsf/v130/configstate"
-	detectionfinding "github.com/synqly/go-sdk/client/engine/ocsf/v130/detectionfinding"
-	softwareinfo "github.com/synqly/go-sdk/client/engine/ocsf/v130/softwareinfo"
-	noteactivity "github.com/synqly/go-sdk/client/engine/ocsf/v180/noteactivity"
-	stix "github.com/synqly/go-sdk/client/engine/stix"
+	internal "github.com/synqly/go-sdk/v2/client/engine/internal"
+	configstate "github.com/synqly/go-sdk/v2/client/engine/ocsf/v130/configstate"
+	detectionfinding "github.com/synqly/go-sdk/v2/client/engine/ocsf/v130/detectionfinding"
+	softwareinfo "github.com/synqly/go-sdk/v2/client/engine/ocsf/v130/softwareinfo"
+	noteactivity "github.com/synqly/go-sdk/v2/client/engine/ocsf/v180/noteactivity"
+	stix "github.com/synqly/go-sdk/v2/client/engine/stix"
 	big "math/big"
 	time "time"
 )

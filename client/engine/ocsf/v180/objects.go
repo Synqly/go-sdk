@@ -5,7 +5,7 @@ package v180
 import (
 	json "encoding/json"
 	fmt "fmt"
-	internal "github.com/synqly/go-sdk/client/engine/internal"
+	internal "github.com/synqly/go-sdk/v2/client/engine/internal"
 	big "math/big"
 	time "time"
 )

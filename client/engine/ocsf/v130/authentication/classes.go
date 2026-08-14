@@ -5,8 +5,8 @@ package authentication
 import (
 	json "encoding/json"
 	fmt "fmt"
-	internal "github.com/synqly/go-sdk/client/engine/internal"
-	v130 "github.com/synqly/go-sdk/client/engine/ocsf/v130"
+	internal "github.com/synqly/go-sdk/v2/client/engine/internal"
+	v130 "github.com/synqly/go-sdk/v2/client/engine/ocsf/v130"
 	big "math/big"
 	time "time"
 )

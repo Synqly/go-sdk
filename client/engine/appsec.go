@@ -5,8 +5,8 @@ package engine
 import (
 	json "encoding/json"
 	fmt "fmt"
-	internal "github.com/synqly/go-sdk/client/engine/internal"
-	latest "github.com/synqly/go-sdk/client/engine/ocsf/latest"
+	internal "github.com/synqly/go-sdk/v2/client/engine/internal"
+	latest "github.com/synqly/go-sdk/v2/client/engine/ocsf/latest"
 	big "math/big"
 )
 

@@ -5,10 +5,10 @@ package engine
 import (
 	json "encoding/json"
 	fmt "fmt"
-	internal "github.com/synqly/go-sdk/client/engine/internal"
-	latest "github.com/synqly/go-sdk/client/engine/ocsf/latest"
-	chatmessageactivity "github.com/synqly/go-sdk/client/engine/ocsf/v180/chatmessageactivity"
-	conversationactivity "github.com/synqly/go-sdk/client/engine/ocsf/v180/conversationactivity"
+	internal "github.com/synqly/go-sdk/v2/client/engine/internal"
+	latest "github.com/synqly/go-sdk/v2/client/engine/ocsf/latest"
+	chatmessageactivity "github.com/synqly/go-sdk/v2/client/engine/ocsf/v180/chatmessageactivity"
+	conversationactivity "github.com/synqly/go-sdk/v2/client/engine/ocsf/v180/conversationactivity"
 	big "math/big"
 )
 

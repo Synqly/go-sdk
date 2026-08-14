@@ -3,7 +3,7 @@
 package option
 
 import (
-	core "github.com/synqly/go-sdk/client/engine/core"
+	core "github.com/synqly/go-sdk/v2/client/engine/core"
 	http "net/http"
 	url "net/url"
 )

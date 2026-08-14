@@ -5,10 +5,10 @@ package capabilities
 import (
     context "context"
 
-    management "github.com/synqly/go-sdk/client/management"
-    core "github.com/synqly/go-sdk/client/management/core"
-    internal "github.com/synqly/go-sdk/client/management/internal"
-    option "github.com/synqly/go-sdk/client/management/option"
+    management "github.com/synqly/go-sdk/v2/client/management"
+    core "github.com/synqly/go-sdk/v2/client/management/core"
+    internal "github.com/synqly/go-sdk/v2/client/management/internal"
+    option "github.com/synqly/go-sdk/v2/client/management/option"
 )
 
 

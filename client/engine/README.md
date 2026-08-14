@@ -32,11 +32,11 @@ package example
 import (
     context "context"
 
-    engine "github.com/synqly/go-sdk/client/engine"
-    client "github.com/synqly/go-sdk/client/engine/client"
-    v180 "github.com/synqly/go-sdk/client/engine/ocsf/v180"
-    applicationsecurityposturefinding "github.com/synqly/go-sdk/client/engine/ocsf/v180/applicationsecurityposturefinding"
-    option "github.com/synqly/go-sdk/client/engine/option"
+    engine "github.com/synqly/go-sdk/v2/client/engine"
+    client "github.com/synqly/go-sdk/v2/client/engine/client"
+    v180 "github.com/synqly/go-sdk/v2/client/engine/ocsf/v180"
+    applicationsecurityposturefinding "github.com/synqly/go-sdk/v2/client/engine/ocsf/v180/applicationsecurityposturefinding"
+    option "github.com/synqly/go-sdk/v2/client/engine/option"
 )
 
 func do() {

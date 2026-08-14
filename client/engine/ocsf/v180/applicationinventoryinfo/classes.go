@@ -5,8 +5,8 @@ package applicationinventoryinfo
 import (
 	json "encoding/json"
 	fmt "fmt"
-	internal "github.com/synqly/go-sdk/client/engine/internal"
-	v180 "github.com/synqly/go-sdk/client/engine/ocsf/v180"
+	internal "github.com/synqly/go-sdk/v2/client/engine/internal"
+	v180 "github.com/synqly/go-sdk/v2/client/engine/ocsf/v180"
 	big "math/big"
 	time "time"
 )

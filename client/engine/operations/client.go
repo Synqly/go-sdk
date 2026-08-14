@@ -5,10 +5,10 @@ package operations
 import (
     context "context"
 
-    engine "github.com/synqly/go-sdk/client/engine"
-    core "github.com/synqly/go-sdk/client/engine/core"
-    internal "github.com/synqly/go-sdk/client/engine/internal"
-    option "github.com/synqly/go-sdk/client/engine/option"
+    engine "github.com/synqly/go-sdk/v2/client/engine"
+    core "github.com/synqly/go-sdk/v2/client/engine/core"
+    internal "github.com/synqly/go-sdk/v2/client/engine/internal"
+    option "github.com/synqly/go-sdk/v2/client/engine/option"
 )
 
 

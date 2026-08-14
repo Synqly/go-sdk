@@ -5,8 +5,8 @@ package cloudresourcesinventoryinfo
 import (
 	json "encoding/json"
 	fmt "fmt"
-	internal "github.com/synqly/go-sdk/client/engine/internal"
-	v140 "github.com/synqly/go-sdk/client/engine/ocsf/v140"
+	internal "github.com/synqly/go-sdk/v2/client/engine/internal"
+	v140 "github.com/synqly/go-sdk/v2/client/engine/ocsf/v140"
 	big "math/big"
 	time "time"
 )

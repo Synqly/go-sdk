@@ -3,8 +3,8 @@
 package engine
 
 import (
-    core "github.com/synqly/go-sdk/client/engine/core"
-    internal "github.com/synqly/go-sdk/client/engine/internal"
+    core "github.com/synqly/go-sdk/v2/client/engine/core"
+    internal "github.com/synqly/go-sdk/v2/client/engine/internal"
 )
 
 

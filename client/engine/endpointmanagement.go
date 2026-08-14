@@ -5,10 +5,10 @@ package engine
 import (
 	json "encoding/json"
 	fmt "fmt"
-	internal "github.com/synqly/go-sdk/client/engine/internal"
-	compliancefinding "github.com/synqly/go-sdk/client/engine/ocsf/v130/compliancefinding"
-	inventoryinfo "github.com/synqly/go-sdk/client/engine/ocsf/v130/inventoryinfo"
-	softwareinfo "github.com/synqly/go-sdk/client/engine/ocsf/v130/softwareinfo"
+	internal "github.com/synqly/go-sdk/v2/client/engine/internal"
+	compliancefinding "github.com/synqly/go-sdk/v2/client/engine/ocsf/v130/compliancefinding"
+	inventoryinfo "github.com/synqly/go-sdk/v2/client/engine/ocsf/v130/inventoryinfo"
+	softwareinfo "github.com/synqly/go-sdk/v2/client/engine/ocsf/v130/softwareinfo"
 	big "math/big"
 )
 

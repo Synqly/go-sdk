@@ -4,7 +4,7 @@ package engine
 
 import (
 	json "encoding/json"
-	core "github.com/synqly/go-sdk/client/engine/core"
+	core "github.com/synqly/go-sdk/v2/client/engine/core"
 )
 
 type BadGatewayError struct {

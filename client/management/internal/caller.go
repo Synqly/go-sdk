@@ -12,7 +12,7 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/synqly/go-sdk/client/management/core"
+	"github.com/synqly/go-sdk/v2/client/management/core"
 )
 
 const (

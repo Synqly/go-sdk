@@ -3,8 +3,8 @@
 package client
 
 import (
-	core "github.com/synqly/go-sdk/client/engine/core"
-	option "github.com/synqly/go-sdk/client/engine/option"
+	core "github.com/synqly/go-sdk/v2/client/engine/core"
+	option "github.com/synqly/go-sdk/v2/client/engine/option"
 	http "net/http"
 )
 

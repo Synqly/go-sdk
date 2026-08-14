@@ -3,8 +3,8 @@
 package management
 
 import (
-    core "github.com/synqly/go-sdk/client/management/core"
-    internal "github.com/synqly/go-sdk/client/management/internal"
+    core "github.com/synqly/go-sdk/v2/client/management/core"
+    internal "github.com/synqly/go-sdk/v2/client/management/internal"
 )
 
 

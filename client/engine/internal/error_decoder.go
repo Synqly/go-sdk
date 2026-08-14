@@ -8,7 +8,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/synqly/go-sdk/client/engine/core"
+	"github.com/synqly/go-sdk/v2/client/engine/core"
 )
 
 // ErrorCodes maps HTTP status codes to error constructors.

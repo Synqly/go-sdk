@@ -5,9 +5,9 @@ package engine
 import (
 	json "encoding/json"
 	fmt "fmt"
-	internal "github.com/synqly/go-sdk/client/engine/internal"
-	inventoryinfo "github.com/synqly/go-sdk/client/engine/ocsf/v130/inventoryinfo"
-	softwareinventoryinfo "github.com/synqly/go-sdk/client/engine/ocsf/v180/softwareinventoryinfo"
+	internal "github.com/synqly/go-sdk/v2/client/engine/internal"
+	inventoryinfo "github.com/synqly/go-sdk/v2/client/engine/ocsf/v130/inventoryinfo"
+	softwareinventoryinfo "github.com/synqly/go-sdk/v2/client/engine/ocsf/v180/softwareinventoryinfo"
 	big "math/big"
 )
 

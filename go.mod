@@ -1,4 +1,4 @@
-module github.com/synqly/go-sdk
+module github.com/synqly/go-sdk/v2
 
 go 1.23.0
 

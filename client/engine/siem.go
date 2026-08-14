@@ -5,8 +5,8 @@ package engine
 import (
 	json "encoding/json"
 	fmt "fmt"
-	internal "github.com/synqly/go-sdk/client/engine/internal"
-	detectionfinding "github.com/synqly/go-sdk/client/engine/ocsf/v130/detectionfinding"
+	internal "github.com/synqly/go-sdk/v2/client/engine/internal"
+	detectionfinding "github.com/synqly/go-sdk/v2/client/engine/ocsf/v130/detectionfinding"
 	big "math/big"
 )
 

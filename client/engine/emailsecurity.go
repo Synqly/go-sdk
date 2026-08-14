@@ -5,9 +5,9 @@ package engine
 import (
 	json "encoding/json"
 	fmt "fmt"
-	internal "github.com/synqly/go-sdk/client/engine/internal"
-	detectionfinding "github.com/synqly/go-sdk/client/engine/ocsf/v180/detectionfinding"
-	emailactivity "github.com/synqly/go-sdk/client/engine/ocsf/v180/emailactivity"
+	internal "github.com/synqly/go-sdk/v2/client/engine/internal"
+	detectionfinding "github.com/synqly/go-sdk/v2/client/engine/ocsf/v180/detectionfinding"
+	emailactivity "github.com/synqly/go-sdk/v2/client/engine/ocsf/v180/emailactivity"
 	big "math/big"
 )
 

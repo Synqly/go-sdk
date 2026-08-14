@@ -5,7 +5,7 @@ package management
 import (
 	json "encoding/json"
 	fmt "fmt"
-	internal "github.com/synqly/go-sdk/client/management/internal"
+	internal "github.com/synqly/go-sdk/v2/client/management/internal"
 	big "math/big"
 )
 
