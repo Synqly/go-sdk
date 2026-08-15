@@ -9,10 +9,10 @@ import (
 	"time"
 
 	"github.com/brianvoe/gofakeit"
-	engine "github.com/synqly/go-sdk/client/engine"
-	engineClient "github.com/synqly/go-sdk/client/engine/client"
-	mgmt "github.com/synqly/go-sdk/client/management"
-	mgmtClient "github.com/synqly/go-sdk/client/management/client"
+	engine "github.com/synqly/go-sdk/v2/client/engine"
+	engineClient "github.com/synqly/go-sdk/v2/client/engine/client"
+	mgmt "github.com/synqly/go-sdk/v2/client/management"
+	mgmtClient "github.com/synqly/go-sdk/v2/client/management/client"
 )
 
 var (

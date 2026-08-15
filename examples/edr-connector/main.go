@@ -15,8 +15,8 @@ import (
 	"github.com/knadh/koanf/providers/env"
 	"github.com/knadh/koanf/providers/file"
 	"github.com/knadh/koanf/v2"
-	"github.com/synqly/go-sdk/client/engine"
-	mgmt "github.com/synqly/go-sdk/client/management"
+	"github.com/synqly/go-sdk/v2/client/engine"
+	mgmt "github.com/synqly/go-sdk/v2/client/management"
 )
 
 var (
@@ -145,15 +145,19 @@ func (s *sentinelOneProvider) demoActions(orgToken string, sentinelOneConf *sent
 
 	// consoleLogger.Printf("Quarantining endpoint %s", *endpointRes.Result[0].Device.Uid)
 	endpointId := *endpointRes.Result[0].Device.Uid
-	t.Synqly.EngineClients[mgmt.CategoryIdEdr].Edr.NetworkQuarantine(ctx, &engine.NetworkQuarantineRequest{
-		EndpointIds: []string{endpointId},
-		State:       engine.ConnectionStateDisconnect,
-		//IsolationType: engine.IsolationTypeSelective.Ptr(),
+	t.Synqly.EngineClients[mgmt.CategoryIdEdr].Edr.NetworkQuarantine(ctx, &engine.NetworkQuarantineRequestInput{
+		Body: &engine.NetworkQuarantineRequest{
+			EndpointIds: []string{endpointId},
+			State:       engine.ConnectionStateDisconnect,
+			//IsolationType: engine.IsolationTypeSelective.Ptr(),
+		},
 	})
 
-	// t.Synqly.EngineClients[mgmt.CategoryIdEdr].Edr.NetworkQuarantine(ctx, &engine.NetworkQuarantineRequest{
-	// 	EndpointIds: []string{endpointId},
-	// 	State:       engine.ConnectionStateConnect,
+	// t.Synqly.EngineClients[mgmt.CategoryIdEdr].Edr.NetworkQuarantine(ctx, &engine.NetworkQuarantineRequestInput{
+	// 	Body: &engine.NetworkQuarantineRequest{
+	// 		EndpointIds: []string{endpointId},
+	// 		State:       engine.ConnectionStateConnect,
+	// 	},
 	// })
 
 	return nil

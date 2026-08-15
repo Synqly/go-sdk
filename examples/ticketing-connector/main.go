@@ -9,10 +9,10 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
-	"github.com/synqly/go-sdk/client/engine"
-	engineClient "github.com/synqly/go-sdk/client/engine/client"
-	mgmt "github.com/synqly/go-sdk/client/management"
-	mgmtClient "github.com/synqly/go-sdk/client/management/client"
+	"github.com/synqly/go-sdk/v2/client/engine"
+	engineClient "github.com/synqly/go-sdk/v2/client/engine/client"
+	mgmt "github.com/synqly/go-sdk/v2/client/management"
+	mgmtClient "github.com/synqly/go-sdk/v2/client/management/client"
 )
 
 var consoleLogger = log.New(os.Stdout, "INFO: ", log.Ldate|log.Ltime)
@@ -152,9 +152,11 @@ func createAttachment(ctx context.Context, client *engineClient.Client, ticketID
 		return nil, err
 	}
 
-	attachmentResponse, err := client.Ticketing.CreateAttachment(ctx, ticketID, &engine.CreateAttachmentRequest{
-		FileName: "image.png",
-		Content:  file,
+	attachmentResponse, err := client.Ticketing.CreateAttachment(ctx, ticketID, &engine.CreateAttachmentRequestInput{
+		Body: &engine.CreateAttachmentRequest{
+			FileName: "image.png",
+			Content:  file,
+		},
 	})
 	if err != nil {
 		return nil, err
@@ -169,8 +171,10 @@ func createAttachment(ctx context.Context, client *engineClient.Client, ticketID
 
 // createComment creates a comment in the ticket with the given ID
 func createComment(ctx context.Context, client *engineClient.Client, ticketID, comment string) (*engine.CreateCommentResponse, error) {
-	res, err := client.Ticketing.CreateComment(ctx, ticketID, &engine.CreateCommentRequest{
-		Content: comment,
+	res, err := client.Ticketing.CreateComment(ctx, ticketID, &engine.CreateCommentRequestInput{
+		Body: &engine.CreateCommentRequest{
+			Content: comment,
+		},
 	})
 	if err != nil {
 		return nil, err
@@ -197,14 +201,16 @@ func createTicket(ctx context.Context, client *engineClient.Client, ticket *Tick
 		priority = engine.PriorityMedium
 	}
 
-	newTicket, err := client.Ticketing.CreateTicket(ctx, &engine.CreateTicketRequest{
-		Name:        ticket.Title,
-		Summary:     engine.String(ticket.Summary),
-		Description: engine.String(ticket.Description),
-		IssueType:   engine.String("Bug"),
-		Priority:    priority.Ptr(),
-		Project:     engine.String("Test"),
-		Tags:        tags,
+	newTicket, err := client.Ticketing.CreateTicket(ctx, &engine.CreateTicketRequestInput{
+		Body: &engine.CreateTicketRequest{
+			Name:        ticket.Title,
+			Summary:     engine.String(ticket.Summary),
+			Description: engine.String(ticket.Description),
+			IssueType:   engine.String("Bug"),
+			Priority:    priority.Ptr(),
+			Project:     engine.String("Test"),
+			Tags:        tags,
+		},
 	})
 	if err != nil {
 		return nil, err
@@ -219,7 +225,7 @@ func createTicket(ctx context.Context, client *engineClient.Client, ticket *Tick
 
 // deleteAttachment deletes the attachment with the given ID in the ticket with the given ID
 func deleteAttachment(ctx context.Context, client *engineClient.Client, ticketID, attachmentID string) error {
-	if err := client.Ticketing.DeleteAttachment(ctx, ticketID, attachmentID); err != nil {
+	if err := client.Ticketing.DeleteAttachment(ctx, ticketID, attachmentID, nil); err != nil {
 		return err
 	}
 
@@ -232,7 +238,7 @@ func deleteAttachment(ctx context.Context, client *engineClient.Client, ticketID
 
 // deleteComment deletes the comment with the given ID in the ticket with the given ID
 func deleteComment(ctx context.Context, client *engineClient.Client, ticketID, commentID string) error {
-	if err := client.Ticketing.DeleteComment(ctx, ticketID, commentID); err != nil {
+	if err := client.Ticketing.DeleteComment(ctx, ticketID, commentID, nil); err != nil {
 		return err
 	}
 
@@ -245,7 +251,7 @@ func deleteComment(ctx context.Context, client *engineClient.Client, ticketID, c
 
 // getAttachment retrieves the attachment with the given ID in the ticket with the given ID
 func getAttachment(ctx context.Context, client *engineClient.Client, ticketID, attachmentID string) (*engine.DownloadAttachmentResponse, error) {
-	attachment, err := client.Ticketing.DownloadAttachment(ctx, ticketID, attachmentID)
+	attachment, err := client.Ticketing.DownloadAttachment(ctx, ticketID, attachmentID, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -259,7 +265,7 @@ func getAttachment(ctx context.Context, client *engineClient.Client, ticketID, a
 
 // getAttachmentsMetadata retrieves the attachments metadata in the ticket with the given ID
 func getAttachmentsMetadata(ctx context.Context, client *engineClient.Client, ticketID string) (*engine.ListAttachmentsMetadataResponse, error) {
-	attachments, err := client.Ticketing.ListAttachmentsMetadata(ctx, ticketID)
+	attachments, err := client.Ticketing.ListAttachmentsMetadata(ctx, ticketID, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -273,7 +279,7 @@ func getAttachmentsMetadata(ctx context.Context, client *engineClient.Client, ti
 
 // getComments retrieves the comments in the ticket with the given ID
 func getComments(ctx context.Context, client *engineClient.Client, ticketID string) (*engine.ListCommentsResponse, error) {
-	comments, err := client.Ticketing.ListComments(ctx, ticketID)
+	comments, err := client.Ticketing.ListComments(ctx, ticketID, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -301,7 +307,7 @@ func getProjects(ctx context.Context, client *engineClient.Client) (*engine.List
 
 // getRemoteFields retrieves all the remote fields for all the projects in the tenant's ticketing integration
 func getRemoteFields(ctx context.Context, client *engineClient.Client) (*engine.ListRemoteFieldsResponse, error) {
-	listRemoteFields, err := client.Ticketing.ListRemoteFields(ctx)
+	listRemoteFields, err := client.Ticketing.ListRemoteFields(ctx, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -315,7 +321,7 @@ func getRemoteFields(ctx context.Context, client *engineClient.Client) (*engine.
 
 // getTicket retrieves the ticket with the given ID
 func getTicket(ctx context.Context, client *engineClient.Client, ticketID string) (*engine.GetTicketResponse, error) {
-	ticket, err := client.Ticketing.GetTicket(ctx, ticketID)
+	ticket, err := client.Ticketing.GetTicket(ctx, ticketID, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -352,7 +358,9 @@ func updateTicket(ctx context.Context, client *engineClient.Client, ticketID str
 		{Op: "replace", Path: "/summary", Value: ticket.Summary},
 	}
 
-	ticketPatched, err := client.Ticketing.PatchTicket(ctx, ticketID, patchRequest)
+	ticketPatched, err := client.Ticketing.PatchTicket(ctx, ticketID, &engine.PatchTicketRequestInput{
+		Body: patchRequest,
+	})
 	if err != nil {
 		return nil, err
 	}

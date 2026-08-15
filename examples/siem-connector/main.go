@@ -10,14 +10,15 @@ import (
 	"strconv"
 	"time"
 
-	engine "github.com/synqly/go-sdk/client/engine"
-	engineClient "github.com/synqly/go-sdk/client/engine/client"
+	engine "github.com/synqly/go-sdk/v2/client/engine"
+	engineClient "github.com/synqly/go-sdk/v2/client/engine/client"
 
-	// Each OCSF event type has its own package. This is intended to make imports
-	// more granular, allowing the end-user to import only the types they need.
-	scheduledJobActivity "github.com/synqly/go-sdk/client/engine/ocsf/v130/scheduledjobactivity"
-	mgmt "github.com/synqly/go-sdk/client/management"
-	mgmtClient "github.com/synqly/go-sdk/client/management/client"
+	// Each OCSF event type has its own package. Shared object types live in the
+	// parent v130 package.
+	ocsfv130 "github.com/synqly/go-sdk/v2/client/engine/ocsf/v130"
+	scheduledJobActivity "github.com/synqly/go-sdk/v2/client/engine/ocsf/v130/scheduledjobactivity"
+	mgmt "github.com/synqly/go-sdk/v2/client/management"
+	mgmtClient "github.com/synqly/go-sdk/v2/client/management/client"
 )
 
 var (
@@ -223,7 +224,7 @@ func (app *App) backgroundJob(durationSeconds int) {
 				// Log the result of the work to Synqly
 				_, err := tenant.EventLogger.Siem.PostEvents(
 					ctx,
-					[]*engine.Event{newEvent},
+					&engine.PostSiemEventRequest{Body: []*engine.Event{newEvent}},
 				)
 				if err != nil {
 					consoleLogger.Printf("error logging event for tenant %s: %s\n", tenant.ID, err)
@@ -244,18 +245,18 @@ func createSampleEvent() *engine.Event {
 		ScheduledJobActivity: &scheduledJobActivity.ScheduledJobActivity{
 			ActivityId: scheduledJobActivity.Activity_Update,
 			ActionId:   &actionId,
-			Device: &scheduledJobActivity.Device{
-				TypeId: scheduledJobActivity.Device_Type_Server,
+			Device: &ocsfv130.Device{
+				TypeId: ocsfv130.Device_Type_Server,
 			},
-			Job: &scheduledJobActivity.Job{
-				File: &scheduledJobActivity.File{
+			Job: &ocsfv130.Job{
+				File: &ocsfv130.File{
 					Name:   "main.go",
 					TypeId: 1,
 				},
 				Name: "Background Job",
 			},
-			Metadata: &scheduledJobActivity.Metadata{
-				Product: &scheduledJobActivity.Product{
+			Metadata: &ocsfv130.Metadata{
+				Product: &ocsfv130.Product{
 					VendorName: &vendorName,
 				},
 				Version: "1.1.0",

@@ -7,10 +7,10 @@ import (
 	"os"
 	"os/signal"
 
-	"github.com/synqly/go-sdk/client/engine"
-	engineClient "github.com/synqly/go-sdk/client/engine/client"
-	mgmt "github.com/synqly/go-sdk/client/management"
-	mgmtClient "github.com/synqly/go-sdk/client/management/client"
+	"github.com/synqly/go-sdk/v2/client/engine"
+	engineClient "github.com/synqly/go-sdk/v2/client/engine/client"
+	mgmt "github.com/synqly/go-sdk/v2/client/management"
+	mgmtClient "github.com/synqly/go-sdk/v2/client/management/client"
 )
 
 var consoleLogger = log.New(os.Stdout, "INFO: ", log.Ldate|log.Ltime)
@@ -142,7 +142,7 @@ func createDevice(ctx context.Context, client *engineClient.Client, device engin
 		Device: &deviceCopy,
 	}
 
-	_, err := client.Assets.CreateAsset(ctx, req)
+	_, err := client.Assets.CreateAsset(ctx, &engine.CreateDeviceRequestInput{Body: req})
 	if err != nil {
 		return fmt.Errorf("unable to create device: %w", err)
 	}

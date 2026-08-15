@@ -14,10 +14,10 @@ import (
 	"github.com/knadh/koanf/providers/env"
 	"github.com/knadh/koanf/providers/file"
 	"github.com/knadh/koanf/v2"
-	"github.com/synqly/go-sdk/client/engine"
-	engineClient "github.com/synqly/go-sdk/client/engine/client"
-	"github.com/synqly/go-sdk/client/engine/ocsf/v130/securityfinding"
-	mgmt "github.com/synqly/go-sdk/client/management"
+	"github.com/synqly/go-sdk/v2/client/engine"
+	engineClient "github.com/synqly/go-sdk/v2/client/engine/client"
+	"github.com/synqly/go-sdk/v2/client/engine/ocsf/v130/securityfinding"
+	mgmt "github.com/synqly/go-sdk/v2/client/management"
 )
 
 var (
@@ -100,14 +100,16 @@ See also:
 		priority = engine.PriorityMedium
 	}
 
-	tick, err := client.Ticketing.CreateTicket(ctx, &engine.CreateTicketRequest{
-		Name:        title,
-		Summary:     engine.String(summary),
-		Description: engine.String(description),
-		IssueType:   engine.String("Bug"),
-		Priority:    priority.Ptr(),
-		Project:     engine.String("Test"),
-		Tags:        tags,
+	tick, err := client.Ticketing.CreateTicket(ctx, &engine.CreateTicketRequestInput{
+		Body: &engine.CreateTicketRequest{
+			Name:        title,
+			Summary:     engine.String(summary),
+			Description: engine.String(description),
+			IssueType:   engine.String("Bug"),
+			Priority:    priority.Ptr(),
+			Project:     engine.String("Test"),
+			Tags:        tags,
+		},
 	})
 	if err != nil {
 		return err

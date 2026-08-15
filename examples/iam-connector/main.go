@@ -15,9 +15,9 @@ import (
 	"github.com/knadh/koanf/providers/env"
 	"github.com/knadh/koanf/providers/file"
 	"github.com/knadh/koanf/v2"
-	"github.com/synqly/go-sdk/client/engine"
-	engineClient "github.com/synqly/go-sdk/client/engine/client"
-	mgmt "github.com/synqly/go-sdk/client/management"
+	"github.com/synqly/go-sdk/v2/client/engine"
+	engineClient "github.com/synqly/go-sdk/v2/client/engine/client"
+	mgmt "github.com/synqly/go-sdk/v2/client/management"
 )
 
 var (
@@ -165,7 +165,7 @@ func demoActions(userEmail, orgToken string, p provider) error {
 	consoleLogger.Printf("\n\n\n\n")
 	consoleLogger.Printf("Forcing password reset for user %s", userEmail)
 
-	err = t.Synqly.EngineClients["identity"].Identity.ForceUserPasswordReset(ctx, userID)
+	err = t.Synqly.EngineClients["identity"].Identity.ForceUserPasswordReset(ctx, userID, nil)
 	if err != nil {
 		return fmt.Errorf("error forcing password reset: %w", err)
 	} else {
@@ -196,7 +196,7 @@ func demoActions(userEmail, orgToken string, p provider) error {
 	consoleLogger.Printf("\n\n\n\n")
 	consoleLogger.Printf("Disabling user %s", userEmail)
 
-	err = t.Synqly.EngineClients["identity"].Identity.DisableUser(ctx, userID)
+	err = t.Synqly.EngineClients["identity"].Identity.DisableUser(ctx, userID, nil)
 	if err != nil {
 		consoleLogger.Printf("Error disabling user: %s", err)
 	} else {
@@ -230,7 +230,7 @@ func demoActions(userEmail, orgToken string, p provider) error {
 
 	now = time.Now().Add(-1 * time.Second).UTC().Format(time.RFC3339)
 
-	err = t.Synqly.EngineClients["identity"].Identity.EnableUser(ctx, userID)
+	err = t.Synqly.EngineClients["identity"].Identity.EnableUser(ctx, userID, nil)
 	if err != nil {
 		consoleLogger.Printf("Error enabling user: %s", err)
 	} else {

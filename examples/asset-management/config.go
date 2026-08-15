@@ -4,7 +4,7 @@ import (
 	"log"
 
 	"github.com/spf13/viper"
-	mgmt "github.com/synqly/go-sdk/client/management"
+	mgmt "github.com/synqly/go-sdk/v2/client/management"
 )
 
 type Config struct {

@@ -6,8 +6,8 @@ import (
 	"log"
 
 	"examples/common"
-	"github.com/synqly/go-sdk/client/engine"
-	mgmt "github.com/synqly/go-sdk/client/management"
+	"github.com/synqly/go-sdk/v2/client/engine"
+	mgmt "github.com/synqly/go-sdk/v2/client/management"
 )
 
 const (
