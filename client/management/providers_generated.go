@@ -4911,6 +4911,143 @@ func (a *AzureMonitorLogsCredential) validate() error {
 	return nil
 }
 
+type BmcHelixCredential struct {
+	Type string
+	// Username and password for BMC Helix ITSM AR REST API authentication.
+	Basic *BasicCredential
+	// Reference to existing Username & Password.
+	BasicId BasicCredentialId
+
+	rawJSON json.RawMessage
+}
+
+func (b *BmcHelixCredential) GetType() string {
+	if b == nil {
+		return ""
+	}
+	return b.Type
+}
+
+func (b *BmcHelixCredential) GetBasic() *BasicCredential {
+	if b == nil {
+		return nil
+	}
+	return b.Basic
+}
+
+func (b *BmcHelixCredential) GetBasicId() BasicCredentialId {
+	if b == nil {
+		return ""
+	}
+	return b.BasicId
+}
+
+func (b *BmcHelixCredential) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	b.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", b)
+	}
+	switch unmarshaler.Type {
+	case "basic":
+		value := new(BasicCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		b.Basic = value
+	case "basic_id":
+		var valueUnmarshaler struct {
+			BasicId BasicCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		b.BasicId = valueUnmarshaler.BasicId
+	}
+	b.rawJSON = nil
+	return nil
+}
+
+func (b BmcHelixCredential) MarshalJSON() ([]byte, error) {
+	if err := b.validate(); err != nil {
+		return nil, err
+	}
+	if b.Basic != nil {
+		return internal.MarshalJSONWithExtraProperty(b.Basic, "type", "basic")
+	}
+	if b.BasicId != "" {
+		var marshaler = struct {
+			Type    string            `json:"type"`
+			BasicId BasicCredentialId `json:"value"`
+		}{
+			Type:    "basic_id",
+			BasicId: b.BasicId,
+		}
+		return json.Marshal(marshaler)
+	}
+	if len(b.rawJSON) > 0 {
+		return b.rawJSON, nil
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", b)
+}
+
+type BmcHelixCredentialVisitor interface {
+	VisitBasic(*BasicCredential) error
+	VisitBasicId(BasicCredentialId) error
+}
+
+func (b *BmcHelixCredential) Accept(visitor BmcHelixCredentialVisitor) error {
+	if b.Basic != nil {
+		return visitor.VisitBasic(b.Basic)
+	}
+	if b.BasicId != "" {
+		return visitor.VisitBasicId(b.BasicId)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", b)
+}
+
+func (b *BmcHelixCredential) validate() error {
+	if b == nil {
+		return fmt.Errorf("type %T is nil", b)
+	}
+	var fields []string
+	if b.Basic != nil {
+		fields = append(fields, "basic")
+	}
+	if b.BasicId != "" {
+		fields = append(fields, "basic_id")
+	}
+	if len(fields) == 0 {
+		if b.Type != "" {
+			if len(b.rawJSON) > 0 {
+				return nil
+			}
+			return fmt.Errorf("type %T defines a discriminant set to %q but the field is not set", b, b.Type)
+		}
+		return fmt.Errorf("type %T is empty", b)
+	}
+	if len(fields) > 1 {
+		return fmt.Errorf("type %T defines values for %s, but only one value is allowed", b, fields)
+	}
+	if b.Type != "" {
+		field := fields[0]
+		if b.Type != field {
+			return fmt.Errorf(
+				"type %T defines a discriminant set to %q, but it does not match the %T field; either remove or update the discriminant to match",
+				b,
+				b.Type,
+				b,
+			)
+		}
+	}
+	return nil
+}
+
 type BitdefenderCredential struct {
 	Type string
 	// Configuration when creating new Token.
@@ -20678,6 +20815,10 @@ type ProviderConfig struct {
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/azuredevops-ticketing-setup)
 	TicketingAzureDevops *TicketingAzureDevOps
+	// Configuration for the BMC Helix ITSM Ticketing Provider
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/bmchelix-ticketing-setup)
+	TicketingBmchelix *TicketingBmchelix
 	// Configuration for Freshdesk.
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/freshdesk-ticketing-setup)
@@ -21697,6 +21838,13 @@ func (p *ProviderConfig) GetTicketingAzureDevops() *TicketingAzureDevOps {
 		return nil
 	}
 	return p.TicketingAzureDevops
+}
+
+func (p *ProviderConfig) GetTicketingBmchelix() *TicketingBmchelix {
+	if p == nil {
+		return nil
+	}
+	return p.TicketingBmchelix
 }
 
 func (p *ProviderConfig) GetTicketingFreshdesk() *TicketingFreshdesk {
@@ -22724,6 +22872,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.TicketingAzureDevops = value
+	case "ticketing_bmchelix":
+		value := new(TicketingBmchelix)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.TicketingBmchelix = value
 	case "ticketing_freshdesk":
 		value := new(TicketingFreshdesk)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -23327,6 +23481,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.TicketingAzureDevops != nil {
 		return internal.MarshalJSONWithExtraProperty(p.TicketingAzureDevops, "type", "ticketing_azure_devops")
 	}
+	if p.TicketingBmchelix != nil {
+		return internal.MarshalJSONWithExtraProperty(p.TicketingBmchelix, "type", "ticketing_bmchelix")
+	}
 	if p.TicketingFreshdesk != nil {
 		return internal.MarshalJSONWithExtraProperty(p.TicketingFreshdesk, "type", "ticketing_freshdesk")
 	}
@@ -23567,6 +23724,7 @@ type ProviderConfigVisitor interface {
 	VisitStorageMockStorage(*StorageMock) error
 	VisitTicketingAutotask(*TicketingAutotask) error
 	VisitTicketingAzureDevops(*TicketingAzureDevOps) error
+	VisitTicketingBmchelix(*TicketingBmchelix) error
 	VisitTicketingFreshdesk(*TicketingFreshdesk) error
 	VisitTicketingGithub(*TicketingGitHub) error
 	VisitTicketingIvanti(*TicketingIvanti) error
@@ -23988,6 +24146,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.TicketingAzureDevops != nil {
 		return visitor.VisitTicketingAzureDevops(p.TicketingAzureDevops)
+	}
+	if p.TicketingBmchelix != nil {
+		return visitor.VisitTicketingBmchelix(p.TicketingBmchelix)
 	}
 	if p.TicketingFreshdesk != nil {
 		return visitor.VisitTicketingFreshdesk(p.TicketingFreshdesk)
@@ -24486,6 +24647,9 @@ func (p *ProviderConfig) validate() error {
 	if p.TicketingAzureDevops != nil {
 		fields = append(fields, "ticketing_azure_devops")
 	}
+	if p.TicketingBmchelix != nil {
+		fields = append(fields, "ticketing_bmchelix")
+	}
 	if p.TicketingFreshdesk != nil {
 		fields = append(fields, "ticketing_freshdesk")
 	}
@@ -24877,6 +25041,8 @@ const (
 	ProviderConfigIdTicketingAutotask ProviderConfigId = "ticketing_autotask"
 	// Azure DevOps Boards
 	ProviderConfigIdTicketingAzureDevOps ProviderConfigId = "ticketing_azure_devops"
+	// BMC Helix ITSM
+	ProviderConfigIdTicketingBmchelix ProviderConfigId = "ticketing_bmchelix"
 	// Freshdesk
 	ProviderConfigIdTicketingFreshdesk ProviderConfigId = "ticketing_freshdesk"
 	// GitHub Issues
@@ -25209,6 +25375,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdTicketingAutotask, nil
 	case "ticketing_azure_devops":
 		return ProviderConfigIdTicketingAzureDevOps, nil
+	case "ticketing_bmchelix":
+		return ProviderConfigIdTicketingBmchelix, nil
 	case "ticketing_freshdesk":
 		return ProviderConfigIdTicketingFreshdesk, nil
 	case "ticketing_github":
@@ -34147,6 +34315,127 @@ func (t *TicketingAzureDevOps) MarshalJSON() ([]byte, error) {
 }
 
 func (t *TicketingAzureDevOps) String() string {
+	if t == nil {
+		return "<nil>"
+	}
+	if len(t.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(t.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(t); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", t)
+}
+
+// Configuration for the BMC Helix ITSM Ticketing Provider
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/bmchelix-ticketing-setup)
+var (
+	ticketingBmchelixFieldCredential         = big.NewInt(1 << 0)
+	ticketingBmchelixFieldInsecureSkipVerify = big.NewInt(1 << 1)
+	ticketingBmchelixFieldUrl                = big.NewInt(1 << 2)
+)
+
+type TicketingBmchelix struct {
+	Credential *BmcHelixCredential `json:"credential" url:"credential"`
+	// When true, skips verification of the BMC Helix TLS certificate. Enable this when connecting to instances that use self-signed certificates.
+	InsecureSkipVerify *bool `json:"insecure_skip_verify,omitempty" url:"insecure_skip_verify,omitempty"`
+	// Base URL for the BMC Helix AR REST API. This should be the root URL of your BMC Helix ITSM instance without any path components.
+	Url string `json:"url" url:"url"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (t *TicketingBmchelix) GetCredential() *BmcHelixCredential {
+	if t == nil {
+		return nil
+	}
+	return t.Credential
+}
+
+func (t *TicketingBmchelix) GetInsecureSkipVerify() *bool {
+	if t == nil {
+		return nil
+	}
+	return t.InsecureSkipVerify
+}
+
+func (t *TicketingBmchelix) GetUrl() string {
+	if t == nil {
+		return ""
+	}
+	return t.Url
+}
+
+func (t *TicketingBmchelix) GetExtraProperties() map[string]interface{} {
+	if t == nil {
+		return nil
+	}
+	return t.extraProperties
+}
+
+func (t *TicketingBmchelix) require(field *big.Int) {
+	if t.explicitFields == nil {
+		t.explicitFields = big.NewInt(0)
+	}
+	t.explicitFields.Or(t.explicitFields, field)
+}
+
+// SetCredential sets the Credential field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (t *TicketingBmchelix) SetCredential(credential *BmcHelixCredential) {
+	t.Credential = credential
+	t.require(ticketingBmchelixFieldCredential)
+}
+
+// SetInsecureSkipVerify sets the InsecureSkipVerify field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (t *TicketingBmchelix) SetInsecureSkipVerify(insecureSkipVerify *bool) {
+	t.InsecureSkipVerify = insecureSkipVerify
+	t.require(ticketingBmchelixFieldInsecureSkipVerify)
+}
+
+// SetUrl sets the Url field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (t *TicketingBmchelix) SetUrl(url string) {
+	t.Url = url
+	t.require(ticketingBmchelixFieldUrl)
+}
+
+func (t *TicketingBmchelix) UnmarshalJSON(data []byte) error {
+	type unmarshaler TicketingBmchelix
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*t = TicketingBmchelix(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *t)
+	if err != nil {
+		return err
+	}
+	t.extraProperties = extraProperties
+	t.rawJSON = nil
+	return nil
+}
+
+func (t *TicketingBmchelix) MarshalJSON() ([]byte, error) {
+	type embed TicketingBmchelix
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*t),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, t.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (t *TicketingBmchelix) String() string {
 	if t == nil {
 		return "<nil>"
 	}
