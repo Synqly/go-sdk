@@ -583,6 +583,7 @@ var (
 	organizationFieldPicture          = big.NewInt(1 << 9)
 	organizationFieldOptions          = big.NewInt(1 << 10)
 	organizationFieldState            = big.NewInt(1 << 11)
+	organizationFieldEndDate          = big.NewInt(1 << 12)
 )
 
 type Organization struct {
@@ -609,6 +610,8 @@ type Organization struct {
 	Options *OrganizationOptions `json:"options,omitempty" url:"options,omitempty"`
 	// Organization state. Omitted when the organization is enabled. Can only be changed through the private organizations API.
 	State *OrganizationState `json:"state,omitempty" url:"state,omitempty"`
+	// Evaluation end date (YYYY-MM-DD, end-of-day UTC) for `pov`/`plg` organizations. Omitted otherwise. Set together with `state` through the private organizations API.
+	EndDate *string `json:"end_date,omitempty" url:"end_date,omitempty"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -699,6 +702,13 @@ func (o *Organization) GetState() *OrganizationState {
 		return nil
 	}
 	return o.State
+}
+
+func (o *Organization) GetEndDate() *string {
+	if o == nil {
+		return nil
+	}
+	return o.EndDate
 }
 
 func (o *Organization) GetExtraProperties() map[string]interface{} {
@@ -797,6 +807,13 @@ func (o *Organization) SetOptions(options *OrganizationOptions) {
 func (o *Organization) SetState(state *OrganizationState) {
 	o.State = state
 	o.require(organizationFieldState)
+}
+
+// SetEndDate sets the EndDate field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (o *Organization) SetEndDate(endDate *string) {
+	o.EndDate = endDate
+	o.require(organizationFieldEndDate)
 }
 
 func (o *Organization) UnmarshalJSON(data []byte) error {
@@ -992,12 +1009,14 @@ func (o *OrganizationOptions) String() string {
 	return fmt.Sprintf("%#v", o)
 }
 
-// Organization state. When `disabled`, all management and engine API requests for the organization return HTTP 402. An organization with no state set is enabled.
+// Organization state. When `disabled`, all management and engine API requests for the organization return HTTP 402. An organization with no state set is enabled. `pov` (sales-run proof-of-value evaluation) and `plg` (self-signup) carry an `end_date`; a `plg` organization behaves like `disabled` after its `end_date` passes (end-of-day UTC), while `pov` never blocks automatically.
 type OrganizationState string
 
 const (
 	OrganizationStateEnabled  OrganizationState = "enabled"
 	OrganizationStateDisabled OrganizationState = "disabled"
+	OrganizationStatePov      OrganizationState = "pov"
+	OrganizationStatePlg      OrganizationState = "plg"
 )
 
 func NewOrganizationStateFromString(s string) (OrganizationState, error) {
@@ -1006,6 +1025,10 @@ func NewOrganizationStateFromString(s string) (OrganizationState, error) {
 		return OrganizationStateEnabled, nil
 	case "disabled":
 		return OrganizationStateDisabled, nil
+	case "pov":
+		return OrganizationStatePov, nil
+	case "plg":
+		return OrganizationStatePlg, nil
 	}
 	var t OrganizationState
 	return "", fmt.Errorf("%s is not a valid %T", s, t)
