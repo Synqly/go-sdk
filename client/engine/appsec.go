@@ -153,6 +153,62 @@ func (a *AppSecQueryApplicationFindingsRequest) SetIncludeRawData(includeRawData
 }
 
 var (
+	appSecQueryApplicationScansRequestFieldMeta           = big.NewInt(1 << 0)
+	appSecQueryApplicationScansRequestFieldLimit          = big.NewInt(1 << 1)
+	appSecQueryApplicationScansRequestFieldCursor         = big.NewInt(1 << 2)
+	appSecQueryApplicationScansRequestFieldIncludeRawData = big.NewInt(1 << 3)
+)
+
+type AppSecQueryApplicationScansRequest struct {
+	// Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
+	Meta []*string `json:"-" url:"meta,omitempty"`
+	// Number of scan records to return. Defaults to 100 with a maximum of 5000. If a provider has a maximum limit lower than 5000, the provider's maximum limit will be used instead.
+	Limit *int `json:"-" url:"limit,omitempty"`
+	// Start search from cursor position.
+	Cursor *string `json:"-" url:"cursor,omitempty"`
+	// Include the raw data from the provider in the response. Defaults to `false`.
+	IncludeRawData *bool `json:"-" url:"include_raw_data,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+}
+
+func (a *AppSecQueryApplicationScansRequest) require(field *big.Int) {
+	if a.explicitFields == nil {
+		a.explicitFields = big.NewInt(0)
+	}
+	a.explicitFields.Or(a.explicitFields, field)
+}
+
+// SetMeta sets the Meta field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (a *AppSecQueryApplicationScansRequest) SetMeta(meta []*string) {
+	a.Meta = meta
+	a.require(appSecQueryApplicationScansRequestFieldMeta)
+}
+
+// SetLimit sets the Limit field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (a *AppSecQueryApplicationScansRequest) SetLimit(limit *int) {
+	a.Limit = limit
+	a.require(appSecQueryApplicationScansRequestFieldLimit)
+}
+
+// SetCursor sets the Cursor field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (a *AppSecQueryApplicationScansRequest) SetCursor(cursor *string) {
+	a.Cursor = cursor
+	a.require(appSecQueryApplicationScansRequestFieldCursor)
+}
+
+// SetIncludeRawData sets the IncludeRawData field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (a *AppSecQueryApplicationScansRequest) SetIncludeRawData(includeRawData *bool) {
+	a.IncludeRawData = includeRawData
+	a.require(appSecQueryApplicationScansRequestFieldIncludeRawData)
+}
+
+var (
 	appSecQueryApplicationsRequestFieldMeta           = big.NewInt(1 << 0)
 	appSecQueryApplicationsRequestFieldLimit          = big.NewInt(1 << 1)
 	appSecQueryApplicationsRequestFieldFilter         = big.NewInt(1 << 2)
@@ -682,6 +738,142 @@ func (a *AppSecQueryApplicationFindingsResponse) String() string {
 }
 
 var (
+	appSecQueryApplicationScansResponseFieldMessages = big.NewInt(1 << 0)
+	appSecQueryApplicationScansResponseFieldMeta     = big.NewInt(1 << 1)
+	appSecQueryApplicationScansResponseFieldCursor   = big.NewInt(1 << 2)
+	appSecQueryApplicationScansResponseFieldResult   = big.NewInt(1 << 3)
+)
+
+type AppSecQueryApplicationScansResponse struct {
+	// Additional messages from the service response that may be helpful to the client.
+	Messages *MessagesResponse `json:"messages,omitempty" url:"messages,omitempty"`
+	// Various metadata about the results organized by group, then type, then field.
+	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
+	// Cursor to use to retrieve the next page of results
+	Cursor string `json:"cursor" url:"cursor"`
+	// List of scan activity records for the application.
+	Result []AppSecScanActivity `json:"result" url:"result"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (a *AppSecQueryApplicationScansResponse) GetMessages() *MessagesResponse {
+	if a == nil {
+		return nil
+	}
+	return a.Messages
+}
+
+func (a *AppSecQueryApplicationScansResponse) GetMeta() *MetaResponse {
+	if a == nil {
+		return nil
+	}
+	return a.Meta
+}
+
+func (a *AppSecQueryApplicationScansResponse) GetCursor() string {
+	if a == nil {
+		return ""
+	}
+	return a.Cursor
+}
+
+func (a *AppSecQueryApplicationScansResponse) GetResult() []AppSecScanActivity {
+	if a == nil {
+		return nil
+	}
+	return a.Result
+}
+
+func (a *AppSecQueryApplicationScansResponse) GetExtraProperties() map[string]interface{} {
+	if a == nil {
+		return nil
+	}
+	return a.extraProperties
+}
+
+func (a *AppSecQueryApplicationScansResponse) require(field *big.Int) {
+	if a.explicitFields == nil {
+		a.explicitFields = big.NewInt(0)
+	}
+	a.explicitFields.Or(a.explicitFields, field)
+}
+
+// SetMessages sets the Messages field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (a *AppSecQueryApplicationScansResponse) SetMessages(messages *MessagesResponse) {
+	a.Messages = messages
+	a.require(appSecQueryApplicationScansResponseFieldMessages)
+}
+
+// SetMeta sets the Meta field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (a *AppSecQueryApplicationScansResponse) SetMeta(meta *MetaResponse) {
+	a.Meta = meta
+	a.require(appSecQueryApplicationScansResponseFieldMeta)
+}
+
+// SetCursor sets the Cursor field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (a *AppSecQueryApplicationScansResponse) SetCursor(cursor string) {
+	a.Cursor = cursor
+	a.require(appSecQueryApplicationScansResponseFieldCursor)
+}
+
+// SetResult sets the Result field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (a *AppSecQueryApplicationScansResponse) SetResult(result []AppSecScanActivity) {
+	a.Result = result
+	a.require(appSecQueryApplicationScansResponseFieldResult)
+}
+
+func (a *AppSecQueryApplicationScansResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler AppSecQueryApplicationScansResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*a = AppSecQueryApplicationScansResponse(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+	a.rawJSON = nil
+	return nil
+}
+
+func (a *AppSecQueryApplicationScansResponse) MarshalJSON() ([]byte, error) {
+	type embed AppSecQueryApplicationScansResponse
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*a),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, a.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (a *AppSecQueryApplicationScansResponse) String() string {
+	if a == nil {
+		return "<nil>"
+	}
+	if len(a.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(a.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(a); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", a)
+}
+
+var (
 	appSecQueryApplicationsResponseFieldMessages = big.NewInt(1 << 0)
 	appSecQueryApplicationsResponseFieldMeta     = big.NewInt(1 << 1)
 	appSecQueryApplicationsResponseFieldCursor   = big.NewInt(1 << 2)
@@ -952,6 +1144,9 @@ func (a *AppSecQueryFindingsResponse) String() string {
 	}
 	return fmt.Sprintf("%#v", a)
 }
+
+// An application security scan activity representing a single scan run.
+type AppSecScanActivity = latest.ScanActivity
 
 // The unique identifier of the application
 type ApplicationId = Id

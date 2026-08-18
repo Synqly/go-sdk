@@ -28,6 +28,7 @@ import (
 	httpactivity "github.com/synqly/go-sdk/v2/client/engine/ocsf/v160/httpactivity"
 	applicationinventoryinfo "github.com/synqly/go-sdk/v2/client/engine/ocsf/v180/applicationinventoryinfo"
 	applicationsecurityposturefinding "github.com/synqly/go-sdk/v2/client/engine/ocsf/v180/applicationsecurityposturefinding"
+	scanactivity "github.com/synqly/go-sdk/v2/client/engine/ocsf/v180/scanactivity"
 )
 
 type AccountChange = *accountchange.AccountChange
@@ -71,6 +72,8 @@ type ModuleActivity = *moduleactivity.ModuleActivity
 type NetworkActivity = *networkactivity.NetworkActivity
 
 type ProcessActivity = *processactivity.ProcessActivity
+
+type ScanActivity = *scanactivity.ScanActivity
 
 type ScheduledJobActivity = *scheduledjobactivity.ScheduledJobActivity
 

@@ -126,3 +126,22 @@ func (c *Client) GetApplicationFindingDetails(
     return response.Body, nil
 }
 
+// Returns a list of scan activity records for the application matching `{applicationId}` from the token-linked application security integration.
+func (c *Client) QueryApplicationScans(
+    ctx context.Context,
+    applicationId engine.ApplicationId,
+    request *engine.AppSecQueryApplicationScansRequest,
+    opts ...option.RequestOption,
+) (*engine.AppSecQueryApplicationScansResponse, error){
+    response, err := c.WithRawResponse.QueryApplicationScans(
+        ctx,
+        applicationId,
+        request,
+        opts...,
+    )
+    if err != nil {
+        return nil, err
+    }
+    return response.Body, nil
+}
+

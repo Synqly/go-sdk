@@ -12,6 +12,7 @@ const (
 	OperationIdAppsecCreateFindings                             OperationId = "appsec_create_findings"
 	OperationIdAppsecGetApplicationFindingDetails               OperationId = "appsec_get_application_finding_details"
 	OperationIdAppsecQueryApplicationFindings                   OperationId = "appsec_query_application_findings"
+	OperationIdAppsecQueryApplicationScans                      OperationId = "appsec_query_application_scans"
 	OperationIdAppsecQueryApplications                          OperationId = "appsec_query_applications"
 	OperationIdAppsecQueryFindings                              OperationId = "appsec_query_findings"
 	OperationIdAssetsCreateAsset                                OperationId = "assets_create_asset"
@@ -148,6 +149,8 @@ func NewOperationIdFromString(s string) (OperationId, error) {
 		return OperationIdAppsecGetApplicationFindingDetails, nil
 	case "appsec_query_application_findings":
 		return OperationIdAppsecQueryApplicationFindings, nil
+	case "appsec_query_application_scans":
+		return OperationIdAppsecQueryApplicationScans, nil
 	case "appsec_query_applications":
 		return OperationIdAppsecQueryApplications, nil
 	case "appsec_query_findings":

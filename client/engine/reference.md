@@ -467,6 +467,98 @@ client.Appsec.GetApplicationFindingDetails(
 </dl>
 </details>
 
+<details><summary><code>client.Appsec.QueryApplicationScans(ApplicationId) -> *engine.AppSecQueryApplicationScansResponse</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Returns a list of scan activity records for the application matching `{applicationId}` from the token-linked application security integration.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```go
+request := &engine.AppSecQueryApplicationScansRequest{}
+client.Appsec.QueryApplicationScans(
+        context.TODO(),
+        "applicationId",
+        request,
+    )
+}
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**applicationId:** `engine.ApplicationId` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**meta:** `*string` — Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**limit:** `*int` — Number of scan records to return. Defaults to 100 with a maximum of 5000. If a provider has a maximum limit lower than 5000, the provider's maximum limit will be used instead.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**cursor:** `*string` — Start search from cursor position.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**includeRawData:** `*bool` — Include the raw data from the provider in the response. Defaults to `false`.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
 ## Assets
 <details><summary><code>client.Assets.QueryDevices() -> *engine.QueryDevicesResponse</code></summary>
 <dl>
