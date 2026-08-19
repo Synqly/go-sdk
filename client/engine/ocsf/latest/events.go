@@ -11,6 +11,7 @@ import (
 	detectionfinding "github.com/synqly/go-sdk/v2/client/engine/ocsf/v130/detectionfinding"
 	dnsactivity "github.com/synqly/go-sdk/v2/client/engine/ocsf/v130/dnsactivity"
 	entitymanagement "github.com/synqly/go-sdk/v2/client/engine/ocsf/v130/entitymanagement"
+	eventlogactivity "github.com/synqly/go-sdk/v2/client/engine/ocsf/v130/eventlogactivity"
 	fileactivity "github.com/synqly/go-sdk/v2/client/engine/ocsf/v130/fileactivity"
 	groupmanagement "github.com/synqly/go-sdk/v2/client/engine/ocsf/v130/groupmanagement"
 	incidentfinding "github.com/synqly/go-sdk/v2/client/engine/ocsf/v130/incidentfinding"
@@ -54,6 +55,8 @@ type DnsActivity = *dnsactivity.DnsActivity
 type EmailActivity = *emailactivity.EmailActivity
 
 type EntityManagement = *entitymanagement.EntityManagement
+
+type EventLogActivity = *eventlogactivity.EventLog
 
 type FileActivity = *fileactivity.FileActivity
 

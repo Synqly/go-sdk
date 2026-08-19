@@ -18,6 +18,7 @@ import (
 	detectionfinding "github.com/synqly/go-sdk/v2/client/engine/ocsf/v130/detectionfinding"
 	dnsactivity "github.com/synqly/go-sdk/v2/client/engine/ocsf/v130/dnsactivity"
 	entitymanagement "github.com/synqly/go-sdk/v2/client/engine/ocsf/v130/entitymanagement"
+	eventlogactivity "github.com/synqly/go-sdk/v2/client/engine/ocsf/v130/eventlogactivity"
 	fileactivity "github.com/synqly/go-sdk/v2/client/engine/ocsf/v130/fileactivity"
 	groupmanagement "github.com/synqly/go-sdk/v2/client/engine/ocsf/v130/groupmanagement"
 	incidentfinding "github.com/synqly/go-sdk/v2/client/engine/ocsf/v130/incidentfinding"
@@ -82,6 +83,7 @@ type Event struct {
 	ChatMessageActivity               *chatmessageactivity.ChatMessageActivity
 	ConversationActivity              *conversationactivity.ConversationActivity
 	ApplicationInventoryInfo          *applicationinventoryinfo.ApplicationInventoryInfo
+	EventLogActivity                  *eventlogactivity.EventLog
 
 	rawJSON json.RawMessage
 }
@@ -345,6 +347,13 @@ func (e *Event) GetApplicationInventoryInfo() *applicationinventoryinfo.Applicat
 	return e.ApplicationInventoryInfo
 }
 
+func (e *Event) GetEventLogActivity() *eventlogactivity.EventLog {
+	if e == nil {
+		return nil
+	}
+	return e.EventLogActivity
+}
+
 func (e *Event) UnmarshalJSON(data []byte) error {
 	var unmarshaler struct {
 		ClassName string `json:"class_name"`
@@ -573,6 +582,12 @@ func (e *Event) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		e.ApplicationInventoryInfo = value
+	case "Event Log Activity":
+		value := new(eventlogactivity.EventLog)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.EventLogActivity = value
 	}
 	e.rawJSON = nil
 	return nil
@@ -690,6 +705,9 @@ func (e Event) MarshalJSON() ([]byte, error) {
 	if e.ApplicationInventoryInfo != nil {
 		return internal.MarshalJSONWithExtraProperty(e.ApplicationInventoryInfo, "class_name", "Application Inventory Info")
 	}
+	if e.EventLogActivity != nil {
+		return internal.MarshalJSONWithExtraProperty(e.EventLogActivity, "class_name", "Event Log Activity")
+	}
 	if len(e.rawJSON) > 0 {
 		return e.rawJSON, nil
 	}
@@ -733,6 +751,7 @@ type EventVisitor interface {
 	VisitChatMessageActivity(*chatmessageactivity.ChatMessageActivity) error
 	VisitConversationActivity(*conversationactivity.ConversationActivity) error
 	VisitApplicationInventoryInfo(*applicationinventoryinfo.ApplicationInventoryInfo) error
+	VisitEventLogActivity(*eventlogactivity.EventLog) error
 }
 
 func (e *Event) Accept(visitor EventVisitor) error {
@@ -843,6 +862,9 @@ func (e *Event) Accept(visitor EventVisitor) error {
 	}
 	if e.ApplicationInventoryInfo != nil {
 		return visitor.VisitApplicationInventoryInfo(e.ApplicationInventoryInfo)
+	}
+	if e.EventLogActivity != nil {
+		return visitor.VisitEventLogActivity(e.EventLogActivity)
 	}
 	return fmt.Errorf("type %T does not define a non-empty union type", e)
 }
@@ -959,6 +981,9 @@ func (e *Event) validate() error {
 	}
 	if e.ApplicationInventoryInfo != nil {
 		fields = append(fields, "Application Inventory Info")
+	}
+	if e.EventLogActivity != nil {
+		fields = append(fields, "Event Log Activity")
 	}
 	if len(fields) == 0 {
 		if e.ClassName != "" {

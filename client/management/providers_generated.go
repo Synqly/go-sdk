@@ -15480,6 +15480,126 @@ func (i *IdentityEntraIdMock) String() string {
 	return fmt.Sprintf("%#v", i)
 }
 
+// Configuration for GitHub as an identity provider.
+var (
+	identityGitHubFieldCredential       = big.NewInt(1 << 0)
+	identityGitHubFieldOrganizationSlug = big.NewInt(1 << 1)
+	identityGitHubFieldUrl              = big.NewInt(1 << 2)
+)
+
+type IdentityGitHub struct {
+	// Credentials used for accessing the GitHub API.
+	Credential *GitHubCredential `json:"credential" url:"credential"`
+	// GitHub organization slug.
+	OrganizationSlug string `json:"organization_slug" url:"organization_slug"`
+	// Base URL for the GitHub environment. Required for GitHub Enterprise Server deployments.
+	Url *string `json:"url,omitempty" url:"url,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (i *IdentityGitHub) GetCredential() *GitHubCredential {
+	if i == nil {
+		return nil
+	}
+	return i.Credential
+}
+
+func (i *IdentityGitHub) GetOrganizationSlug() string {
+	if i == nil {
+		return ""
+	}
+	return i.OrganizationSlug
+}
+
+func (i *IdentityGitHub) GetUrl() *string {
+	if i == nil {
+		return nil
+	}
+	return i.Url
+}
+
+func (i *IdentityGitHub) GetExtraProperties() map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	return i.extraProperties
+}
+
+func (i *IdentityGitHub) require(field *big.Int) {
+	if i.explicitFields == nil {
+		i.explicitFields = big.NewInt(0)
+	}
+	i.explicitFields.Or(i.explicitFields, field)
+}
+
+// SetCredential sets the Credential field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (i *IdentityGitHub) SetCredential(credential *GitHubCredential) {
+	i.Credential = credential
+	i.require(identityGitHubFieldCredential)
+}
+
+// SetOrganizationSlug sets the OrganizationSlug field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (i *IdentityGitHub) SetOrganizationSlug(organizationSlug string) {
+	i.OrganizationSlug = organizationSlug
+	i.require(identityGitHubFieldOrganizationSlug)
+}
+
+// SetUrl sets the Url field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (i *IdentityGitHub) SetUrl(url *string) {
+	i.Url = url
+	i.require(identityGitHubFieldUrl)
+}
+
+func (i *IdentityGitHub) UnmarshalJSON(data []byte) error {
+	type unmarshaler IdentityGitHub
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*i = IdentityGitHub(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *i)
+	if err != nil {
+		return err
+	}
+	i.extraProperties = extraProperties
+	i.rawJSON = nil
+	return nil
+}
+
+func (i *IdentityGitHub) MarshalJSON() ([]byte, error) {
+	type embed IdentityGitHub
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*i),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, i.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (i *IdentityGitHub) String() string {
+	if i == nil {
+		return "<nil>"
+	}
+	if len(i.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(i.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(i); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", i)
+}
+
 // Configuration for Google Workspace.
 //
 // [Configuration guide](https://docs.synqly.com/guides/provider-configuration/google-workspace-setup)
@@ -21211,6 +21331,8 @@ type ProviderConfig struct {
 	IdentityEntraId *IdentityEntraId
 	// Configuration for [MOCK] Microsoft Entra ID.
 	IdentityEntraIdMock *IdentityEntraIdMock
+	// Configuration for GitHub as an identity provider.
+	IdentityGithub *IdentityGitHub
 	// Configuration for Google Workspace.
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/google-workspace-setup)
@@ -22067,6 +22189,13 @@ func (p *ProviderConfig) GetIdentityEntraIdMock() *IdentityEntraIdMock {
 		return nil
 	}
 	return p.IdentityEntraIdMock
+}
+
+func (p *ProviderConfig) GetIdentityGithub() *IdentityGitHub {
+	if p == nil {
+		return nil
+	}
+	return p.IdentityGithub
 }
 
 func (p *ProviderConfig) GetIdentityGoogle() *IdentityGoogle {
@@ -23176,6 +23305,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.IdentityEntraIdMock = value
+	case "identity_github":
+		value := new(IdentityGitHub)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.IdentityGithub = value
 	case "identity_google":
 		value := new(IdentityGoogle)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -23965,6 +24100,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.IdentityEntraIdMock != nil {
 		return internal.MarshalJSONWithExtraProperty(p.IdentityEntraIdMock, "type", "identity_entra_id_mock")
 	}
+	if p.IdentityGithub != nil {
+		return internal.MarshalJSONWithExtraProperty(p.IdentityGithub, "type", "identity_github")
+	}
 	if p.IdentityGoogle != nil {
 		return internal.MarshalJSONWithExtraProperty(p.IdentityGoogle, "type", "identity_google")
 	}
@@ -24325,6 +24463,7 @@ type ProviderConfigVisitor interface {
 	VisitIdentityAwsIam(*IdentityAwsIam) error
 	VisitIdentityEntraId(*IdentityEntraId) error
 	VisitIdentityEntraIdMock(*IdentityEntraIdMock) error
+	VisitIdentityGithub(*IdentityGitHub) error
 	VisitIdentityGoogle(*IdentityGoogle) error
 	VisitIdentityGoogleMock(*IdentityGoogleMock) error
 	VisitIdentityGreenhouse(*IdentityGreenhouse) error
@@ -24642,6 +24781,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.IdentityEntraIdMock != nil {
 		return visitor.VisitIdentityEntraIdMock(p.IdentityEntraIdMock)
+	}
+	if p.IdentityGithub != nil {
+		return visitor.VisitIdentityGithub(p.IdentityGithub)
 	}
 	if p.IdentityGoogle != nil {
 		return visitor.VisitIdentityGoogle(p.IdentityGoogle)
@@ -25152,6 +25294,9 @@ func (p *ProviderConfig) validate() error {
 	if p.IdentityEntraIdMock != nil {
 		fields = append(fields, "identity_entra_id_mock")
 	}
+	if p.IdentityGithub != nil {
+		fields = append(fields, "identity_github")
+	}
 	if p.IdentityGoogle != nil {
 		fields = append(fields, "identity_google")
 	}
@@ -25609,6 +25754,8 @@ const (
 	ProviderConfigIdIdentityEntraId ProviderConfigId = "identity_entra_id"
 	// [MOCK] Microsoft Entra ID
 	ProviderConfigIdIdentityEntraIdMock ProviderConfigId = "identity_entra_id_mock"
+	// GitHub Identity
+	ProviderConfigIdIdentityGitHub ProviderConfigId = "identity_github"
 	// Google Workspace
 	ProviderConfigIdIdentityGoogle ProviderConfigId = "identity_google"
 	// [MOCK] Google Workspace
@@ -25949,6 +26096,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdIdentityEntraId, nil
 	case "identity_entra_id_mock":
 		return ProviderConfigIdIdentityEntraIdMock, nil
+	case "identity_github":
+		return ProviderConfigIdIdentityGitHub, nil
 	case "identity_google":
 		return ProviderConfigIdIdentityGoogle, nil
 	case "identity_google_mock":
