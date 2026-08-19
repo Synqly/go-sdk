@@ -2364,8 +2364,9 @@ var (
 	createTicketRequestFieldStatus         = big.NewInt(1 << 9)
 	createTicketRequestFieldProject        = big.NewInt(1 << 10)
 	createTicketRequestFieldIssueType      = big.NewInt(1 << 11)
-	createTicketRequestFieldTags           = big.NewInt(1 << 12)
-	createTicketRequestFieldCustomFields   = big.NewInt(1 << 13)
+	createTicketRequestFieldParent         = big.NewInt(1 << 12)
+	createTicketRequestFieldTags           = big.NewInt(1 << 13)
+	createTicketRequestFieldCustomFields   = big.NewInt(1 << 14)
 )
 
 type CreateTicketRequest struct {
@@ -2393,6 +2394,8 @@ type CreateTicketRequest struct {
 	Project *string `json:"project,omitempty" url:"project,omitempty"`
 	// The ticket's type.
 	IssueType *string `json:"issue_type,omitempty" url:"issue_type,omitempty"`
+	// Provider specific ID of the parent ticket.
+	Parent *string `json:"parent,omitempty" url:"parent,omitempty"`
 	// Associate tags with Ticket
 	Tags []string `json:"tags,omitempty" url:"tags,omitempty"`
 	// Set custom fields for this ticket, keys are the custom field names.
@@ -2487,6 +2490,13 @@ func (c *CreateTicketRequest) GetIssueType() *string {
 		return nil
 	}
 	return c.IssueType
+}
+
+func (c *CreateTicketRequest) GetParent() *string {
+	if c == nil {
+		return nil
+	}
+	return c.Parent
 }
 
 func (c *CreateTicketRequest) GetTags() []string {
@@ -2599,6 +2609,13 @@ func (c *CreateTicketRequest) SetProject(project *string) {
 func (c *CreateTicketRequest) SetIssueType(issueType *string) {
 	c.IssueType = issueType
 	c.require(createTicketRequestFieldIssueType)
+}
+
+// SetParent sets the Parent field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CreateTicketRequest) SetParent(parent *string) {
+	c.Parent = parent
+	c.require(createTicketRequestFieldParent)
 }
 
 // SetTags sets the Tags field and marks it as non-optional;
@@ -5576,10 +5593,11 @@ var (
 	ticketFieldStatus         = big.NewInt(1 << 12)
 	ticketFieldProject        = big.NewInt(1 << 13)
 	ticketFieldIssueType      = big.NewInt(1 << 14)
-	ticketFieldTags           = big.NewInt(1 << 15)
-	ticketFieldAttachments    = big.NewInt(1 << 16)
-	ticketFieldCustomFields   = big.NewInt(1 << 17)
-	ticketFieldUnmapped       = big.NewInt(1 << 18)
+	ticketFieldParent         = big.NewInt(1 << 15)
+	ticketFieldTags           = big.NewInt(1 << 16)
+	ticketFieldAttachments    = big.NewInt(1 << 17)
+	ticketFieldCustomFields   = big.NewInt(1 << 18)
+	ticketFieldUnmapped       = big.NewInt(1 << 19)
 )
 
 type Ticket struct {
@@ -5612,6 +5630,8 @@ type Ticket struct {
 	Project *ProjectId `json:"project,omitempty" url:"project,omitempty"`
 	// The ticket's type.
 	IssueType *IssueTypeId `json:"issue_type,omitempty" url:"issue_type,omitempty"`
+	// Provider specific ID of the parent ticket.
+	Parent *TicketId `json:"parent,omitempty" url:"parent,omitempty"`
 	// Associate tags with Ticket
 	Tags []string `json:"tags,omitempty" url:"tags,omitempty"`
 	// Metadata of attachments associated with the ticket
@@ -5731,6 +5751,13 @@ func (t *Ticket) GetIssueType() *IssueTypeId {
 		return nil
 	}
 	return t.IssueType
+}
+
+func (t *Ticket) GetParent() *TicketId {
+	if t == nil {
+		return nil
+	}
+	return t.Parent
 }
 
 func (t *Ticket) GetTags() []string {
@@ -5878,6 +5905,13 @@ func (t *Ticket) SetProject(project *ProjectId) {
 func (t *Ticket) SetIssueType(issueType *IssueTypeId) {
 	t.IssueType = issueType
 	t.require(ticketFieldIssueType)
+}
+
+// SetParent sets the Parent field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (t *Ticket) SetParent(parent *TicketId) {
+	t.Parent = parent
+	t.require(ticketFieldParent)
 }
 
 // SetTags sets the Tags field and marks it as non-optional;
