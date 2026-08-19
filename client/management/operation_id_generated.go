@@ -90,6 +90,8 @@ const (
 	OperationIdIdentityQueryUsers                               OperationId = "identity_query_users"
 	OperationIdIncidentresponseQueryEscalationPolicies          OperationId = "incidentresponse_query_escalation_policies"
 	OperationIdIncidentresponseQueryEscalationPolicyUsersOnCall OperationId = "incidentresponse_query_escalation_policy_users_on_call"
+	OperationIdNetworksecurityQueryTrafficEvents                OperationId = "networksecurity_query_traffic_events"
+	OperationIdNetworksecurityQueryTrafficLogConfigurations     OperationId = "networksecurity_query_traffic_log_configurations"
 	OperationIdNotificationsClearMessage                        OperationId = "notifications_clear_message"
 	OperationIdNotificationsCreateMessage                       OperationId = "notifications_create_message"
 	OperationIdNotificationsGetMessage                          OperationId = "notifications_get_message"
@@ -305,6 +307,10 @@ func NewOperationIdFromString(s string) (OperationId, error) {
 		return OperationIdIncidentresponseQueryEscalationPolicies, nil
 	case "incidentresponse_query_escalation_policy_users_on_call":
 		return OperationIdIncidentresponseQueryEscalationPolicyUsersOnCall, nil
+	case "networksecurity_query_traffic_events":
+		return OperationIdNetworksecurityQueryTrafficEvents, nil
+	case "networksecurity_query_traffic_log_configurations":
+		return OperationIdNetworksecurityQueryTrafficLogConfigurations, nil
 	case "notifications_clear_message":
 		return OperationIdNotificationsClearMessage, nil
 	case "notifications_create_message":

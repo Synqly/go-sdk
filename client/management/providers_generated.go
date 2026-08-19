@@ -4637,6 +4637,30 @@ func (a *AzureBlobCredential) validate() error {
 	return nil
 }
 
+type AzureCloud string
+
+const (
+	// Azure public cloud (ARM https://management.azure.com).
+	AzureCloudPublic AzureCloud = "public"
+	// Azure Government (ARM https://management.usgovcloudapi.net).
+	AzureCloudGovernment AzureCloud = "government"
+)
+
+func NewAzureCloudFromString(s string) (AzureCloud, error) {
+	switch s {
+	case "public":
+		return AzureCloudPublic, nil
+	case "government":
+		return AzureCloudGovernment, nil
+	}
+	var t AzureCloud
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (a AzureCloud) Ptr() *AzureCloud {
+	return &a
+}
+
 type AzureDevOpsTicketingCredential struct {
 	Type string
 	// Personal Access Token (PAT) for authenticating with the Azure DevOps REST API. Requires vso.work and vso.work_write scopes.
@@ -4884,6 +4908,143 @@ func (a *AzureMonitorLogsCredential) validate() error {
 	}
 	if a.TokenId != "" {
 		fields = append(fields, "token_id")
+	}
+	if len(fields) == 0 {
+		if a.Type != "" {
+			if len(a.rawJSON) > 0 {
+				return nil
+			}
+			return fmt.Errorf("type %T defines a discriminant set to %q but the field is not set", a, a.Type)
+		}
+		return fmt.Errorf("type %T is empty", a)
+	}
+	if len(fields) > 1 {
+		return fmt.Errorf("type %T defines values for %s, but only one value is allowed", a, fields)
+	}
+	if a.Type != "" {
+		field := fields[0]
+		if a.Type != field {
+			return fmt.Errorf(
+				"type %T defines a discriminant set to %q, but it does not match the %T field; either remove or update the discriminant to match",
+				a,
+				a.Type,
+				a,
+			)
+		}
+	}
+	return nil
+}
+
+type AzureNetworkSecurityCredential struct {
+	Type string
+	// Azure Client ID and Client Secret for a service principal with access to Network Watcher and related Azure networking resources.
+	OAuthClient *OAuthClientCredential
+	// Reference to existing Client Credentials.
+	OAuthClientId OAuthClientCredentialId
+
+	rawJSON json.RawMessage
+}
+
+func (a *AzureNetworkSecurityCredential) GetType() string {
+	if a == nil {
+		return ""
+	}
+	return a.Type
+}
+
+func (a *AzureNetworkSecurityCredential) GetOAuthClient() *OAuthClientCredential {
+	if a == nil {
+		return nil
+	}
+	return a.OAuthClient
+}
+
+func (a *AzureNetworkSecurityCredential) GetOAuthClientId() OAuthClientCredentialId {
+	if a == nil {
+		return ""
+	}
+	return a.OAuthClientId
+}
+
+func (a *AzureNetworkSecurityCredential) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	a.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", a)
+	}
+	switch unmarshaler.Type {
+	case "o_auth_client":
+		value := new(OAuthClientCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		a.OAuthClient = value
+	case "o_auth_client_id":
+		var valueUnmarshaler struct {
+			OAuthClientId OAuthClientCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		a.OAuthClientId = valueUnmarshaler.OAuthClientId
+	}
+	a.rawJSON = nil
+	return nil
+}
+
+func (a AzureNetworkSecurityCredential) MarshalJSON() ([]byte, error) {
+	if err := a.validate(); err != nil {
+		return nil, err
+	}
+	if a.OAuthClient != nil {
+		return internal.MarshalJSONWithExtraProperty(a.OAuthClient, "type", "o_auth_client")
+	}
+	if a.OAuthClientId != "" {
+		var marshaler = struct {
+			Type          string                  `json:"type"`
+			OAuthClientId OAuthClientCredentialId `json:"value"`
+		}{
+			Type:          "o_auth_client_id",
+			OAuthClientId: a.OAuthClientId,
+		}
+		return json.Marshal(marshaler)
+	}
+	if len(a.rawJSON) > 0 {
+		return a.rawJSON, nil
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", a)
+}
+
+type AzureNetworkSecurityCredentialVisitor interface {
+	VisitOAuthClient(*OAuthClientCredential) error
+	VisitOAuthClientId(OAuthClientCredentialId) error
+}
+
+func (a *AzureNetworkSecurityCredential) Accept(visitor AzureNetworkSecurityCredentialVisitor) error {
+	if a.OAuthClient != nil {
+		return visitor.VisitOAuthClient(a.OAuthClient)
+	}
+	if a.OAuthClientId != "" {
+		return visitor.VisitOAuthClientId(a.OAuthClientId)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", a)
+}
+
+func (a *AzureNetworkSecurityCredential) validate() error {
+	if a == nil {
+		return fmt.Errorf("type %T is nil", a)
+	}
+	var fields []string
+	if a.OAuthClient != nil {
+		fields = append(fields, "o_auth_client")
+	}
+	if a.OAuthClientId != "" {
+		fields = append(fields, "o_auth_client_id")
 	}
 	if len(fields) == 0 {
 		if a.Type != "" {
@@ -18011,6 +18172,440 @@ func (m *MimecastCloudGatewayCredential) validate() error {
 	return nil
 }
 
+// Connect Synqly to AWS VPC Flow Logs.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/aws-networksecurity-setup)
+var (
+	networkSecurityAwsFieldCredential                 = big.NewInt(1 << 0)
+	networkSecurityAwsFieldRegion                     = big.NewInt(1 << 1)
+	networkSecurityAwsFieldTrafficLogConfigurationIds = big.NewInt(1 << 2)
+)
+
+type NetworkSecurityAws struct {
+	// AWS credentials that can read VPC Flow Logs and their CloudWatch Logs or S3 destinations.
+	Credential *AwsProviderCredential `json:"credential" url:"credential"`
+	// AWS region where your VPC Flow Logs are configured (for example, `us-east-1`).
+	Region AwsRegion `json:"region" url:"region"`
+	// Optional list of VPC Flow Log IDs (`fl-...`). Leave empty to include all flow logs in the region.
+	TrafficLogConfigurationIds []string `json:"traffic_log_configuration_ids,omitempty" url:"traffic_log_configuration_ids,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (n *NetworkSecurityAws) GetCredential() *AwsProviderCredential {
+	if n == nil {
+		return nil
+	}
+	return n.Credential
+}
+
+func (n *NetworkSecurityAws) GetRegion() AwsRegion {
+	if n == nil {
+		return ""
+	}
+	return n.Region
+}
+
+func (n *NetworkSecurityAws) GetTrafficLogConfigurationIds() []string {
+	if n == nil {
+		return nil
+	}
+	return n.TrafficLogConfigurationIds
+}
+
+func (n *NetworkSecurityAws) GetExtraProperties() map[string]interface{} {
+	if n == nil {
+		return nil
+	}
+	return n.extraProperties
+}
+
+func (n *NetworkSecurityAws) require(field *big.Int) {
+	if n.explicitFields == nil {
+		n.explicitFields = big.NewInt(0)
+	}
+	n.explicitFields.Or(n.explicitFields, field)
+}
+
+// SetCredential sets the Credential field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (n *NetworkSecurityAws) SetCredential(credential *AwsProviderCredential) {
+	n.Credential = credential
+	n.require(networkSecurityAwsFieldCredential)
+}
+
+// SetRegion sets the Region field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (n *NetworkSecurityAws) SetRegion(region AwsRegion) {
+	n.Region = region
+	n.require(networkSecurityAwsFieldRegion)
+}
+
+// SetTrafficLogConfigurationIds sets the TrafficLogConfigurationIds field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (n *NetworkSecurityAws) SetTrafficLogConfigurationIds(trafficLogConfigurationIds []string) {
+	n.TrafficLogConfigurationIds = trafficLogConfigurationIds
+	n.require(networkSecurityAwsFieldTrafficLogConfigurationIds)
+}
+
+func (n *NetworkSecurityAws) UnmarshalJSON(data []byte) error {
+	type unmarshaler NetworkSecurityAws
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*n = NetworkSecurityAws(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *n)
+	if err != nil {
+		return err
+	}
+	n.extraProperties = extraProperties
+	n.rawJSON = nil
+	return nil
+}
+
+func (n *NetworkSecurityAws) MarshalJSON() ([]byte, error) {
+	type embed NetworkSecurityAws
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*n),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, n.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (n *NetworkSecurityAws) String() string {
+	if n == nil {
+		return "<nil>"
+	}
+	if len(n.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(n.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(n); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", n)
+}
+
+// Connect Synqly to Azure Network Watcher flow logs.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/azure-networksecurity-setup)
+var (
+	networkSecurityAzureFieldAzureCloud                 = big.NewInt(1 << 0)
+	networkSecurityAzureFieldCredential                 = big.NewInt(1 << 1)
+	networkSecurityAzureFieldNetworkWatcherName         = big.NewInt(1 << 2)
+	networkSecurityAzureFieldResourceGroup              = big.NewInt(1 << 3)
+	networkSecurityAzureFieldSubscriptionId             = big.NewInt(1 << 4)
+	networkSecurityAzureFieldTenantId                   = big.NewInt(1 << 5)
+	networkSecurityAzureFieldTrafficLogConfigurationIds = big.NewInt(1 << 6)
+)
+
+type NetworkSecurityAzure struct {
+	// Which Microsoft cloud to use: `public` (default) or `government`.
+	AzureCloud *AzureCloud `json:"azure_cloud,omitempty" url:"azure_cloud,omitempty"`
+	// Client ID and secret for an Entra app that can read Network Watcher flow logs and their storage.
+	Credential *AzureNetworkSecurityCredential `json:"credential" url:"credential"`
+	// Name of the Network Watcher to use.
+	NetworkWatcherName string `json:"network_watcher_name" url:"network_watcher_name"`
+	// Resource group that contains the Network Watcher.
+	ResourceGroup string `json:"resource_group" url:"resource_group"`
+	// Azure subscription that contains the Network Watcher.
+	SubscriptionId string `json:"subscription_id" url:"subscription_id"`
+	// Directory (tenant) ID of your Microsoft Entra tenant.
+	TenantId string `json:"tenant_id" url:"tenant_id"`
+	// Optional list of flow log names or IDs. Leave empty to include all flow logs for this Network Watcher.
+	TrafficLogConfigurationIds []string `json:"traffic_log_configuration_ids,omitempty" url:"traffic_log_configuration_ids,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (n *NetworkSecurityAzure) GetAzureCloud() *AzureCloud {
+	if n == nil {
+		return nil
+	}
+	return n.AzureCloud
+}
+
+func (n *NetworkSecurityAzure) GetCredential() *AzureNetworkSecurityCredential {
+	if n == nil {
+		return nil
+	}
+	return n.Credential
+}
+
+func (n *NetworkSecurityAzure) GetNetworkWatcherName() string {
+	if n == nil {
+		return ""
+	}
+	return n.NetworkWatcherName
+}
+
+func (n *NetworkSecurityAzure) GetResourceGroup() string {
+	if n == nil {
+		return ""
+	}
+	return n.ResourceGroup
+}
+
+func (n *NetworkSecurityAzure) GetSubscriptionId() string {
+	if n == nil {
+		return ""
+	}
+	return n.SubscriptionId
+}
+
+func (n *NetworkSecurityAzure) GetTenantId() string {
+	if n == nil {
+		return ""
+	}
+	return n.TenantId
+}
+
+func (n *NetworkSecurityAzure) GetTrafficLogConfigurationIds() []string {
+	if n == nil {
+		return nil
+	}
+	return n.TrafficLogConfigurationIds
+}
+
+func (n *NetworkSecurityAzure) GetExtraProperties() map[string]interface{} {
+	if n == nil {
+		return nil
+	}
+	return n.extraProperties
+}
+
+func (n *NetworkSecurityAzure) require(field *big.Int) {
+	if n.explicitFields == nil {
+		n.explicitFields = big.NewInt(0)
+	}
+	n.explicitFields.Or(n.explicitFields, field)
+}
+
+// SetAzureCloud sets the AzureCloud field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (n *NetworkSecurityAzure) SetAzureCloud(azureCloud *AzureCloud) {
+	n.AzureCloud = azureCloud
+	n.require(networkSecurityAzureFieldAzureCloud)
+}
+
+// SetCredential sets the Credential field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (n *NetworkSecurityAzure) SetCredential(credential *AzureNetworkSecurityCredential) {
+	n.Credential = credential
+	n.require(networkSecurityAzureFieldCredential)
+}
+
+// SetNetworkWatcherName sets the NetworkWatcherName field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (n *NetworkSecurityAzure) SetNetworkWatcherName(networkWatcherName string) {
+	n.NetworkWatcherName = networkWatcherName
+	n.require(networkSecurityAzureFieldNetworkWatcherName)
+}
+
+// SetResourceGroup sets the ResourceGroup field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (n *NetworkSecurityAzure) SetResourceGroup(resourceGroup string) {
+	n.ResourceGroup = resourceGroup
+	n.require(networkSecurityAzureFieldResourceGroup)
+}
+
+// SetSubscriptionId sets the SubscriptionId field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (n *NetworkSecurityAzure) SetSubscriptionId(subscriptionId string) {
+	n.SubscriptionId = subscriptionId
+	n.require(networkSecurityAzureFieldSubscriptionId)
+}
+
+// SetTenantId sets the TenantId field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (n *NetworkSecurityAzure) SetTenantId(tenantId string) {
+	n.TenantId = tenantId
+	n.require(networkSecurityAzureFieldTenantId)
+}
+
+// SetTrafficLogConfigurationIds sets the TrafficLogConfigurationIds field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (n *NetworkSecurityAzure) SetTrafficLogConfigurationIds(trafficLogConfigurationIds []string) {
+	n.TrafficLogConfigurationIds = trafficLogConfigurationIds
+	n.require(networkSecurityAzureFieldTrafficLogConfigurationIds)
+}
+
+func (n *NetworkSecurityAzure) UnmarshalJSON(data []byte) error {
+	type unmarshaler NetworkSecurityAzure
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*n = NetworkSecurityAzure(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *n)
+	if err != nil {
+		return err
+	}
+	n.extraProperties = extraProperties
+	n.rawJSON = nil
+	return nil
+}
+
+func (n *NetworkSecurityAzure) MarshalJSON() ([]byte, error) {
+	type embed NetworkSecurityAzure
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*n),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, n.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (n *NetworkSecurityAzure) String() string {
+	if n == nil {
+		return "<nil>"
+	}
+	if len(n.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(n.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(n); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", n)
+}
+
+// Connect Synqly to Google VPC flow logs.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/google-networksecurity-setup)
+var (
+	networkSecurityGoogleFieldCredential                 = big.NewInt(1 << 0)
+	networkSecurityGoogleFieldProjectId                  = big.NewInt(1 << 1)
+	networkSecurityGoogleFieldTrafficLogConfigurationIds = big.NewInt(1 << 2)
+)
+
+type NetworkSecurityGoogle struct {
+	// Service account credentials that can read VPC flow log configuration and logs in the project.
+	Credential *GoogleServiceAccountCredential `json:"credential" url:"credential"`
+	// Google Cloud project that contains your VPC flow logs.
+	ProjectId string `json:"project_id" url:"project_id"`
+	// Optional list of VPC flow log configuration IDs. Leave empty to include all configurations in the project.
+	TrafficLogConfigurationIds []string `json:"traffic_log_configuration_ids,omitempty" url:"traffic_log_configuration_ids,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (n *NetworkSecurityGoogle) GetCredential() *GoogleServiceAccountCredential {
+	if n == nil {
+		return nil
+	}
+	return n.Credential
+}
+
+func (n *NetworkSecurityGoogle) GetProjectId() string {
+	if n == nil {
+		return ""
+	}
+	return n.ProjectId
+}
+
+func (n *NetworkSecurityGoogle) GetTrafficLogConfigurationIds() []string {
+	if n == nil {
+		return nil
+	}
+	return n.TrafficLogConfigurationIds
+}
+
+func (n *NetworkSecurityGoogle) GetExtraProperties() map[string]interface{} {
+	if n == nil {
+		return nil
+	}
+	return n.extraProperties
+}
+
+func (n *NetworkSecurityGoogle) require(field *big.Int) {
+	if n.explicitFields == nil {
+		n.explicitFields = big.NewInt(0)
+	}
+	n.explicitFields.Or(n.explicitFields, field)
+}
+
+// SetCredential sets the Credential field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (n *NetworkSecurityGoogle) SetCredential(credential *GoogleServiceAccountCredential) {
+	n.Credential = credential
+	n.require(networkSecurityGoogleFieldCredential)
+}
+
+// SetProjectId sets the ProjectId field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (n *NetworkSecurityGoogle) SetProjectId(projectId string) {
+	n.ProjectId = projectId
+	n.require(networkSecurityGoogleFieldProjectId)
+}
+
+// SetTrafficLogConfigurationIds sets the TrafficLogConfigurationIds field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (n *NetworkSecurityGoogle) SetTrafficLogConfigurationIds(trafficLogConfigurationIds []string) {
+	n.TrafficLogConfigurationIds = trafficLogConfigurationIds
+	n.require(networkSecurityGoogleFieldTrafficLogConfigurationIds)
+}
+
+func (n *NetworkSecurityGoogle) UnmarshalJSON(data []byte) error {
+	type unmarshaler NetworkSecurityGoogle
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*n = NetworkSecurityGoogle(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *n)
+	if err != nil {
+		return err
+	}
+	n.extraProperties = extraProperties
+	n.rawJSON = nil
+	return nil
+}
+
+func (n *NetworkSecurityGoogle) MarshalJSON() ([]byte, error) {
+	type embed NetworkSecurityGoogle
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*n),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, n.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (n *NetworkSecurityGoogle) String() string {
+	if n == nil {
+		return "<nil>"
+	}
+	if len(n.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(n.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(n); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", n)
+}
+
 // Configuration for Atlassian Jira.
 //
 // [Configuration guide](https://docs.synqly.com/guides/provider-configuration/jira-notification-setup)
@@ -20650,6 +21245,18 @@ type ProviderConfig struct {
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/pagerduty-incident-response-setup)
 	IncidentresponsePagerduty *IncidentResponsePagerDuty
+	// Connect Synqly to AWS VPC Flow Logs.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/aws-networksecurity-setup)
+	NetworksecurityAws *NetworkSecurityAws
+	// Connect Synqly to Azure Network Watcher flow logs.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/azure-networksecurity-setup)
+	NetworksecurityAzure *NetworkSecurityAzure
+	// Connect Synqly to Google VPC flow logs.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/google-networksecurity-setup)
+	NetworksecurityGoogle *NetworkSecurityGoogle
 	// Configuration for Atlassian Jira.
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/jira-notification-setup)
@@ -21530,6 +22137,27 @@ func (p *ProviderConfig) GetIncidentresponsePagerduty() *IncidentResponsePagerDu
 		return nil
 	}
 	return p.IncidentresponsePagerduty
+}
+
+func (p *ProviderConfig) GetNetworksecurityAws() *NetworkSecurityAws {
+	if p == nil {
+		return nil
+	}
+	return p.NetworksecurityAws
+}
+
+func (p *ProviderConfig) GetNetworksecurityAzure() *NetworkSecurityAzure {
+	if p == nil {
+		return nil
+	}
+	return p.NetworksecurityAzure
+}
+
+func (p *ProviderConfig) GetNetworksecurityGoogle() *NetworkSecurityGoogle {
+	if p == nil {
+		return nil
+	}
+	return p.NetworksecurityGoogle
 }
 
 func (p *ProviderConfig) GetNotificationsJira() *NotificationsJira {
@@ -22608,6 +23236,24 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.IncidentresponsePagerduty = value
+	case "networksecurity_aws":
+		value := new(NetworkSecurityAws)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.NetworksecurityAws = value
+	case "networksecurity_azure":
+		value := new(NetworkSecurityAzure)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.NetworksecurityAzure = value
+	case "networksecurity_google":
+		value := new(NetworkSecurityGoogle)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.NetworksecurityGoogle = value
 	case "notifications_jira":
 		value := new(NotificationsJira)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -23349,6 +23995,15 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.IncidentresponsePagerduty != nil {
 		return internal.MarshalJSONWithExtraProperty(p.IncidentresponsePagerduty, "type", "incidentresponse_pagerduty")
 	}
+	if p.NetworksecurityAws != nil {
+		return internal.MarshalJSONWithExtraProperty(p.NetworksecurityAws, "type", "networksecurity_aws")
+	}
+	if p.NetworksecurityAzure != nil {
+		return internal.MarshalJSONWithExtraProperty(p.NetworksecurityAzure, "type", "networksecurity_azure")
+	}
+	if p.NetworksecurityGoogle != nil {
+		return internal.MarshalJSONWithExtraProperty(p.NetworksecurityGoogle, "type", "networksecurity_google")
+	}
 	if p.NotificationsJira != nil {
 		return internal.MarshalJSONWithExtraProperty(p.NotificationsJira, "type", "notifications_jira")
 	}
@@ -23680,6 +24335,9 @@ type ProviderConfigVisitor interface {
 	VisitIdentityWorkday(*IdentityWorkday) error
 	VisitIncidentresponseIncidentio(*IncidentResponseIncidentIo) error
 	VisitIncidentresponsePagerduty(*IncidentResponsePagerDuty) error
+	VisitNetworksecurityAws(*NetworkSecurityAws) error
+	VisitNetworksecurityAzure(*NetworkSecurityAzure) error
+	VisitNetworksecurityGoogle(*NetworkSecurityGoogle) error
 	VisitNotificationsJira(*NotificationsJira) error
 	VisitNotificationsMockNotifications(*NotificationsMock) error
 	VisitNotificationsSlack(*NotificationsSlack) error
@@ -24014,6 +24672,15 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.IncidentresponsePagerduty != nil {
 		return visitor.VisitIncidentresponsePagerduty(p.IncidentresponsePagerduty)
+	}
+	if p.NetworksecurityAws != nil {
+		return visitor.VisitNetworksecurityAws(p.NetworksecurityAws)
+	}
+	if p.NetworksecurityAzure != nil {
+		return visitor.VisitNetworksecurityAzure(p.NetworksecurityAzure)
+	}
+	if p.NetworksecurityGoogle != nil {
+		return visitor.VisitNetworksecurityGoogle(p.NetworksecurityGoogle)
 	}
 	if p.NotificationsJira != nil {
 		return visitor.VisitNotificationsJira(p.NotificationsJira)
@@ -24515,6 +25182,15 @@ func (p *ProviderConfig) validate() error {
 	if p.IncidentresponsePagerduty != nil {
 		fields = append(fields, "incidentresponse_pagerduty")
 	}
+	if p.NetworksecurityAws != nil {
+		fields = append(fields, "networksecurity_aws")
+	}
+	if p.NetworksecurityAzure != nil {
+		fields = append(fields, "networksecurity_azure")
+	}
+	if p.NetworksecurityGoogle != nil {
+		fields = append(fields, "networksecurity_google")
+	}
 	if p.NotificationsJira != nil {
 		fields = append(fields, "notifications_jira")
 	}
@@ -24953,6 +25629,12 @@ const (
 	ProviderConfigIdIncidentResponseIncidentIo ProviderConfigId = "incidentresponse_incidentio"
 	// PagerDuty Operations Cloud
 	ProviderConfigIdIncidentResponsePagerDuty ProviderConfigId = "incidentresponse_pagerduty"
+	// AWS Network Security
+	ProviderConfigIdNetworkSecurityAws ProviderConfigId = "networksecurity_aws"
+	// Microsoft Azure Network Security
+	ProviderConfigIdNetworkSecurityAzure ProviderConfigId = "networksecurity_azure"
+	// Google Network Security
+	ProviderConfigIdNetworkSecurityGoogle ProviderConfigId = "networksecurity_google"
 	// Atlassian Jira
 	ProviderConfigIdNotificationsJira ProviderConfigId = "notifications_jira"
 	// Synqly Test Provider
@@ -25287,6 +25969,12 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdIncidentResponseIncidentIo, nil
 	case "incidentresponse_pagerduty":
 		return ProviderConfigIdIncidentResponsePagerDuty, nil
+	case "networksecurity_aws":
+		return ProviderConfigIdNetworkSecurityAws, nil
+	case "networksecurity_azure":
+		return ProviderConfigIdNetworkSecurityAzure, nil
+	case "networksecurity_google":
+		return ProviderConfigIdNetworkSecurityGoogle, nil
 	case "notifications_jira":
 		return ProviderConfigIdNotificationsJira, nil
 	case "notifications_mock_notifications":

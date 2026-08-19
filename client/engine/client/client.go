@@ -17,6 +17,7 @@ import (
     incidentresponse "github.com/synqly/go-sdk/v2/client/engine/incidentresponse"
     integrationwebhooks "github.com/synqly/go-sdk/v2/client/engine/integrationwebhooks"
     internal "github.com/synqly/go-sdk/v2/client/engine/internal"
+    networksecurity "github.com/synqly/go-sdk/v2/client/engine/networksecurity"
     notifications "github.com/synqly/go-sdk/v2/client/engine/notifications"
     operations "github.com/synqly/go-sdk/v2/client/engine/operations"
     option "github.com/synqly/go-sdk/v2/client/engine/option"
@@ -41,6 +42,7 @@ type Client struct {
     Identity *identity.Client
     Incidentresponse *incidentresponse.Client
     IntegrationWebhooks *integrationwebhooks.Client
+    Networksecurity *networksecurity.Client
     Notifications *notifications.Client
     Operations *operations.Client
     Siem *siem.Client
@@ -69,6 +71,7 @@ func NewClient(opts ...option.RequestOption) *Client {
         Identity: identity.NewClient(options),
         Incidentresponse: incidentresponse.NewClient(options),
         IntegrationWebhooks: integrationwebhooks.NewClient(options),
+        Networksecurity: networksecurity.NewClient(options),
         Notifications: notifications.NewClient(options),
         Operations: operations.NewClient(options),
         Siem: siem.NewClient(options),
