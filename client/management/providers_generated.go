@@ -21594,6 +21594,10 @@ type ProviderConfig struct {
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/torq-ticketing-setup)
 	TicketingTorq *TicketingTorq
+	// Configuration for Xurrent.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/xurrent-ticketing-setup)
+	TicketingXurrent *TicketingXurrent
 	// Configuration for Zendesk as a Ticketing Provider
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/zendesk-ticketing-setup)
@@ -22695,6 +22699,13 @@ func (p *ProviderConfig) GetTicketingTorq() *TicketingTorq {
 	return p.TicketingTorq
 }
 
+func (p *ProviderConfig) GetTicketingXurrent() *TicketingXurrent {
+	if p == nil {
+		return nil
+	}
+	return p.TicketingXurrent
+}
+
 func (p *ProviderConfig) GetTicketingZendesk() *TicketingZendesk {
 	if p == nil {
 		return nil
@@ -23737,6 +23748,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.TicketingTorq = value
+	case "ticketing_xurrent":
+		value := new(TicketingXurrent)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.TicketingXurrent = value
 	case "ticketing_zendesk":
 		value := new(TicketingZendesk)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -24316,6 +24333,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.TicketingTorq != nil {
 		return internal.MarshalJSONWithExtraProperty(p.TicketingTorq, "type", "ticketing_torq")
 	}
+	if p.TicketingXurrent != nil {
+		return internal.MarshalJSONWithExtraProperty(p.TicketingXurrent, "type", "ticketing_xurrent")
+	}
 	if p.TicketingZendesk != nil {
 		return internal.MarshalJSONWithExtraProperty(p.TicketingZendesk, "type", "ticketing_zendesk")
 	}
@@ -24535,6 +24555,7 @@ type ProviderConfigVisitor interface {
 	VisitTicketingServicenow(*TicketingServiceNow) error
 	VisitTicketingServicenowSir(*TicketingServiceNowSir) error
 	VisitTicketingTorq(*TicketingTorq) error
+	VisitTicketingXurrent(*TicketingXurrent) error
 	VisitTicketingZendesk(*TicketingZendesk) error
 	VisitVulnerabilitiesAmazonInspector(*VulnerabilitiesAmazonInspector) error
 	VisitVulnerabilitiesAxonius(*VulnerabilitiesAxonius) error
@@ -24997,6 +25018,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.TicketingTorq != nil {
 		return visitor.VisitTicketingTorq(p.TicketingTorq)
+	}
+	if p.TicketingXurrent != nil {
+		return visitor.VisitTicketingXurrent(p.TicketingXurrent)
 	}
 	if p.TicketingZendesk != nil {
 		return visitor.VisitTicketingZendesk(p.TicketingZendesk)
@@ -25510,6 +25534,9 @@ func (p *ProviderConfig) validate() error {
 	if p.TicketingTorq != nil {
 		fields = append(fields, "ticketing_torq")
 	}
+	if p.TicketingXurrent != nil {
+		fields = append(fields, "ticketing_xurrent")
+	}
 	if p.TicketingZendesk != nil {
 		fields = append(fields, "ticketing_zendesk")
 	}
@@ -25898,6 +25925,8 @@ const (
 	ProviderConfigIdTicketingServiceNowSir ProviderConfigId = "ticketing_servicenow_sir"
 	// Torq
 	ProviderConfigIdTicketingTorq ProviderConfigId = "ticketing_torq"
+	// Xurrent
+	ProviderConfigIdTicketingXurrent ProviderConfigId = "ticketing_xurrent"
 	// Zendesk
 	ProviderConfigIdTicketingZendesk ProviderConfigId = "ticketing_zendesk"
 	// Amazon Inspector
@@ -26240,6 +26269,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdTicketingServiceNowSir, nil
 	case "ticketing_torq":
 		return ProviderConfigIdTicketingTorq, nil
+	case "ticketing_xurrent":
+		return ProviderConfigIdTicketingXurrent, nil
 	case "ticketing_zendesk":
 		return ProviderConfigIdTicketingZendesk, nil
 	case "vulnerabilities_amazon_inspector":
@@ -36992,6 +37023,144 @@ func (t *TicketingTorq) String() string {
 	return fmt.Sprintf("%#v", t)
 }
 
+// Configuration for Xurrent.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/xurrent-ticketing-setup)
+var (
+	ticketingXurrentFieldAccount           = big.NewInt(1 << 0)
+	ticketingXurrentFieldCredential        = big.NewInt(1 << 1)
+	ticketingXurrentFieldRegion            = big.NewInt(1 << 2)
+	ticketingXurrentFieldServiceInstanceId = big.NewInt(1 << 3)
+)
+
+type TicketingXurrent struct {
+	// Xurrent account identifier.
+	Account    string             `json:"account" url:"account"`
+	Credential *XurrentCredential `json:"credential" url:"credential"`
+	// The Xurrent environment and region to connect to.
+	Region XurrentRegion `json:"region" url:"region"`
+	// Default Xurrent service instance ID for ticket creation. Required by most Xurrent accounts.
+	ServiceInstanceId *string `json:"service_instance_id,omitempty" url:"service_instance_id,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (t *TicketingXurrent) GetAccount() string {
+	if t == nil {
+		return ""
+	}
+	return t.Account
+}
+
+func (t *TicketingXurrent) GetCredential() *XurrentCredential {
+	if t == nil {
+		return nil
+	}
+	return t.Credential
+}
+
+func (t *TicketingXurrent) GetRegion() XurrentRegion {
+	if t == nil {
+		return ""
+	}
+	return t.Region
+}
+
+func (t *TicketingXurrent) GetServiceInstanceId() *string {
+	if t == nil {
+		return nil
+	}
+	return t.ServiceInstanceId
+}
+
+func (t *TicketingXurrent) GetExtraProperties() map[string]interface{} {
+	if t == nil {
+		return nil
+	}
+	return t.extraProperties
+}
+
+func (t *TicketingXurrent) require(field *big.Int) {
+	if t.explicitFields == nil {
+		t.explicitFields = big.NewInt(0)
+	}
+	t.explicitFields.Or(t.explicitFields, field)
+}
+
+// SetAccount sets the Account field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (t *TicketingXurrent) SetAccount(account string) {
+	t.Account = account
+	t.require(ticketingXurrentFieldAccount)
+}
+
+// SetCredential sets the Credential field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (t *TicketingXurrent) SetCredential(credential *XurrentCredential) {
+	t.Credential = credential
+	t.require(ticketingXurrentFieldCredential)
+}
+
+// SetRegion sets the Region field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (t *TicketingXurrent) SetRegion(region XurrentRegion) {
+	t.Region = region
+	t.require(ticketingXurrentFieldRegion)
+}
+
+// SetServiceInstanceId sets the ServiceInstanceId field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (t *TicketingXurrent) SetServiceInstanceId(serviceInstanceId *string) {
+	t.ServiceInstanceId = serviceInstanceId
+	t.require(ticketingXurrentFieldServiceInstanceId)
+}
+
+func (t *TicketingXurrent) UnmarshalJSON(data []byte) error {
+	type unmarshaler TicketingXurrent
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*t = TicketingXurrent(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *t)
+	if err != nil {
+		return err
+	}
+	t.extraProperties = extraProperties
+	t.rawJSON = nil
+	return nil
+}
+
+func (t *TicketingXurrent) MarshalJSON() ([]byte, error) {
+	type embed TicketingXurrent
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*t),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, t.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (t *TicketingXurrent) String() string {
+	if t == nil {
+		return "<nil>"
+	}
+	if len(t.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(t.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(t); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", t)
+}
+
 // Configuration for Zendesk as a Ticketing Provider
 //
 // [Configuration guide](https://docs.synqly.com/guides/provider-configuration/zendesk-ticketing-setup)
@@ -40816,6 +40985,187 @@ func (w *WorkdayCredential) validate() error {
 		}
 	}
 	return nil
+}
+
+type XurrentCredential struct {
+	Type string
+	// Personal access token or application token for the Xurrent REST API.
+	Token *TokenCredential
+	// Reference to existing API Token.
+	TokenId TokenCredentialId
+
+	rawJSON json.RawMessage
+}
+
+func (x *XurrentCredential) GetType() string {
+	if x == nil {
+		return ""
+	}
+	return x.Type
+}
+
+func (x *XurrentCredential) GetToken() *TokenCredential {
+	if x == nil {
+		return nil
+	}
+	return x.Token
+}
+
+func (x *XurrentCredential) GetTokenId() TokenCredentialId {
+	if x == nil {
+		return ""
+	}
+	return x.TokenId
+}
+
+func (x *XurrentCredential) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	x.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", x)
+	}
+	switch unmarshaler.Type {
+	case "token":
+		value := new(TokenCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		x.Token = value
+	case "token_id":
+		var valueUnmarshaler struct {
+			TokenId TokenCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		x.TokenId = valueUnmarshaler.TokenId
+	}
+	x.rawJSON = nil
+	return nil
+}
+
+func (x XurrentCredential) MarshalJSON() ([]byte, error) {
+	if err := x.validate(); err != nil {
+		return nil, err
+	}
+	if x.Token != nil {
+		return internal.MarshalJSONWithExtraProperty(x.Token, "type", "token")
+	}
+	if x.TokenId != "" {
+		var marshaler = struct {
+			Type    string            `json:"type"`
+			TokenId TokenCredentialId `json:"value"`
+		}{
+			Type:    "token_id",
+			TokenId: x.TokenId,
+		}
+		return json.Marshal(marshaler)
+	}
+	if len(x.rawJSON) > 0 {
+		return x.rawJSON, nil
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", x)
+}
+
+type XurrentCredentialVisitor interface {
+	VisitToken(*TokenCredential) error
+	VisitTokenId(TokenCredentialId) error
+}
+
+func (x *XurrentCredential) Accept(visitor XurrentCredentialVisitor) error {
+	if x.Token != nil {
+		return visitor.VisitToken(x.Token)
+	}
+	if x.TokenId != "" {
+		return visitor.VisitTokenId(x.TokenId)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", x)
+}
+
+func (x *XurrentCredential) validate() error {
+	if x == nil {
+		return fmt.Errorf("type %T is nil", x)
+	}
+	var fields []string
+	if x.Token != nil {
+		fields = append(fields, "token")
+	}
+	if x.TokenId != "" {
+		fields = append(fields, "token_id")
+	}
+	if len(fields) == 0 {
+		if x.Type != "" {
+			if len(x.rawJSON) > 0 {
+				return nil
+			}
+			return fmt.Errorf("type %T defines a discriminant set to %q but the field is not set", x, x.Type)
+		}
+		return fmt.Errorf("type %T is empty", x)
+	}
+	if len(fields) > 1 {
+		return fmt.Errorf("type %T defines values for %s, but only one value is allowed", x, fields)
+	}
+	if x.Type != "" {
+		field := fields[0]
+		if x.Type != field {
+			return fmt.Errorf(
+				"type %T defines a discriminant set to %q, but it does not match the %T field; either remove or update the discriminant to match",
+				x,
+				x.Type,
+				x,
+			)
+		}
+	}
+	return nil
+}
+
+type XurrentRegion string
+
+const (
+	// Demo environment (api.4me-demo.com).
+	XurrentRegionDemo XurrentRegion = "demo"
+	// Global production (api.xurrent.com).
+	XurrentRegionGlobal XurrentRegion = "global"
+	// United States production (api.us.xurrent.com).
+	XurrentRegionUs XurrentRegion = "us"
+	// United Kingdom production (api.uk.xurrent.com).
+	XurrentRegionUk XurrentRegion = "uk"
+	// Australia production (api.au.xurrent.com).
+	XurrentRegionAu XurrentRegion = "au"
+	// Switzerland production (api.ch.xurrent.com).
+	XurrentRegionCh XurrentRegion = "ch"
+	// QA environment (api.xurrent.qa).
+	XurrentRegionQa XurrentRegion = "qa"
+)
+
+func NewXurrentRegionFromString(s string) (XurrentRegion, error) {
+	switch s {
+	case "demo":
+		return XurrentRegionDemo, nil
+	case "global":
+		return XurrentRegionGlobal, nil
+	case "us":
+		return XurrentRegionUs, nil
+	case "uk":
+		return XurrentRegionUk, nil
+	case "au":
+		return XurrentRegionAu, nil
+	case "ch":
+		return XurrentRegionCh, nil
+	case "qa":
+		return XurrentRegionQa, nil
+	}
+	var t XurrentRegion
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (x XurrentRegion) Ptr() *XurrentRegion {
+	return &x
 }
 
 type ZendeskCredential struct {
