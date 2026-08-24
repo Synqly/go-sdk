@@ -11939,6 +11939,127 @@ func (e *EndpointmanagementJamf) String() string {
 	return fmt.Sprintf("%#v", e)
 }
 
+// Configuration for NinjaOne.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/ninjaone-endpointmanagement-setup)
+var (
+	endpointmanagementNinjaoneFieldCredential = big.NewInt(1 << 0)
+	endpointmanagementNinjaoneFieldRegion     = big.NewInt(1 << 1)
+	endpointmanagementNinjaoneFieldUrl        = big.NewInt(1 << 2)
+)
+
+type EndpointmanagementNinjaone struct {
+	Credential *NinjaOneCredential `json:"credential" url:"credential"`
+	// NinjaOne instance region. Determines the base URL for API requests.
+	Region NinjaOneRegion `json:"region" url:"region"`
+	// Base URL override for custom or proxied environments. When set, the region field is ignored.
+	Url *string `json:"url,omitempty" url:"url,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (e *EndpointmanagementNinjaone) GetCredential() *NinjaOneCredential {
+	if e == nil {
+		return nil
+	}
+	return e.Credential
+}
+
+func (e *EndpointmanagementNinjaone) GetRegion() NinjaOneRegion {
+	if e == nil {
+		return ""
+	}
+	return e.Region
+}
+
+func (e *EndpointmanagementNinjaone) GetUrl() *string {
+	if e == nil {
+		return nil
+	}
+	return e.Url
+}
+
+func (e *EndpointmanagementNinjaone) GetExtraProperties() map[string]interface{} {
+	if e == nil {
+		return nil
+	}
+	return e.extraProperties
+}
+
+func (e *EndpointmanagementNinjaone) require(field *big.Int) {
+	if e.explicitFields == nil {
+		e.explicitFields = big.NewInt(0)
+	}
+	e.explicitFields.Or(e.explicitFields, field)
+}
+
+// SetCredential sets the Credential field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (e *EndpointmanagementNinjaone) SetCredential(credential *NinjaOneCredential) {
+	e.Credential = credential
+	e.require(endpointmanagementNinjaoneFieldCredential)
+}
+
+// SetRegion sets the Region field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (e *EndpointmanagementNinjaone) SetRegion(region NinjaOneRegion) {
+	e.Region = region
+	e.require(endpointmanagementNinjaoneFieldRegion)
+}
+
+// SetUrl sets the Url field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (e *EndpointmanagementNinjaone) SetUrl(url *string) {
+	e.Url = url
+	e.require(endpointmanagementNinjaoneFieldUrl)
+}
+
+func (e *EndpointmanagementNinjaone) UnmarshalJSON(data []byte) error {
+	type unmarshaler EndpointmanagementNinjaone
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*e = EndpointmanagementNinjaone(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *e)
+	if err != nil {
+		return err
+	}
+	e.extraProperties = extraProperties
+	e.rawJSON = nil
+	return nil
+}
+
+func (e *EndpointmanagementNinjaone) MarshalJSON() ([]byte, error) {
+	type embed EndpointmanagementNinjaone
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*e),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, e.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (e *EndpointmanagementNinjaone) String() string {
+	if e == nil {
+		return "<nil>"
+	}
+	if len(e.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(e.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(e); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", e)
+}
+
 type EntraIdCredential struct {
 	Type string
 	// Client ID and Client Secret for an Azure service principal with access to Microsoft Graph. To use risk and risky-user features, the service principal also needs Identity Protection permissions (requires a Microsoft Entra ID P2 license). See the setup guide for the full list of required permissions.
@@ -18726,6 +18847,179 @@ func (n *NetworkSecurityGoogle) String() string {
 	return fmt.Sprintf("%#v", n)
 }
 
+type NinjaOneCredential struct {
+	Type string
+	// OAuth2 client credentials for NinjaOne API access.
+	OAuthClient *OAuthClientCredential
+	// Reference to existing Client Credentials.
+	OAuthClientId OAuthClientCredentialId
+
+	rawJSON json.RawMessage
+}
+
+func (n *NinjaOneCredential) GetType() string {
+	if n == nil {
+		return ""
+	}
+	return n.Type
+}
+
+func (n *NinjaOneCredential) GetOAuthClient() *OAuthClientCredential {
+	if n == nil {
+		return nil
+	}
+	return n.OAuthClient
+}
+
+func (n *NinjaOneCredential) GetOAuthClientId() OAuthClientCredentialId {
+	if n == nil {
+		return ""
+	}
+	return n.OAuthClientId
+}
+
+func (n *NinjaOneCredential) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	n.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", n)
+	}
+	switch unmarshaler.Type {
+	case "o_auth_client":
+		value := new(OAuthClientCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		n.OAuthClient = value
+	case "o_auth_client_id":
+		var valueUnmarshaler struct {
+			OAuthClientId OAuthClientCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		n.OAuthClientId = valueUnmarshaler.OAuthClientId
+	}
+	n.rawJSON = nil
+	return nil
+}
+
+func (n NinjaOneCredential) MarshalJSON() ([]byte, error) {
+	if err := n.validate(); err != nil {
+		return nil, err
+	}
+	if n.OAuthClient != nil {
+		return internal.MarshalJSONWithExtraProperty(n.OAuthClient, "type", "o_auth_client")
+	}
+	if n.OAuthClientId != "" {
+		var marshaler = struct {
+			Type          string                  `json:"type"`
+			OAuthClientId OAuthClientCredentialId `json:"value"`
+		}{
+			Type:          "o_auth_client_id",
+			OAuthClientId: n.OAuthClientId,
+		}
+		return json.Marshal(marshaler)
+	}
+	if len(n.rawJSON) > 0 {
+		return n.rawJSON, nil
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", n)
+}
+
+type NinjaOneCredentialVisitor interface {
+	VisitOAuthClient(*OAuthClientCredential) error
+	VisitOAuthClientId(OAuthClientCredentialId) error
+}
+
+func (n *NinjaOneCredential) Accept(visitor NinjaOneCredentialVisitor) error {
+	if n.OAuthClient != nil {
+		return visitor.VisitOAuthClient(n.OAuthClient)
+	}
+	if n.OAuthClientId != "" {
+		return visitor.VisitOAuthClientId(n.OAuthClientId)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", n)
+}
+
+func (n *NinjaOneCredential) validate() error {
+	if n == nil {
+		return fmt.Errorf("type %T is nil", n)
+	}
+	var fields []string
+	if n.OAuthClient != nil {
+		fields = append(fields, "o_auth_client")
+	}
+	if n.OAuthClientId != "" {
+		fields = append(fields, "o_auth_client_id")
+	}
+	if len(fields) == 0 {
+		if n.Type != "" {
+			if len(n.rawJSON) > 0 {
+				return nil
+			}
+			return fmt.Errorf("type %T defines a discriminant set to %q but the field is not set", n, n.Type)
+		}
+		return fmt.Errorf("type %T is empty", n)
+	}
+	if len(fields) > 1 {
+		return fmt.Errorf("type %T defines values for %s, but only one value is allowed", n, fields)
+	}
+	if n.Type != "" {
+		field := fields[0]
+		if n.Type != field {
+			return fmt.Errorf(
+				"type %T defines a discriminant set to %q, but it does not match the %T field; either remove or update the discriminant to match",
+				n,
+				n.Type,
+				n,
+			)
+		}
+	}
+	return nil
+}
+
+type NinjaOneRegion string
+
+const (
+	// US region (app.ninjarmm.com)
+	NinjaOneRegionApp NinjaOneRegion = "app"
+	// US region 2 (us2.ninjarmm.com)
+	NinjaOneRegionUs2 NinjaOneRegion = "us2"
+	// EU region (eu.ninjarmm.com)
+	NinjaOneRegionEu NinjaOneRegion = "eu"
+	// Canada region (ca.ninjarmm.com)
+	NinjaOneRegionCa NinjaOneRegion = "ca"
+	// Oceania region (oc.ninjarmm.com)
+	NinjaOneRegionOc NinjaOneRegion = "oc"
+)
+
+func NewNinjaOneRegionFromString(s string) (NinjaOneRegion, error) {
+	switch s {
+	case "app":
+		return NinjaOneRegionApp, nil
+	case "us2":
+		return NinjaOneRegionUs2, nil
+	case "eu":
+		return NinjaOneRegionEu, nil
+	case "ca":
+		return NinjaOneRegionCa, nil
+	case "oc":
+		return NinjaOneRegionOc, nil
+	}
+	var t NinjaOneRegion
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (n NinjaOneRegion) Ptr() *NinjaOneRegion {
+	return &n
+}
+
 // Configuration for Atlassian Jira.
 //
 // [Configuration guide](https://docs.synqly.com/guides/provider-configuration/jira-notification-setup)
@@ -21319,6 +21613,10 @@ type ProviderConfig struct {
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/jamf-endpointmanagement-setup)
 	EndpointmanagementJamf *EndpointmanagementJamf
+	// Configuration for NinjaOne.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/ninjaone-endpointmanagement-setup)
+	EndpointmanagementNinjaone *EndpointmanagementNinjaone
 	// Configuration for Ashby Identity.
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/ashby-identity-setup)
@@ -22169,6 +22467,13 @@ func (p *ProviderConfig) GetEndpointmanagementJamf() *EndpointmanagementJamf {
 		return nil
 	}
 	return p.EndpointmanagementJamf
+}
+
+func (p *ProviderConfig) GetEndpointmanagementNinjaone() *EndpointmanagementNinjaone {
+	if p == nil {
+		return nil
+	}
+	return p.EndpointmanagementNinjaone
 }
 
 func (p *ProviderConfig) GetIdentityAshby() *IdentityAshby {
@@ -23296,6 +23601,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.EndpointmanagementJamf = value
+	case "endpointmanagement_ninjaone":
+		value := new(EndpointmanagementNinjaone)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.EndpointmanagementNinjaone = value
 	case "identity_ashby":
 		value := new(IdentityAshby)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -24109,6 +24420,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.EndpointmanagementJamf != nil {
 		return internal.MarshalJSONWithExtraProperty(p.EndpointmanagementJamf, "type", "endpointmanagement_jamf")
 	}
+	if p.EndpointmanagementNinjaone != nil {
+		return internal.MarshalJSONWithExtraProperty(p.EndpointmanagementNinjaone, "type", "endpointmanagement_ninjaone")
+	}
 	if p.IdentityAshby != nil {
 		return internal.MarshalJSONWithExtraProperty(p.IdentityAshby, "type", "identity_ashby")
 	}
@@ -24483,6 +24797,7 @@ type ProviderConfigVisitor interface {
 	VisitEndpointmanagementIntune(*EndpointmanagementIntune) error
 	VisitEndpointmanagementIru(*EndpointmanagementIru) error
 	VisitEndpointmanagementJamf(*EndpointmanagementJamf) error
+	VisitEndpointmanagementNinjaone(*EndpointmanagementNinjaone) error
 	VisitIdentityAshby(*IdentityAshby) error
 	VisitIdentityAwsIam(*IdentityAwsIam) error
 	VisitIdentityEntraId(*IdentityEntraId) error
@@ -24794,6 +25109,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.EndpointmanagementJamf != nil {
 		return visitor.VisitEndpointmanagementJamf(p.EndpointmanagementJamf)
+	}
+	if p.EndpointmanagementNinjaone != nil {
+		return visitor.VisitEndpointmanagementNinjaone(p.EndpointmanagementNinjaone)
 	}
 	if p.IdentityAshby != nil {
 		return visitor.VisitIdentityAshby(p.IdentityAshby)
@@ -25310,6 +25628,9 @@ func (p *ProviderConfig) validate() error {
 	if p.EndpointmanagementJamf != nil {
 		fields = append(fields, "endpointmanagement_jamf")
 	}
+	if p.EndpointmanagementNinjaone != nil {
+		fields = append(fields, "endpointmanagement_ninjaone")
+	}
 	if p.IdentityAshby != nil {
 		fields = append(fields, "identity_ashby")
 	}
@@ -25777,6 +26098,8 @@ const (
 	ProviderConfigIdEndpointmanagementIru ProviderConfigId = "endpointmanagement_iru"
 	// Jamf Pro
 	ProviderConfigIdEndpointmanagementJamf ProviderConfigId = "endpointmanagement_jamf"
+	// NinjaOne
+	ProviderConfigIdEndpointmanagementNinjaone ProviderConfigId = "endpointmanagement_ninjaone"
 	// Ashby Identity
 	ProviderConfigIdIdentityAshby ProviderConfigId = "identity_ashby"
 	// AWS IAM Identity
@@ -26121,6 +26444,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdEndpointmanagementIru, nil
 	case "endpointmanagement_jamf":
 		return ProviderConfigIdEndpointmanagementJamf, nil
+	case "endpointmanagement_ninjaone":
+		return ProviderConfigIdEndpointmanagementNinjaone, nil
 	case "identity_ashby":
 		return ProviderConfigIdIdentityAshby, nil
 	case "identity_aws_iam":
