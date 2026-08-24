@@ -115,7 +115,8 @@ var (
 	operationExecutionEventFieldDuration           = big.NewInt(1 << 14)
 	operationExecutionEventFieldInitialCursor      = big.NewInt(1 << 15)
 	operationExecutionEventFieldFinalCursor        = big.NewInt(1 << 16)
-	operationExecutionEventFieldError              = big.NewInt(1 << 17)
+	operationExecutionEventFieldCursorAdvancedTo   = big.NewInt(1 << 17)
+	operationExecutionEventFieldError              = big.NewInt(1 << 18)
 )
 
 type OperationExecutionEvent struct {
@@ -154,6 +155,8 @@ type OperationExecutionEvent struct {
 	InitialCursor *string `json:"initial_cursor,omitempty" url:"initial_cursor,omitempty"`
 	// Cursor value at execution completion
 	FinalCursor *string `json:"final_cursor,omitempty" url:"final_cursor,omitempty"`
+	// Maximum data timestamp persisted by this execution; omitted when this execution did not advance the incremental cursor
+	CursorAdvancedTo *time.Time `json:"cursor_advanced_to,omitempty" url:"cursor_advanced_to,omitempty"`
 	// Error message if execution failed
 	Error *string `json:"error,omitempty" url:"error,omitempty"`
 
@@ -281,6 +284,13 @@ func (o *OperationExecutionEvent) GetFinalCursor() *string {
 		return nil
 	}
 	return o.FinalCursor
+}
+
+func (o *OperationExecutionEvent) GetCursorAdvancedTo() *time.Time {
+	if o == nil {
+		return nil
+	}
+	return o.CursorAdvancedTo
 }
 
 func (o *OperationExecutionEvent) GetError() *string {
@@ -423,6 +433,13 @@ func (o *OperationExecutionEvent) SetFinalCursor(finalCursor *string) {
 	o.require(operationExecutionEventFieldFinalCursor)
 }
 
+// SetCursorAdvancedTo sets the CursorAdvancedTo field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (o *OperationExecutionEvent) SetCursorAdvancedTo(cursorAdvancedTo *time.Time) {
+	o.CursorAdvancedTo = cursorAdvancedTo
+	o.require(operationExecutionEventFieldCursorAdvancedTo)
+}
+
 // SetError sets the Error field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
 func (o *OperationExecutionEvent) SetError(error_ *string) {
@@ -434,8 +451,9 @@ func (o *OperationExecutionEvent) UnmarshalJSON(data []byte) error {
 	type embed OperationExecutionEvent
 	var unmarshaler = struct {
 		embed
-		StartedAt   *internal.DateTime `json:"started_at"`
-		CompletedAt *internal.DateTime `json:"completed_at"`
+		StartedAt        *internal.DateTime `json:"started_at"`
+		CompletedAt      *internal.DateTime `json:"completed_at"`
+		CursorAdvancedTo *internal.DateTime `json:"cursor_advanced_to,omitempty"`
 	}{
 		embed: embed(*o),
 	}
@@ -445,6 +463,7 @@ func (o *OperationExecutionEvent) UnmarshalJSON(data []byte) error {
 	*o = OperationExecutionEvent(unmarshaler.embed)
 	o.StartedAt = unmarshaler.StartedAt.Time()
 	o.CompletedAt = unmarshaler.CompletedAt.Time()
+	o.CursorAdvancedTo = unmarshaler.CursorAdvancedTo.TimePtr()
 	extraProperties, err := internal.ExtractExtraProperties(data, *o)
 	if err != nil {
 		return err
@@ -458,12 +477,14 @@ func (o *OperationExecutionEvent) MarshalJSON() ([]byte, error) {
 	type embed OperationExecutionEvent
 	var marshaler = struct {
 		embed
-		StartedAt   *internal.DateTime `json:"started_at"`
-		CompletedAt *internal.DateTime `json:"completed_at"`
+		StartedAt        *internal.DateTime `json:"started_at"`
+		CompletedAt      *internal.DateTime `json:"completed_at"`
+		CursorAdvancedTo *internal.DateTime `json:"cursor_advanced_to,omitempty"`
 	}{
-		embed:       embed(*o),
-		StartedAt:   internal.NewDateTime(o.StartedAt),
-		CompletedAt: internal.NewDateTime(o.CompletedAt),
+		embed:            embed(*o),
+		StartedAt:        internal.NewDateTime(o.StartedAt),
+		CompletedAt:      internal.NewDateTime(o.CompletedAt),
+		CursorAdvancedTo: internal.NewOptionalDateTime(o.CursorAdvancedTo),
 	}
 	explicitMarshaler := internal.HandleExplicitFields(marshaler, o.explicitFields)
 	return json.Marshal(explicitMarshaler)

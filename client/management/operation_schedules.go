@@ -137,7 +137,10 @@ type OperationIncrementalPullConfig struct {
 	// Custom field to use for time-based filtering in incremental mode.
 	// Overrides the operation's default time filter field.
 	// Examples: "modified_time" or "finding.last_seen_time".
-	// The filter will use this field with "[gt]" (greater than) operator.
+	// The comparison operator is operation-specific: "[gt]" (greater than)
+	// by default, or "[gte]" (greater than or equal) for operations whose
+	// providers only accept inclusive range bounds — in which case the
+	// boundary record is re-fetched on each run.
 	// First run will use `initial_backfill_start_time` as the filter value, and
 	// subsequent runs use the last execution time.
 	TimeFilterField *string `json:"time_filter_field,omitempty" url:"time_filter_field,omitempty"`
@@ -285,9 +288,9 @@ type OperationSchedule struct {
 	// Accepts:
 	//   - RFC 3339 datetime: "2024-01-01T00:00:00Z"
 	//   - Relative duration: "7d" (7 days ago), "24h" (24 hours ago), "30m" (30 minutes ago)
+	//   - `"max"`: the maximum one-year backfill window, resolved relative to operation creation
 	//
-	// The resolved starting point may be at most 1 year in the past,
-	// whichever form is used; deeper backfills are rejected.
+	// The resolved starting point may be at most 1 year in the past; deeper backfills are rejected.
 	// If not specified, starts from the operation's creation time.
 	BackfillFromTime *string `json:"backfill_from_time,omitempty" url:"backfill_from_time,omitempty"`
 	// Configuration for how data is fetched on each execution.
@@ -446,32 +449,36 @@ func (o *OperationSchedule) String() string {
 type ScheduledOperationId string
 
 const (
-	ScheduledOperationIdAssetsQueryDevices                       ScheduledOperationId = "assets_query_devices"
-	ScheduledOperationIdAssetsQueryAlerts                        ScheduledOperationId = "assets_query_alerts"
-	ScheduledOperationIdAssetsQueryUtilization                   ScheduledOperationId = "assets_query_utilization"
-	ScheduledOperationIdAssetsQueryVulnerabilities               ScheduledOperationId = "assets_query_vulnerabilities"
-	ScheduledOperationIdCloudsecurityQueryCloudResourceInventory ScheduledOperationId = "cloudsecurity_query_cloud_resource_inventory"
-	ScheduledOperationIdCloudsecurityQueryComplianceFindings     ScheduledOperationId = "cloudsecurity_query_compliance_findings"
-	ScheduledOperationIdCloudsecurityQueryEvents                 ScheduledOperationId = "cloudsecurity_query_events"
-	ScheduledOperationIdCloudsecurityQueryIoms                   ScheduledOperationId = "cloudsecurity_query_ioms"
-	ScheduledOperationIdCloudsecurityQueryThreats                ScheduledOperationId = "cloudsecurity_query_threats"
-	ScheduledOperationIdEdrQueryAlerts                           ScheduledOperationId = "edr_query_alerts"
-	ScheduledOperationIdEdrQueryApplications                     ScheduledOperationId = "edr_query_applications"
-	ScheduledOperationIdEdrQueryEndpoints                        ScheduledOperationId = "edr_query_endpoints"
-	ScheduledOperationIdEdrQueryIocs                             ScheduledOperationId = "edr_query_iocs"
-	ScheduledOperationIdEdrQueryPostureScore                     ScheduledOperationId = "edr_query_posture_score"
-	ScheduledOperationIdEdrQueryThreatevents                     ScheduledOperationId = "edr_query_threatevents"
-	ScheduledOperationIdIdentityQueryAuditLog                    ScheduledOperationId = "identity_query_audit_log"
-	ScheduledOperationIdIdentityQueryGroups                      ScheduledOperationId = "identity_query_groups"
-	ScheduledOperationIdIdentityQueryGroupsEnriched              ScheduledOperationId = "identity_query_groups_enriched"
-	ScheduledOperationIdIdentityQueryUsers                       ScheduledOperationId = "identity_query_users"
-	ScheduledOperationIdIdentityQueryUsersEnriched               ScheduledOperationId = "identity_query_users_enriched"
-	ScheduledOperationIdSiemQueryEvents                          ScheduledOperationId = "siem_query_events"
-	ScheduledOperationIdSiemQueryInvestigations                  ScheduledOperationId = "siem_query_investigations"
-	ScheduledOperationIdVulnerabilitiesQueryAssets               ScheduledOperationId = "vulnerabilities_query_assets"
-	ScheduledOperationIdVulnerabilitiesQueryFindings             ScheduledOperationId = "vulnerabilities_query_findings"
-	ScheduledOperationIdVulnerabilitiesQueryScans                ScheduledOperationId = "vulnerabilities_query_scans"
-	ScheduledOperationIdAppsecQueryFindings                      ScheduledOperationId = "appsec_query_findings"
+	ScheduledOperationIdAssetsQueryDevices                        ScheduledOperationId = "assets_query_devices"
+	ScheduledOperationIdAssetsQueryAlerts                         ScheduledOperationId = "assets_query_alerts"
+	ScheduledOperationIdAssetsQueryUtilization                    ScheduledOperationId = "assets_query_utilization"
+	ScheduledOperationIdAssetsQueryVulnerabilities                ScheduledOperationId = "assets_query_vulnerabilities"
+	ScheduledOperationIdCloudsecurityQueryCloudResourceInventory  ScheduledOperationId = "cloudsecurity_query_cloud_resource_inventory"
+	ScheduledOperationIdCloudsecurityQueryComplianceFindings      ScheduledOperationId = "cloudsecurity_query_compliance_findings"
+	ScheduledOperationIdCloudsecurityQueryEvents                  ScheduledOperationId = "cloudsecurity_query_events"
+	ScheduledOperationIdCloudsecurityQueryIoms                    ScheduledOperationId = "cloudsecurity_query_ioms"
+	ScheduledOperationIdCloudsecurityQueryThreats                 ScheduledOperationId = "cloudsecurity_query_threats"
+	ScheduledOperationIdEdrQueryAlerts                            ScheduledOperationId = "edr_query_alerts"
+	ScheduledOperationIdEdrQueryApplications                      ScheduledOperationId = "edr_query_applications"
+	ScheduledOperationIdEdrQueryEndpoints                         ScheduledOperationId = "edr_query_endpoints"
+	ScheduledOperationIdEdrQueryIocs                              ScheduledOperationId = "edr_query_iocs"
+	ScheduledOperationIdEdrQueryPostureScore                      ScheduledOperationId = "edr_query_posture_score"
+	ScheduledOperationIdEdrQueryThreatevents                      ScheduledOperationId = "edr_query_threatevents"
+	ScheduledOperationIdEmailsecurityQueryThreats                 ScheduledOperationId = "emailsecurity_query_threats"
+	ScheduledOperationIdEmailsecurityQueryEmailEvents             ScheduledOperationId = "emailsecurity_query_email_events"
+	ScheduledOperationIdEndpointmanagementQueryDevices            ScheduledOperationId = "endpointmanagement_query_devices"
+	ScheduledOperationIdEndpointmanagementQueryComplianceFindings ScheduledOperationId = "endpointmanagement_query_compliance_findings"
+	ScheduledOperationIdIdentityQueryAuditLog                     ScheduledOperationId = "identity_query_audit_log"
+	ScheduledOperationIdIdentityQueryGroups                       ScheduledOperationId = "identity_query_groups"
+	ScheduledOperationIdIdentityQueryGroupsEnriched               ScheduledOperationId = "identity_query_groups_enriched"
+	ScheduledOperationIdIdentityQueryUsers                        ScheduledOperationId = "identity_query_users"
+	ScheduledOperationIdIdentityQueryUsersEnriched                ScheduledOperationId = "identity_query_users_enriched"
+	ScheduledOperationIdSiemQueryEvents                           ScheduledOperationId = "siem_query_events"
+	ScheduledOperationIdSiemQueryInvestigations                   ScheduledOperationId = "siem_query_investigations"
+	ScheduledOperationIdVulnerabilitiesQueryAssets                ScheduledOperationId = "vulnerabilities_query_assets"
+	ScheduledOperationIdVulnerabilitiesQueryFindings              ScheduledOperationId = "vulnerabilities_query_findings"
+	ScheduledOperationIdVulnerabilitiesQueryScans                 ScheduledOperationId = "vulnerabilities_query_scans"
+	ScheduledOperationIdAppsecQueryFindings                       ScheduledOperationId = "appsec_query_findings"
 )
 
 func NewScheduledOperationIdFromString(s string) (ScheduledOperationId, error) {
@@ -506,6 +513,14 @@ func NewScheduledOperationIdFromString(s string) (ScheduledOperationId, error) {
 		return ScheduledOperationIdEdrQueryPostureScore, nil
 	case "edr_query_threatevents":
 		return ScheduledOperationIdEdrQueryThreatevents, nil
+	case "emailsecurity_query_threats":
+		return ScheduledOperationIdEmailsecurityQueryThreats, nil
+	case "emailsecurity_query_email_events":
+		return ScheduledOperationIdEmailsecurityQueryEmailEvents, nil
+	case "endpointmanagement_query_devices":
+		return ScheduledOperationIdEndpointmanagementQueryDevices, nil
+	case "endpointmanagement_query_compliance_findings":
+		return ScheduledOperationIdEndpointmanagementQueryComplianceFindings, nil
 	case "identity_query_audit_log":
 		return ScheduledOperationIdIdentityQueryAuditLog, nil
 	case "identity_query_groups":
