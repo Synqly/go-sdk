@@ -18,6 +18,7 @@ The `siem-connector` example will:
 - Go 1.20 or later
 - A Splunk account -- [sign up for a free trial](https://www.splunk.com/en_us/download.html)
 - A Splunk HTTP Event Collector (HEC) endpoint and API token -- [create a new HEC token](https://docs.splunk.com/Documentation/Splunk/8.1.3/Data/UsetheHTTPEventCollector#Create_an_Event_Collector_token)
+- A Splunk Search Service (REST API) endpoint and token, used for read/query operations
 
 ## Setup and run the example
 
@@ -41,7 +42,12 @@ The `siem-connector` example will:
     ```bash
     export SPLUNK_URL=https://my-org.splunkcloud.com:8088/services/collector/event
     export SPLUNK_HEC_TOKEN=my-splunk-token
+    export SPLUNK_REST_URL=https://my-org.splunkcloud.com:8089
+    export SPLUNK_REST_TOKEN=my-splunk-rest-token
     ```
+
+    All four are required to target Splunk. If any is unset, the example falls
+    back to the mock SIEM provider.
 
 5. Run the example:
 

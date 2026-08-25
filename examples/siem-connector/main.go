@@ -30,11 +30,23 @@ var (
 	splunkURL = os.Getenv("SPLUNK_URL")
 	// SPLUNK_HEC_TOKEN: A Splunk HTTP Event Collector token for logging events
 	splunkToken = os.Getenv("SPLUNK_HEC_TOKEN")
+	// SPLUNK_REST_URL: URL of the Splunk Search Service REST API
+	// Example: "https://prd-p-icwnd.splunkcloud.com:8089"
+	splunkRestURL = os.Getenv("SPLUNK_REST_URL")
+	// SPLUNK_REST_TOKEN: A Splunk Search Service token for read/query operations
+	splunkRestToken = os.Getenv("SPLUNK_REST_TOKEN")
 	// DURATION_SECONDS: (Optional) limits event generation to the provided duration
 	durationSeconds = os.Getenv("DURATION_SECONDS")
 )
 
 var consoleLogger = log.New(os.Stdout, "INFO: ", log.Ldate|log.Ltime)
+
+// splunkConfigured reports whether every Splunk variable is set. The Splunk
+// provider config needs both the HEC and Search Service halves, so a partial
+// setup falls back to the mock provider instead of failing the integration create.
+func splunkConfigured() bool {
+	return splunkURL != "" && splunkToken != "" && splunkRestURL != "" && splunkRestToken != ""
+}
 
 // App represents your application. We are not going to implement any app
 // functionality; instead, merely keep a list of tenants, where a tenant
@@ -140,7 +152,7 @@ func (a *App) configureEventLogging(ctx context.Context, tenantID, siemProviderT
 			return err
 		}
 
-		providerConfig = a.splunkConfig(splunkURL, credential.Result.Id)
+		providerConfig = a.splunkConfig(splunkURL, splunkRestURL, splunkRestToken, credential.Result.Id)
 
 	case "inmem":
 		providerConfig = a.inmemConfig()
@@ -166,7 +178,7 @@ func (a *App) configureEventLogging(ctx context.Context, tenantID, siemProviderT
 	return nil
 }
 
-func (a *App) splunkConfig(splunkURL, credentialId string) *mgmt.ProviderConfig {
+func (a *App) splunkConfig(splunkURL, splunkRestURL, splunkRestToken, credentialId string) *mgmt.ProviderConfig {
 	skip := true
 	return &mgmt.ProviderConfig{
 		SiemSplunk: &mgmt.SiemSplunk{
@@ -175,9 +187,10 @@ func (a *App) splunkConfig(splunkURL, credentialId string) *mgmt.ProviderConfig 
 				TokenId: credentialId,
 			},
 
-			// fill in required dummy/unused SearchServiceCredential
-			SearchServiceUrl:        splunkURL,
-			SearchServiceCredential: &mgmt.SplunkSearchCredential{Token: &mgmt.TokenCredential{Secret: "def"}},
+			SearchServiceUrl: splunkRestURL,
+			SearchServiceCredential: &mgmt.SplunkSearchCredential{
+				Token: &mgmt.TokenCredential{Secret: splunkRestToken},
+			},
 
 			// Do not verify the Splunk server's TLS certificate. This
 			// is not recommended for production use; however, it is set
@@ -290,8 +303,8 @@ func main() {
 	if synqlyOrgToken == "" {
 		log.Fatal("Must set following environment variable: SYNQLY_ORG_TOKEN")
 	}
-	if splunkURL == "" || splunkToken == "" {
-		consoleLogger.Print("WARNING: no Splunk credentials provided (SLUNK_URL, SPLUNK_HEC_TOKEN)\nUsing Mock as the SIEM  provider")
+	if !splunkConfigured() {
+		consoleLogger.Print("WARNING: incomplete Splunk configuration (SPLUNK_URL, SPLUNK_HEC_TOKEN, SPLUNK_REST_URL, SPLUNK_REST_TOKEN)\nUsing Mock as the SIEM provider")
 	}
 
 	// Instantiate App object
@@ -311,7 +324,7 @@ func main() {
 
 	// Create a couple of tenants
 
-	if splunkToken != "" && splunkURL != "" {
+	if splunkConfigured() {
 		// Create and configure Tenant ABC to use splunk SIEM event logging provider
 		consoleLogger.Print("Creating Tenant ABC with splunk SIEM provider")
 		if err := app.NewTenant(ctx, "Tenant ABC"); err != nil {
