@@ -3421,7 +3421,7 @@ func (a *AssetsTaniumCloudMock) String() string {
 
 // Configuration for Tenable Cloud.
 //
-// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/tenable-setup)
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/tenable-asset-setup)
 var (
 	assetsTenableCloudFieldCredential = big.NewInt(1 << 0)
 	assetsTenableCloudFieldUrl        = big.NewInt(1 << 1)
@@ -11301,7 +11301,7 @@ func (e *EmailSecurityExchangeOnline) String() string {
 
 // Configuration for Mimecast Cloud Gateway as an email security provider.
 //
-// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/mimecast-cloud-gateway-setup)
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/mimecast-cloud-gateway-emailsecurity-setup)
 var (
 	emailSecurityMimecastCloudGatewayFieldApiGateway = big.NewInt(1 << 0)
 	emailSecurityMimecastCloudGatewayFieldCredential = big.NewInt(1 << 1)
@@ -11491,7 +11491,7 @@ func (e *EmailSecurityMimecastCloudGatewayMock) String() string {
 
 // Configuration for Automox.
 //
-// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/automox-endpointmanagement-setup)
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/automox-endpointmgmt-setup)
 var (
 	endpointmanagementAutomoxFieldCredential = big.NewInt(1 << 0)
 	endpointmanagementAutomoxFieldOrgId      = big.NewInt(1 << 1)
@@ -11612,7 +11612,7 @@ func (e *EndpointmanagementAutomox) String() string {
 
 // Configuration for Microsoft Intune.
 //
-// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/intune-endpointmanagement-setup)
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/intune-endpointmgmt-setup)
 var (
 	endpointmanagementIntuneFieldCredential = big.NewInt(1 << 0)
 	endpointmanagementIntuneFieldTenantId   = big.NewInt(1 << 1)
@@ -11733,7 +11733,7 @@ func (e *EndpointmanagementIntune) String() string {
 
 // Configuration for Iru.
 //
-// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/iru-endpointmanagement-setup)
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/iru-endpointmgmt-setup)
 var (
 	endpointmanagementIruFieldCredential = big.NewInt(1 << 0)
 	endpointmanagementIruFieldUrl        = big.NewInt(1 << 1)
@@ -11837,7 +11837,7 @@ func (e *EndpointmanagementIru) String() string {
 
 // Configuration for Jamf Pro.
 //
-// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/jamf-endpointmanagement-setup)
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/jamf-endpointmgmt-setup)
 var (
 	endpointmanagementJamfFieldCredential = big.NewInt(1 << 0)
 	endpointmanagementJamfFieldUrl        = big.NewInt(1 << 1)
@@ -21495,7 +21495,7 @@ type ProviderConfig struct {
 	AssetsTaniumCloudMock *AssetsTaniumCloudMock
 	// Configuration for Tenable Cloud.
 	//
-	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/tenable-setup)
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/tenable-asset-setup)
 	AssetsTenableCloud *AssetsTenableCloud
 	// Configuration for a mock Tenable Cloud Assets provider
 	AssetsTenableCloudMock *AssetsTenableCloudMock
@@ -21593,25 +21593,25 @@ type ProviderConfig struct {
 	EmailsecurityExchangeOnline *EmailSecurityExchangeOnline
 	// Configuration for Mimecast Cloud Gateway as an email security provider.
 	//
-	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/mimecast-cloud-gateway-setup)
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/mimecast-cloud-gateway-emailsecurity-setup)
 	EmailsecurityMimecastCloudGateway *EmailSecurityMimecastCloudGateway
 	// Configuration for [MOCK] Mimecast Cloud Gateway.
 	EmailsecurityMimecastCloudGatewayMock *EmailSecurityMimecastCloudGatewayMock
 	// Configuration for Automox.
 	//
-	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/automox-endpointmanagement-setup)
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/automox-endpointmgmt-setup)
 	EndpointmanagementAutomox *EndpointmanagementAutomox
 	// Configuration for Microsoft Intune.
 	//
-	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/intune-endpointmanagement-setup)
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/intune-endpointmgmt-setup)
 	EndpointmanagementIntune *EndpointmanagementIntune
 	// Configuration for Iru.
 	//
-	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/iru-endpointmanagement-setup)
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/iru-endpointmgmt-setup)
 	EndpointmanagementIru *EndpointmanagementIru
 	// Configuration for Jamf Pro.
 	//
-	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/jamf-endpointmanagement-setup)
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/jamf-endpointmgmt-setup)
 	EndpointmanagementJamf *EndpointmanagementJamf
 	// Configuration for NinjaOne.
 	//
