@@ -6202,34 +6202,35 @@ var (
 	deviceFieldLocation          = big.NewInt(1 << 28)
 	deviceFieldMac               = big.NewInt(1 << 29)
 	deviceFieldMacAddresses      = big.NewInt(1 << 30)
-	deviceFieldModifiedTime      = big.NewInt(1 << 31)
-	deviceFieldModifiedTimeDt    = big.NewInt(1 << 32)
-	deviceFieldName              = big.NewInt(1 << 33)
-	deviceFieldNamespacePid      = big.NewInt(1 << 34)
-	deviceFieldNetbiosNames      = big.NewInt(1 << 35)
-	deviceFieldNetworkInterfaces = big.NewInt(1 << 36)
-	deviceFieldNetworkStatus     = big.NewInt(1 << 37)
-	deviceFieldNetworkStatusId   = big.NewInt(1 << 38)
-	deviceFieldOrg               = big.NewInt(1 << 39)
-	deviceFieldOs                = big.NewInt(1 << 40)
-	deviceFieldOwner             = big.NewInt(1 << 41)
-	deviceFieldRegion            = big.NewInt(1 << 42)
-	deviceFieldRiskLevel         = big.NewInt(1 << 43)
-	deviceFieldRiskLevelId       = big.NewInt(1 << 44)
-	deviceFieldRiskScore         = big.NewInt(1 << 45)
-	deviceFieldSrcUrl            = big.NewInt(1 << 46)
-	deviceFieldSubnet            = big.NewInt(1 << 47)
-	deviceFieldSubnetUid         = big.NewInt(1 << 48)
-	deviceFieldSwInfo            = big.NewInt(1 << 49)
-	deviceFieldType              = big.NewInt(1 << 50)
-	deviceFieldTypeId            = big.NewInt(1 << 51)
-	deviceFieldUid               = big.NewInt(1 << 52)
-	deviceFieldUidAlt            = big.NewInt(1 << 53)
-	deviceFieldVendor            = big.NewInt(1 << 54)
-	deviceFieldVendorName        = big.NewInt(1 << 55)
-	deviceFieldVlanUid           = big.NewInt(1 << 56)
-	deviceFieldVpcUid            = big.NewInt(1 << 57)
-	deviceFieldZone              = big.NewInt(1 << 58)
+	deviceFieldModel             = big.NewInt(1 << 31)
+	deviceFieldModifiedTime      = big.NewInt(1 << 32)
+	deviceFieldModifiedTimeDt    = big.NewInt(1 << 33)
+	deviceFieldName              = big.NewInt(1 << 34)
+	deviceFieldNamespacePid      = big.NewInt(1 << 35)
+	deviceFieldNetbiosNames      = big.NewInt(1 << 36)
+	deviceFieldNetworkInterfaces = big.NewInt(1 << 37)
+	deviceFieldNetworkStatus     = big.NewInt(1 << 38)
+	deviceFieldNetworkStatusId   = big.NewInt(1 << 39)
+	deviceFieldOrg               = big.NewInt(1 << 40)
+	deviceFieldOs                = big.NewInt(1 << 41)
+	deviceFieldOwner             = big.NewInt(1 << 42)
+	deviceFieldRegion            = big.NewInt(1 << 43)
+	deviceFieldRiskLevel         = big.NewInt(1 << 44)
+	deviceFieldRiskLevelId       = big.NewInt(1 << 45)
+	deviceFieldRiskScore         = big.NewInt(1 << 46)
+	deviceFieldSrcUrl            = big.NewInt(1 << 47)
+	deviceFieldSubnet            = big.NewInt(1 << 48)
+	deviceFieldSubnetUid         = big.NewInt(1 << 49)
+	deviceFieldSwInfo            = big.NewInt(1 << 50)
+	deviceFieldType              = big.NewInt(1 << 51)
+	deviceFieldTypeId            = big.NewInt(1 << 52)
+	deviceFieldUid               = big.NewInt(1 << 53)
+	deviceFieldUidAlt            = big.NewInt(1 << 54)
+	deviceFieldVendor            = big.NewInt(1 << 55)
+	deviceFieldVendorName        = big.NewInt(1 << 56)
+	deviceFieldVlanUid           = big.NewInt(1 << 57)
+	deviceFieldVpcUid            = big.NewInt(1 << 58)
+	deviceFieldZone              = big.NewInt(1 << 59)
 )
 
 type Device struct {
@@ -6295,6 +6296,8 @@ type Device struct {
 	Mac *MacAddress `json:"mac,omitempty" url:"mac,omitempty"`
 	// A list of MAC addresses available on the device
 	MacAddresses []string `json:"mac_addresses,omitempty" url:"mac_addresses,omitempty"`
+	// The model of the device. For example <code>MacBook Pro</code> or <code>t3a.medium</code>.
+	Model *string `json:"model,omitempty" url:"model,omitempty"`
 	// The time when the device was last known to have been modified.
 	ModifiedTime *Timestamp `json:"modified_time,omitempty" url:"modified_time,omitempty"`
 	// The time when the device was last known to have been modified.
@@ -6574,6 +6577,13 @@ func (d *Device) GetMacAddresses() []string {
 		return nil
 	}
 	return d.MacAddresses
+}
+
+func (d *Device) GetModel() *string {
+	if d == nil {
+		return nil
+	}
+	return d.Model
 }
 
 func (d *Device) GetModifiedTime() *Timestamp {
@@ -7001,6 +7011,13 @@ func (d *Device) SetMac(mac *MacAddress) {
 func (d *Device) SetMacAddresses(macAddresses []string) {
 	d.MacAddresses = macAddresses
 	d.require(deviceFieldMacAddresses)
+}
+
+// SetModel sets the Model field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (d *Device) SetModel(model *string) {
+	d.Model = model
+	d.require(deviceFieldModel)
 }
 
 // SetModifiedTime sets the ModifiedTime field and marks it as non-optional;

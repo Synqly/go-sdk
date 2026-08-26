@@ -9760,7 +9760,7 @@ type Device struct {
 	MacAddresses []string `json:"mac_addresses,omitempty" url:"mac_addresses,omitempty"`
 	// The Mobile Equipment Identifier. It's a unique number that identifies a Code Division Multiple Access (CDMA) mobile device.
 	Meid *string `json:"meid,omitempty" url:"meid,omitempty"`
-	// The model of the device. For example <code>ThinkPad X1 Carbon</code>.
+	// The model of the device. For example <code>MacBook Pro</code> or <code>t3a.medium</code>.
 	Model *string `json:"model,omitempty" url:"model,omitempty"`
 	// The time when the device was last known to have been modified.
 	ModifiedTime *Timestamp `json:"modified_time,omitempty" url:"modified_time,omitempty"`

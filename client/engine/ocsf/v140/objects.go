@@ -7520,7 +7520,7 @@ type Device struct {
 	Mac *MacAddress `json:"mac,omitempty" url:"mac,omitempty"`
 	// A list of MAC addresses available on the device
 	MacAddresses []string `json:"mac_addresses,omitempty" url:"mac_addresses,omitempty"`
-	// The model of the device. For example <code>ThinkPad X1 Carbon</code>.
+	// The model of the device. For example <code>MacBook Pro</code> or <code>t3a.medium</code>.
 	Model *string `json:"model,omitempty" url:"model,omitempty"`
 	// The time when the device was last known to have been modified.
 	ModifiedTime *Timestamp `json:"modified_time,omitempty" url:"modified_time,omitempty"`
