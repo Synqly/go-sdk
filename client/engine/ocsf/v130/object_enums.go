@@ -339,7 +339,7 @@ const Databucket_Type_GCPBucket DatabucketTypeId = 3
 const Databucket_Type_Other DatabucketTypeId = 99
 
 // DeviceNetworkStatusId Values
-// Network Isolation Status ID. The network isolation status ID.
+// . The network isolation status ID.
 
 // NotIsolated. Device is not isolated from the network.
 const Device_NetworkStatus_NotIsolated DeviceNetworkStatusId = 1
