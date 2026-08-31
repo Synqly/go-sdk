@@ -17529,10 +17529,14 @@ func (j *JamfCredential) validate() error {
 
 type JiraCredential struct {
 	Type string
-	// Configuration when creating new Basic Credentials.
+	// Classic user email and API token. See the Jira service account guide for Atlassian organization service accounts.
 	Basic *BasicCredential
-	// Reference to existing Basic Credentials.
+	// Reference to existing User API Token.
 	BasicId BasicCredentialId
+	// Atlassian organization service account email and scoped API token. See https://docs.synqly.com/guides/provider-configuration/jira-service-account-setup.
+	ServiceAccount *BasicCredential
+	// Reference to existing Service Account.
+	ServiceAccountId BasicCredentialId
 
 	rawJSON json.RawMessage
 }
@@ -17556,6 +17560,20 @@ func (j *JiraCredential) GetBasicId() BasicCredentialId {
 		return ""
 	}
 	return j.BasicId
+}
+
+func (j *JiraCredential) GetServiceAccount() *BasicCredential {
+	if j == nil {
+		return nil
+	}
+	return j.ServiceAccount
+}
+
+func (j *JiraCredential) GetServiceAccountId() BasicCredentialId {
+	if j == nil {
+		return ""
+	}
+	return j.ServiceAccountId
 }
 
 func (j *JiraCredential) UnmarshalJSON(data []byte) error {
@@ -17584,6 +17602,20 @@ func (j *JiraCredential) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		j.BasicId = valueUnmarshaler.BasicId
+	case "service_account":
+		value := new(BasicCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		j.ServiceAccount = value
+	case "service_account_id":
+		var valueUnmarshaler struct {
+			ServiceAccountId BasicCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		j.ServiceAccountId = valueUnmarshaler.ServiceAccountId
 	}
 	j.rawJSON = nil
 	return nil
@@ -17606,6 +17638,19 @@ func (j JiraCredential) MarshalJSON() ([]byte, error) {
 		}
 		return json.Marshal(marshaler)
 	}
+	if j.ServiceAccount != nil {
+		return internal.MarshalJSONWithExtraProperty(j.ServiceAccount, "type", "service_account")
+	}
+	if j.ServiceAccountId != "" {
+		var marshaler = struct {
+			Type             string            `json:"type"`
+			ServiceAccountId BasicCredentialId `json:"value"`
+		}{
+			Type:             "service_account_id",
+			ServiceAccountId: j.ServiceAccountId,
+		}
+		return json.Marshal(marshaler)
+	}
 	if len(j.rawJSON) > 0 {
 		return j.rawJSON, nil
 	}
@@ -17615,6 +17660,8 @@ func (j JiraCredential) MarshalJSON() ([]byte, error) {
 type JiraCredentialVisitor interface {
 	VisitBasic(*BasicCredential) error
 	VisitBasicId(BasicCredentialId) error
+	VisitServiceAccount(*BasicCredential) error
+	VisitServiceAccountId(BasicCredentialId) error
 }
 
 func (j *JiraCredential) Accept(visitor JiraCredentialVisitor) error {
@@ -17623,6 +17670,12 @@ func (j *JiraCredential) Accept(visitor JiraCredentialVisitor) error {
 	}
 	if j.BasicId != "" {
 		return visitor.VisitBasicId(j.BasicId)
+	}
+	if j.ServiceAccount != nil {
+		return visitor.VisitServiceAccount(j.ServiceAccount)
+	}
+	if j.ServiceAccountId != "" {
+		return visitor.VisitServiceAccountId(j.ServiceAccountId)
 	}
 	return fmt.Errorf("type %T does not define a non-empty union type", j)
 }
@@ -17637,6 +17690,12 @@ func (j *JiraCredential) validate() error {
 	}
 	if j.BasicId != "" {
 		fields = append(fields, "basic_id")
+	}
+	if j.ServiceAccount != nil {
+		fields = append(fields, "service_account")
+	}
+	if j.ServiceAccountId != "" {
+		fields = append(fields, "service_account_id")
 	}
 	if len(fields) == 0 {
 		if j.Type != "" {
@@ -19030,7 +19089,7 @@ var (
 
 type NotificationsJira struct {
 	Credential *JiraCredential `json:"credential" url:"credential"`
-	// Base URL for the Jira API.
+	// Base URL for the Jira tenant.
 	Url string `json:"url" url:"url"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
@@ -36113,7 +36172,7 @@ type TicketingJira struct {
 	DefaultIssueType *string `json:"default_issue_type,omitempty" url:"default_issue_type,omitempty"`
 	// Default Project for the integration.
 	DefaultProject *string `json:"default_project,omitempty" url:"default_project,omitempty"`
-	// Base URL for the Jira API.
+	// Base URL for the Jira tenant.
 	Url string `json:"url" url:"url"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
@@ -36268,7 +36327,7 @@ type TicketingJiraServiceManagement struct {
 	DefaultIssueType *string `json:"default_issue_type,omitempty" url:"default_issue_type,omitempty"`
 	// Default project when listing, creating, or editing tickets.
 	DefaultProject *string `json:"default_project,omitempty" url:"default_project,omitempty"`
-	// Base URL for the Jira Service Management API.
+	// Base URL for the Jira tenant.
 	Url string `json:"url" url:"url"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
