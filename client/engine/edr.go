@@ -5473,12 +5473,15 @@ func (q *QueryThreatsResponse) String() string {
 }
 
 var (
-	retrieveFileRequestFieldPath = big.NewInt(1 << 0)
+	retrieveFileRequestFieldPath     = big.NewInt(1 << 0)
+	retrieveFileRequestFieldPassword = big.NewInt(1 << 1)
 )
 
 type RetrieveFileRequest struct {
 	// The remote file path to retrieve from the endpoint.
 	Path string `json:"path" url:"path"`
+	// Password used to protect the returned file archive. Required by providers that encrypt the retrieved archive (e.g. SentinelOne, which requires 10+ characters with mixed case, a digit, and a symbol); ignored by providers that do not (e.g. CrowdStrike).
+	Password *string `json:"password,omitempty" url:"password,omitempty"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -5492,6 +5495,13 @@ func (r *RetrieveFileRequest) GetPath() string {
 		return ""
 	}
 	return r.Path
+}
+
+func (r *RetrieveFileRequest) GetPassword() *string {
+	if r == nil {
+		return nil
+	}
+	return r.Password
 }
 
 func (r *RetrieveFileRequest) GetExtraProperties() map[string]interface{} {
@@ -5513,6 +5523,13 @@ func (r *RetrieveFileRequest) require(field *big.Int) {
 func (r *RetrieveFileRequest) SetPath(path string) {
 	r.Path = path
 	r.require(retrieveFileRequestFieldPath)
+}
+
+// SetPassword sets the Password field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (r *RetrieveFileRequest) SetPassword(password *string) {
+	r.Password = password
+	r.require(retrieveFileRequestFieldPassword)
 }
 
 func (r *RetrieveFileRequest) UnmarshalJSON(data []byte) error {
