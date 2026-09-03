@@ -1560,12 +1560,15 @@ func (l *ListIntegrationsResponse) String() string {
 var (
 	patchIntegrationResponseFieldResult             = big.NewInt(1 << 0)
 	patchIntegrationResponseFieldCredentialsCreated = big.NewInt(1 << 1)
+	patchIntegrationResponseFieldMessages           = big.NewInt(1 << 2)
 )
 
 type PatchIntegrationResponse struct {
 	Result *Integration `json:"result" url:"result"`
 	// Credentials created and attached to the integration as a result of this patch. Populated only when the request added a credential to an integration that previously had none; empty otherwise.
 	CredentialsCreated []*CredentialResponse `json:"credentials_created,omitempty" url:"credentials_created,omitempty"`
+	// Warnings or issues that occurred during the patch that did not prevent it from succeeding, such as a scheduled operation frequency that was automatically raised to a supported minimum.
+	Messages *IntegrationMessagesResponse `json:"messages,omitempty" url:"messages,omitempty"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -1586,6 +1589,13 @@ func (p *PatchIntegrationResponse) GetCredentialsCreated() []*CredentialResponse
 		return nil
 	}
 	return p.CredentialsCreated
+}
+
+func (p *PatchIntegrationResponse) GetMessages() *IntegrationMessagesResponse {
+	if p == nil {
+		return nil
+	}
+	return p.Messages
 }
 
 func (p *PatchIntegrationResponse) GetExtraProperties() map[string]interface{} {
@@ -1614,6 +1624,13 @@ func (p *PatchIntegrationResponse) SetResult(result *Integration) {
 func (p *PatchIntegrationResponse) SetCredentialsCreated(credentialsCreated []*CredentialResponse) {
 	p.CredentialsCreated = credentialsCreated
 	p.require(patchIntegrationResponseFieldCredentialsCreated)
+}
+
+// SetMessages sets the Messages field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (p *PatchIntegrationResponse) SetMessages(messages *IntegrationMessagesResponse) {
+	p.Messages = messages
+	p.require(patchIntegrationResponseFieldMessages)
 }
 
 func (p *PatchIntegrationResponse) UnmarshalJSON(data []byte) error {
@@ -1663,12 +1680,15 @@ type UpdateIntegrationRequest = *Integration
 var (
 	updateIntegrationResponseFieldResult             = big.NewInt(1 << 0)
 	updateIntegrationResponseFieldCredentialsCreated = big.NewInt(1 << 1)
+	updateIntegrationResponseFieldMessages           = big.NewInt(1 << 2)
 )
 
 type UpdateIntegrationResponse struct {
 	Result *Integration `json:"result" url:"result"`
 	// Credentials created and attached to the integration as a result of this update. Populated only when the request added a credential to an integration that previously had none; empty otherwise.
 	CredentialsCreated []*CredentialResponse `json:"credentials_created,omitempty" url:"credentials_created,omitempty"`
+	// Warnings or issues that occurred during the update that did not prevent it from succeeding, such as a scheduled operation frequency that was automatically raised to a supported minimum.
+	Messages *IntegrationMessagesResponse `json:"messages,omitempty" url:"messages,omitempty"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -1689,6 +1709,13 @@ func (u *UpdateIntegrationResponse) GetCredentialsCreated() []*CredentialRespons
 		return nil
 	}
 	return u.CredentialsCreated
+}
+
+func (u *UpdateIntegrationResponse) GetMessages() *IntegrationMessagesResponse {
+	if u == nil {
+		return nil
+	}
+	return u.Messages
 }
 
 func (u *UpdateIntegrationResponse) GetExtraProperties() map[string]interface{} {
@@ -1717,6 +1744,13 @@ func (u *UpdateIntegrationResponse) SetResult(result *Integration) {
 func (u *UpdateIntegrationResponse) SetCredentialsCreated(credentialsCreated []*CredentialResponse) {
 	u.CredentialsCreated = credentialsCreated
 	u.require(updateIntegrationResponseFieldCredentialsCreated)
+}
+
+// SetMessages sets the Messages field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (u *UpdateIntegrationResponse) SetMessages(messages *IntegrationMessagesResponse) {
+	u.Messages = messages
+	u.require(updateIntegrationResponseFieldMessages)
 }
 
 func (u *UpdateIntegrationResponse) UnmarshalJSON(data []byte) error {

@@ -29951,6 +29951,30 @@ func (s *SevcoCredential) validate() error {
 	return nil
 }
 
+type SinkAwsSqsEventsPerMessage string
+
+const (
+	// Deliver each event as its own SQS message. The body will be a single json object.
+	SinkAwsSqsEventsPerMessageSingleEvent SinkAwsSqsEventsPerMessage = "single_event"
+	// Pack up to a page of events into a single SQS message. The body is a json array of event objects.
+	SinkAwsSqsEventsPerMessagePageOfEvents SinkAwsSqsEventsPerMessage = "page_of_events"
+)
+
+func NewSinkAwsSqsEventsPerMessageFromString(s string) (SinkAwsSqsEventsPerMessage, error) {
+	switch s {
+	case "single_event":
+		return SinkAwsSqsEventsPerMessageSingleEvent, nil
+	case "page_of_events":
+		return SinkAwsSqsEventsPerMessagePageOfEvents, nil
+	}
+	var t SinkAwsSqsEventsPerMessage
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (s SinkAwsSqsEventsPerMessage) Ptr() *SinkAwsSqsEventsPerMessage {
+	return &s
+}
+
 // Configuration for Amazon S3 as a Sink provider. Events are written directly to an AWS S3 bucket in compressed JSON format.
 //
 // [Configuration guide](https://docs.synqly.com/guides/provider-configuration/aws-s3-sink-setup)
@@ -30114,14 +30138,17 @@ func (s *SinkAwsS3) String() string {
 //
 // [Configuration guide](https://docs.synqly.com/guides/provider-configuration/aws-sqs-sink-setup)
 var (
-	sinkAwsSqsFieldCredential = big.NewInt(1 << 0)
-	sinkAwsSqsFieldRegion     = big.NewInt(1 << 1)
-	sinkAwsSqsFieldUrl        = big.NewInt(1 << 2)
+	sinkAwsSqsFieldCredential       = big.NewInt(1 << 0)
+	sinkAwsSqsFieldEventsPerMessage = big.NewInt(1 << 1)
+	sinkAwsSqsFieldRegion           = big.NewInt(1 << 2)
+	sinkAwsSqsFieldUrl              = big.NewInt(1 << 3)
 )
 
 type SinkAwsSqs struct {
 	// AWS credentials with write access to the configured SQS queue.
 	Credential *AwsProviderCredential `json:"credential" url:"credential"`
+	// How events are packed into SQS messages. Defaults to `page_of_events`.
+	EventsPerMessage *SinkAwsSqsEventsPerMessage `json:"events_per_message,omitempty" url:"events_per_message,omitempty"`
 	// Overrides the default AWS region. If not present, the region will be inferred from the URL.
 	Region *string `json:"region,omitempty" url:"region,omitempty"`
 	// HTTP(S) URL of the queue; must be a valid SQS queue URL (validated when connecting).
@@ -30139,6 +30166,13 @@ func (s *SinkAwsSqs) GetCredential() *AwsProviderCredential {
 		return nil
 	}
 	return s.Credential
+}
+
+func (s *SinkAwsSqs) GetEventsPerMessage() *SinkAwsSqsEventsPerMessage {
+	if s == nil {
+		return nil
+	}
+	return s.EventsPerMessage
 }
 
 func (s *SinkAwsSqs) GetRegion() *string {
@@ -30174,6 +30208,13 @@ func (s *SinkAwsSqs) require(field *big.Int) {
 func (s *SinkAwsSqs) SetCredential(credential *AwsProviderCredential) {
 	s.Credential = credential
 	s.require(sinkAwsSqsFieldCredential)
+}
+
+// SetEventsPerMessage sets the EventsPerMessage field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (s *SinkAwsSqs) SetEventsPerMessage(eventsPerMessage *SinkAwsSqsEventsPerMessage) {
+	s.EventsPerMessage = eventsPerMessage
+	s.require(sinkAwsSqsFieldEventsPerMessage)
 }
 
 // SetRegion sets the Region field and marks it as non-optional;
