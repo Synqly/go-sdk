@@ -95,12 +95,18 @@ func (c *CreateFindingsRequestInput) MarshalJSON() ([]byte, error) {
 }
 
 var (
-	vulnerabilitiesGetLabelsRequestFieldMeta = big.NewInt(1 << 0)
+	vulnerabilitiesGetLabelsRequestFieldMeta   = big.NewInt(1 << 0)
+	vulnerabilitiesGetLabelsRequestFieldLimit  = big.NewInt(1 << 1)
+	vulnerabilitiesGetLabelsRequestFieldCursor = big.NewInt(1 << 2)
 )
 
 type VulnerabilitiesGetLabelsRequest struct {
 	// Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
 	Meta []*string `json:"-" url:"meta,omitempty"`
+	// Number of labels to return. Defaults to 50.
+	Limit *int `json:"-" url:"limit,omitempty"`
+	// Start search from cursor position.
+	Cursor *string `json:"-" url:"cursor,omitempty"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -118,6 +124,20 @@ func (v *VulnerabilitiesGetLabelsRequest) require(field *big.Int) {
 func (v *VulnerabilitiesGetLabelsRequest) SetMeta(meta []*string) {
 	v.Meta = meta
 	v.require(vulnerabilitiesGetLabelsRequestFieldMeta)
+}
+
+// SetLimit sets the Limit field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (v *VulnerabilitiesGetLabelsRequest) SetLimit(limit *int) {
+	v.Limit = limit
+	v.require(vulnerabilitiesGetLabelsRequestFieldLimit)
+}
+
+// SetCursor sets the Cursor field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (v *VulnerabilitiesGetLabelsRequest) SetCursor(cursor *string) {
+	v.Cursor = cursor
+	v.require(vulnerabilitiesGetLabelsRequestFieldCursor)
 }
 
 var (

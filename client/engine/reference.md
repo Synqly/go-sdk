@@ -10972,6 +10972,22 @@ client.Vulnerabilities.GetLabels(
     
 </dd>
 </dl>
+
+<dl>
+<dd>
+
+**limit:** `*int` — Number of labels to return. Defaults to 50.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**cursor:** `*string` — Start search from cursor position.
+    
+</dd>
+</dl>
 </dd>
 </dl>
 

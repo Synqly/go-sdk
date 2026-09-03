@@ -22009,6 +22009,8 @@ type ProviderConfig struct {
 	VulnerabilitiesRapid7InsightCloud *VulnerabilitiesRapid7InsightCloud
 	// Configuration for a mocked Rapid7 Insight Cloud as a Vulnerabilities Provider
 	VulnerabilitiesRapid7InsightCloudMock *VulnerabilitiesRapid7InsightCloudMock
+	// Configuration for ServiceNow USEM.
+	VulnerabilitiesServicenowUsem *VulnerabilitiesServiceNowUsem
 	// Configuration for ServiceNow Vulnerability Response.
 	VulnerabilitiesServicenowVr *VulnerabilitiesServiceNow
 	// Configuration for Tanium Vulnerability Management.
@@ -23186,6 +23188,13 @@ func (p *ProviderConfig) GetVulnerabilitiesRapid7InsightCloudMock() *Vulnerabili
 	return p.VulnerabilitiesRapid7InsightCloudMock
 }
 
+func (p *ProviderConfig) GetVulnerabilitiesServicenowUsem() *VulnerabilitiesServiceNowUsem {
+	if p == nil {
+		return nil
+	}
+	return p.VulnerabilitiesServicenowUsem
+}
+
 func (p *ProviderConfig) GetVulnerabilitiesServicenowVr() *VulnerabilitiesServiceNow {
 	if p == nil {
 		return nil
@@ -24224,6 +24233,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.VulnerabilitiesRapid7InsightCloudMock = value
+	case "vulnerabilities_servicenow_usem":
+		value := new(VulnerabilitiesServiceNowUsem)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.VulnerabilitiesServicenowUsem = value
 	case "vulnerabilities_servicenow_vr":
 		value := new(VulnerabilitiesServiceNow)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -24761,6 +24776,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.VulnerabilitiesRapid7InsightCloudMock != nil {
 		return internal.MarshalJSONWithExtraProperty(p.VulnerabilitiesRapid7InsightCloudMock, "type", "vulnerabilities_rapid7_insight_cloud_mock")
 	}
+	if p.VulnerabilitiesServicenowUsem != nil {
+		return internal.MarshalJSONWithExtraProperty(p.VulnerabilitiesServicenowUsem, "type", "vulnerabilities_servicenow_usem")
+	}
 	if p.VulnerabilitiesServicenowVr != nil {
 		return internal.MarshalJSONWithExtraProperty(p.VulnerabilitiesServicenowVr, "type", "vulnerabilities_servicenow_vr")
 	}
@@ -24950,6 +24968,7 @@ type ProviderConfigVisitor interface {
 	VisitVulnerabilitiesQualysCloudMock(*VulnerabilitiesQualysCloudMock) error
 	VisitVulnerabilitiesRapid7InsightCloud(*VulnerabilitiesRapid7InsightCloud) error
 	VisitVulnerabilitiesRapid7InsightCloudMock(*VulnerabilitiesRapid7InsightCloudMock) error
+	VisitVulnerabilitiesServicenowUsem(*VulnerabilitiesServiceNowUsem) error
 	VisitVulnerabilitiesServicenowVr(*VulnerabilitiesServiceNow) error
 	VisitVulnerabilitiesTaniumCloud(*VulnerabilitiesTaniumCloud) error
 	VisitVulnerabilitiesTaniumCloudMock(*VulnerabilitiesTaniumCloudMock) error
@@ -25450,6 +25469,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.VulnerabilitiesRapid7InsightCloudMock != nil {
 		return visitor.VisitVulnerabilitiesRapid7InsightCloudMock(p.VulnerabilitiesRapid7InsightCloudMock)
+	}
+	if p.VulnerabilitiesServicenowUsem != nil {
+		return visitor.VisitVulnerabilitiesServicenowUsem(p.VulnerabilitiesServicenowUsem)
 	}
 	if p.VulnerabilitiesServicenowVr != nil {
 		return visitor.VisitVulnerabilitiesServicenowVr(p.VulnerabilitiesServicenowVr)
@@ -25969,6 +25991,9 @@ func (p *ProviderConfig) validate() error {
 	if p.VulnerabilitiesRapid7InsightCloudMock != nil {
 		fields = append(fields, "vulnerabilities_rapid7_insight_cloud_mock")
 	}
+	if p.VulnerabilitiesServicenowUsem != nil {
+		fields = append(fields, "vulnerabilities_servicenow_usem")
+	}
 	if p.VulnerabilitiesServicenowVr != nil {
 		fields = append(fields, "vulnerabilities_servicenow_vr")
 	}
@@ -26347,6 +26372,8 @@ const (
 	ProviderConfigIdVulnerabilitiesRapid7InsightCloudMock ProviderConfigId = "vulnerabilities_rapid7_insight_cloud_mock"
 	// ServiceNow Vulnerability Response
 	ProviderConfigIdVulnerabilitiesServiceNow ProviderConfigId = "vulnerabilities_servicenow_vr"
+	// ServiceNow USEM
+	ProviderConfigIdVulnerabilitiesServiceNowUsem ProviderConfigId = "vulnerabilities_servicenow_usem"
 	// Tanium Vulnerability Management
 	ProviderConfigIdVulnerabilitiesTaniumCloud ProviderConfigId = "vulnerabilities_tanium_cloud"
 	// [MOCK] Tanium Vulnerability Management
@@ -26693,6 +26720,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdVulnerabilitiesRapid7InsightCloudMock, nil
 	case "vulnerabilities_servicenow_vr":
 		return ProviderConfigIdVulnerabilitiesServiceNow, nil
+	case "vulnerabilities_servicenow_usem":
+		return ProviderConfigIdVulnerabilitiesServiceNowUsem, nil
 	case "vulnerabilities_tanium_cloud":
 		return ProviderConfigIdVulnerabilitiesTaniumCloud, nil
 	case "vulnerabilities_tanium_cloud_mock":
@@ -29532,15 +29561,15 @@ func (s *SentinelOneEdrEventsCredential) validate() error {
 
 type ServiceNowCredential struct {
 	Type string
-	// Username and secret used to authenticate with ServiceNow. The password can be a [generated token](https://docs.servicenow.com/bundle/vancouver-platform-administration/page/administer/users-and-groups/task/t_CreateAUser.html). The token receives the same permissions as the user that generated it, so they must have access to the necessary projects.
+	// Username and secret used to authenticate with ServiceNow. The password can be a [generated token](https://docs.servicenow.com/bundle/vancouver-platform-administration/page/administer/users-and-groups/task/t_CreateAUser.html).
 	Basic *BasicCredential
 	// Reference to existing Basic Credentials.
 	BasicId BasicCredentialId
-	// OAuth 2.0 client credentials used to authenticate with ServiceNow. Requires ServiceNow `Washington D.C.` or later with the client credentials grant type enabled (`glide.oauth.inbound.client.credential.grant_type.enabled = true`). The OAuth Application Registry must have an Application User and Auth Scopes configured. Use `oauth_scopes` in the provider config to specify the scopes to request.
+	// OAuth client credentials used to authenticate with ServiceNow. Requires ServiceNow `Washington D.C.` or later.
 	OAuthClient *OAuthClientCredential
 	// Reference to existing Client Credentials.
 	OAuthClientId OAuthClientCredentialId
-	// Token used to authenticate with ServiceNow. This token will be used with the authentication header `x-sn-apikey`. To use token authentication, the version of ServiceNow must be `Washington D.C.` or later.
+	// Token used to authenticate with ServiceNow. Requires ServiceNow `Washington D.C.` or later.
 	Token *TokenCredential
 	// Reference to existing Token.
 	TokenId TokenCredentialId
@@ -40588,6 +40617,108 @@ func (v *VulnerabilitiesServiceNow) MarshalJSON() ([]byte, error) {
 }
 
 func (v *VulnerabilitiesServiceNow) String() string {
+	if v == nil {
+		return "<nil>"
+	}
+	if len(v.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(v.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(v); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", v)
+}
+
+// Configuration for ServiceNow USEM.
+var (
+	vulnerabilitiesServiceNowUsemFieldCredential = big.NewInt(1 << 0)
+	vulnerabilitiesServiceNowUsemFieldUrl        = big.NewInt(1 << 1)
+)
+
+type VulnerabilitiesServiceNowUsem struct {
+	Credential *ServiceNowCredential `json:"credential" url:"credential"`
+	// Base URL for the ServiceNow API.
+	Url string `json:"url" url:"url"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (v *VulnerabilitiesServiceNowUsem) GetCredential() *ServiceNowCredential {
+	if v == nil {
+		return nil
+	}
+	return v.Credential
+}
+
+func (v *VulnerabilitiesServiceNowUsem) GetUrl() string {
+	if v == nil {
+		return ""
+	}
+	return v.Url
+}
+
+func (v *VulnerabilitiesServiceNowUsem) GetExtraProperties() map[string]interface{} {
+	if v == nil {
+		return nil
+	}
+	return v.extraProperties
+}
+
+func (v *VulnerabilitiesServiceNowUsem) require(field *big.Int) {
+	if v.explicitFields == nil {
+		v.explicitFields = big.NewInt(0)
+	}
+	v.explicitFields.Or(v.explicitFields, field)
+}
+
+// SetCredential sets the Credential field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (v *VulnerabilitiesServiceNowUsem) SetCredential(credential *ServiceNowCredential) {
+	v.Credential = credential
+	v.require(vulnerabilitiesServiceNowUsemFieldCredential)
+}
+
+// SetUrl sets the Url field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (v *VulnerabilitiesServiceNowUsem) SetUrl(url string) {
+	v.Url = url
+	v.require(vulnerabilitiesServiceNowUsemFieldUrl)
+}
+
+func (v *VulnerabilitiesServiceNowUsem) UnmarshalJSON(data []byte) error {
+	type unmarshaler VulnerabilitiesServiceNowUsem
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*v = VulnerabilitiesServiceNowUsem(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *v)
+	if err != nil {
+		return err
+	}
+	v.extraProperties = extraProperties
+	v.rawJSON = nil
+	return nil
+}
+
+func (v *VulnerabilitiesServiceNowUsem) MarshalJSON() ([]byte, error) {
+	type embed VulnerabilitiesServiceNowUsem
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*v),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, v.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (v *VulnerabilitiesServiceNowUsem) String() string {
 	if v == nil {
 		return "<nil>"
 	}
