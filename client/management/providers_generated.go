@@ -17533,7 +17533,7 @@ type JiraCredential struct {
 	Basic *BasicCredential
 	// Reference to existing User API Token.
 	BasicId BasicCredentialId
-	// Atlassian organization service account email and scoped API token. See https://docs.synqly.com/guides/provider-configuration/jira-service-account-setup.
+	// Atlassian organization service account email and scoped API token.
 	ServiceAccount *BasicCredential
 	// Reference to existing Service Account.
 	ServiceAccountId BasicCredentialId
