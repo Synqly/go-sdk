@@ -95,6 +95,12 @@ const (
 	OperationIdNotificationsClearMessage                        OperationId = "notifications_clear_message"
 	OperationIdNotificationsCreateMessage                       OperationId = "notifications_create_message"
 	OperationIdNotificationsGetMessage                          OperationId = "notifications_get_message"
+	OperationIdSecurityawarenessGetPhishingSimulationDetails    OperationId = "securityawareness_get_phishing_simulation_details"
+	OperationIdSecurityawarenessGetTrainingCampaignDetails      OperationId = "securityawareness_get_training_campaign_details"
+	OperationIdSecurityawarenessGetUserDetails                  OperationId = "securityawareness_get_user_details"
+	OperationIdSecurityawarenessQueryPhishingSimulations        OperationId = "securityawareness_query_phishing_simulations"
+	OperationIdSecurityawarenessQueryTrainingCampaigns          OperationId = "securityawareness_query_training_campaigns"
+	OperationIdSecurityawarenessQueryUsers                      OperationId = "securityawareness_query_users"
 	OperationIdSiemGetAlert                                     OperationId = "siem_get_alert"
 	OperationIdSiemGetEvidence                                  OperationId = "siem_get_evidence"
 	OperationIdSiemGetInvestigation                             OperationId = "siem_get_investigation"
@@ -317,6 +323,18 @@ func NewOperationIdFromString(s string) (OperationId, error) {
 		return OperationIdNotificationsCreateMessage, nil
 	case "notifications_get_message":
 		return OperationIdNotificationsGetMessage, nil
+	case "securityawareness_get_phishing_simulation_details":
+		return OperationIdSecurityawarenessGetPhishingSimulationDetails, nil
+	case "securityawareness_get_training_campaign_details":
+		return OperationIdSecurityawarenessGetTrainingCampaignDetails, nil
+	case "securityawareness_get_user_details":
+		return OperationIdSecurityawarenessGetUserDetails, nil
+	case "securityawareness_query_phishing_simulations":
+		return OperationIdSecurityawarenessQueryPhishingSimulations, nil
+	case "securityawareness_query_training_campaigns":
+		return OperationIdSecurityawarenessQueryTrainingCampaigns, nil
+	case "securityawareness_query_users":
+		return OperationIdSecurityawarenessQueryUsers, nil
 	case "siem_get_alert":
 		return OperationIdSiemGetAlert, nil
 	case "siem_get_evidence":

@@ -15482,6 +15482,328 @@ func (e *Enrichment) String() string {
 	return fmt.Sprintf("%#v", e)
 }
 
+// An Enrollment is a record of a user's enrollment or assignment in a security awareness training campaign.
+var (
+	enrollmentFieldCreatedTime    = big.NewInt(1 << 0)
+	enrollmentFieldCreatedTimeDt  = big.NewInt(1 << 1)
+	enrollmentFieldEndTime        = big.NewInt(1 << 2)
+	enrollmentFieldEndTimeDt      = big.NewInt(1 << 3)
+	enrollmentFieldModifiedTime   = big.NewInt(1 << 4)
+	enrollmentFieldModifiedTimeDt = big.NewInt(1 << 5)
+	enrollmentFieldName           = big.NewInt(1 << 6)
+	enrollmentFieldStartTime      = big.NewInt(1 << 7)
+	enrollmentFieldStartTimeDt    = big.NewInt(1 << 8)
+	enrollmentFieldState          = big.NewInt(1 << 9)
+	enrollmentFieldStateId        = big.NewInt(1 << 10)
+	enrollmentFieldType           = big.NewInt(1 << 11)
+	enrollmentFieldUid            = big.NewInt(1 << 12)
+)
+
+type Enrollment struct {
+	// The time the enrollment was known to have been created.
+	CreatedTime *Timestamp `json:"created_time,omitempty" url:"created_time,omitempty"`
+	// The time the enrollment was known to have been created.
+	CreatedTimeDt *time.Time `json:"created_time_dt,omitempty" url:"created_time_dt,omitempty"`
+	// The time the enrollment is due at.
+	EndTime *Timestamp `json:"end_time,omitempty" url:"end_time,omitempty"`
+	// The time the enrollment is due at.
+	EndTimeDt *time.Time `json:"end_time_dt,omitempty" url:"end_time_dt,omitempty"`
+	// The time the enrollment was known to have been modified.
+	ModifiedTime *Timestamp `json:"modified_time,omitempty" url:"modified_time,omitempty"`
+	// The time the enrollment was known to have been modified.
+	ModifiedTimeDt *time.Time `json:"modified_time_dt,omitempty" url:"modified_time_dt,omitempty"`
+	// The name of the entity.
+	Name *string `json:"name,omitempty" url:"name,omitempty"`
+	// The time the enrollment is scheduled to start or actually started.
+	StartTime *Timestamp `json:"start_time,omitempty" url:"start_time,omitempty"`
+	// The time the enrollment is scheduled to start or actually started.
+	StartTimeDt *time.Time `json:"start_time_dt,omitempty" url:"start_time_dt,omitempty"`
+	// The enrollment state, normalized to the caption of the <code>state_id</code> value. In the case of <code>Other</code>, it is defined by the event source.
+	State *string `json:"state,omitempty" url:"state,omitempty"`
+	// The normalized identifier of the enrollment progress state.
+	StateId *EnrollmentStateId `json:"state_id,omitempty" url:"state_id,omitempty"`
+	// The enrollment type as reported by the source.
+	Type *string `json:"type,omitempty" url:"type,omitempty"`
+	// The unique identifier of the entity.
+	Uid *string `json:"uid,omitempty" url:"uid,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (e *Enrollment) GetCreatedTime() *Timestamp {
+	if e == nil {
+		return nil
+	}
+	return e.CreatedTime
+}
+
+func (e *Enrollment) GetCreatedTimeDt() *time.Time {
+	if e == nil {
+		return nil
+	}
+	return e.CreatedTimeDt
+}
+
+func (e *Enrollment) GetEndTime() *Timestamp {
+	if e == nil {
+		return nil
+	}
+	return e.EndTime
+}
+
+func (e *Enrollment) GetEndTimeDt() *time.Time {
+	if e == nil {
+		return nil
+	}
+	return e.EndTimeDt
+}
+
+func (e *Enrollment) GetModifiedTime() *Timestamp {
+	if e == nil {
+		return nil
+	}
+	return e.ModifiedTime
+}
+
+func (e *Enrollment) GetModifiedTimeDt() *time.Time {
+	if e == nil {
+		return nil
+	}
+	return e.ModifiedTimeDt
+}
+
+func (e *Enrollment) GetName() *string {
+	if e == nil {
+		return nil
+	}
+	return e.Name
+}
+
+func (e *Enrollment) GetStartTime() *Timestamp {
+	if e == nil {
+		return nil
+	}
+	return e.StartTime
+}
+
+func (e *Enrollment) GetStartTimeDt() *time.Time {
+	if e == nil {
+		return nil
+	}
+	return e.StartTimeDt
+}
+
+func (e *Enrollment) GetState() *string {
+	if e == nil {
+		return nil
+	}
+	return e.State
+}
+
+func (e *Enrollment) GetStateId() *EnrollmentStateId {
+	if e == nil {
+		return nil
+	}
+	return e.StateId
+}
+
+func (e *Enrollment) GetType() *string {
+	if e == nil {
+		return nil
+	}
+	return e.Type
+}
+
+func (e *Enrollment) GetUid() *string {
+	if e == nil {
+		return nil
+	}
+	return e.Uid
+}
+
+func (e *Enrollment) GetExtraProperties() map[string]interface{} {
+	if e == nil {
+		return nil
+	}
+	return e.extraProperties
+}
+
+func (e *Enrollment) require(field *big.Int) {
+	if e.explicitFields == nil {
+		e.explicitFields = big.NewInt(0)
+	}
+	e.explicitFields.Or(e.explicitFields, field)
+}
+
+// SetCreatedTime sets the CreatedTime field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (e *Enrollment) SetCreatedTime(createdTime *Timestamp) {
+	e.CreatedTime = createdTime
+	e.require(enrollmentFieldCreatedTime)
+}
+
+// SetCreatedTimeDt sets the CreatedTimeDt field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (e *Enrollment) SetCreatedTimeDt(createdTimeDt *time.Time) {
+	e.CreatedTimeDt = createdTimeDt
+	e.require(enrollmentFieldCreatedTimeDt)
+}
+
+// SetEndTime sets the EndTime field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (e *Enrollment) SetEndTime(endTime *Timestamp) {
+	e.EndTime = endTime
+	e.require(enrollmentFieldEndTime)
+}
+
+// SetEndTimeDt sets the EndTimeDt field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (e *Enrollment) SetEndTimeDt(endTimeDt *time.Time) {
+	e.EndTimeDt = endTimeDt
+	e.require(enrollmentFieldEndTimeDt)
+}
+
+// SetModifiedTime sets the ModifiedTime field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (e *Enrollment) SetModifiedTime(modifiedTime *Timestamp) {
+	e.ModifiedTime = modifiedTime
+	e.require(enrollmentFieldModifiedTime)
+}
+
+// SetModifiedTimeDt sets the ModifiedTimeDt field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (e *Enrollment) SetModifiedTimeDt(modifiedTimeDt *time.Time) {
+	e.ModifiedTimeDt = modifiedTimeDt
+	e.require(enrollmentFieldModifiedTimeDt)
+}
+
+// SetName sets the Name field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (e *Enrollment) SetName(name *string) {
+	e.Name = name
+	e.require(enrollmentFieldName)
+}
+
+// SetStartTime sets the StartTime field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (e *Enrollment) SetStartTime(startTime *Timestamp) {
+	e.StartTime = startTime
+	e.require(enrollmentFieldStartTime)
+}
+
+// SetStartTimeDt sets the StartTimeDt field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (e *Enrollment) SetStartTimeDt(startTimeDt *time.Time) {
+	e.StartTimeDt = startTimeDt
+	e.require(enrollmentFieldStartTimeDt)
+}
+
+// SetState sets the State field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (e *Enrollment) SetState(state *string) {
+	e.State = state
+	e.require(enrollmentFieldState)
+}
+
+// SetStateId sets the StateId field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (e *Enrollment) SetStateId(stateId *EnrollmentStateId) {
+	e.StateId = stateId
+	e.require(enrollmentFieldStateId)
+}
+
+// SetType sets the Type field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (e *Enrollment) SetType(type_ *string) {
+	e.Type = type_
+	e.require(enrollmentFieldType)
+}
+
+// SetUid sets the Uid field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (e *Enrollment) SetUid(uid *string) {
+	e.Uid = uid
+	e.require(enrollmentFieldUid)
+}
+
+func (e *Enrollment) UnmarshalJSON(data []byte) error {
+	type embed Enrollment
+	var unmarshaler = struct {
+		embed
+		CreatedTimeDt  *internal.DateTime `json:"created_time_dt,omitempty"`
+		EndTimeDt      *internal.DateTime `json:"end_time_dt,omitempty"`
+		ModifiedTimeDt *internal.DateTime `json:"modified_time_dt,omitempty"`
+		StartTimeDt    *internal.DateTime `json:"start_time_dt,omitempty"`
+	}{
+		embed: embed(*e),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*e = Enrollment(unmarshaler.embed)
+	e.CreatedTimeDt = unmarshaler.CreatedTimeDt.TimePtr()
+	e.EndTimeDt = unmarshaler.EndTimeDt.TimePtr()
+	e.ModifiedTimeDt = unmarshaler.ModifiedTimeDt.TimePtr()
+	e.StartTimeDt = unmarshaler.StartTimeDt.TimePtr()
+	extraProperties, err := internal.ExtractExtraProperties(data, *e)
+	if err != nil {
+		return err
+	}
+	e.extraProperties = extraProperties
+	e.rawJSON = nil
+	return nil
+}
+
+func (e *Enrollment) MarshalJSON() ([]byte, error) {
+	type embed Enrollment
+	var marshaler = struct {
+		embed
+		CreatedTimeDt  *internal.DateTime `json:"created_time_dt,omitempty"`
+		EndTimeDt      *internal.DateTime `json:"end_time_dt,omitempty"`
+		ModifiedTimeDt *internal.DateTime `json:"modified_time_dt,omitempty"`
+		StartTimeDt    *internal.DateTime `json:"start_time_dt,omitempty"`
+	}{
+		embed:          embed(*e),
+		CreatedTimeDt:  internal.NewOptionalDateTime(e.CreatedTimeDt),
+		EndTimeDt:      internal.NewOptionalDateTime(e.EndTimeDt),
+		ModifiedTimeDt: internal.NewOptionalDateTime(e.ModifiedTimeDt),
+		StartTimeDt:    internal.NewOptionalDateTime(e.StartTimeDt),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, e.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (e *Enrollment) String() string {
+	if e == nil {
+		return "<nil>"
+	}
+	if len(e.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(e.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(e); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", e)
+}
+
+// EnrollmentStateId is an enum, and the following values are allowed.
+// 0 - Unknown: The state is unknown.
+// 1 - Assigned: The enrollment is assigned but not started.
+// 2 - Started: The learner has started the enrollment.
+// 3 - Completed: The enrollment is completed.
+// 4 - Overdue: The enrollment is overdue.
+// 5 - Expired: The enrollment has expired.
+// 6 - Waived: The enrollment was waived.
+// 7 - Failed: The learner failed a scored enrollment.
+// 99 - Other: The state is not mapped. See the <code>state</code> attribute for the data source specific value.
+type EnrollmentStateId = int
+
 // The Entity object is an unordered collection of attributes, with a name and unique identifier. It serves as a base object that defines a set of attributes and default constraints available in all objects that extend it.
 var (
 	entityFieldName = big.NewInt(1 << 0)
@@ -32522,6 +32844,724 @@ func (p *PermissionAnalysisResult) String() string {
 	return fmt.Sprintf("%#v", p)
 }
 
+// The Phishing Program object describes a recurring phishing simulation program or series used by security awareness platforms. Examples include a KnowBe4 phishing campaign (container of security tests) or an autopilot / campaign-of-the-month schedule. <p><strong>Note:</strong> This object is distinct from the core threat-actor <code>campaign</code> object and must not be conflated with ATT&amp;CK intrusion campaigns.</p>
+var (
+	phishingProgramFieldCreatedTime    = big.NewInt(1 << 0)
+	phishingProgramFieldCreatedTimeDt  = big.NewInt(1 << 1)
+	phishingProgramFieldDesc           = big.NewInt(1 << 2)
+	phishingProgramFieldModifiedTime   = big.NewInt(1 << 3)
+	phishingProgramFieldModifiedTimeDt = big.NewInt(1 << 4)
+	phishingProgramFieldName           = big.NewInt(1 << 5)
+	phishingProgramFieldState          = big.NewInt(1 << 6)
+	phishingProgramFieldStateId        = big.NewInt(1 << 7)
+	phishingProgramFieldUid            = big.NewInt(1 << 8)
+)
+
+type PhishingProgram struct {
+	// The time the phishing program was known to have been created.
+	CreatedTime *Timestamp `json:"created_time,omitempty" url:"created_time,omitempty"`
+	// The time the phishing program was known to have been created.
+	CreatedTimeDt *time.Time `json:"created_time_dt,omitempty" url:"created_time_dt,omitempty"`
+	// The description of the phishing program.
+	Desc *string `json:"desc,omitempty" url:"desc,omitempty"`
+	// The time the phishing program was known to have been modified.
+	ModifiedTime *Timestamp `json:"modified_time,omitempty" url:"modified_time,omitempty"`
+	// The time the phishing program was known to have been modified.
+	ModifiedTimeDt *time.Time `json:"modified_time_dt,omitempty" url:"modified_time_dt,omitempty"`
+	// The name of the phishing program.
+	Name *string `json:"name,omitempty" url:"name,omitempty"`
+	// The state of the phishing program, normalized to the caption of <code>state_id</code>. In the case of <code>Other</code>, it is defined by the event source.
+	State *string `json:"state,omitempty" url:"state,omitempty"`
+	// The normalized state of the phishing program.
+	StateId *PhishingProgramStateId `json:"state_id,omitempty" url:"state_id,omitempty"`
+	// The unique identifier of the phishing program.
+	Uid *string `json:"uid,omitempty" url:"uid,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (p *PhishingProgram) GetCreatedTime() *Timestamp {
+	if p == nil {
+		return nil
+	}
+	return p.CreatedTime
+}
+
+func (p *PhishingProgram) GetCreatedTimeDt() *time.Time {
+	if p == nil {
+		return nil
+	}
+	return p.CreatedTimeDt
+}
+
+func (p *PhishingProgram) GetDesc() *string {
+	if p == nil {
+		return nil
+	}
+	return p.Desc
+}
+
+func (p *PhishingProgram) GetModifiedTime() *Timestamp {
+	if p == nil {
+		return nil
+	}
+	return p.ModifiedTime
+}
+
+func (p *PhishingProgram) GetModifiedTimeDt() *time.Time {
+	if p == nil {
+		return nil
+	}
+	return p.ModifiedTimeDt
+}
+
+func (p *PhishingProgram) GetName() *string {
+	if p == nil {
+		return nil
+	}
+	return p.Name
+}
+
+func (p *PhishingProgram) GetState() *string {
+	if p == nil {
+		return nil
+	}
+	return p.State
+}
+
+func (p *PhishingProgram) GetStateId() *PhishingProgramStateId {
+	if p == nil {
+		return nil
+	}
+	return p.StateId
+}
+
+func (p *PhishingProgram) GetUid() *string {
+	if p == nil {
+		return nil
+	}
+	return p.Uid
+}
+
+func (p *PhishingProgram) GetExtraProperties() map[string]interface{} {
+	if p == nil {
+		return nil
+	}
+	return p.extraProperties
+}
+
+func (p *PhishingProgram) require(field *big.Int) {
+	if p.explicitFields == nil {
+		p.explicitFields = big.NewInt(0)
+	}
+	p.explicitFields.Or(p.explicitFields, field)
+}
+
+// SetCreatedTime sets the CreatedTime field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (p *PhishingProgram) SetCreatedTime(createdTime *Timestamp) {
+	p.CreatedTime = createdTime
+	p.require(phishingProgramFieldCreatedTime)
+}
+
+// SetCreatedTimeDt sets the CreatedTimeDt field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (p *PhishingProgram) SetCreatedTimeDt(createdTimeDt *time.Time) {
+	p.CreatedTimeDt = createdTimeDt
+	p.require(phishingProgramFieldCreatedTimeDt)
+}
+
+// SetDesc sets the Desc field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (p *PhishingProgram) SetDesc(desc *string) {
+	p.Desc = desc
+	p.require(phishingProgramFieldDesc)
+}
+
+// SetModifiedTime sets the ModifiedTime field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (p *PhishingProgram) SetModifiedTime(modifiedTime *Timestamp) {
+	p.ModifiedTime = modifiedTime
+	p.require(phishingProgramFieldModifiedTime)
+}
+
+// SetModifiedTimeDt sets the ModifiedTimeDt field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (p *PhishingProgram) SetModifiedTimeDt(modifiedTimeDt *time.Time) {
+	p.ModifiedTimeDt = modifiedTimeDt
+	p.require(phishingProgramFieldModifiedTimeDt)
+}
+
+// SetName sets the Name field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (p *PhishingProgram) SetName(name *string) {
+	p.Name = name
+	p.require(phishingProgramFieldName)
+}
+
+// SetState sets the State field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (p *PhishingProgram) SetState(state *string) {
+	p.State = state
+	p.require(phishingProgramFieldState)
+}
+
+// SetStateId sets the StateId field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (p *PhishingProgram) SetStateId(stateId *PhishingProgramStateId) {
+	p.StateId = stateId
+	p.require(phishingProgramFieldStateId)
+}
+
+// SetUid sets the Uid field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (p *PhishingProgram) SetUid(uid *string) {
+	p.Uid = uid
+	p.require(phishingProgramFieldUid)
+}
+
+func (p *PhishingProgram) UnmarshalJSON(data []byte) error {
+	type embed PhishingProgram
+	var unmarshaler = struct {
+		embed
+		CreatedTimeDt  *internal.DateTime `json:"created_time_dt,omitempty"`
+		ModifiedTimeDt *internal.DateTime `json:"modified_time_dt,omitempty"`
+	}{
+		embed: embed(*p),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*p = PhishingProgram(unmarshaler.embed)
+	p.CreatedTimeDt = unmarshaler.CreatedTimeDt.TimePtr()
+	p.ModifiedTimeDt = unmarshaler.ModifiedTimeDt.TimePtr()
+	extraProperties, err := internal.ExtractExtraProperties(data, *p)
+	if err != nil {
+		return err
+	}
+	p.extraProperties = extraProperties
+	p.rawJSON = nil
+	return nil
+}
+
+func (p *PhishingProgram) MarshalJSON() ([]byte, error) {
+	type embed PhishingProgram
+	var marshaler = struct {
+		embed
+		CreatedTimeDt  *internal.DateTime `json:"created_time_dt,omitempty"`
+		ModifiedTimeDt *internal.DateTime `json:"modified_time_dt,omitempty"`
+	}{
+		embed:          embed(*p),
+		CreatedTimeDt:  internal.NewOptionalDateTime(p.CreatedTimeDt),
+		ModifiedTimeDt: internal.NewOptionalDateTime(p.ModifiedTimeDt),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, p.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (p *PhishingProgram) String() string {
+	if p == nil {
+		return "<nil>"
+	}
+	if len(p.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(p.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(p); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", p)
+}
+
+// PhishingProgramStateId is an enum, and the following values are allowed.
+// 0 - Unknown: The state is unknown.
+// 99 - Other: The state is not mapped. See the <code>state</code> attribute, which contains a data source specific value.
+type PhishingProgramStateId = int
+
+// The Phishing Simulation object describes a single phishing simulation run. A simulation may belong to a parent <code>phishing_program</code>.
+var (
+	phishingSimulationFieldCreatedTime    = big.NewInt(1 << 0)
+	phishingSimulationFieldCreatedTimeDt  = big.NewInt(1 << 1)
+	phishingSimulationFieldDesc           = big.NewInt(1 << 2)
+	phishingSimulationFieldEndTime        = big.NewInt(1 << 3)
+	phishingSimulationFieldEndTimeDt      = big.NewInt(1 << 4)
+	phishingSimulationFieldGroups         = big.NewInt(1 << 5)
+	phishingSimulationFieldModifiedTime   = big.NewInt(1 << 6)
+	phishingSimulationFieldModifiedTimeDt = big.NewInt(1 << 7)
+	phishingSimulationFieldName           = big.NewInt(1 << 8)
+	phishingSimulationFieldNumClicks      = big.NewInt(1 << 9)
+	phishingSimulationFieldNumDelivered   = big.NewInt(1 << 10)
+	phishingSimulationFieldNumFailed      = big.NewInt(1 << 11)
+	phishingSimulationFieldNumOpens       = big.NewInt(1 << 12)
+	phishingSimulationFieldNumReports     = big.NewInt(1 << 13)
+	phishingSimulationFieldNumScheduled   = big.NewInt(1 << 14)
+	phishingSimulationFieldStartTime      = big.NewInt(1 << 15)
+	phishingSimulationFieldStartTimeDt    = big.NewInt(1 << 16)
+	phishingSimulationFieldState          = big.NewInt(1 << 17)
+	phishingSimulationFieldStateId        = big.NewInt(1 << 18)
+	phishingSimulationFieldType           = big.NewInt(1 << 19)
+	phishingSimulationFieldTypeId         = big.NewInt(1 << 20)
+	phishingSimulationFieldUid            = big.NewInt(1 << 21)
+)
+
+type PhishingSimulation struct {
+	// The time the phishing simulation was known to have been created.
+	CreatedTime *Timestamp `json:"created_time,omitempty" url:"created_time,omitempty"`
+	// The time the phishing simulation was known to have been created.
+	CreatedTimeDt *time.Time `json:"created_time_dt,omitempty" url:"created_time_dt,omitempty"`
+	// The description of the phishing simulation.
+	Desc *string `json:"desc,omitempty" url:"desc,omitempty"`
+	// The end time of the phishing simulation tracking window.
+	EndTime *Timestamp `json:"end_time,omitempty" url:"end_time,omitempty"`
+	// The end time of the phishing simulation tracking window.
+	EndTimeDt *time.Time `json:"end_time_dt,omitempty" url:"end_time_dt,omitempty"`
+	// The list of groups who are targeted by the phishing simulation.
+	Groups []*Group `json:"groups,omitempty" url:"groups,omitempty"`
+	// The time the phishing simulation was known to have been modified.
+	ModifiedTime *Timestamp `json:"modified_time,omitempty" url:"modified_time,omitempty"`
+	// The time the phishing simulation was known to have been modified.
+	ModifiedTimeDt *time.Time `json:"modified_time_dt,omitempty" url:"modified_time_dt,omitempty"`
+	// The name of the phishing simulation.
+	Name *string `json:"name,omitempty" url:"name,omitempty"`
+	// The number of clicks on the phishing simulation.
+	NumClicks *int `json:"num_clicks,omitempty" url:"num_clicks,omitempty"`
+	// The number of phishing simulation messages delivered.
+	NumDelivered *int `json:"num_delivered,omitempty" url:"num_delivered,omitempty"`
+	// The number of users who failed the phishing simulation.
+	NumFailed *int `json:"num_failed,omitempty" url:"num_failed,omitempty"`
+	// The number of opens of phishing simulation messages.
+	NumOpens *int `json:"num_opens,omitempty" url:"num_opens,omitempty"`
+	// The number of reports received by users for the phishing simulation.
+	NumReports *int `json:"num_reports,omitempty" url:"num_reports,omitempty"`
+	// The number of emails scheduled to be sent to users for a phishing simulation.
+	NumScheduled *int `json:"num_scheduled,omitempty" url:"num_scheduled,omitempty"`
+	// The start time of the phishing simulation tracking window.
+	StartTime *Timestamp `json:"start_time,omitempty" url:"start_time,omitempty"`
+	// The start time of the phishing simulation tracking window.
+	StartTimeDt *time.Time `json:"start_time_dt,omitempty" url:"start_time_dt,omitempty"`
+	// The state of the phishing simulation, normalized to the caption of <code>state_id</code>. In the case of <code>Other</code>, it is defined by the event source.
+	State *string `json:"state,omitempty" url:"state,omitempty"`
+	// The normalized state of the phishing simulation run.
+	StateId *PhishingSimulationStateId `json:"state_id,omitempty" url:"state_id,omitempty"`
+	// The type of the phishing simulation, normalized to the caption of <code>type_id</code>. In the case of <code>Other</code>, it is defined by the event source.
+	Type *string `json:"type,omitempty" url:"type,omitempty"`
+	// The normalized type of the phishing simulation.
+	TypeId *PhishingSimulationTypeId `json:"type_id,omitempty" url:"type_id,omitempty"`
+	// The unique identifier of the phishing simulation run.
+	Uid *string `json:"uid,omitempty" url:"uid,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (p *PhishingSimulation) GetCreatedTime() *Timestamp {
+	if p == nil {
+		return nil
+	}
+	return p.CreatedTime
+}
+
+func (p *PhishingSimulation) GetCreatedTimeDt() *time.Time {
+	if p == nil {
+		return nil
+	}
+	return p.CreatedTimeDt
+}
+
+func (p *PhishingSimulation) GetDesc() *string {
+	if p == nil {
+		return nil
+	}
+	return p.Desc
+}
+
+func (p *PhishingSimulation) GetEndTime() *Timestamp {
+	if p == nil {
+		return nil
+	}
+	return p.EndTime
+}
+
+func (p *PhishingSimulation) GetEndTimeDt() *time.Time {
+	if p == nil {
+		return nil
+	}
+	return p.EndTimeDt
+}
+
+func (p *PhishingSimulation) GetGroups() []*Group {
+	if p == nil {
+		return nil
+	}
+	return p.Groups
+}
+
+func (p *PhishingSimulation) GetModifiedTime() *Timestamp {
+	if p == nil {
+		return nil
+	}
+	return p.ModifiedTime
+}
+
+func (p *PhishingSimulation) GetModifiedTimeDt() *time.Time {
+	if p == nil {
+		return nil
+	}
+	return p.ModifiedTimeDt
+}
+
+func (p *PhishingSimulation) GetName() *string {
+	if p == nil {
+		return nil
+	}
+	return p.Name
+}
+
+func (p *PhishingSimulation) GetNumClicks() *int {
+	if p == nil {
+		return nil
+	}
+	return p.NumClicks
+}
+
+func (p *PhishingSimulation) GetNumDelivered() *int {
+	if p == nil {
+		return nil
+	}
+	return p.NumDelivered
+}
+
+func (p *PhishingSimulation) GetNumFailed() *int {
+	if p == nil {
+		return nil
+	}
+	return p.NumFailed
+}
+
+func (p *PhishingSimulation) GetNumOpens() *int {
+	if p == nil {
+		return nil
+	}
+	return p.NumOpens
+}
+
+func (p *PhishingSimulation) GetNumReports() *int {
+	if p == nil {
+		return nil
+	}
+	return p.NumReports
+}
+
+func (p *PhishingSimulation) GetNumScheduled() *int {
+	if p == nil {
+		return nil
+	}
+	return p.NumScheduled
+}
+
+func (p *PhishingSimulation) GetStartTime() *Timestamp {
+	if p == nil {
+		return nil
+	}
+	return p.StartTime
+}
+
+func (p *PhishingSimulation) GetStartTimeDt() *time.Time {
+	if p == nil {
+		return nil
+	}
+	return p.StartTimeDt
+}
+
+func (p *PhishingSimulation) GetState() *string {
+	if p == nil {
+		return nil
+	}
+	return p.State
+}
+
+func (p *PhishingSimulation) GetStateId() *PhishingSimulationStateId {
+	if p == nil {
+		return nil
+	}
+	return p.StateId
+}
+
+func (p *PhishingSimulation) GetType() *string {
+	if p == nil {
+		return nil
+	}
+	return p.Type
+}
+
+func (p *PhishingSimulation) GetTypeId() *PhishingSimulationTypeId {
+	if p == nil {
+		return nil
+	}
+	return p.TypeId
+}
+
+func (p *PhishingSimulation) GetUid() *string {
+	if p == nil {
+		return nil
+	}
+	return p.Uid
+}
+
+func (p *PhishingSimulation) GetExtraProperties() map[string]interface{} {
+	if p == nil {
+		return nil
+	}
+	return p.extraProperties
+}
+
+func (p *PhishingSimulation) require(field *big.Int) {
+	if p.explicitFields == nil {
+		p.explicitFields = big.NewInt(0)
+	}
+	p.explicitFields.Or(p.explicitFields, field)
+}
+
+// SetCreatedTime sets the CreatedTime field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (p *PhishingSimulation) SetCreatedTime(createdTime *Timestamp) {
+	p.CreatedTime = createdTime
+	p.require(phishingSimulationFieldCreatedTime)
+}
+
+// SetCreatedTimeDt sets the CreatedTimeDt field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (p *PhishingSimulation) SetCreatedTimeDt(createdTimeDt *time.Time) {
+	p.CreatedTimeDt = createdTimeDt
+	p.require(phishingSimulationFieldCreatedTimeDt)
+}
+
+// SetDesc sets the Desc field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (p *PhishingSimulation) SetDesc(desc *string) {
+	p.Desc = desc
+	p.require(phishingSimulationFieldDesc)
+}
+
+// SetEndTime sets the EndTime field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (p *PhishingSimulation) SetEndTime(endTime *Timestamp) {
+	p.EndTime = endTime
+	p.require(phishingSimulationFieldEndTime)
+}
+
+// SetEndTimeDt sets the EndTimeDt field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (p *PhishingSimulation) SetEndTimeDt(endTimeDt *time.Time) {
+	p.EndTimeDt = endTimeDt
+	p.require(phishingSimulationFieldEndTimeDt)
+}
+
+// SetGroups sets the Groups field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (p *PhishingSimulation) SetGroups(groups []*Group) {
+	p.Groups = groups
+	p.require(phishingSimulationFieldGroups)
+}
+
+// SetModifiedTime sets the ModifiedTime field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (p *PhishingSimulation) SetModifiedTime(modifiedTime *Timestamp) {
+	p.ModifiedTime = modifiedTime
+	p.require(phishingSimulationFieldModifiedTime)
+}
+
+// SetModifiedTimeDt sets the ModifiedTimeDt field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (p *PhishingSimulation) SetModifiedTimeDt(modifiedTimeDt *time.Time) {
+	p.ModifiedTimeDt = modifiedTimeDt
+	p.require(phishingSimulationFieldModifiedTimeDt)
+}
+
+// SetName sets the Name field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (p *PhishingSimulation) SetName(name *string) {
+	p.Name = name
+	p.require(phishingSimulationFieldName)
+}
+
+// SetNumClicks sets the NumClicks field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (p *PhishingSimulation) SetNumClicks(numClicks *int) {
+	p.NumClicks = numClicks
+	p.require(phishingSimulationFieldNumClicks)
+}
+
+// SetNumDelivered sets the NumDelivered field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (p *PhishingSimulation) SetNumDelivered(numDelivered *int) {
+	p.NumDelivered = numDelivered
+	p.require(phishingSimulationFieldNumDelivered)
+}
+
+// SetNumFailed sets the NumFailed field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (p *PhishingSimulation) SetNumFailed(numFailed *int) {
+	p.NumFailed = numFailed
+	p.require(phishingSimulationFieldNumFailed)
+}
+
+// SetNumOpens sets the NumOpens field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (p *PhishingSimulation) SetNumOpens(numOpens *int) {
+	p.NumOpens = numOpens
+	p.require(phishingSimulationFieldNumOpens)
+}
+
+// SetNumReports sets the NumReports field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (p *PhishingSimulation) SetNumReports(numReports *int) {
+	p.NumReports = numReports
+	p.require(phishingSimulationFieldNumReports)
+}
+
+// SetNumScheduled sets the NumScheduled field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (p *PhishingSimulation) SetNumScheduled(numScheduled *int) {
+	p.NumScheduled = numScheduled
+	p.require(phishingSimulationFieldNumScheduled)
+}
+
+// SetStartTime sets the StartTime field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (p *PhishingSimulation) SetStartTime(startTime *Timestamp) {
+	p.StartTime = startTime
+	p.require(phishingSimulationFieldStartTime)
+}
+
+// SetStartTimeDt sets the StartTimeDt field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (p *PhishingSimulation) SetStartTimeDt(startTimeDt *time.Time) {
+	p.StartTimeDt = startTimeDt
+	p.require(phishingSimulationFieldStartTimeDt)
+}
+
+// SetState sets the State field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (p *PhishingSimulation) SetState(state *string) {
+	p.State = state
+	p.require(phishingSimulationFieldState)
+}
+
+// SetStateId sets the StateId field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (p *PhishingSimulation) SetStateId(stateId *PhishingSimulationStateId) {
+	p.StateId = stateId
+	p.require(phishingSimulationFieldStateId)
+}
+
+// SetType sets the Type field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (p *PhishingSimulation) SetType(type_ *string) {
+	p.Type = type_
+	p.require(phishingSimulationFieldType)
+}
+
+// SetTypeId sets the TypeId field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (p *PhishingSimulation) SetTypeId(typeId *PhishingSimulationTypeId) {
+	p.TypeId = typeId
+	p.require(phishingSimulationFieldTypeId)
+}
+
+// SetUid sets the Uid field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (p *PhishingSimulation) SetUid(uid *string) {
+	p.Uid = uid
+	p.require(phishingSimulationFieldUid)
+}
+
+func (p *PhishingSimulation) UnmarshalJSON(data []byte) error {
+	type embed PhishingSimulation
+	var unmarshaler = struct {
+		embed
+		CreatedTimeDt  *internal.DateTime `json:"created_time_dt,omitempty"`
+		EndTimeDt      *internal.DateTime `json:"end_time_dt,omitempty"`
+		ModifiedTimeDt *internal.DateTime `json:"modified_time_dt,omitempty"`
+		StartTimeDt    *internal.DateTime `json:"start_time_dt,omitempty"`
+	}{
+		embed: embed(*p),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*p = PhishingSimulation(unmarshaler.embed)
+	p.CreatedTimeDt = unmarshaler.CreatedTimeDt.TimePtr()
+	p.EndTimeDt = unmarshaler.EndTimeDt.TimePtr()
+	p.ModifiedTimeDt = unmarshaler.ModifiedTimeDt.TimePtr()
+	p.StartTimeDt = unmarshaler.StartTimeDt.TimePtr()
+	extraProperties, err := internal.ExtractExtraProperties(data, *p)
+	if err != nil {
+		return err
+	}
+	p.extraProperties = extraProperties
+	p.rawJSON = nil
+	return nil
+}
+
+func (p *PhishingSimulation) MarshalJSON() ([]byte, error) {
+	type embed PhishingSimulation
+	var marshaler = struct {
+		embed
+		CreatedTimeDt  *internal.DateTime `json:"created_time_dt,omitempty"`
+		EndTimeDt      *internal.DateTime `json:"end_time_dt,omitempty"`
+		ModifiedTimeDt *internal.DateTime `json:"modified_time_dt,omitempty"`
+		StartTimeDt    *internal.DateTime `json:"start_time_dt,omitempty"`
+	}{
+		embed:          embed(*p),
+		CreatedTimeDt:  internal.NewOptionalDateTime(p.CreatedTimeDt),
+		EndTimeDt:      internal.NewOptionalDateTime(p.EndTimeDt),
+		ModifiedTimeDt: internal.NewOptionalDateTime(p.ModifiedTimeDt),
+		StartTimeDt:    internal.NewOptionalDateTime(p.StartTimeDt),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, p.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (p *PhishingSimulation) String() string {
+	if p == nil {
+		return "<nil>"
+	}
+	if len(p.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(p.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(p); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", p)
+}
+
+// PhishingSimulationStateId is an enum, and the following values are allowed.
+// 0 - Unknown: The state is unknown.
+// 1 - Draft: The phishing simulation is a draft.
+// 2 - Scheduled: The phishing simulation is scheduled to be sent.
+// 3 - Running: The phishing simulation is running.
+// 4 - Completed: The phishing simulation is completed.
+// 5 - Canceled: The phishing simulation is canceled.
+// 6 - Failed: The phishing simulation is failed.
+// 99 - Other: The state is not mapped. See the <code>state</code> attribute, which contains a data source specific value.
+type PhishingSimulationStateId = int
+
+// PhishingSimulationTypeId is an enum, and the following values are allowed.
+// 0 - Unknown: The type is unknown.
+// 99 - Other: The type is not mapped. See the <code>type</code> attribute, which contains a data source specific value.
+type PhishingSimulationTypeId = int
+
 // The Policy object describes the policies that are applicable. <p>Policy attributes provide traceability to the operational state of the security product at the time that the event was captured, facilitating forensics, troubleshooting, and policy tuning/adjustments.</p>
 var (
 	policyFieldData      = big.NewInt(1 << 0)
@@ -42937,6 +43977,429 @@ func (t *Trace) String() string {
 	return fmt.Sprintf("%#v", t)
 }
 
+// The Training Campaign object describes a security awareness training assignment container that targets users or groups with one or more training content items and yields enrollments. Examples include a KnowBe4 training campaign or an enrollment batch. <p><strong>Note:</strong> This object is distinct from the core threat-actor <code>campaign</code> object and from <code>phishing_program</code>.</p>
+var (
+	trainingCampaignFieldCreatedTime     = big.NewInt(1 << 0)
+	trainingCampaignFieldCreatedTimeDt   = big.NewInt(1 << 1)
+	trainingCampaignFieldDesc            = big.NewInt(1 << 2)
+	trainingCampaignFieldEndTime         = big.NewInt(1 << 3)
+	trainingCampaignFieldEndTimeDt       = big.NewInt(1 << 4)
+	trainingCampaignFieldEnrollments     = big.NewInt(1 << 5)
+	trainingCampaignFieldGroups          = big.NewInt(1 << 6)
+	trainingCampaignFieldModifiedTime    = big.NewInt(1 << 7)
+	trainingCampaignFieldModifiedTimeDt  = big.NewInt(1 << 8)
+	trainingCampaignFieldName            = big.NewInt(1 << 9)
+	trainingCampaignFieldNumCompleted    = big.NewInt(1 << 10)
+	trainingCampaignFieldNumEnrolled     = big.NewInt(1 << 11)
+	trainingCampaignFieldNumOverdue      = big.NewInt(1 << 12)
+	trainingCampaignFieldPercentComplete = big.NewInt(1 << 13)
+	trainingCampaignFieldStartTime       = big.NewInt(1 << 14)
+	trainingCampaignFieldStartTimeDt     = big.NewInt(1 << 15)
+	trainingCampaignFieldState           = big.NewInt(1 << 16)
+	trainingCampaignFieldStateId         = big.NewInt(1 << 17)
+	trainingCampaignFieldUid             = big.NewInt(1 << 18)
+)
+
+type TrainingCampaign struct {
+	// The time the training campaign was known to have been created.
+	CreatedTime *Timestamp `json:"created_time,omitempty" url:"created_time,omitempty"`
+	// The time the training campaign was known to have been created.
+	CreatedTimeDt *time.Time `json:"created_time_dt,omitempty" url:"created_time_dt,omitempty"`
+	// The description of the training campaign.
+	Desc *string `json:"desc,omitempty" url:"desc,omitempty"`
+	// The time the training campaign is scheduled to end or actually ended.
+	EndTime *Timestamp `json:"end_time,omitempty" url:"end_time,omitempty"`
+	// The time the training campaign is scheduled to end or actually ended.
+	EndTimeDt *time.Time `json:"end_time_dt,omitempty" url:"end_time_dt,omitempty"`
+	// The enrollments for the training campaign.
+	Enrollments []*Enrollment `json:"enrollments,omitempty" url:"enrollments,omitempty"`
+	// The groups targeted by the training campaign.
+	Groups []*Group `json:"groups,omitempty" url:"groups,omitempty"`
+	// The time the training campaign was known to have been modified.
+	ModifiedTime *Timestamp `json:"modified_time,omitempty" url:"modified_time,omitempty"`
+	// The time the training campaign was known to have been modified.
+	ModifiedTimeDt *time.Time `json:"modified_time_dt,omitempty" url:"modified_time_dt,omitempty"`
+	// The name of the entity.
+	Name *string `json:"name,omitempty" url:"name,omitempty"`
+	// The number of users who have completed a training campaign.
+	NumCompleted *int `json:"num_completed,omitempty" url:"num_completed,omitempty"`
+	// The number of users who are enrolled in a training campaign.
+	NumEnrolled *int `json:"num_enrolled,omitempty" url:"num_enrolled,omitempty"`
+	// The number of users who have not completed the training campaign by the due date.
+	NumOverdue *int `json:"num_overdue,omitempty" url:"num_overdue,omitempty"`
+	// The percentage of the training campaign that has been completed. This is a value between 0.0 and 100.0.
+	PercentComplete *float64 `json:"percent_complete,omitempty" url:"percent_complete,omitempty"`
+	// The time the training campaign is scheduled to start or actually started.
+	StartTime *Timestamp `json:"start_time,omitempty" url:"start_time,omitempty"`
+	// The time the training campaign is scheduled to start or actually started.
+	StartTimeDt *time.Time `json:"start_time_dt,omitempty" url:"start_time_dt,omitempty"`
+	// The state of the training campaign, normalized to the caption of <code>state_id</code>. In the case of <code>Other</code>, it is defined by the event source.
+	State *string `json:"state,omitempty" url:"state,omitempty"`
+	// The normalized state of the training campaign.
+	StateId *TrainingCampaignStateId `json:"state_id,omitempty" url:"state_id,omitempty"`
+	// The unique identifier of the training campaign.
+	Uid *string `json:"uid,omitempty" url:"uid,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (t *TrainingCampaign) GetCreatedTime() *Timestamp {
+	if t == nil {
+		return nil
+	}
+	return t.CreatedTime
+}
+
+func (t *TrainingCampaign) GetCreatedTimeDt() *time.Time {
+	if t == nil {
+		return nil
+	}
+	return t.CreatedTimeDt
+}
+
+func (t *TrainingCampaign) GetDesc() *string {
+	if t == nil {
+		return nil
+	}
+	return t.Desc
+}
+
+func (t *TrainingCampaign) GetEndTime() *Timestamp {
+	if t == nil {
+		return nil
+	}
+	return t.EndTime
+}
+
+func (t *TrainingCampaign) GetEndTimeDt() *time.Time {
+	if t == nil {
+		return nil
+	}
+	return t.EndTimeDt
+}
+
+func (t *TrainingCampaign) GetEnrollments() []*Enrollment {
+	if t == nil {
+		return nil
+	}
+	return t.Enrollments
+}
+
+func (t *TrainingCampaign) GetGroups() []*Group {
+	if t == nil {
+		return nil
+	}
+	return t.Groups
+}
+
+func (t *TrainingCampaign) GetModifiedTime() *Timestamp {
+	if t == nil {
+		return nil
+	}
+	return t.ModifiedTime
+}
+
+func (t *TrainingCampaign) GetModifiedTimeDt() *time.Time {
+	if t == nil {
+		return nil
+	}
+	return t.ModifiedTimeDt
+}
+
+func (t *TrainingCampaign) GetName() *string {
+	if t == nil {
+		return nil
+	}
+	return t.Name
+}
+
+func (t *TrainingCampaign) GetNumCompleted() *int {
+	if t == nil {
+		return nil
+	}
+	return t.NumCompleted
+}
+
+func (t *TrainingCampaign) GetNumEnrolled() *int {
+	if t == nil {
+		return nil
+	}
+	return t.NumEnrolled
+}
+
+func (t *TrainingCampaign) GetNumOverdue() *int {
+	if t == nil {
+		return nil
+	}
+	return t.NumOverdue
+}
+
+func (t *TrainingCampaign) GetPercentComplete() *float64 {
+	if t == nil {
+		return nil
+	}
+	return t.PercentComplete
+}
+
+func (t *TrainingCampaign) GetStartTime() *Timestamp {
+	if t == nil {
+		return nil
+	}
+	return t.StartTime
+}
+
+func (t *TrainingCampaign) GetStartTimeDt() *time.Time {
+	if t == nil {
+		return nil
+	}
+	return t.StartTimeDt
+}
+
+func (t *TrainingCampaign) GetState() *string {
+	if t == nil {
+		return nil
+	}
+	return t.State
+}
+
+func (t *TrainingCampaign) GetStateId() *TrainingCampaignStateId {
+	if t == nil {
+		return nil
+	}
+	return t.StateId
+}
+
+func (t *TrainingCampaign) GetUid() *string {
+	if t == nil {
+		return nil
+	}
+	return t.Uid
+}
+
+func (t *TrainingCampaign) GetExtraProperties() map[string]interface{} {
+	if t == nil {
+		return nil
+	}
+	return t.extraProperties
+}
+
+func (t *TrainingCampaign) require(field *big.Int) {
+	if t.explicitFields == nil {
+		t.explicitFields = big.NewInt(0)
+	}
+	t.explicitFields.Or(t.explicitFields, field)
+}
+
+// SetCreatedTime sets the CreatedTime field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (t *TrainingCampaign) SetCreatedTime(createdTime *Timestamp) {
+	t.CreatedTime = createdTime
+	t.require(trainingCampaignFieldCreatedTime)
+}
+
+// SetCreatedTimeDt sets the CreatedTimeDt field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (t *TrainingCampaign) SetCreatedTimeDt(createdTimeDt *time.Time) {
+	t.CreatedTimeDt = createdTimeDt
+	t.require(trainingCampaignFieldCreatedTimeDt)
+}
+
+// SetDesc sets the Desc field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (t *TrainingCampaign) SetDesc(desc *string) {
+	t.Desc = desc
+	t.require(trainingCampaignFieldDesc)
+}
+
+// SetEndTime sets the EndTime field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (t *TrainingCampaign) SetEndTime(endTime *Timestamp) {
+	t.EndTime = endTime
+	t.require(trainingCampaignFieldEndTime)
+}
+
+// SetEndTimeDt sets the EndTimeDt field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (t *TrainingCampaign) SetEndTimeDt(endTimeDt *time.Time) {
+	t.EndTimeDt = endTimeDt
+	t.require(trainingCampaignFieldEndTimeDt)
+}
+
+// SetEnrollments sets the Enrollments field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (t *TrainingCampaign) SetEnrollments(enrollments []*Enrollment) {
+	t.Enrollments = enrollments
+	t.require(trainingCampaignFieldEnrollments)
+}
+
+// SetGroups sets the Groups field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (t *TrainingCampaign) SetGroups(groups []*Group) {
+	t.Groups = groups
+	t.require(trainingCampaignFieldGroups)
+}
+
+// SetModifiedTime sets the ModifiedTime field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (t *TrainingCampaign) SetModifiedTime(modifiedTime *Timestamp) {
+	t.ModifiedTime = modifiedTime
+	t.require(trainingCampaignFieldModifiedTime)
+}
+
+// SetModifiedTimeDt sets the ModifiedTimeDt field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (t *TrainingCampaign) SetModifiedTimeDt(modifiedTimeDt *time.Time) {
+	t.ModifiedTimeDt = modifiedTimeDt
+	t.require(trainingCampaignFieldModifiedTimeDt)
+}
+
+// SetName sets the Name field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (t *TrainingCampaign) SetName(name *string) {
+	t.Name = name
+	t.require(trainingCampaignFieldName)
+}
+
+// SetNumCompleted sets the NumCompleted field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (t *TrainingCampaign) SetNumCompleted(numCompleted *int) {
+	t.NumCompleted = numCompleted
+	t.require(trainingCampaignFieldNumCompleted)
+}
+
+// SetNumEnrolled sets the NumEnrolled field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (t *TrainingCampaign) SetNumEnrolled(numEnrolled *int) {
+	t.NumEnrolled = numEnrolled
+	t.require(trainingCampaignFieldNumEnrolled)
+}
+
+// SetNumOverdue sets the NumOverdue field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (t *TrainingCampaign) SetNumOverdue(numOverdue *int) {
+	t.NumOverdue = numOverdue
+	t.require(trainingCampaignFieldNumOverdue)
+}
+
+// SetPercentComplete sets the PercentComplete field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (t *TrainingCampaign) SetPercentComplete(percentComplete *float64) {
+	t.PercentComplete = percentComplete
+	t.require(trainingCampaignFieldPercentComplete)
+}
+
+// SetStartTime sets the StartTime field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (t *TrainingCampaign) SetStartTime(startTime *Timestamp) {
+	t.StartTime = startTime
+	t.require(trainingCampaignFieldStartTime)
+}
+
+// SetStartTimeDt sets the StartTimeDt field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (t *TrainingCampaign) SetStartTimeDt(startTimeDt *time.Time) {
+	t.StartTimeDt = startTimeDt
+	t.require(trainingCampaignFieldStartTimeDt)
+}
+
+// SetState sets the State field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (t *TrainingCampaign) SetState(state *string) {
+	t.State = state
+	t.require(trainingCampaignFieldState)
+}
+
+// SetStateId sets the StateId field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (t *TrainingCampaign) SetStateId(stateId *TrainingCampaignStateId) {
+	t.StateId = stateId
+	t.require(trainingCampaignFieldStateId)
+}
+
+// SetUid sets the Uid field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (t *TrainingCampaign) SetUid(uid *string) {
+	t.Uid = uid
+	t.require(trainingCampaignFieldUid)
+}
+
+func (t *TrainingCampaign) UnmarshalJSON(data []byte) error {
+	type embed TrainingCampaign
+	var unmarshaler = struct {
+		embed
+		CreatedTimeDt  *internal.DateTime `json:"created_time_dt,omitempty"`
+		EndTimeDt      *internal.DateTime `json:"end_time_dt,omitempty"`
+		ModifiedTimeDt *internal.DateTime `json:"modified_time_dt,omitempty"`
+		StartTimeDt    *internal.DateTime `json:"start_time_dt,omitempty"`
+	}{
+		embed: embed(*t),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*t = TrainingCampaign(unmarshaler.embed)
+	t.CreatedTimeDt = unmarshaler.CreatedTimeDt.TimePtr()
+	t.EndTimeDt = unmarshaler.EndTimeDt.TimePtr()
+	t.ModifiedTimeDt = unmarshaler.ModifiedTimeDt.TimePtr()
+	t.StartTimeDt = unmarshaler.StartTimeDt.TimePtr()
+	extraProperties, err := internal.ExtractExtraProperties(data, *t)
+	if err != nil {
+		return err
+	}
+	t.extraProperties = extraProperties
+	t.rawJSON = nil
+	return nil
+}
+
+func (t *TrainingCampaign) MarshalJSON() ([]byte, error) {
+	type embed TrainingCampaign
+	var marshaler = struct {
+		embed
+		CreatedTimeDt  *internal.DateTime `json:"created_time_dt,omitempty"`
+		EndTimeDt      *internal.DateTime `json:"end_time_dt,omitempty"`
+		ModifiedTimeDt *internal.DateTime `json:"modified_time_dt,omitempty"`
+		StartTimeDt    *internal.DateTime `json:"start_time_dt,omitempty"`
+	}{
+		embed:          embed(*t),
+		CreatedTimeDt:  internal.NewOptionalDateTime(t.CreatedTimeDt),
+		EndTimeDt:      internal.NewOptionalDateTime(t.EndTimeDt),
+		ModifiedTimeDt: internal.NewOptionalDateTime(t.ModifiedTimeDt),
+		StartTimeDt:    internal.NewOptionalDateTime(t.StartTimeDt),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, t.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (t *TrainingCampaign) String() string {
+	if t == nil {
+		return "<nil>"
+	}
+	if len(t.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(t.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(t); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", t)
+}
+
+// TrainingCampaignStateId is an enum, and the following values are allowed.
+// 0 - Unknown: The state is unknown.
+// 1 - Draft: The training campaign is a draft.
+// 2 - Building: The training campaign is building.
+// 3 - Scheduled: The training campaign is scheduled to start.
+// 4 - Active: The training campaign is active.
+// 5 - Completed: The training campaign is completed.
+// 6 - Canceled: The training campaign is canceled.
+// 99 - Other: The state is not mapped. See the <code>state</code> attribute, which contains a data source specific value.
+type TrainingCampaignStateId = int
+
 // Describes a characteristic or feature of an entity that was observed. For example, this object can be used to represent specific characteristics derived from events or findings that can be surfaced as distinguishing traits of the entity in question.
 var (
 	traitFieldCategory = big.NewInt(1 << 0)
@@ -44548,22 +46011,23 @@ var (
 	userFieldDisplayName             = big.NewInt(1 << 2)
 	userFieldDomain                  = big.NewInt(1 << 3)
 	userFieldEmailAddr               = big.NewInt(1 << 4)
-	userFieldForwardAddr             = big.NewInt(1 << 5)
-	userFieldFullName                = big.NewInt(1 << 6)
-	userFieldGroups                  = big.NewInt(1 << 7)
-	userFieldHasMfa                  = big.NewInt(1 << 8)
-	userFieldLdapPerson              = big.NewInt(1 << 9)
-	userFieldName                    = big.NewInt(1 << 10)
-	userFieldOrg                     = big.NewInt(1 << 11)
-	userFieldPhoneNumber             = big.NewInt(1 << 12)
-	userFieldProgrammaticCredentials = big.NewInt(1 << 13)
-	userFieldRiskLevel               = big.NewInt(1 << 14)
-	userFieldRiskLevelId             = big.NewInt(1 << 15)
-	userFieldRiskScore               = big.NewInt(1 << 16)
-	userFieldType                    = big.NewInt(1 << 17)
-	userFieldTypeId                  = big.NewInt(1 << 18)
-	userFieldUid                     = big.NewInt(1 << 19)
-	userFieldUidAlt                  = big.NewInt(1 << 20)
+	userFieldEnrollments             = big.NewInt(1 << 5)
+	userFieldForwardAddr             = big.NewInt(1 << 6)
+	userFieldFullName                = big.NewInt(1 << 7)
+	userFieldGroups                  = big.NewInt(1 << 8)
+	userFieldHasMfa                  = big.NewInt(1 << 9)
+	userFieldLdapPerson              = big.NewInt(1 << 10)
+	userFieldName                    = big.NewInt(1 << 11)
+	userFieldOrg                     = big.NewInt(1 << 12)
+	userFieldPhoneNumber             = big.NewInt(1 << 13)
+	userFieldProgrammaticCredentials = big.NewInt(1 << 14)
+	userFieldRiskLevel               = big.NewInt(1 << 15)
+	userFieldRiskLevelId             = big.NewInt(1 << 16)
+	userFieldRiskScore               = big.NewInt(1 << 17)
+	userFieldType                    = big.NewInt(1 << 18)
+	userFieldTypeId                  = big.NewInt(1 << 19)
+	userFieldUid                     = big.NewInt(1 << 20)
+	userFieldUidAlt                  = big.NewInt(1 << 21)
 )
 
 type User struct {
@@ -44577,6 +46041,8 @@ type User struct {
 	Domain *string `json:"domain,omitempty" url:"domain,omitempty"`
 	// The user's primary email address.
 	EmailAddr *EmailAddress `json:"email_addr,omitempty" url:"email_addr,omitempty"`
+	// The list of security awareness training enrollments for the user.
+	Enrollments []*Enrollment `json:"enrollments,omitempty" url:"enrollments,omitempty"`
 	// The user's forwarding email address.
 	ForwardAddr *EmailAddress `json:"forward_addr,omitempty" url:"forward_addr,omitempty"`
 	// The full name of the user, as reported by the product.
@@ -44650,6 +46116,13 @@ func (u *User) GetEmailAddr() *EmailAddress {
 		return nil
 	}
 	return u.EmailAddr
+}
+
+func (u *User) GetEnrollments() []*Enrollment {
+	if u == nil {
+		return nil
+	}
+	return u.Enrollments
 }
 
 func (u *User) GetForwardAddr() *EmailAddress {
@@ -44811,6 +46284,13 @@ func (u *User) SetDomain(domain *string) {
 func (u *User) SetEmailAddr(emailAddr *EmailAddress) {
 	u.EmailAddr = emailAddr
 	u.require(userFieldEmailAddr)
+}
+
+// SetEnrollments sets the Enrollments field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (u *User) SetEnrollments(enrollments []*Enrollment) {
+	u.Enrollments = enrollments
+	u.require(userFieldEnrollments)
 }
 
 // SetForwardAddr sets the ForwardAddr field and marks it as non-optional;

@@ -15602,6 +15602,8 @@ func (i *IdentityEntraIdMock) String() string {
 }
 
 // Configuration for GitHub as an identity provider.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/github-identity-setup)
 var (
 	identityGitHubFieldCredential       = big.NewInt(1 << 0)
 	identityGitHubFieldOrganizationSlug = big.NewInt(1 << 1)
@@ -17858,6 +17860,184 @@ func (j *JupiterOneCredential) validate() error {
 		}
 	}
 	return nil
+}
+
+type KnowBe4Credential struct {
+	Type string
+	// Configuration when creating new Token.
+	Token *TokenCredential
+	// Reference to existing Token.
+	TokenId TokenCredentialId
+
+	rawJSON json.RawMessage
+}
+
+func (k *KnowBe4Credential) GetType() string {
+	if k == nil {
+		return ""
+	}
+	return k.Type
+}
+
+func (k *KnowBe4Credential) GetToken() *TokenCredential {
+	if k == nil {
+		return nil
+	}
+	return k.Token
+}
+
+func (k *KnowBe4Credential) GetTokenId() TokenCredentialId {
+	if k == nil {
+		return ""
+	}
+	return k.TokenId
+}
+
+func (k *KnowBe4Credential) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	k.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", k)
+	}
+	switch unmarshaler.Type {
+	case "token":
+		value := new(TokenCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		k.Token = value
+	case "token_id":
+		var valueUnmarshaler struct {
+			TokenId TokenCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		k.TokenId = valueUnmarshaler.TokenId
+	}
+	k.rawJSON = nil
+	return nil
+}
+
+func (k KnowBe4Credential) MarshalJSON() ([]byte, error) {
+	if err := k.validate(); err != nil {
+		return nil, err
+	}
+	if k.Token != nil {
+		return internal.MarshalJSONWithExtraProperty(k.Token, "type", "token")
+	}
+	if k.TokenId != "" {
+		var marshaler = struct {
+			Type    string            `json:"type"`
+			TokenId TokenCredentialId `json:"value"`
+		}{
+			Type:    "token_id",
+			TokenId: k.TokenId,
+		}
+		return json.Marshal(marshaler)
+	}
+	if len(k.rawJSON) > 0 {
+		return k.rawJSON, nil
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", k)
+}
+
+type KnowBe4CredentialVisitor interface {
+	VisitToken(*TokenCredential) error
+	VisitTokenId(TokenCredentialId) error
+}
+
+func (k *KnowBe4Credential) Accept(visitor KnowBe4CredentialVisitor) error {
+	if k.Token != nil {
+		return visitor.VisitToken(k.Token)
+	}
+	if k.TokenId != "" {
+		return visitor.VisitTokenId(k.TokenId)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", k)
+}
+
+func (k *KnowBe4Credential) validate() error {
+	if k == nil {
+		return fmt.Errorf("type %T is nil", k)
+	}
+	var fields []string
+	if k.Token != nil {
+		fields = append(fields, "token")
+	}
+	if k.TokenId != "" {
+		fields = append(fields, "token_id")
+	}
+	if len(fields) == 0 {
+		if k.Type != "" {
+			if len(k.rawJSON) > 0 {
+				return nil
+			}
+			return fmt.Errorf("type %T defines a discriminant set to %q but the field is not set", k, k.Type)
+		}
+		return fmt.Errorf("type %T is empty", k)
+	}
+	if len(fields) > 1 {
+		return fmt.Errorf("type %T defines values for %s, but only one value is allowed", k, fields)
+	}
+	if k.Type != "" {
+		field := fields[0]
+		if k.Type != field {
+			return fmt.Errorf(
+				"type %T defines a discriminant set to %q, but it does not match the %T field; either remove or update the discriminant to match",
+				k,
+				k.Type,
+				k,
+			)
+		}
+	}
+	return nil
+}
+
+type KnowBe4Region string
+
+const (
+	// US region.
+	// This value maps to the `https://training.knowbe4.com` endpoint.
+	KnowBe4RegionUs KnowBe4Region = "US"
+	// EU region.
+	// This value maps to the `https://eu.knowbe4.com` endpoint.
+	KnowBe4RegionEu KnowBe4Region = "EU"
+	// Canada region.
+	// This value maps to the `https://ca.knowbe4.com` endpoint.
+	KnowBe4RegionCa KnowBe4Region = "CA"
+	// UK region.
+	// This value maps to the `https://uk.knowbe4.com` endpoint.
+	KnowBe4RegionUk KnowBe4Region = "UK"
+	// Germany region.
+	// This value maps to the `https://de.knowbe4.com` endpoint.
+	KnowBe4RegionDe KnowBe4Region = "DE"
+)
+
+func NewKnowBe4RegionFromString(s string) (KnowBe4Region, error) {
+	switch s {
+	case "US":
+		return KnowBe4RegionUs, nil
+	case "EU":
+		return KnowBe4RegionEu, nil
+	case "CA":
+		return KnowBe4RegionCa, nil
+	case "UK":
+		return KnowBe4RegionUk, nil
+	case "DE":
+		return KnowBe4RegionDe, nil
+	}
+	var t KnowBe4Region
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (k KnowBe4Region) Ptr() *KnowBe4Region {
+	return &k
 }
 
 type LinearCredential struct {
@@ -21691,6 +21871,8 @@ type ProviderConfig struct {
 	// Configuration for [MOCK] Microsoft Entra ID.
 	IdentityEntraIdMock *IdentityEntraIdMock
 	// Configuration for GitHub as an identity provider.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/github-identity-setup)
 	IdentityGithub *IdentityGitHub
 	// Configuration for Google Workspace.
 	//
@@ -21757,6 +21939,8 @@ type ProviderConfig struct {
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/teams-notification-setup)
 	NotificationsTeams *NotificationsTeams
+	// Configuration for KnowBe4 Security Awareness Training (KSAT) as a security awareness provider.
+	SecurityawarenessKnowbe4 *SecurityAwarenessKnowBe4
 	// Configuration for CrowdStrike Falcon® Next-Gen SIEM.
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/crowdstrike-siem-setup)
@@ -22696,6 +22880,13 @@ func (p *ProviderConfig) GetNotificationsTeams() *NotificationsTeams {
 		return nil
 	}
 	return p.NotificationsTeams
+}
+
+func (p *ProviderConfig) GetSecurityawarenessKnowbe4() *SecurityAwarenessKnowBe4 {
+	if p == nil {
+		return nil
+	}
+	return p.SecurityawarenessKnowbe4
 }
 
 func (p *ProviderConfig) GetSiemCrowdstrike() *SiemCrowdstrike {
@@ -23813,6 +24004,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.NotificationsTeams = value
+	case "securityawareness_knowbe4":
+		value := new(SecurityAwarenessKnowBe4)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.SecurityawarenessKnowbe4 = value
 	case "siem_crowdstrike":
 		value := new(SiemCrowdstrike)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -24566,6 +24763,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.NotificationsTeams != nil {
 		return internal.MarshalJSONWithExtraProperty(p.NotificationsTeams, "type", "notifications_teams")
 	}
+	if p.SecurityawarenessKnowbe4 != nil {
+		return internal.MarshalJSONWithExtraProperty(p.SecurityawarenessKnowbe4, "type", "securityawareness_knowbe4")
+	}
 	if p.SiemCrowdstrike != nil {
 		return internal.MarshalJSONWithExtraProperty(p.SiemCrowdstrike, "type", "siem_crowdstrike")
 	}
@@ -24898,6 +25098,7 @@ type ProviderConfigVisitor interface {
 	VisitNotificationsSlack(*NotificationsSlack) error
 	VisitNotificationsSlackWebhook(*NotificationsSlackWebhook) error
 	VisitNotificationsTeams(*NotificationsTeams) error
+	VisitSecurityawarenessKnowbe4(*SecurityAwarenessKnowBe4) error
 	VisitSiemCrowdstrike(*SiemCrowdstrike) error
 	VisitSiemDatadog(*SiemDatadog) error
 	VisitSiemElasticsearch(*SiemElasticsearch) error
@@ -25259,6 +25460,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.NotificationsTeams != nil {
 		return visitor.VisitNotificationsTeams(p.NotificationsTeams)
+	}
+	if p.SecurityawarenessKnowbe4 != nil {
+		return visitor.VisitSecurityawarenessKnowbe4(p.SecurityawarenessKnowbe4)
 	}
 	if p.SiemCrowdstrike != nil {
 		return visitor.VisitSiemCrowdstrike(p.SiemCrowdstrike)
@@ -25781,6 +25985,9 @@ func (p *ProviderConfig) validate() error {
 	if p.NotificationsTeams != nil {
 		fields = append(fields, "notifications_teams")
 	}
+	if p.SecurityawarenessKnowbe4 != nil {
+		fields = append(fields, "securityawareness_knowbe4")
+	}
 	if p.SiemCrowdstrike != nil {
 		fields = append(fields, "siem_crowdstrike")
 	}
@@ -26230,6 +26437,8 @@ const (
 	ProviderConfigIdNotificationsSlack ProviderConfigId = "notifications_slack"
 	// Microsoft Teams
 	ProviderConfigIdNotificationsTeams ProviderConfigId = "notifications_teams"
+	// KnowBe4 Security Awareness Training (KSAT)
+	ProviderConfigIdSecurityAwarenessKnowBe4 ProviderConfigId = "securityawareness_knowbe4"
 	// CrowdStrike Falcon® Next-Gen SIEM
 	ProviderConfigIdSiemCrowdstrike ProviderConfigId = "siem_crowdstrike"
 	// Datadog Cloud SIEM
@@ -26578,6 +26787,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdNotificationsSlack, nil
 	case "notifications_teams":
 		return ProviderConfigIdNotificationsTeams, nil
+	case "securityawareness_knowbe4":
+		return ProviderConfigIdSecurityAwarenessKnowBe4, nil
 	case "siem_crowdstrike":
 		return ProviderConfigIdSiemCrowdstrike, nil
 	case "siem_datadog":
@@ -29128,6 +29339,109 @@ func (s *SiemSumoLogic) MarshalJSON() ([]byte, error) {
 }
 
 func (s *SiemSumoLogic) String() string {
+	if s == nil {
+		return "<nil>"
+	}
+	if len(s.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(s.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(s); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", s)
+}
+
+// Configuration for KnowBe4 Security Awareness Training (KSAT) as a security awareness provider.
+var (
+	securityAwarenessKnowBe4FieldCredential = big.NewInt(1 << 0)
+	securityAwarenessKnowBe4FieldRegion     = big.NewInt(1 << 1)
+)
+
+type SecurityAwarenessKnowBe4 struct {
+	// Credentials for the KnowBe4 Security Awareness Training (KSAT) API.
+	Credential *KnowBe4Credential `json:"credential" url:"credential"`
+	// Region for the KnowBe4 Security Awareness Training (KSAT) API.
+	Region KnowBe4Region `json:"region" url:"region"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (s *SecurityAwarenessKnowBe4) GetCredential() *KnowBe4Credential {
+	if s == nil {
+		return nil
+	}
+	return s.Credential
+}
+
+func (s *SecurityAwarenessKnowBe4) GetRegion() KnowBe4Region {
+	if s == nil {
+		return ""
+	}
+	return s.Region
+}
+
+func (s *SecurityAwarenessKnowBe4) GetExtraProperties() map[string]interface{} {
+	if s == nil {
+		return nil
+	}
+	return s.extraProperties
+}
+
+func (s *SecurityAwarenessKnowBe4) require(field *big.Int) {
+	if s.explicitFields == nil {
+		s.explicitFields = big.NewInt(0)
+	}
+	s.explicitFields.Or(s.explicitFields, field)
+}
+
+// SetCredential sets the Credential field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (s *SecurityAwarenessKnowBe4) SetCredential(credential *KnowBe4Credential) {
+	s.Credential = credential
+	s.require(securityAwarenessKnowBe4FieldCredential)
+}
+
+// SetRegion sets the Region field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (s *SecurityAwarenessKnowBe4) SetRegion(region KnowBe4Region) {
+	s.Region = region
+	s.require(securityAwarenessKnowBe4FieldRegion)
+}
+
+func (s *SecurityAwarenessKnowBe4) UnmarshalJSON(data []byte) error {
+	type unmarshaler SecurityAwarenessKnowBe4
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*s = SecurityAwarenessKnowBe4(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+	s.rawJSON = nil
+	return nil
+}
+
+func (s *SecurityAwarenessKnowBe4) MarshalJSON() ([]byte, error) {
+	type embed SecurityAwarenessKnowBe4
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*s),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, s.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (s *SecurityAwarenessKnowBe4) String() string {
 	if s == nil {
 		return "<nil>"
 	}

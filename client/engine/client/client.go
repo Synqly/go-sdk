@@ -21,6 +21,7 @@ import (
     notifications "github.com/synqly/go-sdk/v2/client/engine/notifications"
     operations "github.com/synqly/go-sdk/v2/client/engine/operations"
     option "github.com/synqly/go-sdk/v2/client/engine/option"
+    securityawareness "github.com/synqly/go-sdk/v2/client/engine/securityawareness"
     siem "github.com/synqly/go-sdk/v2/client/engine/siem"
     sink "github.com/synqly/go-sdk/v2/client/engine/sink"
     storage "github.com/synqly/go-sdk/v2/client/engine/storage"
@@ -45,6 +46,7 @@ type Client struct {
     Networksecurity *networksecurity.Client
     Notifications *notifications.Client
     Operations *operations.Client
+    Securityawareness *securityawareness.Client
     Siem *siem.Client
     Sink *sink.Client
     Storage *storage.Client
@@ -74,6 +76,7 @@ func NewClient(opts ...option.RequestOption) *Client {
         Networksecurity: networksecurity.NewClient(options),
         Notifications: notifications.NewClient(options),
         Operations: operations.NewClient(options),
+        Securityawareness: securityawareness.NewClient(options),
         Siem: siem.NewClient(options),
         Sink: sink.NewClient(options),
         Storage: storage.NewClient(options),

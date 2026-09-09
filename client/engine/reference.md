@@ -7393,6 +7393,508 @@ client.Operations.Cancel(
 </dl>
 </details>
 
+## Securityawareness
+<details><summary><code>client.Securityawareness.QueryTrainingCampaigns() -> *engine.SecurityAwarenessQueryTrainingCampaignsResponse</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Returns a list of training campaigns matching the query from the token-linked security awareness integration.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```go
+request := &engine.SecurityAwarenessQueryTrainingCampaignsRequest{}
+client.Securityawareness.QueryTrainingCampaigns(
+        context.TODO(),
+        request,
+    )
+}
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**meta:** `*string` — Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**limit:** `*int` — Number of training campaigns to return. Defaults to 100 with a maximum of 1000. If a provider has a maximum limit lower than 1000, the provider's maximum limit will be used instead.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**filter:** `*string` — Filter results by this query. For more information on filtering, refer to our [Filtering Guide](https://docs.synqly.com/guides/connectors/security-awareness/query-filters). Defaults to no filter. If used more than once, the queries are ANDed together.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**cursor:** `*string` — Start search from cursor position.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**includeRawData:** `*bool` — Include the raw data from the provider in the response. Defaults to `false`.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.Securityawareness.QueryPhishingSimulations() -> *engine.SecurityAwarenessQueryPhishingSimulationsResponse</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Returns a list of phishing simulations matching the query from the token-linked security awareness integration.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```go
+request := &engine.SecurityAwarenessQueryPhishingSimulationsRequest{}
+client.Securityawareness.QueryPhishingSimulations(
+        context.TODO(),
+        request,
+    )
+}
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**meta:** `*string` — Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**limit:** `*int` — Number of phishing simulations to return. Defaults to 100 with a maximum of 1000. If a provider has a maximum limit lower than 1000, the provider's maximum limit will be used instead.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**filter:** `*string` — Filter results by this query. For more information on filtering, refer to our [Filtering Guide](https://docs.synqly.com/guides/connectors/security-awareness/query-filters). Defaults to no filter. If used more than once, the queries are ANDed together.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**cursor:** `*string` — Start search from cursor position.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**includeRawData:** `*bool` — Include the raw data from the provider in the response. Defaults to `false`.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.Securityawareness.QueryUsers() -> *engine.SecurityAwarenessQueryUsersResponse</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Returns a list of users matching the query from the token-linked security awareness integration.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```go
+request := &engine.SecurityAwarenessQueryUsersRequest{}
+client.Securityawareness.QueryUsers(
+        context.TODO(),
+        request,
+    )
+}
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**meta:** `*string` — Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**limit:** `*int` — Number of users to return. Defaults to 100 with a maximum of 1000. If a provider has a maximum limit lower than 1000, the provider's maximum limit will be used instead.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**filter:** `*string` — Filter results by this query. For more information on filtering, refer to our [Filtering Guide](https://docs.synqly.com/guides/connectors/security-awareness/query-filters). Defaults to no filter. If used more than once, the queries are ANDed together.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**cursor:** `*string` — Start search from cursor position.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**includeRawData:** `*bool` — Include the raw data from the provider in the response. Defaults to `false`.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.Securityawareness.GetTrainingCampaignDetails(TrainingCampaignId) -> *engine.SecurityAwarenessGetTrainingCampaignDetailsResponse</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Returns the details of the training campaign matching `{trainingCampaignId}` from the token-linked security awareness integration.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```go
+request := &engine.SecurityAwarenessGetTrainingCampaignDetailsRequest{}
+client.Securityawareness.GetTrainingCampaignDetails(
+        context.TODO(),
+        "trainingCampaignId",
+        request,
+    )
+}
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**trainingCampaignId:** `engine.Id` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**meta:** `*string` — Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**includeRawData:** `*bool` — Include the raw data from the provider in the response. Defaults to `false`.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.Securityawareness.GetPhishingSimulationDetails(PhishingSimulationId) -> *engine.SecurityAwarenessGetPhishingSimulationDetailsResponse</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Returns the details of the phishing simulation matching `{phishingSimulationId}` from the token-linked security awareness integration.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```go
+request := &engine.SecurityAwarenessGetPhishingSimulationDetailsRequest{}
+client.Securityawareness.GetPhishingSimulationDetails(
+        context.TODO(),
+        "phishingSimulationId",
+        request,
+    )
+}
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**phishingSimulationId:** `engine.Id` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**meta:** `*string` — Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**includeRawData:** `*bool` — Include the raw data from the provider in the response. Defaults to `false`.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.Securityawareness.GetUserDetails(UserId) -> *engine.SecurityAwarenessGetUserDetailsResponse</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Returns the details of the user matching `{userId}` from the token-linked security awareness integration.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```go
+request := &engine.SecurityAwarenessGetUserDetailsRequest{}
+client.Securityawareness.GetUserDetails(
+        context.TODO(),
+        "userId",
+        request,
+    )
+}
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**userId:** `engine.Id` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**meta:** `*string` — Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**includeRawData:** `*bool` — Include the raw data from the provider in the response. Defaults to `false`.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
 ## Siem
 <details><summary><code>client.Siem.QueryInvestigations() -> *engine.QueryInvestigationResponse</code></summary>
 <dl>

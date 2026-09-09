@@ -29,7 +29,10 @@ import (
 	httpactivity "github.com/synqly/go-sdk/v2/client/engine/ocsf/v160/httpactivity"
 	applicationinventoryinfo "github.com/synqly/go-sdk/v2/client/engine/ocsf/v180/applicationinventoryinfo"
 	applicationsecurityposturefinding "github.com/synqly/go-sdk/v2/client/engine/ocsf/v180/applicationsecurityposturefinding"
+	phishingsimulationinventoryinfo "github.com/synqly/go-sdk/v2/client/engine/ocsf/v180/phishingsimulationinventoryinfo"
 	scanactivity "github.com/synqly/go-sdk/v2/client/engine/ocsf/v180/scanactivity"
+	trainingcampaigninventoryinfo "github.com/synqly/go-sdk/v2/client/engine/ocsf/v180/trainingcampaigninventoryinfo"
+	userinventory "github.com/synqly/go-sdk/v2/client/engine/ocsf/v180/userinventory"
 )
 
 type AccountChange = *accountchange.AccountChange
@@ -74,6 +77,8 @@ type ModuleActivity = *moduleactivity.ModuleActivity
 
 type NetworkActivity = *networkactivity.NetworkActivity
 
+type PhishingSimulationInventoryInfo = *phishingsimulationinventoryinfo.PhishingSimulationInventoryInfo
+
 type ProcessActivity = *processactivity.ProcessActivity
 
 type ScanActivity = *scanactivity.ScanActivity
@@ -81,6 +86,10 @@ type ScanActivity = *scanactivity.ScanActivity
 type ScheduledJobActivity = *scheduledjobactivity.ScheduledJobActivity
 
 type SecurityFinding = *securityfinding.SecurityFinding
+
+type TrainingCampaignInventoryInfo = *trainingcampaigninventoryinfo.TrainingCampaignInventoryInfo
+
+type UserInventoryInfo = *userinventory.UserInventory
 
 type VulnerabilityFinding = *vulnerabilityfinding.VulnerabilityFinding
 

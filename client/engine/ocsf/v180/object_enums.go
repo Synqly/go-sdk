@@ -718,6 +718,28 @@ const Endpoint_Type_LoadBalancer EndpointTypeId = 15
 // Other. The type is not mapped. See the <code>type</code> attribute, which contains a data source specific value.
 const Endpoint_Type_Other EndpointTypeId = 99
 
+// EnrollmentStateId Values
+// State ID. The normalized identifier of the enrollment progress state.
+
+// Unknown. The state is unknown.
+const Enrollment_State_Unknown EnrollmentStateId = 0
+// Assigned. The enrollment is assigned but not started.
+const Enrollment_State_Assigned EnrollmentStateId = 1
+// Started. The learner has started the enrollment.
+const Enrollment_State_Started EnrollmentStateId = 2
+// Completed. The enrollment is completed.
+const Enrollment_State_Completed EnrollmentStateId = 3
+// Overdue. The enrollment is overdue.
+const Enrollment_State_Overdue EnrollmentStateId = 4
+// Expired. The enrollment has expired.
+const Enrollment_State_Expired EnrollmentStateId = 5
+// Waived. The enrollment was waived.
+const Enrollment_State_Waived EnrollmentStateId = 6
+// Failed. The learner failed a scored enrollment.
+const Enrollment_State_Failed EnrollmentStateId = 7
+// Other. The state is not mapped. See the <code>state</code> attribute for the data source specific value.
+const Enrollment_State_Other EnrollmentStateId = 99
+
 // EvidencesVerdictId Values
 // Verdict ID. The normalized verdict (or status) ID of the evidence associated with the security detection. For example, Microsoft Graph Security Alerts contain a <code>verdict</code> enumeration for each type of <code>evidence</code> associated with the Alert. This is typically set by an automated investigation process or an analyst/investigator assigned to the finding.
 
@@ -1642,6 +1664,42 @@ const PeripheralDevice_Type_Webcam PeripheralDeviceTypeId = 7
 // Other. The peripheral device type is not mapped. See the <code>type</code> attribute which contains an event source specific value.
 const PeripheralDevice_Type_Other PeripheralDeviceTypeId = 99
 
+// PhishingProgramStateId Values
+// State ID. The normalized state of the phishing program.
+
+// Unknown. The state is unknown.
+const PhishingProgram_State_Unknown PhishingProgramStateId = 0
+// Other. The state is not mapped. See the <code>state</code> attribute, which contains a data source specific value.
+const PhishingProgram_State_Other PhishingProgramStateId = 99
+
+// PhishingSimulationStateId Values
+// State ID. The normalized state of the phishing simulation run.
+
+// Unknown. The state is unknown.
+const PhishingSimulation_State_Unknown PhishingSimulationStateId = 0
+// Draft. The phishing simulation is a draft.
+const PhishingSimulation_State_Draft PhishingSimulationStateId = 1
+// Scheduled. The phishing simulation is scheduled to be sent.
+const PhishingSimulation_State_Scheduled PhishingSimulationStateId = 2
+// Running. The phishing simulation is running.
+const PhishingSimulation_State_Running PhishingSimulationStateId = 3
+// Completed. The phishing simulation is completed.
+const PhishingSimulation_State_Completed PhishingSimulationStateId = 4
+// Canceled. The phishing simulation is canceled.
+const PhishingSimulation_State_Canceled PhishingSimulationStateId = 5
+// Failed. The phishing simulation is failed.
+const PhishingSimulation_State_Failed PhishingSimulationStateId = 6
+// Other. The state is not mapped. See the <code>state</code> attribute, which contains a data source specific value.
+const PhishingSimulation_State_Other PhishingSimulationStateId = 99
+
+// PhishingSimulationTypeId Values
+// Type ID. The normalized type of the phishing simulation.
+
+// Unknown. The type is unknown.
+const PhishingSimulation_Type_Unknown PhishingSimulationTypeId = 0
+// Other. The type is not mapped. See the <code>type</code> attribute, which contains a data source specific value.
+const PhishingSimulation_Type_Other PhishingSimulationTypeId = 99
+
 // PrivilegeInfoTypeId Values
 // Type ID. The normalized type of the privilege.
 
@@ -2263,6 +2321,26 @@ const Token_Type_ClientToken TokenTypeId = 6
 const Token_Type_APIToken TokenTypeId = 7
 // Other. The type is not mapped. See the <code>type</code> attribute, which contains a data source specific value.
 const Token_Type_Other TokenTypeId = 99
+
+// TrainingCampaignStateId Values
+// State ID. The normalized state of the training campaign.
+
+// Unknown. The state is unknown.
+const TrainingCampaign_State_Unknown TrainingCampaignStateId = 0
+// Draft. The training campaign is a draft.
+const TrainingCampaign_State_Draft TrainingCampaignStateId = 1
+// Building. The training campaign is building.
+const TrainingCampaign_State_Building TrainingCampaignStateId = 2
+// Scheduled. The training campaign is scheduled to start.
+const TrainingCampaign_State_Scheduled TrainingCampaignStateId = 3
+// Active. The training campaign is active.
+const TrainingCampaign_State_Active TrainingCampaignStateId = 4
+// Completed. The training campaign is completed.
+const TrainingCampaign_State_Completed TrainingCampaignStateId = 5
+// Canceled. The training campaign is canceled.
+const TrainingCampaign_State_Canceled TrainingCampaignStateId = 6
+// Other. The state is not mapped. See the <code>state</code> attribute, which contains a data source specific value.
+const TrainingCampaign_State_Other TrainingCampaignStateId = 99
 
 // UnmannedAerialSystemTypeId Values
 // Type ID. The UAS type identifier.

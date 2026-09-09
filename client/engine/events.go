@@ -42,7 +42,10 @@ import (
 	chatmessageactivity "github.com/synqly/go-sdk/v2/client/engine/ocsf/v180/chatmessageactivity"
 	conversationactivity "github.com/synqly/go-sdk/v2/client/engine/ocsf/v180/conversationactivity"
 	noteactivity "github.com/synqly/go-sdk/v2/client/engine/ocsf/v180/noteactivity"
+	phishingsimulationinventoryinfo "github.com/synqly/go-sdk/v2/client/engine/ocsf/v180/phishingsimulationinventoryinfo"
 	softwareinventoryinfo "github.com/synqly/go-sdk/v2/client/engine/ocsf/v180/softwareinventoryinfo"
+	trainingcampaigninventoryinfo "github.com/synqly/go-sdk/v2/client/engine/ocsf/v180/trainingcampaigninventoryinfo"
+	userinventory "github.com/synqly/go-sdk/v2/client/engine/ocsf/v180/userinventory"
 )
 
 type Event struct {
@@ -84,6 +87,9 @@ type Event struct {
 	ConversationActivity              *conversationactivity.ConversationActivity
 	ApplicationInventoryInfo          *applicationinventoryinfo.ApplicationInventoryInfo
 	EventLogActivity                  *eventlogactivity.EventLog
+	TrainingCampaignInventoryInfo     *trainingcampaigninventoryinfo.TrainingCampaignInventoryInfo
+	PhishingSimulationInventoryInfo   *phishingsimulationinventoryinfo.PhishingSimulationInventoryInfo
+	UserInventoryInfo                 *userinventory.UserInventory
 
 	rawJSON json.RawMessage
 }
@@ -354,6 +360,27 @@ func (e *Event) GetEventLogActivity() *eventlogactivity.EventLog {
 	return e.EventLogActivity
 }
 
+func (e *Event) GetTrainingCampaignInventoryInfo() *trainingcampaigninventoryinfo.TrainingCampaignInventoryInfo {
+	if e == nil {
+		return nil
+	}
+	return e.TrainingCampaignInventoryInfo
+}
+
+func (e *Event) GetPhishingSimulationInventoryInfo() *phishingsimulationinventoryinfo.PhishingSimulationInventoryInfo {
+	if e == nil {
+		return nil
+	}
+	return e.PhishingSimulationInventoryInfo
+}
+
+func (e *Event) GetUserInventoryInfo() *userinventory.UserInventory {
+	if e == nil {
+		return nil
+	}
+	return e.UserInventoryInfo
+}
+
 func (e *Event) UnmarshalJSON(data []byte) error {
 	var unmarshaler struct {
 		ClassName string `json:"class_name"`
@@ -588,6 +615,24 @@ func (e *Event) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		e.EventLogActivity = value
+	case "Training Campaign Inventory Info":
+		value := new(trainingcampaigninventoryinfo.TrainingCampaignInventoryInfo)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.TrainingCampaignInventoryInfo = value
+	case "Phishing Simulation Inventory Info":
+		value := new(phishingsimulationinventoryinfo.PhishingSimulationInventoryInfo)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.PhishingSimulationInventoryInfo = value
+	case "User Inventory Info":
+		value := new(userinventory.UserInventory)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.UserInventoryInfo = value
 	}
 	e.rawJSON = nil
 	return nil
@@ -708,6 +753,15 @@ func (e Event) MarshalJSON() ([]byte, error) {
 	if e.EventLogActivity != nil {
 		return internal.MarshalJSONWithExtraProperty(e.EventLogActivity, "class_name", "Event Log Activity")
 	}
+	if e.TrainingCampaignInventoryInfo != nil {
+		return internal.MarshalJSONWithExtraProperty(e.TrainingCampaignInventoryInfo, "class_name", "Training Campaign Inventory Info")
+	}
+	if e.PhishingSimulationInventoryInfo != nil {
+		return internal.MarshalJSONWithExtraProperty(e.PhishingSimulationInventoryInfo, "class_name", "Phishing Simulation Inventory Info")
+	}
+	if e.UserInventoryInfo != nil {
+		return internal.MarshalJSONWithExtraProperty(e.UserInventoryInfo, "class_name", "User Inventory Info")
+	}
 	if len(e.rawJSON) > 0 {
 		return e.rawJSON, nil
 	}
@@ -752,6 +806,9 @@ type EventVisitor interface {
 	VisitConversationActivity(*conversationactivity.ConversationActivity) error
 	VisitApplicationInventoryInfo(*applicationinventoryinfo.ApplicationInventoryInfo) error
 	VisitEventLogActivity(*eventlogactivity.EventLog) error
+	VisitTrainingCampaignInventoryInfo(*trainingcampaigninventoryinfo.TrainingCampaignInventoryInfo) error
+	VisitPhishingSimulationInventoryInfo(*phishingsimulationinventoryinfo.PhishingSimulationInventoryInfo) error
+	VisitUserInventoryInfo(*userinventory.UserInventory) error
 }
 
 func (e *Event) Accept(visitor EventVisitor) error {
@@ -865,6 +922,15 @@ func (e *Event) Accept(visitor EventVisitor) error {
 	}
 	if e.EventLogActivity != nil {
 		return visitor.VisitEventLogActivity(e.EventLogActivity)
+	}
+	if e.TrainingCampaignInventoryInfo != nil {
+		return visitor.VisitTrainingCampaignInventoryInfo(e.TrainingCampaignInventoryInfo)
+	}
+	if e.PhishingSimulationInventoryInfo != nil {
+		return visitor.VisitPhishingSimulationInventoryInfo(e.PhishingSimulationInventoryInfo)
+	}
+	if e.UserInventoryInfo != nil {
+		return visitor.VisitUserInventoryInfo(e.UserInventoryInfo)
 	}
 	return fmt.Errorf("type %T does not define a non-empty union type", e)
 }
@@ -984,6 +1050,15 @@ func (e *Event) validate() error {
 	}
 	if e.EventLogActivity != nil {
 		fields = append(fields, "Event Log Activity")
+	}
+	if e.TrainingCampaignInventoryInfo != nil {
+		fields = append(fields, "Training Campaign Inventory Info")
+	}
+	if e.PhishingSimulationInventoryInfo != nil {
+		fields = append(fields, "Phishing Simulation Inventory Info")
+	}
+	if e.UserInventoryInfo != nil {
+		fields = append(fields, "User Inventory Info")
 	}
 	if len(fields) == 0 {
 		if e.ClassName != "" {
