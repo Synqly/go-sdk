@@ -21940,6 +21940,8 @@ type ProviderConfig struct {
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/teams-notification-setup)
 	NotificationsTeams *NotificationsTeams
 	// Configuration for KnowBe4 Security Awareness Training (KSAT) as a security awareness provider.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/knowbe4-securityawareness-setup)
 	SecurityawarenessKnowbe4 *SecurityAwarenessKnowBe4
 	// Configuration for CrowdStrike Falcon® Next-Gen SIEM.
 	//
@@ -29354,6 +29356,8 @@ func (s *SiemSumoLogic) String() string {
 }
 
 // Configuration for KnowBe4 Security Awareness Training (KSAT) as a security awareness provider.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/knowbe4-securityawareness-setup)
 var (
 	securityAwarenessKnowBe4FieldCredential = big.NewInt(1 << 0)
 	securityAwarenessKnowBe4FieldRegion     = big.NewInt(1 << 1)
