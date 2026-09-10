@@ -1287,7 +1287,7 @@ client.Chat.QueryUsers(
 <dl>
 <dd>
 
-**limit:** `*int` — Number of users to return. Defaults to 100.
+**limit:** `*int` — Number of users to return. Defaults to 100 with a maximum of 1000. If a provider has a maximum limit lower than 1000, the provider's maximum limit will be used instead.
     
 </dd>
 </dl>
@@ -1304,6 +1304,14 @@ client.Chat.QueryUsers(
 <dd>
 
 **cursor:** `*string` — Start search from cursor position.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**includeRawData:** `*bool` — Include the raw data from the chat provider in the response. Defaults to `false`.
     
 </dd>
 </dl>
@@ -1379,7 +1387,7 @@ client.Chat.QueryUserConversations(
 <dl>
 <dd>
 
-**limit:** `*int` — Number of conversations to return. Defaults to 100.
+**limit:** `*int` — Number of conversations to return. Defaults to 100 with a maximum of 1000. If a provider has a maximum limit lower than 1000, the provider's maximum limit will be used instead.
     
 </dd>
 </dl>
@@ -1396,6 +1404,14 @@ client.Chat.QueryUserConversations(
 <dd>
 
 **cursor:** `*string` — Start search from cursor position.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**includeRawData:** `*bool` — Include the raw data from the chat provider in the response. Defaults to `false`.
     
 </dd>
 </dl>
@@ -1480,7 +1496,7 @@ client.Chat.QueryUserConversationMembers(
 <dl>
 <dd>
 
-**limit:** `*int` — Number of members to return. Defaults to 100.
+**limit:** `*int` — Number of members to return. Defaults to 100 with a maximum of 1000. If a provider has a maximum limit lower than 1000, the provider's maximum limit will be used instead.
     
 </dd>
 </dl>
@@ -1489,6 +1505,14 @@ client.Chat.QueryUserConversationMembers(
 <dd>
 
 **cursor:** `*string` — Start search from cursor position.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**includeRawData:** `*bool` — Include the raw data from the chat provider in the response. Defaults to `false`.
     
 </dd>
 </dl>
@@ -1573,7 +1597,7 @@ client.Chat.QueryUserConversationMessages(
 <dl>
 <dd>
 
-**limit:** `*int` — Number of messages to return. Defaults to 100.
+**limit:** `*int` — Number of messages to return. Defaults to 100 with a maximum of 1000. If a provider has a maximum limit lower than 1000, the provider's maximum limit will be used instead.
     
 </dd>
 </dl>
@@ -1590,6 +1614,14 @@ client.Chat.QueryUserConversationMessages(
 <dd>
 
 **cursor:** `*string` — Start search from cursor position.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**includeRawData:** `*bool` — Include the raw data from the chat provider in the response. Defaults to `false`.
     
 </dd>
 </dl>
@@ -1656,7 +1688,7 @@ client.Chat.QueryConversations(
 <dl>
 <dd>
 
-**limit:** `*int` — Number of conversations to return. Defaults to 100.
+**limit:** `*int` — Number of conversations to return. Defaults to 100 with a maximum of 1000. If a provider has a maximum limit lower than 1000, the provider's maximum limit will be used instead.
     
 </dd>
 </dl>
@@ -1673,6 +1705,14 @@ client.Chat.QueryConversations(
 <dd>
 
 **cursor:** `*string` — Start search from cursor position.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**includeRawData:** `*bool` — Include the raw data from the chat provider in the response. Defaults to `false`.
     
 </dd>
 </dl>
@@ -1748,7 +1788,7 @@ client.Chat.QueryConversationMembers(
 <dl>
 <dd>
 
-**limit:** `*int` — Number of members to return. Defaults to 100.
+**limit:** `*int` — Number of members to return. Defaults to 100 with a maximum of 1000. If a provider has a maximum limit lower than 1000, the provider's maximum limit will be used instead.
     
 </dd>
 </dl>
@@ -1757,6 +1797,105 @@ client.Chat.QueryConversationMembers(
 <dd>
 
 **cursor:** `*string` — Start search from cursor position.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**includeRawData:** `*bool` — Include the raw data from the chat provider in the response. Defaults to `false`.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.Chat.QueryMessages() -> *engine.ChatQueryMessagesResponse</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Returns all messages across every conversation in the connected workspace or tenant.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```go
+request := &engine.ChatQueryMessages{}
+client.Chat.QueryMessages(
+        context.TODO(),
+        request,
+    )
+}
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**meta:** `*string` — Add metadata to the response by invoking meta functions.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**limit:** `*int` — Number of messages to return per page. Defaults to 100 with a maximum of 1000. If a provider has a maximum limit lower than 1000, the provider's maximum limit will be used instead.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**filter:** `*string` — Filter results by this query. Only an optional time window (`time[gte]`/`time[lte]`) is supported, and only for providers whose message APIs support time filtering. Defaults to no filter. If used more than once, the queries are ANDed together.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**cursor:** `*string` — Start search from cursor position.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**includeRawData:** `*bool` — Include the raw data from the chat provider in the response. Defaults to `false`.
     
 </dd>
 </dl>
@@ -1832,7 +1971,7 @@ client.Chat.QueryConversationMessages(
 <dl>
 <dd>
 
-**limit:** `*int` — Number of messages to return. Defaults to 100.
+**limit:** `*int` — Number of messages to return. Defaults to 100 with a maximum of 1000. If a provider has a maximum limit lower than 1000, the provider's maximum limit will be used instead.
     
 </dd>
 </dl>
@@ -1849,6 +1988,14 @@ client.Chat.QueryConversationMessages(
 <dd>
 
 **cursor:** `*string` — Start search from cursor position.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**includeRawData:** `*bool` — Include the raw data from the chat provider in the response. Defaults to `false`.
     
 </dd>
 </dl>

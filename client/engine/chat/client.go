@@ -149,6 +149,23 @@ func (c *Client) QueryConversationMembers(
     return response.Body, nil
 }
 
+// Returns all messages across every conversation in the connected workspace or tenant.
+func (c *Client) QueryMessages(
+    ctx context.Context,
+    request *engine.ChatQueryMessages,
+    opts ...option.RequestOption,
+) (*engine.ChatQueryMessagesResponse, error){
+    response, err := c.WithRawResponse.QueryMessages(
+        ctx,
+        request,
+        opts...,
+    )
+    if err != nil {
+        return nil, err
+    }
+    return response.Body, nil
+}
+
 // Returns messages from a specific conversation. The conversationId must be obtained from query_conversations or query_user_conversations. Use the user-scoped variant (query_user_conversation_messages) for chats that only exist in a user's mailbox.
 func (c *Client) QueryConversationMessages(
     ctx context.Context,

@@ -13,18 +13,21 @@ import (
 )
 
 var (
-	queryConversationMembersFieldMeta   = big.NewInt(1 << 0)
-	queryConversationMembersFieldLimit  = big.NewInt(1 << 1)
-	queryConversationMembersFieldCursor = big.NewInt(1 << 2)
+	queryConversationMembersFieldMeta           = big.NewInt(1 << 0)
+	queryConversationMembersFieldLimit          = big.NewInt(1 << 1)
+	queryConversationMembersFieldCursor         = big.NewInt(1 << 2)
+	queryConversationMembersFieldIncludeRawData = big.NewInt(1 << 3)
 )
 
 type QueryConversationMembers struct {
 	// Add metadata to the response by invoking meta functions.
 	Meta []*string `json:"-" url:"meta,omitempty"`
-	// Number of members to return. Defaults to 100.
+	// Number of members to return. Defaults to 100 with a maximum of 1000. If a provider has a maximum limit lower than 1000, the provider's maximum limit will be used instead.
 	Limit *int `json:"-" url:"limit,omitempty"`
 	// Start search from cursor position.
 	Cursor *string `json:"-" url:"cursor,omitempty"`
+	// Include the raw data from the chat provider in the response. Defaults to `false`.
+	IncludeRawData *bool `json:"-" url:"include_raw_data,omitempty"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -58,22 +61,32 @@ func (q *QueryConversationMembers) SetCursor(cursor *string) {
 	q.require(queryConversationMembersFieldCursor)
 }
 
+// SetIncludeRawData sets the IncludeRawData field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryConversationMembers) SetIncludeRawData(includeRawData *bool) {
+	q.IncludeRawData = includeRawData
+	q.require(queryConversationMembersFieldIncludeRawData)
+}
+
 var (
-	queryConversationMessagesFieldMeta   = big.NewInt(1 << 0)
-	queryConversationMessagesFieldLimit  = big.NewInt(1 << 1)
-	queryConversationMessagesFieldFilter = big.NewInt(1 << 2)
-	queryConversationMessagesFieldCursor = big.NewInt(1 << 3)
+	queryConversationMessagesFieldMeta           = big.NewInt(1 << 0)
+	queryConversationMessagesFieldLimit          = big.NewInt(1 << 1)
+	queryConversationMessagesFieldFilter         = big.NewInt(1 << 2)
+	queryConversationMessagesFieldCursor         = big.NewInt(1 << 3)
+	queryConversationMessagesFieldIncludeRawData = big.NewInt(1 << 4)
 )
 
 type QueryConversationMessages struct {
 	// Add metadata to the response by invoking meta functions.
 	Meta []*string `json:"-" url:"meta,omitempty"`
-	// Number of messages to return. Defaults to 100.
+	// Number of messages to return. Defaults to 100 with a maximum of 1000. If a provider has a maximum limit lower than 1000, the provider's maximum limit will be used instead.
 	Limit *int `json:"-" url:"limit,omitempty"`
 	// Filter results by this query. Supported filter fields vary by provider. Defaults to no filter. If used more than once, the queries are ANDed together.
 	Filter []*string `json:"-" url:"filter,omitempty"`
 	// Start search from cursor position.
 	Cursor *string `json:"-" url:"cursor,omitempty"`
+	// Include the raw data from the chat provider in the response. Defaults to `false`.
+	IncludeRawData *bool `json:"-" url:"include_raw_data,omitempty"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -114,22 +127,32 @@ func (q *QueryConversationMessages) SetCursor(cursor *string) {
 	q.require(queryConversationMessagesFieldCursor)
 }
 
+// SetIncludeRawData sets the IncludeRawData field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryConversationMessages) SetIncludeRawData(includeRawData *bool) {
+	q.IncludeRawData = includeRawData
+	q.require(queryConversationMessagesFieldIncludeRawData)
+}
+
 var (
-	queryConversationsFieldMeta   = big.NewInt(1 << 0)
-	queryConversationsFieldLimit  = big.NewInt(1 << 1)
-	queryConversationsFieldFilter = big.NewInt(1 << 2)
-	queryConversationsFieldCursor = big.NewInt(1 << 3)
+	queryConversationsFieldMeta           = big.NewInt(1 << 0)
+	queryConversationsFieldLimit          = big.NewInt(1 << 1)
+	queryConversationsFieldFilter         = big.NewInt(1 << 2)
+	queryConversationsFieldCursor         = big.NewInt(1 << 3)
+	queryConversationsFieldIncludeRawData = big.NewInt(1 << 4)
 )
 
 type QueryConversations struct {
 	// Add metadata to the response by invoking meta functions.
 	Meta []*string `json:"-" url:"meta,omitempty"`
-	// Number of conversations to return. Defaults to 100.
+	// Number of conversations to return. Defaults to 100 with a maximum of 1000. If a provider has a maximum limit lower than 1000, the provider's maximum limit will be used instead.
 	Limit *int `json:"-" url:"limit,omitempty"`
 	// Filter results by this query. Defaults to no filter. If used more than once, the queries are ANDed together.
 	Filter []*string `json:"-" url:"filter,omitempty"`
 	// Start search from cursor position.
 	Cursor *string `json:"-" url:"cursor,omitempty"`
+	// Include the raw data from the chat provider in the response. Defaults to `false`.
+	IncludeRawData *bool `json:"-" url:"include_raw_data,omitempty"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -170,19 +193,95 @@ func (q *QueryConversations) SetCursor(cursor *string) {
 	q.require(queryConversationsFieldCursor)
 }
 
+// SetIncludeRawData sets the IncludeRawData field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryConversations) SetIncludeRawData(includeRawData *bool) {
+	q.IncludeRawData = includeRawData
+	q.require(queryConversationsFieldIncludeRawData)
+}
+
 var (
-	queryUserConversationMembersFieldMeta   = big.NewInt(1 << 0)
-	queryUserConversationMembersFieldLimit  = big.NewInt(1 << 1)
-	queryUserConversationMembersFieldCursor = big.NewInt(1 << 2)
+	chatQueryMessagesFieldMeta           = big.NewInt(1 << 0)
+	chatQueryMessagesFieldLimit          = big.NewInt(1 << 1)
+	chatQueryMessagesFieldFilter         = big.NewInt(1 << 2)
+	chatQueryMessagesFieldCursor         = big.NewInt(1 << 3)
+	chatQueryMessagesFieldIncludeRawData = big.NewInt(1 << 4)
+)
+
+type ChatQueryMessages struct {
+	// Add metadata to the response by invoking meta functions.
+	Meta []*string `json:"-" url:"meta,omitempty"`
+	// Number of messages to return per page. Defaults to 100 with a maximum of 1000. If a provider has a maximum limit lower than 1000, the provider's maximum limit will be used instead.
+	Limit *int `json:"-" url:"limit,omitempty"`
+	// Filter results by this query. Only an optional time window (`time[gte]`/`time[lte]`) is supported, and only for providers whose message APIs support time filtering. Defaults to no filter. If used more than once, the queries are ANDed together.
+	Filter []*string `json:"-" url:"filter,omitempty"`
+	// Start search from cursor position.
+	Cursor *string `json:"-" url:"cursor,omitempty"`
+	// Include the raw data from the chat provider in the response. Defaults to `false`.
+	IncludeRawData *bool `json:"-" url:"include_raw_data,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+}
+
+func (c *ChatQueryMessages) require(field *big.Int) {
+	if c.explicitFields == nil {
+		c.explicitFields = big.NewInt(0)
+	}
+	c.explicitFields.Or(c.explicitFields, field)
+}
+
+// SetMeta sets the Meta field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *ChatQueryMessages) SetMeta(meta []*string) {
+	c.Meta = meta
+	c.require(chatQueryMessagesFieldMeta)
+}
+
+// SetLimit sets the Limit field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *ChatQueryMessages) SetLimit(limit *int) {
+	c.Limit = limit
+	c.require(chatQueryMessagesFieldLimit)
+}
+
+// SetFilter sets the Filter field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *ChatQueryMessages) SetFilter(filter []*string) {
+	c.Filter = filter
+	c.require(chatQueryMessagesFieldFilter)
+}
+
+// SetCursor sets the Cursor field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *ChatQueryMessages) SetCursor(cursor *string) {
+	c.Cursor = cursor
+	c.require(chatQueryMessagesFieldCursor)
+}
+
+// SetIncludeRawData sets the IncludeRawData field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *ChatQueryMessages) SetIncludeRawData(includeRawData *bool) {
+	c.IncludeRawData = includeRawData
+	c.require(chatQueryMessagesFieldIncludeRawData)
+}
+
+var (
+	queryUserConversationMembersFieldMeta           = big.NewInt(1 << 0)
+	queryUserConversationMembersFieldLimit          = big.NewInt(1 << 1)
+	queryUserConversationMembersFieldCursor         = big.NewInt(1 << 2)
+	queryUserConversationMembersFieldIncludeRawData = big.NewInt(1 << 3)
 )
 
 type QueryUserConversationMembers struct {
 	// Add metadata to the response by invoking meta functions.
 	Meta []*string `json:"-" url:"meta,omitempty"`
-	// Number of members to return. Defaults to 100.
+	// Number of members to return. Defaults to 100 with a maximum of 1000. If a provider has a maximum limit lower than 1000, the provider's maximum limit will be used instead.
 	Limit *int `json:"-" url:"limit,omitempty"`
 	// Start search from cursor position.
 	Cursor *string `json:"-" url:"cursor,omitempty"`
+	// Include the raw data from the chat provider in the response. Defaults to `false`.
+	IncludeRawData *bool `json:"-" url:"include_raw_data,omitempty"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -216,22 +315,32 @@ func (q *QueryUserConversationMembers) SetCursor(cursor *string) {
 	q.require(queryUserConversationMembersFieldCursor)
 }
 
+// SetIncludeRawData sets the IncludeRawData field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryUserConversationMembers) SetIncludeRawData(includeRawData *bool) {
+	q.IncludeRawData = includeRawData
+	q.require(queryUserConversationMembersFieldIncludeRawData)
+}
+
 var (
-	queryUserConversationMessagesFieldMeta   = big.NewInt(1 << 0)
-	queryUserConversationMessagesFieldLimit  = big.NewInt(1 << 1)
-	queryUserConversationMessagesFieldFilter = big.NewInt(1 << 2)
-	queryUserConversationMessagesFieldCursor = big.NewInt(1 << 3)
+	queryUserConversationMessagesFieldMeta           = big.NewInt(1 << 0)
+	queryUserConversationMessagesFieldLimit          = big.NewInt(1 << 1)
+	queryUserConversationMessagesFieldFilter         = big.NewInt(1 << 2)
+	queryUserConversationMessagesFieldCursor         = big.NewInt(1 << 3)
+	queryUserConversationMessagesFieldIncludeRawData = big.NewInt(1 << 4)
 )
 
 type QueryUserConversationMessages struct {
 	// Add metadata to the response by invoking meta functions.
 	Meta []*string `json:"-" url:"meta,omitempty"`
-	// Number of messages to return. Defaults to 100.
+	// Number of messages to return. Defaults to 100 with a maximum of 1000. If a provider has a maximum limit lower than 1000, the provider's maximum limit will be used instead.
 	Limit *int `json:"-" url:"limit,omitempty"`
 	// Filter results by this query. Supported filter fields vary by provider. Defaults to no filter. If used more than once, the queries are ANDed together.
 	Filter []*string `json:"-" url:"filter,omitempty"`
 	// Start search from cursor position.
 	Cursor *string `json:"-" url:"cursor,omitempty"`
+	// Include the raw data from the chat provider in the response. Defaults to `false`.
+	IncludeRawData *bool `json:"-" url:"include_raw_data,omitempty"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -272,22 +381,32 @@ func (q *QueryUserConversationMessages) SetCursor(cursor *string) {
 	q.require(queryUserConversationMessagesFieldCursor)
 }
 
+// SetIncludeRawData sets the IncludeRawData field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryUserConversationMessages) SetIncludeRawData(includeRawData *bool) {
+	q.IncludeRawData = includeRawData
+	q.require(queryUserConversationMessagesFieldIncludeRawData)
+}
+
 var (
-	queryUserConversationsFieldMeta   = big.NewInt(1 << 0)
-	queryUserConversationsFieldLimit  = big.NewInt(1 << 1)
-	queryUserConversationsFieldFilter = big.NewInt(1 << 2)
-	queryUserConversationsFieldCursor = big.NewInt(1 << 3)
+	queryUserConversationsFieldMeta           = big.NewInt(1 << 0)
+	queryUserConversationsFieldLimit          = big.NewInt(1 << 1)
+	queryUserConversationsFieldFilter         = big.NewInt(1 << 2)
+	queryUserConversationsFieldCursor         = big.NewInt(1 << 3)
+	queryUserConversationsFieldIncludeRawData = big.NewInt(1 << 4)
 )
 
 type QueryUserConversations struct {
 	// Add metadata to the response by invoking meta functions.
 	Meta []*string `json:"-" url:"meta,omitempty"`
-	// Number of conversations to return. Defaults to 100.
+	// Number of conversations to return. Defaults to 100 with a maximum of 1000. If a provider has a maximum limit lower than 1000, the provider's maximum limit will be used instead.
 	Limit *int `json:"-" url:"limit,omitempty"`
 	// Filter results by this query. Defaults to no filter. If used more than once, the queries are ANDed together.
 	Filter []*string `json:"-" url:"filter,omitempty"`
 	// Start search from cursor position.
 	Cursor *string `json:"-" url:"cursor,omitempty"`
+	// Include the raw data from the chat provider in the response. Defaults to `false`.
+	IncludeRawData *bool `json:"-" url:"include_raw_data,omitempty"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -328,22 +447,32 @@ func (q *QueryUserConversations) SetCursor(cursor *string) {
 	q.require(queryUserConversationsFieldCursor)
 }
 
+// SetIncludeRawData sets the IncludeRawData field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryUserConversations) SetIncludeRawData(includeRawData *bool) {
+	q.IncludeRawData = includeRawData
+	q.require(queryUserConversationsFieldIncludeRawData)
+}
+
 var (
-	queryChatUsersFieldMeta   = big.NewInt(1 << 0)
-	queryChatUsersFieldLimit  = big.NewInt(1 << 1)
-	queryChatUsersFieldFilter = big.NewInt(1 << 2)
-	queryChatUsersFieldCursor = big.NewInt(1 << 3)
+	queryChatUsersFieldMeta           = big.NewInt(1 << 0)
+	queryChatUsersFieldLimit          = big.NewInt(1 << 1)
+	queryChatUsersFieldFilter         = big.NewInt(1 << 2)
+	queryChatUsersFieldCursor         = big.NewInt(1 << 3)
+	queryChatUsersFieldIncludeRawData = big.NewInt(1 << 4)
 )
 
 type QueryChatUsers struct {
 	// Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
 	Meta []*string `json:"-" url:"meta,omitempty"`
-	// Number of users to return. Defaults to 100.
+	// Number of users to return. Defaults to 100 with a maximum of 1000. If a provider has a maximum limit lower than 1000, the provider's maximum limit will be used instead.
 	Limit *int `json:"-" url:"limit,omitempty"`
 	// Filter results by this query. For more information on filtering, refer to our [Filtering Guide](https://docs.synqly.com/guides/connectors/chat/query-filters). Defaults to no filter. If used more than once, the queries are ANDed together.
 	Filter []*string `json:"-" url:"filter,omitempty"`
 	// Start search from cursor position.
 	Cursor *string `json:"-" url:"cursor,omitempty"`
+	// Include the raw data from the chat provider in the response. Defaults to `false`.
+	IncludeRawData *bool `json:"-" url:"include_raw_data,omitempty"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -382,6 +511,13 @@ func (q *QueryChatUsers) SetFilter(filter []*string) {
 func (q *QueryChatUsers) SetCursor(cursor *string) {
 	q.Cursor = cursor
 	q.require(queryChatUsersFieldCursor)
+}
+
+// SetIncludeRawData sets the IncludeRawData field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryChatUsers) SetIncludeRawData(includeRawData *bool) {
+	q.IncludeRawData = includeRawData
+	q.require(queryChatUsersFieldIncludeRawData)
 }
 
 var (

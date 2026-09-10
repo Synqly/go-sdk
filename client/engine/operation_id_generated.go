@@ -29,6 +29,7 @@ const (
 	OperationIdChatQueryConversationMembers                     OperationId = "chat_query_conversation_members"
 	OperationIdChatQueryConversationMessages                    OperationId = "chat_query_conversation_messages"
 	OperationIdChatQueryConversations                           OperationId = "chat_query_conversations"
+	OperationIdChatQueryMessages                                OperationId = "chat_query_messages"
 	OperationIdChatQueryUserConversationMembers                 OperationId = "chat_query_user_conversation_members"
 	OperationIdChatQueryUserConversationMessages                OperationId = "chat_query_user_conversation_messages"
 	OperationIdChatQueryUserConversations                       OperationId = "chat_query_user_conversations"
@@ -191,6 +192,8 @@ func NewOperationIdFromString(s string) (OperationId, error) {
 		return OperationIdChatQueryConversationMessages, nil
 	case "chat_query_conversations":
 		return OperationIdChatQueryConversations, nil
+	case "chat_query_messages":
+		return OperationIdChatQueryMessages, nil
 	case "chat_query_user_conversation_members":
 		return OperationIdChatQueryUserConversationMembers, nil
 	case "chat_query_user_conversation_messages":
