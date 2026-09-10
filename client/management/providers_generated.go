@@ -15112,6 +15112,25 @@ func (h HttpRequestBodyFormat) Ptr() *HttpRequestBodyFormat {
 	return &h
 }
 
+type IdentityCrowdStrikeDataset string
+
+const (
+	IdentityCrowdStrikeDatasetBasicVer0 IdentityCrowdStrikeDataset = "basic_v0"
+)
+
+func NewIdentityCrowdStrikeDatasetFromString(s string) (IdentityCrowdStrikeDataset, error) {
+	switch s {
+	case "basic_v0":
+		return IdentityCrowdStrikeDatasetBasicVer0, nil
+	}
+	var t IdentityCrowdStrikeDataset
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (i IdentityCrowdStrikeDataset) Ptr() *IdentityCrowdStrikeDataset {
+	return &i
+}
+
 type IdentityEntraIdDataset string
 
 const (
@@ -15364,6 +15383,193 @@ func (i *IdentityAwsIam) MarshalJSON() ([]byte, error) {
 }
 
 func (i *IdentityAwsIam) String() string {
+	if i == nil {
+		return "<nil>"
+	}
+	if len(i.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(i.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(i); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", i)
+}
+
+// Configuration for CrowdStrike Falcon Identity Protection.
+var (
+	identityCrowdStrikeFieldCredential = big.NewInt(1 << 0)
+	identityCrowdStrikeFieldUrl        = big.NewInt(1 << 1)
+)
+
+type IdentityCrowdStrike struct {
+	Credential *CrowdStrikeCredential `json:"credential" url:"credential"`
+	// Base URL for the CrowdStrike Falcon API.
+	Url *string `json:"url,omitempty" url:"url,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (i *IdentityCrowdStrike) GetCredential() *CrowdStrikeCredential {
+	if i == nil {
+		return nil
+	}
+	return i.Credential
+}
+
+func (i *IdentityCrowdStrike) GetUrl() *string {
+	if i == nil {
+		return nil
+	}
+	return i.Url
+}
+
+func (i *IdentityCrowdStrike) GetExtraProperties() map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	return i.extraProperties
+}
+
+func (i *IdentityCrowdStrike) require(field *big.Int) {
+	if i.explicitFields == nil {
+		i.explicitFields = big.NewInt(0)
+	}
+	i.explicitFields.Or(i.explicitFields, field)
+}
+
+// SetCredential sets the Credential field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (i *IdentityCrowdStrike) SetCredential(credential *CrowdStrikeCredential) {
+	i.Credential = credential
+	i.require(identityCrowdStrikeFieldCredential)
+}
+
+// SetUrl sets the Url field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (i *IdentityCrowdStrike) SetUrl(url *string) {
+	i.Url = url
+	i.require(identityCrowdStrikeFieldUrl)
+}
+
+func (i *IdentityCrowdStrike) UnmarshalJSON(data []byte) error {
+	type unmarshaler IdentityCrowdStrike
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*i = IdentityCrowdStrike(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *i)
+	if err != nil {
+		return err
+	}
+	i.extraProperties = extraProperties
+	i.rawJSON = nil
+	return nil
+}
+
+func (i *IdentityCrowdStrike) MarshalJSON() ([]byte, error) {
+	type embed IdentityCrowdStrike
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*i),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, i.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (i *IdentityCrowdStrike) String() string {
+	if i == nil {
+		return "<nil>"
+	}
+	if len(i.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(i.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(i); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", i)
+}
+
+// Configuration for [MOCK] CrowdStrike Falcon Identity Protection.
+var (
+	identityCrowdStrikeMockFieldDataset = big.NewInt(1 << 0)
+)
+
+type IdentityCrowdStrikeMock struct {
+	Dataset IdentityCrowdStrikeDataset `json:"dataset" url:"dataset"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (i *IdentityCrowdStrikeMock) GetDataset() IdentityCrowdStrikeDataset {
+	if i == nil {
+		return ""
+	}
+	return i.Dataset
+}
+
+func (i *IdentityCrowdStrikeMock) GetExtraProperties() map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	return i.extraProperties
+}
+
+func (i *IdentityCrowdStrikeMock) require(field *big.Int) {
+	if i.explicitFields == nil {
+		i.explicitFields = big.NewInt(0)
+	}
+	i.explicitFields.Or(i.explicitFields, field)
+}
+
+// SetDataset sets the Dataset field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (i *IdentityCrowdStrikeMock) SetDataset(dataset IdentityCrowdStrikeDataset) {
+	i.Dataset = dataset
+	i.require(identityCrowdStrikeMockFieldDataset)
+}
+
+func (i *IdentityCrowdStrikeMock) UnmarshalJSON(data []byte) error {
+	type unmarshaler IdentityCrowdStrikeMock
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*i = IdentityCrowdStrikeMock(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *i)
+	if err != nil {
+		return err
+	}
+	i.extraProperties = extraProperties
+	i.rawJSON = nil
+	return nil
+}
+
+func (i *IdentityCrowdStrikeMock) MarshalJSON() ([]byte, error) {
+	type embed IdentityCrowdStrikeMock
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*i),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, i.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (i *IdentityCrowdStrikeMock) String() string {
 	if i == nil {
 		return "<nil>"
 	}
@@ -21864,6 +22070,10 @@ type ProviderConfig struct {
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/aws-iam-identity-setup)
 	IdentityAwsIam *IdentityAwsIam
+	// Configuration for CrowdStrike Falcon Identity Protection.
+	IdentityCrowdstrike *IdentityCrowdStrike
+	// Configuration for [MOCK] CrowdStrike Falcon Identity Protection.
+	IdentityCrowdstrikeMock *IdentityCrowdStrikeMock
 	// Configuration for Microsoft Entra ID.
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/entra-id-setup)
@@ -22735,6 +22945,20 @@ func (p *ProviderConfig) GetIdentityAwsIam() *IdentityAwsIam {
 		return nil
 	}
 	return p.IdentityAwsIam
+}
+
+func (p *ProviderConfig) GetIdentityCrowdstrike() *IdentityCrowdStrike {
+	if p == nil {
+		return nil
+	}
+	return p.IdentityCrowdstrike
+}
+
+func (p *ProviderConfig) GetIdentityCrowdstrikeMock() *IdentityCrowdStrikeMock {
+	if p == nil {
+		return nil
+	}
+	return p.IdentityCrowdstrikeMock
 }
 
 func (p *ProviderConfig) GetIdentityEntraId() *IdentityEntraId {
@@ -23880,6 +24104,18 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.IdentityAwsIam = value
+	case "identity_crowdstrike":
+		value := new(IdentityCrowdStrike)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.IdentityCrowdstrike = value
+	case "identity_crowdstrike_mock":
+		value := new(IdentityCrowdStrikeMock)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.IdentityCrowdstrikeMock = value
 	case "identity_entra_id":
 		value := new(IdentityEntraId)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -24702,6 +24938,12 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.IdentityAwsIam != nil {
 		return internal.MarshalJSONWithExtraProperty(p.IdentityAwsIam, "type", "identity_aws_iam")
 	}
+	if p.IdentityCrowdstrike != nil {
+		return internal.MarshalJSONWithExtraProperty(p.IdentityCrowdstrike, "type", "identity_crowdstrike")
+	}
+	if p.IdentityCrowdstrikeMock != nil {
+		return internal.MarshalJSONWithExtraProperty(p.IdentityCrowdstrikeMock, "type", "identity_crowdstrike_mock")
+	}
 	if p.IdentityEntraId != nil {
 		return internal.MarshalJSONWithExtraProperty(p.IdentityEntraId, "type", "identity_entra_id")
 	}
@@ -25079,6 +25321,8 @@ type ProviderConfigVisitor interface {
 	VisitEndpointmanagementNinjaone(*EndpointmanagementNinjaone) error
 	VisitIdentityAshby(*IdentityAshby) error
 	VisitIdentityAwsIam(*IdentityAwsIam) error
+	VisitIdentityCrowdstrike(*IdentityCrowdStrike) error
+	VisitIdentityCrowdstrikeMock(*IdentityCrowdStrikeMock) error
 	VisitIdentityEntraId(*IdentityEntraId) error
 	VisitIdentityEntraIdMock(*IdentityEntraIdMock) error
 	VisitIdentityGithub(*IdentityGitHub) error
@@ -25399,6 +25643,12 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.IdentityAwsIam != nil {
 		return visitor.VisitIdentityAwsIam(p.IdentityAwsIam)
+	}
+	if p.IdentityCrowdstrike != nil {
+		return visitor.VisitIdentityCrowdstrike(p.IdentityCrowdstrike)
+	}
+	if p.IdentityCrowdstrikeMock != nil {
+		return visitor.VisitIdentityCrowdstrikeMock(p.IdentityCrowdstrikeMock)
 	}
 	if p.IdentityEntraId != nil {
 		return visitor.VisitIdentityEntraId(p.IdentityEntraId)
@@ -25924,6 +26174,12 @@ func (p *ProviderConfig) validate() error {
 	if p.IdentityAwsIam != nil {
 		fields = append(fields, "identity_aws_iam")
 	}
+	if p.IdentityCrowdstrike != nil {
+		fields = append(fields, "identity_crowdstrike")
+	}
+	if p.IdentityCrowdstrikeMock != nil {
+		fields = append(fields, "identity_crowdstrike_mock")
+	}
 	if p.IdentityEntraId != nil {
 		fields = append(fields, "identity_entra_id")
 	}
@@ -26397,6 +26653,10 @@ const (
 	ProviderConfigIdIdentityAshby ProviderConfigId = "identity_ashby"
 	// AWS IAM Identity
 	ProviderConfigIdIdentityAwsIam ProviderConfigId = "identity_aws_iam"
+	// CrowdStrike Falcon Identity Protection
+	ProviderConfigIdIdentityCrowdStrike ProviderConfigId = "identity_crowdstrike"
+	// [MOCK] CrowdStrike Falcon Identity Protection
+	ProviderConfigIdIdentityCrowdStrikeMock ProviderConfigId = "identity_crowdstrike_mock"
 	// Microsoft Entra ID
 	ProviderConfigIdIdentityEntraId ProviderConfigId = "identity_entra_id"
 	// [MOCK] Microsoft Entra ID
@@ -26747,6 +27007,10 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdIdentityAshby, nil
 	case "identity_aws_iam":
 		return ProviderConfigIdIdentityAwsIam, nil
+	case "identity_crowdstrike":
+		return ProviderConfigIdIdentityCrowdStrike, nil
+	case "identity_crowdstrike_mock":
+		return ProviderConfigIdIdentityCrowdStrikeMock, nil
 	case "identity_entra_id":
 		return ProviderConfigIdIdentityEntraId, nil
 	case "identity_entra_id_mock":
