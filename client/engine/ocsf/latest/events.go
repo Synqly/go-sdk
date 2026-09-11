@@ -29,6 +29,7 @@ import (
 	httpactivity "github.com/synqly/go-sdk/v2/client/engine/ocsf/v160/httpactivity"
 	applicationinventoryinfo "github.com/synqly/go-sdk/v2/client/engine/ocsf/v180/applicationinventoryinfo"
 	applicationsecurityposturefinding "github.com/synqly/go-sdk/v2/client/engine/ocsf/v180/applicationsecurityposturefinding"
+	compliancecontrolinventoryinfo "github.com/synqly/go-sdk/v2/client/engine/ocsf/v180/compliancecontrolinventoryinfo"
 	phishingsimulationinventoryinfo "github.com/synqly/go-sdk/v2/client/engine/ocsf/v180/phishingsimulationinventoryinfo"
 	scanactivity "github.com/synqly/go-sdk/v2/client/engine/ocsf/v180/scanactivity"
 	trainingcampaigninventoryinfo "github.com/synqly/go-sdk/v2/client/engine/ocsf/v180/trainingcampaigninventoryinfo"
@@ -48,6 +49,8 @@ type Authentication = *authentication.Authentication
 type CloudActivity = *cloudactivity.CloudActivity
 
 type CloudResourcesInventoryInfo = *cloudresourcesinventoryinfo.CloudResourcesInventoryInfo
+
+type ComplianceControlInventoryInfo = *compliancecontrolinventoryinfo.ComplianceControlInventoryInfo
 
 type ComplianceFinding = *compliancefinding.ComplianceFinding
 

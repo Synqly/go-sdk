@@ -76,6 +76,16 @@ const (
 	OperationIdEndpointmanagementRestartDevice                  OperationId = "endpointmanagement_restart_device"
 	OperationIdEndpointmanagementUpdateDevice                   OperationId = "endpointmanagement_update_device"
 	OperationIdEndpointmanagementWipeDevice                     OperationId = "endpointmanagement_wipe_device"
+	OperationIdGrcGetControl                                    OperationId = "grc_get_control"
+	OperationIdGrcGetDevice                                     OperationId = "grc_get_device"
+	OperationIdGrcGetPersonnel                                  OperationId = "grc_get_personnel"
+	OperationIdGrcGetTest                                       OperationId = "grc_get_test"
+	OperationIdGrcQueryControls                                 OperationId = "grc_query_controls"
+	OperationIdGrcQueryDevices                                  OperationId = "grc_query_devices"
+	OperationIdGrcQueryEvidence                                 OperationId = "grc_query_evidence"
+	OperationIdGrcQueryFrameworks                               OperationId = "grc_query_frameworks"
+	OperationIdGrcQueryPersonnel                                OperationId = "grc_query_personnel"
+	OperationIdGrcQueryTests                                    OperationId = "grc_query_tests"
 	OperationIdIdentityDisableUser                              OperationId = "identity_disable_user"
 	OperationIdIdentityEnableUser                               OperationId = "identity_enable_user"
 	OperationIdIdentityExpireAllUserSessions                    OperationId = "identity_expire_all_user_sessions"
@@ -286,6 +296,26 @@ func NewOperationIdFromString(s string) (OperationId, error) {
 		return OperationIdEndpointmanagementUpdateDevice, nil
 	case "endpointmanagement_wipe_device":
 		return OperationIdEndpointmanagementWipeDevice, nil
+	case "grc_get_control":
+		return OperationIdGrcGetControl, nil
+	case "grc_get_device":
+		return OperationIdGrcGetDevice, nil
+	case "grc_get_personnel":
+		return OperationIdGrcGetPersonnel, nil
+	case "grc_get_test":
+		return OperationIdGrcGetTest, nil
+	case "grc_query_controls":
+		return OperationIdGrcQueryControls, nil
+	case "grc_query_devices":
+		return OperationIdGrcQueryDevices, nil
+	case "grc_query_evidence":
+		return OperationIdGrcQueryEvidence, nil
+	case "grc_query_frameworks":
+		return OperationIdGrcQueryFrameworks, nil
+	case "grc_query_personnel":
+		return OperationIdGrcQueryPersonnel, nil
+	case "grc_query_tests":
+		return OperationIdGrcQueryTests, nil
 	case "identity_disable_user":
 		return OperationIdIdentityDisableUser, nil
 	case "identity_enable_user":

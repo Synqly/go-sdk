@@ -258,6 +258,74 @@ const Check_Status_Fail CheckStatusId = 3
 // Other. The event status is not mapped. See the <code>status</code> attribute, which contains a data source specific value.
 const Check_Status_Other CheckStatusId = 99
 
+// ComplianceControlAssessmentStatusId Values
+// Assessment Status ID. The normalized assessment result of the control.
+
+// Unknown. The assessment result is unknown.
+const ComplianceControl_AssessmentStatus_Unknown ComplianceControlAssessmentStatusId = 0
+// Pass. The control or test passed.
+const ComplianceControl_AssessmentStatus_Pass ComplianceControlAssessmentStatusId = 1
+// Warning. The assessment did not yield a definitive result.
+const ComplianceControl_AssessmentStatus_Warning ComplianceControlAssessmentStatusId = 2
+// Fail. The control or test failed.
+const ComplianceControl_AssessmentStatus_Fail ComplianceControlAssessmentStatusId = 3
+// NotAssessed. The control or test has not been assessed.
+const ComplianceControl_AssessmentStatus_NotAssessed ComplianceControlAssessmentStatusId = 4
+// NotApplicable. The control or test is not applicable.
+const ComplianceControl_AssessmentStatus_NotApplicable ComplianceControlAssessmentStatusId = 5
+// Other. The assessment status is not mapped. See the <code>assessment_status</code> attribute, which contains a data source specific value.
+const ComplianceControl_AssessmentStatus_Other ComplianceControlAssessmentStatusId = 99
+
+// ComplianceControlImplementationStatusId Values
+// Implementation Status ID. The normalized implementation state of the control.
+
+// Unknown. The implementation state is unknown.
+const ComplianceControl_ImplementationStatus_Unknown ComplianceControlImplementationStatusId = 0
+// NotImplemented. The control is not implemented.
+const ComplianceControl_ImplementationStatus_NotImplemented ComplianceControlImplementationStatusId = 1
+// Partial. The control is partially implemented.
+const ComplianceControl_ImplementationStatus_Partial ComplianceControlImplementationStatusId = 2
+// Implemented. The control is fully implemented.
+const ComplianceControl_ImplementationStatus_Implemented ComplianceControlImplementationStatusId = 3
+// Other. The implementation status is not mapped. See the <code>implementation_status</code> attribute, which contains a data source specific value.
+const ComplianceControl_ImplementationStatus_Other ComplianceControlImplementationStatusId = 99
+
+// ComplianceEvidenceEvidenceTypeId Values
+// Evidence Type ID. The normalized type of the evidence artifact.
+
+// Unknown. The evidence type is unknown.
+const ComplianceEvidence_EvidenceType_Unknown ComplianceEvidenceEvidenceTypeId = 0
+// Document. A document or file.
+const ComplianceEvidence_EvidenceType_Document ComplianceEvidenceEvidenceTypeId = 1
+// Screenshot. A screenshot.
+const ComplianceEvidence_EvidenceType_Screenshot ComplianceEvidenceEvidenceTypeId = 2
+// Export. A data export.
+const ComplianceEvidence_EvidenceType_Export ComplianceEvidenceEvidenceTypeId = 3
+// Link. A link to an external artifact.
+const ComplianceEvidence_EvidenceType_Link ComplianceEvidenceEvidenceTypeId = 4
+// Attestation. A signed attestation.
+const ComplianceEvidence_EvidenceType_Attestation ComplianceEvidenceEvidenceTypeId = 5
+// Other. The evidence type is not mapped. See the <code>evidence_type</code> attribute, which contains a data source specific value.
+const ComplianceEvidence_EvidenceType_Other ComplianceEvidenceEvidenceTypeId = 99
+
+// ComplianceTestAssessmentStatusId Values
+// Assessment Status ID. The normalized current result of the test.
+
+// Unknown. The assessment result is unknown.
+const ComplianceTest_AssessmentStatus_Unknown ComplianceTestAssessmentStatusId = 0
+// Pass. The control or test passed.
+const ComplianceTest_AssessmentStatus_Pass ComplianceTestAssessmentStatusId = 1
+// Warning. The assessment did not yield a definitive result.
+const ComplianceTest_AssessmentStatus_Warning ComplianceTestAssessmentStatusId = 2
+// Fail. The control or test failed.
+const ComplianceTest_AssessmentStatus_Fail ComplianceTestAssessmentStatusId = 3
+// NotAssessed. The control or test has not been assessed.
+const ComplianceTest_AssessmentStatus_NotAssessed ComplianceTestAssessmentStatusId = 4
+// NotApplicable. The control or test is not applicable.
+const ComplianceTest_AssessmentStatus_NotApplicable ComplianceTestAssessmentStatusId = 5
+// Other. The assessment status is not mapped. See the <code>assessment_status</code> attribute, which contains a data source specific value.
+const ComplianceTest_AssessmentStatus_Other ComplianceTestAssessmentStatusId = 99
+
 // ComplianceStatusId Values
 // Status ID. The normalized status identifier of the compliance check.
 

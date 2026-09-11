@@ -6841,14 +6841,15 @@ var (
 	complianceFieldComplianceStandards  = big.NewInt(1 << 4)
 	complianceFieldControl              = big.NewInt(1 << 5)
 	complianceFieldControlParameters    = big.NewInt(1 << 6)
-	complianceFieldDesc                 = big.NewInt(1 << 7)
-	complianceFieldRequirements         = big.NewInt(1 << 8)
-	complianceFieldStandards            = big.NewInt(1 << 9)
-	complianceFieldStatus               = big.NewInt(1 << 10)
-	complianceFieldStatusCode           = big.NewInt(1 << 11)
-	complianceFieldStatusDetail         = big.NewInt(1 << 12)
-	complianceFieldStatusDetails        = big.NewInt(1 << 13)
-	complianceFieldStatusId             = big.NewInt(1 << 14)
+	complianceFieldControlUid           = big.NewInt(1 << 7)
+	complianceFieldDesc                 = big.NewInt(1 << 8)
+	complianceFieldRequirements         = big.NewInt(1 << 9)
+	complianceFieldStandards            = big.NewInt(1 << 10)
+	complianceFieldStatus               = big.NewInt(1 << 11)
+	complianceFieldStatusCode           = big.NewInt(1 << 12)
+	complianceFieldStatusDetail         = big.NewInt(1 << 13)
+	complianceFieldStatusDetails        = big.NewInt(1 << 14)
+	complianceFieldStatusId             = big.NewInt(1 << 15)
 )
 
 type Compliance struct {
@@ -6866,6 +6867,8 @@ type Compliance struct {
 	Control *string `json:"control,omitempty" url:"control,omitempty"`
 	// The list of control parameters evaluated in a Compliance check. E.g., parameters for CloudTrail configuration might include <code>multiRegionTrailEnabled: true</code>, <code>logFileValidationEnabled: true</code>, and <code>requiredRegions: [us-east-1, us-west-2]</code>
 	ControlParameters []*KeyValueObject `json:"control_parameters,omitempty" url:"control_parameters,omitempty"`
+	// The unique identifier of the control in the source GRC system that this evaluation was performed against.
+	ControlUid *string `json:"control_uid,omitempty" url:"control_uid,omitempty"`
 	// The description or criteria of a control.
 	Desc *string `json:"desc,omitempty" url:"desc,omitempty"`
 	// The specific compliance requirements being evaluated. E.g., <code>PCI DSS Requirement 8.2.3 - Passwords must meet minimum complexity requirements</code> or <code>HIPAA Security Rule 164.312(a)(2)(iv) - Implement encryption and decryption mechanisms</code>
@@ -6937,6 +6940,13 @@ func (c *Compliance) GetControlParameters() []*KeyValueObject {
 		return nil
 	}
 	return c.ControlParameters
+}
+
+func (c *Compliance) GetControlUid() *string {
+	if c == nil {
+		return nil
+	}
+	return c.ControlUid
 }
 
 func (c *Compliance) GetDesc() *string {
@@ -7058,6 +7068,13 @@ func (c *Compliance) SetControlParameters(controlParameters []*KeyValueObject) {
 	c.require(complianceFieldControlParameters)
 }
 
+// SetControlUid sets the ControlUid field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *Compliance) SetControlUid(controlUid *string) {
+	c.ControlUid = controlUid
+	c.require(complianceFieldControlUid)
+}
+
 // SetDesc sets the Desc field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
 func (c *Compliance) SetDesc(desc *string) {
@@ -7155,6 +7172,1379 @@ func (c *Compliance) String() string {
 	}
 	return fmt.Sprintf("%#v", c)
 }
+
+// A security or compliance control defined in a GRC platform: a specific policy, procedure, or technical measure that must be in place. Controls are mapped to framework requirements and validated by tests. Status attributes are populated where the source exposes them; in some providers control status is available only on the detail endpoint.
+var (
+	complianceControlFieldAssessmentStatus       = big.NewInt(1 << 0)
+	complianceControlFieldAssessmentStatusId     = big.NewInt(1 << 1)
+	complianceControlFieldCategory               = big.NewInt(1 << 2)
+	complianceControlFieldCreatedTime            = big.NewInt(1 << 3)
+	complianceControlFieldCreatedTimeDt          = big.NewInt(1 << 4)
+	complianceControlFieldDesc                   = big.NewInt(1 << 5)
+	complianceControlFieldFailingTestsCount      = big.NewInt(1 << 6)
+	complianceControlFieldFirstFailedTime        = big.NewInt(1 << 7)
+	complianceControlFieldFirstFailedTimeDt      = big.NewInt(1 << 8)
+	complianceControlFieldImplementationStatus   = big.NewInt(1 << 9)
+	complianceControlFieldImplementationStatusId = big.NewInt(1 << 10)
+	complianceControlFieldModifiedTime           = big.NewInt(1 << 11)
+	complianceControlFieldModifiedTimeDt         = big.NewInt(1 << 12)
+	complianceControlFieldName                   = big.NewInt(1 << 13)
+	complianceControlFieldOwner                  = big.NewInt(1 << 14)
+	complianceControlFieldPassingTestsCount      = big.NewInt(1 << 15)
+	complianceControlFieldStandards              = big.NewInt(1 << 16)
+	complianceControlFieldUid                    = big.NewInt(1 << 17)
+	complianceControlFieldVendorCode             = big.NewInt(1 << 18)
+)
+
+type ComplianceControl struct {
+	// The assessment result, as defined by <code>assessment_status_id</code>. In the case of <code>Other</code>, it is the value reported by the data source.
+	AssessmentStatus *string `json:"assessment_status,omitempty" url:"assessment_status,omitempty"`
+	// The normalized assessment result of the control.
+	AssessmentStatusId *ComplianceControlAssessmentStatusId `json:"assessment_status_id,omitempty" url:"assessment_status_id,omitempty"`
+	// The category or domain of the control. For example <code>Access Management</code>.
+	Category *string `json:"category,omitempty" url:"category,omitempty"`
+	// The time the control was created in the source system.
+	CreatedTime *Timestamp `json:"created_time,omitempty" url:"created_time,omitempty"`
+	// The time the control was created in the source system.
+	CreatedTimeDt *time.Time `json:"created_time_dt,omitempty" url:"created_time_dt,omitempty"`
+	// The description or criteria of the control.
+	Desc *string `json:"desc,omitempty" url:"desc,omitempty"`
+	// The number of mapped tests currently failing.
+	FailingTestsCount *int `json:"failing_tests_count,omitempty" url:"failing_tests_count,omitempty"`
+	// The time the control first entered a failing state.
+	FirstFailedTime *Timestamp `json:"first_failed_time,omitempty" url:"first_failed_time,omitempty"`
+	// The time the control first entered a failing state.
+	FirstFailedTimeDt *time.Time `json:"first_failed_time_dt,omitempty" url:"first_failed_time_dt,omitempty"`
+	// The implementation state, as defined by <code>implementation_status_id</code>. In the case of <code>Other</code>, it is the value reported by the data source.
+	ImplementationStatus *string `json:"implementation_status,omitempty" url:"implementation_status,omitempty"`
+	// The normalized implementation state of the control.
+	ImplementationStatusId *ComplianceControlImplementationStatusId `json:"implementation_status_id,omitempty" url:"implementation_status_id,omitempty"`
+	// The time the control was last updated in the source system.
+	ModifiedTime *Timestamp `json:"modified_time,omitempty" url:"modified_time,omitempty"`
+	// The time the control was last updated in the source system.
+	ModifiedTimeDt *time.Time `json:"modified_time_dt,omitempty" url:"modified_time_dt,omitempty"`
+	// The name of the control.
+	Name string `json:"name" url:"name"`
+	// The user who owns the control.
+	Owner *User `json:"owner,omitempty" url:"owner,omitempty"`
+	// The number of mapped tests currently passing.
+	PassingTestsCount *int `json:"passing_tests_count,omitempty" url:"passing_tests_count,omitempty"`
+	// The compliance standards this control belongs to, as reported by the provider. Values are the provider's own framework identifiers, passed through unmodified (not normalized across providers).
+	Standards []string `json:"standards,omitempty" url:"standards,omitempty"`
+	// The unique identifier of the control in the source GRC system.
+	Uid *string `json:"uid,omitempty" url:"uid,omitempty"`
+	// The provider-internal code for the control (for example <code>DCF-1002</code>). This is the provider's own identifier, distinct from the framework identifiers carried in <code>standards</code>.
+	VendorCode *string `json:"vendor_code,omitempty" url:"vendor_code,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (c *ComplianceControl) GetAssessmentStatus() *string {
+	if c == nil {
+		return nil
+	}
+	return c.AssessmentStatus
+}
+
+func (c *ComplianceControl) GetAssessmentStatusId() *ComplianceControlAssessmentStatusId {
+	if c == nil {
+		return nil
+	}
+	return c.AssessmentStatusId
+}
+
+func (c *ComplianceControl) GetCategory() *string {
+	if c == nil {
+		return nil
+	}
+	return c.Category
+}
+
+func (c *ComplianceControl) GetCreatedTime() *Timestamp {
+	if c == nil {
+		return nil
+	}
+	return c.CreatedTime
+}
+
+func (c *ComplianceControl) GetCreatedTimeDt() *time.Time {
+	if c == nil {
+		return nil
+	}
+	return c.CreatedTimeDt
+}
+
+func (c *ComplianceControl) GetDesc() *string {
+	if c == nil {
+		return nil
+	}
+	return c.Desc
+}
+
+func (c *ComplianceControl) GetFailingTestsCount() *int {
+	if c == nil {
+		return nil
+	}
+	return c.FailingTestsCount
+}
+
+func (c *ComplianceControl) GetFirstFailedTime() *Timestamp {
+	if c == nil {
+		return nil
+	}
+	return c.FirstFailedTime
+}
+
+func (c *ComplianceControl) GetFirstFailedTimeDt() *time.Time {
+	if c == nil {
+		return nil
+	}
+	return c.FirstFailedTimeDt
+}
+
+func (c *ComplianceControl) GetImplementationStatus() *string {
+	if c == nil {
+		return nil
+	}
+	return c.ImplementationStatus
+}
+
+func (c *ComplianceControl) GetImplementationStatusId() *ComplianceControlImplementationStatusId {
+	if c == nil {
+		return nil
+	}
+	return c.ImplementationStatusId
+}
+
+func (c *ComplianceControl) GetModifiedTime() *Timestamp {
+	if c == nil {
+		return nil
+	}
+	return c.ModifiedTime
+}
+
+func (c *ComplianceControl) GetModifiedTimeDt() *time.Time {
+	if c == nil {
+		return nil
+	}
+	return c.ModifiedTimeDt
+}
+
+func (c *ComplianceControl) GetName() string {
+	if c == nil {
+		return ""
+	}
+	return c.Name
+}
+
+func (c *ComplianceControl) GetOwner() *User {
+	if c == nil {
+		return nil
+	}
+	return c.Owner
+}
+
+func (c *ComplianceControl) GetPassingTestsCount() *int {
+	if c == nil {
+		return nil
+	}
+	return c.PassingTestsCount
+}
+
+func (c *ComplianceControl) GetStandards() []string {
+	if c == nil {
+		return nil
+	}
+	return c.Standards
+}
+
+func (c *ComplianceControl) GetUid() *string {
+	if c == nil {
+		return nil
+	}
+	return c.Uid
+}
+
+func (c *ComplianceControl) GetVendorCode() *string {
+	if c == nil {
+		return nil
+	}
+	return c.VendorCode
+}
+
+func (c *ComplianceControl) GetExtraProperties() map[string]interface{} {
+	if c == nil {
+		return nil
+	}
+	return c.extraProperties
+}
+
+func (c *ComplianceControl) require(field *big.Int) {
+	if c.explicitFields == nil {
+		c.explicitFields = big.NewInt(0)
+	}
+	c.explicitFields.Or(c.explicitFields, field)
+}
+
+// SetAssessmentStatus sets the AssessmentStatus field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *ComplianceControl) SetAssessmentStatus(assessmentStatus *string) {
+	c.AssessmentStatus = assessmentStatus
+	c.require(complianceControlFieldAssessmentStatus)
+}
+
+// SetAssessmentStatusId sets the AssessmentStatusId field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *ComplianceControl) SetAssessmentStatusId(assessmentStatusId *ComplianceControlAssessmentStatusId) {
+	c.AssessmentStatusId = assessmentStatusId
+	c.require(complianceControlFieldAssessmentStatusId)
+}
+
+// SetCategory sets the Category field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *ComplianceControl) SetCategory(category *string) {
+	c.Category = category
+	c.require(complianceControlFieldCategory)
+}
+
+// SetCreatedTime sets the CreatedTime field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *ComplianceControl) SetCreatedTime(createdTime *Timestamp) {
+	c.CreatedTime = createdTime
+	c.require(complianceControlFieldCreatedTime)
+}
+
+// SetCreatedTimeDt sets the CreatedTimeDt field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *ComplianceControl) SetCreatedTimeDt(createdTimeDt *time.Time) {
+	c.CreatedTimeDt = createdTimeDt
+	c.require(complianceControlFieldCreatedTimeDt)
+}
+
+// SetDesc sets the Desc field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *ComplianceControl) SetDesc(desc *string) {
+	c.Desc = desc
+	c.require(complianceControlFieldDesc)
+}
+
+// SetFailingTestsCount sets the FailingTestsCount field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *ComplianceControl) SetFailingTestsCount(failingTestsCount *int) {
+	c.FailingTestsCount = failingTestsCount
+	c.require(complianceControlFieldFailingTestsCount)
+}
+
+// SetFirstFailedTime sets the FirstFailedTime field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *ComplianceControl) SetFirstFailedTime(firstFailedTime *Timestamp) {
+	c.FirstFailedTime = firstFailedTime
+	c.require(complianceControlFieldFirstFailedTime)
+}
+
+// SetFirstFailedTimeDt sets the FirstFailedTimeDt field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *ComplianceControl) SetFirstFailedTimeDt(firstFailedTimeDt *time.Time) {
+	c.FirstFailedTimeDt = firstFailedTimeDt
+	c.require(complianceControlFieldFirstFailedTimeDt)
+}
+
+// SetImplementationStatus sets the ImplementationStatus field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *ComplianceControl) SetImplementationStatus(implementationStatus *string) {
+	c.ImplementationStatus = implementationStatus
+	c.require(complianceControlFieldImplementationStatus)
+}
+
+// SetImplementationStatusId sets the ImplementationStatusId field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *ComplianceControl) SetImplementationStatusId(implementationStatusId *ComplianceControlImplementationStatusId) {
+	c.ImplementationStatusId = implementationStatusId
+	c.require(complianceControlFieldImplementationStatusId)
+}
+
+// SetModifiedTime sets the ModifiedTime field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *ComplianceControl) SetModifiedTime(modifiedTime *Timestamp) {
+	c.ModifiedTime = modifiedTime
+	c.require(complianceControlFieldModifiedTime)
+}
+
+// SetModifiedTimeDt sets the ModifiedTimeDt field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *ComplianceControl) SetModifiedTimeDt(modifiedTimeDt *time.Time) {
+	c.ModifiedTimeDt = modifiedTimeDt
+	c.require(complianceControlFieldModifiedTimeDt)
+}
+
+// SetName sets the Name field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *ComplianceControl) SetName(name string) {
+	c.Name = name
+	c.require(complianceControlFieldName)
+}
+
+// SetOwner sets the Owner field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *ComplianceControl) SetOwner(owner *User) {
+	c.Owner = owner
+	c.require(complianceControlFieldOwner)
+}
+
+// SetPassingTestsCount sets the PassingTestsCount field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *ComplianceControl) SetPassingTestsCount(passingTestsCount *int) {
+	c.PassingTestsCount = passingTestsCount
+	c.require(complianceControlFieldPassingTestsCount)
+}
+
+// SetStandards sets the Standards field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *ComplianceControl) SetStandards(standards []string) {
+	c.Standards = standards
+	c.require(complianceControlFieldStandards)
+}
+
+// SetUid sets the Uid field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *ComplianceControl) SetUid(uid *string) {
+	c.Uid = uid
+	c.require(complianceControlFieldUid)
+}
+
+// SetVendorCode sets the VendorCode field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *ComplianceControl) SetVendorCode(vendorCode *string) {
+	c.VendorCode = vendorCode
+	c.require(complianceControlFieldVendorCode)
+}
+
+func (c *ComplianceControl) UnmarshalJSON(data []byte) error {
+	type embed ComplianceControl
+	var unmarshaler = struct {
+		embed
+		CreatedTimeDt     *internal.DateTime `json:"created_time_dt,omitempty"`
+		FirstFailedTimeDt *internal.DateTime `json:"first_failed_time_dt,omitempty"`
+		ModifiedTimeDt    *internal.DateTime `json:"modified_time_dt,omitempty"`
+	}{
+		embed: embed(*c),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*c = ComplianceControl(unmarshaler.embed)
+	c.CreatedTimeDt = unmarshaler.CreatedTimeDt.TimePtr()
+	c.FirstFailedTimeDt = unmarshaler.FirstFailedTimeDt.TimePtr()
+	c.ModifiedTimeDt = unmarshaler.ModifiedTimeDt.TimePtr()
+	extraProperties, err := internal.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+	c.rawJSON = nil
+	return nil
+}
+
+func (c *ComplianceControl) MarshalJSON() ([]byte, error) {
+	type embed ComplianceControl
+	var marshaler = struct {
+		embed
+		CreatedTimeDt     *internal.DateTime `json:"created_time_dt,omitempty"`
+		FirstFailedTimeDt *internal.DateTime `json:"first_failed_time_dt,omitempty"`
+		ModifiedTimeDt    *internal.DateTime `json:"modified_time_dt,omitempty"`
+	}{
+		embed:             embed(*c),
+		CreatedTimeDt:     internal.NewOptionalDateTime(c.CreatedTimeDt),
+		FirstFailedTimeDt: internal.NewOptionalDateTime(c.FirstFailedTimeDt),
+		ModifiedTimeDt:    internal.NewOptionalDateTime(c.ModifiedTimeDt),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, c.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (c *ComplianceControl) String() string {
+	if c == nil {
+		return "<nil>"
+	}
+	if len(c.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(c.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
+// ComplianceControlAssessmentStatusId is an enum, and the following values are allowed.
+// 0 - Unknown: The assessment result is unknown.
+// 1 - Pass: The control or test passed.
+// 2 - Warning: The assessment did not yield a definitive result.
+// 3 - Fail: The control or test failed.
+// 4 - NotAssessed: The control or test has not been assessed.
+// 5 - NotApplicable: The control or test is not applicable.
+// 99 - Other: The assessment status is not mapped. See the <code>assessment_status</code> attribute, which contains a data source specific value.
+type ComplianceControlAssessmentStatusId = int
+
+// ComplianceControlImplementationStatusId is an enum, and the following values are allowed.
+// 0 - Unknown: The implementation state is unknown.
+// 1 - NotImplemented: The control is not implemented.
+// 2 - Partial: The control is partially implemented.
+// 3 - Implemented: The control is fully implemented.
+// 99 - Other: The implementation status is not mapped. See the <code>implementation_status</code> attribute, which contains a data source specific value.
+type ComplianceControlImplementationStatusId = int
+
+// An auditor-facing documentation artifact that proves a control is working: a file, screenshot, export, signed attestation, or link. Distinct from OCSF <code>Evidences</code>, which describes telemetry behind a security detection. This object is the artifact record and its association to the control or test it supports.
+var (
+	complianceEvidenceFieldControlUid     = big.NewInt(1 << 0)
+	complianceEvidenceFieldCreatedTime    = big.NewInt(1 << 1)
+	complianceEvidenceFieldCreatedTimeDt  = big.NewInt(1 << 2)
+	complianceEvidenceFieldDesc           = big.NewInt(1 << 3)
+	complianceEvidenceFieldEvidenceType   = big.NewInt(1 << 4)
+	complianceEvidenceFieldEvidenceTypeId = big.NewInt(1 << 5)
+	complianceEvidenceFieldIsAccepted     = big.NewInt(1 << 6)
+	complianceEvidenceFieldModifiedTime   = big.NewInt(1 << 7)
+	complianceEvidenceFieldModifiedTimeDt = big.NewInt(1 << 8)
+	complianceEvidenceFieldName           = big.NewInt(1 << 9)
+	complianceEvidenceFieldStandards      = big.NewInt(1 << 10)
+	complianceEvidenceFieldUid            = big.NewInt(1 << 11)
+)
+
+type ComplianceEvidence struct {
+	// The identifier of the control this evidence supports.
+	ControlUid *string `json:"control_uid,omitempty" url:"control_uid,omitempty"`
+	// The time the evidence was collected or created in the source system.
+	CreatedTime *Timestamp `json:"created_time,omitempty" url:"created_time,omitempty"`
+	// The time the evidence was collected or created in the source system.
+	CreatedTimeDt *time.Time `json:"created_time_dt,omitempty" url:"created_time_dt,omitempty"`
+	// A description of the evidence.
+	Desc *string `json:"desc,omitempty" url:"desc,omitempty"`
+	// The evidence type, as defined by <code>evidence_type_id</code>. In the case of <code>Other</code>, it is the value reported by the data source.
+	EvidenceType *string `json:"evidence_type,omitempty" url:"evidence_type,omitempty"`
+	// The normalized type of the evidence artifact.
+	EvidenceTypeId *ComplianceEvidenceEvidenceTypeId `json:"evidence_type_id,omitempty" url:"evidence_type_id,omitempty"`
+	// Whether the evidence has been accepted, where the source tracks acceptance.
+	IsAccepted *bool `json:"is_accepted,omitempty" url:"is_accepted,omitempty"`
+	// The time the evidence was last updated in the source system.
+	ModifiedTime *Timestamp `json:"modified_time,omitempty" url:"modified_time,omitempty"`
+	// The time the evidence was last updated in the source system.
+	ModifiedTimeDt *time.Time `json:"modified_time_dt,omitempty" url:"modified_time_dt,omitempty"`
+	// The name or title of the evidence artifact, where the source exposes it.
+	Name *string `json:"name,omitempty" url:"name,omitempty"`
+	// The compliance standards this evidence contributes to, as reported by the provider. Values are the provider's own framework identifiers, passed through unmodified (not normalized across providers).
+	Standards []string `json:"standards,omitempty" url:"standards,omitempty"`
+	// The unique identifier of the evidence in the source GRC system.
+	Uid *string `json:"uid,omitempty" url:"uid,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (c *ComplianceEvidence) GetControlUid() *string {
+	if c == nil {
+		return nil
+	}
+	return c.ControlUid
+}
+
+func (c *ComplianceEvidence) GetCreatedTime() *Timestamp {
+	if c == nil {
+		return nil
+	}
+	return c.CreatedTime
+}
+
+func (c *ComplianceEvidence) GetCreatedTimeDt() *time.Time {
+	if c == nil {
+		return nil
+	}
+	return c.CreatedTimeDt
+}
+
+func (c *ComplianceEvidence) GetDesc() *string {
+	if c == nil {
+		return nil
+	}
+	return c.Desc
+}
+
+func (c *ComplianceEvidence) GetEvidenceType() *string {
+	if c == nil {
+		return nil
+	}
+	return c.EvidenceType
+}
+
+func (c *ComplianceEvidence) GetEvidenceTypeId() *ComplianceEvidenceEvidenceTypeId {
+	if c == nil {
+		return nil
+	}
+	return c.EvidenceTypeId
+}
+
+func (c *ComplianceEvidence) GetIsAccepted() *bool {
+	if c == nil {
+		return nil
+	}
+	return c.IsAccepted
+}
+
+func (c *ComplianceEvidence) GetModifiedTime() *Timestamp {
+	if c == nil {
+		return nil
+	}
+	return c.ModifiedTime
+}
+
+func (c *ComplianceEvidence) GetModifiedTimeDt() *time.Time {
+	if c == nil {
+		return nil
+	}
+	return c.ModifiedTimeDt
+}
+
+func (c *ComplianceEvidence) GetName() *string {
+	if c == nil {
+		return nil
+	}
+	return c.Name
+}
+
+func (c *ComplianceEvidence) GetStandards() []string {
+	if c == nil {
+		return nil
+	}
+	return c.Standards
+}
+
+func (c *ComplianceEvidence) GetUid() *string {
+	if c == nil {
+		return nil
+	}
+	return c.Uid
+}
+
+func (c *ComplianceEvidence) GetExtraProperties() map[string]interface{} {
+	if c == nil {
+		return nil
+	}
+	return c.extraProperties
+}
+
+func (c *ComplianceEvidence) require(field *big.Int) {
+	if c.explicitFields == nil {
+		c.explicitFields = big.NewInt(0)
+	}
+	c.explicitFields.Or(c.explicitFields, field)
+}
+
+// SetControlUid sets the ControlUid field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *ComplianceEvidence) SetControlUid(controlUid *string) {
+	c.ControlUid = controlUid
+	c.require(complianceEvidenceFieldControlUid)
+}
+
+// SetCreatedTime sets the CreatedTime field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *ComplianceEvidence) SetCreatedTime(createdTime *Timestamp) {
+	c.CreatedTime = createdTime
+	c.require(complianceEvidenceFieldCreatedTime)
+}
+
+// SetCreatedTimeDt sets the CreatedTimeDt field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *ComplianceEvidence) SetCreatedTimeDt(createdTimeDt *time.Time) {
+	c.CreatedTimeDt = createdTimeDt
+	c.require(complianceEvidenceFieldCreatedTimeDt)
+}
+
+// SetDesc sets the Desc field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *ComplianceEvidence) SetDesc(desc *string) {
+	c.Desc = desc
+	c.require(complianceEvidenceFieldDesc)
+}
+
+// SetEvidenceType sets the EvidenceType field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *ComplianceEvidence) SetEvidenceType(evidenceType *string) {
+	c.EvidenceType = evidenceType
+	c.require(complianceEvidenceFieldEvidenceType)
+}
+
+// SetEvidenceTypeId sets the EvidenceTypeId field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *ComplianceEvidence) SetEvidenceTypeId(evidenceTypeId *ComplianceEvidenceEvidenceTypeId) {
+	c.EvidenceTypeId = evidenceTypeId
+	c.require(complianceEvidenceFieldEvidenceTypeId)
+}
+
+// SetIsAccepted sets the IsAccepted field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *ComplianceEvidence) SetIsAccepted(isAccepted *bool) {
+	c.IsAccepted = isAccepted
+	c.require(complianceEvidenceFieldIsAccepted)
+}
+
+// SetModifiedTime sets the ModifiedTime field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *ComplianceEvidence) SetModifiedTime(modifiedTime *Timestamp) {
+	c.ModifiedTime = modifiedTime
+	c.require(complianceEvidenceFieldModifiedTime)
+}
+
+// SetModifiedTimeDt sets the ModifiedTimeDt field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *ComplianceEvidence) SetModifiedTimeDt(modifiedTimeDt *time.Time) {
+	c.ModifiedTimeDt = modifiedTimeDt
+	c.require(complianceEvidenceFieldModifiedTimeDt)
+}
+
+// SetName sets the Name field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *ComplianceEvidence) SetName(name *string) {
+	c.Name = name
+	c.require(complianceEvidenceFieldName)
+}
+
+// SetStandards sets the Standards field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *ComplianceEvidence) SetStandards(standards []string) {
+	c.Standards = standards
+	c.require(complianceEvidenceFieldStandards)
+}
+
+// SetUid sets the Uid field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *ComplianceEvidence) SetUid(uid *string) {
+	c.Uid = uid
+	c.require(complianceEvidenceFieldUid)
+}
+
+func (c *ComplianceEvidence) UnmarshalJSON(data []byte) error {
+	type embed ComplianceEvidence
+	var unmarshaler = struct {
+		embed
+		CreatedTimeDt  *internal.DateTime `json:"created_time_dt,omitempty"`
+		ModifiedTimeDt *internal.DateTime `json:"modified_time_dt,omitempty"`
+	}{
+		embed: embed(*c),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*c = ComplianceEvidence(unmarshaler.embed)
+	c.CreatedTimeDt = unmarshaler.CreatedTimeDt.TimePtr()
+	c.ModifiedTimeDt = unmarshaler.ModifiedTimeDt.TimePtr()
+	extraProperties, err := internal.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+	c.rawJSON = nil
+	return nil
+}
+
+func (c *ComplianceEvidence) MarshalJSON() ([]byte, error) {
+	type embed ComplianceEvidence
+	var marshaler = struct {
+		embed
+		CreatedTimeDt  *internal.DateTime `json:"created_time_dt,omitempty"`
+		ModifiedTimeDt *internal.DateTime `json:"modified_time_dt,omitempty"`
+	}{
+		embed:          embed(*c),
+		CreatedTimeDt:  internal.NewOptionalDateTime(c.CreatedTimeDt),
+		ModifiedTimeDt: internal.NewOptionalDateTime(c.ModifiedTimeDt),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, c.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (c *ComplianceEvidence) String() string {
+	if c == nil {
+		return "<nil>"
+	}
+	if len(c.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(c.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
+// ComplianceEvidenceEvidenceTypeId is an enum, and the following values are allowed.
+// 0 - Unknown: The evidence type is unknown.
+// 1 - Document: A document or file.
+// 2 - Screenshot: A screenshot.
+// 3 - Export: A data export.
+// 4 - Link: A link to an external artifact.
+// 5 - Attestation: A signed attestation.
+// 99 - Other: The evidence type is not mapped. See the <code>evidence_type</code> attribute, which contains a data source specific value.
+type ComplianceEvidenceEvidenceTypeId = int
+
+// A compliance standard or regulatory framework that an organization is tracking in a GRC platform, such as SOC 2, ISO 27001, HIPAA, PCI DSS, NIST SP 800-53, or FedRAMP, along with its aggregate posture counts.
+var (
+	complianceFrameworkFieldCreatedTime        = big.NewInt(1 << 0)
+	complianceFrameworkFieldCreatedTimeDt      = big.NewInt(1 << 1)
+	complianceFrameworkFieldDesc               = big.NewInt(1 << 2)
+	complianceFrameworkFieldFailingTestsCount  = big.NewInt(1 << 3)
+	complianceFrameworkFieldModifiedTime       = big.NewInt(1 << 4)
+	complianceFrameworkFieldModifiedTimeDt     = big.NewInt(1 << 5)
+	complianceFrameworkFieldName               = big.NewInt(1 << 6)
+	complianceFrameworkFieldPassingTestsCount  = big.NewInt(1 << 7)
+	complianceFrameworkFieldStandard           = big.NewInt(1 << 8)
+	complianceFrameworkFieldTotalControlsCount = big.NewInt(1 << 9)
+	complianceFrameworkFieldUid                = big.NewInt(1 << 10)
+)
+
+type ComplianceFramework struct {
+	// The time the framework was added to the source system.
+	CreatedTime *Timestamp `json:"created_time,omitempty" url:"created_time,omitempty"`
+	// The time the framework was added to the source system.
+	CreatedTimeDt *time.Time `json:"created_time_dt,omitempty" url:"created_time_dt,omitempty"`
+	// A description of the framework.
+	Desc *string `json:"desc,omitempty" url:"desc,omitempty"`
+	// The number of tests for this framework currently failing.
+	FailingTestsCount *int `json:"failing_tests_count,omitempty" url:"failing_tests_count,omitempty"`
+	// The time the framework was last updated in the source system.
+	ModifiedTime *Timestamp `json:"modified_time,omitempty" url:"modified_time,omitempty"`
+	// The time the framework was last updated in the source system.
+	ModifiedTimeDt *time.Time `json:"modified_time_dt,omitempty" url:"modified_time_dt,omitempty"`
+	// The display name of the framework. For example <code>SOC 2 Type II</code>.
+	Name string `json:"name" url:"name"`
+	// The number of applicable tests currently passing.
+	PassingTestsCount *int `json:"passing_tests_count,omitempty" url:"passing_tests_count,omitempty"`
+	// The compliance standard identifier as reported by the provider (for example, `SOC_2`, `ISO_27001`, or `CIS_IG1`). This is the provider's own identifier, passed through unmodified; Synqly does not normalize standard identifiers across providers.
+	Standard *string `json:"standard,omitempty" url:"standard,omitempty"`
+	// The total number of controls applicable to this framework.
+	TotalControlsCount *int `json:"total_controls_count,omitempty" url:"total_controls_count,omitempty"`
+	// The unique identifier of the framework in the source GRC system.
+	Uid *string `json:"uid,omitempty" url:"uid,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (c *ComplianceFramework) GetCreatedTime() *Timestamp {
+	if c == nil {
+		return nil
+	}
+	return c.CreatedTime
+}
+
+func (c *ComplianceFramework) GetCreatedTimeDt() *time.Time {
+	if c == nil {
+		return nil
+	}
+	return c.CreatedTimeDt
+}
+
+func (c *ComplianceFramework) GetDesc() *string {
+	if c == nil {
+		return nil
+	}
+	return c.Desc
+}
+
+func (c *ComplianceFramework) GetFailingTestsCount() *int {
+	if c == nil {
+		return nil
+	}
+	return c.FailingTestsCount
+}
+
+func (c *ComplianceFramework) GetModifiedTime() *Timestamp {
+	if c == nil {
+		return nil
+	}
+	return c.ModifiedTime
+}
+
+func (c *ComplianceFramework) GetModifiedTimeDt() *time.Time {
+	if c == nil {
+		return nil
+	}
+	return c.ModifiedTimeDt
+}
+
+func (c *ComplianceFramework) GetName() string {
+	if c == nil {
+		return ""
+	}
+	return c.Name
+}
+
+func (c *ComplianceFramework) GetPassingTestsCount() *int {
+	if c == nil {
+		return nil
+	}
+	return c.PassingTestsCount
+}
+
+func (c *ComplianceFramework) GetStandard() *string {
+	if c == nil {
+		return nil
+	}
+	return c.Standard
+}
+
+func (c *ComplianceFramework) GetTotalControlsCount() *int {
+	if c == nil {
+		return nil
+	}
+	return c.TotalControlsCount
+}
+
+func (c *ComplianceFramework) GetUid() *string {
+	if c == nil {
+		return nil
+	}
+	return c.Uid
+}
+
+func (c *ComplianceFramework) GetExtraProperties() map[string]interface{} {
+	if c == nil {
+		return nil
+	}
+	return c.extraProperties
+}
+
+func (c *ComplianceFramework) require(field *big.Int) {
+	if c.explicitFields == nil {
+		c.explicitFields = big.NewInt(0)
+	}
+	c.explicitFields.Or(c.explicitFields, field)
+}
+
+// SetCreatedTime sets the CreatedTime field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *ComplianceFramework) SetCreatedTime(createdTime *Timestamp) {
+	c.CreatedTime = createdTime
+	c.require(complianceFrameworkFieldCreatedTime)
+}
+
+// SetCreatedTimeDt sets the CreatedTimeDt field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *ComplianceFramework) SetCreatedTimeDt(createdTimeDt *time.Time) {
+	c.CreatedTimeDt = createdTimeDt
+	c.require(complianceFrameworkFieldCreatedTimeDt)
+}
+
+// SetDesc sets the Desc field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *ComplianceFramework) SetDesc(desc *string) {
+	c.Desc = desc
+	c.require(complianceFrameworkFieldDesc)
+}
+
+// SetFailingTestsCount sets the FailingTestsCount field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *ComplianceFramework) SetFailingTestsCount(failingTestsCount *int) {
+	c.FailingTestsCount = failingTestsCount
+	c.require(complianceFrameworkFieldFailingTestsCount)
+}
+
+// SetModifiedTime sets the ModifiedTime field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *ComplianceFramework) SetModifiedTime(modifiedTime *Timestamp) {
+	c.ModifiedTime = modifiedTime
+	c.require(complianceFrameworkFieldModifiedTime)
+}
+
+// SetModifiedTimeDt sets the ModifiedTimeDt field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *ComplianceFramework) SetModifiedTimeDt(modifiedTimeDt *time.Time) {
+	c.ModifiedTimeDt = modifiedTimeDt
+	c.require(complianceFrameworkFieldModifiedTimeDt)
+}
+
+// SetName sets the Name field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *ComplianceFramework) SetName(name string) {
+	c.Name = name
+	c.require(complianceFrameworkFieldName)
+}
+
+// SetPassingTestsCount sets the PassingTestsCount field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *ComplianceFramework) SetPassingTestsCount(passingTestsCount *int) {
+	c.PassingTestsCount = passingTestsCount
+	c.require(complianceFrameworkFieldPassingTestsCount)
+}
+
+// SetStandard sets the Standard field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *ComplianceFramework) SetStandard(standard *string) {
+	c.Standard = standard
+	c.require(complianceFrameworkFieldStandard)
+}
+
+// SetTotalControlsCount sets the TotalControlsCount field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *ComplianceFramework) SetTotalControlsCount(totalControlsCount *int) {
+	c.TotalControlsCount = totalControlsCount
+	c.require(complianceFrameworkFieldTotalControlsCount)
+}
+
+// SetUid sets the Uid field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *ComplianceFramework) SetUid(uid *string) {
+	c.Uid = uid
+	c.require(complianceFrameworkFieldUid)
+}
+
+func (c *ComplianceFramework) UnmarshalJSON(data []byte) error {
+	type embed ComplianceFramework
+	var unmarshaler = struct {
+		embed
+		CreatedTimeDt  *internal.DateTime `json:"created_time_dt,omitempty"`
+		ModifiedTimeDt *internal.DateTime `json:"modified_time_dt,omitempty"`
+	}{
+		embed: embed(*c),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*c = ComplianceFramework(unmarshaler.embed)
+	c.CreatedTimeDt = unmarshaler.CreatedTimeDt.TimePtr()
+	c.ModifiedTimeDt = unmarshaler.ModifiedTimeDt.TimePtr()
+	extraProperties, err := internal.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+	c.rawJSON = nil
+	return nil
+}
+
+func (c *ComplianceFramework) MarshalJSON() ([]byte, error) {
+	type embed ComplianceFramework
+	var marshaler = struct {
+		embed
+		CreatedTimeDt  *internal.DateTime `json:"created_time_dt,omitempty"`
+		ModifiedTimeDt *internal.DateTime `json:"modified_time_dt,omitempty"`
+	}{
+		embed:          embed(*c),
+		CreatedTimeDt:  internal.NewOptionalDateTime(c.CreatedTimeDt),
+		ModifiedTimeDt: internal.NewOptionalDateTime(c.ModifiedTimeDt),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, c.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (c *ComplianceFramework) String() string {
+	if c == nil {
+		return "<nil>"
+	}
+	if len(c.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(c.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
+// An automated evaluation that verifies whether a control is being met. Tests run continuously or on a schedule and carry a current pass/fail status. In some providers tests are the only place a pass/fail signal is exposed. This object is a persistent test definition with its current result, not a point-in-time finding.
+var (
+	complianceTestFieldAssessmentStatus    = big.NewInt(1 << 0)
+	complianceTestFieldAssessmentStatusId  = big.NewInt(1 << 1)
+	complianceTestFieldCategory            = big.NewInt(1 << 2)
+	complianceTestFieldControlUids         = big.NewInt(1 << 3)
+	complianceTestFieldCreatedTime         = big.NewInt(1 << 4)
+	complianceTestFieldCreatedTimeDt       = big.NewInt(1 << 5)
+	complianceTestFieldDesc                = big.NewInt(1 << 6)
+	complianceTestFieldFailureMessage      = big.NewInt(1 << 7)
+	complianceTestFieldLastEvaluatedTime   = big.NewInt(1 << 8)
+	complianceTestFieldLastEvaluatedTimeDt = big.NewInt(1 << 9)
+	complianceTestFieldModifiedTime        = big.NewInt(1 << 10)
+	complianceTestFieldModifiedTimeDt      = big.NewInt(1 << 11)
+	complianceTestFieldName                = big.NewInt(1 << 12)
+	complianceTestFieldOwner               = big.NewInt(1 << 13)
+	complianceTestFieldRemediation         = big.NewInt(1 << 14)
+	complianceTestFieldStandards           = big.NewInt(1 << 15)
+	complianceTestFieldUid                 = big.NewInt(1 << 16)
+)
+
+type ComplianceTest struct {
+	// The test result, as defined by <code>assessment_status_id</code>. In the case of <code>Other</code>, it is the value reported by the data source.
+	AssessmentStatus *string `json:"assessment_status,omitempty" url:"assessment_status,omitempty"`
+	// The normalized current result of the test.
+	AssessmentStatusId *ComplianceTestAssessmentStatusId `json:"assessment_status_id,omitempty" url:"assessment_status_id,omitempty"`
+	// The category or domain of the test. For example <code>Account security</code> or <code>Infrastructure</code>.
+	Category *string `json:"category,omitempty" url:"category,omitempty"`
+	// The identifiers of the controls this test validates.
+	ControlUids []string `json:"control_uids,omitempty" url:"control_uids,omitempty"`
+	// The time the test was created in the source system.
+	CreatedTime *Timestamp `json:"created_time,omitempty" url:"created_time,omitempty"`
+	// The time the test was created in the source system.
+	CreatedTimeDt *time.Time `json:"created_time_dt,omitempty" url:"created_time_dt,omitempty"`
+	// A description of what the test verifies.
+	Desc *string `json:"desc,omitempty" url:"desc,omitempty"`
+	// The message describing why the test is currently failing.
+	FailureMessage *string `json:"failure_message,omitempty" url:"failure_message,omitempty"`
+	// The time the test was last evaluated.
+	LastEvaluatedTime *Timestamp `json:"last_evaluated_time,omitempty" url:"last_evaluated_time,omitempty"`
+	// The time the test was last evaluated.
+	LastEvaluatedTimeDt *time.Time `json:"last_evaluated_time_dt,omitempty" url:"last_evaluated_time_dt,omitempty"`
+	// The time the test was last updated in the source system.
+	ModifiedTime *Timestamp `json:"modified_time,omitempty" url:"modified_time,omitempty"`
+	// The time the test was last updated in the source system.
+	ModifiedTimeDt *time.Time `json:"modified_time_dt,omitempty" url:"modified_time_dt,omitempty"`
+	// The name of the test.
+	Name string `json:"name" url:"name"`
+	// The user who owns the test.
+	Owner *User `json:"owner,omitempty" url:"owner,omitempty"`
+	// The recommended remediation steps to bring the test into a passing state. The steps are carried in <code>remediation.desc</code>.
+	Remediation *Remediation `json:"remediation,omitempty" url:"remediation,omitempty"`
+	// The compliance standards this test contributes to, as reported by the provider. Values are the provider's own framework identifiers, passed through unmodified (not normalized across providers).
+	Standards []string `json:"standards,omitempty" url:"standards,omitempty"`
+	// The unique identifier of the test in the source GRC system.
+	Uid *string `json:"uid,omitempty" url:"uid,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (c *ComplianceTest) GetAssessmentStatus() *string {
+	if c == nil {
+		return nil
+	}
+	return c.AssessmentStatus
+}
+
+func (c *ComplianceTest) GetAssessmentStatusId() *ComplianceTestAssessmentStatusId {
+	if c == nil {
+		return nil
+	}
+	return c.AssessmentStatusId
+}
+
+func (c *ComplianceTest) GetCategory() *string {
+	if c == nil {
+		return nil
+	}
+	return c.Category
+}
+
+func (c *ComplianceTest) GetControlUids() []string {
+	if c == nil {
+		return nil
+	}
+	return c.ControlUids
+}
+
+func (c *ComplianceTest) GetCreatedTime() *Timestamp {
+	if c == nil {
+		return nil
+	}
+	return c.CreatedTime
+}
+
+func (c *ComplianceTest) GetCreatedTimeDt() *time.Time {
+	if c == nil {
+		return nil
+	}
+	return c.CreatedTimeDt
+}
+
+func (c *ComplianceTest) GetDesc() *string {
+	if c == nil {
+		return nil
+	}
+	return c.Desc
+}
+
+func (c *ComplianceTest) GetFailureMessage() *string {
+	if c == nil {
+		return nil
+	}
+	return c.FailureMessage
+}
+
+func (c *ComplianceTest) GetLastEvaluatedTime() *Timestamp {
+	if c == nil {
+		return nil
+	}
+	return c.LastEvaluatedTime
+}
+
+func (c *ComplianceTest) GetLastEvaluatedTimeDt() *time.Time {
+	if c == nil {
+		return nil
+	}
+	return c.LastEvaluatedTimeDt
+}
+
+func (c *ComplianceTest) GetModifiedTime() *Timestamp {
+	if c == nil {
+		return nil
+	}
+	return c.ModifiedTime
+}
+
+func (c *ComplianceTest) GetModifiedTimeDt() *time.Time {
+	if c == nil {
+		return nil
+	}
+	return c.ModifiedTimeDt
+}
+
+func (c *ComplianceTest) GetName() string {
+	if c == nil {
+		return ""
+	}
+	return c.Name
+}
+
+func (c *ComplianceTest) GetOwner() *User {
+	if c == nil {
+		return nil
+	}
+	return c.Owner
+}
+
+func (c *ComplianceTest) GetRemediation() *Remediation {
+	if c == nil {
+		return nil
+	}
+	return c.Remediation
+}
+
+func (c *ComplianceTest) GetStandards() []string {
+	if c == nil {
+		return nil
+	}
+	return c.Standards
+}
+
+func (c *ComplianceTest) GetUid() *string {
+	if c == nil {
+		return nil
+	}
+	return c.Uid
+}
+
+func (c *ComplianceTest) GetExtraProperties() map[string]interface{} {
+	if c == nil {
+		return nil
+	}
+	return c.extraProperties
+}
+
+func (c *ComplianceTest) require(field *big.Int) {
+	if c.explicitFields == nil {
+		c.explicitFields = big.NewInt(0)
+	}
+	c.explicitFields.Or(c.explicitFields, field)
+}
+
+// SetAssessmentStatus sets the AssessmentStatus field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *ComplianceTest) SetAssessmentStatus(assessmentStatus *string) {
+	c.AssessmentStatus = assessmentStatus
+	c.require(complianceTestFieldAssessmentStatus)
+}
+
+// SetAssessmentStatusId sets the AssessmentStatusId field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *ComplianceTest) SetAssessmentStatusId(assessmentStatusId *ComplianceTestAssessmentStatusId) {
+	c.AssessmentStatusId = assessmentStatusId
+	c.require(complianceTestFieldAssessmentStatusId)
+}
+
+// SetCategory sets the Category field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *ComplianceTest) SetCategory(category *string) {
+	c.Category = category
+	c.require(complianceTestFieldCategory)
+}
+
+// SetControlUids sets the ControlUids field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *ComplianceTest) SetControlUids(controlUids []string) {
+	c.ControlUids = controlUids
+	c.require(complianceTestFieldControlUids)
+}
+
+// SetCreatedTime sets the CreatedTime field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *ComplianceTest) SetCreatedTime(createdTime *Timestamp) {
+	c.CreatedTime = createdTime
+	c.require(complianceTestFieldCreatedTime)
+}
+
+// SetCreatedTimeDt sets the CreatedTimeDt field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *ComplianceTest) SetCreatedTimeDt(createdTimeDt *time.Time) {
+	c.CreatedTimeDt = createdTimeDt
+	c.require(complianceTestFieldCreatedTimeDt)
+}
+
+// SetDesc sets the Desc field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *ComplianceTest) SetDesc(desc *string) {
+	c.Desc = desc
+	c.require(complianceTestFieldDesc)
+}
+
+// SetFailureMessage sets the FailureMessage field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *ComplianceTest) SetFailureMessage(failureMessage *string) {
+	c.FailureMessage = failureMessage
+	c.require(complianceTestFieldFailureMessage)
+}
+
+// SetLastEvaluatedTime sets the LastEvaluatedTime field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *ComplianceTest) SetLastEvaluatedTime(lastEvaluatedTime *Timestamp) {
+	c.LastEvaluatedTime = lastEvaluatedTime
+	c.require(complianceTestFieldLastEvaluatedTime)
+}
+
+// SetLastEvaluatedTimeDt sets the LastEvaluatedTimeDt field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *ComplianceTest) SetLastEvaluatedTimeDt(lastEvaluatedTimeDt *time.Time) {
+	c.LastEvaluatedTimeDt = lastEvaluatedTimeDt
+	c.require(complianceTestFieldLastEvaluatedTimeDt)
+}
+
+// SetModifiedTime sets the ModifiedTime field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *ComplianceTest) SetModifiedTime(modifiedTime *Timestamp) {
+	c.ModifiedTime = modifiedTime
+	c.require(complianceTestFieldModifiedTime)
+}
+
+// SetModifiedTimeDt sets the ModifiedTimeDt field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *ComplianceTest) SetModifiedTimeDt(modifiedTimeDt *time.Time) {
+	c.ModifiedTimeDt = modifiedTimeDt
+	c.require(complianceTestFieldModifiedTimeDt)
+}
+
+// SetName sets the Name field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *ComplianceTest) SetName(name string) {
+	c.Name = name
+	c.require(complianceTestFieldName)
+}
+
+// SetOwner sets the Owner field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *ComplianceTest) SetOwner(owner *User) {
+	c.Owner = owner
+	c.require(complianceTestFieldOwner)
+}
+
+// SetRemediation sets the Remediation field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *ComplianceTest) SetRemediation(remediation *Remediation) {
+	c.Remediation = remediation
+	c.require(complianceTestFieldRemediation)
+}
+
+// SetStandards sets the Standards field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *ComplianceTest) SetStandards(standards []string) {
+	c.Standards = standards
+	c.require(complianceTestFieldStandards)
+}
+
+// SetUid sets the Uid field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *ComplianceTest) SetUid(uid *string) {
+	c.Uid = uid
+	c.require(complianceTestFieldUid)
+}
+
+func (c *ComplianceTest) UnmarshalJSON(data []byte) error {
+	type embed ComplianceTest
+	var unmarshaler = struct {
+		embed
+		CreatedTimeDt       *internal.DateTime `json:"created_time_dt,omitempty"`
+		LastEvaluatedTimeDt *internal.DateTime `json:"last_evaluated_time_dt,omitempty"`
+		ModifiedTimeDt      *internal.DateTime `json:"modified_time_dt,omitempty"`
+	}{
+		embed: embed(*c),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*c = ComplianceTest(unmarshaler.embed)
+	c.CreatedTimeDt = unmarshaler.CreatedTimeDt.TimePtr()
+	c.LastEvaluatedTimeDt = unmarshaler.LastEvaluatedTimeDt.TimePtr()
+	c.ModifiedTimeDt = unmarshaler.ModifiedTimeDt.TimePtr()
+	extraProperties, err := internal.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+	c.rawJSON = nil
+	return nil
+}
+
+func (c *ComplianceTest) MarshalJSON() ([]byte, error) {
+	type embed ComplianceTest
+	var marshaler = struct {
+		embed
+		CreatedTimeDt       *internal.DateTime `json:"created_time_dt,omitempty"`
+		LastEvaluatedTimeDt *internal.DateTime `json:"last_evaluated_time_dt,omitempty"`
+		ModifiedTimeDt      *internal.DateTime `json:"modified_time_dt,omitempty"`
+	}{
+		embed:               embed(*c),
+		CreatedTimeDt:       internal.NewOptionalDateTime(c.CreatedTimeDt),
+		LastEvaluatedTimeDt: internal.NewOptionalDateTime(c.LastEvaluatedTimeDt),
+		ModifiedTimeDt:      internal.NewOptionalDateTime(c.ModifiedTimeDt),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, c.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (c *ComplianceTest) String() string {
+	if c == nil {
+		return "<nil>"
+	}
+	if len(c.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(c.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
+// ComplianceTestAssessmentStatusId is an enum, and the following values are allowed.
+// 0 - Unknown: The assessment result is unknown.
+// 1 - Pass: The control or test passed.
+// 2 - Warning: The assessment did not yield a definitive result.
+// 3 - Fail: The control or test failed.
+// 4 - NotAssessed: The control or test has not been assessed.
+// 5 - NotApplicable: The control or test is not applicable.
+// 99 - Other: The assessment status is not mapped. See the <code>assessment_status</code> attribute, which contains a data source specific value.
+type ComplianceTestAssessmentStatusId = int
 
 // ComplianceStatusId is an enum, and the following values are allowed.
 // 0 - Unknown: The status is unknown.

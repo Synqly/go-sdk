@@ -40,6 +40,10 @@ import (
 	applicationinventoryinfo "github.com/synqly/go-sdk/v2/client/engine/ocsf/v180/applicationinventoryinfo"
 	applicationsecurityposturefinding "github.com/synqly/go-sdk/v2/client/engine/ocsf/v180/applicationsecurityposturefinding"
 	chatmessageactivity "github.com/synqly/go-sdk/v2/client/engine/ocsf/v180/chatmessageactivity"
+	compliancecontrolinventoryinfo "github.com/synqly/go-sdk/v2/client/engine/ocsf/v180/compliancecontrolinventoryinfo"
+	complianceevidenceinventoryinfo "github.com/synqly/go-sdk/v2/client/engine/ocsf/v180/complianceevidenceinventoryinfo"
+	complianceframeworkinventoryinfo "github.com/synqly/go-sdk/v2/client/engine/ocsf/v180/complianceframeworkinventoryinfo"
+	compliancetestinventoryinfo "github.com/synqly/go-sdk/v2/client/engine/ocsf/v180/compliancetestinventoryinfo"
 	conversationactivity "github.com/synqly/go-sdk/v2/client/engine/ocsf/v180/conversationactivity"
 	noteactivity "github.com/synqly/go-sdk/v2/client/engine/ocsf/v180/noteactivity"
 	phishingsimulationinventoryinfo "github.com/synqly/go-sdk/v2/client/engine/ocsf/v180/phishingsimulationinventoryinfo"
@@ -86,6 +90,10 @@ type Event struct {
 	ChatMessageActivity               *chatmessageactivity.ChatMessageActivity
 	ConversationActivity              *conversationactivity.ConversationActivity
 	ApplicationInventoryInfo          *applicationinventoryinfo.ApplicationInventoryInfo
+	ComplianceControlInventoryInfo    *compliancecontrolinventoryinfo.ComplianceControlInventoryInfo
+	ComplianceFrameworkInventoryInfo  *complianceframeworkinventoryinfo.ComplianceFrameworkInventoryInfo
+	ComplianceTestInventoryInfo       *compliancetestinventoryinfo.ComplianceTestInventoryInfo
+	ComplianceEvidenceInventoryInfo   *complianceevidenceinventoryinfo.ComplianceEvidenceInventoryInfo
 	EventLogActivity                  *eventlogactivity.EventLog
 	TrainingCampaignInventoryInfo     *trainingcampaigninventoryinfo.TrainingCampaignInventoryInfo
 	PhishingSimulationInventoryInfo   *phishingsimulationinventoryinfo.PhishingSimulationInventoryInfo
@@ -353,6 +361,34 @@ func (e *Event) GetApplicationInventoryInfo() *applicationinventoryinfo.Applicat
 	return e.ApplicationInventoryInfo
 }
 
+func (e *Event) GetComplianceControlInventoryInfo() *compliancecontrolinventoryinfo.ComplianceControlInventoryInfo {
+	if e == nil {
+		return nil
+	}
+	return e.ComplianceControlInventoryInfo
+}
+
+func (e *Event) GetComplianceFrameworkInventoryInfo() *complianceframeworkinventoryinfo.ComplianceFrameworkInventoryInfo {
+	if e == nil {
+		return nil
+	}
+	return e.ComplianceFrameworkInventoryInfo
+}
+
+func (e *Event) GetComplianceTestInventoryInfo() *compliancetestinventoryinfo.ComplianceTestInventoryInfo {
+	if e == nil {
+		return nil
+	}
+	return e.ComplianceTestInventoryInfo
+}
+
+func (e *Event) GetComplianceEvidenceInventoryInfo() *complianceevidenceinventoryinfo.ComplianceEvidenceInventoryInfo {
+	if e == nil {
+		return nil
+	}
+	return e.ComplianceEvidenceInventoryInfo
+}
+
 func (e *Event) GetEventLogActivity() *eventlogactivity.EventLog {
 	if e == nil {
 		return nil
@@ -609,6 +645,30 @@ func (e *Event) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		e.ApplicationInventoryInfo = value
+	case "Compliance Control Inventory Info":
+		value := new(compliancecontrolinventoryinfo.ComplianceControlInventoryInfo)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.ComplianceControlInventoryInfo = value
+	case "Compliance Framework Inventory Info":
+		value := new(complianceframeworkinventoryinfo.ComplianceFrameworkInventoryInfo)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.ComplianceFrameworkInventoryInfo = value
+	case "Compliance Test Inventory Info":
+		value := new(compliancetestinventoryinfo.ComplianceTestInventoryInfo)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.ComplianceTestInventoryInfo = value
+	case "Compliance Evidence Inventory Info":
+		value := new(complianceevidenceinventoryinfo.ComplianceEvidenceInventoryInfo)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.ComplianceEvidenceInventoryInfo = value
 	case "Event Log Activity":
 		value := new(eventlogactivity.EventLog)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -750,6 +810,18 @@ func (e Event) MarshalJSON() ([]byte, error) {
 	if e.ApplicationInventoryInfo != nil {
 		return internal.MarshalJSONWithExtraProperty(e.ApplicationInventoryInfo, "class_name", "Application Inventory Info")
 	}
+	if e.ComplianceControlInventoryInfo != nil {
+		return internal.MarshalJSONWithExtraProperty(e.ComplianceControlInventoryInfo, "class_name", "Compliance Control Inventory Info")
+	}
+	if e.ComplianceFrameworkInventoryInfo != nil {
+		return internal.MarshalJSONWithExtraProperty(e.ComplianceFrameworkInventoryInfo, "class_name", "Compliance Framework Inventory Info")
+	}
+	if e.ComplianceTestInventoryInfo != nil {
+		return internal.MarshalJSONWithExtraProperty(e.ComplianceTestInventoryInfo, "class_name", "Compliance Test Inventory Info")
+	}
+	if e.ComplianceEvidenceInventoryInfo != nil {
+		return internal.MarshalJSONWithExtraProperty(e.ComplianceEvidenceInventoryInfo, "class_name", "Compliance Evidence Inventory Info")
+	}
 	if e.EventLogActivity != nil {
 		return internal.MarshalJSONWithExtraProperty(e.EventLogActivity, "class_name", "Event Log Activity")
 	}
@@ -805,6 +877,10 @@ type EventVisitor interface {
 	VisitChatMessageActivity(*chatmessageactivity.ChatMessageActivity) error
 	VisitConversationActivity(*conversationactivity.ConversationActivity) error
 	VisitApplicationInventoryInfo(*applicationinventoryinfo.ApplicationInventoryInfo) error
+	VisitComplianceControlInventoryInfo(*compliancecontrolinventoryinfo.ComplianceControlInventoryInfo) error
+	VisitComplianceFrameworkInventoryInfo(*complianceframeworkinventoryinfo.ComplianceFrameworkInventoryInfo) error
+	VisitComplianceTestInventoryInfo(*compliancetestinventoryinfo.ComplianceTestInventoryInfo) error
+	VisitComplianceEvidenceInventoryInfo(*complianceevidenceinventoryinfo.ComplianceEvidenceInventoryInfo) error
 	VisitEventLogActivity(*eventlogactivity.EventLog) error
 	VisitTrainingCampaignInventoryInfo(*trainingcampaigninventoryinfo.TrainingCampaignInventoryInfo) error
 	VisitPhishingSimulationInventoryInfo(*phishingsimulationinventoryinfo.PhishingSimulationInventoryInfo) error
@@ -919,6 +995,18 @@ func (e *Event) Accept(visitor EventVisitor) error {
 	}
 	if e.ApplicationInventoryInfo != nil {
 		return visitor.VisitApplicationInventoryInfo(e.ApplicationInventoryInfo)
+	}
+	if e.ComplianceControlInventoryInfo != nil {
+		return visitor.VisitComplianceControlInventoryInfo(e.ComplianceControlInventoryInfo)
+	}
+	if e.ComplianceFrameworkInventoryInfo != nil {
+		return visitor.VisitComplianceFrameworkInventoryInfo(e.ComplianceFrameworkInventoryInfo)
+	}
+	if e.ComplianceTestInventoryInfo != nil {
+		return visitor.VisitComplianceTestInventoryInfo(e.ComplianceTestInventoryInfo)
+	}
+	if e.ComplianceEvidenceInventoryInfo != nil {
+		return visitor.VisitComplianceEvidenceInventoryInfo(e.ComplianceEvidenceInventoryInfo)
 	}
 	if e.EventLogActivity != nil {
 		return visitor.VisitEventLogActivity(e.EventLogActivity)
@@ -1047,6 +1135,18 @@ func (e *Event) validate() error {
 	}
 	if e.ApplicationInventoryInfo != nil {
 		fields = append(fields, "Application Inventory Info")
+	}
+	if e.ComplianceControlInventoryInfo != nil {
+		fields = append(fields, "Compliance Control Inventory Info")
+	}
+	if e.ComplianceFrameworkInventoryInfo != nil {
+		fields = append(fields, "Compliance Framework Inventory Info")
+	}
+	if e.ComplianceTestInventoryInfo != nil {
+		fields = append(fields, "Compliance Test Inventory Info")
+	}
+	if e.ComplianceEvidenceInventoryInfo != nil {
+		fields = append(fields, "Compliance Evidence Inventory Info")
 	}
 	if e.EventLogActivity != nil {
 		fields = append(fields, "Event Log Activity")

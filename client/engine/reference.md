@@ -5582,6 +5582,905 @@ client.Endpointmanagement.QueryDeviceApplications(
 </dl>
 </details>
 
+## Grc
+<details><summary><code>client.Grc.QueryFrameworks() -> *engine.GrcQueryFrameworksResponse</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Returns the compliance frameworks tracked in the token-linked GRC integration.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```go
+request := &engine.GrcQueryFrameworksRequest{}
+client.Grc.QueryFrameworks(
+        context.TODO(),
+        request,
+    )
+}
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**meta:** `*string` — Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**limit:** `*int` — Number of frameworks to return. Defaults to 100.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**order:** `*string` — Ordering is not supported for frameworks in v1.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**filter:** `*string` — Filtering is not supported for frameworks in v1.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**cursor:** `*string` — Start search from cursor position.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**includeRawData:** `*bool` — Include the raw data from the provider in the response. Defaults to `false`.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.Grc.QueryControls() -> *engine.GrcQueryControlsResponse</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Returns the compliance controls defined in the token-linked GRC integration.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```go
+request := &engine.GrcQueryControlsRequest{}
+client.Grc.QueryControls(
+        context.TODO(),
+        request,
+    )
+}
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**meta:** `*string` — Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**limit:** `*int` — Number of controls to return. Defaults to 100.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**order:** `*string` — Order results by a supported field. Ascending by default; append `[desc]` for descending (or `[asc]`). Supported fields — `compliance_control.name`, `compliance_control.created_time`, `compliance_control.modified_time`.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**filter:** `*string` — Filter results with `field[operator]value` clauses using `eq`/`in` (repeat the parameter to AND clauses together). Supported fields — `compliance_control.assessment_status`, `compliance_control.name`, `compliance_control.vendor_code`. See the [Filtering Guide](https://docs.synqly.com/guides/connectors/grc/query-filters).
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**cursor:** `*string` — Start search from cursor position.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**includeRawData:** `*bool` — Include the raw data from the provider in the response. Defaults to `false`.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.Grc.GetControl(ControlId) -> *engine.GrcGetControlResponse</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Returns the compliance control matching `{controlId}` from the token-linked GRC integration.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```go
+request := &engine.GrcGetControlRequest{}
+client.Grc.GetControl(
+        context.TODO(),
+        "controlId",
+        request,
+    )
+}
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**controlId:** `engine.GrcControlId` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**meta:** `*string` — Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**includeRawData:** `*bool` — Include the raw data from the provider in the response. Defaults to `false`.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.Grc.QueryTests() -> *engine.GrcQueryTestsResponse</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Returns the automated compliance tests defined in the token-linked GRC integration.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```go
+request := &engine.GrcQueryTestsRequest{}
+client.Grc.QueryTests(
+        context.TODO(),
+        request,
+    )
+}
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**meta:** `*string` — Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**limit:** `*int` — Number of tests to return. Defaults to 100.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**order:** `*string` — Order results by a supported field. Ascending by default; append `[desc]` for descending (or `[asc]`). Supported fields — `compliance_test.created_time`, `compliance_test.modified_time`.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**filter:** `*string` — Filter results with `field[operator]value` clauses using `eq`/`in` (repeat the parameter to AND clauses together). Supported fields — `compliance_test.name`. See the [Filtering Guide](https://docs.synqly.com/guides/connectors/grc/query-filters).
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**cursor:** `*string` — Start search from cursor position.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**includeRawData:** `*bool` — Include the raw data from the provider in the response. Defaults to `false`.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.Grc.GetTest(TestId) -> *engine.GrcGetTestResponse</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Returns the compliance test matching `{testId}` from the token-linked GRC integration.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```go
+request := &engine.GrcGetTestRequest{}
+client.Grc.GetTest(
+        context.TODO(),
+        "testId",
+        request,
+    )
+}
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**testId:** `engine.GrcTestId` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**meta:** `*string` — Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**includeRawData:** `*bool` — Include the raw data from the provider in the response. Defaults to `false`.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.Grc.QueryEvidence() -> *engine.GrcQueryEvidenceResponse</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Returns the documentation artifacts collected in the token-linked GRC integration.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```go
+request := &engine.GrcQueryEvidenceRequest{}
+client.Grc.QueryEvidence(
+        context.TODO(),
+        request,
+    )
+}
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**meta:** `*string` — Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**limit:** `*int` — Number of evidence artifacts to return. Defaults to 100.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**order:** `*string` — Order results by a supported field. Ascending by default; append `[desc]` for descending (or `[asc]`). Supported fields — `compliance_evidence.created_time`, `compliance_evidence.modified_time`.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**filter:** `*string` — Filter results with `field[operator]value` clauses using `eq`/`in` (repeat the parameter to AND clauses together). Supported fields — `compliance_evidence.evidence_type`. See the [Filtering Guide](https://docs.synqly.com/guides/connectors/grc/query-filters).
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**cursor:** `*string` — Start search from cursor position.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**includeRawData:** `*bool` — Include the raw data from the provider in the response. Defaults to `false`.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.Grc.QueryDevices() -> *engine.GrcQueryDevicesResponse</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Returns the compliance state of every device tracked in the token-linked GRC integration, as OCSF Compliance Findings. Includes compliant devices.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```go
+request := &engine.GrcQueryDevicesRequest{}
+client.Grc.QueryDevices(
+        context.TODO(),
+        request,
+    )
+}
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**meta:** `*string` — Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**limit:** `*int` — Number of devices to return. Defaults to 100.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**order:** `*string` — Order results by a supported field. Ascending by default; append `[desc]` for descending (or `[asc]`). Supported fields — `device.name`.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**filter:** `*string` — Filter results with `field[operator]value` clauses using `eq`/`in` (repeat the parameter to AND clauses together). Supported fields — `device.name`. See the [Filtering Guide](https://docs.synqly.com/guides/connectors/grc/query-filters).
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**cursor:** `*string` — Start search from cursor position.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**includeRawData:** `*bool` — Include the raw data from the provider in the response. Defaults to `false`.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.Grc.GetDevice(DeviceId) -> *engine.GrcGetDeviceResponse</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Returns the compliance state of the device matching `{deviceId}` from the token-linked GRC integration.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```go
+request := &engine.GrcGetDeviceRequest{}
+client.Grc.GetDevice(
+        context.TODO(),
+        "deviceId",
+        request,
+    )
+}
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**deviceId:** `engine.GrcDeviceId` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**meta:** `*string` — Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**includeRawData:** `*bool` — Include the raw data from the provider in the response. Defaults to `false`.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.Grc.QueryPersonnel() -> *engine.GrcQueryPersonnelResponse</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Returns the compliance state of every person tracked in the token-linked GRC integration, as OCSF Compliance Findings. Includes compliant personnel.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```go
+request := &engine.GrcQueryPersonnelRequest{}
+client.Grc.QueryPersonnel(
+        context.TODO(),
+        request,
+    )
+}
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**meta:** `*string` — Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**limit:** `*int` — Number of people to return. Defaults to 100.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**order:** `*string` — Order results by a supported field. Ascending by default; append `[desc]` for descending (or `[asc]`). Supported fields — `resource.name`.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**filter:** `*string` — Filter results with `field[operator]value` clauses using `eq`/`in` (repeat the parameter to AND clauses together). Supported fields — `resource.name`. See the [Filtering Guide](https://docs.synqly.com/guides/connectors/grc/query-filters).
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**cursor:** `*string` — Start search from cursor position.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**includeRawData:** `*bool` — Include the raw data from the provider in the response. Defaults to `false`.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.Grc.GetPersonnel(PersonnelId) -> *engine.GrcGetPersonnelResponse</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Returns the compliance state of the person matching `{personnelId}` from the token-linked GRC integration.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```go
+request := &engine.GrcGetPersonnelRequest{}
+client.Grc.GetPersonnel(
+        context.TODO(),
+        "personnelId",
+        request,
+    )
+}
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**personnelId:** `engine.GrcPersonnelId` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**meta:** `*string` — Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**includeRawData:** `*bool` — Include the raw data from the provider in the response. Defaults to `false`.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
 ## Hooks
 <details><summary><code>client.Hooks.Proxy(request) -> error</code></summary>
 <dl>

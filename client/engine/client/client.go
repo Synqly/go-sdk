@@ -12,6 +12,7 @@ import (
     edr "github.com/synqly/go-sdk/v2/client/engine/edr"
     emailsecurity "github.com/synqly/go-sdk/v2/client/engine/emailsecurity"
     endpointmanagement "github.com/synqly/go-sdk/v2/client/engine/endpointmanagement"
+    grc "github.com/synqly/go-sdk/v2/client/engine/grc"
     hooks "github.com/synqly/go-sdk/v2/client/engine/hooks"
     identity "github.com/synqly/go-sdk/v2/client/engine/identity"
     incidentresponse "github.com/synqly/go-sdk/v2/client/engine/incidentresponse"
@@ -39,6 +40,7 @@ type Client struct {
     Edr *edr.Client
     Emailsecurity *emailsecurity.Client
     Endpointmanagement *endpointmanagement.Client
+    Grc *grc.Client
     Hooks *hooks.Client
     Identity *identity.Client
     Incidentresponse *incidentresponse.Client
@@ -69,6 +71,7 @@ func NewClient(opts ...option.RequestOption) *Client {
         Edr: edr.NewClient(options),
         Emailsecurity: emailsecurity.NewClient(options),
         Endpointmanagement: endpointmanagement.NewClient(options),
+        Grc: grc.NewClient(options),
         Hooks: hooks.NewClient(options),
         Identity: identity.NewClient(options),
         Incidentresponse: incidentresponse.NewClient(options),

@@ -13430,6 +13430,111 @@ func (g *GoogleServiceAccountCredential) validate() error {
 	return nil
 }
 
+// Configuration for Secureframe as a GRC provider.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/secureframe-grc-setup)
+var (
+	grcSecureframeFieldCredential = big.NewInt(1 << 0)
+	grcSecureframeFieldRegion     = big.NewInt(1 << 1)
+)
+
+type GrcSecureframe struct {
+	// Credentials used for accessing the Secureframe API.
+	Credential *SecureframeCredential `json:"credential" url:"credential"`
+	// The Secureframe data region that hosts this organization's tenant.
+	Region SecureframeRegion `json:"region" url:"region"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (g *GrcSecureframe) GetCredential() *SecureframeCredential {
+	if g == nil {
+		return nil
+	}
+	return g.Credential
+}
+
+func (g *GrcSecureframe) GetRegion() SecureframeRegion {
+	if g == nil {
+		return ""
+	}
+	return g.Region
+}
+
+func (g *GrcSecureframe) GetExtraProperties() map[string]interface{} {
+	if g == nil {
+		return nil
+	}
+	return g.extraProperties
+}
+
+func (g *GrcSecureframe) require(field *big.Int) {
+	if g.explicitFields == nil {
+		g.explicitFields = big.NewInt(0)
+	}
+	g.explicitFields.Or(g.explicitFields, field)
+}
+
+// SetCredential sets the Credential field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (g *GrcSecureframe) SetCredential(credential *SecureframeCredential) {
+	g.Credential = credential
+	g.require(grcSecureframeFieldCredential)
+}
+
+// SetRegion sets the Region field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (g *GrcSecureframe) SetRegion(region SecureframeRegion) {
+	g.Region = region
+	g.require(grcSecureframeFieldRegion)
+}
+
+func (g *GrcSecureframe) UnmarshalJSON(data []byte) error {
+	type unmarshaler GrcSecureframe
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*g = GrcSecureframe(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *g)
+	if err != nil {
+		return err
+	}
+	g.extraProperties = extraProperties
+	g.rawJSON = nil
+	return nil
+}
+
+func (g *GrcSecureframe) MarshalJSON() ([]byte, error) {
+	type embed GrcSecureframe
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*g),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, g.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (g *GrcSecureframe) String() string {
+	if g == nil {
+		return "<nil>"
+	}
+	if len(g.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(g.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(g); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", g)
+}
+
 type GreenhouseCredential struct {
 	Type string
 	// Greenhouse Harvest v3 OAuth client credentials.
@@ -22062,6 +22167,10 @@ type ProviderConfig struct {
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/ninjaone-endpointmanagement-setup)
 	EndpointmanagementNinjaone *EndpointmanagementNinjaone
+	// Configuration for Secureframe as a GRC provider.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/secureframe-grc-setup)
+	GrcSecureframe *GrcSecureframe
 	// Configuration for Ashby Identity.
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/ashby-identity-setup)
@@ -22931,6 +23040,13 @@ func (p *ProviderConfig) GetEndpointmanagementNinjaone() *EndpointmanagementNinj
 		return nil
 	}
 	return p.EndpointmanagementNinjaone
+}
+
+func (p *ProviderConfig) GetGrcSecureframe() *GrcSecureframe {
+	if p == nil {
+		return nil
+	}
+	return p.GrcSecureframe
 }
 
 func (p *ProviderConfig) GetIdentityAshby() *IdentityAshby {
@@ -24092,6 +24208,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.EndpointmanagementNinjaone = value
+	case "grc_secureframe":
+		value := new(GrcSecureframe)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.GrcSecureframe = value
 	case "identity_ashby":
 		value := new(IdentityAshby)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -24932,6 +25054,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.EndpointmanagementNinjaone != nil {
 		return internal.MarshalJSONWithExtraProperty(p.EndpointmanagementNinjaone, "type", "endpointmanagement_ninjaone")
 	}
+	if p.GrcSecureframe != nil {
+		return internal.MarshalJSONWithExtraProperty(p.GrcSecureframe, "type", "grc_secureframe")
+	}
 	if p.IdentityAshby != nil {
 		return internal.MarshalJSONWithExtraProperty(p.IdentityAshby, "type", "identity_ashby")
 	}
@@ -25319,6 +25444,7 @@ type ProviderConfigVisitor interface {
 	VisitEndpointmanagementIru(*EndpointmanagementIru) error
 	VisitEndpointmanagementJamf(*EndpointmanagementJamf) error
 	VisitEndpointmanagementNinjaone(*EndpointmanagementNinjaone) error
+	VisitGrcSecureframe(*GrcSecureframe) error
 	VisitIdentityAshby(*IdentityAshby) error
 	VisitIdentityAwsIam(*IdentityAwsIam) error
 	VisitIdentityCrowdstrike(*IdentityCrowdStrike) error
@@ -25637,6 +25763,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.EndpointmanagementNinjaone != nil {
 		return visitor.VisitEndpointmanagementNinjaone(p.EndpointmanagementNinjaone)
+	}
+	if p.GrcSecureframe != nil {
+		return visitor.VisitGrcSecureframe(p.GrcSecureframe)
 	}
 	if p.IdentityAshby != nil {
 		return visitor.VisitIdentityAshby(p.IdentityAshby)
@@ -26168,6 +26297,9 @@ func (p *ProviderConfig) validate() error {
 	if p.EndpointmanagementNinjaone != nil {
 		fields = append(fields, "endpointmanagement_ninjaone")
 	}
+	if p.GrcSecureframe != nil {
+		fields = append(fields, "grc_secureframe")
+	}
 	if p.IdentityAshby != nil {
 		fields = append(fields, "identity_ashby")
 	}
@@ -26649,6 +26781,8 @@ const (
 	ProviderConfigIdEndpointmanagementJamf ProviderConfigId = "endpointmanagement_jamf"
 	// NinjaOne
 	ProviderConfigIdEndpointmanagementNinjaone ProviderConfigId = "endpointmanagement_ninjaone"
+	// Secureframe
+	ProviderConfigIdGrcSecureframe ProviderConfigId = "grc_secureframe"
 	// Ashby Identity
 	ProviderConfigIdIdentityAshby ProviderConfigId = "identity_ashby"
 	// AWS IAM Identity
@@ -27003,6 +27137,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdEndpointmanagementJamf, nil
 	case "endpointmanagement_ninjaone":
 		return ProviderConfigIdEndpointmanagementNinjaone, nil
+	case "grc_secureframe":
+		return ProviderConfigIdGrcSecureframe, nil
 	case "identity_ashby":
 		return ProviderConfigIdIdentityAshby, nil
 	case "identity_aws_iam":
@@ -29617,6 +29753,167 @@ func (s *SiemSumoLogic) String() string {
 		return value
 	}
 	return fmt.Sprintf("%#v", s)
+}
+
+type SecureframeCredential struct {
+	Type string
+	// Secureframe API access key and secret.
+	Basic *BasicCredential
+	// Reference to existing API Key.
+	BasicId BasicCredentialId
+
+	rawJSON json.RawMessage
+}
+
+func (s *SecureframeCredential) GetType() string {
+	if s == nil {
+		return ""
+	}
+	return s.Type
+}
+
+func (s *SecureframeCredential) GetBasic() *BasicCredential {
+	if s == nil {
+		return nil
+	}
+	return s.Basic
+}
+
+func (s *SecureframeCredential) GetBasicId() BasicCredentialId {
+	if s == nil {
+		return ""
+	}
+	return s.BasicId
+}
+
+func (s *SecureframeCredential) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	s.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", s)
+	}
+	switch unmarshaler.Type {
+	case "basic":
+		value := new(BasicCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		s.Basic = value
+	case "basic_id":
+		var valueUnmarshaler struct {
+			BasicId BasicCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		s.BasicId = valueUnmarshaler.BasicId
+	}
+	s.rawJSON = nil
+	return nil
+}
+
+func (s SecureframeCredential) MarshalJSON() ([]byte, error) {
+	if err := s.validate(); err != nil {
+		return nil, err
+	}
+	if s.Basic != nil {
+		return internal.MarshalJSONWithExtraProperty(s.Basic, "type", "basic")
+	}
+	if s.BasicId != "" {
+		var marshaler = struct {
+			Type    string            `json:"type"`
+			BasicId BasicCredentialId `json:"value"`
+		}{
+			Type:    "basic_id",
+			BasicId: s.BasicId,
+		}
+		return json.Marshal(marshaler)
+	}
+	if len(s.rawJSON) > 0 {
+		return s.rawJSON, nil
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", s)
+}
+
+type SecureframeCredentialVisitor interface {
+	VisitBasic(*BasicCredential) error
+	VisitBasicId(BasicCredentialId) error
+}
+
+func (s *SecureframeCredential) Accept(visitor SecureframeCredentialVisitor) error {
+	if s.Basic != nil {
+		return visitor.VisitBasic(s.Basic)
+	}
+	if s.BasicId != "" {
+		return visitor.VisitBasicId(s.BasicId)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", s)
+}
+
+func (s *SecureframeCredential) validate() error {
+	if s == nil {
+		return fmt.Errorf("type %T is nil", s)
+	}
+	var fields []string
+	if s.Basic != nil {
+		fields = append(fields, "basic")
+	}
+	if s.BasicId != "" {
+		fields = append(fields, "basic_id")
+	}
+	if len(fields) == 0 {
+		if s.Type != "" {
+			if len(s.rawJSON) > 0 {
+				return nil
+			}
+			return fmt.Errorf("type %T defines a discriminant set to %q but the field is not set", s, s.Type)
+		}
+		return fmt.Errorf("type %T is empty", s)
+	}
+	if len(fields) > 1 {
+		return fmt.Errorf("type %T defines values for %s, but only one value is allowed", s, fields)
+	}
+	if s.Type != "" {
+		field := fields[0]
+		if s.Type != field {
+			return fmt.Errorf(
+				"type %T defines a discriminant set to %q, but it does not match the %T field; either remove or update the discriminant to match",
+				s,
+				s.Type,
+				s,
+			)
+		}
+	}
+	return nil
+}
+
+type SecureframeRegion string
+
+const (
+	// United States region.
+	SecureframeRegionUs SecureframeRegion = "US"
+	// United Kingdom region.
+	SecureframeRegionUk SecureframeRegion = "UK"
+)
+
+func NewSecureframeRegionFromString(s string) (SecureframeRegion, error) {
+	switch s {
+	case "US":
+		return SecureframeRegionUs, nil
+	case "UK":
+		return SecureframeRegionUk, nil
+	}
+	var t SecureframeRegion
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (s SecureframeRegion) Ptr() *SecureframeRegion {
+	return &s
 }
 
 // Configuration for KnowBe4 Security Awareness Training (KSAT) as a security awareness provider.
