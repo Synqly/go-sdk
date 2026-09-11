@@ -10061,6 +10061,315 @@ client.Storage.DeleteFile(
 </dl>
 </details>
 
+## Threatintel
+<details><summary><code>client.Threatintel.LookupHash(request) -> *engine.ThreatIntelLookupHashResponse</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Looks up a file hash against the token-linked threat intelligence source and returns normalized reputation and context. MD5, SHA-1, and SHA-256 hashes are supported; the hash type is detected from the value. A lookup that finds no intel records is a successful response with an empty `osint` array.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```go
+request := &engine.ThreatIntelLookupHashRequest{
+        Value: "value",
+    }
+client.Threatintel.LookupHash(
+        context.TODO(),
+        request,
+    )
+}
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**meta:** `*string` — Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**includeRawData:** `*bool` — Include the raw data from the provider in the response. Defaults to `false`.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**value:** `string` — The file hash to look up (MD5, SHA-1, or SHA-256, hex-encoded).
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.Threatintel.LookupUrl(request) -> *engine.ThreatIntelLookupUrlResponse</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Looks up a URL against the token-linked threat intelligence source and returns normalized reputation and context. Note that the looked-up URL is disclosed to the third-party intelligence provider; avoid looking up URLs that embed secrets (for example, signed URLs) unless that disclosure is acceptable. A lookup that finds no intel records is a successful response with an empty `osint` array.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```go
+request := &engine.ThreatIntelLookupUrlRequest{
+        Value: "value",
+    }
+client.Threatintel.LookupUrl(
+        context.TODO(),
+        request,
+    )
+}
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**meta:** `*string` — Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**includeRawData:** `*bool` — Include the raw data from the provider in the response. Defaults to `false`.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**value:** `string` — The URL to look up. Must be absolute and use the `http` or `https` scheme.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.Threatintel.LookupDomain(request) -> *engine.ThreatIntelLookupDomainResponse</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Looks up a domain name against the token-linked threat intelligence source and returns normalized reputation and context. Note that the looked-up domain is disclosed to the third-party intelligence provider, which can reveal internal hostnames. A lookup that finds no intel records is a successful response with an empty `osint` array.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```go
+request := &engine.ThreatIntelLookupDomainRequest{
+        Value: "value",
+    }
+client.Threatintel.LookupDomain(
+        context.TODO(),
+        request,
+    )
+}
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**meta:** `*string` — Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**includeRawData:** `*bool` — Include the raw data from the provider in the response. Defaults to `false`.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**value:** `string` — The domain name to look up. Internationalized domain names must be in punycode (A-label) form.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.Threatintel.LookupIp(request) -> *engine.ThreatIntelLookupIpResponse</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Looks up an IPv4 or IPv6 address against the token-linked threat intelligence source and returns normalized reputation and context. A lookup that finds no intel records is a successful response with an empty `osint` array.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```go
+request := &engine.ThreatIntelLookupIpRequest{
+        Value: "value",
+    }
+client.Threatintel.LookupIp(
+        context.TODO(),
+        request,
+    )
+}
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**meta:** `*string` — Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**includeRawData:** `*bool` — Include the raw data from the provider in the response. Defaults to `false`.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**value:** `string` — The IPv4 or IPv6 address to look up.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
 ## Ticketing
 <details><summary><code>client.Ticketing.ListRemoteFields() -> *engine.ListRemoteFieldsResponse</code></summary>
 <dl>

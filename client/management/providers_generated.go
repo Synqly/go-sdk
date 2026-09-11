@@ -40,6 +40,143 @@ func (a ApiRegion) Ptr() *ApiRegion {
 	return &a
 }
 
+type AbuseIpdbCredential struct {
+	Type string
+	// The AbuseIPDB API key to authenticate with the provider.
+	Token *TokenCredential
+	// Reference to existing API Key.
+	TokenId TokenCredentialId
+
+	rawJSON json.RawMessage
+}
+
+func (a *AbuseIpdbCredential) GetType() string {
+	if a == nil {
+		return ""
+	}
+	return a.Type
+}
+
+func (a *AbuseIpdbCredential) GetToken() *TokenCredential {
+	if a == nil {
+		return nil
+	}
+	return a.Token
+}
+
+func (a *AbuseIpdbCredential) GetTokenId() TokenCredentialId {
+	if a == nil {
+		return ""
+	}
+	return a.TokenId
+}
+
+func (a *AbuseIpdbCredential) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	a.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", a)
+	}
+	switch unmarshaler.Type {
+	case "token":
+		value := new(TokenCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		a.Token = value
+	case "token_id":
+		var valueUnmarshaler struct {
+			TokenId TokenCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		a.TokenId = valueUnmarshaler.TokenId
+	}
+	a.rawJSON = nil
+	return nil
+}
+
+func (a AbuseIpdbCredential) MarshalJSON() ([]byte, error) {
+	if err := a.validate(); err != nil {
+		return nil, err
+	}
+	if a.Token != nil {
+		return internal.MarshalJSONWithExtraProperty(a.Token, "type", "token")
+	}
+	if a.TokenId != "" {
+		var marshaler = struct {
+			Type    string            `json:"type"`
+			TokenId TokenCredentialId `json:"value"`
+		}{
+			Type:    "token_id",
+			TokenId: a.TokenId,
+		}
+		return json.Marshal(marshaler)
+	}
+	if len(a.rawJSON) > 0 {
+		return a.rawJSON, nil
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", a)
+}
+
+type AbuseIpdbCredentialVisitor interface {
+	VisitToken(*TokenCredential) error
+	VisitTokenId(TokenCredentialId) error
+}
+
+func (a *AbuseIpdbCredential) Accept(visitor AbuseIpdbCredentialVisitor) error {
+	if a.Token != nil {
+		return visitor.VisitToken(a.Token)
+	}
+	if a.TokenId != "" {
+		return visitor.VisitTokenId(a.TokenId)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", a)
+}
+
+func (a *AbuseIpdbCredential) validate() error {
+	if a == nil {
+		return fmt.Errorf("type %T is nil", a)
+	}
+	var fields []string
+	if a.Token != nil {
+		fields = append(fields, "token")
+	}
+	if a.TokenId != "" {
+		fields = append(fields, "token_id")
+	}
+	if len(fields) == 0 {
+		if a.Type != "" {
+			if len(a.rawJSON) > 0 {
+				return nil
+			}
+			return fmt.Errorf("type %T defines a discriminant set to %q but the field is not set", a, a.Type)
+		}
+		return fmt.Errorf("type %T is empty", a)
+	}
+	if len(fields) > 1 {
+		return fmt.Errorf("type %T defines values for %s, but only one value is allowed", a, fields)
+	}
+	if a.Type != "" {
+		field := fields[0]
+		if a.Type != field {
+			return fmt.Errorf(
+				"type %T defines a discriminant set to %q, but it does not match the %T field; either remove or update the discriminant to match",
+				a,
+				a.Type,
+				a,
+			)
+		}
+	}
+	return nil
+}
+
 var (
 	apiConfigFieldCredential = big.NewInt(1 << 0)
 	apiConfigFieldUrl        = big.NewInt(1 << 1)
@@ -22402,6 +22539,12 @@ type ProviderConfig struct {
 	StorageGcs *StorageGcs
 	// Configuration for the Synqly mock in-memory storage Provider. This provider is for testing purposes only and does not retain files pushed to it.
 	StorageMockStorage *StorageMock
+	// Configuration for AbuseIPDB as a Threat Intelligence Provider.
+	ThreatintelAbuseipdb *ThreatIntelAbuseIpdb
+	// Configuration for ThreatFox as a Threat Intelligence Provider.
+	ThreatintelThreatfox *ThreatIntelThreatFox
+	// Configuration for VirusTotal as a Threat Intelligence Provider.
+	ThreatintelVirustotal *ThreatIntelVirusTotal
 	// Configuration for Autotask Operations Cloud.
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/autotask-ticketing-setup)
@@ -23488,6 +23631,27 @@ func (p *ProviderConfig) GetStorageMockStorage() *StorageMock {
 		return nil
 	}
 	return p.StorageMockStorage
+}
+
+func (p *ProviderConfig) GetThreatintelAbuseipdb() *ThreatIntelAbuseIpdb {
+	if p == nil {
+		return nil
+	}
+	return p.ThreatintelAbuseipdb
+}
+
+func (p *ProviderConfig) GetThreatintelThreatfox() *ThreatIntelThreatFox {
+	if p == nil {
+		return nil
+	}
+	return p.ThreatintelThreatfox
+}
+
+func (p *ProviderConfig) GetThreatintelVirustotal() *ThreatIntelVirusTotal {
+	if p == nil {
+		return nil
+	}
+	return p.ThreatintelVirustotal
 }
 
 func (p *ProviderConfig) GetTicketingAutotask() *TicketingAutotask {
@@ -24592,6 +24756,24 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.StorageMockStorage = value
+	case "threatintel_abuseipdb":
+		value := new(ThreatIntelAbuseIpdb)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.ThreatintelAbuseipdb = value
+	case "threatintel_threatfox":
+		value := new(ThreatIntelThreatFox)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.ThreatintelThreatfox = value
+	case "threatintel_virustotal":
+		value := new(ThreatIntelVirusTotal)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.ThreatintelVirustotal = value
 	case "ticketing_autotask":
 		value := new(TicketingAutotask)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -25246,6 +25428,15 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.StorageMockStorage != nil {
 		return internal.MarshalJSONWithExtraProperty(p.StorageMockStorage, "type", "storage_mock_storage")
 	}
+	if p.ThreatintelAbuseipdb != nil {
+		return internal.MarshalJSONWithExtraProperty(p.ThreatintelAbuseipdb, "type", "threatintel_abuseipdb")
+	}
+	if p.ThreatintelThreatfox != nil {
+		return internal.MarshalJSONWithExtraProperty(p.ThreatintelThreatfox, "type", "threatintel_threatfox")
+	}
+	if p.ThreatintelVirustotal != nil {
+		return internal.MarshalJSONWithExtraProperty(p.ThreatintelVirustotal, "type", "threatintel_virustotal")
+	}
 	if p.TicketingAutotask != nil {
 		return internal.MarshalJSONWithExtraProperty(p.TicketingAutotask, "type", "ticketing_autotask")
 	}
@@ -25508,6 +25699,9 @@ type ProviderConfigVisitor interface {
 	VisitStorageAzureBlob(*StorageAzureBlob) error
 	VisitStorageGcs(*StorageGcs) error
 	VisitStorageMockStorage(*StorageMock) error
+	VisitThreatintelAbuseipdb(*ThreatIntelAbuseIpdb) error
+	VisitThreatintelThreatfox(*ThreatIntelThreatFox) error
+	VisitThreatintelVirustotal(*ThreatIntelVirusTotal) error
 	VisitTicketingAutotask(*TicketingAutotask) error
 	VisitTicketingAzureDevops(*TicketingAzureDevOps) error
 	VisitTicketingBmchelix(*TicketingBmchelix) error
@@ -25955,6 +26149,15 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.StorageMockStorage != nil {
 		return visitor.VisitStorageMockStorage(p.StorageMockStorage)
+	}
+	if p.ThreatintelAbuseipdb != nil {
+		return visitor.VisitThreatintelAbuseipdb(p.ThreatintelAbuseipdb)
+	}
+	if p.ThreatintelThreatfox != nil {
+		return visitor.VisitThreatintelThreatfox(p.ThreatintelThreatfox)
+	}
+	if p.ThreatintelVirustotal != nil {
+		return visitor.VisitThreatintelVirustotal(p.ThreatintelVirustotal)
 	}
 	if p.TicketingAutotask != nil {
 		return visitor.VisitTicketingAutotask(p.TicketingAutotask)
@@ -26489,6 +26692,15 @@ func (p *ProviderConfig) validate() error {
 	if p.StorageMockStorage != nil {
 		fields = append(fields, "storage_mock_storage")
 	}
+	if p.ThreatintelAbuseipdb != nil {
+		fields = append(fields, "threatintel_abuseipdb")
+	}
+	if p.ThreatintelThreatfox != nil {
+		fields = append(fields, "threatintel_threatfox")
+	}
+	if p.ThreatintelVirustotal != nil {
+		fields = append(fields, "threatintel_virustotal")
+	}
 	if p.TicketingAutotask != nil {
 		fields = append(fields, "ticketing_autotask")
 	}
@@ -26909,6 +27121,12 @@ const (
 	ProviderConfigIdStorageGcs ProviderConfigId = "storage_gcs"
 	// Synqly Test Provider
 	ProviderConfigIdStorageMock ProviderConfigId = "storage_mock_storage"
+	// AbuseIPDB
+	ProviderConfigIdThreatIntelAbuseIpdb ProviderConfigId = "threatintel_abuseipdb"
+	// ThreatFox
+	ProviderConfigIdThreatIntelThreatFox ProviderConfigId = "threatintel_threatfox"
+	// VirusTotal
+	ProviderConfigIdThreatIntelVirusTotal ProviderConfigId = "threatintel_virustotal"
 	// Autotask Operations Cloud
 	ProviderConfigIdTicketingAutotask ProviderConfigId = "ticketing_autotask"
 	// Azure DevOps Boards
@@ -27265,6 +27483,12 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdStorageGcs, nil
 	case "storage_mock_storage":
 		return ProviderConfigIdStorageMock, nil
+	case "threatintel_abuseipdb":
+		return ProviderConfigIdThreatIntelAbuseIpdb, nil
+	case "threatintel_threatfox":
+		return ProviderConfigIdThreatIntelThreatFox, nil
+	case "threatintel_virustotal":
+		return ProviderConfigIdThreatIntelVirusTotal, nil
 	case "ticketing_autotask":
 		return ProviderConfigIdTicketingAutotask, nil
 	case "ticketing_azure_devops":
@@ -36170,6 +36394,401 @@ func (t *TenableScCredential) validate() error {
 	return nil
 }
 
+type ThreatFoxCredential struct {
+	Type string
+	// The abuse.ch Auth-Key to authenticate lookups with.
+	Token *TokenCredential
+	// Reference to existing Auth-Key.
+	TokenId TokenCredentialId
+
+	rawJSON json.RawMessage
+}
+
+func (t *ThreatFoxCredential) GetType() string {
+	if t == nil {
+		return ""
+	}
+	return t.Type
+}
+
+func (t *ThreatFoxCredential) GetToken() *TokenCredential {
+	if t == nil {
+		return nil
+	}
+	return t.Token
+}
+
+func (t *ThreatFoxCredential) GetTokenId() TokenCredentialId {
+	if t == nil {
+		return ""
+	}
+	return t.TokenId
+}
+
+func (t *ThreatFoxCredential) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	t.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", t)
+	}
+	switch unmarshaler.Type {
+	case "token":
+		value := new(TokenCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		t.Token = value
+	case "token_id":
+		var valueUnmarshaler struct {
+			TokenId TokenCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		t.TokenId = valueUnmarshaler.TokenId
+	}
+	t.rawJSON = nil
+	return nil
+}
+
+func (t ThreatFoxCredential) MarshalJSON() ([]byte, error) {
+	if err := t.validate(); err != nil {
+		return nil, err
+	}
+	if t.Token != nil {
+		return internal.MarshalJSONWithExtraProperty(t.Token, "type", "token")
+	}
+	if t.TokenId != "" {
+		var marshaler = struct {
+			Type    string            `json:"type"`
+			TokenId TokenCredentialId `json:"value"`
+		}{
+			Type:    "token_id",
+			TokenId: t.TokenId,
+		}
+		return json.Marshal(marshaler)
+	}
+	if len(t.rawJSON) > 0 {
+		return t.rawJSON, nil
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", t)
+}
+
+type ThreatFoxCredentialVisitor interface {
+	VisitToken(*TokenCredential) error
+	VisitTokenId(TokenCredentialId) error
+}
+
+func (t *ThreatFoxCredential) Accept(visitor ThreatFoxCredentialVisitor) error {
+	if t.Token != nil {
+		return visitor.VisitToken(t.Token)
+	}
+	if t.TokenId != "" {
+		return visitor.VisitTokenId(t.TokenId)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", t)
+}
+
+func (t *ThreatFoxCredential) validate() error {
+	if t == nil {
+		return fmt.Errorf("type %T is nil", t)
+	}
+	var fields []string
+	if t.Token != nil {
+		fields = append(fields, "token")
+	}
+	if t.TokenId != "" {
+		fields = append(fields, "token_id")
+	}
+	if len(fields) == 0 {
+		if t.Type != "" {
+			if len(t.rawJSON) > 0 {
+				return nil
+			}
+			return fmt.Errorf("type %T defines a discriminant set to %q but the field is not set", t, t.Type)
+		}
+		return fmt.Errorf("type %T is empty", t)
+	}
+	if len(fields) > 1 {
+		return fmt.Errorf("type %T defines values for %s, but only one value is allowed", t, fields)
+	}
+	if t.Type != "" {
+		field := fields[0]
+		if t.Type != field {
+			return fmt.Errorf(
+				"type %T defines a discriminant set to %q, but it does not match the %T field; either remove or update the discriminant to match",
+				t,
+				t.Type,
+				t,
+			)
+		}
+	}
+	return nil
+}
+
+// Configuration for AbuseIPDB as a Threat Intelligence Provider.
+var (
+	threatIntelAbuseIpdbFieldCredential = big.NewInt(1 << 0)
+)
+
+type ThreatIntelAbuseIpdb struct {
+	// The AbuseIPDB API key to authenticate with the provider.
+	Credential *AbuseIpdbCredential `json:"credential" url:"credential"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (t *ThreatIntelAbuseIpdb) GetCredential() *AbuseIpdbCredential {
+	if t == nil {
+		return nil
+	}
+	return t.Credential
+}
+
+func (t *ThreatIntelAbuseIpdb) GetExtraProperties() map[string]interface{} {
+	if t == nil {
+		return nil
+	}
+	return t.extraProperties
+}
+
+func (t *ThreatIntelAbuseIpdb) require(field *big.Int) {
+	if t.explicitFields == nil {
+		t.explicitFields = big.NewInt(0)
+	}
+	t.explicitFields.Or(t.explicitFields, field)
+}
+
+// SetCredential sets the Credential field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (t *ThreatIntelAbuseIpdb) SetCredential(credential *AbuseIpdbCredential) {
+	t.Credential = credential
+	t.require(threatIntelAbuseIpdbFieldCredential)
+}
+
+func (t *ThreatIntelAbuseIpdb) UnmarshalJSON(data []byte) error {
+	type unmarshaler ThreatIntelAbuseIpdb
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*t = ThreatIntelAbuseIpdb(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *t)
+	if err != nil {
+		return err
+	}
+	t.extraProperties = extraProperties
+	t.rawJSON = nil
+	return nil
+}
+
+func (t *ThreatIntelAbuseIpdb) MarshalJSON() ([]byte, error) {
+	type embed ThreatIntelAbuseIpdb
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*t),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, t.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (t *ThreatIntelAbuseIpdb) String() string {
+	if t == nil {
+		return "<nil>"
+	}
+	if len(t.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(t.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(t); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", t)
+}
+
+// Configuration for ThreatFox as a Threat Intelligence Provider.
+var (
+	threatIntelThreatFoxFieldCredential = big.NewInt(1 << 0)
+)
+
+type ThreatIntelThreatFox struct {
+	// An abuse.ch Auth-Key to authenticate with the provider.
+	Credential *ThreatFoxCredential `json:"credential" url:"credential"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (t *ThreatIntelThreatFox) GetCredential() *ThreatFoxCredential {
+	if t == nil {
+		return nil
+	}
+	return t.Credential
+}
+
+func (t *ThreatIntelThreatFox) GetExtraProperties() map[string]interface{} {
+	if t == nil {
+		return nil
+	}
+	return t.extraProperties
+}
+
+func (t *ThreatIntelThreatFox) require(field *big.Int) {
+	if t.explicitFields == nil {
+		t.explicitFields = big.NewInt(0)
+	}
+	t.explicitFields.Or(t.explicitFields, field)
+}
+
+// SetCredential sets the Credential field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (t *ThreatIntelThreatFox) SetCredential(credential *ThreatFoxCredential) {
+	t.Credential = credential
+	t.require(threatIntelThreatFoxFieldCredential)
+}
+
+func (t *ThreatIntelThreatFox) UnmarshalJSON(data []byte) error {
+	type unmarshaler ThreatIntelThreatFox
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*t = ThreatIntelThreatFox(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *t)
+	if err != nil {
+		return err
+	}
+	t.extraProperties = extraProperties
+	t.rawJSON = nil
+	return nil
+}
+
+func (t *ThreatIntelThreatFox) MarshalJSON() ([]byte, error) {
+	type embed ThreatIntelThreatFox
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*t),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, t.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (t *ThreatIntelThreatFox) String() string {
+	if t == nil {
+		return "<nil>"
+	}
+	if len(t.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(t.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(t); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", t)
+}
+
+// Configuration for VirusTotal as a Threat Intelligence Provider.
+var (
+	threatIntelVirusTotalFieldCredential = big.NewInt(1 << 0)
+)
+
+type ThreatIntelVirusTotal struct {
+	// A VirusTotal API key to authenticate with the provider.
+	Credential *VirusTotalCredential `json:"credential" url:"credential"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (t *ThreatIntelVirusTotal) GetCredential() *VirusTotalCredential {
+	if t == nil {
+		return nil
+	}
+	return t.Credential
+}
+
+func (t *ThreatIntelVirusTotal) GetExtraProperties() map[string]interface{} {
+	if t == nil {
+		return nil
+	}
+	return t.extraProperties
+}
+
+func (t *ThreatIntelVirusTotal) require(field *big.Int) {
+	if t.explicitFields == nil {
+		t.explicitFields = big.NewInt(0)
+	}
+	t.explicitFields.Or(t.explicitFields, field)
+}
+
+// SetCredential sets the Credential field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (t *ThreatIntelVirusTotal) SetCredential(credential *VirusTotalCredential) {
+	t.Credential = credential
+	t.require(threatIntelVirusTotalFieldCredential)
+}
+
+func (t *ThreatIntelVirusTotal) UnmarshalJSON(data []byte) error {
+	type unmarshaler ThreatIntelVirusTotal
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*t = ThreatIntelVirusTotal(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *t)
+	if err != nil {
+		return err
+	}
+	t.extraProperties = extraProperties
+	t.rawJSON = nil
+	return nil
+}
+
+func (t *ThreatIntelVirusTotal) MarshalJSON() ([]byte, error) {
+	type embed ThreatIntelVirusTotal
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*t),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, t.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (t *ThreatIntelVirusTotal) String() string {
+	if t == nil {
+		return "<nil>"
+	}
+	if len(t.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(t.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(t); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", t)
+}
+
 type TicketingIvantiDataset string
 
 const (
@@ -39748,6 +40367,143 @@ func NewVeracodeRegionFromString(s string) (VeracodeRegion, error) {
 
 func (v VeracodeRegion) Ptr() *VeracodeRegion {
 	return &v
+}
+
+type VirusTotalCredential struct {
+	Type string
+	// The VirusTotal API key to authenticate lookups with.
+	Token *TokenCredential
+	// Reference to existing API Key.
+	TokenId TokenCredentialId
+
+	rawJSON json.RawMessage
+}
+
+func (v *VirusTotalCredential) GetType() string {
+	if v == nil {
+		return ""
+	}
+	return v.Type
+}
+
+func (v *VirusTotalCredential) GetToken() *TokenCredential {
+	if v == nil {
+		return nil
+	}
+	return v.Token
+}
+
+func (v *VirusTotalCredential) GetTokenId() TokenCredentialId {
+	if v == nil {
+		return ""
+	}
+	return v.TokenId
+}
+
+func (v *VirusTotalCredential) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	v.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", v)
+	}
+	switch unmarshaler.Type {
+	case "token":
+		value := new(TokenCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		v.Token = value
+	case "token_id":
+		var valueUnmarshaler struct {
+			TokenId TokenCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		v.TokenId = valueUnmarshaler.TokenId
+	}
+	v.rawJSON = nil
+	return nil
+}
+
+func (v VirusTotalCredential) MarshalJSON() ([]byte, error) {
+	if err := v.validate(); err != nil {
+		return nil, err
+	}
+	if v.Token != nil {
+		return internal.MarshalJSONWithExtraProperty(v.Token, "type", "token")
+	}
+	if v.TokenId != "" {
+		var marshaler = struct {
+			Type    string            `json:"type"`
+			TokenId TokenCredentialId `json:"value"`
+		}{
+			Type:    "token_id",
+			TokenId: v.TokenId,
+		}
+		return json.Marshal(marshaler)
+	}
+	if len(v.rawJSON) > 0 {
+		return v.rawJSON, nil
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", v)
+}
+
+type VirusTotalCredentialVisitor interface {
+	VisitToken(*TokenCredential) error
+	VisitTokenId(TokenCredentialId) error
+}
+
+func (v *VirusTotalCredential) Accept(visitor VirusTotalCredentialVisitor) error {
+	if v.Token != nil {
+		return visitor.VisitToken(v.Token)
+	}
+	if v.TokenId != "" {
+		return visitor.VisitTokenId(v.TokenId)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", v)
+}
+
+func (v *VirusTotalCredential) validate() error {
+	if v == nil {
+		return fmt.Errorf("type %T is nil", v)
+	}
+	var fields []string
+	if v.Token != nil {
+		fields = append(fields, "token")
+	}
+	if v.TokenId != "" {
+		fields = append(fields, "token_id")
+	}
+	if len(fields) == 0 {
+		if v.Type != "" {
+			if len(v.rawJSON) > 0 {
+				return nil
+			}
+			return fmt.Errorf("type %T defines a discriminant set to %q but the field is not set", v, v.Type)
+		}
+		return fmt.Errorf("type %T is empty", v)
+	}
+	if len(fields) > 1 {
+		return fmt.Errorf("type %T defines values for %s, but only one value is allowed", v, fields)
+	}
+	if v.Type != "" {
+		field := fields[0]
+		if v.Type != field {
+			return fmt.Errorf(
+				"type %T defines a discriminant set to %q, but it does not match the %T field; either remove or update the discriminant to match",
+				v,
+				v.Type,
+				v,
+			)
+		}
+	}
+	return nil
 }
 
 type VulnerabilitiesAxoniusDataset string

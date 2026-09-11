@@ -27,6 +27,7 @@ const (
 	CategoryIdSiem               CategoryId = "siem"
 	CategoryIdSink               CategoryId = "sink"
 	CategoryIdStorage            CategoryId = "storage"
+	CategoryIdThreatintel        CategoryId = "threatintel"
 	CategoryIdTicketing          CategoryId = "ticketing"
 	CategoryIdVulnerabilities    CategoryId = "vulnerabilities"
 )
@@ -67,6 +68,8 @@ func NewCategoryIdFromString(s string) (CategoryId, error) {
 		return CategoryIdSink, nil
 	case "storage":
 		return CategoryIdStorage, nil
+	case "threatintel":
+		return CategoryIdThreatintel, nil
 	case "ticketing":
 		return CategoryIdTicketing, nil
 	case "vulnerabilities":

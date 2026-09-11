@@ -46,6 +46,7 @@ import (
 	compliancetestinventoryinfo "github.com/synqly/go-sdk/v2/client/engine/ocsf/v180/compliancetestinventoryinfo"
 	conversationactivity "github.com/synqly/go-sdk/v2/client/engine/ocsf/v180/conversationactivity"
 	noteactivity "github.com/synqly/go-sdk/v2/client/engine/ocsf/v180/noteactivity"
+	osintinventoryinfo "github.com/synqly/go-sdk/v2/client/engine/ocsf/v180/osintinventoryinfo"
 	phishingsimulationinventoryinfo "github.com/synqly/go-sdk/v2/client/engine/ocsf/v180/phishingsimulationinventoryinfo"
 	softwareinventoryinfo "github.com/synqly/go-sdk/v2/client/engine/ocsf/v180/softwareinventoryinfo"
 	trainingcampaigninventoryinfo "github.com/synqly/go-sdk/v2/client/engine/ocsf/v180/trainingcampaigninventoryinfo"
@@ -98,6 +99,7 @@ type Event struct {
 	TrainingCampaignInventoryInfo     *trainingcampaigninventoryinfo.TrainingCampaignInventoryInfo
 	PhishingSimulationInventoryInfo   *phishingsimulationinventoryinfo.PhishingSimulationInventoryInfo
 	UserInventoryInfo                 *userinventory.UserInventory
+	OsintInventoryInfo                *osintinventoryinfo.OsintInventoryInfo
 
 	rawJSON json.RawMessage
 }
@@ -417,6 +419,13 @@ func (e *Event) GetUserInventoryInfo() *userinventory.UserInventory {
 	return e.UserInventoryInfo
 }
 
+func (e *Event) GetOsintInventoryInfo() *osintinventoryinfo.OsintInventoryInfo {
+	if e == nil {
+		return nil
+	}
+	return e.OsintInventoryInfo
+}
+
 func (e *Event) UnmarshalJSON(data []byte) error {
 	var unmarshaler struct {
 		ClassName string `json:"class_name"`
@@ -693,6 +702,12 @@ func (e *Event) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		e.UserInventoryInfo = value
+	case "OSINT Inventory Info":
+		value := new(osintinventoryinfo.OsintInventoryInfo)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.OsintInventoryInfo = value
 	}
 	e.rawJSON = nil
 	return nil
@@ -834,6 +849,9 @@ func (e Event) MarshalJSON() ([]byte, error) {
 	if e.UserInventoryInfo != nil {
 		return internal.MarshalJSONWithExtraProperty(e.UserInventoryInfo, "class_name", "User Inventory Info")
 	}
+	if e.OsintInventoryInfo != nil {
+		return internal.MarshalJSONWithExtraProperty(e.OsintInventoryInfo, "class_name", "OSINT Inventory Info")
+	}
 	if len(e.rawJSON) > 0 {
 		return e.rawJSON, nil
 	}
@@ -885,6 +903,7 @@ type EventVisitor interface {
 	VisitTrainingCampaignInventoryInfo(*trainingcampaigninventoryinfo.TrainingCampaignInventoryInfo) error
 	VisitPhishingSimulationInventoryInfo(*phishingsimulationinventoryinfo.PhishingSimulationInventoryInfo) error
 	VisitUserInventoryInfo(*userinventory.UserInventory) error
+	VisitOsintInventoryInfo(*osintinventoryinfo.OsintInventoryInfo) error
 }
 
 func (e *Event) Accept(visitor EventVisitor) error {
@@ -1019,6 +1038,9 @@ func (e *Event) Accept(visitor EventVisitor) error {
 	}
 	if e.UserInventoryInfo != nil {
 		return visitor.VisitUserInventoryInfo(e.UserInventoryInfo)
+	}
+	if e.OsintInventoryInfo != nil {
+		return visitor.VisitOsintInventoryInfo(e.OsintInventoryInfo)
 	}
 	return fmt.Errorf("type %T does not define a non-empty union type", e)
 }
@@ -1159,6 +1181,9 @@ func (e *Event) validate() error {
 	}
 	if e.UserInventoryInfo != nil {
 		fields = append(fields, "User Inventory Info")
+	}
+	if e.OsintInventoryInfo != nil {
+		fields = append(fields, "OSINT Inventory Info")
 	}
 	if len(fields) == 0 {
 		if e.ClassName != "" {

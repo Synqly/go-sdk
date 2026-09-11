@@ -126,6 +126,10 @@ const (
 	OperationIdStorageDownloadFile                              OperationId = "storage_download_file"
 	OperationIdStorageListFiles                                 OperationId = "storage_list_files"
 	OperationIdStorageUploadFile                                OperationId = "storage_upload_file"
+	OperationIdThreatintelLookupDomain                          OperationId = "threatintel_lookup_domain"
+	OperationIdThreatintelLookupHash                            OperationId = "threatintel_lookup_hash"
+	OperationIdThreatintelLookupIp                              OperationId = "threatintel_lookup_ip"
+	OperationIdThreatintelLookupUrl                             OperationId = "threatintel_lookup_url"
 	OperationIdTicketingCreateAttachment                        OperationId = "ticketing_create_attachment"
 	OperationIdTicketingCreateComment                           OperationId = "ticketing_create_comment"
 	OperationIdTicketingCreateNote                              OperationId = "ticketing_create_note"
@@ -396,6 +400,14 @@ func NewOperationIdFromString(s string) (OperationId, error) {
 		return OperationIdStorageListFiles, nil
 	case "storage_upload_file":
 		return OperationIdStorageUploadFile, nil
+	case "threatintel_lookup_domain":
+		return OperationIdThreatintelLookupDomain, nil
+	case "threatintel_lookup_hash":
+		return OperationIdThreatintelLookupHash, nil
+	case "threatintel_lookup_ip":
+		return OperationIdThreatintelLookupIp, nil
+	case "threatintel_lookup_url":
+		return OperationIdThreatintelLookupUrl, nil
 	case "ticketing_create_attachment":
 		return OperationIdTicketingCreateAttachment, nil
 	case "ticketing_create_comment":
