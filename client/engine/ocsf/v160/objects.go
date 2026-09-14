@@ -3079,19 +3079,18 @@ var (
 	applicationFieldLabels               = big.NewInt(1 << 5)
 	applicationFieldName                 = big.NewInt(1 << 6)
 	applicationFieldOwner                = big.NewInt(1 << 7)
-	applicationFieldRawData              = big.NewInt(1 << 8)
-	applicationFieldRegion               = big.NewInt(1 << 9)
-	applicationFieldResourceRelationship = big.NewInt(1 << 10)
-	applicationFieldRiskLevel            = big.NewInt(1 << 11)
-	applicationFieldRiskLevelId          = big.NewInt(1 << 12)
-	applicationFieldRiskScore            = big.NewInt(1 << 13)
-	applicationFieldSbom                 = big.NewInt(1 << 14)
-	applicationFieldTags                 = big.NewInt(1 << 15)
-	applicationFieldType                 = big.NewInt(1 << 16)
-	applicationFieldUid                  = big.NewInt(1 << 17)
-	applicationFieldUidAlt               = big.NewInt(1 << 18)
-	applicationFieldUrl                  = big.NewInt(1 << 19)
-	applicationFieldVersion              = big.NewInt(1 << 20)
+	applicationFieldRegion               = big.NewInt(1 << 8)
+	applicationFieldResourceRelationship = big.NewInt(1 << 9)
+	applicationFieldRiskLevel            = big.NewInt(1 << 10)
+	applicationFieldRiskLevelId          = big.NewInt(1 << 11)
+	applicationFieldRiskScore            = big.NewInt(1 << 12)
+	applicationFieldSbom                 = big.NewInt(1 << 13)
+	applicationFieldTags                 = big.NewInt(1 << 14)
+	applicationFieldType                 = big.NewInt(1 << 15)
+	applicationFieldUid                  = big.NewInt(1 << 16)
+	applicationFieldUidAlt               = big.NewInt(1 << 17)
+	applicationFieldUrl                  = big.NewInt(1 << 18)
+	applicationFieldVersion              = big.NewInt(1 << 19)
 )
 
 type Application struct {
@@ -3111,8 +3110,6 @@ type Application struct {
 	Name *string `json:"name,omitempty" url:"name,omitempty"`
 	// The identity of the service or user account that owns the application.
 	Owner *User `json:"owner,omitempty" url:"owner,omitempty"`
-	// The raw event/finding data as received from the source.
-	RawData *string `json:"raw_data,omitempty" url:"raw_data,omitempty"`
 	// The cloud region of the resource.
 	Region *string `json:"region,omitempty" url:"region,omitempty"`
 	// A graph representation showing how this application relates to and interacts with other entities in the environment. This can include parent/child relationships, dependencies, or other connections.
@@ -3199,13 +3196,6 @@ func (a *Application) GetOwner() *User {
 		return nil
 	}
 	return a.Owner
-}
-
-func (a *Application) GetRawData() *string {
-	if a == nil {
-		return nil
-	}
-	return a.RawData
 }
 
 func (a *Application) GetRegion() *string {
@@ -3360,13 +3350,6 @@ func (a *Application) SetName(name *string) {
 func (a *Application) SetOwner(owner *User) {
 	a.Owner = owner
 	a.require(applicationFieldOwner)
-}
-
-// SetRawData sets the RawData field and marks it as non-optional;
-// this prevents an empty or null value for this field from being omitted during serialization.
-func (a *Application) SetRawData(rawData *string) {
-	a.RawData = rawData
-	a.require(applicationFieldRawData)
 }
 
 // SetRegion sets the Region field and marks it as non-optional;
