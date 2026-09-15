@@ -19100,19 +19100,22 @@ func (m *MimecastCloudGatewayCredential) validate() error {
 	return nil
 }
 
-// Connect Synqly to AWS VPC Flow Logs.
+// Configuration for AWS VPC Flow Logs and Route 53 Resolver query logs.
 //
 // [Configuration guide](https://docs.synqly.com/guides/provider-configuration/aws-networksecurity-setup)
 var (
 	networkSecurityAwsFieldCredential                 = big.NewInt(1 << 0)
-	networkSecurityAwsFieldRegion                     = big.NewInt(1 << 1)
-	networkSecurityAwsFieldTrafficLogConfigurationIds = big.NewInt(1 << 2)
+	networkSecurityAwsFieldDnsLogConfigurationIds     = big.NewInt(1 << 1)
+	networkSecurityAwsFieldRegion                     = big.NewInt(1 << 2)
+	networkSecurityAwsFieldTrafficLogConfigurationIds = big.NewInt(1 << 3)
 )
 
 type NetworkSecurityAws struct {
-	// AWS credentials that can read VPC Flow Logs and their CloudWatch Logs or S3 destinations.
+	// AWS credentials that can read VPC Flow Logs, Route 53 Resolver query logs, and their CloudWatch Logs or S3 destinations.
 	Credential *AwsProviderCredential `json:"credential" url:"credential"`
-	// AWS region where your VPC Flow Logs are configured (for example, `us-east-1`).
+	// List of Route 53 Resolver query log configuration IDs (`rqlc-...`). Leave empty to include all query log configurations in the region.
+	DnsLogConfigurationIds []string `json:"dns_log_configuration_ids,omitempty" url:"dns_log_configuration_ids,omitempty"`
+	// AWS region where your VPC Flow Logs and Route 53 Resolver query logs are configured (for example, `us-east-1`).
 	Region AwsRegion `json:"region" url:"region"`
 	// Optional list of VPC Flow Log IDs (`fl-...`). Leave empty to include all flow logs in the region.
 	TrafficLogConfigurationIds []string `json:"traffic_log_configuration_ids,omitempty" url:"traffic_log_configuration_ids,omitempty"`
@@ -19129,6 +19132,13 @@ func (n *NetworkSecurityAws) GetCredential() *AwsProviderCredential {
 		return nil
 	}
 	return n.Credential
+}
+
+func (n *NetworkSecurityAws) GetDnsLogConfigurationIds() []string {
+	if n == nil {
+		return nil
+	}
+	return n.DnsLogConfigurationIds
 }
 
 func (n *NetworkSecurityAws) GetRegion() AwsRegion {
@@ -19164,6 +19174,13 @@ func (n *NetworkSecurityAws) require(field *big.Int) {
 func (n *NetworkSecurityAws) SetCredential(credential *AwsProviderCredential) {
 	n.Credential = credential
 	n.require(networkSecurityAwsFieldCredential)
+}
+
+// SetDnsLogConfigurationIds sets the DnsLogConfigurationIds field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (n *NetworkSecurityAws) SetDnsLogConfigurationIds(dnsLogConfigurationIds []string) {
+	n.DnsLogConfigurationIds = dnsLogConfigurationIds
+	n.require(networkSecurityAwsFieldDnsLogConfigurationIds)
 }
 
 // SetRegion sets the Region field and marks it as non-optional;
@@ -22364,7 +22381,7 @@ type ProviderConfig struct {
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/pagerduty-incident-response-setup)
 	IncidentresponsePagerduty *IncidentResponsePagerDuty
-	// Connect Synqly to AWS VPC Flow Logs.
+	// Configuration for AWS VPC Flow Logs and Route 53 Resolver query logs.
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/aws-networksecurity-setup)
 	NetworksecurityAws *NetworkSecurityAws

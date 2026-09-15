@@ -8052,6 +8052,173 @@ client.Networksecurity.QueryTrafficEvents(
 </dl>
 </details>
 
+<details><summary><code>client.Networksecurity.QueryDnsLogConfigurations() -> *engine.QueryDnsLogConfigurationsResponse</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Returns DNS log configurations discovered for the integration.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```go
+request := &engine.QueryDnsLogConfigurationsRequest{}
+client.Networksecurity.QueryDnsLogConfigurations(
+        context.TODO(),
+        request,
+    )
+}
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**meta:** `*string` — Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**limit:** `*int` — Number of DNS log configurations to return. Defaults to 100 with a maximum of 200. If a provider has a maximum limit lower than 200, the provider's maximum limit will be used instead.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**filter:** `*string` — Filter results by this query. For more information on filtering, refer to our [Filtering Guide](https://docs.synqly.com/guides/connectors/networksecurity/query-filters). Defaults to no filter. If used more than once, the queries are ANDed together. No network security provider currently supports filters on this endpoint, so a request that includes a filter is rejected with a 400 error.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**cursor:** `*string` — Start search from cursor position.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.Networksecurity.QueryDnsEvents() -> *engine.QueryDnsEventsResponse</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Returns DNS events from DNS log configurations on the
+integration. Results are normalized to OCSF DNS Activity (class_uid 4003).
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```go
+request := &engine.QueryDnsEventsRequest{}
+client.Networksecurity.QueryDnsEvents(
+        context.TODO(),
+        request,
+    )
+}
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**meta:** `*string` — Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**limit:** `*int` — Number of DNS events to return. Defaults to 100 with a maximum of 200. If a provider has a maximum limit lower than 200, the provider's maximum limit will be used instead.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**filter:** `*string` — Filter results by this query. For more information on filtering, refer to our [Filtering Guide](https://docs.synqly.com/guides/connectors/networksecurity/query-filters). Defaults to no filter. If used more than once, the queries are ANDed together. Network security providers support only the `time[gte]` and `time[lte]` filters on this endpoint, and any other filter is rejected with a 400 error. When no time filter is supplied, the query covers the most recent hour.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**cursor:** `*string` — Start search from cursor position.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
 ## Notifications
 <details><summary><code>client.Notifications.GetMessage(NotificationId) -> *engine.GetNotificationResponse</code></summary>
 <dl>

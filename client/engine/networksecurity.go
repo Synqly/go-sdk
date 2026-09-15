@@ -7,9 +7,122 @@ import (
 	fmt "fmt"
 	internal "github.com/synqly/go-sdk/v2/client/engine/internal"
 	cloudresourcesinventoryinfo "github.com/synqly/go-sdk/v2/client/engine/ocsf/v180/cloudresourcesinventoryinfo"
+	dnsactivity "github.com/synqly/go-sdk/v2/client/engine/ocsf/v180/dnsactivity"
 	networkactivity "github.com/synqly/go-sdk/v2/client/engine/ocsf/v180/networkactivity"
 	big "math/big"
 )
+
+var (
+	queryDnsEventsRequestFieldMeta   = big.NewInt(1 << 0)
+	queryDnsEventsRequestFieldLimit  = big.NewInt(1 << 1)
+	queryDnsEventsRequestFieldFilter = big.NewInt(1 << 2)
+	queryDnsEventsRequestFieldCursor = big.NewInt(1 << 3)
+)
+
+type QueryDnsEventsRequest struct {
+	// Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
+	Meta []*string `json:"-" url:"meta,omitempty"`
+	// Number of DNS events to return. Defaults to 100 with a maximum of 200. If a provider has a maximum limit lower than 200, the provider's maximum limit will be used instead.
+	Limit *int `json:"-" url:"limit,omitempty"`
+	// Filter results by this query. For more information on filtering, refer to our [Filtering Guide](https://docs.synqly.com/guides/connectors/networksecurity/query-filters). Defaults to no filter. If used more than once, the queries are ANDed together. Network security providers support only the `time[gte]` and `time[lte]` filters on this endpoint, and any other filter is rejected with a 400 error. When no time filter is supplied, the query covers the most recent hour.
+	Filter []*string `json:"-" url:"filter,omitempty"`
+	// Start search from cursor position.
+	Cursor *string `json:"-" url:"cursor,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+}
+
+func (q *QueryDnsEventsRequest) require(field *big.Int) {
+	if q.explicitFields == nil {
+		q.explicitFields = big.NewInt(0)
+	}
+	q.explicitFields.Or(q.explicitFields, field)
+}
+
+// SetMeta sets the Meta field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryDnsEventsRequest) SetMeta(meta []*string) {
+	q.Meta = meta
+	q.require(queryDnsEventsRequestFieldMeta)
+}
+
+// SetLimit sets the Limit field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryDnsEventsRequest) SetLimit(limit *int) {
+	q.Limit = limit
+	q.require(queryDnsEventsRequestFieldLimit)
+}
+
+// SetFilter sets the Filter field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryDnsEventsRequest) SetFilter(filter []*string) {
+	q.Filter = filter
+	q.require(queryDnsEventsRequestFieldFilter)
+}
+
+// SetCursor sets the Cursor field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryDnsEventsRequest) SetCursor(cursor *string) {
+	q.Cursor = cursor
+	q.require(queryDnsEventsRequestFieldCursor)
+}
+
+var (
+	queryDnsLogConfigurationsRequestFieldMeta   = big.NewInt(1 << 0)
+	queryDnsLogConfigurationsRequestFieldLimit  = big.NewInt(1 << 1)
+	queryDnsLogConfigurationsRequestFieldFilter = big.NewInt(1 << 2)
+	queryDnsLogConfigurationsRequestFieldCursor = big.NewInt(1 << 3)
+)
+
+type QueryDnsLogConfigurationsRequest struct {
+	// Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
+	Meta []*string `json:"-" url:"meta,omitempty"`
+	// Number of DNS log configurations to return. Defaults to 100 with a maximum of 200. If a provider has a maximum limit lower than 200, the provider's maximum limit will be used instead.
+	Limit *int `json:"-" url:"limit,omitempty"`
+	// Filter results by this query. For more information on filtering, refer to our [Filtering Guide](https://docs.synqly.com/guides/connectors/networksecurity/query-filters). Defaults to no filter. If used more than once, the queries are ANDed together. No network security provider currently supports filters on this endpoint, so a request that includes a filter is rejected with a 400 error.
+	Filter []*string `json:"-" url:"filter,omitempty"`
+	// Start search from cursor position.
+	Cursor *string `json:"-" url:"cursor,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+}
+
+func (q *QueryDnsLogConfigurationsRequest) require(field *big.Int) {
+	if q.explicitFields == nil {
+		q.explicitFields = big.NewInt(0)
+	}
+	q.explicitFields.Or(q.explicitFields, field)
+}
+
+// SetMeta sets the Meta field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryDnsLogConfigurationsRequest) SetMeta(meta []*string) {
+	q.Meta = meta
+	q.require(queryDnsLogConfigurationsRequestFieldMeta)
+}
+
+// SetLimit sets the Limit field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryDnsLogConfigurationsRequest) SetLimit(limit *int) {
+	q.Limit = limit
+	q.require(queryDnsLogConfigurationsRequestFieldLimit)
+}
+
+// SetFilter sets the Filter field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryDnsLogConfigurationsRequest) SetFilter(filter []*string) {
+	q.Filter = filter
+	q.require(queryDnsLogConfigurationsRequestFieldFilter)
+}
+
+// SetCursor sets the Cursor field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryDnsLogConfigurationsRequest) SetCursor(cursor *string) {
+	q.Cursor = cursor
+	q.require(queryDnsLogConfigurationsRequestFieldCursor)
+}
 
 var (
 	queryTrafficEventsRequestFieldMeta   = big.NewInt(1 << 0)
@@ -121,6 +234,284 @@ func (q *QueryTrafficLogConfigurationsRequest) SetFilter(filter []*string) {
 func (q *QueryTrafficLogConfigurationsRequest) SetCursor(cursor *string) {
 	q.Cursor = cursor
 	q.require(queryTrafficLogConfigurationsRequestFieldCursor)
+}
+
+// Normalized DNS event.
+type DnsEvent = *dnsactivity.DnsActivity
+
+// DNS log configuration discovered for the integration.
+type DnsLogConfiguration = *cloudresourcesinventoryinfo.CloudResourcesInventoryInfo
+
+var (
+	queryDnsEventsResponseFieldMessages = big.NewInt(1 << 0)
+	queryDnsEventsResponseFieldMeta     = big.NewInt(1 << 1)
+	queryDnsEventsResponseFieldCursor   = big.NewInt(1 << 2)
+	queryDnsEventsResponseFieldResult   = big.NewInt(1 << 3)
+)
+
+type QueryDnsEventsResponse struct {
+	// Additional messages from the service response that may be helpful to the client.
+	Messages *MessagesResponse `json:"messages,omitempty" url:"messages,omitempty"`
+	// Various metadata about the results organized by group, then type, then field.
+	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
+	// Cursor to use to retrieve the next page of results
+	Cursor string `json:"cursor" url:"cursor"`
+	// List of DNS events matching the query.
+	Result []DnsEvent `json:"result" url:"result"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (q *QueryDnsEventsResponse) GetMessages() *MessagesResponse {
+	if q == nil {
+		return nil
+	}
+	return q.Messages
+}
+
+func (q *QueryDnsEventsResponse) GetMeta() *MetaResponse {
+	if q == nil {
+		return nil
+	}
+	return q.Meta
+}
+
+func (q *QueryDnsEventsResponse) GetCursor() string {
+	if q == nil {
+		return ""
+	}
+	return q.Cursor
+}
+
+func (q *QueryDnsEventsResponse) GetResult() []DnsEvent {
+	if q == nil {
+		return nil
+	}
+	return q.Result
+}
+
+func (q *QueryDnsEventsResponse) GetExtraProperties() map[string]interface{} {
+	if q == nil {
+		return nil
+	}
+	return q.extraProperties
+}
+
+func (q *QueryDnsEventsResponse) require(field *big.Int) {
+	if q.explicitFields == nil {
+		q.explicitFields = big.NewInt(0)
+	}
+	q.explicitFields.Or(q.explicitFields, field)
+}
+
+// SetMessages sets the Messages field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryDnsEventsResponse) SetMessages(messages *MessagesResponse) {
+	q.Messages = messages
+	q.require(queryDnsEventsResponseFieldMessages)
+}
+
+// SetMeta sets the Meta field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryDnsEventsResponse) SetMeta(meta *MetaResponse) {
+	q.Meta = meta
+	q.require(queryDnsEventsResponseFieldMeta)
+}
+
+// SetCursor sets the Cursor field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryDnsEventsResponse) SetCursor(cursor string) {
+	q.Cursor = cursor
+	q.require(queryDnsEventsResponseFieldCursor)
+}
+
+// SetResult sets the Result field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryDnsEventsResponse) SetResult(result []DnsEvent) {
+	q.Result = result
+	q.require(queryDnsEventsResponseFieldResult)
+}
+
+func (q *QueryDnsEventsResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler QueryDnsEventsResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*q = QueryDnsEventsResponse(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *q)
+	if err != nil {
+		return err
+	}
+	q.extraProperties = extraProperties
+	q.rawJSON = nil
+	return nil
+}
+
+func (q *QueryDnsEventsResponse) MarshalJSON() ([]byte, error) {
+	type embed QueryDnsEventsResponse
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*q),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, q.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (q *QueryDnsEventsResponse) String() string {
+	if q == nil {
+		return "<nil>"
+	}
+	if len(q.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(q.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(q); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", q)
+}
+
+var (
+	queryDnsLogConfigurationsResponseFieldMessages = big.NewInt(1 << 0)
+	queryDnsLogConfigurationsResponseFieldMeta     = big.NewInt(1 << 1)
+	queryDnsLogConfigurationsResponseFieldCursor   = big.NewInt(1 << 2)
+	queryDnsLogConfigurationsResponseFieldResult   = big.NewInt(1 << 3)
+)
+
+type QueryDnsLogConfigurationsResponse struct {
+	// Additional messages from the service response that may be helpful to the client.
+	Messages *MessagesResponse `json:"messages,omitempty" url:"messages,omitempty"`
+	// Various metadata about the results organized by group, then type, then field.
+	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
+	// Cursor to use to retrieve the next page of results
+	Cursor string `json:"cursor" url:"cursor"`
+	// List of DNS log configurations matching the query.
+	Result []DnsLogConfiguration `json:"result" url:"result"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (q *QueryDnsLogConfigurationsResponse) GetMessages() *MessagesResponse {
+	if q == nil {
+		return nil
+	}
+	return q.Messages
+}
+
+func (q *QueryDnsLogConfigurationsResponse) GetMeta() *MetaResponse {
+	if q == nil {
+		return nil
+	}
+	return q.Meta
+}
+
+func (q *QueryDnsLogConfigurationsResponse) GetCursor() string {
+	if q == nil {
+		return ""
+	}
+	return q.Cursor
+}
+
+func (q *QueryDnsLogConfigurationsResponse) GetResult() []DnsLogConfiguration {
+	if q == nil {
+		return nil
+	}
+	return q.Result
+}
+
+func (q *QueryDnsLogConfigurationsResponse) GetExtraProperties() map[string]interface{} {
+	if q == nil {
+		return nil
+	}
+	return q.extraProperties
+}
+
+func (q *QueryDnsLogConfigurationsResponse) require(field *big.Int) {
+	if q.explicitFields == nil {
+		q.explicitFields = big.NewInt(0)
+	}
+	q.explicitFields.Or(q.explicitFields, field)
+}
+
+// SetMessages sets the Messages field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryDnsLogConfigurationsResponse) SetMessages(messages *MessagesResponse) {
+	q.Messages = messages
+	q.require(queryDnsLogConfigurationsResponseFieldMessages)
+}
+
+// SetMeta sets the Meta field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryDnsLogConfigurationsResponse) SetMeta(meta *MetaResponse) {
+	q.Meta = meta
+	q.require(queryDnsLogConfigurationsResponseFieldMeta)
+}
+
+// SetCursor sets the Cursor field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryDnsLogConfigurationsResponse) SetCursor(cursor string) {
+	q.Cursor = cursor
+	q.require(queryDnsLogConfigurationsResponseFieldCursor)
+}
+
+// SetResult sets the Result field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryDnsLogConfigurationsResponse) SetResult(result []DnsLogConfiguration) {
+	q.Result = result
+	q.require(queryDnsLogConfigurationsResponseFieldResult)
+}
+
+func (q *QueryDnsLogConfigurationsResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler QueryDnsLogConfigurationsResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*q = QueryDnsLogConfigurationsResponse(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *q)
+	if err != nil {
+		return err
+	}
+	q.extraProperties = extraProperties
+	q.rawJSON = nil
+	return nil
+}
+
+func (q *QueryDnsLogConfigurationsResponse) MarshalJSON() ([]byte, error) {
+	type embed QueryDnsLogConfigurationsResponse
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*q),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, q.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (q *QueryDnsLogConfigurationsResponse) String() string {
+	if q == nil {
+		return "<nil>"
+	}
+	if len(q.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(q.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(q); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", q)
 }
 
 var (

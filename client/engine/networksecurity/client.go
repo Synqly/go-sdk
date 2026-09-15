@@ -70,3 +70,38 @@ func (c *Client) QueryTrafficEvents(
     return response.Body, nil
 }
 
+// Returns DNS log configurations discovered for the integration.
+func (c *Client) QueryDnsLogConfigurations(
+    ctx context.Context,
+    request *engine.QueryDnsLogConfigurationsRequest,
+    opts ...option.RequestOption,
+) (*engine.QueryDnsLogConfigurationsResponse, error){
+    response, err := c.WithRawResponse.QueryDnsLogConfigurations(
+        ctx,
+        request,
+        opts...,
+    )
+    if err != nil {
+        return nil, err
+    }
+    return response.Body, nil
+}
+
+// Returns DNS events from DNS log configurations on the
+// integration. Results are normalized to OCSF DNS Activity (class_uid 4003).
+func (c *Client) QueryDnsEvents(
+    ctx context.Context,
+    request *engine.QueryDnsEventsRequest,
+    opts ...option.RequestOption,
+) (*engine.QueryDnsEventsResponse, error){
+    response, err := c.WithRawResponse.QueryDnsEvents(
+        ctx,
+        request,
+        opts...,
+    )
+    if err != nil {
+        return nil, err
+    }
+    return response.Body, nil
+}
+
