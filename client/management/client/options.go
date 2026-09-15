@@ -34,7 +34,7 @@ func WithToken(token string) *core.TokenOption {
 	return option.WithToken(token)
 }
 
-// WithAuthToken is deprecated; use WithToken instead. Sets the Authorization request header.\n
+// WithAuthToken is deprecated; use WithToken instead. Sets the Authorization request header.
 func WithAuthToken(token string) *core.TokenOption {
 	return option.WithToken(token)
 }
