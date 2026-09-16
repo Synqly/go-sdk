@@ -16670,7 +16670,7 @@ type IdentityPingOne struct {
 	// Client ID for the application set up as a worker.
 	ClientId   string             `json:"client_id" url:"client_id"`
 	Credential *PingOneCredential `json:"credential" url:"credential"`
-	// The organization ID that the client app is a part of.
+	// The PingOne environment ID that the worker application belongs to.
 	OrganizationId string `json:"organization_id" url:"organization_id"`
 	// Base URL for the PingOne API.
 	Url PingOneApiurl `json:"url" url:"url"`
