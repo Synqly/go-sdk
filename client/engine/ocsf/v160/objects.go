@@ -1820,17 +1820,20 @@ type AffectedPackageTypeId = int
 // An Agent (also known as a Sensor) is typically installed on an Operating System (OS) and serves as a specialized software component that can be designed to monitor, detect, collect, archive, or take action. These activities and possible actions are defined by the upstream system controlling the Agent and its intended purpose. For instance, an Agent can include Endpoint Detection & Response (EDR) agents, backup/disaster recovery sensors, Application Performance Monitoring or profiling sensors, and similar software.
 var (
 	agentFieldName       = big.NewInt(1 << 0)
-	agentFieldType       = big.NewInt(1 << 1)
-	agentFieldTypeId     = big.NewInt(1 << 2)
-	agentFieldUid        = big.NewInt(1 << 3)
-	agentFieldUidAlt     = big.NewInt(1 << 4)
-	agentFieldVendorName = big.NewInt(1 << 5)
-	agentFieldVersion    = big.NewInt(1 << 6)
+	agentFieldPolicies   = big.NewInt(1 << 1)
+	agentFieldType       = big.NewInt(1 << 2)
+	agentFieldTypeId     = big.NewInt(1 << 3)
+	agentFieldUid        = big.NewInt(1 << 4)
+	agentFieldUidAlt     = big.NewInt(1 << 5)
+	agentFieldVendorName = big.NewInt(1 << 6)
+	agentFieldVersion    = big.NewInt(1 << 7)
 )
 
 type Agent struct {
 	// The name of the agent or sensor. For example: <code>AWS SSM Agent</code>.
 	Name *string `json:"name,omitempty" url:"name,omitempty"`
+	// Describes the various policies that may be applied or enforced by an agent or sensor. E.g., Conditional Access, prevention, auto-update, tamper protection, destination configuration, etc.
+	Policies []*Policy `json:"policies,omitempty" url:"policies,omitempty"`
 	// The normalized caption of the type_id value for the agent or sensor. In the case of 'Other' or 'Unknown', it is defined by the event source.
 	Type *string `json:"type,omitempty" url:"type,omitempty"`
 	// The normalized representation of an agent or sensor. E.g., EDR, vulnerability management, APM, backup & recovery, etc.
@@ -1856,6 +1859,13 @@ func (a *Agent) GetName() *string {
 		return nil
 	}
 	return a.Name
+}
+
+func (a *Agent) GetPolicies() []*Policy {
+	if a == nil {
+		return nil
+	}
+	return a.Policies
 }
 
 func (a *Agent) GetType() *string {
@@ -1919,6 +1929,13 @@ func (a *Agent) require(field *big.Int) {
 func (a *Agent) SetName(name *string) {
 	a.Name = name
 	a.require(agentFieldName)
+}
+
+// SetPolicies sets the Policies field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (a *Agent) SetPolicies(policies []*Policy) {
+	a.Policies = policies
+	a.require(agentFieldPolicies)
 }
 
 // SetType sets the Type field and marks it as non-optional;
@@ -34508,27 +34525,39 @@ func (r *Resource) String() string {
 
 // The Resource Details object describes details about resources that were affected by the activity/event.
 var (
-	resourceDetailsFieldAgentList      = big.NewInt(1 << 0)
-	resourceDetailsFieldCloudPartition = big.NewInt(1 << 1)
-	resourceDetailsFieldCriticality    = big.NewInt(1 << 2)
-	resourceDetailsFieldData           = big.NewInt(1 << 3)
-	resourceDetailsFieldGroup          = big.NewInt(1 << 4)
-	resourceDetailsFieldIp             = big.NewInt(1 << 5)
-	resourceDetailsFieldLabels         = big.NewInt(1 << 6)
-	resourceDetailsFieldLastSeenTime   = big.NewInt(1 << 7)
-	resourceDetailsFieldLastSeenTimeDt = big.NewInt(1 << 8)
-	resourceDetailsFieldMac            = big.NewInt(1 << 9)
-	resourceDetailsFieldName           = big.NewInt(1 << 10)
-	resourceDetailsFieldNamespace      = big.NewInt(1 << 11)
-	resourceDetailsFieldOsType         = big.NewInt(1 << 12)
-	resourceDetailsFieldOwner          = big.NewInt(1 << 13)
-	resourceDetailsFieldRegion         = big.NewInt(1 << 14)
-	resourceDetailsFieldSrcUrl         = big.NewInt(1 << 15)
-	resourceDetailsFieldType           = big.NewInt(1 << 16)
-	resourceDetailsFieldUid            = big.NewInt(1 << 17)
-	resourceDetailsFieldVendorName     = big.NewInt(1 << 18)
-	resourceDetailsFieldVendorUuid     = big.NewInt(1 << 19)
-	resourceDetailsFieldVersion        = big.NewInt(1 << 20)
+	resourceDetailsFieldAgentList            = big.NewInt(1 << 0)
+	resourceDetailsFieldCloudPartition       = big.NewInt(1 << 1)
+	resourceDetailsFieldCreatedTime          = big.NewInt(1 << 2)
+	resourceDetailsFieldCreatedTimeDt        = big.NewInt(1 << 3)
+	resourceDetailsFieldCriticality          = big.NewInt(1 << 4)
+	resourceDetailsFieldData                 = big.NewInt(1 << 5)
+	resourceDetailsFieldGroup                = big.NewInt(1 << 6)
+	resourceDetailsFieldHostname             = big.NewInt(1 << 7)
+	resourceDetailsFieldIp                   = big.NewInt(1 << 8)
+	resourceDetailsFieldIsBackedUp           = big.NewInt(1 << 9)
+	resourceDetailsFieldLabels               = big.NewInt(1 << 10)
+	resourceDetailsFieldLastSeenTime         = big.NewInt(1 << 11)
+	resourceDetailsFieldLastSeenTimeDt       = big.NewInt(1 << 12)
+	resourceDetailsFieldMac                  = big.NewInt(1 << 13)
+	resourceDetailsFieldModifiedTime         = big.NewInt(1 << 14)
+	resourceDetailsFieldModifiedTimeDt       = big.NewInt(1 << 15)
+	resourceDetailsFieldName                 = big.NewInt(1 << 16)
+	resourceDetailsFieldNamespace            = big.NewInt(1 << 17)
+	resourceDetailsFieldOsType               = big.NewInt(1 << 18)
+	resourceDetailsFieldOwner                = big.NewInt(1 << 19)
+	resourceDetailsFieldRegion               = big.NewInt(1 << 20)
+	resourceDetailsFieldResourceRelationship = big.NewInt(1 << 21)
+	resourceDetailsFieldRole                 = big.NewInt(1 << 22)
+	resourceDetailsFieldRoleId               = big.NewInt(1 << 23)
+	resourceDetailsFieldSrcUrl               = big.NewInt(1 << 24)
+	resourceDetailsFieldTags                 = big.NewInt(1 << 25)
+	resourceDetailsFieldType                 = big.NewInt(1 << 26)
+	resourceDetailsFieldUid                  = big.NewInt(1 << 27)
+	resourceDetailsFieldUidAlt               = big.NewInt(1 << 28)
+	resourceDetailsFieldVendorName           = big.NewInt(1 << 29)
+	resourceDetailsFieldVendorUuid           = big.NewInt(1 << 30)
+	resourceDetailsFieldVersion              = big.NewInt(1 << 31)
+	resourceDetailsFieldZone                 = big.NewInt(1 << 32)
 )
 
 type ResourceDetails struct {
@@ -34536,14 +34565,22 @@ type ResourceDetails struct {
 	AgentList []*Agent `json:"agent_list,omitempty" url:"agent_list,omitempty"`
 	// The canonical cloud partition name to which the region is assigned (e.g. AWS Partitions: aws, aws-cn, aws-us-gov).
 	CloudPartition *string `json:"cloud_partition,omitempty" url:"cloud_partition,omitempty"`
+	// The time when the resource was created.
+	CreatedTime *Timestamp `json:"created_time,omitempty" url:"created_time,omitempty"`
+	// The time when the resource was created.
+	CreatedTimeDt *time.Time `json:"created_time_dt,omitempty" url:"created_time_dt,omitempty"`
 	// The criticality of the resource as defined by the event source.
 	Criticality *string `json:"criticality,omitempty" url:"criticality,omitempty"`
 	// Additional data describing the resource.
 	Data any `json:"data,omitempty" url:"data,omitempty"`
 	// The name of the related resource group.
 	Group *Group `json:"group,omitempty" url:"group,omitempty"`
+	// The fully qualified name of the resource.
+	Hostname *Hostname `json:"hostname,omitempty" url:"hostname,omitempty"`
 	// The IP address associated with the resource.
 	Ip *IpAddress `json:"ip,omitempty" url:"ip,omitempty"`
+	// Indicates whether the device or resource has a backup enabled, such as an automated snapshot or a cloud backup. For example, this is indicated by the <code>cloudBackupEnabled</code> value within JAMF Pro mobile devices or the registration of an AWS ARN with the AWS Backup service.
+	IsBackedUp *bool `json:"is_backed_up,omitempty" url:"is_backed_up,omitempty"`
 	// The list of labels/tags associated to a resource.
 	Labels []string `json:"labels,omitempty" url:"labels,omitempty"`
 	// The timestamp when the resource was last observed or reported.
@@ -34552,6 +34589,10 @@ type ResourceDetails struct {
 	LastSeenTimeDt *time.Time `json:"last_seen_time_dt,omitempty" url:"last_seen_time_dt,omitempty"`
 	// The MAC address associated with the resource.
 	Mac *MacAddress `json:"mac,omitempty" url:"mac,omitempty"`
+	// The time when the resource was last modified.
+	ModifiedTime *Timestamp `json:"modified_time,omitempty" url:"modified_time,omitempty"`
+	// The time when the resource was last modified.
+	ModifiedTimeDt *time.Time `json:"modified_time_dt,omitempty" url:"modified_time_dt,omitempty"`
 	// The name of the resource.
 	Name *string `json:"name,omitempty" url:"name,omitempty"`
 	// The namespace is useful when similar entities exist that you need to keep separate.
@@ -34562,18 +34603,30 @@ type ResourceDetails struct {
 	Owner *User `json:"owner,omitempty" url:"owner,omitempty"`
 	// The cloud region of the resource.
 	Region *string `json:"region,omitempty" url:"region,omitempty"`
+	// A graph representation showing how this resource relates to and interacts with other entities in the environment. This can include parent/child relationships, dependencies, or other connections.
+	ResourceRelationship *Graph `json:"resource_relationship,omitempty" url:"resource_relationship,omitempty"`
+	// The role of the resource in the context of the event or finding, normalized to the caption of the role_id value. In the case of 'Other', it is defined by the event source.
+	Role *string `json:"role,omitempty" url:"role,omitempty"`
+	// The normalized identifier of the resource's role in the context of the event or finding.
+	RoleId *ResourceDetailsRoleId `json:"role_id,omitempty" url:"role_id,omitempty"`
 	// The URL of the resource in the event sources system.
 	SrcUrl *UrlString `json:"src_url,omitempty" url:"src_url,omitempty"`
+	// The list of tags; <code>{key:value}</code> pairs associated to the resource.
+	Tags []*KeyValueObject `json:"tags,omitempty" url:"tags,omitempty"`
 	// The resource type as defined by the event source.
 	Type *string `json:"type,omitempty" url:"type,omitempty"`
 	// The unique identifier of the resource.
-	Uid *string `json:"uid,omitempty" url:"uid,omitempty"`
+	Uid *ResourceUid `json:"uid,omitempty" url:"uid,omitempty"`
+	// The alternative unique identifier of the resource.
+	UidAlt *ResourceUid `json:"uid_alt,omitempty" url:"uid_alt,omitempty"`
 	// The name of the vendor.
 	VendorName *string `json:"vendor_name,omitempty" url:"vendor_name,omitempty"`
 	// The UUID of the vendor.
 	VendorUuid *string `json:"vendor_uuid,omitempty" url:"vendor_uuid,omitempty"`
 	// The version of the resource. For example 1.2.3.
 	Version *string `json:"version,omitempty" url:"version,omitempty"`
+	// The specific availability zone within a cloud region where the resource is located.
+	Zone *string `json:"zone,omitempty" url:"zone,omitempty"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -34594,6 +34647,20 @@ func (r *ResourceDetails) GetCloudPartition() *string {
 		return nil
 	}
 	return r.CloudPartition
+}
+
+func (r *ResourceDetails) GetCreatedTime() *Timestamp {
+	if r == nil {
+		return nil
+	}
+	return r.CreatedTime
+}
+
+func (r *ResourceDetails) GetCreatedTimeDt() *time.Time {
+	if r == nil {
+		return nil
+	}
+	return r.CreatedTimeDt
 }
 
 func (r *ResourceDetails) GetCriticality() *string {
@@ -34617,11 +34684,25 @@ func (r *ResourceDetails) GetGroup() *Group {
 	return r.Group
 }
 
+func (r *ResourceDetails) GetHostname() *Hostname {
+	if r == nil {
+		return nil
+	}
+	return r.Hostname
+}
+
 func (r *ResourceDetails) GetIp() *IpAddress {
 	if r == nil {
 		return nil
 	}
 	return r.Ip
+}
+
+func (r *ResourceDetails) GetIsBackedUp() *bool {
+	if r == nil {
+		return nil
+	}
+	return r.IsBackedUp
 }
 
 func (r *ResourceDetails) GetLabels() []string {
@@ -34650,6 +34731,20 @@ func (r *ResourceDetails) GetMac() *MacAddress {
 		return nil
 	}
 	return r.Mac
+}
+
+func (r *ResourceDetails) GetModifiedTime() *Timestamp {
+	if r == nil {
+		return nil
+	}
+	return r.ModifiedTime
+}
+
+func (r *ResourceDetails) GetModifiedTimeDt() *time.Time {
+	if r == nil {
+		return nil
+	}
+	return r.ModifiedTimeDt
 }
 
 func (r *ResourceDetails) GetName() *string {
@@ -34687,11 +34782,39 @@ func (r *ResourceDetails) GetRegion() *string {
 	return r.Region
 }
 
+func (r *ResourceDetails) GetResourceRelationship() *Graph {
+	if r == nil {
+		return nil
+	}
+	return r.ResourceRelationship
+}
+
+func (r *ResourceDetails) GetRole() *string {
+	if r == nil {
+		return nil
+	}
+	return r.Role
+}
+
+func (r *ResourceDetails) GetRoleId() *ResourceDetailsRoleId {
+	if r == nil {
+		return nil
+	}
+	return r.RoleId
+}
+
 func (r *ResourceDetails) GetSrcUrl() *UrlString {
 	if r == nil {
 		return nil
 	}
 	return r.SrcUrl
+}
+
+func (r *ResourceDetails) GetTags() []*KeyValueObject {
+	if r == nil {
+		return nil
+	}
+	return r.Tags
 }
 
 func (r *ResourceDetails) GetType() *string {
@@ -34701,11 +34824,18 @@ func (r *ResourceDetails) GetType() *string {
 	return r.Type
 }
 
-func (r *ResourceDetails) GetUid() *string {
+func (r *ResourceDetails) GetUid() *ResourceUid {
 	if r == nil {
 		return nil
 	}
 	return r.Uid
+}
+
+func (r *ResourceDetails) GetUidAlt() *ResourceUid {
+	if r == nil {
+		return nil
+	}
+	return r.UidAlt
 }
 
 func (r *ResourceDetails) GetVendorName() *string {
@@ -34727,6 +34857,13 @@ func (r *ResourceDetails) GetVersion() *string {
 		return nil
 	}
 	return r.Version
+}
+
+func (r *ResourceDetails) GetZone() *string {
+	if r == nil {
+		return nil
+	}
+	return r.Zone
 }
 
 func (r *ResourceDetails) GetExtraProperties() map[string]interface{} {
@@ -34757,6 +34894,20 @@ func (r *ResourceDetails) SetCloudPartition(cloudPartition *string) {
 	r.require(resourceDetailsFieldCloudPartition)
 }
 
+// SetCreatedTime sets the CreatedTime field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (r *ResourceDetails) SetCreatedTime(createdTime *Timestamp) {
+	r.CreatedTime = createdTime
+	r.require(resourceDetailsFieldCreatedTime)
+}
+
+// SetCreatedTimeDt sets the CreatedTimeDt field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (r *ResourceDetails) SetCreatedTimeDt(createdTimeDt *time.Time) {
+	r.CreatedTimeDt = createdTimeDt
+	r.require(resourceDetailsFieldCreatedTimeDt)
+}
+
 // SetCriticality sets the Criticality field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
 func (r *ResourceDetails) SetCriticality(criticality *string) {
@@ -34778,11 +34929,25 @@ func (r *ResourceDetails) SetGroup(group *Group) {
 	r.require(resourceDetailsFieldGroup)
 }
 
+// SetHostname sets the Hostname field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (r *ResourceDetails) SetHostname(hostname *Hostname) {
+	r.Hostname = hostname
+	r.require(resourceDetailsFieldHostname)
+}
+
 // SetIp sets the Ip field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
 func (r *ResourceDetails) SetIp(ip *IpAddress) {
 	r.Ip = ip
 	r.require(resourceDetailsFieldIp)
+}
+
+// SetIsBackedUp sets the IsBackedUp field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (r *ResourceDetails) SetIsBackedUp(isBackedUp *bool) {
+	r.IsBackedUp = isBackedUp
+	r.require(resourceDetailsFieldIsBackedUp)
 }
 
 // SetLabels sets the Labels field and marks it as non-optional;
@@ -34811,6 +34976,20 @@ func (r *ResourceDetails) SetLastSeenTimeDt(lastSeenTimeDt *time.Time) {
 func (r *ResourceDetails) SetMac(mac *MacAddress) {
 	r.Mac = mac
 	r.require(resourceDetailsFieldMac)
+}
+
+// SetModifiedTime sets the ModifiedTime field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (r *ResourceDetails) SetModifiedTime(modifiedTime *Timestamp) {
+	r.ModifiedTime = modifiedTime
+	r.require(resourceDetailsFieldModifiedTime)
+}
+
+// SetModifiedTimeDt sets the ModifiedTimeDt field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (r *ResourceDetails) SetModifiedTimeDt(modifiedTimeDt *time.Time) {
+	r.ModifiedTimeDt = modifiedTimeDt
+	r.require(resourceDetailsFieldModifiedTimeDt)
 }
 
 // SetName sets the Name field and marks it as non-optional;
@@ -34848,11 +35027,39 @@ func (r *ResourceDetails) SetRegion(region *string) {
 	r.require(resourceDetailsFieldRegion)
 }
 
+// SetResourceRelationship sets the ResourceRelationship field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (r *ResourceDetails) SetResourceRelationship(resourceRelationship *Graph) {
+	r.ResourceRelationship = resourceRelationship
+	r.require(resourceDetailsFieldResourceRelationship)
+}
+
+// SetRole sets the Role field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (r *ResourceDetails) SetRole(role *string) {
+	r.Role = role
+	r.require(resourceDetailsFieldRole)
+}
+
+// SetRoleId sets the RoleId field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (r *ResourceDetails) SetRoleId(roleId *ResourceDetailsRoleId) {
+	r.RoleId = roleId
+	r.require(resourceDetailsFieldRoleId)
+}
+
 // SetSrcUrl sets the SrcUrl field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
 func (r *ResourceDetails) SetSrcUrl(srcUrl *UrlString) {
 	r.SrcUrl = srcUrl
 	r.require(resourceDetailsFieldSrcUrl)
+}
+
+// SetTags sets the Tags field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (r *ResourceDetails) SetTags(tags []*KeyValueObject) {
+	r.Tags = tags
+	r.require(resourceDetailsFieldTags)
 }
 
 // SetType sets the Type field and marks it as non-optional;
@@ -34864,9 +35071,16 @@ func (r *ResourceDetails) SetType(type_ *string) {
 
 // SetUid sets the Uid field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (r *ResourceDetails) SetUid(uid *string) {
+func (r *ResourceDetails) SetUid(uid *ResourceUid) {
 	r.Uid = uid
 	r.require(resourceDetailsFieldUid)
+}
+
+// SetUidAlt sets the UidAlt field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (r *ResourceDetails) SetUidAlt(uidAlt *ResourceUid) {
+	r.UidAlt = uidAlt
+	r.require(resourceDetailsFieldUidAlt)
 }
 
 // SetVendorName sets the VendorName field and marks it as non-optional;
@@ -34890,11 +35104,20 @@ func (r *ResourceDetails) SetVersion(version *string) {
 	r.require(resourceDetailsFieldVersion)
 }
 
+// SetZone sets the Zone field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (r *ResourceDetails) SetZone(zone *string) {
+	r.Zone = zone
+	r.require(resourceDetailsFieldZone)
+}
+
 func (r *ResourceDetails) UnmarshalJSON(data []byte) error {
 	type embed ResourceDetails
 	var unmarshaler = struct {
 		embed
+		CreatedTimeDt  *internal.DateTime `json:"created_time_dt,omitempty"`
 		LastSeenTimeDt *internal.DateTime `json:"last_seen_time_dt,omitempty"`
+		ModifiedTimeDt *internal.DateTime `json:"modified_time_dt,omitempty"`
 	}{
 		embed: embed(*r),
 	}
@@ -34902,7 +35125,9 @@ func (r *ResourceDetails) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*r = ResourceDetails(unmarshaler.embed)
+	r.CreatedTimeDt = unmarshaler.CreatedTimeDt.TimePtr()
 	r.LastSeenTimeDt = unmarshaler.LastSeenTimeDt.TimePtr()
+	r.ModifiedTimeDt = unmarshaler.ModifiedTimeDt.TimePtr()
 	extraProperties, err := internal.ExtractExtraProperties(data, *r)
 	if err != nil {
 		return err
@@ -34916,10 +35141,14 @@ func (r *ResourceDetails) MarshalJSON() ([]byte, error) {
 	type embed ResourceDetails
 	var marshaler = struct {
 		embed
+		CreatedTimeDt  *internal.DateTime `json:"created_time_dt,omitempty"`
 		LastSeenTimeDt *internal.DateTime `json:"last_seen_time_dt,omitempty"`
+		ModifiedTimeDt *internal.DateTime `json:"modified_time_dt,omitempty"`
 	}{
 		embed:          embed(*r),
+		CreatedTimeDt:  internal.NewOptionalDateTime(r.CreatedTimeDt),
 		LastSeenTimeDt: internal.NewOptionalDateTime(r.LastSeenTimeDt),
+		ModifiedTimeDt: internal.NewOptionalDateTime(r.ModifiedTimeDt),
 	}
 	explicitMarshaler := internal.HandleExplicitFields(marshaler, r.explicitFields)
 	return json.Marshal(explicitMarshaler)
@@ -34939,6 +35168,15 @@ func (r *ResourceDetails) String() string {
 	}
 	return fmt.Sprintf("%#v", r)
 }
+
+// ResourceDetailsRoleId is an enum, and the following values are allowed.
+// 0 - Unknown: The role is unknown.
+// 1 - Target: The resource is the primary target or subject of the event/finding.
+// 2 - Actor: The resource is acting as the initiator or performer in the context of the event/finding.
+// 3 - Affected: The resource was impacted or affected by the event/finding.
+// 4 - Related: The resource is related to or associated with the event/finding.
+// 99 - Other: The role is not mapped. See the role attribute, which contains a data source specific value.
+type ResourceDetailsRoleId = int
 
 // The Response Elements object describes characteristics of an API response.
 var (

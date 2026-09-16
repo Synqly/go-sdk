@@ -1646,6 +1646,22 @@ const Reputation_Score_Malicious ReputationScoreId = 10
 // Other. The reputation score is not mapped. See the <code>rep_score</code> attribute, which contains a data source specific value.
 const Reputation_Score_Other ReputationScoreId = 99
 
+// ResourceDetailsRoleId Values
+// Role ID. The normalized identifier of the resource's role in the context of the event or finding.
+
+// Unknown. The role is unknown.
+const ResourceDetails_Role_Unknown ResourceDetailsRoleId = 0
+// Target. The resource is the primary target or subject of the event/finding.
+const ResourceDetails_Role_Target ResourceDetailsRoleId = 1
+// Actor. The resource is acting as the initiator or performer in the context of the event/finding.
+const ResourceDetails_Role_Actor ResourceDetailsRoleId = 2
+// Affected. The resource was impacted or affected by the event/finding.
+const ResourceDetails_Role_Affected ResourceDetailsRoleId = 3
+// Related. The resource is related to or associated with the event/finding.
+const ResourceDetails_Role_Related ResourceDetailsRoleId = 4
+// Other. The role is not mapped. See the role attribute, which contains a data source specific value.
+const ResourceDetails_Role_Other ResourceDetailsRoleId = 99
+
 // SbomTypeId Values
 // Type ID. The type of SBOM.
 

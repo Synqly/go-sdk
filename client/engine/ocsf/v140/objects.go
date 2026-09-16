@@ -1402,17 +1402,20 @@ type AffectedPackageTypeId = int
 // An Agent (also known as a Sensor) is typically installed on an Operating System (OS) and serves as a specialized software component that can be designed to monitor, detect, collect, archive, or take action. These activities and possible actions are defined by the upstream system controlling the Agent and its intended purpose. For instance, an Agent can include Endpoint Detection & Response (EDR) agents, backup/disaster recovery sensors, Application Performance Monitoring or profiling sensors, and similar software.
 var (
 	agentFieldName       = big.NewInt(1 << 0)
-	agentFieldType       = big.NewInt(1 << 1)
-	agentFieldTypeId     = big.NewInt(1 << 2)
-	agentFieldUid        = big.NewInt(1 << 3)
-	agentFieldUidAlt     = big.NewInt(1 << 4)
-	agentFieldVendorName = big.NewInt(1 << 5)
-	agentFieldVersion    = big.NewInt(1 << 6)
+	agentFieldPolicies   = big.NewInt(1 << 1)
+	agentFieldType       = big.NewInt(1 << 2)
+	agentFieldTypeId     = big.NewInt(1 << 3)
+	agentFieldUid        = big.NewInt(1 << 4)
+	agentFieldUidAlt     = big.NewInt(1 << 5)
+	agentFieldVendorName = big.NewInt(1 << 6)
+	agentFieldVersion    = big.NewInt(1 << 7)
 )
 
 type Agent struct {
 	// The name of the agent or sensor. For example: <code>AWS SSM Agent</code>.
 	Name *string `json:"name,omitempty" url:"name,omitempty"`
+	// Describes the various policies that may be applied or enforced by an agent or sensor. E.g., Conditional Access, prevention, auto-update, tamper protection, destination configuration, etc.
+	Policies []*Policy `json:"policies,omitempty" url:"policies,omitempty"`
 	// The normalized caption of the type_id value for the agent or sensor. In the case of 'Other' or 'Unknown', it is defined by the event source.
 	Type *string `json:"type,omitempty" url:"type,omitempty"`
 	// The normalized representation of an agent or sensor. E.g., EDR, vulnerability management, APM, backup & recovery, etc.
@@ -1438,6 +1441,13 @@ func (a *Agent) GetName() *string {
 		return nil
 	}
 	return a.Name
+}
+
+func (a *Agent) GetPolicies() []*Policy {
+	if a == nil {
+		return nil
+	}
+	return a.Policies
 }
 
 func (a *Agent) GetType() *string {
@@ -1501,6 +1511,13 @@ func (a *Agent) require(field *big.Int) {
 func (a *Agent) SetName(name *string) {
 	a.Name = name
 	a.require(agentFieldName)
+}
+
+// SetPolicies sets the Policies field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (a *Agent) SetPolicies(policies []*Policy) {
+	a.Policies = policies
+	a.require(agentFieldPolicies)
 }
 
 // SetType sets the Type field and marks it as non-optional;
@@ -6594,28 +6611,30 @@ var (
 	databucketFieldFile              = big.NewInt(1 << 8)
 	databucketFieldGroup             = big.NewInt(1 << 9)
 	databucketFieldGroups            = big.NewInt(1 << 10)
-	databucketFieldIp                = big.NewInt(1 << 11)
-	databucketFieldIsEncrypted       = big.NewInt(1 << 12)
-	databucketFieldIsPublic          = big.NewInt(1 << 13)
-	databucketFieldLabels            = big.NewInt(1 << 14)
-	databucketFieldLastSeenTime      = big.NewInt(1 << 15)
-	databucketFieldLastSeenTimeDt    = big.NewInt(1 << 16)
-	databucketFieldMac               = big.NewInt(1 << 17)
-	databucketFieldModifiedTime      = big.NewInt(1 << 18)
-	databucketFieldModifiedTimeDt    = big.NewInt(1 << 19)
-	databucketFieldName              = big.NewInt(1 << 20)
-	databucketFieldNamespace         = big.NewInt(1 << 21)
-	databucketFieldOsType            = big.NewInt(1 << 22)
-	databucketFieldOwner             = big.NewInt(1 << 23)
-	databucketFieldRegion            = big.NewInt(1 << 24)
-	databucketFieldSize              = big.NewInt(1 << 25)
-	databucketFieldSrcUrl            = big.NewInt(1 << 26)
-	databucketFieldType              = big.NewInt(1 << 27)
-	databucketFieldTypeId            = big.NewInt(1 << 28)
-	databucketFieldUid               = big.NewInt(1 << 29)
-	databucketFieldVendorName        = big.NewInt(1 << 30)
-	databucketFieldVendorUuid        = big.NewInt(1 << 31)
-	databucketFieldVersion           = big.NewInt(1 << 32)
+	databucketFieldHostname          = big.NewInt(1 << 11)
+	databucketFieldIp                = big.NewInt(1 << 12)
+	databucketFieldIsEncrypted       = big.NewInt(1 << 13)
+	databucketFieldIsPublic          = big.NewInt(1 << 14)
+	databucketFieldLabels            = big.NewInt(1 << 15)
+	databucketFieldLastSeenTime      = big.NewInt(1 << 16)
+	databucketFieldLastSeenTimeDt    = big.NewInt(1 << 17)
+	databucketFieldMac               = big.NewInt(1 << 18)
+	databucketFieldModifiedTime      = big.NewInt(1 << 19)
+	databucketFieldModifiedTimeDt    = big.NewInt(1 << 20)
+	databucketFieldName              = big.NewInt(1 << 21)
+	databucketFieldNamespace         = big.NewInt(1 << 22)
+	databucketFieldOsType            = big.NewInt(1 << 23)
+	databucketFieldOwner             = big.NewInt(1 << 24)
+	databucketFieldRegion            = big.NewInt(1 << 25)
+	databucketFieldSize              = big.NewInt(1 << 26)
+	databucketFieldSrcUrl            = big.NewInt(1 << 27)
+	databucketFieldTags              = big.NewInt(1 << 28)
+	databucketFieldType              = big.NewInt(1 << 29)
+	databucketFieldTypeId            = big.NewInt(1 << 30)
+	databucketFieldUid               = big.NewInt(1 << 31)
+	databucketFieldVendorName        = big.NewInt(1 << 32)
+	databucketFieldVendorUuid        = big.NewInt(1 << 33)
+	databucketFieldVersion           = big.NewInt(1 << 34)
 )
 
 type Databucket struct {
@@ -6641,6 +6660,8 @@ type Databucket struct {
 	Group *Group `json:"group,omitempty" url:"group,omitempty"`
 	// The group names to which the databucket belongs.
 	Groups []*Group `json:"groups,omitempty" url:"groups,omitempty"`
+	// The fully qualified name of the resource.
+	Hostname *Hostname `json:"hostname,omitempty" url:"hostname,omitempty"`
 	// The IP address associated with the resource.
 	Ip *IpAddress `json:"ip,omitempty" url:"ip,omitempty"`
 	// Indicates if the databucket is encrypted.
@@ -6673,6 +6694,8 @@ type Databucket struct {
 	Size *int `json:"size,omitempty" url:"size,omitempty"`
 	// The URL of the resource in the event sources system.
 	SrcUrl *UrlString `json:"src_url,omitempty" url:"src_url,omitempty"`
+	// The list of tags; <code>{key:value}</code> pairs associated to the resource.
+	Tags []*KeyValueObject `json:"tags,omitempty" url:"tags,omitempty"`
 	// The databucket type.
 	Type *string `json:"type,omitempty" url:"type,omitempty"`
 	// The normalized identifier of the databucket type.
@@ -6768,6 +6791,13 @@ func (d *Databucket) GetGroups() []*Group {
 		return nil
 	}
 	return d.Groups
+}
+
+func (d *Databucket) GetHostname() *Hostname {
+	if d == nil {
+		return nil
+	}
+	return d.Hostname
 }
 
 func (d *Databucket) GetIp() *IpAddress {
@@ -6880,6 +6910,13 @@ func (d *Databucket) GetSrcUrl() *UrlString {
 		return nil
 	}
 	return d.SrcUrl
+}
+
+func (d *Databucket) GetTags() []*KeyValueObject {
+	if d == nil {
+		return nil
+	}
+	return d.Tags
 }
 
 func (d *Databucket) GetType() *string {
@@ -7015,6 +7052,13 @@ func (d *Databucket) SetGroups(groups []*Group) {
 	d.require(databucketFieldGroups)
 }
 
+// SetHostname sets the Hostname field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (d *Databucket) SetHostname(hostname *Hostname) {
+	d.Hostname = hostname
+	d.require(databucketFieldHostname)
+}
+
 // SetIp sets the Ip field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
 func (d *Databucket) SetIp(ip *IpAddress) {
@@ -7125,6 +7169,13 @@ func (d *Databucket) SetSize(size *int) {
 func (d *Databucket) SetSrcUrl(srcUrl *UrlString) {
 	d.SrcUrl = srcUrl
 	d.require(databucketFieldSrcUrl)
+}
+
+// SetTags sets the Tags field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (d *Databucket) SetTags(tags []*KeyValueObject) {
+	d.Tags = tags
+	d.require(databucketFieldTags)
 }
 
 // SetType sets the Type field and marks it as non-optional;
@@ -28538,22 +28589,24 @@ var (
 	resourceDetailsFieldCriticality    = big.NewInt(1 << 2)
 	resourceDetailsFieldData           = big.NewInt(1 << 3)
 	resourceDetailsFieldGroup          = big.NewInt(1 << 4)
-	resourceDetailsFieldIp             = big.NewInt(1 << 5)
-	resourceDetailsFieldLabels         = big.NewInt(1 << 6)
-	resourceDetailsFieldLastSeenTime   = big.NewInt(1 << 7)
-	resourceDetailsFieldLastSeenTimeDt = big.NewInt(1 << 8)
-	resourceDetailsFieldMac            = big.NewInt(1 << 9)
-	resourceDetailsFieldName           = big.NewInt(1 << 10)
-	resourceDetailsFieldNamespace      = big.NewInt(1 << 11)
-	resourceDetailsFieldOsType         = big.NewInt(1 << 12)
-	resourceDetailsFieldOwner          = big.NewInt(1 << 13)
-	resourceDetailsFieldRegion         = big.NewInt(1 << 14)
-	resourceDetailsFieldSrcUrl         = big.NewInt(1 << 15)
-	resourceDetailsFieldType           = big.NewInt(1 << 16)
-	resourceDetailsFieldUid            = big.NewInt(1 << 17)
-	resourceDetailsFieldVendorName     = big.NewInt(1 << 18)
-	resourceDetailsFieldVendorUuid     = big.NewInt(1 << 19)
-	resourceDetailsFieldVersion        = big.NewInt(1 << 20)
+	resourceDetailsFieldHostname       = big.NewInt(1 << 5)
+	resourceDetailsFieldIp             = big.NewInt(1 << 6)
+	resourceDetailsFieldLabels         = big.NewInt(1 << 7)
+	resourceDetailsFieldLastSeenTime   = big.NewInt(1 << 8)
+	resourceDetailsFieldLastSeenTimeDt = big.NewInt(1 << 9)
+	resourceDetailsFieldMac            = big.NewInt(1 << 10)
+	resourceDetailsFieldName           = big.NewInt(1 << 11)
+	resourceDetailsFieldNamespace      = big.NewInt(1 << 12)
+	resourceDetailsFieldOsType         = big.NewInt(1 << 13)
+	resourceDetailsFieldOwner          = big.NewInt(1 << 14)
+	resourceDetailsFieldRegion         = big.NewInt(1 << 15)
+	resourceDetailsFieldSrcUrl         = big.NewInt(1 << 16)
+	resourceDetailsFieldTags           = big.NewInt(1 << 17)
+	resourceDetailsFieldType           = big.NewInt(1 << 18)
+	resourceDetailsFieldUid            = big.NewInt(1 << 19)
+	resourceDetailsFieldVendorName     = big.NewInt(1 << 20)
+	resourceDetailsFieldVendorUuid     = big.NewInt(1 << 21)
+	resourceDetailsFieldVersion        = big.NewInt(1 << 22)
 )
 
 type ResourceDetails struct {
@@ -28567,6 +28620,8 @@ type ResourceDetails struct {
 	Data any `json:"data,omitempty" url:"data,omitempty"`
 	// The name of the related resource group.
 	Group *Group `json:"group,omitempty" url:"group,omitempty"`
+	// The fully qualified name of the resource.
+	Hostname *Hostname `json:"hostname,omitempty" url:"hostname,omitempty"`
 	// The IP address associated with the resource.
 	Ip *IpAddress `json:"ip,omitempty" url:"ip,omitempty"`
 	// The list of labels/tags associated to a resource.
@@ -28589,6 +28644,8 @@ type ResourceDetails struct {
 	Region *string `json:"region,omitempty" url:"region,omitempty"`
 	// The URL of the resource in the event sources system.
 	SrcUrl *UrlString `json:"src_url,omitempty" url:"src_url,omitempty"`
+	// The list of tags; <code>{key:value}</code> pairs associated to the resource.
+	Tags []*KeyValueObject `json:"tags,omitempty" url:"tags,omitempty"`
 	// The resource type as defined by the event source.
 	Type *string `json:"type,omitempty" url:"type,omitempty"`
 	// The unique identifier of the resource.
@@ -28640,6 +28697,13 @@ func (r *ResourceDetails) GetGroup() *Group {
 		return nil
 	}
 	return r.Group
+}
+
+func (r *ResourceDetails) GetHostname() *Hostname {
+	if r == nil {
+		return nil
+	}
+	return r.Hostname
 }
 
 func (r *ResourceDetails) GetIp() *IpAddress {
@@ -28717,6 +28781,13 @@ func (r *ResourceDetails) GetSrcUrl() *UrlString {
 		return nil
 	}
 	return r.SrcUrl
+}
+
+func (r *ResourceDetails) GetTags() []*KeyValueObject {
+	if r == nil {
+		return nil
+	}
+	return r.Tags
 }
 
 func (r *ResourceDetails) GetType() *string {
@@ -28803,6 +28874,13 @@ func (r *ResourceDetails) SetGroup(group *Group) {
 	r.require(resourceDetailsFieldGroup)
 }
 
+// SetHostname sets the Hostname field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (r *ResourceDetails) SetHostname(hostname *Hostname) {
+	r.Hostname = hostname
+	r.require(resourceDetailsFieldHostname)
+}
+
 // SetIp sets the Ip field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
 func (r *ResourceDetails) SetIp(ip *IpAddress) {
@@ -28878,6 +28956,13 @@ func (r *ResourceDetails) SetRegion(region *string) {
 func (r *ResourceDetails) SetSrcUrl(srcUrl *UrlString) {
 	r.SrcUrl = srcUrl
 	r.require(resourceDetailsFieldSrcUrl)
+}
+
+// SetTags sets the Tags field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (r *ResourceDetails) SetTags(tags []*KeyValueObject) {
+	r.Tags = tags
+	r.require(resourceDetailsFieldTags)
 }
 
 // SetType sets the Type field and marks it as non-optional;

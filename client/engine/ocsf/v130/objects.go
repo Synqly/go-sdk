@@ -1377,17 +1377,20 @@ type AffectedPackageTypeId = int
 // An Agent (also known as a Sensor) is typically installed on an Operating System (OS) and serves as a specialized software component that can be designed to monitor, detect, collect, archive, or take action. These activities and possible actions are defined by the upstream system controlling the Agent and its intended purpose. For instance, an Agent can include Endpoint Detection & Response (EDR) agents, backup/disaster recovery sensors, Application Performance Monitoring or profiling sensors, and similar software.
 var (
 	agentFieldName       = big.NewInt(1 << 0)
-	agentFieldType       = big.NewInt(1 << 1)
-	agentFieldTypeId     = big.NewInt(1 << 2)
-	agentFieldUid        = big.NewInt(1 << 3)
-	agentFieldUidAlt     = big.NewInt(1 << 4)
-	agentFieldVendorName = big.NewInt(1 << 5)
-	agentFieldVersion    = big.NewInt(1 << 6)
+	agentFieldPolicies   = big.NewInt(1 << 1)
+	agentFieldType       = big.NewInt(1 << 2)
+	agentFieldTypeId     = big.NewInt(1 << 3)
+	agentFieldUid        = big.NewInt(1 << 4)
+	agentFieldUidAlt     = big.NewInt(1 << 5)
+	agentFieldVendorName = big.NewInt(1 << 6)
+	agentFieldVersion    = big.NewInt(1 << 7)
 )
 
 type Agent struct {
 	// The name of the agent or sensor. For example: <code>AWS SSM Agent</code>.
 	Name *string `json:"name,omitempty" url:"name,omitempty"`
+	// Describes the various policies that may be applied or enforced by an agent or sensor. E.g., Conditional Access, prevention, auto-update, tamper protection, destination configuration, etc.
+	Policies []*Policy `json:"policies,omitempty" url:"policies,omitempty"`
 	// The normalized caption of the type_id value for the agent or sensor. In the case of 'Other' or 'Unknown', it is defined by the event source.
 	Type *string `json:"type,omitempty" url:"type,omitempty"`
 	// The normalized representation of an agent or sensor. E.g., EDR, vulnerability management, APM, backup & recovery, etc.
@@ -1413,6 +1416,13 @@ func (a *Agent) GetName() *string {
 		return nil
 	}
 	return a.Name
+}
+
+func (a *Agent) GetPolicies() []*Policy {
+	if a == nil {
+		return nil
+	}
+	return a.Policies
 }
 
 func (a *Agent) GetType() *string {
@@ -1476,6 +1486,13 @@ func (a *Agent) require(field *big.Int) {
 func (a *Agent) SetName(name *string) {
 	a.Name = name
 	a.require(agentFieldName)
+}
+
+// SetPolicies sets the Policies field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (a *Agent) SetPolicies(policies []*Policy) {
+	a.Policies = policies
+	a.require(agentFieldPolicies)
 }
 
 // SetType sets the Type field and marks it as non-optional;
