@@ -120,6 +120,26 @@ func (c *Client) QuerySoftware(
     return response.Body, nil
 }
 
+// Query software inventory records for a single device.
+func (c *Client) QueryDeviceSoftware(
+    ctx context.Context,
+    // Uid of the device.
+    deviceUid string,
+    request *engine.QueryDeviceSoftwareInventoryRequest,
+    opts ...option.RequestOption,
+) (*engine.QuerySoftwareInventoryResponse, error){
+    response, err := c.WithRawResponse.QueryDeviceSoftware(
+        ctx,
+        deviceUid,
+        request,
+        opts...,
+    )
+    if err != nil {
+        return nil, err
+    }
+    return response.Body, nil
+}
+
 // Creates a software inventory record in the token-linked Integration.
 // 
 // **Tenable Cloud:** This is asset import enrichment, not full software-inventory CRUD. Each

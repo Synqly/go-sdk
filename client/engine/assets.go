@@ -158,6 +158,82 @@ func (g *GetLabelsRequest) SetMeta(meta []*string) {
 }
 
 var (
+	queryDeviceSoftwareInventoryRequestFieldMeta           = big.NewInt(1 << 0)
+	queryDeviceSoftwareInventoryRequestFieldLimit          = big.NewInt(1 << 1)
+	queryDeviceSoftwareInventoryRequestFieldCursor         = big.NewInt(1 << 2)
+	queryDeviceSoftwareInventoryRequestFieldFilter         = big.NewInt(1 << 3)
+	queryDeviceSoftwareInventoryRequestFieldOrder          = big.NewInt(1 << 4)
+	queryDeviceSoftwareInventoryRequestFieldIncludeRawData = big.NewInt(1 << 5)
+)
+
+type QueryDeviceSoftwareInventoryRequest struct {
+	// Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
+	Meta []*string `json:"-" url:"meta,omitempty"`
+	// Number of software inventory records to return. Defaults to 50.
+	Limit *int `json:"-" url:"limit,omitempty"`
+	// Start search from cursor position.
+	Cursor *string `json:"-" url:"cursor,omitempty"`
+	// Filter results by this query. For more information on filtering, refer to the [Assets Filtering Guide](https://docs.synqly.com/guides/connectors/assets/query-filters). Defaults to no filter. If used more than once, the queries are ANDed together.
+	Filter []*string `json:"-" url:"filter,omitempty"`
+	// Results are returned in a fixed `package.name` ascending order. Passing `order` is rejected.
+	Order *string `json:"-" url:"order,omitempty"`
+	// Include the raw data from the provider in the response. Defaults to `false`.
+	IncludeRawData *bool `json:"-" url:"include_raw_data,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+}
+
+func (q *QueryDeviceSoftwareInventoryRequest) require(field *big.Int) {
+	if q.explicitFields == nil {
+		q.explicitFields = big.NewInt(0)
+	}
+	q.explicitFields.Or(q.explicitFields, field)
+}
+
+// SetMeta sets the Meta field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryDeviceSoftwareInventoryRequest) SetMeta(meta []*string) {
+	q.Meta = meta
+	q.require(queryDeviceSoftwareInventoryRequestFieldMeta)
+}
+
+// SetLimit sets the Limit field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryDeviceSoftwareInventoryRequest) SetLimit(limit *int) {
+	q.Limit = limit
+	q.require(queryDeviceSoftwareInventoryRequestFieldLimit)
+}
+
+// SetCursor sets the Cursor field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryDeviceSoftwareInventoryRequest) SetCursor(cursor *string) {
+	q.Cursor = cursor
+	q.require(queryDeviceSoftwareInventoryRequestFieldCursor)
+}
+
+// SetFilter sets the Filter field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryDeviceSoftwareInventoryRequest) SetFilter(filter []*string) {
+	q.Filter = filter
+	q.require(queryDeviceSoftwareInventoryRequestFieldFilter)
+}
+
+// SetOrder sets the Order field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryDeviceSoftwareInventoryRequest) SetOrder(order *string) {
+	q.Order = order
+	q.require(queryDeviceSoftwareInventoryRequestFieldOrder)
+}
+
+// SetIncludeRawData sets the IncludeRawData field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryDeviceSoftwareInventoryRequest) SetIncludeRawData(includeRawData *bool) {
+	q.IncludeRawData = includeRawData
+	q.require(queryDeviceSoftwareInventoryRequestFieldIncludeRawData)
+}
+
+var (
 	queryDevicesRequestFieldMeta           = big.NewInt(1 << 0)
 	queryDevicesRequestFieldLimit          = big.NewInt(1 << 1)
 	queryDevicesRequestFieldCursor         = big.NewInt(1 << 2)

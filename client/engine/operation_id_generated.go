@@ -20,6 +20,7 @@ const (
 	OperationIdAssetsCreateSoftware                             OperationId = "assets_create_software"
 	OperationIdAssetsGetLabels                                  OperationId = "assets_get_labels"
 	OperationIdAssetsQueryAlerts                                OperationId = "assets_query_alerts"
+	OperationIdAssetsQueryDeviceSoftware                        OperationId = "assets_query_device_software"
 	OperationIdAssetsQueryDevices                               OperationId = "assets_query_devices"
 	OperationIdAssetsQuerySoftware                              OperationId = "assets_query_software"
 	OperationIdAssetsQueryUtilization                           OperationId = "assets_query_utilization"
@@ -190,6 +191,8 @@ func NewOperationIdFromString(s string) (OperationId, error) {
 		return OperationIdAssetsGetLabels, nil
 	case "assets_query_alerts":
 		return OperationIdAssetsQueryAlerts, nil
+	case "assets_query_device_software":
+		return OperationIdAssetsQueryDeviceSoftware, nil
 	case "assets_query_devices":
 		return OperationIdAssetsQueryDevices, nil
 	case "assets_query_software":

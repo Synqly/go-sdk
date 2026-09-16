@@ -1013,6 +1013,114 @@ The ordering defaults to `asc` if not specified.
 </dl>
 </details>
 
+<details><summary><code>client.Assets.QueryDeviceSoftware(DeviceUid) -> *engine.QuerySoftwareInventoryResponse</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Query software inventory records for a single device.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```go
+request := &engine.QueryDeviceSoftwareInventoryRequest{}
+client.Assets.QueryDeviceSoftware(
+        context.TODO(),
+        "deviceUid",
+        request,
+    )
+}
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**deviceUid:** `string` — Uid of the device.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**meta:** `*string` — Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**limit:** `*int` — Number of software inventory records to return. Defaults to 50.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**cursor:** `*string` — Start search from cursor position.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**filter:** `*string` — Filter results by this query. For more information on filtering, refer to the [Assets Filtering Guide](https://docs.synqly.com/guides/connectors/assets/query-filters). Defaults to no filter. If used more than once, the queries are ANDed together.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**order:** `*string` — Results are returned in a fixed `package.name` ascending order. Passing `order` is rejected.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**includeRawData:** `*bool` — Include the raw data from the provider in the response. Defaults to `false`.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
 <details><summary><code>client.Assets.CreateSoftware(request) -> *engine.CreateSoftwareInventoryResponse</code></summary>
 <dl>
 <dd>

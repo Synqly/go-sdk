@@ -280,6 +280,60 @@ func (r *RawClient) QuerySoftware(
     }, nil
 }
 
+func (r *RawClient) QueryDeviceSoftware(
+    ctx context.Context,
+    // Uid of the device.
+    deviceUid string,
+    request *engine.QueryDeviceSoftwareInventoryRequest,
+    opts ...option.RequestOption,
+) (*core.Response[*engine.QuerySoftwareInventoryResponse], error){
+    options := core.NewRequestOptions(opts...)
+    baseURL := internal.ResolveBaseURL(
+        options.BaseURL,
+        r.baseURL,
+        "https://api.synqly.com",
+    )
+    endpointURL := internal.EncodeURL(
+        baseURL + "/v1/assets/devices/%v/software",
+        deviceUid,
+    )
+    queryParams, err := internal.QueryValues(request)
+    if err != nil {
+        return nil, err
+    }
+    if len(queryParams) > 0 {
+        endpointURL += "?" + queryParams.Encode()
+    }
+    headers := internal.MergeHeaders(
+        r.options.ToHeader(),
+        options.ToHeader(),
+    )
+    var response *engine.QuerySoftwareInventoryResponse
+    raw, err := r.caller.Call(
+        ctx,
+        &internal.CallParams{
+            URL: endpointURL,
+            Method: http.MethodGet,
+            Headers: headers,
+            MaxAttempts: options.MaxAttempts,
+            DisableRetries: options.DisableRetries,
+            BodyProperties: options.BodyProperties,
+            QueryParameters: options.QueryParameters,
+            Client: options.HTTPClient,
+            Response: &response,
+            ErrorDecoder: internal.NewErrorDecoder(engine.ErrorCodes),
+        },
+    )
+    if err != nil {
+        return nil, err
+    }
+    return &core.Response[*engine.QuerySoftwareInventoryResponse]{
+        StatusCode: raw.StatusCode,
+        Header: raw.Header,
+        Body: response,
+    }, nil
+}
+
 func (r *RawClient) CreateSoftware(
     ctx context.Context,
     request *engine.CreateSoftwareInventoryRequestInput,
