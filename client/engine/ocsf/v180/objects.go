@@ -15096,41 +15096,47 @@ func (e *Edge) String() string {
 // The Email object describes the email metadata such as sender, recipients, and direction, and can include embedded URLs and files.
 var (
 	emailFieldAttachmentCount  = big.NewInt(1 << 0)
-	emailFieldCc               = big.NewInt(1 << 1)
-	emailFieldCcMailboxes      = big.NewInt(1 << 2)
-	emailFieldDeliveredTo      = big.NewInt(1 << 3)
-	emailFieldDeliveredToList  = big.NewInt(1 << 4)
-	emailFieldFiles            = big.NewInt(1 << 5)
-	emailFieldFrom             = big.NewInt(1 << 6)
-	emailFieldFromList         = big.NewInt(1 << 7)
-	emailFieldFromMailbox      = big.NewInt(1 << 8)
-	emailFieldFromMailboxes    = big.NewInt(1 << 9)
-	emailFieldHttpHeaders      = big.NewInt(1 << 10)
-	emailFieldIsDelivered      = big.NewInt(1 << 11)
-	emailFieldIsRead           = big.NewInt(1 << 12)
-	emailFieldMessageUid       = big.NewInt(1 << 13)
-	emailFieldRawHeader        = big.NewInt(1 << 14)
-	emailFieldReplyTo          = big.NewInt(1 << 15)
-	emailFieldReplyToList      = big.NewInt(1 << 16)
-	emailFieldReplyToMailboxes = big.NewInt(1 << 17)
-	emailFieldReturnPath       = big.NewInt(1 << 18)
-	emailFieldSender           = big.NewInt(1 << 19)
-	emailFieldSenderMailbox    = big.NewInt(1 << 20)
-	emailFieldSize             = big.NewInt(1 << 21)
-	emailFieldSmtpFrom         = big.NewInt(1 << 22)
-	emailFieldSmtpTo           = big.NewInt(1 << 23)
-	emailFieldSubject          = big.NewInt(1 << 24)
-	emailFieldTo               = big.NewInt(1 << 25)
-	emailFieldToMailboxes      = big.NewInt(1 << 26)
-	emailFieldUid              = big.NewInt(1 << 27)
-	emailFieldUrlCount         = big.NewInt(1 << 28)
-	emailFieldUrls             = big.NewInt(1 << 29)
-	emailFieldXOriginatingIp   = big.NewInt(1 << 30)
+	emailFieldBcc              = big.NewInt(1 << 1)
+	emailFieldBccMailboxes     = big.NewInt(1 << 2)
+	emailFieldCc               = big.NewInt(1 << 3)
+	emailFieldCcMailboxes      = big.NewInt(1 << 4)
+	emailFieldDeliveredTo      = big.NewInt(1 << 5)
+	emailFieldDeliveredToList  = big.NewInt(1 << 6)
+	emailFieldFiles            = big.NewInt(1 << 7)
+	emailFieldFrom             = big.NewInt(1 << 8)
+	emailFieldFromList         = big.NewInt(1 << 9)
+	emailFieldFromMailbox      = big.NewInt(1 << 10)
+	emailFieldFromMailboxes    = big.NewInt(1 << 11)
+	emailFieldHttpHeaders      = big.NewInt(1 << 12)
+	emailFieldIsDelivered      = big.NewInt(1 << 13)
+	emailFieldIsRead           = big.NewInt(1 << 14)
+	emailFieldMessageUid       = big.NewInt(1 << 15)
+	emailFieldRawHeader        = big.NewInt(1 << 16)
+	emailFieldReplyTo          = big.NewInt(1 << 17)
+	emailFieldReplyToList      = big.NewInt(1 << 18)
+	emailFieldReplyToMailboxes = big.NewInt(1 << 19)
+	emailFieldReturnPath       = big.NewInt(1 << 20)
+	emailFieldSender           = big.NewInt(1 << 21)
+	emailFieldSenderMailbox    = big.NewInt(1 << 22)
+	emailFieldSize             = big.NewInt(1 << 23)
+	emailFieldSmtpFrom         = big.NewInt(1 << 24)
+	emailFieldSmtpTo           = big.NewInt(1 << 25)
+	emailFieldSubject          = big.NewInt(1 << 26)
+	emailFieldTo               = big.NewInt(1 << 27)
+	emailFieldToMailboxes      = big.NewInt(1 << 28)
+	emailFieldUid              = big.NewInt(1 << 29)
+	emailFieldUrlCount         = big.NewInt(1 << 30)
+	emailFieldUrls             = big.NewInt(1 << 31)
+	emailFieldXOriginatingIp   = big.NewInt(1 << 32)
 )
 
 type Email struct {
 	// The number of attachments in the email as reported by the event source.
 	AttachmentCount *int `json:"attachment_count,omitempty" url:"attachment_count,omitempty"`
+	// The machine-readable email header Bcc values, as defined by RFC 5322. For example <code>example.user@usersdomain.com</code>.
+	Bcc []EmailAddress `json:"bcc,omitempty" url:"bcc,omitempty"`
+	// The human-readable email header Bcc Mailbox values. For example <code>'Example User &lt;example.user@usersdomain.com&gt;'</code>.
+	BccMailboxes []string `json:"bcc_mailboxes,omitempty" url:"bcc_mailboxes,omitempty"`
 	// The machine-readable email header Cc values, as defined by RFC 5322. For example <code>example.user@usersdomain.com</code>.
 	Cc []EmailAddress `json:"cc,omitempty" url:"cc,omitempty"`
 	// The human-readable email header Cc Mailbox values. For example <code>'Example User &lt;example.user@usersdomain.com&gt;'</code>.
@@ -15204,6 +15210,20 @@ func (e *Email) GetAttachmentCount() *int {
 		return nil
 	}
 	return e.AttachmentCount
+}
+
+func (e *Email) GetBcc() []EmailAddress {
+	if e == nil {
+		return nil
+	}
+	return e.Bcc
+}
+
+func (e *Email) GetBccMailboxes() []string {
+	if e == nil {
+		return nil
+	}
+	return e.BccMailboxes
 }
 
 func (e *Email) GetCc() []EmailAddress {
@@ -15435,6 +15455,20 @@ func (e *Email) require(field *big.Int) {
 func (e *Email) SetAttachmentCount(attachmentCount *int) {
 	e.AttachmentCount = attachmentCount
 	e.require(emailFieldAttachmentCount)
+}
+
+// SetBcc sets the Bcc field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (e *Email) SetBcc(bcc []EmailAddress) {
+	e.Bcc = bcc
+	e.require(emailFieldBcc)
+}
+
+// SetBccMailboxes sets the BccMailboxes field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (e *Email) SetBccMailboxes(bccMailboxes []string) {
+	e.BccMailboxes = bccMailboxes
+	e.require(emailFieldBccMailboxes)
 }
 
 // SetCc sets the Cc field and marks it as non-optional;

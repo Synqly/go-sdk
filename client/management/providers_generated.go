@@ -11626,6 +11626,142 @@ func (e *EmailSecurityMimecastCloudGatewayMock) String() string {
 	return fmt.Sprintf("%#v", e)
 }
 
+// Configuration for Microsoft 365 Management Activity as an Email Security provider.
+var (
+	emailSecurityO365ManagementActivityFieldCloud      = big.NewInt(1 << 0)
+	emailSecurityO365ManagementActivityFieldCredential = big.NewInt(1 << 1)
+	emailSecurityO365ManagementActivityFieldOperations = big.NewInt(1 << 2)
+	emailSecurityO365ManagementActivityFieldTenantId   = big.NewInt(1 << 3)
+)
+
+type EmailSecurityO365ManagementActivity struct {
+	// Microsoft 365 cloud that hosts the tenant.
+	Cloud      *O365ManagementActivityCloud      `json:"cloud,omitempty" url:"cloud,omitempty"`
+	Credential *O365ManagementActivityCredential `json:"credential" url:"credential"`
+	// Audit operations to report.
+	Operations []string `json:"operations,omitempty" url:"operations,omitempty"`
+	// Azure Directory (tenant) identifier.
+	TenantId string `json:"tenant_id" url:"tenant_id"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (e *EmailSecurityO365ManagementActivity) GetCloud() *O365ManagementActivityCloud {
+	if e == nil {
+		return nil
+	}
+	return e.Cloud
+}
+
+func (e *EmailSecurityO365ManagementActivity) GetCredential() *O365ManagementActivityCredential {
+	if e == nil {
+		return nil
+	}
+	return e.Credential
+}
+
+func (e *EmailSecurityO365ManagementActivity) GetOperations() []string {
+	if e == nil {
+		return nil
+	}
+	return e.Operations
+}
+
+func (e *EmailSecurityO365ManagementActivity) GetTenantId() string {
+	if e == nil {
+		return ""
+	}
+	return e.TenantId
+}
+
+func (e *EmailSecurityO365ManagementActivity) GetExtraProperties() map[string]interface{} {
+	if e == nil {
+		return nil
+	}
+	return e.extraProperties
+}
+
+func (e *EmailSecurityO365ManagementActivity) require(field *big.Int) {
+	if e.explicitFields == nil {
+		e.explicitFields = big.NewInt(0)
+	}
+	e.explicitFields.Or(e.explicitFields, field)
+}
+
+// SetCloud sets the Cloud field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (e *EmailSecurityO365ManagementActivity) SetCloud(cloud *O365ManagementActivityCloud) {
+	e.Cloud = cloud
+	e.require(emailSecurityO365ManagementActivityFieldCloud)
+}
+
+// SetCredential sets the Credential field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (e *EmailSecurityO365ManagementActivity) SetCredential(credential *O365ManagementActivityCredential) {
+	e.Credential = credential
+	e.require(emailSecurityO365ManagementActivityFieldCredential)
+}
+
+// SetOperations sets the Operations field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (e *EmailSecurityO365ManagementActivity) SetOperations(operations []string) {
+	e.Operations = operations
+	e.require(emailSecurityO365ManagementActivityFieldOperations)
+}
+
+// SetTenantId sets the TenantId field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (e *EmailSecurityO365ManagementActivity) SetTenantId(tenantId string) {
+	e.TenantId = tenantId
+	e.require(emailSecurityO365ManagementActivityFieldTenantId)
+}
+
+func (e *EmailSecurityO365ManagementActivity) UnmarshalJSON(data []byte) error {
+	type unmarshaler EmailSecurityO365ManagementActivity
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*e = EmailSecurityO365ManagementActivity(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *e)
+	if err != nil {
+		return err
+	}
+	e.extraProperties = extraProperties
+	e.rawJSON = nil
+	return nil
+}
+
+func (e *EmailSecurityO365ManagementActivity) MarshalJSON() ([]byte, error) {
+	type embed EmailSecurityO365ManagementActivity
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*e),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, e.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (e *EmailSecurityO365ManagementActivity) String() string {
+	if e == nil {
+		return "<nil>"
+	}
+	if len(e.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(e.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(e); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", e)
+}
+
 // Configuration for Automox.
 //
 // [Configuration guide](https://docs.synqly.com/guides/provider-configuration/automox-endpointmgmt-setup)
@@ -20552,6 +20688,243 @@ func (n *NucleusCredential) validate() error {
 	return nil
 }
 
+// Microsoft 365 cloud instance that hosts the Office 365 Management Activity API. The value selects the API base URL and the Microsoft Entra login host together; the two cannot be set independently.
+type O365ManagementActivityCloud string
+
+const (
+	// Worldwide (commercial) Microsoft 365.
+	//
+	// API base URL `https://manage.office.com`, login host `login.microsoftonline.com`.
+	O365ManagementActivityCloudGlobal O365ManagementActivityCloud = "global"
+	// GCC (Government Community Cloud).
+	//
+	// API base URL `https://manage-gcc.office.com`, login host `login.microsoftonline.com`.
+	O365ManagementActivityCloudGcc O365ManagementActivityCloud = "gcc"
+	// GCC High (Government Community Cloud High).
+	//
+	// API base URL `https://manage.office365.us`, login host `login.microsoftonline.us`.
+	O365ManagementActivityCloudGccHigh O365ManagementActivityCloud = "gcc_high"
+	// DoD (Department of Defense).
+	//
+	// API base URL `https://manage.protection.apps.mil`, login host `login.microsoftonline.us`.
+	O365ManagementActivityCloudDoD O365ManagementActivityCloud = "dod"
+)
+
+func NewO365ManagementActivityCloudFromString(s string) (O365ManagementActivityCloud, error) {
+	switch s {
+	case "global":
+		return O365ManagementActivityCloudGlobal, nil
+	case "gcc":
+		return O365ManagementActivityCloudGcc, nil
+	case "gcc_high":
+		return O365ManagementActivityCloudGccHigh, nil
+	case "dod":
+		return O365ManagementActivityCloudDoD, nil
+	}
+	var t O365ManagementActivityCloud
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (o O365ManagementActivityCloud) Ptr() *O365ManagementActivityCloud {
+	return &o
+}
+
+type O365ManagementActivityCredential struct {
+	Type string
+	// Client ID and client secret of the Azure application registration.
+	OAuthClient *OAuthClientCredential
+	// Reference to existing Client Secret.
+	OAuthClientId OAuthClientCredentialId
+	// Certificate, private key, and client ID of the Azure application registration.
+	TlsCertificate *TlsCertificateCredential
+	// Reference to existing Certificate.
+	TlsCertificateId TlsCertificateCredentialId
+
+	rawJSON json.RawMessage
+}
+
+func (o *O365ManagementActivityCredential) GetType() string {
+	if o == nil {
+		return ""
+	}
+	return o.Type
+}
+
+func (o *O365ManagementActivityCredential) GetOAuthClient() *OAuthClientCredential {
+	if o == nil {
+		return nil
+	}
+	return o.OAuthClient
+}
+
+func (o *O365ManagementActivityCredential) GetOAuthClientId() OAuthClientCredentialId {
+	if o == nil {
+		return ""
+	}
+	return o.OAuthClientId
+}
+
+func (o *O365ManagementActivityCredential) GetTlsCertificate() *TlsCertificateCredential {
+	if o == nil {
+		return nil
+	}
+	return o.TlsCertificate
+}
+
+func (o *O365ManagementActivityCredential) GetTlsCertificateId() TlsCertificateCredentialId {
+	if o == nil {
+		return ""
+	}
+	return o.TlsCertificateId
+}
+
+func (o *O365ManagementActivityCredential) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	o.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", o)
+	}
+	switch unmarshaler.Type {
+	case "o_auth_client":
+		value := new(OAuthClientCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		o.OAuthClient = value
+	case "o_auth_client_id":
+		var valueUnmarshaler struct {
+			OAuthClientId OAuthClientCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		o.OAuthClientId = valueUnmarshaler.OAuthClientId
+	case "tls_certificate":
+		value := new(TlsCertificateCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		o.TlsCertificate = value
+	case "tls_certificate_id":
+		var valueUnmarshaler struct {
+			TlsCertificateId TlsCertificateCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		o.TlsCertificateId = valueUnmarshaler.TlsCertificateId
+	}
+	o.rawJSON = nil
+	return nil
+}
+
+func (o O365ManagementActivityCredential) MarshalJSON() ([]byte, error) {
+	if err := o.validate(); err != nil {
+		return nil, err
+	}
+	if o.OAuthClient != nil {
+		return internal.MarshalJSONWithExtraProperty(o.OAuthClient, "type", "o_auth_client")
+	}
+	if o.OAuthClientId != "" {
+		var marshaler = struct {
+			Type          string                  `json:"type"`
+			OAuthClientId OAuthClientCredentialId `json:"value"`
+		}{
+			Type:          "o_auth_client_id",
+			OAuthClientId: o.OAuthClientId,
+		}
+		return json.Marshal(marshaler)
+	}
+	if o.TlsCertificate != nil {
+		return internal.MarshalJSONWithExtraProperty(o.TlsCertificate, "type", "tls_certificate")
+	}
+	if o.TlsCertificateId != "" {
+		var marshaler = struct {
+			Type             string                     `json:"type"`
+			TlsCertificateId TlsCertificateCredentialId `json:"value"`
+		}{
+			Type:             "tls_certificate_id",
+			TlsCertificateId: o.TlsCertificateId,
+		}
+		return json.Marshal(marshaler)
+	}
+	if len(o.rawJSON) > 0 {
+		return o.rawJSON, nil
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", o)
+}
+
+type O365ManagementActivityCredentialVisitor interface {
+	VisitOAuthClient(*OAuthClientCredential) error
+	VisitOAuthClientId(OAuthClientCredentialId) error
+	VisitTlsCertificate(*TlsCertificateCredential) error
+	VisitTlsCertificateId(TlsCertificateCredentialId) error
+}
+
+func (o *O365ManagementActivityCredential) Accept(visitor O365ManagementActivityCredentialVisitor) error {
+	if o.OAuthClient != nil {
+		return visitor.VisitOAuthClient(o.OAuthClient)
+	}
+	if o.OAuthClientId != "" {
+		return visitor.VisitOAuthClientId(o.OAuthClientId)
+	}
+	if o.TlsCertificate != nil {
+		return visitor.VisitTlsCertificate(o.TlsCertificate)
+	}
+	if o.TlsCertificateId != "" {
+		return visitor.VisitTlsCertificateId(o.TlsCertificateId)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", o)
+}
+
+func (o *O365ManagementActivityCredential) validate() error {
+	if o == nil {
+		return fmt.Errorf("type %T is nil", o)
+	}
+	var fields []string
+	if o.OAuthClient != nil {
+		fields = append(fields, "o_auth_client")
+	}
+	if o.OAuthClientId != "" {
+		fields = append(fields, "o_auth_client_id")
+	}
+	if o.TlsCertificate != nil {
+		fields = append(fields, "tls_certificate")
+	}
+	if o.TlsCertificateId != "" {
+		fields = append(fields, "tls_certificate_id")
+	}
+	if len(fields) == 0 {
+		if o.Type != "" {
+			if len(o.rawJSON) > 0 {
+				return nil
+			}
+			return fmt.Errorf("type %T defines a discriminant set to %q but the field is not set", o, o.Type)
+		}
+		return fmt.Errorf("type %T is empty", o)
+	}
+	if len(fields) > 1 {
+		return fmt.Errorf("type %T defines values for %s, but only one value is allowed", o, fields)
+	}
+	if o.Type != "" {
+		field := fields[0]
+		if o.Type != field {
+			return fmt.Errorf(
+				"type %T defines a discriminant set to %q, but it does not match the %T field; either remove or update the discriminant to match",
+				o,
+				o.Type,
+				o,
+			)
+		}
+	}
+	return nil
+}
+
 type OktaCredential struct {
 	Type string
 	// OAuth 2.0 Token URL, Client ID, and Client Secret for a Synqly Identity Connector API service application.
@@ -22301,6 +22674,8 @@ type ProviderConfig struct {
 	EmailsecurityMimecastCloudGateway *EmailSecurityMimecastCloudGateway
 	// Configuration for [MOCK] Mimecast Cloud Gateway.
 	EmailsecurityMimecastCloudGatewayMock *EmailSecurityMimecastCloudGatewayMock
+	// Configuration for Microsoft 365 Management Activity as an Email Security provider.
+	EmailsecurityO365ManagementActivity *EmailSecurityO365ManagementActivity
 	// Configuration for Automox.
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/automox-endpointmgmt-setup)
@@ -23165,6 +23540,13 @@ func (p *ProviderConfig) GetEmailsecurityMimecastCloudGatewayMock() *EmailSecuri
 		return nil
 	}
 	return p.EmailsecurityMimecastCloudGatewayMock
+}
+
+func (p *ProviderConfig) GetEmailsecurityO365ManagementActivity() *EmailSecurityO365ManagementActivity {
+	if p == nil {
+		return nil
+	}
+	return p.EmailsecurityO365ManagementActivity
 }
 
 func (p *ProviderConfig) GetEndpointmanagementAutomox() *EndpointmanagementAutomox {
@@ -24359,6 +24741,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.EmailsecurityMimecastCloudGatewayMock = value
+	case "emailsecurity_o365_management_activity":
+		value := new(EmailSecurityO365ManagementActivity)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.EmailsecurityO365ManagementActivity = value
 	case "endpointmanagement_automox":
 		value := new(EndpointmanagementAutomox)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -25238,6 +25626,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.EmailsecurityMimecastCloudGatewayMock != nil {
 		return internal.MarshalJSONWithExtraProperty(p.EmailsecurityMimecastCloudGatewayMock, "type", "emailsecurity_mimecast_cloud_gateway_mock")
 	}
+	if p.EmailsecurityO365ManagementActivity != nil {
+		return internal.MarshalJSONWithExtraProperty(p.EmailsecurityO365ManagementActivity, "type", "emailsecurity_o365_management_activity")
+	}
 	if p.EndpointmanagementAutomox != nil {
 		return internal.MarshalJSONWithExtraProperty(p.EndpointmanagementAutomox, "type", "endpointmanagement_automox")
 	}
@@ -25647,6 +26038,7 @@ type ProviderConfigVisitor interface {
 	VisitEmailsecurityExchangeOnline(*EmailSecurityExchangeOnline) error
 	VisitEmailsecurityMimecastCloudGateway(*EmailSecurityMimecastCloudGateway) error
 	VisitEmailsecurityMimecastCloudGatewayMock(*EmailSecurityMimecastCloudGatewayMock) error
+	VisitEmailsecurityO365ManagementActivity(*EmailSecurityO365ManagementActivity) error
 	VisitEndpointmanagementAutomox(*EndpointmanagementAutomox) error
 	VisitEndpointmanagementIntune(*EndpointmanagementIntune) error
 	VisitEndpointmanagementIru(*EndpointmanagementIru) error
@@ -25959,6 +26351,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.EmailsecurityMimecastCloudGatewayMock != nil {
 		return visitor.VisitEmailsecurityMimecastCloudGatewayMock(p.EmailsecurityMimecastCloudGatewayMock)
+	}
+	if p.EmailsecurityO365ManagementActivity != nil {
+		return visitor.VisitEmailsecurityO365ManagementActivity(p.EmailsecurityO365ManagementActivity)
 	}
 	if p.EndpointmanagementAutomox != nil {
 		return visitor.VisitEndpointmanagementAutomox(p.EndpointmanagementAutomox)
@@ -26502,6 +26897,9 @@ func (p *ProviderConfig) validate() error {
 	if p.EmailsecurityMimecastCloudGatewayMock != nil {
 		fields = append(fields, "emailsecurity_mimecast_cloud_gateway_mock")
 	}
+	if p.EmailsecurityO365ManagementActivity != nil {
+		fields = append(fields, "emailsecurity_o365_management_activity")
+	}
 	if p.EndpointmanagementAutomox != nil {
 		fields = append(fields, "endpointmanagement_automox")
 	}
@@ -27000,6 +27398,8 @@ const (
 	ProviderConfigIdEmailSecurityMimecastCloudGateway ProviderConfigId = "emailsecurity_mimecast_cloud_gateway"
 	// [MOCK] Mimecast Cloud Gateway
 	ProviderConfigIdEmailSecurityMimecastCloudGatewayMock ProviderConfigId = "emailsecurity_mimecast_cloud_gateway_mock"
+	// Microsoft 365 Management Activity
+	ProviderConfigIdEmailSecurityO365ManagementActivity ProviderConfigId = "emailsecurity_o365_management_activity"
 	// Automox
 	ProviderConfigIdEndpointmanagementAutomox ProviderConfigId = "endpointmanagement_automox"
 	// Microsoft Intune
@@ -27362,6 +27762,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdEmailSecurityMimecastCloudGateway, nil
 	case "emailsecurity_mimecast_cloud_gateway_mock":
 		return ProviderConfigIdEmailSecurityMimecastCloudGatewayMock, nil
+	case "emailsecurity_o365_management_activity":
+		return ProviderConfigIdEmailSecurityO365ManagementActivity, nil
 	case "endpointmanagement_automox":
 		return ProviderConfigIdEndpointmanagementAutomox, nil
 	case "endpointmanagement_intune":

@@ -2349,6 +2349,7 @@ type SecretCredentialId = CredentialId
 var (
 	tlsCertificateCredentialFieldCertificate = big.NewInt(1 << 0)
 	tlsCertificateCredentialFieldPrivateKey  = big.NewInt(1 << 1)
+	tlsCertificateCredentialFieldExtra       = big.NewInt(1 << 2)
 )
 
 type TlsCertificateCredential struct {
@@ -2356,6 +2357,8 @@ type TlsCertificateCredential struct {
 	Certificate string `json:"certificate" url:"certificate"`
 	// PEM-encoded private key corresponding to the certificate.
 	PrivateKey string `json:"private_key" url:"private_key"`
+	// Optional connection specific JSON map data such as the client ID the certificate authenticates
+	Extra map[string]any `json:"extra,omitempty" url:"extra,omitempty"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -2376,6 +2379,13 @@ func (t *TlsCertificateCredential) GetPrivateKey() string {
 		return ""
 	}
 	return t.PrivateKey
+}
+
+func (t *TlsCertificateCredential) GetExtra() map[string]any {
+	if t == nil {
+		return nil
+	}
+	return t.Extra
 }
 
 func (t *TlsCertificateCredential) GetExtraProperties() map[string]interface{} {
@@ -2404,6 +2414,13 @@ func (t *TlsCertificateCredential) SetCertificate(certificate string) {
 func (t *TlsCertificateCredential) SetPrivateKey(privateKey string) {
 	t.PrivateKey = privateKey
 	t.require(tlsCertificateCredentialFieldPrivateKey)
+}
+
+// SetExtra sets the Extra field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (t *TlsCertificateCredential) SetExtra(extra map[string]any) {
+	t.Extra = extra
+	t.require(tlsCertificateCredentialFieldExtra)
 }
 
 func (t *TlsCertificateCredential) UnmarshalJSON(data []byte) error {
@@ -2447,6 +2464,9 @@ func (t *TlsCertificateCredential) String() string {
 	}
 	return fmt.Sprintf("%#v", t)
 }
+
+// Unique identifier for a TLS Certificate Credential
+type TlsCertificateCredentialId = CredentialId
 
 // Token used to authenticate with an external service.
 var (

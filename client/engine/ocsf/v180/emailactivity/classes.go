@@ -93,64 +93,66 @@ var (
 	emailActivityFieldActionId        = big.NewInt(1 << 1)
 	emailActivityFieldActivityId      = big.NewInt(1 << 2)
 	emailActivityFieldActivityName    = big.NewInt(1 << 3)
-	emailActivityFieldAttacks         = big.NewInt(1 << 4)
-	emailActivityFieldAttempt         = big.NewInt(1 << 5)
-	emailActivityFieldAuthorizations  = big.NewInt(1 << 6)
-	emailActivityFieldBanner          = big.NewInt(1 << 7)
-	emailActivityFieldCategoryName    = big.NewInt(1 << 8)
-	emailActivityFieldCategoryUid     = big.NewInt(1 << 9)
-	emailActivityFieldClassUid        = big.NewInt(1 << 10)
-	emailActivityFieldCommand         = big.NewInt(1 << 11)
-	emailActivityFieldConfidence      = big.NewInt(1 << 12)
-	emailActivityFieldConfidenceId    = big.NewInt(1 << 13)
-	emailActivityFieldConfidenceScore = big.NewInt(1 << 14)
-	emailActivityFieldCount           = big.NewInt(1 << 15)
-	emailActivityFieldDirection       = big.NewInt(1 << 16)
-	emailActivityFieldDirectionId     = big.NewInt(1 << 17)
-	emailActivityFieldDisposition     = big.NewInt(1 << 18)
-	emailActivityFieldDispositionId   = big.NewInt(1 << 19)
-	emailActivityFieldDstEndpoint     = big.NewInt(1 << 20)
-	emailActivityFieldDuration        = big.NewInt(1 << 21)
-	emailActivityFieldEmail           = big.NewInt(1 << 22)
-	emailActivityFieldEmailAuth       = big.NewInt(1 << 23)
-	emailActivityFieldEndTime         = big.NewInt(1 << 24)
-	emailActivityFieldEndTimeDt       = big.NewInt(1 << 25)
-	emailActivityFieldEnrichments     = big.NewInt(1 << 26)
-	emailActivityFieldFirewallRule    = big.NewInt(1 << 27)
-	emailActivityFieldFrom            = big.NewInt(1 << 28)
-	emailActivityFieldIsAlert         = big.NewInt(1 << 29)
-	emailActivityFieldMalware         = big.NewInt(1 << 30)
-	emailActivityFieldMalwareScanInfo = big.NewInt(1 << 31)
-	emailActivityFieldMessage         = big.NewInt(1 << 32)
-	emailActivityFieldMessageTraceUid = big.NewInt(1 << 33)
-	emailActivityFieldMetadata        = big.NewInt(1 << 34)
-	emailActivityFieldObservables     = big.NewInt(1 << 35)
-	emailActivityFieldPolicy          = big.NewInt(1 << 36)
-	emailActivityFieldProtocolName    = big.NewInt(1 << 37)
-	emailActivityFieldRawData         = big.NewInt(1 << 38)
-	emailActivityFieldRawDataHash     = big.NewInt(1 << 39)
-	emailActivityFieldRawDataSize     = big.NewInt(1 << 40)
-	emailActivityFieldRiskDetails     = big.NewInt(1 << 41)
-	emailActivityFieldRiskLevel       = big.NewInt(1 << 42)
-	emailActivityFieldRiskLevelId     = big.NewInt(1 << 43)
-	emailActivityFieldRiskScore       = big.NewInt(1 << 44)
-	emailActivityFieldSeverity        = big.NewInt(1 << 45)
-	emailActivityFieldSeverityId      = big.NewInt(1 << 46)
-	emailActivityFieldSmtpHello       = big.NewInt(1 << 47)
-	emailActivityFieldSrcEndpoint     = big.NewInt(1 << 48)
-	emailActivityFieldStartTime       = big.NewInt(1 << 49)
-	emailActivityFieldStartTimeDt     = big.NewInt(1 << 50)
-	emailActivityFieldStatus          = big.NewInt(1 << 51)
-	emailActivityFieldStatusCode      = big.NewInt(1 << 52)
-	emailActivityFieldStatusDetail    = big.NewInt(1 << 53)
-	emailActivityFieldStatusId        = big.NewInt(1 << 54)
-	emailActivityFieldTime            = big.NewInt(1 << 55)
-	emailActivityFieldTimeDt          = big.NewInt(1 << 56)
-	emailActivityFieldTimezoneOffset  = big.NewInt(1 << 57)
-	emailActivityFieldTo              = big.NewInt(1 << 58)
-	emailActivityFieldTypeName        = big.NewInt(1 << 59)
-	emailActivityFieldTypeUid         = big.NewInt(1 << 60)
-	emailActivityFieldUnmapped        = big.NewInt(1 << 61)
+	emailActivityFieldActor           = big.NewInt(1 << 4)
+	emailActivityFieldAttacks         = big.NewInt(1 << 5)
+	emailActivityFieldAttempt         = big.NewInt(1 << 6)
+	emailActivityFieldAuthorizations  = big.NewInt(1 << 7)
+	emailActivityFieldBanner          = big.NewInt(1 << 8)
+	emailActivityFieldCategoryName    = big.NewInt(1 << 9)
+	emailActivityFieldCategoryUid     = big.NewInt(1 << 10)
+	emailActivityFieldClassUid        = big.NewInt(1 << 11)
+	emailActivityFieldCommand         = big.NewInt(1 << 12)
+	emailActivityFieldConfidence      = big.NewInt(1 << 13)
+	emailActivityFieldConfidenceId    = big.NewInt(1 << 14)
+	emailActivityFieldConfidenceScore = big.NewInt(1 << 15)
+	emailActivityFieldCount           = big.NewInt(1 << 16)
+	emailActivityFieldDevice          = big.NewInt(1 << 17)
+	emailActivityFieldDirection       = big.NewInt(1 << 18)
+	emailActivityFieldDirectionId     = big.NewInt(1 << 19)
+	emailActivityFieldDisposition     = big.NewInt(1 << 20)
+	emailActivityFieldDispositionId   = big.NewInt(1 << 21)
+	emailActivityFieldDstEndpoint     = big.NewInt(1 << 22)
+	emailActivityFieldDuration        = big.NewInt(1 << 23)
+	emailActivityFieldEmail           = big.NewInt(1 << 24)
+	emailActivityFieldEmailAuth       = big.NewInt(1 << 25)
+	emailActivityFieldEndTime         = big.NewInt(1 << 26)
+	emailActivityFieldEndTimeDt       = big.NewInt(1 << 27)
+	emailActivityFieldEnrichments     = big.NewInt(1 << 28)
+	emailActivityFieldFirewallRule    = big.NewInt(1 << 29)
+	emailActivityFieldFrom            = big.NewInt(1 << 30)
+	emailActivityFieldIsAlert         = big.NewInt(1 << 31)
+	emailActivityFieldMalware         = big.NewInt(1 << 32)
+	emailActivityFieldMalwareScanInfo = big.NewInt(1 << 33)
+	emailActivityFieldMessage         = big.NewInt(1 << 34)
+	emailActivityFieldMessageTraceUid = big.NewInt(1 << 35)
+	emailActivityFieldMetadata        = big.NewInt(1 << 36)
+	emailActivityFieldObservables     = big.NewInt(1 << 37)
+	emailActivityFieldPolicy          = big.NewInt(1 << 38)
+	emailActivityFieldProtocolName    = big.NewInt(1 << 39)
+	emailActivityFieldRawData         = big.NewInt(1 << 40)
+	emailActivityFieldRawDataHash     = big.NewInt(1 << 41)
+	emailActivityFieldRawDataSize     = big.NewInt(1 << 42)
+	emailActivityFieldRiskDetails     = big.NewInt(1 << 43)
+	emailActivityFieldRiskLevel       = big.NewInt(1 << 44)
+	emailActivityFieldRiskLevelId     = big.NewInt(1 << 45)
+	emailActivityFieldRiskScore       = big.NewInt(1 << 46)
+	emailActivityFieldSeverity        = big.NewInt(1 << 47)
+	emailActivityFieldSeverityId      = big.NewInt(1 << 48)
+	emailActivityFieldSmtpHello       = big.NewInt(1 << 49)
+	emailActivityFieldSrcEndpoint     = big.NewInt(1 << 50)
+	emailActivityFieldStartTime       = big.NewInt(1 << 51)
+	emailActivityFieldStartTimeDt     = big.NewInt(1 << 52)
+	emailActivityFieldStatus          = big.NewInt(1 << 53)
+	emailActivityFieldStatusCode      = big.NewInt(1 << 54)
+	emailActivityFieldStatusDetail    = big.NewInt(1 << 55)
+	emailActivityFieldStatusId        = big.NewInt(1 << 56)
+	emailActivityFieldTime            = big.NewInt(1 << 57)
+	emailActivityFieldTimeDt          = big.NewInt(1 << 58)
+	emailActivityFieldTimezoneOffset  = big.NewInt(1 << 59)
+	emailActivityFieldTo              = big.NewInt(1 << 60)
+	emailActivityFieldTypeName        = big.NewInt(1 << 61)
+	emailActivityFieldTypeUid         = big.NewInt(1 << 62)
+	emailActivityFieldUnmapped        = big.NewInt(0).Lsh(big.NewInt(1), 63)
 )
 
 type EmailActivity struct {
@@ -162,6 +164,8 @@ type EmailActivity struct {
 	ActivityId ActivityId `json:"activity_id" url:"activity_id"`
 	// The event activity name, as defined by the activity_id.
 	ActivityName *string `json:"activity_name,omitempty" url:"activity_name,omitempty"`
+	// The actor object describes details about the user/role/process that was the source of the activity. Note that this is not the threat actor of a campaign but may be part of a campaign.
+	Actor *v180.Actor `json:"actor,omitempty" url:"actor,omitempty"`
 	// An array of MITRE ATT&CK® objects describing identified tactics, techniques & sub-techniques. The objects are compatible with MITRE ATLAS™ tactics, techniques & sub-techniques.
 	Attacks []*v180.Attack `json:"attacks,omitempty" url:"attacks,omitempty"`
 	// The attempt number for attempting to deliver the email.
@@ -186,6 +190,8 @@ type EmailActivity struct {
 	ConfidenceScore *int `json:"confidence_score,omitempty" url:"confidence_score,omitempty"`
 	// The number of times that events in the same logical group occurred during the event <strong>Start Time</strong> to <strong>End Time</strong> period.
 	Count *int `json:"count,omitempty" url:"count,omitempty"`
+	// An addressable device, computer system or host.
+	Device *v180.Device `json:"device,omitempty" url:"device,omitempty"`
 	// The direction of the email, as defined by the <code>direction_id</code> value.
 	Direction *string `json:"direction,omitempty" url:"direction,omitempty"`
 	// <p>The direction of the email relative to the scanning host or organization.</p>Email scanned at an internet gateway might be characterized as inbound to the organization from the Internet, outbound from the organization to the Internet, or internal within the organization. Email scanned at a workstation might be characterized as inbound to, or outbound from the workstation.
@@ -314,6 +320,13 @@ func (e *EmailActivity) GetActivityName() *string {
 	return e.ActivityName
 }
 
+func (e *EmailActivity) GetActor() *v180.Actor {
+	if e == nil {
+		return nil
+	}
+	return e.Actor
+}
+
 func (e *EmailActivity) GetAttacks() []*v180.Attack {
 	if e == nil {
 		return nil
@@ -396,6 +409,13 @@ func (e *EmailActivity) GetCount() *int {
 		return nil
 	}
 	return e.Count
+}
+
+func (e *EmailActivity) GetDevice() *v180.Device {
+	if e == nil {
+		return nil
+	}
+	return e.Device
 }
 
 func (e *EmailActivity) GetDirection() *string {
@@ -762,6 +782,13 @@ func (e *EmailActivity) SetActivityName(activityName *string) {
 	e.require(emailActivityFieldActivityName)
 }
 
+// SetActor sets the Actor field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (e *EmailActivity) SetActor(actor *v180.Actor) {
+	e.Actor = actor
+	e.require(emailActivityFieldActor)
+}
+
 // SetAttacks sets the Attacks field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
 func (e *EmailActivity) SetAttacks(attacks []*v180.Attack) {
@@ -844,6 +871,13 @@ func (e *EmailActivity) SetConfidenceScore(confidenceScore *int) {
 func (e *EmailActivity) SetCount(count *int) {
 	e.Count = count
 	e.require(emailActivityFieldCount)
+}
+
+// SetDevice sets the Device field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (e *EmailActivity) SetDevice(device *v180.Device) {
+	e.Device = device
+	e.require(emailActivityFieldDevice)
 }
 
 // SetDirection sets the Direction field and marks it as non-optional;
