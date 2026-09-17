@@ -236,7 +236,7 @@ func (r *RawClient) RemediateDevice(
 
 func (r *RawClient) UpdateDevice(
     ctx context.Context,
-    request *engine.DeviceActionRequest,
+    request *engine.UpdateDeviceRequest,
     opts ...option.RequestOption,
 ) (*core.Response[*engine.DeviceActionResponse], error){
     options := core.NewRequestOptions(opts...)
@@ -246,6 +246,13 @@ func (r *RawClient) UpdateDevice(
         "https://api.synqly.com",
     )
     endpointURL := baseURL + "/v1/endpoint-management/devices/actions/update"
+    queryParams, err := internal.QueryValues(request)
+    if err != nil {
+        return nil, err
+    }
+    if len(queryParams) > 0 {
+        endpointURL += "?" + queryParams.Encode()
+    }
     headers := internal.MergeHeaders(
         r.options.ToHeader(),
         options.ToHeader(),
@@ -279,7 +286,7 @@ func (r *RawClient) UpdateDevice(
 
 func (r *RawClient) LockDevice(
     ctx context.Context,
-    request *engine.DeviceActionRequest,
+    request *engine.LockDeviceRequest,
     opts ...option.RequestOption,
 ) (*core.Response[*engine.DeviceActionResponse], error){
     options := core.NewRequestOptions(opts...)
@@ -289,6 +296,13 @@ func (r *RawClient) LockDevice(
         "https://api.synqly.com",
     )
     endpointURL := baseURL + "/v1/endpoint-management/devices/actions/lock"
+    queryParams, err := internal.QueryValues(request)
+    if err != nil {
+        return nil, err
+    }
+    if len(queryParams) > 0 {
+        endpointURL += "?" + queryParams.Encode()
+    }
     headers := internal.MergeHeaders(
         r.options.ToHeader(),
         options.ToHeader(),
@@ -322,7 +336,7 @@ func (r *RawClient) LockDevice(
 
 func (r *RawClient) RestartDevice(
     ctx context.Context,
-    request *engine.DeviceActionRequest,
+    request *engine.RestartDeviceRequest,
     opts ...option.RequestOption,
 ) (*core.Response[*engine.DeviceActionResponse], error){
     options := core.NewRequestOptions(opts...)
@@ -332,6 +346,13 @@ func (r *RawClient) RestartDevice(
         "https://api.synqly.com",
     )
     endpointURL := baseURL + "/v1/endpoint-management/devices/actions/restart"
+    queryParams, err := internal.QueryValues(request)
+    if err != nil {
+        return nil, err
+    }
+    if len(queryParams) > 0 {
+        endpointURL += "?" + queryParams.Encode()
+    }
     headers := internal.MergeHeaders(
         r.options.ToHeader(),
         options.ToHeader(),
@@ -365,7 +386,7 @@ func (r *RawClient) RestartDevice(
 
 func (r *RawClient) WipeDevice(
     ctx context.Context,
-    request *engine.DeviceActionRequest,
+    request *engine.WipeDeviceRequest,
     opts ...option.RequestOption,
 ) (*core.Response[*engine.DeviceActionResponse], error){
     options := core.NewRequestOptions(opts...)
@@ -375,6 +396,13 @@ func (r *RawClient) WipeDevice(
         "https://api.synqly.com",
     )
     endpointURL := baseURL + "/v1/endpoint-management/devices/actions/wipe"
+    queryParams, err := internal.QueryValues(request)
+    if err != nil {
+        return nil, err
+    }
+    if len(queryParams) > 0 {
+        endpointURL += "?" + queryParams.Encode()
+    }
     headers := internal.MergeHeaders(
         r.options.ToHeader(),
         options.ToHeader(),

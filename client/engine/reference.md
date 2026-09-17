@@ -5373,8 +5373,10 @@ Triggers the device to check in and enforce all assigned policies, profiles, and
 <dd>
 
 ```go
-request := &engine.DeviceActionRequest{
-        DeviceId: "device_id",
+request := &engine.UpdateDeviceRequest{
+        Body: &engine.DeviceActionRequestBody{
+            DeviceId: "device_id",
+        },
     }
 client.Endpointmanagement.UpdateDevice(
         context.TODO(),
@@ -5395,7 +5397,15 @@ client.Endpointmanagement.UpdateDevice(
 <dl>
 <dd>
 
-**request:** `*engine.DeviceActionRequest` 
+**meta:** `*string` — Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request:** `*engine.DeviceActionRequestBody` 
     
 </dd>
 </dl>
@@ -5434,8 +5444,10 @@ Remotely locks the device screen.
 <dd>
 
 ```go
-request := &engine.DeviceActionRequest{
-        DeviceId: "device_id",
+request := &engine.LockDeviceRequest{
+        Body: &engine.DeviceActionRequestBody{
+            DeviceId: "device_id",
+        },
     }
 client.Endpointmanagement.LockDevice(
         context.TODO(),
@@ -5456,7 +5468,15 @@ client.Endpointmanagement.LockDevice(
 <dl>
 <dd>
 
-**request:** `*engine.DeviceActionRequest` 
+**meta:** `*string` — Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request:** `*engine.DeviceActionRequestBody` 
     
 </dd>
 </dl>
@@ -5495,8 +5515,10 @@ Remotely reboots the device.
 <dd>
 
 ```go
-request := &engine.DeviceActionRequest{
-        DeviceId: "device_id",
+request := &engine.RestartDeviceRequest{
+        Body: &engine.DeviceActionRequestBody{
+            DeviceId: "device_id",
+        },
     }
 client.Endpointmanagement.RestartDevice(
         context.TODO(),
@@ -5517,7 +5539,15 @@ client.Endpointmanagement.RestartDevice(
 <dl>
 <dd>
 
-**request:** `*engine.DeviceActionRequest` 
+**meta:** `*string` — Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request:** `*engine.DeviceActionRequestBody` 
     
 </dd>
 </dl>
@@ -5556,8 +5586,10 @@ Factory resets or erases all data from the device.
 <dd>
 
 ```go
-request := &engine.DeviceActionRequest{
-        DeviceId: "device_id",
+request := &engine.WipeDeviceRequest{
+        Body: &engine.DeviceActionRequestBody{
+            DeviceId: "device_id",
+        },
     }
 client.Endpointmanagement.WipeDevice(
         context.TODO(),
@@ -5578,7 +5610,15 @@ client.Endpointmanagement.WipeDevice(
 <dl>
 <dd>
 
-**request:** `*engine.DeviceActionRequest` 
+**meta:** `*string` — Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request:** `*engine.DeviceActionRequestBody` 
     
 </dd>
 </dl>

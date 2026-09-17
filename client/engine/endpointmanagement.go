@@ -39,6 +39,46 @@ func (g *GetDeviceRequest) SetMeta(meta []*string) {
 }
 
 var (
+	lockDeviceRequestFieldMeta = big.NewInt(1 << 0)
+)
+
+type LockDeviceRequest struct {
+	// Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
+	Meta []*string                `json:"-" url:"meta,omitempty"`
+	Body *DeviceActionRequestBody `json:"-" url:"-"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+}
+
+func (l *LockDeviceRequest) require(field *big.Int) {
+	if l.explicitFields == nil {
+		l.explicitFields = big.NewInt(0)
+	}
+	l.explicitFields.Or(l.explicitFields, field)
+}
+
+// SetMeta sets the Meta field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (l *LockDeviceRequest) SetMeta(meta []*string) {
+	l.Meta = meta
+	l.require(lockDeviceRequestFieldMeta)
+}
+
+func (l *LockDeviceRequest) UnmarshalJSON(data []byte) error {
+	body := new(DeviceActionRequestBody)
+	if err := json.Unmarshal(data, &body); err != nil {
+		return err
+	}
+	l.Body = body
+	return nil
+}
+
+func (l *LockDeviceRequest) MarshalJSON() ([]byte, error) {
+	return json.Marshal(l.Body)
+}
+
+var (
 	queryDeviceComplianceRequestFieldMeta   = big.NewInt(1 << 0)
 	queryDeviceComplianceRequestFieldLimit  = big.NewInt(1 << 1)
 	queryDeviceComplianceRequestFieldCursor = big.NewInt(1 << 2)
@@ -266,16 +306,56 @@ func (r *RemediationRequestInput) MarshalJSON() ([]byte, error) {
 	return json.Marshal(r.Body)
 }
 
+var (
+	restartDeviceRequestFieldMeta = big.NewInt(1 << 0)
+)
+
+type RestartDeviceRequest struct {
+	// Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
+	Meta []*string                `json:"-" url:"meta,omitempty"`
+	Body *DeviceActionRequestBody `json:"-" url:"-"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+}
+
+func (r *RestartDeviceRequest) require(field *big.Int) {
+	if r.explicitFields == nil {
+		r.explicitFields = big.NewInt(0)
+	}
+	r.explicitFields.Or(r.explicitFields, field)
+}
+
+// SetMeta sets the Meta field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (r *RestartDeviceRequest) SetMeta(meta []*string) {
+	r.Meta = meta
+	r.require(restartDeviceRequestFieldMeta)
+}
+
+func (r *RestartDeviceRequest) UnmarshalJSON(data []byte) error {
+	body := new(DeviceActionRequestBody)
+	if err := json.Unmarshal(data, &body); err != nil {
+		return err
+	}
+	r.Body = body
+	return nil
+}
+
+func (r *RestartDeviceRequest) MarshalJSON() ([]byte, error) {
+	return json.Marshal(r.Body)
+}
+
 // Compliance finding represented by OCSF Compliance Finding class (class_uid 2003).
 type ComplianceFinding = *compliancefinding.ComplianceFinding
 
 var (
-	deviceActionRequestFieldDeviceId = big.NewInt(1 << 0)
-	deviceActionRequestFieldComment  = big.NewInt(1 << 1)
-	deviceActionRequestFieldParams   = big.NewInt(1 << 2)
+	deviceActionRequestBodyFieldDeviceId = big.NewInt(1 << 0)
+	deviceActionRequestBodyFieldComment  = big.NewInt(1 << 1)
+	deviceActionRequestBodyFieldParams   = big.NewInt(1 << 2)
 )
 
-type DeviceActionRequest struct {
+type DeviceActionRequestBody struct {
 	// Target device ID.
 	DeviceId string `json:"device_id" url:"device_id"`
 	// Optional comment or reason for the action.
@@ -290,35 +370,35 @@ type DeviceActionRequest struct {
 	rawJSON         json.RawMessage
 }
 
-func (d *DeviceActionRequest) GetDeviceId() string {
+func (d *DeviceActionRequestBody) GetDeviceId() string {
 	if d == nil {
 		return ""
 	}
 	return d.DeviceId
 }
 
-func (d *DeviceActionRequest) GetComment() *string {
+func (d *DeviceActionRequestBody) GetComment() *string {
 	if d == nil {
 		return nil
 	}
 	return d.Comment
 }
 
-func (d *DeviceActionRequest) GetParams() map[string]any {
+func (d *DeviceActionRequestBody) GetParams() map[string]any {
 	if d == nil {
 		return nil
 	}
 	return d.Params
 }
 
-func (d *DeviceActionRequest) GetExtraProperties() map[string]interface{} {
+func (d *DeviceActionRequestBody) GetExtraProperties() map[string]interface{} {
 	if d == nil {
 		return nil
 	}
 	return d.extraProperties
 }
 
-func (d *DeviceActionRequest) require(field *big.Int) {
+func (d *DeviceActionRequestBody) require(field *big.Int) {
 	if d.explicitFields == nil {
 		d.explicitFields = big.NewInt(0)
 	}
@@ -327,32 +407,32 @@ func (d *DeviceActionRequest) require(field *big.Int) {
 
 // SetDeviceId sets the DeviceId field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (d *DeviceActionRequest) SetDeviceId(deviceId string) {
+func (d *DeviceActionRequestBody) SetDeviceId(deviceId string) {
 	d.DeviceId = deviceId
-	d.require(deviceActionRequestFieldDeviceId)
+	d.require(deviceActionRequestBodyFieldDeviceId)
 }
 
 // SetComment sets the Comment field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (d *DeviceActionRequest) SetComment(comment *string) {
+func (d *DeviceActionRequestBody) SetComment(comment *string) {
 	d.Comment = comment
-	d.require(deviceActionRequestFieldComment)
+	d.require(deviceActionRequestBodyFieldComment)
 }
 
 // SetParams sets the Params field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (d *DeviceActionRequest) SetParams(params map[string]any) {
+func (d *DeviceActionRequestBody) SetParams(params map[string]any) {
 	d.Params = params
-	d.require(deviceActionRequestFieldParams)
+	d.require(deviceActionRequestBodyFieldParams)
 }
 
-func (d *DeviceActionRequest) UnmarshalJSON(data []byte) error {
-	type unmarshaler DeviceActionRequest
+func (d *DeviceActionRequestBody) UnmarshalJSON(data []byte) error {
+	type unmarshaler DeviceActionRequestBody
 	var value unmarshaler
 	if err := json.Unmarshal(data, &value); err != nil {
 		return err
 	}
-	*d = DeviceActionRequest(value)
+	*d = DeviceActionRequestBody(value)
 	extraProperties, err := internal.ExtractExtraProperties(data, *d)
 	if err != nil {
 		return err
@@ -362,8 +442,8 @@ func (d *DeviceActionRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (d *DeviceActionRequest) MarshalJSON() ([]byte, error) {
-	type embed DeviceActionRequest
+func (d *DeviceActionRequestBody) MarshalJSON() ([]byte, error) {
+	type embed DeviceActionRequestBody
 	var marshaler = struct {
 		embed
 	}{
@@ -373,7 +453,7 @@ func (d *DeviceActionRequest) MarshalJSON() ([]byte, error) {
 	return json.Marshal(explicitMarshaler)
 }
 
-func (d *DeviceActionRequest) String() string {
+func (d *DeviceActionRequestBody) String() string {
 	if d == nil {
 		return "<nil>"
 	}
@@ -1330,4 +1410,84 @@ func (r *RemediationRequest) String() string {
 		return value
 	}
 	return fmt.Sprintf("%#v", r)
+}
+
+var (
+	updateDeviceRequestFieldMeta = big.NewInt(1 << 0)
+)
+
+type UpdateDeviceRequest struct {
+	// Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
+	Meta []*string                `json:"-" url:"meta,omitempty"`
+	Body *DeviceActionRequestBody `json:"-" url:"-"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+}
+
+func (u *UpdateDeviceRequest) require(field *big.Int) {
+	if u.explicitFields == nil {
+		u.explicitFields = big.NewInt(0)
+	}
+	u.explicitFields.Or(u.explicitFields, field)
+}
+
+// SetMeta sets the Meta field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (u *UpdateDeviceRequest) SetMeta(meta []*string) {
+	u.Meta = meta
+	u.require(updateDeviceRequestFieldMeta)
+}
+
+func (u *UpdateDeviceRequest) UnmarshalJSON(data []byte) error {
+	body := new(DeviceActionRequestBody)
+	if err := json.Unmarshal(data, &body); err != nil {
+		return err
+	}
+	u.Body = body
+	return nil
+}
+
+func (u *UpdateDeviceRequest) MarshalJSON() ([]byte, error) {
+	return json.Marshal(u.Body)
+}
+
+var (
+	wipeDeviceRequestFieldMeta = big.NewInt(1 << 0)
+)
+
+type WipeDeviceRequest struct {
+	// Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
+	Meta []*string                `json:"-" url:"meta,omitempty"`
+	Body *DeviceActionRequestBody `json:"-" url:"-"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+}
+
+func (w *WipeDeviceRequest) require(field *big.Int) {
+	if w.explicitFields == nil {
+		w.explicitFields = big.NewInt(0)
+	}
+	w.explicitFields.Or(w.explicitFields, field)
+}
+
+// SetMeta sets the Meta field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (w *WipeDeviceRequest) SetMeta(meta []*string) {
+	w.Meta = meta
+	w.require(wipeDeviceRequestFieldMeta)
+}
+
+func (w *WipeDeviceRequest) UnmarshalJSON(data []byte) error {
+	body := new(DeviceActionRequestBody)
+	if err := json.Unmarshal(data, &body); err != nil {
+		return err
+	}
+	w.Body = body
+	return nil
+}
+
+func (w *WipeDeviceRequest) MarshalJSON() ([]byte, error) {
+	return json.Marshal(w.Body)
 }

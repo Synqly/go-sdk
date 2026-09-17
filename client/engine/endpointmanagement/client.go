@@ -108,7 +108,7 @@ func (c *Client) RemediateDevice(
 // Triggers the device to check in and enforce all assigned policies, profiles, and pending updates.
 func (c *Client) UpdateDevice(
     ctx context.Context,
-    request *engine.DeviceActionRequest,
+    request *engine.UpdateDeviceRequest,
     opts ...option.RequestOption,
 ) (*engine.DeviceActionResponse, error){
     response, err := c.WithRawResponse.UpdateDevice(
@@ -125,7 +125,7 @@ func (c *Client) UpdateDevice(
 // Remotely locks the device screen.
 func (c *Client) LockDevice(
     ctx context.Context,
-    request *engine.DeviceActionRequest,
+    request *engine.LockDeviceRequest,
     opts ...option.RequestOption,
 ) (*engine.DeviceActionResponse, error){
     response, err := c.WithRawResponse.LockDevice(
@@ -142,7 +142,7 @@ func (c *Client) LockDevice(
 // Remotely reboots the device.
 func (c *Client) RestartDevice(
     ctx context.Context,
-    request *engine.DeviceActionRequest,
+    request *engine.RestartDeviceRequest,
     opts ...option.RequestOption,
 ) (*engine.DeviceActionResponse, error){
     response, err := c.WithRawResponse.RestartDevice(
@@ -159,7 +159,7 @@ func (c *Client) RestartDevice(
 // Factory resets or erases all data from the device.
 func (c *Client) WipeDevice(
     ctx context.Context,
-    request *engine.DeviceActionRequest,
+    request *engine.WipeDeviceRequest,
     opts ...option.RequestOption,
 ) (*engine.DeviceActionResponse, error){
     response, err := c.WithRawResponse.WipeDevice(
