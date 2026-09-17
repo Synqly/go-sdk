@@ -13895,6 +13895,7 @@ var (
 	findingFieldTitle           = big.NewInt(1 << 15)
 	findingFieldTypes           = big.NewInt(1 << 16)
 	findingFieldUid             = big.NewInt(1 << 17)
+	findingFieldXattributes     = big.NewInt(1 << 18)
 )
 
 type Finding struct {
@@ -13934,6 +13935,8 @@ type Finding struct {
 	Types []string `json:"types,omitempty" url:"types,omitempty"`
 	// The unique identifier of the reported finding.
 	Uid string `json:"uid" url:"uid"`
+	// An unordered collection of zero or more name/value pairs that represent a finding's extended attributes and are specific to the event source.
+	Xattributes *Object `json:"xattributes,omitempty" url:"xattributes,omitempty"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -14066,6 +14069,13 @@ func (f *Finding) GetUid() string {
 		return ""
 	}
 	return f.Uid
+}
+
+func (f *Finding) GetXattributes() *Object {
+	if f == nil {
+		return nil
+	}
+	return f.Xattributes
 }
 
 func (f *Finding) GetExtraProperties() map[string]interface{} {
@@ -14206,6 +14216,13 @@ func (f *Finding) SetTypes(types []string) {
 func (f *Finding) SetUid(uid string) {
 	f.Uid = uid
 	f.require(findingFieldUid)
+}
+
+// SetXattributes sets the Xattributes field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (f *Finding) SetXattributes(xattributes *Object) {
+	f.Xattributes = xattributes
+	f.require(findingFieldXattributes)
 }
 
 func (f *Finding) UnmarshalJSON(data []byte) error {
