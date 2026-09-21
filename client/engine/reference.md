@@ -9833,7 +9833,7 @@ client.Siem.QueryEvents(
 <dl>
 <dd>
 
-**order:** `*string` — Select a field to order the results by. Defaults to `time`. To control the direction of the sorting, append `[asc]` or `[desc]` to the field name. For example, `name[desc]` will sort the results by `name` in descending order. The ordering defaults to `asc` if not specified. May be used multiple times to order by multiple fields, and the ordering is applied in the order the fields are specified.
+**order:** `*string` — Select a field to order the results by. Defaults to `time` descending (newest first). To control the direction of the sorting, append `[asc]` or `[desc]` to the field name. For example, `name[desc]` will sort the results by `name` in descending order. Bare `order=time` is descending. May be used multiple times to order by multiple fields, and the ordering is applied in the order the fields are specified.
     
 </dd>
 </dl>
