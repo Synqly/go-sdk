@@ -3,7 +3,9 @@
 package billing
 
 import (
+    bytes "bytes"
     context "context"
+    io "io"
     http "net/http"
 
     management "github.com/synqly/go-sdk/v2/client/management"
@@ -76,6 +78,55 @@ func (r *RawClient) List(
         return nil, err
     }
     return &core.Response[*management.ListBillingResponse]{
+        StatusCode: raw.StatusCode,
+        Header: raw.Header,
+        Body: response,
+    }, nil
+}
+
+func (r *RawClient) Export(
+    ctx context.Context,
+    request *management.ExportBillingRequest,
+    opts ...option.RequestOption,
+) (*core.Response[io.Reader], error){
+    options := core.NewRequestOptions(opts...)
+    baseURL := internal.ResolveBaseURL(
+        options.BaseURL,
+        r.baseURL,
+        "https://api.synqly.com",
+    )
+    endpointURL := baseURL + "/v1/billing/export"
+    queryParams, err := internal.QueryValues(request)
+    if err != nil {
+        return nil, err
+    }
+    if len(queryParams) > 0 {
+        endpointURL += "?" + queryParams.Encode()
+    }
+    headers := internal.MergeHeaders(
+        r.options.ToHeader(),
+        options.ToHeader(),
+    )
+    response := bytes.NewBuffer(nil)
+    raw, err := r.caller.Call(
+        ctx,
+        &internal.CallParams{
+            URL: endpointURL,
+            Method: http.MethodGet,
+            Headers: headers,
+            MaxAttempts: options.MaxAttempts,
+            DisableRetries: options.DisableRetries,
+            BodyProperties: options.BodyProperties,
+            QueryParameters: options.QueryParameters,
+            Client: options.HTTPClient,
+            Response: response,
+            ErrorDecoder: internal.NewErrorDecoder(management.ErrorCodes),
+        },
+    )
+    if err != nil {
+        return nil, err
+    }
+    return &core.Response[io.Reader]{
         StatusCode: raw.StatusCode,
         Header: raw.Header,
         Body: response,

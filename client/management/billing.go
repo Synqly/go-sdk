@@ -11,6 +11,52 @@ import (
 )
 
 var (
+	exportBillingRequestFieldMonth = big.NewInt(1 << 0)
+	exportBillingRequestFieldFrom  = big.NewInt(1 << 1)
+	exportBillingRequestFieldTo    = big.NewInt(1 << 2)
+)
+
+type ExportBillingRequest struct {
+	// A single month to export. Each month name resolves to its most recently completed occurrence, so the twelve names cover the previous twelve months. Defaults to the previous month when no month or range is given. `partial` is not accepted, and this cannot be combined with `from`/`to`.
+	Month *BillingMonth `json:"-" url:"month,omitempty"`
+	// First month of an inclusive range, given with `to`. The archive holds one CSV per month in the range, in chronological order, and a month nobody was billed for is left out. `partial` is not accepted.
+	From *BillingMonth `json:"-" url:"from,omitempty"`
+	// Last month of an inclusive range, given with `from`. Must not resolve to a month earlier than `from`. `partial` is not accepted.
+	To *BillingMonth `json:"-" url:"to,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+}
+
+func (e *ExportBillingRequest) require(field *big.Int) {
+	if e.explicitFields == nil {
+		e.explicitFields = big.NewInt(0)
+	}
+	e.explicitFields.Or(e.explicitFields, field)
+}
+
+// SetMonth sets the Month field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (e *ExportBillingRequest) SetMonth(month *BillingMonth) {
+	e.Month = month
+	e.require(exportBillingRequestFieldMonth)
+}
+
+// SetFrom sets the From field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (e *ExportBillingRequest) SetFrom(from *BillingMonth) {
+	e.From = from
+	e.require(exportBillingRequestFieldFrom)
+}
+
+// SetTo sets the To field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (e *ExportBillingRequest) SetTo(to *BillingMonth) {
+	e.To = to
+	e.require(exportBillingRequestFieldTo)
+}
+
+var (
 	listBillingRequestFieldLimit      = big.NewInt(1 << 0)
 	listBillingRequestFieldStartAfter = big.NewInt(1 << 1)
 	listBillingRequestFieldOrder      = big.NewInt(1 << 2)

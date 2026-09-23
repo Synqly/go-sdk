@@ -4,6 +4,7 @@ package billing
 
 import (
     context "context"
+    io "io"
 
     management "github.com/synqly/go-sdk/v2/client/management"
     core "github.com/synqly/go-sdk/v2/client/management/core"
@@ -42,6 +43,23 @@ func (c *Client) List(
     opts ...option.RequestOption,
 ) (*management.ListBillingResponse, error){
     response, err := c.WithRawResponse.List(
+        ctx,
+        request,
+        opts...,
+    )
+    if err != nil {
+        return nil, err
+    }
+    return response.Body, nil
+}
+
+// Downloads billing reports as a gzipped tar archive, covering every Organization the token can access. Give `month` for one month, or `from` and `to` for an inclusive range; with neither, the previous month is exported. The archive holds a CSV of every billed line item per month, a `metadata.json` naming the export time, Synqly version and months covered, and an `export.log`. A month no Organization was billed for is left out of both. Use a RootOrganization token to cover multiple Organizations in one archive. Month-to-date `partial` reports are not exported; use Get Billing Report for those.
+func (c *Client) Export(
+    ctx context.Context,
+    request *management.ExportBillingRequest,
+    opts ...option.RequestOption,
+) (io.Reader, error){
+    response, err := c.WithRawResponse.Export(
         ctx,
         request,
         opts...,

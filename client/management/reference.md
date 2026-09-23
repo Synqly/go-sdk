@@ -1150,6 +1150,81 @@ If used more than once, the queries are ANDed together.
 </dl>
 </details>
 
+<details><summary><code>client.Billing.Export() -> string</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Downloads billing reports as a gzipped tar archive, covering every Organization the token can access. Give `month` for one month, or `from` and `to` for an inclusive range; with neither, the previous month is exported. The archive holds a CSV of every billed line item per month, a `metadata.json` naming the export time, Synqly version and months covered, and an `export.log`. A month no Organization was billed for is left out of both. Use a RootOrganization token to cover multiple Organizations in one archive. Month-to-date `partial` reports are not exported; use Get Billing Report for those.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```go
+request := &management.ExportBillingRequest{}
+client.Billing.Export(
+        context.TODO(),
+        request,
+    )
+}
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**month:** `*management.BillingMonth` — A single month to export. Each month name resolves to its most recently completed occurrence, so the twelve names cover the previous twelve months. Defaults to the previous month when no month or range is given. `partial` is not accepted, and this cannot be combined with `from`/`to`.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**from:** `*management.BillingMonth` — First month of an inclusive range, given with `to`. The archive holds one CSV per month in the range, in chronological order, and a month nobody was billed for is left out. `partial` is not accepted.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**to:** `*management.BillingMonth` — Last month of an inclusive range, given with `from`. Must not resolve to a month earlier than `from`. `partial` is not accepted.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
 <details><summary><code>client.Billing.Get(OrganizationId, Month) -> *management.GetBillingResponse</code></summary>
 <dl>
 <dd>
