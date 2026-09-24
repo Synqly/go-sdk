@@ -16908,19 +16908,20 @@ func (e *Enrichment) String() string {
 
 // An Enrollment is a record of a user's enrollment or assignment in a security awareness training campaign.
 var (
-	enrollmentFieldCreatedTime    = big.NewInt(1 << 0)
-	enrollmentFieldCreatedTimeDt  = big.NewInt(1 << 1)
-	enrollmentFieldEndTime        = big.NewInt(1 << 2)
-	enrollmentFieldEndTimeDt      = big.NewInt(1 << 3)
-	enrollmentFieldModifiedTime   = big.NewInt(1 << 4)
-	enrollmentFieldModifiedTimeDt = big.NewInt(1 << 5)
-	enrollmentFieldName           = big.NewInt(1 << 6)
-	enrollmentFieldStartTime      = big.NewInt(1 << 7)
-	enrollmentFieldStartTimeDt    = big.NewInt(1 << 8)
-	enrollmentFieldState          = big.NewInt(1 << 9)
-	enrollmentFieldStateId        = big.NewInt(1 << 10)
-	enrollmentFieldType           = big.NewInt(1 << 11)
-	enrollmentFieldUid            = big.NewInt(1 << 12)
+	enrollmentFieldCreatedTime         = big.NewInt(1 << 0)
+	enrollmentFieldCreatedTimeDt       = big.NewInt(1 << 1)
+	enrollmentFieldEndTime             = big.NewInt(1 << 2)
+	enrollmentFieldEndTimeDt           = big.NewInt(1 << 3)
+	enrollmentFieldModifiedTime        = big.NewInt(1 << 4)
+	enrollmentFieldModifiedTimeDt      = big.NewInt(1 << 5)
+	enrollmentFieldName                = big.NewInt(1 << 6)
+	enrollmentFieldStartTime           = big.NewInt(1 << 7)
+	enrollmentFieldStartTimeDt         = big.NewInt(1 << 8)
+	enrollmentFieldState               = big.NewInt(1 << 9)
+	enrollmentFieldStateId             = big.NewInt(1 << 10)
+	enrollmentFieldTrainingCampaignUid = big.NewInt(1 << 11)
+	enrollmentFieldType                = big.NewInt(1 << 12)
+	enrollmentFieldUid                 = big.NewInt(1 << 13)
 )
 
 type Enrollment struct {
@@ -16946,6 +16947,8 @@ type Enrollment struct {
 	State *string `json:"state,omitempty" url:"state,omitempty"`
 	// The normalized identifier of the enrollment progress state.
 	StateId *EnrollmentStateId `json:"state_id,omitempty" url:"state_id,omitempty"`
+	// The training campaign that this enrollment is associated with. This attribute is only populated when the enrollment object is not nested within any level of a training campaign.
+	TrainingCampaignUid *string `json:"training_campaign_uid,omitempty" url:"training_campaign_uid,omitempty"`
 	// The enrollment type as reported by the source.
 	Type *string `json:"type,omitempty" url:"type,omitempty"`
 	// The unique identifier of the entity.
@@ -17033,6 +17036,13 @@ func (e *Enrollment) GetStateId() *EnrollmentStateId {
 		return nil
 	}
 	return e.StateId
+}
+
+func (e *Enrollment) GetTrainingCampaignUid() *string {
+	if e == nil {
+		return nil
+	}
+	return e.TrainingCampaignUid
 }
 
 func (e *Enrollment) GetType() *string {
@@ -17138,6 +17148,13 @@ func (e *Enrollment) SetState(state *string) {
 func (e *Enrollment) SetStateId(stateId *EnrollmentStateId) {
 	e.StateId = stateId
 	e.require(enrollmentFieldStateId)
+}
+
+// SetTrainingCampaignUid sets the TrainingCampaignUid field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (e *Enrollment) SetTrainingCampaignUid(trainingCampaignUid *string) {
+	e.TrainingCampaignUid = trainingCampaignUid
+	e.require(enrollmentFieldTrainingCampaignUid)
 }
 
 // SetType sets the Type field and marks it as non-optional;
