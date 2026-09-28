@@ -300,6 +300,7 @@ var (
 	createAccountRequestFieldFullname    = big.NewInt(1 << 1)
 	createAccountRequestFieldEnvironment = big.NewInt(1 << 2)
 	createAccountRequestFieldLabels      = big.NewInt(1 << 3)
+	createAccountRequestFieldToken       = big.NewInt(1 << 4)
 )
 
 type CreateAccountRequest struct {
@@ -311,6 +312,11 @@ type CreateAccountRequest struct {
 	Environment *Environment `json:"environment,omitempty" url:"environment,omitempty"`
 	// User defined labels that apply to this account. Labels are limited to 48 characters in length, must contain at least 1 character, and must contain only letters, numbers, underscores, hyphens, colons, and periods. The label values can be used in role bindings to limit the scope of permissions.
 	Labels []string `json:"labels,omitempty" url:"labels,omitempty"`
+	// Optionally issue a token scoped to the new `Account`. The token secret is
+	// returned exactly once, in this response, and cannot be retrieved again. If the
+	// response is lost, an organization administrator must issue a replacement with
+	// `POST /v1/tokens`.
+	Token *ProvisionedTokenRequest `json:"token,omitempty" url:"token,omitempty"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -345,6 +351,13 @@ func (c *CreateAccountRequest) GetLabels() []string {
 		return nil
 	}
 	return c.Labels
+}
+
+func (c *CreateAccountRequest) GetToken() *ProvisionedTokenRequest {
+	if c == nil {
+		return nil
+	}
+	return c.Token
 }
 
 func (c *CreateAccountRequest) GetExtraProperties() map[string]interface{} {
@@ -387,6 +400,13 @@ func (c *CreateAccountRequest) SetEnvironment(environment *Environment) {
 func (c *CreateAccountRequest) SetLabels(labels []string) {
 	c.Labels = labels
 	c.require(createAccountRequestFieldLabels)
+}
+
+// SetToken sets the Token field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CreateAccountRequest) SetToken(token *ProvisionedTokenRequest) {
+	c.Token = token
+	c.require(createAccountRequestFieldToken)
 }
 
 func (c *CreateAccountRequest) UnmarshalJSON(data []byte) error {
@@ -517,10 +537,13 @@ func (c *CreateAccountResponse) String() string {
 
 var (
 	createAccountResponseResultFieldAccount = big.NewInt(1 << 0)
+	createAccountResponseResultFieldToken   = big.NewInt(1 << 1)
 )
 
 type CreateAccountResponseResult struct {
 	Account *Account `json:"account" url:"account"`
+	// Present only when the request carried a `token` block.
+	Token *RefreshToken `json:"token,omitempty" url:"token,omitempty"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -534,6 +557,13 @@ func (c *CreateAccountResponseResult) GetAccount() *Account {
 		return nil
 	}
 	return c.Account
+}
+
+func (c *CreateAccountResponseResult) GetToken() *RefreshToken {
+	if c == nil {
+		return nil
+	}
+	return c.Token
 }
 
 func (c *CreateAccountResponseResult) GetExtraProperties() map[string]interface{} {
@@ -555,6 +585,13 @@ func (c *CreateAccountResponseResult) require(field *big.Int) {
 func (c *CreateAccountResponseResult) SetAccount(account *Account) {
 	c.Account = account
 	c.require(createAccountResponseResultFieldAccount)
+}
+
+// SetToken sets the Token field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CreateAccountResponseResult) SetToken(token *RefreshToken) {
+	c.Token = token
+	c.require(createAccountResponseResultFieldToken)
 }
 
 func (c *CreateAccountResponseResult) UnmarshalJSON(data []byte) error {
@@ -853,6 +890,146 @@ func (p *PatchAccountResponse) MarshalJSON() ([]byte, error) {
 }
 
 func (p *PatchAccountResponse) String() string {
+	if p == nil {
+		return "<nil>"
+	}
+	if len(p.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(p.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(p); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", p)
+}
+
+// Request a token for the `Account` being created. Requires the `tokens: provision`
+// action, granted by the `account-provisioner` permission set. The token is scoped
+// by the server to the new `Account`; its scope cannot be set by the caller.
+var (
+	provisionedTokenRequestFieldPermissionSet = big.NewInt(1 << 0)
+	provisionedTokenRequestFieldTokenTtl      = big.NewInt(1 << 1)
+	provisionedTokenRequestFieldName          = big.NewInt(1 << 2)
+	provisionedTokenRequestFieldFullname      = big.NewInt(1 << 3)
+)
+
+type ProvisionedTokenRequest struct {
+	// Permission set for the new token. Must be one of `account-manager`,
+	// `connect-ui` or `token-issuer`.
+	PermissionSet Permissions `json:"permission_set" url:"permission_set"`
+	// Token time-to-live. If not provided, defaults to 24 hours. Use the format "1h", "1m", "1s" for hours, minutes, and seconds respectively, e.g., "720h" for 30 days.
+	TokenTtl *string `json:"token_ttl,omitempty" url:"token_ttl,omitempty"`
+	// Unique short name for this token (lowercase [a-z0-9_-], can be used in URLs). Defaults to the token id. Must not collide with an existing token in the organization.
+	Name *string `json:"name,omitempty" url:"name,omitempty"`
+	// Human friendly display name for this token, defaults to the same value as the 'name' field if not specified.
+	Fullname *string `json:"fullname,omitempty" url:"fullname,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (p *ProvisionedTokenRequest) GetPermissionSet() Permissions {
+	if p == nil {
+		return ""
+	}
+	return p.PermissionSet
+}
+
+func (p *ProvisionedTokenRequest) GetTokenTtl() *string {
+	if p == nil {
+		return nil
+	}
+	return p.TokenTtl
+}
+
+func (p *ProvisionedTokenRequest) GetName() *string {
+	if p == nil {
+		return nil
+	}
+	return p.Name
+}
+
+func (p *ProvisionedTokenRequest) GetFullname() *string {
+	if p == nil {
+		return nil
+	}
+	return p.Fullname
+}
+
+func (p *ProvisionedTokenRequest) GetExtraProperties() map[string]interface{} {
+	if p == nil {
+		return nil
+	}
+	return p.extraProperties
+}
+
+func (p *ProvisionedTokenRequest) require(field *big.Int) {
+	if p.explicitFields == nil {
+		p.explicitFields = big.NewInt(0)
+	}
+	p.explicitFields.Or(p.explicitFields, field)
+}
+
+// SetPermissionSet sets the PermissionSet field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (p *ProvisionedTokenRequest) SetPermissionSet(permissionSet Permissions) {
+	p.PermissionSet = permissionSet
+	p.require(provisionedTokenRequestFieldPermissionSet)
+}
+
+// SetTokenTtl sets the TokenTtl field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (p *ProvisionedTokenRequest) SetTokenTtl(tokenTtl *string) {
+	p.TokenTtl = tokenTtl
+	p.require(provisionedTokenRequestFieldTokenTtl)
+}
+
+// SetName sets the Name field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (p *ProvisionedTokenRequest) SetName(name *string) {
+	p.Name = name
+	p.require(provisionedTokenRequestFieldName)
+}
+
+// SetFullname sets the Fullname field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (p *ProvisionedTokenRequest) SetFullname(fullname *string) {
+	p.Fullname = fullname
+	p.require(provisionedTokenRequestFieldFullname)
+}
+
+func (p *ProvisionedTokenRequest) UnmarshalJSON(data []byte) error {
+	type unmarshaler ProvisionedTokenRequest
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*p = ProvisionedTokenRequest(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *p)
+	if err != nil {
+		return err
+	}
+	p.extraProperties = extraProperties
+	p.rawJSON = nil
+	return nil
+}
+
+func (p *ProvisionedTokenRequest) MarshalJSON() ([]byte, error) {
+	type embed ProvisionedTokenRequest
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*p),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, p.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (p *ProvisionedTokenRequest) String() string {
 	if p == nil {
 		return "<nil>"
 	}

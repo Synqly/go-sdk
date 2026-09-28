@@ -19,6 +19,8 @@ const (
 	PermissionsMcpIntegrationsUseOnly Permissions = "mcp-integrations-use-only"
 	// Permission set that provides the minimum level of access necessary for MCP management use. Can create and update integrations but cannot use any Connector API.
 	PermissionsMcpManagement Permissions = "mcp-management"
+	// Permission set that provides the minimum level of access necessary to onboard accounts. Can create accounts and, as part of creating an account, issue a token scoped to that account. Cannot read or modify existing accounts and cannot issue tokens on its own.
+	PermissionsAccountProvisioner Permissions = "account-provisioner"
 )
 
 func NewPermissionsFromString(s string) (Permissions, error) {
@@ -39,6 +41,8 @@ func NewPermissionsFromString(s string) (Permissions, error) {
 		return PermissionsMcpIntegrationsUseOnly, nil
 	case "mcp-management":
 		return PermissionsMcpManagement, nil
+	case "account-provisioner":
+		return PermissionsAccountProvisioner, nil
 	}
 	var t Permissions
 	return "", fmt.Errorf("%s is not a valid %T", s, t)

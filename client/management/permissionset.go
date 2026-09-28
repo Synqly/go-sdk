@@ -3262,13 +3262,15 @@ const (
 	TokensActionsCreate                   TokensActions = "create"
 	TokensActionsCreateIntegration        TokensActions = "create_integration"
 	TokensActionsCreateSynqlyIntegrations TokensActions = "create_synqly_integrations"
-	TokensActionsDelete                   TokensActions = "delete"
-	TokensActionsGet                      TokensActions = "get"
-	TokensActionsReset                    TokensActions = "reset"
-	TokensActionsRotate                   TokensActions = "rotate"
-	TokensActionsRefresh                  TokensActions = "refresh"
-	TokensActionsRemoveSecondary          TokensActions = "remove_secondary"
-	TokensActionsAll                      TokensActions = "*"
+	// Issue a token only as part of `POST /v1/accounts`, scoped by the server to the account being created. Grants no route under `/v1/tokens`.
+	TokensActionsProvision       TokensActions = "provision"
+	TokensActionsDelete          TokensActions = "delete"
+	TokensActionsGet             TokensActions = "get"
+	TokensActionsReset           TokensActions = "reset"
+	TokensActionsRotate          TokensActions = "rotate"
+	TokensActionsRefresh         TokensActions = "refresh"
+	TokensActionsRemoveSecondary TokensActions = "remove_secondary"
+	TokensActionsAll             TokensActions = "*"
 )
 
 func NewTokensActionsFromString(s string) (TokensActions, error) {
@@ -3281,6 +3283,8 @@ func NewTokensActionsFromString(s string) (TokensActions, error) {
 		return TokensActionsCreateIntegration, nil
 	case "create_synqly_integrations":
 		return TokensActionsCreateSynqlyIntegrations, nil
+	case "provision":
+		return TokensActionsProvision, nil
 	case "delete":
 		return TokensActionsDelete, nil
 	case "get":
