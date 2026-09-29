@@ -7160,6 +7160,108 @@ func (c *CloudSecurityPaloAlto) String() string {
 	return fmt.Sprintf("%#v", c)
 }
 
+// Configuration for the SentinelOne Singularity Cloud Native Security Provider
+var (
+	cloudSecuritySentinelOneFieldCredential = big.NewInt(1 << 0)
+	cloudSecuritySentinelOneFieldUrl        = big.NewInt(1 << 1)
+)
+
+type CloudSecuritySentinelOne struct {
+	Credential *SentinelOneCredential `json:"credential" url:"credential"`
+	// Base URL of the SentinelOne management console. Cloud Native Security requires the Singularity Operations Center.
+	Url string `json:"url" url:"url"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (c *CloudSecuritySentinelOne) GetCredential() *SentinelOneCredential {
+	if c == nil {
+		return nil
+	}
+	return c.Credential
+}
+
+func (c *CloudSecuritySentinelOne) GetUrl() string {
+	if c == nil {
+		return ""
+	}
+	return c.Url
+}
+
+func (c *CloudSecuritySentinelOne) GetExtraProperties() map[string]interface{} {
+	if c == nil {
+		return nil
+	}
+	return c.extraProperties
+}
+
+func (c *CloudSecuritySentinelOne) require(field *big.Int) {
+	if c.explicitFields == nil {
+		c.explicitFields = big.NewInt(0)
+	}
+	c.explicitFields.Or(c.explicitFields, field)
+}
+
+// SetCredential sets the Credential field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CloudSecuritySentinelOne) SetCredential(credential *SentinelOneCredential) {
+	c.Credential = credential
+	c.require(cloudSecuritySentinelOneFieldCredential)
+}
+
+// SetUrl sets the Url field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CloudSecuritySentinelOne) SetUrl(url string) {
+	c.Url = url
+	c.require(cloudSecuritySentinelOneFieldUrl)
+}
+
+func (c *CloudSecuritySentinelOne) UnmarshalJSON(data []byte) error {
+	type unmarshaler CloudSecuritySentinelOne
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = CloudSecuritySentinelOne(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+	c.rawJSON = nil
+	return nil
+}
+
+func (c *CloudSecuritySentinelOne) MarshalJSON() ([]byte, error) {
+	type embed CloudSecuritySentinelOne
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*c),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, c.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (c *CloudSecuritySentinelOne) String() string {
+	if c == nil {
+		return "<nil>"
+	}
+	if len(c.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(c.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
 // Configuration for the Upwind Cloud Security provider.
 //
 // [Configuration guide](https://docs.synqly.com/guides/provider-configuration/upwind-setup)
@@ -22576,6 +22678,8 @@ type ProviderConfig struct {
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/paloalto-cloudsecurity-setup)
 	CloudsecurityPaloalto *CloudSecurityPaloAlto
+	// Configuration for the SentinelOne Singularity Cloud Native Security Provider
+	CloudsecuritySentinelone *CloudSecuritySentinelOne
 	// Configuration for the Upwind Cloud Security provider.
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/upwind-setup)
@@ -23366,6 +23470,13 @@ func (p *ProviderConfig) GetCloudsecurityPaloalto() *CloudSecurityPaloAlto {
 		return nil
 	}
 	return p.CloudsecurityPaloalto
+}
+
+func (p *ProviderConfig) GetCloudsecuritySentinelone() *CloudSecuritySentinelOne {
+	if p == nil {
+		return nil
+	}
+	return p.CloudsecuritySentinelone
 }
 
 func (p *ProviderConfig) GetCloudsecurityUpwind() *CloudSecurityUpwind {
@@ -24587,6 +24698,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.CloudsecurityPaloalto = value
+	case "cloudsecurity_sentinelone":
+		value := new(CloudSecuritySentinelOne)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.CloudsecuritySentinelone = value
 	case "cloudsecurity_upwind":
 		value := new(CloudSecurityUpwind)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -25532,6 +25649,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.CloudsecurityPaloalto != nil {
 		return internal.MarshalJSONWithExtraProperty(p.CloudsecurityPaloalto, "type", "cloudsecurity_paloalto")
 	}
+	if p.CloudsecuritySentinelone != nil {
+		return internal.MarshalJSONWithExtraProperty(p.CloudsecuritySentinelone, "type", "cloudsecurity_sentinelone")
+	}
 	if p.CloudsecurityUpwind != nil {
 		return internal.MarshalJSONWithExtraProperty(p.CloudsecurityUpwind, "type", "cloudsecurity_upwind")
 	}
@@ -25984,6 +26104,7 @@ type ProviderConfigVisitor interface {
 	VisitCloudsecurityDefender(*CloudSecurityDefender) error
 	VisitCloudsecurityGoogle(*CloudSecurityGoogle) error
 	VisitCloudsecurityPaloalto(*CloudSecurityPaloAlto) error
+	VisitCloudsecuritySentinelone(*CloudSecuritySentinelOne) error
 	VisitCloudsecurityUpwind(*CloudSecurityUpwind) error
 	VisitCloudsecurityWiz(*CloudSecurityWiz) error
 	VisitCustomSynqly(*CustomSynqly) error
@@ -26257,6 +26378,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.CloudsecurityPaloalto != nil {
 		return visitor.VisitCloudsecurityPaloalto(p.CloudsecurityPaloalto)
+	}
+	if p.CloudsecuritySentinelone != nil {
+		return visitor.VisitCloudsecuritySentinelone(p.CloudsecuritySentinelone)
 	}
 	if p.CloudsecurityUpwind != nil {
 		return visitor.VisitCloudsecurityUpwind(p.CloudsecurityUpwind)
@@ -26803,6 +26927,9 @@ func (p *ProviderConfig) validate() error {
 	if p.CloudsecurityPaloalto != nil {
 		fields = append(fields, "cloudsecurity_paloalto")
 	}
+	if p.CloudsecuritySentinelone != nil {
+		fields = append(fields, "cloudsecurity_sentinelone")
+	}
 	if p.CloudsecurityUpwind != nil {
 		fields = append(fields, "cloudsecurity_upwind")
 	}
@@ -27324,6 +27451,8 @@ const (
 	ProviderConfigIdCloudSecurityGoogle ProviderConfigId = "cloudsecurity_google"
 	// Palo Alto Networks Cortex Cloud Security
 	ProviderConfigIdCloudSecurityPaloAlto ProviderConfigId = "cloudsecurity_paloalto"
+	// SentinelOne Singularity™ Cloud Native Security
+	ProviderConfigIdCloudSecuritySentinelOne ProviderConfigId = "cloudsecurity_sentinelone"
 	// Upwind Cloud Security
 	ProviderConfigIdCloudSecurityUpwind ProviderConfigId = "cloudsecurity_upwind"
 	// Wiz
@@ -27688,6 +27817,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdCloudSecurityGoogle, nil
 	case "cloudsecurity_paloalto":
 		return ProviderConfigIdCloudSecurityPaloAlto, nil
+	case "cloudsecurity_sentinelone":
+		return ProviderConfigIdCloudSecuritySentinelOne, nil
 	case "cloudsecurity_upwind":
 		return ProviderConfigIdCloudSecurityUpwind, nil
 	case "cloudsecurity_wiz":
