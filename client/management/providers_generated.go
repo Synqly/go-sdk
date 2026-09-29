@@ -19381,11 +19381,9 @@ func (n *NetworkSecurityAws) String() string {
 var (
 	networkSecurityAzureFieldAzureCloud                 = big.NewInt(1 << 0)
 	networkSecurityAzureFieldCredential                 = big.NewInt(1 << 1)
-	networkSecurityAzureFieldNetworkWatcherName         = big.NewInt(1 << 2)
-	networkSecurityAzureFieldResourceGroup              = big.NewInt(1 << 3)
-	networkSecurityAzureFieldSubscriptionId             = big.NewInt(1 << 4)
-	networkSecurityAzureFieldTenantId                   = big.NewInt(1 << 5)
-	networkSecurityAzureFieldTrafficLogConfigurationIds = big.NewInt(1 << 6)
+	networkSecurityAzureFieldSubscriptionId             = big.NewInt(1 << 2)
+	networkSecurityAzureFieldTenantId                   = big.NewInt(1 << 3)
+	networkSecurityAzureFieldTrafficLogConfigurationIds = big.NewInt(1 << 4)
 )
 
 type NetworkSecurityAzure struct {
@@ -19393,15 +19391,11 @@ type NetworkSecurityAzure struct {
 	AzureCloud *AzureCloud `json:"azure_cloud,omitempty" url:"azure_cloud,omitempty"`
 	// Client ID and secret for an Entra app that can read Network Watcher flow logs and their storage.
 	Credential *AzureNetworkSecurityCredential `json:"credential" url:"credential"`
-	// Name of the Network Watcher to use.
-	NetworkWatcherName string `json:"network_watcher_name" url:"network_watcher_name"`
-	// Resource group that contains the Network Watcher.
-	ResourceGroup string `json:"resource_group" url:"resource_group"`
-	// Azure subscription that contains the Network Watcher.
+	// Azure subscription that owns the flow logs.
 	SubscriptionId string `json:"subscription_id" url:"subscription_id"`
 	// Directory (tenant) ID of your Microsoft Entra tenant.
 	TenantId string `json:"tenant_id" url:"tenant_id"`
-	// Optional list of flow log names or IDs. Leave empty to include all flow logs for this Network Watcher.
+	// Optional list of flow log resource IDs. Leave empty to include all flow logs in the subscription.
 	TrafficLogConfigurationIds []string `json:"traffic_log_configuration_ids,omitempty" url:"traffic_log_configuration_ids,omitempty"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
@@ -19423,20 +19417,6 @@ func (n *NetworkSecurityAzure) GetCredential() *AzureNetworkSecurityCredential {
 		return nil
 	}
 	return n.Credential
-}
-
-func (n *NetworkSecurityAzure) GetNetworkWatcherName() string {
-	if n == nil {
-		return ""
-	}
-	return n.NetworkWatcherName
-}
-
-func (n *NetworkSecurityAzure) GetResourceGroup() string {
-	if n == nil {
-		return ""
-	}
-	return n.ResourceGroup
 }
 
 func (n *NetworkSecurityAzure) GetSubscriptionId() string {
@@ -19486,20 +19466,6 @@ func (n *NetworkSecurityAzure) SetAzureCloud(azureCloud *AzureCloud) {
 func (n *NetworkSecurityAzure) SetCredential(credential *AzureNetworkSecurityCredential) {
 	n.Credential = credential
 	n.require(networkSecurityAzureFieldCredential)
-}
-
-// SetNetworkWatcherName sets the NetworkWatcherName field and marks it as non-optional;
-// this prevents an empty or null value for this field from being omitted during serialization.
-func (n *NetworkSecurityAzure) SetNetworkWatcherName(networkWatcherName string) {
-	n.NetworkWatcherName = networkWatcherName
-	n.require(networkSecurityAzureFieldNetworkWatcherName)
-}
-
-// SetResourceGroup sets the ResourceGroup field and marks it as non-optional;
-// this prevents an empty or null value for this field from being omitted during serialization.
-func (n *NetworkSecurityAzure) SetResourceGroup(resourceGroup string) {
-	n.ResourceGroup = resourceGroup
-	n.require(networkSecurityAzureFieldResourceGroup)
 }
 
 // SetSubscriptionId sets the SubscriptionId field and marks it as non-optional;
