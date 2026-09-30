@@ -4,9 +4,11 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"math/rand"
 	"os"
 	"os/signal"
 	"strings"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/synqly/go-sdk/v2/client/engine"
@@ -74,6 +76,12 @@ func (a *App) NewTenant(ctx context.Context, name string) error {
 		TicketClient: nil,
 	}
 	return nil
+}
+
+// uniqueName appends a short unique suffix to a base account name. Synqly
+// requires an account's slug (its Name) to be unique within an org
+func uniqueName(base string) string {
+	return fmt.Sprintf("%s-%d-%04d", base, time.Now().UnixNano(), rand.Intn(10000)) //nolint:gosec
 }
 
 func (a *App) inmemConfig() *mgmt.CreateIntegrationRequest {
@@ -413,7 +421,7 @@ func main() {
 		Description: "Description of the vulnerability",
 	}
 
-	customerName := "ticketing_demo_customer"
+	customerName := uniqueName("ticketing_demo_customer")
 	consoleLogger.Printf("Creating %s tenant\n", customerName)
 	if err := app.NewTenant(ctx, customerName); err != nil {
 		log.Fatal(err)

@@ -4,8 +4,10 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"math/rand"
 	"os"
 	"os/signal"
+	"time"
 
 	"github.com/synqly/go-sdk/v2/client/engine"
 	engineClient "github.com/synqly/go-sdk/v2/client/engine/client"
@@ -72,6 +74,11 @@ func (a *App) NewTenant(ctx context.Context, name string) error {
 		AssetMgmtClients: make(map[string]*engineClient.Client),
 	}
 	return nil
+}
+
+// uniqueName appends a short unique suffix to a base account name.
+func uniqueName(base string) string {
+	return fmt.Sprintf("%s-%d-%04d", base, time.Now().UnixNano(), rand.Intn(10000)) //nolint:gosec
 }
 
 func (app *App) cleanup() {
@@ -176,7 +183,9 @@ func main() {
 	// Also be sure to run clean up if the program exits gracefully
 	defer app.cleanup()
 
-	customerName := "asset_demo_customer"
+	// Unique per-run account name so parallel/repeat runs sharing one Synqly org
+	// do not collide on the account slug (see uniqueName). 
+	customerName := uniqueName("asset_demo_customer")
 	consoleLogger.Printf("Creating %s tenant\n", customerName)
 	if err := app.NewTenant(ctx, customerName); err != nil {
 		log.Fatal(err)

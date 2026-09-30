@@ -22,7 +22,10 @@ type ProviderConfiguration struct {
 }
 
 func (p *ProviderConfiguration) New(config Configuration, providerConfig mgmt.ProviderConfig, providerName string) error {
-	p.AccountName = fmt.Sprintf("%s%s", TENANT_CONFIG_NAME_PREFIX, providerName)
+	// Unique per-run account name so parallel/repeat runs sharing one Synqly org
+	// do not collide on the account slug. AccountName is stored once here and
+	// reused for account creation AND exact-name cleanup (see CleanUp)
+	p.AccountName = common.UniqueName(fmt.Sprintf("%s%s", TENANT_CONFIG_NAME_PREFIX, providerName))
 	p.IntegrationRequest = &mgmt.CreateIntegrationRequest{
 		Fullname:       engine.String(fmt.Sprintf("Vulnerability %s Scanner", providerName)),
 		ProviderConfig: &providerConfig,

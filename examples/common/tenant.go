@@ -5,7 +5,9 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"math/rand"
 	"os"
+	"time"
 
 	engineClient "github.com/synqly/go-sdk/v2/client/engine/client"
 	mgmt "github.com/synqly/go-sdk/v2/client/management"
@@ -14,6 +16,13 @@ import (
 )
 
 var consoleLogger = log.New(os.Stdout, "INFO: ", log.Ldate|log.Ltime)
+
+// UniqueName appends a short unique suffix to a base account name. Synqly
+// derives an account's slug from its name and slugs must be unique within an
+// org.
+func UniqueName(base string) string {
+	return fmt.Sprintf("%s %d-%04d", base, time.Now().UnixNano(), rand.Intn(10000)) //nolint:gosec
+}
 
 // Tenant represents a customer of yours. It has its own account in Synqly, and this struct
 // keeps the information you need to interact with Synqly on behalf of the customer.

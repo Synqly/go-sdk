@@ -215,7 +215,9 @@ func main() {
 
 	ctx := context.Background()
 
-	t, err := common.NewTenant(ctx, "Zenith Systems", "tenant_store_qualys.yaml", synqlyOrgToken, map[mgmt.CategoryId]*mgmt.CreateIntegrationRequest{
+	// Unique per-run account name so parallel/repeat runs sharing one Synqly org
+	// do not collide on the account slug (see common.UniqueName).
+	t, err := common.NewTenant(ctx, common.UniqueName("Zenith Systems"), "tenant_store_qualys.yaml", synqlyOrgToken, map[mgmt.CategoryId]*mgmt.CreateIntegrationRequest{
 		mgmt.CategoryIdTicketing:       ticketingProvider,
 		mgmt.CategoryIdVulnerabilities: vulnProvider,
 	})

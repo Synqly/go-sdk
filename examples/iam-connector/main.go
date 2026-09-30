@@ -118,7 +118,9 @@ func waitForAuditLogResult(ctx context.Context, client *engineClient.Client, req
 func demoActions(userEmail, orgToken string, p provider) error {
 	ctx := context.Background()
 
-	t, err := common.NewTenant(ctx, "Secure Identities Corp", "tenant_store-okta.yaml", orgToken, map[mgmt.CategoryId]*mgmt.CreateIntegrationRequest{
+	// Unique per-run account name so parallel/repeat runs sharing one Synqly org
+	// do not collide on the account slug (see common.UniqueName).
+	t, err := common.NewTenant(ctx, common.UniqueName("Secure Identities Corp"), "tenant_store-okta.yaml", orgToken, map[mgmt.CategoryId]*mgmt.CreateIntegrationRequest{
 		mgmt.CategoryIdIdentity: {
 			Name:           engine.String("iam"),
 			ProviderConfig: p.ProviderConfig(),

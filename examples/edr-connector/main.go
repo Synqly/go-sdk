@@ -83,7 +83,9 @@ func main() {
 func (s *sentinelOneProvider) demoActions(orgToken string, sentinelOneConf *sentinelOneConfig) error {
 	ctx := context.Background()
 
-	id := "EDR SentinelOne Tenant"
+	// Unique per-run account name so parallel/repeat runs sharing one Synqly org
+	// do not collide on the account slug (see common.UniqueName).
+	id := common.UniqueName("EDR SentinelOne Tenant")
 	t, err := common.NewTenant(ctx, id, "tenant_store.yaml", orgToken, map[mgmt.CategoryId]*mgmt.CreateIntegrationRequest{
 		mgmt.CategoryIdEdr: {
 			Fullname: mgmt.String("SentinelOne Identity Provider"),

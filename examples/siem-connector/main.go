@@ -286,6 +286,9 @@ func (app *App) cleanup() {
 	// persist the Synqly Account id and Integration tokens to handle process
 	// restarts. We are not doing that in this example, so we need to clean up
 	// the accounts we created in Synqly.
+	if len(app.Tenants) == 0 {
+		return
+	}
 	consoleLogger.Println("Cleaning up Synqly Accounts")
 	ctx := context.Background()
 	for _, tenant := range app.Tenants {
@@ -294,14 +297,24 @@ func (app *App) cleanup() {
 			consoleLogger.Printf("Error deleting account %s: %s\n", tenant.SynqlyAccountId, err)
 		}
 	}
-	os.Exit(0)
+}
+
+// uniqueName appends a short unique suffix to a base name. 
+func uniqueName(base string) string {
+	return fmt.Sprintf("%s %d-%04d", base, time.Now().UnixNano(), rand.Intn(10000)) //nolint:gosec
 }
 
 func main() {
+	if err := run(); err != nil {
+		log.Fatal(err)
+	}
+}
+
+func run() error {
 	ctx := context.Background()
 
 	if synqlyOrgToken == "" {
-		log.Fatal("Must set following environment variable: SYNQLY_ORG_TOKEN")
+		return fmt.Errorf("must set following environment variable: SYNQLY_ORG_TOKEN")
 	}
 	if !splunkConfigured() {
 		consoleLogger.Print("WARNING: incomplete Splunk configuration (SPLUNK_URL, SPLUNK_HEC_TOKEN, SPLUNK_REST_URL, SPLUNK_REST_TOKEN)\nUsing Mock as the SIEM provider")
@@ -310,38 +323,42 @@ func main() {
 	// Instantiate App object
 	app := NewApp()
 
+	// Always clean up the Synqly Accounts we created, whether this function
+	// returns normally, returns an error, or panics.
+	defer app.cleanup()
+
 	// Create an interrupt handler to clean up tenants if the program is shut down
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
 	go func() {
-		// Intercept all ^C
+		// Intercept all ^C, clean up, and exit.
 		for range c {
 			app.cleanup()
+			os.Exit(1)
 		}
 	}()
-	// Also be sure to run clean up if the program exits gracefully
-	defer app.cleanup()
 
-	// Create a couple of tenants
+	tenantABC := uniqueName("Tenant ABC")
+	tenantXYZ := uniqueName("Tenant XYZ")
 
 	if splunkConfigured() {
 		// Create and configure Tenant ABC to use splunk SIEM event logging provider
-		consoleLogger.Print("Creating Tenant ABC with splunk SIEM provider")
-		if err := app.NewTenant(ctx, "Tenant ABC"); err != nil {
-			log.Fatal(err)
+		consoleLogger.Printf("Creating %s with splunk SIEM provider", tenantABC)
+		if err := app.NewTenant(ctx, tenantABC); err != nil {
+			return err
 		}
-		if err := app.configureEventLogging(ctx, "Tenant ABC", "splunk"); err != nil {
-			log.Fatal(err)
+		if err := app.configureEventLogging(ctx, tenantABC, "splunk"); err != nil {
+			return err
 		}
 	}
 
 	// Create and configure Tenant XYZ to use mock SIEM event logging provider
-	consoleLogger.Print("Creating Tenant XYZ with mock SIEM provider")
-	if err := app.NewTenant(ctx, "Tenant XYZ"); err != nil {
-		log.Fatal(err)
+	consoleLogger.Printf("Creating %s with mock SIEM provider", tenantXYZ)
+	if err := app.NewTenant(ctx, tenantXYZ); err != nil {
+		return err
 	}
-	if err := app.configureEventLogging(ctx, "Tenant XYZ", "inmem"); err != nil {
-		log.Fatal(err)
+	if err := app.configureEventLogging(ctx, tenantXYZ, "inmem"); err != nil {
+		return err
 	}
 
 	// Generate synthetic load for the tenants
@@ -352,8 +369,9 @@ func main() {
 		// Otherwise, run for the provided duration
 		dur, err := strconv.Atoi(durationSeconds)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 		app.backgroundJob(dur)
 	}
+	return nil
 }
