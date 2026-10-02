@@ -19477,23 +19477,26 @@ func (n *NetworkSecurityAws) String() string {
 	return fmt.Sprintf("%#v", n)
 }
 
-// Connect Synqly to Azure Network Watcher flow logs.
+// Configuration for the Microsoft Azure Network Security Provider.
 //
 // [Configuration guide](https://docs.synqly.com/guides/provider-configuration/azure-networksecurity-setup)
 var (
 	networkSecurityAzureFieldAzureCloud                 = big.NewInt(1 << 0)
 	networkSecurityAzureFieldCredential                 = big.NewInt(1 << 1)
-	networkSecurityAzureFieldSubscriptionId             = big.NewInt(1 << 2)
-	networkSecurityAzureFieldTenantId                   = big.NewInt(1 << 3)
-	networkSecurityAzureFieldTrafficLogConfigurationIds = big.NewInt(1 << 4)
+	networkSecurityAzureFieldDnsLogConfigurationIds     = big.NewInt(1 << 2)
+	networkSecurityAzureFieldSubscriptionId             = big.NewInt(1 << 3)
+	networkSecurityAzureFieldTenantId                   = big.NewInt(1 << 4)
+	networkSecurityAzureFieldTrafficLogConfigurationIds = big.NewInt(1 << 5)
 )
 
 type NetworkSecurityAzure struct {
 	// Which Microsoft cloud to use: `public` (default) or `government`.
 	AzureCloud *AzureCloud `json:"azure_cloud,omitempty" url:"azure_cloud,omitempty"`
-	// Client ID and secret for an Entra app that can read Network Watcher flow logs and their storage.
+	// Client ID and secret for the Entra app.
 	Credential *AzureNetworkSecurityCredential `json:"credential" url:"credential"`
-	// Azure subscription that owns the flow logs.
+	// Optional list of DNS log configuration IDs, in the form `{resourceId}|{category}`. Leave empty to include all DNS logging in the subscription.
+	DnsLogConfigurationIds []string `json:"dns_log_configuration_ids,omitempty" url:"dns_log_configuration_ids,omitempty"`
+	// Azure subscription that owns the flow logs and DNS security policies.
 	SubscriptionId string `json:"subscription_id" url:"subscription_id"`
 	// Directory (tenant) ID of your Microsoft Entra tenant.
 	TenantId string `json:"tenant_id" url:"tenant_id"`
@@ -19519,6 +19522,13 @@ func (n *NetworkSecurityAzure) GetCredential() *AzureNetworkSecurityCredential {
 		return nil
 	}
 	return n.Credential
+}
+
+func (n *NetworkSecurityAzure) GetDnsLogConfigurationIds() []string {
+	if n == nil {
+		return nil
+	}
+	return n.DnsLogConfigurationIds
 }
 
 func (n *NetworkSecurityAzure) GetSubscriptionId() string {
@@ -19568,6 +19578,13 @@ func (n *NetworkSecurityAzure) SetAzureCloud(azureCloud *AzureCloud) {
 func (n *NetworkSecurityAzure) SetCredential(credential *AzureNetworkSecurityCredential) {
 	n.Credential = credential
 	n.require(networkSecurityAzureFieldCredential)
+}
+
+// SetDnsLogConfigurationIds sets the DnsLogConfigurationIds field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (n *NetworkSecurityAzure) SetDnsLogConfigurationIds(dnsLogConfigurationIds []string) {
+	n.DnsLogConfigurationIds = dnsLogConfigurationIds
+	n.require(networkSecurityAzureFieldDnsLogConfigurationIds)
 }
 
 // SetSubscriptionId sets the SubscriptionId field and marks it as non-optional;
@@ -22830,7 +22847,7 @@ type ProviderConfig struct {
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/aws-networksecurity-setup)
 	NetworksecurityAws *NetworkSecurityAws
-	// Connect Synqly to Azure Network Watcher flow logs.
+	// Configuration for the Microsoft Azure Network Security Provider.
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/azure-networksecurity-setup)
 	NetworksecurityAzure *NetworkSecurityAzure
