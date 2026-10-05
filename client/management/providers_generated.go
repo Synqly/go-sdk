@@ -5346,6 +5346,143 @@ func (b *BmcHelixCredential) validate() error {
 	return nil
 }
 
+type BigFixCredential struct {
+	Type string
+	// Username and password for a BigFix operator account.
+	Basic *BasicCredential
+	// Reference to existing Basic Credentials.
+	BasicId BasicCredentialId
+
+	rawJSON json.RawMessage
+}
+
+func (b *BigFixCredential) GetType() string {
+	if b == nil {
+		return ""
+	}
+	return b.Type
+}
+
+func (b *BigFixCredential) GetBasic() *BasicCredential {
+	if b == nil {
+		return nil
+	}
+	return b.Basic
+}
+
+func (b *BigFixCredential) GetBasicId() BasicCredentialId {
+	if b == nil {
+		return ""
+	}
+	return b.BasicId
+}
+
+func (b *BigFixCredential) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	b.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", b)
+	}
+	switch unmarshaler.Type {
+	case "basic":
+		value := new(BasicCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		b.Basic = value
+	case "basic_id":
+		var valueUnmarshaler struct {
+			BasicId BasicCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		b.BasicId = valueUnmarshaler.BasicId
+	}
+	b.rawJSON = nil
+	return nil
+}
+
+func (b BigFixCredential) MarshalJSON() ([]byte, error) {
+	if err := b.validate(); err != nil {
+		return nil, err
+	}
+	if b.Basic != nil {
+		return internal.MarshalJSONWithExtraProperty(b.Basic, "type", "basic")
+	}
+	if b.BasicId != "" {
+		var marshaler = struct {
+			Type    string            `json:"type"`
+			BasicId BasicCredentialId `json:"value"`
+		}{
+			Type:    "basic_id",
+			BasicId: b.BasicId,
+		}
+		return json.Marshal(marshaler)
+	}
+	if len(b.rawJSON) > 0 {
+		return b.rawJSON, nil
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", b)
+}
+
+type BigFixCredentialVisitor interface {
+	VisitBasic(*BasicCredential) error
+	VisitBasicId(BasicCredentialId) error
+}
+
+func (b *BigFixCredential) Accept(visitor BigFixCredentialVisitor) error {
+	if b.Basic != nil {
+		return visitor.VisitBasic(b.Basic)
+	}
+	if b.BasicId != "" {
+		return visitor.VisitBasicId(b.BasicId)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", b)
+}
+
+func (b *BigFixCredential) validate() error {
+	if b == nil {
+		return fmt.Errorf("type %T is nil", b)
+	}
+	var fields []string
+	if b.Basic != nil {
+		fields = append(fields, "basic")
+	}
+	if b.BasicId != "" {
+		fields = append(fields, "basic_id")
+	}
+	if len(fields) == 0 {
+		if b.Type != "" {
+			if len(b.rawJSON) > 0 {
+				return nil
+			}
+			return fmt.Errorf("type %T defines a discriminant set to %q but the field is not set", b, b.Type)
+		}
+		return fmt.Errorf("type %T is empty", b)
+	}
+	if len(fields) > 1 {
+		return fmt.Errorf("type %T defines values for %s, but only one value is allowed", b, fields)
+	}
+	if b.Type != "" {
+		field := fields[0]
+		if b.Type != field {
+			return fmt.Errorf(
+				"type %T defines a discriminant set to %q, but it does not match the %T field; either remove or update the discriminant to match",
+				b,
+				b.Type,
+				b,
+			)
+		}
+	}
+	return nil
+}
+
 type BitdefenderCredential struct {
 	Type string
 	// Configuration when creating new Token.
@@ -11971,6 +12108,127 @@ func (e *EndpointmanagementAutomox) MarshalJSON() ([]byte, error) {
 }
 
 func (e *EndpointmanagementAutomox) String() string {
+	if e == nil {
+		return "<nil>"
+	}
+	if len(e.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(e.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(e); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", e)
+}
+
+// Configuration for HCL BigFix.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/bigfix-endpointmanagement-setup)
+var (
+	endpointmanagementBigfixFieldCredential = big.NewInt(1 << 0)
+	endpointmanagementBigfixFieldSkipVerify = big.NewInt(1 << 1)
+	endpointmanagementBigfixFieldUrl        = big.NewInt(1 << 2)
+)
+
+type EndpointmanagementBigfix struct {
+	Credential *BigFixCredential `json:"credential" url:"credential"`
+	// Skip TLS certificate verification. Enable only when the server uses a self-signed or internally-issued certificate.
+	SkipVerify *bool `json:"skip_verify,omitempty" url:"skip_verify,omitempty"`
+	// Base URL of the BigFix server's REST API.
+	Url string `json:"url" url:"url"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (e *EndpointmanagementBigfix) GetCredential() *BigFixCredential {
+	if e == nil {
+		return nil
+	}
+	return e.Credential
+}
+
+func (e *EndpointmanagementBigfix) GetSkipVerify() *bool {
+	if e == nil {
+		return nil
+	}
+	return e.SkipVerify
+}
+
+func (e *EndpointmanagementBigfix) GetUrl() string {
+	if e == nil {
+		return ""
+	}
+	return e.Url
+}
+
+func (e *EndpointmanagementBigfix) GetExtraProperties() map[string]interface{} {
+	if e == nil {
+		return nil
+	}
+	return e.extraProperties
+}
+
+func (e *EndpointmanagementBigfix) require(field *big.Int) {
+	if e.explicitFields == nil {
+		e.explicitFields = big.NewInt(0)
+	}
+	e.explicitFields.Or(e.explicitFields, field)
+}
+
+// SetCredential sets the Credential field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (e *EndpointmanagementBigfix) SetCredential(credential *BigFixCredential) {
+	e.Credential = credential
+	e.require(endpointmanagementBigfixFieldCredential)
+}
+
+// SetSkipVerify sets the SkipVerify field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (e *EndpointmanagementBigfix) SetSkipVerify(skipVerify *bool) {
+	e.SkipVerify = skipVerify
+	e.require(endpointmanagementBigfixFieldSkipVerify)
+}
+
+// SetUrl sets the Url field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (e *EndpointmanagementBigfix) SetUrl(url string) {
+	e.Url = url
+	e.require(endpointmanagementBigfixFieldUrl)
+}
+
+func (e *EndpointmanagementBigfix) UnmarshalJSON(data []byte) error {
+	type unmarshaler EndpointmanagementBigfix
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*e = EndpointmanagementBigfix(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *e)
+	if err != nil {
+		return err
+	}
+	e.extraProperties = extraProperties
+	e.rawJSON = nil
+	return nil
+}
+
+func (e *EndpointmanagementBigfix) MarshalJSON() ([]byte, error) {
+	type embed EndpointmanagementBigfix
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*e),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, e.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (e *EndpointmanagementBigfix) String() string {
 	if e == nil {
 		return "<nil>"
 	}
@@ -22767,6 +23025,10 @@ type ProviderConfig struct {
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/automox-endpointmgmt-setup)
 	EndpointmanagementAutomox *EndpointmanagementAutomox
+	// Configuration for HCL BigFix.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/bigfix-endpointmanagement-setup)
+	EndpointmanagementBigfix *EndpointmanagementBigfix
 	// Configuration for Microsoft Intune.
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/intune-endpointmgmt-setup)
@@ -23648,6 +23910,13 @@ func (p *ProviderConfig) GetEndpointmanagementAutomox() *EndpointmanagementAutom
 		return nil
 	}
 	return p.EndpointmanagementAutomox
+}
+
+func (p *ProviderConfig) GetEndpointmanagementBigfix() *EndpointmanagementBigfix {
+	if p == nil {
+		return nil
+	}
+	return p.EndpointmanagementBigfix
 }
 
 func (p *ProviderConfig) GetEndpointmanagementIntune() *EndpointmanagementIntune {
@@ -24853,6 +25122,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.EndpointmanagementAutomox = value
+	case "endpointmanagement_bigfix":
+		value := new(EndpointmanagementBigfix)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.EndpointmanagementBigfix = value
 	case "endpointmanagement_intune":
 		value := new(EndpointmanagementIntune)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -25735,6 +26010,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.EndpointmanagementAutomox != nil {
 		return internal.MarshalJSONWithExtraProperty(p.EndpointmanagementAutomox, "type", "endpointmanagement_automox")
 	}
+	if p.EndpointmanagementBigfix != nil {
+		return internal.MarshalJSONWithExtraProperty(p.EndpointmanagementBigfix, "type", "endpointmanagement_bigfix")
+	}
 	if p.EndpointmanagementIntune != nil {
 		return internal.MarshalJSONWithExtraProperty(p.EndpointmanagementIntune, "type", "endpointmanagement_intune")
 	}
@@ -26144,6 +26422,7 @@ type ProviderConfigVisitor interface {
 	VisitEmailsecurityMimecastCloudGatewayMock(*EmailSecurityMimecastCloudGatewayMock) error
 	VisitEmailsecurityO365ManagementActivity(*EmailSecurityO365ManagementActivity) error
 	VisitEndpointmanagementAutomox(*EndpointmanagementAutomox) error
+	VisitEndpointmanagementBigfix(*EndpointmanagementBigfix) error
 	VisitEndpointmanagementIntune(*EndpointmanagementIntune) error
 	VisitEndpointmanagementIru(*EndpointmanagementIru) error
 	VisitEndpointmanagementJamf(*EndpointmanagementJamf) error
@@ -26464,6 +26743,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.EndpointmanagementAutomox != nil {
 		return visitor.VisitEndpointmanagementAutomox(p.EndpointmanagementAutomox)
+	}
+	if p.EndpointmanagementBigfix != nil {
+		return visitor.VisitEndpointmanagementBigfix(p.EndpointmanagementBigfix)
 	}
 	if p.EndpointmanagementIntune != nil {
 		return visitor.VisitEndpointmanagementIntune(p.EndpointmanagementIntune)
@@ -27013,6 +27295,9 @@ func (p *ProviderConfig) validate() error {
 	if p.EndpointmanagementAutomox != nil {
 		fields = append(fields, "endpointmanagement_automox")
 	}
+	if p.EndpointmanagementBigfix != nil {
+		fields = append(fields, "endpointmanagement_bigfix")
+	}
 	if p.EndpointmanagementIntune != nil {
 		fields = append(fields, "endpointmanagement_intune")
 	}
@@ -27514,6 +27799,8 @@ const (
 	ProviderConfigIdEmailSecurityO365ManagementActivity ProviderConfigId = "emailsecurity_o365_management_activity"
 	// Automox
 	ProviderConfigIdEndpointmanagementAutomox ProviderConfigId = "endpointmanagement_automox"
+	// HCL BigFix
+	ProviderConfigIdEndpointmanagementBigfix ProviderConfigId = "endpointmanagement_bigfix"
 	// Microsoft Intune
 	ProviderConfigIdEndpointmanagementIntune ProviderConfigId = "endpointmanagement_intune"
 	// Iru
@@ -27880,6 +28167,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdEmailSecurityO365ManagementActivity, nil
 	case "endpointmanagement_automox":
 		return ProviderConfigIdEndpointmanagementAutomox, nil
+	case "endpointmanagement_bigfix":
+		return ProviderConfigIdEndpointmanagementBigfix, nil
 	case "endpointmanagement_intune":
 		return ProviderConfigIdEndpointmanagementIntune, nil
 	case "endpointmanagement_iru":
