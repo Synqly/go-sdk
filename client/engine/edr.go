@@ -9,6 +9,7 @@ import (
 	configstate "github.com/synqly/go-sdk/v2/client/engine/ocsf/v130/configstate"
 	detectionfinding "github.com/synqly/go-sdk/v2/client/engine/ocsf/v130/detectionfinding"
 	softwareinfo "github.com/synqly/go-sdk/v2/client/engine/ocsf/v130/softwareinfo"
+	compliancefinding "github.com/synqly/go-sdk/v2/client/engine/ocsf/v180/compliancefinding"
 	noteactivity "github.com/synqly/go-sdk/v2/client/engine/ocsf/v180/noteactivity"
 	stix "github.com/synqly/go-sdk/v2/client/engine/stix"
 	big "math/big"
@@ -686,6 +687,82 @@ func (q *QueryEndpointsRequest) SetIncludeRawData(includeRawData *bool) {
 }
 
 var (
+	queryExclusionsRequestFieldMeta           = big.NewInt(1 << 0)
+	queryExclusionsRequestFieldLimit          = big.NewInt(1 << 1)
+	queryExclusionsRequestFieldCursor         = big.NewInt(1 << 2)
+	queryExclusionsRequestFieldOrder          = big.NewInt(1 << 3)
+	queryExclusionsRequestFieldFilter         = big.NewInt(1 << 4)
+	queryExclusionsRequestFieldIncludeRawData = big.NewInt(1 << 5)
+)
+
+type QueryExclusionsRequest struct {
+	// Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
+	Meta []*string `json:"-" url:"meta,omitempty"`
+	// Number of exclusions to return. Defaults to 50.
+	Limit *int `json:"-" url:"limit,omitempty"`
+	// Start search from cursor position.
+	Cursor *string `json:"-" url:"cursor,omitempty"`
+	// Select a field to order the results by. To control the direction of the sorting, append `[asc]` or `[desc]` to the field name. For example, `created_time[desc]` will sort the results by `created_time` in descending order. The ordering defaults to `asc` if not specified.
+	Order []*string `json:"-" url:"order,omitempty"`
+	// Filter results by this query. For more information on filtering, refer to our [Filtering Guide](https://docs.synqly.com/guides/connectors/edr/query-filters). Defaults to no filter. If used more than once, the queries are ANDed together.
+	Filter []*string `json:"-" url:"filter,omitempty"`
+	// Include the raw data from the EDR in the response. Defaults to `false`.
+	IncludeRawData *bool `json:"-" url:"include_raw_data,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+}
+
+func (q *QueryExclusionsRequest) require(field *big.Int) {
+	if q.explicitFields == nil {
+		q.explicitFields = big.NewInt(0)
+	}
+	q.explicitFields.Or(q.explicitFields, field)
+}
+
+// SetMeta sets the Meta field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryExclusionsRequest) SetMeta(meta []*string) {
+	q.Meta = meta
+	q.require(queryExclusionsRequestFieldMeta)
+}
+
+// SetLimit sets the Limit field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryExclusionsRequest) SetLimit(limit *int) {
+	q.Limit = limit
+	q.require(queryExclusionsRequestFieldLimit)
+}
+
+// SetCursor sets the Cursor field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryExclusionsRequest) SetCursor(cursor *string) {
+	q.Cursor = cursor
+	q.require(queryExclusionsRequestFieldCursor)
+}
+
+// SetOrder sets the Order field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryExclusionsRequest) SetOrder(order []*string) {
+	q.Order = order
+	q.require(queryExclusionsRequestFieldOrder)
+}
+
+// SetFilter sets the Filter field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryExclusionsRequest) SetFilter(filter []*string) {
+	q.Filter = filter
+	q.require(queryExclusionsRequestFieldFilter)
+}
+
+// SetIncludeRawData sets the IncludeRawData field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryExclusionsRequest) SetIncludeRawData(includeRawData *bool) {
+	q.IncludeRawData = includeRawData
+	q.require(queryExclusionsRequestFieldIncludeRawData)
+}
+
+var (
 	queryIoaRequestFieldMeta           = big.NewInt(1 << 0)
 	queryIoaRequestFieldLimit          = big.NewInt(1 << 1)
 	queryIoaRequestFieldCursor         = big.NewInt(1 << 2)
@@ -835,6 +912,82 @@ func (q *QueryIocsRequest) SetFilter(filter []*string) {
 func (q *QueryIocsRequest) SetIncludeRawData(includeRawData *bool) {
 	q.IncludeRawData = includeRawData
 	q.require(queryIocsRequestFieldIncludeRawData)
+}
+
+var (
+	queryPoliciesRequestFieldMeta           = big.NewInt(1 << 0)
+	queryPoliciesRequestFieldLimit          = big.NewInt(1 << 1)
+	queryPoliciesRequestFieldCursor         = big.NewInt(1 << 2)
+	queryPoliciesRequestFieldOrder          = big.NewInt(1 << 3)
+	queryPoliciesRequestFieldFilter         = big.NewInt(1 << 4)
+	queryPoliciesRequestFieldIncludeRawData = big.NewInt(1 << 5)
+)
+
+type QueryPoliciesRequest struct {
+	// Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
+	Meta []*string `json:"-" url:"meta,omitempty"`
+	// Number of findings to return. Defaults to 50.
+	Limit *int `json:"-" url:"limit,omitempty"`
+	// Start search from cursor position.
+	Cursor *string `json:"-" url:"cursor,omitempty"`
+	// Select a field to order the results by. To control the direction of the sorting, append `[asc]` or `[desc]` to the field name. For example, `created_time[desc]` will sort the results by `created_time` in descending order. The ordering defaults to `asc` if not specified.
+	Order []*string `json:"-" url:"order,omitempty"`
+	// Filter results by this query. For more information on filtering, refer to our [Filtering Guide](https://docs.synqly.com/guides/connectors/edr/query-filters). Defaults to no filter. If used more than once, the queries are ANDed together.
+	Filter []*string `json:"-" url:"filter,omitempty"`
+	// Include the raw data from the EDR in the response. Defaults to `false`.
+	IncludeRawData *bool `json:"-" url:"include_raw_data,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+}
+
+func (q *QueryPoliciesRequest) require(field *big.Int) {
+	if q.explicitFields == nil {
+		q.explicitFields = big.NewInt(0)
+	}
+	q.explicitFields.Or(q.explicitFields, field)
+}
+
+// SetMeta sets the Meta field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryPoliciesRequest) SetMeta(meta []*string) {
+	q.Meta = meta
+	q.require(queryPoliciesRequestFieldMeta)
+}
+
+// SetLimit sets the Limit field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryPoliciesRequest) SetLimit(limit *int) {
+	q.Limit = limit
+	q.require(queryPoliciesRequestFieldLimit)
+}
+
+// SetCursor sets the Cursor field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryPoliciesRequest) SetCursor(cursor *string) {
+	q.Cursor = cursor
+	q.require(queryPoliciesRequestFieldCursor)
+}
+
+// SetOrder sets the Order field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryPoliciesRequest) SetOrder(order []*string) {
+	q.Order = order
+	q.require(queryPoliciesRequestFieldOrder)
+}
+
+// SetFilter sets the Filter field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryPoliciesRequest) SetFilter(filter []*string) {
+	q.Filter = filter
+	q.require(queryPoliciesRequestFieldFilter)
+}
+
+// SetIncludeRawData sets the IncludeRawData field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryPoliciesRequest) SetIncludeRawData(includeRawData *bool) {
+	q.IncludeRawData = includeRawData
+	q.require(queryPoliciesRequestFieldIncludeRawData)
 }
 
 var (
@@ -4929,6 +5082,142 @@ func (q *QueryEndpointsResponse) String() string {
 }
 
 var (
+	queryExclusionsResponseFieldMessages = big.NewInt(1 << 0)
+	queryExclusionsResponseFieldMeta     = big.NewInt(1 << 1)
+	queryExclusionsResponseFieldCursor   = big.NewInt(1 << 2)
+	queryExclusionsResponseFieldResult   = big.NewInt(1 << 3)
+)
+
+type QueryExclusionsResponse struct {
+	// Additional messages from the service response that may be helpful to the client.
+	Messages *MessagesResponse `json:"messages,omitempty" url:"messages,omitempty"`
+	// Various metadata about the results organized by group, then type, then field.
+	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
+	// Cursor to use to retrieve the next page of results
+	Cursor string `json:"cursor" url:"cursor"`
+	// List of exclusion findings that match the query, one per exclusion rule.
+	Result []*compliancefinding.ComplianceFinding `json:"result" url:"result"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (q *QueryExclusionsResponse) GetMessages() *MessagesResponse {
+	if q == nil {
+		return nil
+	}
+	return q.Messages
+}
+
+func (q *QueryExclusionsResponse) GetMeta() *MetaResponse {
+	if q == nil {
+		return nil
+	}
+	return q.Meta
+}
+
+func (q *QueryExclusionsResponse) GetCursor() string {
+	if q == nil {
+		return ""
+	}
+	return q.Cursor
+}
+
+func (q *QueryExclusionsResponse) GetResult() []*compliancefinding.ComplianceFinding {
+	if q == nil {
+		return nil
+	}
+	return q.Result
+}
+
+func (q *QueryExclusionsResponse) GetExtraProperties() map[string]interface{} {
+	if q == nil {
+		return nil
+	}
+	return q.extraProperties
+}
+
+func (q *QueryExclusionsResponse) require(field *big.Int) {
+	if q.explicitFields == nil {
+		q.explicitFields = big.NewInt(0)
+	}
+	q.explicitFields.Or(q.explicitFields, field)
+}
+
+// SetMessages sets the Messages field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryExclusionsResponse) SetMessages(messages *MessagesResponse) {
+	q.Messages = messages
+	q.require(queryExclusionsResponseFieldMessages)
+}
+
+// SetMeta sets the Meta field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryExclusionsResponse) SetMeta(meta *MetaResponse) {
+	q.Meta = meta
+	q.require(queryExclusionsResponseFieldMeta)
+}
+
+// SetCursor sets the Cursor field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryExclusionsResponse) SetCursor(cursor string) {
+	q.Cursor = cursor
+	q.require(queryExclusionsResponseFieldCursor)
+}
+
+// SetResult sets the Result field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryExclusionsResponse) SetResult(result []*compliancefinding.ComplianceFinding) {
+	q.Result = result
+	q.require(queryExclusionsResponseFieldResult)
+}
+
+func (q *QueryExclusionsResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler QueryExclusionsResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*q = QueryExclusionsResponse(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *q)
+	if err != nil {
+		return err
+	}
+	q.extraProperties = extraProperties
+	q.rawJSON = nil
+	return nil
+}
+
+func (q *QueryExclusionsResponse) MarshalJSON() ([]byte, error) {
+	type embed QueryExclusionsResponse
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*q),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, q.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (q *QueryExclusionsResponse) String() string {
+	if q == nil {
+		return "<nil>"
+	}
+	if len(q.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(q.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(q); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", q)
+}
+
+var (
 	queryIoaResponseFieldMessages = big.NewInt(1 << 0)
 	queryIoaResponseFieldMeta     = big.NewInt(1 << 1)
 	queryIoaResponseFieldCursor   = big.NewInt(1 << 2)
@@ -5186,6 +5475,142 @@ func (q *QueryIocsResponse) MarshalJSON() ([]byte, error) {
 }
 
 func (q *QueryIocsResponse) String() string {
+	if q == nil {
+		return "<nil>"
+	}
+	if len(q.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(q.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(q); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", q)
+}
+
+var (
+	queryPoliciesResponseFieldMessages = big.NewInt(1 << 0)
+	queryPoliciesResponseFieldMeta     = big.NewInt(1 << 1)
+	queryPoliciesResponseFieldCursor   = big.NewInt(1 << 2)
+	queryPoliciesResponseFieldResult   = big.NewInt(1 << 3)
+)
+
+type QueryPoliciesResponse struct {
+	// Additional messages from the service response that may be helpful to the client.
+	Messages *MessagesResponse `json:"messages,omitempty" url:"messages,omitempty"`
+	// Various metadata about the results organized by group, then type, then field.
+	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
+	// Cursor to use to retrieve the next page of results
+	Cursor string `json:"cursor" url:"cursor"`
+	// List of policy findings that match the query, one per scope at the requested level of the policy tree.
+	Result []*compliancefinding.ComplianceFinding `json:"result" url:"result"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (q *QueryPoliciesResponse) GetMessages() *MessagesResponse {
+	if q == nil {
+		return nil
+	}
+	return q.Messages
+}
+
+func (q *QueryPoliciesResponse) GetMeta() *MetaResponse {
+	if q == nil {
+		return nil
+	}
+	return q.Meta
+}
+
+func (q *QueryPoliciesResponse) GetCursor() string {
+	if q == nil {
+		return ""
+	}
+	return q.Cursor
+}
+
+func (q *QueryPoliciesResponse) GetResult() []*compliancefinding.ComplianceFinding {
+	if q == nil {
+		return nil
+	}
+	return q.Result
+}
+
+func (q *QueryPoliciesResponse) GetExtraProperties() map[string]interface{} {
+	if q == nil {
+		return nil
+	}
+	return q.extraProperties
+}
+
+func (q *QueryPoliciesResponse) require(field *big.Int) {
+	if q.explicitFields == nil {
+		q.explicitFields = big.NewInt(0)
+	}
+	q.explicitFields.Or(q.explicitFields, field)
+}
+
+// SetMessages sets the Messages field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryPoliciesResponse) SetMessages(messages *MessagesResponse) {
+	q.Messages = messages
+	q.require(queryPoliciesResponseFieldMessages)
+}
+
+// SetMeta sets the Meta field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryPoliciesResponse) SetMeta(meta *MetaResponse) {
+	q.Meta = meta
+	q.require(queryPoliciesResponseFieldMeta)
+}
+
+// SetCursor sets the Cursor field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryPoliciesResponse) SetCursor(cursor string) {
+	q.Cursor = cursor
+	q.require(queryPoliciesResponseFieldCursor)
+}
+
+// SetResult sets the Result field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryPoliciesResponse) SetResult(result []*compliancefinding.ComplianceFinding) {
+	q.Result = result
+	q.require(queryPoliciesResponseFieldResult)
+}
+
+func (q *QueryPoliciesResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler QueryPoliciesResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*q = QueryPoliciesResponse(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *q)
+	if err != nil {
+		return err
+	}
+	q.extraProperties = extraProperties
+	q.rawJSON = nil
+	return nil
+}
+
+func (q *QueryPoliciesResponse) MarshalJSON() ([]byte, error) {
+	type embed QueryPoliciesResponse
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*q),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, q.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (q *QueryPoliciesResponse) String() string {
 	if q == nil {
 		return "<nil>"
 	}

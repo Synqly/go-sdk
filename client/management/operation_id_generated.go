@@ -60,8 +60,10 @@ const (
 	OperationIdEdrQueryApplications                             OperationId = "edr_query_applications"
 	OperationIdEdrQueryEdrEvents                                OperationId = "edr_query_edr_events"
 	OperationIdEdrQueryEndpoints                                OperationId = "edr_query_endpoints"
+	OperationIdEdrQueryExclusions                               OperationId = "edr_query_exclusions"
 	OperationIdEdrQueryIoa                                      OperationId = "edr_query_ioa"
 	OperationIdEdrQueryIocs                                     OperationId = "edr_query_iocs"
+	OperationIdEdrQueryPolicies                                 OperationId = "edr_query_policies"
 	OperationIdEdrQueryPostureScore                             OperationId = "edr_query_posture_score"
 	OperationIdEdrQueryThreatevents                             OperationId = "edr_query_threatevents"
 	OperationIdEdrRetrieveFile                                  OperationId = "edr_retrieve_file"
@@ -271,10 +273,14 @@ func NewOperationIdFromString(s string) (OperationId, error) {
 		return OperationIdEdrQueryEdrEvents, nil
 	case "edr_query_endpoints":
 		return OperationIdEdrQueryEndpoints, nil
+	case "edr_query_exclusions":
+		return OperationIdEdrQueryExclusions, nil
 	case "edr_query_ioa":
 		return OperationIdEdrQueryIoa, nil
 	case "edr_query_iocs":
 		return OperationIdEdrQueryIocs, nil
+	case "edr_query_policies":
+		return OperationIdEdrQueryPolicies, nil
 	case "edr_query_posture_score":
 		return OperationIdEdrQueryPostureScore, nil
 	case "edr_query_threatevents":

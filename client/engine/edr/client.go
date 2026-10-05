@@ -299,6 +299,40 @@ func (c *Client) DeleteIoa(
     return response.Body, nil
 }
 
+// Returns the exclusions configured in the token-linked EDR source as OCSF Compliance Findings, one per exclusion rule, with the rule's pattern, type, platform, owner and scope. By default only admin-created exclusions are returned; filter `resource.owner.type[in]Admin,System` to include rules the vendor manages.
+func (c *Client) QueryExclusions(
+    ctx context.Context,
+    request *engine.QueryExclusionsRequest,
+    opts ...option.RequestOption,
+) (*engine.QueryExclusionsResponse, error){
+    response, err := c.WithRawResponse.QueryExclusions(
+        ctx,
+        request,
+        opts...,
+    )
+    if err != nil {
+        return nil, err
+    }
+    return response.Body, nil
+}
+
+// Returns the protection policy at one level of the token-linked EDR source's policy tree (global, account, site or group; `resource.type` selects the level and defaults to global) as OCSF Compliance Findings, one per scope at that level, with each recommended setting as an assessment and the vendor policy setting that decided it. Findings describe the policy at the requested level; overrides below it are not reflected.
+func (c *Client) QueryPolicies(
+    ctx context.Context,
+    request *engine.QueryPoliciesRequest,
+    opts ...option.RequestOption,
+) (*engine.QueryPoliciesResponse, error){
+    response, err := c.WithRawResponse.QueryPolicies(
+        ctx,
+        request,
+        opts...,
+    )
+    if err != nil {
+        return nil, err
+    }
+    return response.Body, nil
+}
+
 // Returns the posture score of the endpoint assets that match the query from the token-linked EDR source.
 func (c *Client) QueryPostureScore(
     ctx context.Context,
