@@ -10003,6 +10003,110 @@ func (e *EdrEsetConnect) String() string {
 	return fmt.Sprintf("%#v", e)
 }
 
+// Configuration for Huntress Managed EDR.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/huntress-edr-setup)
+var (
+	edrHuntressFieldCredential = big.NewInt(1 << 0)
+	edrHuntressFieldUrl        = big.NewInt(1 << 1)
+)
+
+type EdrHuntress struct {
+	Credential *HuntressCredential `json:"credential" url:"credential"`
+	// The base URL of the Huntress API.
+	Url string `json:"url" url:"url"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (e *EdrHuntress) GetCredential() *HuntressCredential {
+	if e == nil {
+		return nil
+	}
+	return e.Credential
+}
+
+func (e *EdrHuntress) GetUrl() string {
+	if e == nil {
+		return ""
+	}
+	return e.Url
+}
+
+func (e *EdrHuntress) GetExtraProperties() map[string]interface{} {
+	if e == nil {
+		return nil
+	}
+	return e.extraProperties
+}
+
+func (e *EdrHuntress) require(field *big.Int) {
+	if e.explicitFields == nil {
+		e.explicitFields = big.NewInt(0)
+	}
+	e.explicitFields.Or(e.explicitFields, field)
+}
+
+// SetCredential sets the Credential field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (e *EdrHuntress) SetCredential(credential *HuntressCredential) {
+	e.Credential = credential
+	e.require(edrHuntressFieldCredential)
+}
+
+// SetUrl sets the Url field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (e *EdrHuntress) SetUrl(url string) {
+	e.Url = url
+	e.require(edrHuntressFieldUrl)
+}
+
+func (e *EdrHuntress) UnmarshalJSON(data []byte) error {
+	type unmarshaler EdrHuntress
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*e = EdrHuntress(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *e)
+	if err != nil {
+		return err
+	}
+	e.extraProperties = extraProperties
+	e.rawJSON = nil
+	return nil
+}
+
+func (e *EdrHuntress) MarshalJSON() ([]byte, error) {
+	type embed EdrHuntress
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*e),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, e.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (e *EdrHuntress) String() string {
+	if e == nil {
+		return "<nil>"
+	}
+	if len(e.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(e.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(e); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", e)
+}
+
 // Configuration for Iru as a EDR Provider
 //
 // [Configuration guide](https://docs.synqly.com/guides/provider-configuration/iru-setup)
@@ -15848,6 +15952,143 @@ func NewHttpRequestBodyFormatFromString(s string) (HttpRequestBodyFormat, error)
 
 func (h HttpRequestBodyFormat) Ptr() *HttpRequestBodyFormat {
 	return &h
+}
+
+type HuntressCredential struct {
+	Type string
+	// Configuration when creating new Basic Credentials.
+	Basic *BasicCredential
+	// Reference to existing Basic Credentials.
+	BasicId BasicCredentialId
+
+	rawJSON json.RawMessage
+}
+
+func (h *HuntressCredential) GetType() string {
+	if h == nil {
+		return ""
+	}
+	return h.Type
+}
+
+func (h *HuntressCredential) GetBasic() *BasicCredential {
+	if h == nil {
+		return nil
+	}
+	return h.Basic
+}
+
+func (h *HuntressCredential) GetBasicId() BasicCredentialId {
+	if h == nil {
+		return ""
+	}
+	return h.BasicId
+}
+
+func (h *HuntressCredential) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	h.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", h)
+	}
+	switch unmarshaler.Type {
+	case "basic":
+		value := new(BasicCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		h.Basic = value
+	case "basic_id":
+		var valueUnmarshaler struct {
+			BasicId BasicCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		h.BasicId = valueUnmarshaler.BasicId
+	}
+	h.rawJSON = nil
+	return nil
+}
+
+func (h HuntressCredential) MarshalJSON() ([]byte, error) {
+	if err := h.validate(); err != nil {
+		return nil, err
+	}
+	if h.Basic != nil {
+		return internal.MarshalJSONWithExtraProperty(h.Basic, "type", "basic")
+	}
+	if h.BasicId != "" {
+		var marshaler = struct {
+			Type    string            `json:"type"`
+			BasicId BasicCredentialId `json:"value"`
+		}{
+			Type:    "basic_id",
+			BasicId: h.BasicId,
+		}
+		return json.Marshal(marshaler)
+	}
+	if len(h.rawJSON) > 0 {
+		return h.rawJSON, nil
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", h)
+}
+
+type HuntressCredentialVisitor interface {
+	VisitBasic(*BasicCredential) error
+	VisitBasicId(BasicCredentialId) error
+}
+
+func (h *HuntressCredential) Accept(visitor HuntressCredentialVisitor) error {
+	if h.Basic != nil {
+		return visitor.VisitBasic(h.Basic)
+	}
+	if h.BasicId != "" {
+		return visitor.VisitBasicId(h.BasicId)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", h)
+}
+
+func (h *HuntressCredential) validate() error {
+	if h == nil {
+		return fmt.Errorf("type %T is nil", h)
+	}
+	var fields []string
+	if h.Basic != nil {
+		fields = append(fields, "basic")
+	}
+	if h.BasicId != "" {
+		fields = append(fields, "basic_id")
+	}
+	if len(fields) == 0 {
+		if h.Type != "" {
+			if len(h.rawJSON) > 0 {
+				return nil
+			}
+			return fmt.Errorf("type %T defines a discriminant set to %q but the field is not set", h, h.Type)
+		}
+		return fmt.Errorf("type %T is empty", h)
+	}
+	if len(fields) > 1 {
+		return fmt.Errorf("type %T defines values for %s, but only one value is allowed", h, fields)
+	}
+	if h.Type != "" {
+		field := fields[0]
+		if h.Type != field {
+			return fmt.Errorf(
+				"type %T defines a discriminant set to %q, but it does not match the %T field; either remove or update the discriminant to match",
+				h,
+				h.Type,
+				h,
+			)
+		}
+	}
+	return nil
 }
 
 type IdentityCrowdStrikeDataset string
@@ -22979,6 +23220,10 @@ type ProviderConfig struct {
 	EdrDefender *EdrDefender
 	// Configuration for ESET Connect as a EDR Provider
 	EdrEsetConnect *EdrEsetConnect
+	// Configuration for Huntress Managed EDR.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/huntress-edr-setup)
+	EdrHuntress *EdrHuntress
 	// Configuration for Iru as a EDR Provider
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/iru-setup)
@@ -23812,6 +24057,13 @@ func (p *ProviderConfig) GetEdrEsetConnect() *EdrEsetConnect {
 		return nil
 	}
 	return p.EdrEsetConnect
+}
+
+func (p *ProviderConfig) GetEdrHuntress() *EdrHuntress {
+	if p == nil {
+		return nil
+	}
+	return p.EdrHuntress
 }
 
 func (p *ProviderConfig) GetEdrIru() *EdrIru {
@@ -25038,6 +25290,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.EdrEsetConnect = value
+	case "edr_huntress":
+		value := new(EdrHuntress)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.EdrHuntress = value
 	case "edr_iru":
 		value := new(EdrIru)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -25968,6 +26226,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.EdrEsetConnect != nil {
 		return internal.MarshalJSONWithExtraProperty(p.EdrEsetConnect, "type", "edr_eset_connect")
 	}
+	if p.EdrHuntress != nil {
+		return internal.MarshalJSONWithExtraProperty(p.EdrHuntress, "type", "edr_huntress")
+	}
 	if p.EdrIru != nil {
 		return internal.MarshalJSONWithExtraProperty(p.EdrIru, "type", "edr_iru")
 	}
@@ -26408,6 +26669,7 @@ type ProviderConfigVisitor interface {
 	VisitEdrCrowdstrikeMock(*EdrCrowdStrikeMock) error
 	VisitEdrDefender(*EdrDefender) error
 	VisitEdrEsetConnect(*EdrEsetConnect) error
+	VisitEdrHuntress(*EdrHuntress) error
 	VisitEdrIru(*EdrIru) error
 	VisitEdrMalwarebytes(*EdrMalwarebytes) error
 	VisitEdrSentinelone(*EdrSentinelOne) error
@@ -26701,6 +26963,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.EdrEsetConnect != nil {
 		return visitor.VisitEdrEsetConnect(p.EdrEsetConnect)
+	}
+	if p.EdrHuntress != nil {
+		return visitor.VisitEdrHuntress(p.EdrHuntress)
 	}
 	if p.EdrIru != nil {
 		return visitor.VisitEdrIru(p.EdrIru)
@@ -27253,6 +27518,9 @@ func (p *ProviderConfig) validate() error {
 	if p.EdrEsetConnect != nil {
 		fields = append(fields, "edr_eset_connect")
 	}
+	if p.EdrHuntress != nil {
+		fields = append(fields, "edr_huntress")
+	}
 	if p.EdrIru != nil {
 		fields = append(fields, "edr_iru")
 	}
@@ -27771,6 +28039,8 @@ const (
 	ProviderConfigIdEdrDefender ProviderConfigId = "edr_defender"
 	// ESET Connect
 	ProviderConfigIdEdrEsetConnect ProviderConfigId = "edr_eset_connect"
+	// Huntress Managed EDR
+	ProviderConfigIdEdrHuntress ProviderConfigId = "edr_huntress"
 	// Iru
 	ProviderConfigIdEdrIru ProviderConfigId = "edr_iru"
 	// ThreatDown Endpoint Detection & Response
@@ -28139,6 +28409,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdEdrDefender, nil
 	case "edr_eset_connect":
 		return ProviderConfigIdEdrEsetConnect, nil
+	case "edr_huntress":
+		return ProviderConfigIdEdrHuntress, nil
 	case "edr_iru":
 		return ProviderConfigIdEdrIru, nil
 	case "edr_malwarebytes":
