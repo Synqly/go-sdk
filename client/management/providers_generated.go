@@ -9314,6 +9314,143 @@ func (d *DefenderEasmCredential) validate() error {
 	return nil
 }
 
+type DuoSecurityCredential struct {
+	Type string
+	// Integration key (ikey) and secret key (skey) for a Duo Admin API application.
+	Basic *BasicCredential
+	// Reference to existing Basic Credentials.
+	BasicId BasicCredentialId
+
+	rawJSON json.RawMessage
+}
+
+func (d *DuoSecurityCredential) GetType() string {
+	if d == nil {
+		return ""
+	}
+	return d.Type
+}
+
+func (d *DuoSecurityCredential) GetBasic() *BasicCredential {
+	if d == nil {
+		return nil
+	}
+	return d.Basic
+}
+
+func (d *DuoSecurityCredential) GetBasicId() BasicCredentialId {
+	if d == nil {
+		return ""
+	}
+	return d.BasicId
+}
+
+func (d *DuoSecurityCredential) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	d.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", d)
+	}
+	switch unmarshaler.Type {
+	case "basic":
+		value := new(BasicCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		d.Basic = value
+	case "basic_id":
+		var valueUnmarshaler struct {
+			BasicId BasicCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		d.BasicId = valueUnmarshaler.BasicId
+	}
+	d.rawJSON = nil
+	return nil
+}
+
+func (d DuoSecurityCredential) MarshalJSON() ([]byte, error) {
+	if err := d.validate(); err != nil {
+		return nil, err
+	}
+	if d.Basic != nil {
+		return internal.MarshalJSONWithExtraProperty(d.Basic, "type", "basic")
+	}
+	if d.BasicId != "" {
+		var marshaler = struct {
+			Type    string            `json:"type"`
+			BasicId BasicCredentialId `json:"value"`
+		}{
+			Type:    "basic_id",
+			BasicId: d.BasicId,
+		}
+		return json.Marshal(marshaler)
+	}
+	if len(d.rawJSON) > 0 {
+		return d.rawJSON, nil
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", d)
+}
+
+type DuoSecurityCredentialVisitor interface {
+	VisitBasic(*BasicCredential) error
+	VisitBasicId(BasicCredentialId) error
+}
+
+func (d *DuoSecurityCredential) Accept(visitor DuoSecurityCredentialVisitor) error {
+	if d.Basic != nil {
+		return visitor.VisitBasic(d.Basic)
+	}
+	if d.BasicId != "" {
+		return visitor.VisitBasicId(d.BasicId)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", d)
+}
+
+func (d *DuoSecurityCredential) validate() error {
+	if d == nil {
+		return fmt.Errorf("type %T is nil", d)
+	}
+	var fields []string
+	if d.Basic != nil {
+		fields = append(fields, "basic")
+	}
+	if d.BasicId != "" {
+		fields = append(fields, "basic_id")
+	}
+	if len(fields) == 0 {
+		if d.Type != "" {
+			if len(d.rawJSON) > 0 {
+				return nil
+			}
+			return fmt.Errorf("type %T defines a discriminant set to %q but the field is not set", d, d.Type)
+		}
+		return fmt.Errorf("type %T is empty", d)
+	}
+	if len(fields) > 1 {
+		return fmt.Errorf("type %T defines values for %s, but only one value is allowed", d, fields)
+	}
+	if d.Type != "" {
+		field := fields[0]
+		if d.Type != field {
+			return fmt.Errorf(
+				"type %T defines a discriminant set to %q, but it does not match the %T field; either remove or update the discriminant to match",
+				d,
+				d.Type,
+				d,
+			)
+		}
+	}
+	return nil
+}
+
 type EsetCredential struct {
 	Type string
 	// Configuration when creating new Client Credentials.
@@ -16563,6 +16700,110 @@ func (i *IdentityCrowdStrikeMock) String() string {
 	return fmt.Sprintf("%#v", i)
 }
 
+// Configuration for Duo Security Identity.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/duosecurity-identity-setup)
+var (
+	identityDuoSecurityFieldCredential = big.NewInt(1 << 0)
+	identityDuoSecurityFieldUrl        = big.NewInt(1 << 1)
+)
+
+type IdentityDuoSecurity struct {
+	Credential *DuoSecurityCredential `json:"credential" url:"credential"`
+	// Base URL of the Duo Admin API.
+	Url string `json:"url" url:"url"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (i *IdentityDuoSecurity) GetCredential() *DuoSecurityCredential {
+	if i == nil {
+		return nil
+	}
+	return i.Credential
+}
+
+func (i *IdentityDuoSecurity) GetUrl() string {
+	if i == nil {
+		return ""
+	}
+	return i.Url
+}
+
+func (i *IdentityDuoSecurity) GetExtraProperties() map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	return i.extraProperties
+}
+
+func (i *IdentityDuoSecurity) require(field *big.Int) {
+	if i.explicitFields == nil {
+		i.explicitFields = big.NewInt(0)
+	}
+	i.explicitFields.Or(i.explicitFields, field)
+}
+
+// SetCredential sets the Credential field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (i *IdentityDuoSecurity) SetCredential(credential *DuoSecurityCredential) {
+	i.Credential = credential
+	i.require(identityDuoSecurityFieldCredential)
+}
+
+// SetUrl sets the Url field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (i *IdentityDuoSecurity) SetUrl(url string) {
+	i.Url = url
+	i.require(identityDuoSecurityFieldUrl)
+}
+
+func (i *IdentityDuoSecurity) UnmarshalJSON(data []byte) error {
+	type unmarshaler IdentityDuoSecurity
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*i = IdentityDuoSecurity(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *i)
+	if err != nil {
+		return err
+	}
+	i.extraProperties = extraProperties
+	i.rawJSON = nil
+	return nil
+}
+
+func (i *IdentityDuoSecurity) MarshalJSON() ([]byte, error) {
+	type embed IdentityDuoSecurity
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*i),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, i.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (i *IdentityDuoSecurity) String() string {
+	if i == nil {
+		return "<nil>"
+	}
+	if len(i.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(i.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(i); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", i)
+}
+
 // Configuration for Microsoft Entra ID.
 //
 // [Configuration guide](https://docs.synqly.com/guides/provider-configuration/entra-id-setup)
@@ -23306,6 +23547,10 @@ type ProviderConfig struct {
 	IdentityCrowdstrike *IdentityCrowdStrike
 	// Configuration for [MOCK] CrowdStrike Falcon Identity Protection.
 	IdentityCrowdstrikeMock *IdentityCrowdStrikeMock
+	// Configuration for Duo Security Identity.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/duosecurity-identity-setup)
+	IdentityDuosecurity *IdentityDuoSecurity
 	// Configuration for Microsoft Entra ID.
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/entra-id-setup)
@@ -24236,6 +24481,13 @@ func (p *ProviderConfig) GetIdentityCrowdstrikeMock() *IdentityCrowdStrikeMock {
 		return nil
 	}
 	return p.IdentityCrowdstrikeMock
+}
+
+func (p *ProviderConfig) GetIdentityDuosecurity() *IdentityDuoSecurity {
+	if p == nil {
+		return nil
+	}
+	return p.IdentityDuosecurity
 }
 
 func (p *ProviderConfig) GetIdentityEntraId() *IdentityEntraId {
@@ -25451,6 +25703,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.IdentityCrowdstrikeMock = value
+	case "identity_duosecurity":
+		value := new(IdentityDuoSecurity)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.IdentityDuosecurity = value
 	case "identity_entra_id":
 		value := new(IdentityEntraId)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -26318,6 +26576,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.IdentityCrowdstrikeMock != nil {
 		return internal.MarshalJSONWithExtraProperty(p.IdentityCrowdstrikeMock, "type", "identity_crowdstrike_mock")
 	}
+	if p.IdentityDuosecurity != nil {
+		return internal.MarshalJSONWithExtraProperty(p.IdentityDuosecurity, "type", "identity_duosecurity")
+	}
 	if p.IdentityEntraId != nil {
 		return internal.MarshalJSONWithExtraProperty(p.IdentityEntraId, "type", "identity_entra_id")
 	}
@@ -26714,6 +26975,7 @@ type ProviderConfigVisitor interface {
 	VisitIdentityAwsIam(*IdentityAwsIam) error
 	VisitIdentityCrowdstrike(*IdentityCrowdStrike) error
 	VisitIdentityCrowdstrikeMock(*IdentityCrowdStrikeMock) error
+	VisitIdentityDuosecurity(*IdentityDuoSecurity) error
 	VisitIdentityEntraId(*IdentityEntraId) error
 	VisitIdentityEntraIdMock(*IdentityEntraIdMock) error
 	VisitIdentityGithub(*IdentityGitHub) error
@@ -27059,6 +27321,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.IdentityCrowdstrikeMock != nil {
 		return visitor.VisitIdentityCrowdstrikeMock(p.IdentityCrowdstrikeMock)
+	}
+	if p.IdentityDuosecurity != nil {
+		return visitor.VisitIdentityDuosecurity(p.IdentityDuosecurity)
 	}
 	if p.IdentityEntraId != nil {
 		return visitor.VisitIdentityEntraId(p.IdentityEntraId)
@@ -27617,6 +27882,9 @@ func (p *ProviderConfig) validate() error {
 	if p.IdentityCrowdstrikeMock != nil {
 		fields = append(fields, "identity_crowdstrike_mock")
 	}
+	if p.IdentityDuosecurity != nil {
+		fields = append(fields, "identity_duosecurity")
+	}
 	if p.IdentityEntraId != nil {
 		fields = append(fields, "identity_entra_id")
 	}
@@ -28116,6 +28384,8 @@ const (
 	ProviderConfigIdIdentityCrowdStrike ProviderConfigId = "identity_crowdstrike"
 	// [MOCK] CrowdStrike Falcon Identity Protection
 	ProviderConfigIdIdentityCrowdStrikeMock ProviderConfigId = "identity_crowdstrike_mock"
+	// Duo Security Identity
+	ProviderConfigIdIdentityDuoSecurity ProviderConfigId = "identity_duosecurity"
 	// Microsoft Entra ID
 	ProviderConfigIdIdentityEntraId ProviderConfigId = "identity_entra_id"
 	// [MOCK] Microsoft Entra ID
@@ -28488,6 +28758,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdIdentityCrowdStrike, nil
 	case "identity_crowdstrike_mock":
 		return ProviderConfigIdIdentityCrowdStrikeMock, nil
+	case "identity_duosecurity":
+		return ProviderConfigIdIdentityDuoSecurity, nil
 	case "identity_entra_id":
 		return ProviderConfigIdIdentityEntraId, nil
 	case "identity_entra_id_mock":
