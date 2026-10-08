@@ -23653,6 +23653,10 @@ type ProviderConfig struct {
 	VulnerabilitiesTaniumCloud *VulnerabilitiesTaniumCloud
 	// Configuration for a mock Tanium Cloud as a Vulnerabilities Provider
 	VulnerabilitiesTaniumCloudMock *VulnerabilitiesTaniumCloudMock
+	// Configuration for Tenable Attack Surface Management.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/tenableasm-vulnerabilities-setup)
+	VulnerabilitiesTenableAsm *VulnerabilitiesTenableAsm
 	// Configuration for Tenable Vulnerability Management.
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/tenable-vulns-setup)
@@ -24927,6 +24931,13 @@ func (p *ProviderConfig) GetVulnerabilitiesTaniumCloudMock() *VulnerabilitiesTan
 	return p.VulnerabilitiesTaniumCloudMock
 }
 
+func (p *ProviderConfig) GetVulnerabilitiesTenableAsm() *VulnerabilitiesTenableAsm {
+	if p == nil {
+		return nil
+	}
+	return p.VulnerabilitiesTenableAsm
+}
+
 func (p *ProviderConfig) GetVulnerabilitiesTenableCloud() *VulnerabilitiesTenableCloud {
 	if p == nil {
 		return nil
@@ -26034,6 +26045,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.VulnerabilitiesTaniumCloudMock = value
+	case "vulnerabilities_tenable_asm":
+		value := new(VulnerabilitiesTenableAsm)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.VulnerabilitiesTenableAsm = value
 	case "vulnerabilities_tenable_cloud":
 		value := new(VulnerabilitiesTenableCloud)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -26598,6 +26615,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.VulnerabilitiesTaniumCloudMock != nil {
 		return internal.MarshalJSONWithExtraProperty(p.VulnerabilitiesTaniumCloudMock, "type", "vulnerabilities_tanium_cloud_mock")
 	}
+	if p.VulnerabilitiesTenableAsm != nil {
+		return internal.MarshalJSONWithExtraProperty(p.VulnerabilitiesTenableAsm, "type", "vulnerabilities_tenable_asm")
+	}
 	if p.VulnerabilitiesTenableCloud != nil {
 		return internal.MarshalJSONWithExtraProperty(p.VulnerabilitiesTenableCloud, "type", "vulnerabilities_tenable_cloud")
 	}
@@ -26793,6 +26813,7 @@ type ProviderConfigVisitor interface {
 	VisitVulnerabilitiesServicenowVr(*VulnerabilitiesServiceNow) error
 	VisitVulnerabilitiesTaniumCloud(*VulnerabilitiesTaniumCloud) error
 	VisitVulnerabilitiesTaniumCloudMock(*VulnerabilitiesTaniumCloudMock) error
+	VisitVulnerabilitiesTenableAsm(*VulnerabilitiesTenableAsm) error
 	VisitVulnerabilitiesTenableCloud(*VulnerabilitiesTenableCloud) error
 	VisitVulnerabilitiesTenableSc(*VulnerabilitiesTenableSc) error
 	VisitVulnerabilitiesWiz(*VulnerabilitiesWiz) error
@@ -27335,6 +27356,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.VulnerabilitiesTaniumCloudMock != nil {
 		return visitor.VisitVulnerabilitiesTaniumCloudMock(p.VulnerabilitiesTaniumCloudMock)
+	}
+	if p.VulnerabilitiesTenableAsm != nil {
+		return visitor.VisitVulnerabilitiesTenableAsm(p.VulnerabilitiesTenableAsm)
 	}
 	if p.VulnerabilitiesTenableCloud != nil {
 		return visitor.VisitVulnerabilitiesTenableCloud(p.VulnerabilitiesTenableCloud)
@@ -27890,6 +27914,9 @@ func (p *ProviderConfig) validate() error {
 	if p.VulnerabilitiesTaniumCloudMock != nil {
 		fields = append(fields, "vulnerabilities_tanium_cloud_mock")
 	}
+	if p.VulnerabilitiesTenableAsm != nil {
+		fields = append(fields, "vulnerabilities_tenable_asm")
+	}
 	if p.VulnerabilitiesTenableCloud != nil {
 		fields = append(fields, "vulnerabilities_tenable_cloud")
 	}
@@ -28287,6 +28314,8 @@ const (
 	ProviderConfigIdVulnerabilitiesTaniumCloud ProviderConfigId = "vulnerabilities_tanium_cloud"
 	// [MOCK] Tanium Vulnerability Management
 	ProviderConfigIdVulnerabilitiesTaniumCloudMock ProviderConfigId = "vulnerabilities_tanium_cloud_mock"
+	// Tenable Attack Surface Management
+	ProviderConfigIdVulnerabilitiesTenableAsm ProviderConfigId = "vulnerabilities_tenable_asm"
 	// Tenable Vulnerability Management
 	ProviderConfigIdVulnerabilitiesTenableCloud ProviderConfigId = "vulnerabilities_tenable_cloud"
 	// Tenable Security Center
@@ -28657,6 +28686,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdVulnerabilitiesTaniumCloud, nil
 	case "vulnerabilities_tanium_cloud_mock":
 		return ProviderConfigIdVulnerabilitiesTaniumCloudMock, nil
+	case "vulnerabilities_tenable_asm":
+		return ProviderConfigIdVulnerabilitiesTenableAsm, nil
 	case "vulnerabilities_tenable_cloud":
 		return ProviderConfigIdVulnerabilitiesTenableCloud, nil
 	case "vulnerabilities_tenable_sc":
@@ -37214,6 +37245,143 @@ func (t *TeamsGraphChatCredential) validate() error {
 	return nil
 }
 
+type TenableAsmCredential struct {
+	Type string
+	// Configuration when creating new API Key.
+	Token *TokenCredential
+	// Reference to existing API Key.
+	TokenId TokenCredentialId
+
+	rawJSON json.RawMessage
+}
+
+func (t *TenableAsmCredential) GetType() string {
+	if t == nil {
+		return ""
+	}
+	return t.Type
+}
+
+func (t *TenableAsmCredential) GetToken() *TokenCredential {
+	if t == nil {
+		return nil
+	}
+	return t.Token
+}
+
+func (t *TenableAsmCredential) GetTokenId() TokenCredentialId {
+	if t == nil {
+		return ""
+	}
+	return t.TokenId
+}
+
+func (t *TenableAsmCredential) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	t.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", t)
+	}
+	switch unmarshaler.Type {
+	case "token":
+		value := new(TokenCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		t.Token = value
+	case "token_id":
+		var valueUnmarshaler struct {
+			TokenId TokenCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		t.TokenId = valueUnmarshaler.TokenId
+	}
+	t.rawJSON = nil
+	return nil
+}
+
+func (t TenableAsmCredential) MarshalJSON() ([]byte, error) {
+	if err := t.validate(); err != nil {
+		return nil, err
+	}
+	if t.Token != nil {
+		return internal.MarshalJSONWithExtraProperty(t.Token, "type", "token")
+	}
+	if t.TokenId != "" {
+		var marshaler = struct {
+			Type    string            `json:"type"`
+			TokenId TokenCredentialId `json:"value"`
+		}{
+			Type:    "token_id",
+			TokenId: t.TokenId,
+		}
+		return json.Marshal(marshaler)
+	}
+	if len(t.rawJSON) > 0 {
+		return t.rawJSON, nil
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", t)
+}
+
+type TenableAsmCredentialVisitor interface {
+	VisitToken(*TokenCredential) error
+	VisitTokenId(TokenCredentialId) error
+}
+
+func (t *TenableAsmCredential) Accept(visitor TenableAsmCredentialVisitor) error {
+	if t.Token != nil {
+		return visitor.VisitToken(t.Token)
+	}
+	if t.TokenId != "" {
+		return visitor.VisitTokenId(t.TokenId)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", t)
+}
+
+func (t *TenableAsmCredential) validate() error {
+	if t == nil {
+		return fmt.Errorf("type %T is nil", t)
+	}
+	var fields []string
+	if t.Token != nil {
+		fields = append(fields, "token")
+	}
+	if t.TokenId != "" {
+		fields = append(fields, "token_id")
+	}
+	if len(fields) == 0 {
+		if t.Type != "" {
+			if len(t.rawJSON) > 0 {
+				return nil
+			}
+			return fmt.Errorf("type %T defines a discriminant set to %q but the field is not set", t, t.Type)
+		}
+		return fmt.Errorf("type %T is empty", t)
+	}
+	if len(fields) > 1 {
+		return fmt.Errorf("type %T defines values for %s, but only one value is allowed", t, fields)
+	}
+	if t.Type != "" {
+		field := fields[0]
+		if t.Type != field {
+			return fmt.Errorf(
+				"type %T defines a discriminant set to %q, but it does not match the %T field; either remove or update the discriminant to match",
+				t,
+				t.Type,
+				t,
+			)
+		}
+	}
+	return nil
+}
+
 type TenableCloudCredential struct {
 	Type string
 	// Configuration when creating new API Keys.
@@ -43678,6 +43846,110 @@ func (v *VulnerabilitiesTaniumCloudMock) MarshalJSON() ([]byte, error) {
 }
 
 func (v *VulnerabilitiesTaniumCloudMock) String() string {
+	if v == nil {
+		return "<nil>"
+	}
+	if len(v.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(v.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(v); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", v)
+}
+
+// Configuration for Tenable Attack Surface Management.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/tenableasm-vulnerabilities-setup)
+var (
+	vulnerabilitiesTenableAsmFieldCredential = big.NewInt(1 << 0)
+	vulnerabilitiesTenableAsmFieldUrl        = big.NewInt(1 << 1)
+)
+
+type VulnerabilitiesTenableAsm struct {
+	Credential *TenableAsmCredential `json:"credential" url:"credential"`
+	// Base URL for the Tenable Attack Surface Management API. Leave blank to use the standard Tenable ASM endpoint.
+	Url *string `json:"url,omitempty" url:"url,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (v *VulnerabilitiesTenableAsm) GetCredential() *TenableAsmCredential {
+	if v == nil {
+		return nil
+	}
+	return v.Credential
+}
+
+func (v *VulnerabilitiesTenableAsm) GetUrl() *string {
+	if v == nil {
+		return nil
+	}
+	return v.Url
+}
+
+func (v *VulnerabilitiesTenableAsm) GetExtraProperties() map[string]interface{} {
+	if v == nil {
+		return nil
+	}
+	return v.extraProperties
+}
+
+func (v *VulnerabilitiesTenableAsm) require(field *big.Int) {
+	if v.explicitFields == nil {
+		v.explicitFields = big.NewInt(0)
+	}
+	v.explicitFields.Or(v.explicitFields, field)
+}
+
+// SetCredential sets the Credential field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (v *VulnerabilitiesTenableAsm) SetCredential(credential *TenableAsmCredential) {
+	v.Credential = credential
+	v.require(vulnerabilitiesTenableAsmFieldCredential)
+}
+
+// SetUrl sets the Url field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (v *VulnerabilitiesTenableAsm) SetUrl(url *string) {
+	v.Url = url
+	v.require(vulnerabilitiesTenableAsmFieldUrl)
+}
+
+func (v *VulnerabilitiesTenableAsm) UnmarshalJSON(data []byte) error {
+	type unmarshaler VulnerabilitiesTenableAsm
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*v = VulnerabilitiesTenableAsm(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *v)
+	if err != nil {
+		return err
+	}
+	v.extraProperties = extraProperties
+	v.rawJSON = nil
+	return nil
+}
+
+func (v *VulnerabilitiesTenableAsm) MarshalJSON() ([]byte, error) {
+	type embed VulnerabilitiesTenableAsm
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*v),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, v.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (v *VulnerabilitiesTenableAsm) String() string {
 	if v == nil {
 		return "<nil>"
 	}
