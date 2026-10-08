@@ -7193,6 +7193,144 @@ func (c *CloudSecurityGoogle) String() string {
 	return fmt.Sprintf("%#v", c)
 }
 
+// Configuration for the Orca Security provider.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/orca-cloudsecurity-setup)
+var (
+	cloudSecurityOrcaFieldComplianceFrameworkIds = big.NewInt(1 << 0)
+	cloudSecurityOrcaFieldCredential             = big.NewInt(1 << 1)
+	cloudSecurityOrcaFieldRegion                 = big.NewInt(1 << 2)
+	cloudSecurityOrcaFieldUrl                    = big.NewInt(1 << 3)
+)
+
+type CloudSecurityOrca struct {
+	// Limit compliance findings to these frameworks, using the framework IDs shown in the Orca console. Leaving this empty will cover every framework in your account.
+	ComplianceFrameworkIds []string        `json:"compliance_framework_ids,omitempty" url:"compliance_framework_ids,omitempty"`
+	Credential             *OrcaCredential `json:"credential" url:"credential"`
+	// The Orca region your account is hosted in.
+	Region OrcaRegion `json:"region" url:"region"`
+	// Base URL override for custom or proxied environments. When set, the region field is ignored.
+	Url *string `json:"url,omitempty" url:"url,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (c *CloudSecurityOrca) GetComplianceFrameworkIds() []string {
+	if c == nil {
+		return nil
+	}
+	return c.ComplianceFrameworkIds
+}
+
+func (c *CloudSecurityOrca) GetCredential() *OrcaCredential {
+	if c == nil {
+		return nil
+	}
+	return c.Credential
+}
+
+func (c *CloudSecurityOrca) GetRegion() OrcaRegion {
+	if c == nil {
+		return ""
+	}
+	return c.Region
+}
+
+func (c *CloudSecurityOrca) GetUrl() *string {
+	if c == nil {
+		return nil
+	}
+	return c.Url
+}
+
+func (c *CloudSecurityOrca) GetExtraProperties() map[string]interface{} {
+	if c == nil {
+		return nil
+	}
+	return c.extraProperties
+}
+
+func (c *CloudSecurityOrca) require(field *big.Int) {
+	if c.explicitFields == nil {
+		c.explicitFields = big.NewInt(0)
+	}
+	c.explicitFields.Or(c.explicitFields, field)
+}
+
+// SetComplianceFrameworkIds sets the ComplianceFrameworkIds field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CloudSecurityOrca) SetComplianceFrameworkIds(complianceFrameworkIds []string) {
+	c.ComplianceFrameworkIds = complianceFrameworkIds
+	c.require(cloudSecurityOrcaFieldComplianceFrameworkIds)
+}
+
+// SetCredential sets the Credential field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CloudSecurityOrca) SetCredential(credential *OrcaCredential) {
+	c.Credential = credential
+	c.require(cloudSecurityOrcaFieldCredential)
+}
+
+// SetRegion sets the Region field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CloudSecurityOrca) SetRegion(region OrcaRegion) {
+	c.Region = region
+	c.require(cloudSecurityOrcaFieldRegion)
+}
+
+// SetUrl sets the Url field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CloudSecurityOrca) SetUrl(url *string) {
+	c.Url = url
+	c.require(cloudSecurityOrcaFieldUrl)
+}
+
+func (c *CloudSecurityOrca) UnmarshalJSON(data []byte) error {
+	type unmarshaler CloudSecurityOrca
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = CloudSecurityOrca(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+	c.rawJSON = nil
+	return nil
+}
+
+func (c *CloudSecurityOrca) MarshalJSON() ([]byte, error) {
+	type embed CloudSecurityOrca
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*c),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, c.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (c *CloudSecurityOrca) String() string {
+	if c == nil {
+		return "<nil>"
+	}
+	if len(c.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(c.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
 // Configuration for Palo Alto Networks Cortex Cloud Security
 //
 // [Configuration guide](https://docs.synqly.com/guides/provider-configuration/paloalto-cloudsecurity-setup)
@@ -22391,6 +22529,179 @@ func (o OpenTextCoreApplicationSecurityUrl) Ptr() *OpenTextCoreApplicationSecuri
 	return &o
 }
 
+type OrcaCredential struct {
+	Type string
+	// Configuration when creating new Token.
+	Token *TokenCredential
+	// Reference to existing Token.
+	TokenId TokenCredentialId
+
+	rawJSON json.RawMessage
+}
+
+func (o *OrcaCredential) GetType() string {
+	if o == nil {
+		return ""
+	}
+	return o.Type
+}
+
+func (o *OrcaCredential) GetToken() *TokenCredential {
+	if o == nil {
+		return nil
+	}
+	return o.Token
+}
+
+func (o *OrcaCredential) GetTokenId() TokenCredentialId {
+	if o == nil {
+		return ""
+	}
+	return o.TokenId
+}
+
+func (o *OrcaCredential) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	o.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", o)
+	}
+	switch unmarshaler.Type {
+	case "token":
+		value := new(TokenCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		o.Token = value
+	case "token_id":
+		var valueUnmarshaler struct {
+			TokenId TokenCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		o.TokenId = valueUnmarshaler.TokenId
+	}
+	o.rawJSON = nil
+	return nil
+}
+
+func (o OrcaCredential) MarshalJSON() ([]byte, error) {
+	if err := o.validate(); err != nil {
+		return nil, err
+	}
+	if o.Token != nil {
+		return internal.MarshalJSONWithExtraProperty(o.Token, "type", "token")
+	}
+	if o.TokenId != "" {
+		var marshaler = struct {
+			Type    string            `json:"type"`
+			TokenId TokenCredentialId `json:"value"`
+		}{
+			Type:    "token_id",
+			TokenId: o.TokenId,
+		}
+		return json.Marshal(marshaler)
+	}
+	if len(o.rawJSON) > 0 {
+		return o.rawJSON, nil
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", o)
+}
+
+type OrcaCredentialVisitor interface {
+	VisitToken(*TokenCredential) error
+	VisitTokenId(TokenCredentialId) error
+}
+
+func (o *OrcaCredential) Accept(visitor OrcaCredentialVisitor) error {
+	if o.Token != nil {
+		return visitor.VisitToken(o.Token)
+	}
+	if o.TokenId != "" {
+		return visitor.VisitTokenId(o.TokenId)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", o)
+}
+
+func (o *OrcaCredential) validate() error {
+	if o == nil {
+		return fmt.Errorf("type %T is nil", o)
+	}
+	var fields []string
+	if o.Token != nil {
+		fields = append(fields, "token")
+	}
+	if o.TokenId != "" {
+		fields = append(fields, "token_id")
+	}
+	if len(fields) == 0 {
+		if o.Type != "" {
+			if len(o.rawJSON) > 0 {
+				return nil
+			}
+			return fmt.Errorf("type %T defines a discriminant set to %q but the field is not set", o, o.Type)
+		}
+		return fmt.Errorf("type %T is empty", o)
+	}
+	if len(fields) > 1 {
+		return fmt.Errorf("type %T defines values for %s, but only one value is allowed", o, fields)
+	}
+	if o.Type != "" {
+		field := fields[0]
+		if o.Type != field {
+			return fmt.Errorf(
+				"type %T defines a discriminant set to %q, but it does not match the %T field; either remove or update the discriminant to match",
+				o,
+				o.Type,
+				o,
+			)
+		}
+	}
+	return nil
+}
+
+type OrcaRegion string
+
+const (
+	// US region (api.us.orcasecurity.io)
+	OrcaRegionUs OrcaRegion = "us"
+	// EU region (api.eu.orcasecurity.io)
+	OrcaRegionEu OrcaRegion = "eu"
+	// Australia region (api.au.orcasecurity.io)
+	OrcaRegionAu OrcaRegion = "au"
+	// India region (api.in.orcasecurity.io)
+	OrcaRegionIn OrcaRegion = "in"
+	// Saudi Arabia region (api.sa.orcasecurity.io)
+	OrcaRegionSa OrcaRegion = "sa"
+)
+
+func NewOrcaRegionFromString(s string) (OrcaRegion, error) {
+	switch s {
+	case "us":
+		return OrcaRegionUs, nil
+	case "eu":
+		return OrcaRegionEu, nil
+	case "au":
+		return OrcaRegionAu, nil
+	case "in":
+		return OrcaRegionIn, nil
+	case "sa":
+		return OrcaRegionSa, nil
+	}
+	var t OrcaRegion
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (o OrcaRegion) Ptr() *OrcaRegion {
+	return &o
+}
+
 type PagerDutyCredential struct {
 	Type string
 	// Configuration when creating new API Key.
@@ -23431,6 +23742,10 @@ type ProviderConfig struct {
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/google-security-command-center-cloudsecurity-setup)
 	CloudsecurityGoogle *CloudSecurityGoogle
+	// Configuration for the Orca Security provider.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/orca-cloudsecurity-setup)
+	CloudsecurityOrca *CloudSecurityOrca
 	// Configuration for Palo Alto Networks Cortex Cloud Security
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/paloalto-cloudsecurity-setup)
@@ -24236,6 +24551,13 @@ func (p *ProviderConfig) GetCloudsecurityGoogle() *CloudSecurityGoogle {
 		return nil
 	}
 	return p.CloudsecurityGoogle
+}
+
+func (p *ProviderConfig) GetCloudsecurityOrca() *CloudSecurityOrca {
+	if p == nil {
+		return nil
+	}
+	return p.CloudsecurityOrca
 }
 
 func (p *ProviderConfig) GetCloudsecurityPaloalto() *CloudSecurityPaloAlto {
@@ -25493,6 +25815,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.CloudsecurityGoogle = value
+	case "cloudsecurity_orca":
+		value := new(CloudSecurityOrca)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.CloudsecurityOrca = value
 	case "cloudsecurity_paloalto":
 		value := new(CloudSecurityPaloAlto)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -26471,6 +26799,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.CloudsecurityGoogle != nil {
 		return internal.MarshalJSONWithExtraProperty(p.CloudsecurityGoogle, "type", "cloudsecurity_google")
 	}
+	if p.CloudsecurityOrca != nil {
+		return internal.MarshalJSONWithExtraProperty(p.CloudsecurityOrca, "type", "cloudsecurity_orca")
+	}
 	if p.CloudsecurityPaloalto != nil {
 		return internal.MarshalJSONWithExtraProperty(p.CloudsecurityPaloalto, "type", "cloudsecurity_paloalto")
 	}
@@ -26940,6 +27271,7 @@ type ProviderConfigVisitor interface {
 	VisitCloudsecurityCrowdstrikeMock(*CloudSecurityCrowdStrikeMock) error
 	VisitCloudsecurityDefender(*CloudSecurityDefender) error
 	VisitCloudsecurityGoogle(*CloudSecurityGoogle) error
+	VisitCloudsecurityOrca(*CloudSecurityOrca) error
 	VisitCloudsecurityPaloalto(*CloudSecurityPaloAlto) error
 	VisitCloudsecuritySentinelone(*CloudSecuritySentinelOne) error
 	VisitCloudsecurityUpwind(*CloudSecurityUpwind) error
@@ -27216,6 +27548,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.CloudsecurityGoogle != nil {
 		return visitor.VisitCloudsecurityGoogle(p.CloudsecurityGoogle)
+	}
+	if p.CloudsecurityOrca != nil {
+		return visitor.VisitCloudsecurityOrca(p.CloudsecurityOrca)
 	}
 	if p.CloudsecurityPaloalto != nil {
 		return visitor.VisitCloudsecurityPaloalto(p.CloudsecurityPaloalto)
@@ -27777,6 +28112,9 @@ func (p *ProviderConfig) validate() error {
 	if p.CloudsecurityGoogle != nil {
 		fields = append(fields, "cloudsecurity_google")
 	}
+	if p.CloudsecurityOrca != nil {
+		fields = append(fields, "cloudsecurity_orca")
+	}
 	if p.CloudsecurityPaloalto != nil {
 		fields = append(fields, "cloudsecurity_paloalto")
 	}
@@ -28314,6 +28652,8 @@ const (
 	ProviderConfigIdCloudSecurityDefender ProviderConfigId = "cloudsecurity_defender"
 	// Google Security Command Center
 	ProviderConfigIdCloudSecurityGoogle ProviderConfigId = "cloudsecurity_google"
+	// Orca Security
+	ProviderConfigIdCloudSecurityOrca ProviderConfigId = "cloudsecurity_orca"
 	// Palo Alto Networks Cortex Cloud Security
 	ProviderConfigIdCloudSecurityPaloAlto ProviderConfigId = "cloudsecurity_paloalto"
 	// SentinelOne Singularity™ Cloud Native Security
@@ -28688,6 +29028,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdCloudSecurityDefender, nil
 	case "cloudsecurity_google":
 		return ProviderConfigIdCloudSecurityGoogle, nil
+	case "cloudsecurity_orca":
+		return ProviderConfigIdCloudSecurityOrca, nil
 	case "cloudsecurity_paloalto":
 		return ProviderConfigIdCloudSecurityPaloAlto, nil
 	case "cloudsecurity_sentinelone":
