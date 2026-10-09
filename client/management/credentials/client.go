@@ -114,7 +114,10 @@ func (c *Client) Create(
 }
 
 // Updates the `Credential` object matching `{credentialId}`, where the
-// `Credential` belongs to the `Account`, `Integration`, `IntegrationPoint` or `OrganizationWebhook` matching `{ownerId}`.
+// `Credential` belongs to the `Account`, `Integration`,
+// `IntegrationPoint` or `OrganizationWebhook` matching `{ownerId}`. The
+// owner of a `Credential` cannot be changed. `{ownerId}` must be the
+// credential's owner.
 func (c *Client) Update(
     ctx context.Context,
     ownerId management.Id,
@@ -143,6 +146,9 @@ func (c *Client) Update(
 // `/fullname`, `/expires` or a `/config` field. The `copy`, `move` and
 // `test` operations are not accepted. Any other operation or path is
 // rejected with a `400`.
+// 
+// The owner of a `Credential` cannot be changed. `{ownerId}` must be the
+// credential's owner.
 func (c *Client) Patch(
     ctx context.Context,
     ownerId management.Id,
