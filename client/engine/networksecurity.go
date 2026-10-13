@@ -125,6 +125,62 @@ func (q *QueryDnsLogConfigurationsRequest) SetCursor(cursor *string) {
 }
 
 var (
+	queryFirewallRulesRequestFieldMeta   = big.NewInt(1 << 0)
+	queryFirewallRulesRequestFieldLimit  = big.NewInt(1 << 1)
+	queryFirewallRulesRequestFieldFilter = big.NewInt(1 << 2)
+	queryFirewallRulesRequestFieldCursor = big.NewInt(1 << 3)
+)
+
+type QueryFirewallRulesRequest struct {
+	// Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
+	Meta []*string `json:"-" url:"meta,omitempty"`
+	// Number of firewall rules to return. Defaults to 100 with a maximum of 200. If a provider has a maximum limit lower than 200, the provider's maximum limit will be used instead.
+	Limit *int `json:"-" url:"limit,omitempty"`
+	// Filter results by this query. For more information on filtering, refer to our [Filtering Guide](https://docs.synqly.com/guides/connectors/networksecurity/query-filters). Defaults to no filter. If used more than once, the queries are ANDed together. No network security provider currently supports filters on this endpoint, so a request that includes a filter is rejected with a 400 error.
+	Filter []*string `json:"-" url:"filter,omitempty"`
+	// Start search from cursor position.
+	Cursor *string `json:"-" url:"cursor,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+}
+
+func (q *QueryFirewallRulesRequest) require(field *big.Int) {
+	if q.explicitFields == nil {
+		q.explicitFields = big.NewInt(0)
+	}
+	q.explicitFields.Or(q.explicitFields, field)
+}
+
+// SetMeta sets the Meta field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryFirewallRulesRequest) SetMeta(meta []*string) {
+	q.Meta = meta
+	q.require(queryFirewallRulesRequestFieldMeta)
+}
+
+// SetLimit sets the Limit field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryFirewallRulesRequest) SetLimit(limit *int) {
+	q.Limit = limit
+	q.require(queryFirewallRulesRequestFieldLimit)
+}
+
+// SetFilter sets the Filter field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryFirewallRulesRequest) SetFilter(filter []*string) {
+	q.Filter = filter
+	q.require(queryFirewallRulesRequestFieldFilter)
+}
+
+// SetCursor sets the Cursor field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryFirewallRulesRequest) SetCursor(cursor *string) {
+	q.Cursor = cursor
+	q.require(queryFirewallRulesRequestFieldCursor)
+}
+
+var (
 	queryTrafficEventsRequestFieldMeta   = big.NewInt(1 << 0)
 	queryTrafficEventsRequestFieldLimit  = big.NewInt(1 << 1)
 	queryTrafficEventsRequestFieldFilter = big.NewInt(1 << 2)
@@ -241,6 +297,9 @@ type DnsEvent = *dnsactivity.DnsActivity
 
 // DNS log configuration discovered for the integration.
 type DnsLogConfiguration = *cloudresourcesinventoryinfo.CloudResourcesInventoryInfo
+
+// Firewall rule discovered for the integration.
+type FirewallRuleRecord = *cloudresourcesinventoryinfo.CloudResourcesInventoryInfo
 
 var (
 	queryDnsEventsResponseFieldMessages = big.NewInt(1 << 0)
@@ -500,6 +559,142 @@ func (q *QueryDnsLogConfigurationsResponse) MarshalJSON() ([]byte, error) {
 }
 
 func (q *QueryDnsLogConfigurationsResponse) String() string {
+	if q == nil {
+		return "<nil>"
+	}
+	if len(q.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(q.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(q); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", q)
+}
+
+var (
+	queryFirewallRulesResponseFieldMessages = big.NewInt(1 << 0)
+	queryFirewallRulesResponseFieldMeta     = big.NewInt(1 << 1)
+	queryFirewallRulesResponseFieldCursor   = big.NewInt(1 << 2)
+	queryFirewallRulesResponseFieldResult   = big.NewInt(1 << 3)
+)
+
+type QueryFirewallRulesResponse struct {
+	// Additional messages from the service response that may be helpful to the client.
+	Messages *MessagesResponse `json:"messages,omitempty" url:"messages,omitempty"`
+	// Various metadata about the results organized by group, then type, then field.
+	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
+	// Cursor to use to retrieve the next page of results
+	Cursor string `json:"cursor" url:"cursor"`
+	// List of firewall rules matching the query.
+	Result []FirewallRuleRecord `json:"result" url:"result"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (q *QueryFirewallRulesResponse) GetMessages() *MessagesResponse {
+	if q == nil {
+		return nil
+	}
+	return q.Messages
+}
+
+func (q *QueryFirewallRulesResponse) GetMeta() *MetaResponse {
+	if q == nil {
+		return nil
+	}
+	return q.Meta
+}
+
+func (q *QueryFirewallRulesResponse) GetCursor() string {
+	if q == nil {
+		return ""
+	}
+	return q.Cursor
+}
+
+func (q *QueryFirewallRulesResponse) GetResult() []FirewallRuleRecord {
+	if q == nil {
+		return nil
+	}
+	return q.Result
+}
+
+func (q *QueryFirewallRulesResponse) GetExtraProperties() map[string]interface{} {
+	if q == nil {
+		return nil
+	}
+	return q.extraProperties
+}
+
+func (q *QueryFirewallRulesResponse) require(field *big.Int) {
+	if q.explicitFields == nil {
+		q.explicitFields = big.NewInt(0)
+	}
+	q.explicitFields.Or(q.explicitFields, field)
+}
+
+// SetMessages sets the Messages field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryFirewallRulesResponse) SetMessages(messages *MessagesResponse) {
+	q.Messages = messages
+	q.require(queryFirewallRulesResponseFieldMessages)
+}
+
+// SetMeta sets the Meta field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryFirewallRulesResponse) SetMeta(meta *MetaResponse) {
+	q.Meta = meta
+	q.require(queryFirewallRulesResponseFieldMeta)
+}
+
+// SetCursor sets the Cursor field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryFirewallRulesResponse) SetCursor(cursor string) {
+	q.Cursor = cursor
+	q.require(queryFirewallRulesResponseFieldCursor)
+}
+
+// SetResult sets the Result field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryFirewallRulesResponse) SetResult(result []FirewallRuleRecord) {
+	q.Result = result
+	q.require(queryFirewallRulesResponseFieldResult)
+}
+
+func (q *QueryFirewallRulesResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler QueryFirewallRulesResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*q = QueryFirewallRulesResponse(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *q)
+	if err != nil {
+		return err
+	}
+	q.extraProperties = extraProperties
+	q.rawJSON = nil
+	return nil
+}
+
+func (q *QueryFirewallRulesResponse) MarshalJSON() ([]byte, error) {
+	type embed QueryFirewallRulesResponse
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*q),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, q.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (q *QueryFirewallRulesResponse) String() string {
 	if q == nil {
 		return "<nil>"
 	}

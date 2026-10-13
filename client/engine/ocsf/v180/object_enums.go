@@ -946,6 +946,34 @@ const Fingerprint_Algorithm_HASSH FingerprintAlgorithmId = 20
 // Other. The algorithm is not mapped. See the <code>algorithm</code> attribute, which contains a data source specific value.
 const Fingerprint_Algorithm_Other FingerprintAlgorithmId = 99
 
+// FirewallRuleActionId Values
+// Action ID. The normalized action the rule applies to matching traffic.
+
+// Unknown. The action was unknown.
+const FirewallRule_Action_Unknown FirewallRuleActionId = 0
+// Allowed. The activity was allowed.
+const FirewallRule_Action_Allowed FirewallRuleActionId = 1
+// Denied. The attempted activity was denied.
+const FirewallRule_Action_Denied FirewallRuleActionId = 2
+// Other. The action was not mapped. See the <code>action</code> attribute, which contains a data source specific value.
+const FirewallRule_Action_Other FirewallRuleActionId = 99
+
+// FirewallRuleDirectionId Values
+// Direction ID. The normalized direction of the traffic the rule applies to.
+
+// Unknown. The connection direction is unknown.
+const FirewallRule_Direction_Unknown FirewallRuleDirectionId = 0
+// Inbound. Inbound network connection. The connection originated from the Internet or outside network, destined for services on the inside network.
+const FirewallRule_Direction_Inbound FirewallRuleDirectionId = 1
+// Outbound. Outbound network connection. The connection originated from inside the network, destined for services on the Internet or outside network.
+const FirewallRule_Direction_Outbound FirewallRuleDirectionId = 2
+// Lateral. Lateral network connection. The connection originated from inside the network, destined for services on the inside network.
+const FirewallRule_Direction_Lateral FirewallRuleDirectionId = 3
+// Local. Local network connection (<code>localhost</code>). The connection is intra-device, originating from and destined for services running on the same device.
+const FirewallRule_Direction_Local FirewallRuleDirectionId = 4
+// Other. The direction is not mapped. See the <code>direction</code> attribute, which contains a data source specific value.
+const FirewallRule_Direction_Other FirewallRuleDirectionId = 99
+
 // GpuInfoBusTypeId Values
 // Bus Type ID. The normalized identifier of the attachment bus or interface standard.
 

@@ -20490,51 +20490,98 @@ type FingerprintAlgorithmId = int
 
 // The Firewall Rule object represents a specific rule within a firewall policy or event. It contains information about a rule's configuration, properties, and associated actions that define how network traffic is handled by the firewall.
 var (
-	firewallRuleFieldCategory      = big.NewInt(1 << 0)
-	firewallRuleFieldCondition     = big.NewInt(1 << 1)
-	firewallRuleFieldDesc          = big.NewInt(1 << 2)
-	firewallRuleFieldDuration      = big.NewInt(1 << 3)
-	firewallRuleFieldMatchDetails  = big.NewInt(1 << 4)
-	firewallRuleFieldMatchLocation = big.NewInt(1 << 5)
-	firewallRuleFieldName          = big.NewInt(1 << 6)
-	firewallRuleFieldRateLimit     = big.NewInt(1 << 7)
-	firewallRuleFieldSensitivity   = big.NewInt(1 << 8)
-	firewallRuleFieldType          = big.NewInt(1 << 9)
-	firewallRuleFieldUid           = big.NewInt(1 << 10)
-	firewallRuleFieldVersion       = big.NewInt(1 << 11)
+	firewallRuleFieldAction             = big.NewInt(1 << 0)
+	firewallRuleFieldActionId           = big.NewInt(1 << 1)
+	firewallRuleFieldCategory           = big.NewInt(1 << 2)
+	firewallRuleFieldCondition          = big.NewInt(1 << 3)
+	firewallRuleFieldDesc               = big.NewInt(1 << 4)
+	firewallRuleFieldDirection          = big.NewInt(1 << 5)
+	firewallRuleFieldDirectionId        = big.NewInt(1 << 6)
+	firewallRuleFieldDstIpRanges        = big.NewInt(1 << 7)
+	firewallRuleFieldDuration           = big.NewInt(1 << 8)
+	firewallRuleFieldEvaluationPriority = big.NewInt(1 << 9)
+	firewallRuleFieldIsDisabled         = big.NewInt(1 << 10)
+	firewallRuleFieldIsLoggingEnabled   = big.NewInt(1 << 11)
+	firewallRuleFieldMatchDetails       = big.NewInt(1 << 12)
+	firewallRuleFieldMatchLocation      = big.NewInt(1 << 13)
+	firewallRuleFieldName               = big.NewInt(1 << 14)
+	firewallRuleFieldProtocolPorts      = big.NewInt(1 << 15)
+	firewallRuleFieldRateLimit          = big.NewInt(1 << 16)
+	firewallRuleFieldSensitivity        = big.NewInt(1 << 17)
+	firewallRuleFieldSrcIpRanges        = big.NewInt(1 << 18)
+	firewallRuleFieldType               = big.NewInt(1 << 19)
+	firewallRuleFieldUid                = big.NewInt(1 << 20)
+	firewallRuleFieldVersion            = big.NewInt(1 << 21)
+	firewallRuleFieldVpcUid             = big.NewInt(1 << 22)
 )
 
 type FirewallRule struct {
+	// The action the rule applies to matching traffic, normalized to the caption of <code>action_id</code>. In the case of <code>Other</code>, it is defined by the source. For example: <code>goto_next</code>.
+	Action *string `json:"action,omitempty" url:"action,omitempty"`
+	// The normalized action the rule applies to matching traffic.
+	ActionId *FirewallRuleActionId `json:"action_id,omitempty" url:"action_id,omitempty"`
 	// The rule category.
 	Category *string `json:"category,omitempty" url:"category,omitempty"`
 	// The rule trigger condition for the rule. For example: SQL_INJECTION.
 	Condition *string `json:"condition,omitempty" url:"condition,omitempty"`
 	// The description of the rule that generated the event.
 	Desc *string `json:"desc,omitempty" url:"desc,omitempty"`
+	// The direction of the traffic the rule applies to, normalized to the caption of <code>direction_id</code>.
+	Direction *string `json:"direction,omitempty" url:"direction,omitempty"`
+	// The normalized direction of the traffic the rule applies to.
+	DirectionId *FirewallRuleDirectionId `json:"direction_id,omitempty" url:"direction_id,omitempty"`
+	// The destination IP ranges, in CIDR notation, that a rule matches. Absent when the rule matches its destination by something other than an IP range, such as a security group, prefix list or network tag; an absent range never means any address. A rule open to every address lists <code>0.0.0.0/0</code> or <code>::/0</code>.
+	DstIpRanges []Subnet `json:"dst_ip_ranges,omitempty" url:"dst_ip_ranges,omitempty"`
 	// The rule response time duration, usually used for challenge completion time.
 	Duration *int `json:"duration,omitempty" url:"duration,omitempty"`
+	// The rule's priority within the policy or rule set it belongs to; lower values are evaluated first.
+	EvaluationPriority *int `json:"evaluation_priority,omitempty" url:"evaluation_priority,omitempty"`
+	// Indicates whether the rule is disabled and so not applied.
+	IsDisabled *bool `json:"is_disabled,omitempty" url:"is_disabled,omitempty"`
+	// Indicates whether traffic the rule matches is logged.
+	IsLoggingEnabled *bool `json:"is_logging_enabled,omitempty" url:"is_logging_enabled,omitempty"`
 	// The data in a request that rule matched. For example: '["10","and","1"]'.
 	MatchDetails []string `json:"match_details,omitempty" url:"match_details,omitempty"`
 	// The location of the matched data in the source which resulted in the triggered firewall rule. For example: HEADER.
 	MatchLocation *string `json:"match_location,omitempty" url:"match_location,omitempty"`
 	// The name of the rule that generated the event.
 	Name *string `json:"name,omitempty" url:"name,omitempty"`
+	// The protocols, and for each its ports, that a rule matches.
+	ProtocolPorts []*FirewallRuleProtocol `json:"protocol_ports,omitempty" url:"protocol_ports,omitempty"`
 	// The rate limit for a rate-based rule.
 	RateLimit *int `json:"rate_limit,omitempty" url:"rate_limit,omitempty"`
 	// The sensitivity of the firewall rule in the matched event. For example: HIGH.
 	Sensitivity *string `json:"sensitivity,omitempty" url:"sensitivity,omitempty"`
+	// The source IP ranges, in CIDR notation, that a rule matches. Absent when the rule matches its source by something other than an IP range, such as a security group, prefix list or network tag; an absent range never means any address. A rule open to every address lists <code>0.0.0.0/0</code> or <code>::/0</code>.
+	SrcIpRanges []Subnet `json:"src_ip_ranges,omitempty" url:"src_ip_ranges,omitempty"`
 	// The rule type.
 	Type *string `json:"type,omitempty" url:"type,omitempty"`
 	// The unique identifier of the rule that generated the event.
 	Uid *string `json:"uid,omitempty" url:"uid,omitempty"`
 	// The rule version. For example: <code>1.1</code>.
 	Version *string `json:"version,omitempty" url:"version,omitempty"`
+	// The unique identifier of the network the rule is applied to.
+	VpcUid *string `json:"vpc_uid,omitempty" url:"vpc_uid,omitempty"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
 
 	extraProperties map[string]interface{}
 	rawJSON         json.RawMessage
+}
+
+func (f *FirewallRule) GetAction() *string {
+	if f == nil {
+		return nil
+	}
+	return f.Action
+}
+
+func (f *FirewallRule) GetActionId() *FirewallRuleActionId {
+	if f == nil {
+		return nil
+	}
+	return f.ActionId
 }
 
 func (f *FirewallRule) GetCategory() *string {
@@ -20558,11 +20605,53 @@ func (f *FirewallRule) GetDesc() *string {
 	return f.Desc
 }
 
+func (f *FirewallRule) GetDirection() *string {
+	if f == nil {
+		return nil
+	}
+	return f.Direction
+}
+
+func (f *FirewallRule) GetDirectionId() *FirewallRuleDirectionId {
+	if f == nil {
+		return nil
+	}
+	return f.DirectionId
+}
+
+func (f *FirewallRule) GetDstIpRanges() []Subnet {
+	if f == nil {
+		return nil
+	}
+	return f.DstIpRanges
+}
+
 func (f *FirewallRule) GetDuration() *int {
 	if f == nil {
 		return nil
 	}
 	return f.Duration
+}
+
+func (f *FirewallRule) GetEvaluationPriority() *int {
+	if f == nil {
+		return nil
+	}
+	return f.EvaluationPriority
+}
+
+func (f *FirewallRule) GetIsDisabled() *bool {
+	if f == nil {
+		return nil
+	}
+	return f.IsDisabled
+}
+
+func (f *FirewallRule) GetIsLoggingEnabled() *bool {
+	if f == nil {
+		return nil
+	}
+	return f.IsLoggingEnabled
 }
 
 func (f *FirewallRule) GetMatchDetails() []string {
@@ -20586,6 +20675,13 @@ func (f *FirewallRule) GetName() *string {
 	return f.Name
 }
 
+func (f *FirewallRule) GetProtocolPorts() []*FirewallRuleProtocol {
+	if f == nil {
+		return nil
+	}
+	return f.ProtocolPorts
+}
+
 func (f *FirewallRule) GetRateLimit() *int {
 	if f == nil {
 		return nil
@@ -20598,6 +20694,13 @@ func (f *FirewallRule) GetSensitivity() *string {
 		return nil
 	}
 	return f.Sensitivity
+}
+
+func (f *FirewallRule) GetSrcIpRanges() []Subnet {
+	if f == nil {
+		return nil
+	}
+	return f.SrcIpRanges
 }
 
 func (f *FirewallRule) GetType() *string {
@@ -20621,6 +20724,13 @@ func (f *FirewallRule) GetVersion() *string {
 	return f.Version
 }
 
+func (f *FirewallRule) GetVpcUid() *string {
+	if f == nil {
+		return nil
+	}
+	return f.VpcUid
+}
+
 func (f *FirewallRule) GetExtraProperties() map[string]interface{} {
 	if f == nil {
 		return nil
@@ -20633,6 +20743,20 @@ func (f *FirewallRule) require(field *big.Int) {
 		f.explicitFields = big.NewInt(0)
 	}
 	f.explicitFields.Or(f.explicitFields, field)
+}
+
+// SetAction sets the Action field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (f *FirewallRule) SetAction(action *string) {
+	f.Action = action
+	f.require(firewallRuleFieldAction)
+}
+
+// SetActionId sets the ActionId field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (f *FirewallRule) SetActionId(actionId *FirewallRuleActionId) {
+	f.ActionId = actionId
+	f.require(firewallRuleFieldActionId)
 }
 
 // SetCategory sets the Category field and marks it as non-optional;
@@ -20656,11 +20780,53 @@ func (f *FirewallRule) SetDesc(desc *string) {
 	f.require(firewallRuleFieldDesc)
 }
 
+// SetDirection sets the Direction field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (f *FirewallRule) SetDirection(direction *string) {
+	f.Direction = direction
+	f.require(firewallRuleFieldDirection)
+}
+
+// SetDirectionId sets the DirectionId field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (f *FirewallRule) SetDirectionId(directionId *FirewallRuleDirectionId) {
+	f.DirectionId = directionId
+	f.require(firewallRuleFieldDirectionId)
+}
+
+// SetDstIpRanges sets the DstIpRanges field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (f *FirewallRule) SetDstIpRanges(dstIpRanges []Subnet) {
+	f.DstIpRanges = dstIpRanges
+	f.require(firewallRuleFieldDstIpRanges)
+}
+
 // SetDuration sets the Duration field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
 func (f *FirewallRule) SetDuration(duration *int) {
 	f.Duration = duration
 	f.require(firewallRuleFieldDuration)
+}
+
+// SetEvaluationPriority sets the EvaluationPriority field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (f *FirewallRule) SetEvaluationPriority(evaluationPriority *int) {
+	f.EvaluationPriority = evaluationPriority
+	f.require(firewallRuleFieldEvaluationPriority)
+}
+
+// SetIsDisabled sets the IsDisabled field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (f *FirewallRule) SetIsDisabled(isDisabled *bool) {
+	f.IsDisabled = isDisabled
+	f.require(firewallRuleFieldIsDisabled)
+}
+
+// SetIsLoggingEnabled sets the IsLoggingEnabled field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (f *FirewallRule) SetIsLoggingEnabled(isLoggingEnabled *bool) {
+	f.IsLoggingEnabled = isLoggingEnabled
+	f.require(firewallRuleFieldIsLoggingEnabled)
 }
 
 // SetMatchDetails sets the MatchDetails field and marks it as non-optional;
@@ -20684,6 +20850,13 @@ func (f *FirewallRule) SetName(name *string) {
 	f.require(firewallRuleFieldName)
 }
 
+// SetProtocolPorts sets the ProtocolPorts field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (f *FirewallRule) SetProtocolPorts(protocolPorts []*FirewallRuleProtocol) {
+	f.ProtocolPorts = protocolPorts
+	f.require(firewallRuleFieldProtocolPorts)
+}
+
 // SetRateLimit sets the RateLimit field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
 func (f *FirewallRule) SetRateLimit(rateLimit *int) {
@@ -20696,6 +20869,13 @@ func (f *FirewallRule) SetRateLimit(rateLimit *int) {
 func (f *FirewallRule) SetSensitivity(sensitivity *string) {
 	f.Sensitivity = sensitivity
 	f.require(firewallRuleFieldSensitivity)
+}
+
+// SetSrcIpRanges sets the SrcIpRanges field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (f *FirewallRule) SetSrcIpRanges(srcIpRanges []Subnet) {
+	f.SrcIpRanges = srcIpRanges
+	f.require(firewallRuleFieldSrcIpRanges)
 }
 
 // SetType sets the Type field and marks it as non-optional;
@@ -20717,6 +20897,13 @@ func (f *FirewallRule) SetUid(uid *string) {
 func (f *FirewallRule) SetVersion(version *string) {
 	f.Version = version
 	f.require(firewallRuleFieldVersion)
+}
+
+// SetVpcUid sets the VpcUid field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (f *FirewallRule) SetVpcUid(vpcUid *string) {
+	f.VpcUid = vpcUid
+	f.require(firewallRuleFieldVpcUid)
 }
 
 func (f *FirewallRule) UnmarshalJSON(data []byte) error {
@@ -20760,6 +20947,142 @@ func (f *FirewallRule) String() string {
 	}
 	return fmt.Sprintf("%#v", f)
 }
+
+// A protocol a firewall rule matches, with the ports it matches for that protocol.
+var (
+	firewallRuleProtocolFieldPortRanges   = big.NewInt(1 << 0)
+	firewallRuleProtocolFieldProtocolName = big.NewInt(1 << 1)
+	firewallRuleProtocolFieldProtocolNum  = big.NewInt(1 << 2)
+)
+
+type FirewallRuleProtocol struct {
+	// The ports matched for this protocol. Absent when the rule matches every port.
+	PortRanges []string `json:"port_ranges,omitempty" url:"port_ranges,omitempty"`
+	// The protocol matched, as named by the source. For example: <code>tcp</code>, <code>udp</code>, <code>icmp</code> or <code>all</code>.
+	ProtocolName string `json:"protocol_name" url:"protocol_name"`
+	// The IANA protocol number, when the source gives one.
+	ProtocolNum *int `json:"protocol_num,omitempty" url:"protocol_num,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (f *FirewallRuleProtocol) GetPortRanges() []string {
+	if f == nil {
+		return nil
+	}
+	return f.PortRanges
+}
+
+func (f *FirewallRuleProtocol) GetProtocolName() string {
+	if f == nil {
+		return ""
+	}
+	return f.ProtocolName
+}
+
+func (f *FirewallRuleProtocol) GetProtocolNum() *int {
+	if f == nil {
+		return nil
+	}
+	return f.ProtocolNum
+}
+
+func (f *FirewallRuleProtocol) GetExtraProperties() map[string]interface{} {
+	if f == nil {
+		return nil
+	}
+	return f.extraProperties
+}
+
+func (f *FirewallRuleProtocol) require(field *big.Int) {
+	if f.explicitFields == nil {
+		f.explicitFields = big.NewInt(0)
+	}
+	f.explicitFields.Or(f.explicitFields, field)
+}
+
+// SetPortRanges sets the PortRanges field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (f *FirewallRuleProtocol) SetPortRanges(portRanges []string) {
+	f.PortRanges = portRanges
+	f.require(firewallRuleProtocolFieldPortRanges)
+}
+
+// SetProtocolName sets the ProtocolName field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (f *FirewallRuleProtocol) SetProtocolName(protocolName string) {
+	f.ProtocolName = protocolName
+	f.require(firewallRuleProtocolFieldProtocolName)
+}
+
+// SetProtocolNum sets the ProtocolNum field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (f *FirewallRuleProtocol) SetProtocolNum(protocolNum *int) {
+	f.ProtocolNum = protocolNum
+	f.require(firewallRuleProtocolFieldProtocolNum)
+}
+
+func (f *FirewallRuleProtocol) UnmarshalJSON(data []byte) error {
+	type unmarshaler FirewallRuleProtocol
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*f = FirewallRuleProtocol(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *f)
+	if err != nil {
+		return err
+	}
+	f.extraProperties = extraProperties
+	f.rawJSON = nil
+	return nil
+}
+
+func (f *FirewallRuleProtocol) MarshalJSON() ([]byte, error) {
+	type embed FirewallRuleProtocol
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*f),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, f.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (f *FirewallRuleProtocol) String() string {
+	if f == nil {
+		return "<nil>"
+	}
+	if len(f.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(f.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(f); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", f)
+}
+
+// FirewallRuleActionId is an enum, and the following values are allowed.
+// 0 - Unknown: The action was unknown.
+// 1 - Allowed: The activity was allowed.
+// 2 - Denied: The attempted activity was denied.
+// 99 - Other: The action was not mapped. See the <code>action</code> attribute, which contains a data source specific value.
+type FirewallRuleActionId = int
+
+// FirewallRuleDirectionId is an enum, and the following values are allowed.
+// 0 - Unknown: The connection direction is unknown.
+// 1 - Inbound: Inbound network connection. The connection originated from the Internet or outside network, destined for services on the inside network.
+// 2 - Outbound: Outbound network connection. The connection originated from inside the network, destined for services on the Internet or outside network.
+// 3 - Lateral: Lateral network connection. The connection originated from inside the network, destined for services on the inside network.
+// 4 - Local: Local network connection (<code>localhost</code>). The connection is intra-device, originating from and destined for services running on the same device.
+// 99 - Other: The direction is not mapped. See the <code>direction</code> attribute, which contains a data source specific value.
+type FirewallRuleDirectionId = int
 
 // The Function Invocation object provides details regarding the invocation of a function.
 var (

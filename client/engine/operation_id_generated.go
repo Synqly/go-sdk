@@ -106,6 +106,7 @@ const (
 	OperationIdIncidentresponseQueryEscalationPolicyUsersOnCall OperationId = "incidentresponse_query_escalation_policy_users_on_call"
 	OperationIdNetworksecurityQueryDnsEvents                    OperationId = "networksecurity_query_dns_events"
 	OperationIdNetworksecurityQueryDnsLogConfigurations         OperationId = "networksecurity_query_dns_log_configurations"
+	OperationIdNetworksecurityQueryFirewallRules                OperationId = "networksecurity_query_firewall_rules"
 	OperationIdNetworksecurityQueryTrafficEvents                OperationId = "networksecurity_query_traffic_events"
 	OperationIdNetworksecurityQueryTrafficLogConfigurations     OperationId = "networksecurity_query_traffic_log_configurations"
 	OperationIdNotificationsClearMessage                        OperationId = "notifications_clear_message"
@@ -365,6 +366,8 @@ func NewOperationIdFromString(s string) (OperationId, error) {
 		return OperationIdNetworksecurityQueryDnsEvents, nil
 	case "networksecurity_query_dns_log_configurations":
 		return OperationIdNetworksecurityQueryDnsLogConfigurations, nil
+	case "networksecurity_query_firewall_rules":
+		return OperationIdNetworksecurityQueryFirewallRules, nil
 	case "networksecurity_query_traffic_events":
 		return OperationIdNetworksecurityQueryTrafficEvents, nil
 	case "networksecurity_query_traffic_log_configurations":

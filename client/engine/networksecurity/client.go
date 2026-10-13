@@ -105,3 +105,21 @@ func (c *Client) QueryDnsEvents(
     return response.Body, nil
 }
 
+// Returns the firewall rules that control traffic within the integration's scope. Built-in default rules that the provider's API does not
+// report are not included. A rule that applies to several networks is returned once per network
+func (c *Client) QueryFirewallRules(
+    ctx context.Context,
+    request *engine.QueryFirewallRulesRequest,
+    opts ...option.RequestOption,
+) (*engine.QueryFirewallRulesResponse, error){
+    response, err := c.WithRawResponse.QueryFirewallRules(
+        ctx,
+        request,
+        opts...,
+    )
+    if err != nil {
+        return nil, err
+    }
+    return response.Body, nil
+}
+

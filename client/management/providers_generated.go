@@ -20216,7 +20216,7 @@ func (m *MimecastCloudGatewayCredential) validate() error {
 	return nil
 }
 
-// Configuration for AWS VPC Flow Logs and Route 53 Resolver query logs.
+// Configuration for the AWS Network Security Provider.
 //
 // [Configuration guide](https://docs.synqly.com/guides/provider-configuration/aws-networksecurity-setup)
 var (
@@ -20227,11 +20227,11 @@ var (
 )
 
 type NetworkSecurityAws struct {
-	// AWS credentials that can read VPC Flow Logs, Route 53 Resolver query logs, and their CloudWatch Logs or S3 destinations.
+	// AWS credentials with sufficient access.
 	Credential *AwsProviderCredential `json:"credential" url:"credential"`
 	// List of Route 53 Resolver query log configuration IDs (`rqlc-...`). Leave empty to include all query log configurations in the region.
 	DnsLogConfigurationIds []string `json:"dns_log_configuration_ids,omitempty" url:"dns_log_configuration_ids,omitempty"`
-	// AWS region where your VPC Flow Logs and Route 53 Resolver query logs are configured (for example, `us-east-1`).
+	// The [AWS region](https://docs.aws.amazon.com/global-infrastructure/latest/regions/aws-regions.html) to use for the Amazon Network Security provider.
 	Region AwsRegion `json:"region" url:"region"`
 	// Optional list of VPC Flow Log IDs (`fl-...`). Leave empty to include all flow logs in the region.
 	TrafficLogConfigurationIds []string `json:"traffic_log_configuration_ids,omitempty" url:"traffic_log_configuration_ids,omitempty"`
@@ -20528,7 +20528,7 @@ func (n *NetworkSecurityAzure) String() string {
 	return fmt.Sprintf("%#v", n)
 }
 
-// Connect Synqly to Google VPC flow logs.
+// Configuration for the Google Cloud Platform Network Security Provider.
 //
 // [Configuration guide](https://docs.synqly.com/guides/provider-configuration/google-networksecurity-setup)
 var (
@@ -20538,7 +20538,7 @@ var (
 )
 
 type NetworkSecurityGoogle struct {
-	// Service account credentials that can read VPC flow log configuration and logs in the project.
+	// Service account credentials with sufficient access.
 	Credential *GoogleServiceAccountCredential `json:"credential" url:"credential"`
 	// Google Cloud project that contains your VPC flow logs.
 	ProjectId string `json:"project_id" url:"project_id"`
@@ -23910,7 +23910,7 @@ type ProviderConfig struct {
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/pagerduty-incident-response-setup)
 	IncidentresponsePagerduty *IncidentResponsePagerDuty
-	// Configuration for AWS VPC Flow Logs and Route 53 Resolver query logs.
+	// Configuration for the AWS Network Security Provider.
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/aws-networksecurity-setup)
 	NetworksecurityAws *NetworkSecurityAws
@@ -23918,7 +23918,7 @@ type ProviderConfig struct {
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/azure-networksecurity-setup)
 	NetworksecurityAzure *NetworkSecurityAzure
-	// Connect Synqly to Google VPC flow logs.
+	// Configuration for the Google Cloud Platform Network Security Provider.
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/google-networksecurity-setup)
 	NetworksecurityGoogle *NetworkSecurityGoogle
