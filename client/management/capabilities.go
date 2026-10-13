@@ -1519,6 +1519,7 @@ var (
 	providerFilterFieldType      = big.NewInt(1 << 1)
 	providerFilterFieldOperators = big.NewInt(1 << 2)
 	providerFilterFieldValues    = big.NewInt(1 << 3)
+	providerFilterFieldDocs      = big.NewInt(1 << 4)
 )
 
 type ProviderFilter struct {
@@ -1530,6 +1531,8 @@ type ProviderFilter struct {
 	Operators []string `json:"operators" url:"operators"`
 	// List of possible values for this filter.
 	Values []string `json:"values,omitempty" url:"values,omitempty"`
+	// Caller-facing notes for this filter, such as operator semantics that differ from the Synqly default.
+	Docs *string `json:"docs,omitempty" url:"docs,omitempty"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -1564,6 +1567,13 @@ func (p *ProviderFilter) GetValues() []string {
 		return nil
 	}
 	return p.Values
+}
+
+func (p *ProviderFilter) GetDocs() *string {
+	if p == nil {
+		return nil
+	}
+	return p.Docs
 }
 
 func (p *ProviderFilter) GetExtraProperties() map[string]interface{} {
@@ -1606,6 +1616,13 @@ func (p *ProviderFilter) SetOperators(operators []string) {
 func (p *ProviderFilter) SetValues(values []string) {
 	p.Values = values
 	p.require(providerFilterFieldValues)
+}
+
+// SetDocs sets the Docs field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (p *ProviderFilter) SetDocs(docs *string) {
+	p.Docs = docs
+	p.require(providerFilterFieldDocs)
 }
 
 func (p *ProviderFilter) UnmarshalJSON(data []byte) error {
