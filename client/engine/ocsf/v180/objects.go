@@ -20956,7 +20956,7 @@ var (
 )
 
 type FirewallRuleProtocol struct {
-	// The ports matched for this protocol. Absent when the rule matches every port.
+	// The destination ports matched for this protocol. Absent when the rule matches every port.
 	PortRanges []string `json:"port_ranges,omitempty" url:"port_ranges,omitempty"`
 	// The protocol matched, as named by the source. For example: <code>tcp</code>, <code>udp</code>, <code>icmp</code> or <code>all</code>.
 	ProtocolName string `json:"protocol_name" url:"protocol_name"`

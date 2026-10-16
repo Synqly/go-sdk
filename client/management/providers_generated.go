@@ -20391,7 +20391,7 @@ type NetworkSecurityAzure struct {
 	Credential *AzureNetworkSecurityCredential `json:"credential" url:"credential"`
 	// Optional list of DNS log configuration IDs, in the form `{resourceId}|{category}`. Leave empty to include all DNS logging in the subscription.
 	DnsLogConfigurationIds []string `json:"dns_log_configuration_ids,omitempty" url:"dns_log_configuration_ids,omitempty"`
-	// Azure subscription that owns the flow logs and DNS security policies.
+	// Azure subscription that owns the network security resources.
 	SubscriptionId string `json:"subscription_id" url:"subscription_id"`
 	// Directory (tenant) ID of your Microsoft Entra tenant.
 	TenantId string `json:"tenant_id" url:"tenant_id"`
