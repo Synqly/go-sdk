@@ -477,6 +477,7 @@ const (
 	ScheduledOperationIdIdentityQueryAuditLog                     ScheduledOperationId = "identity_query_audit_log"
 	ScheduledOperationIdIdentityQueryGroups                       ScheduledOperationId = "identity_query_groups"
 	ScheduledOperationIdIdentityQueryGroupsEnriched               ScheduledOperationId = "identity_query_groups_enriched"
+	ScheduledOperationIdIdentityQueryRiskEvents                   ScheduledOperationId = "identity_query_risk_events"
 	ScheduledOperationIdIdentityQueryUsers                        ScheduledOperationId = "identity_query_users"
 	ScheduledOperationIdIdentityQueryUsersEnriched                ScheduledOperationId = "identity_query_users_enriched"
 	ScheduledOperationIdSiemQueryEvents                           ScheduledOperationId = "siem_query_events"
@@ -533,6 +534,8 @@ func NewScheduledOperationIdFromString(s string) (ScheduledOperationId, error) {
 		return ScheduledOperationIdIdentityQueryGroups, nil
 	case "identity_query_groups_enriched":
 		return ScheduledOperationIdIdentityQueryGroupsEnriched, nil
+	case "identity_query_risk_events":
+		return ScheduledOperationIdIdentityQueryRiskEvents, nil
 	case "identity_query_users":
 		return ScheduledOperationIdIdentityQueryUsers, nil
 	case "identity_query_users_enriched":
