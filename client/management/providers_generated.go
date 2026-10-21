@@ -43602,13 +43602,16 @@ func (v *VulnerabilitiesNucleus) String() string {
 
 // Configuration for Pentera as a Vulnerabilities Provider
 var (
-	vulnerabilitiesPenteraFieldCredential = big.NewInt(1 << 0)
-	vulnerabilitiesPenteraFieldUrl        = big.NewInt(1 << 1)
+	vulnerabilitiesPenteraFieldCredential    = big.NewInt(1 << 0)
+	vulnerabilitiesPenteraFieldSkipTlsVerify = big.NewInt(1 << 1)
+	vulnerabilitiesPenteraFieldUrl           = big.NewInt(1 << 2)
 )
 
 type VulnerabilitiesPentera struct {
 	// Credentials for the Pentera API.
 	Credential *PenteraCredential `json:"credential" url:"credential"`
+	// When true, skips verification of the Pentera TLS certificate.
+	SkipTlsVerify *bool `json:"skip_tls_verify,omitempty" url:"skip_tls_verify,omitempty"`
 	// Base URL of the Pentera appliance.
 	Url string `json:"url" url:"url"`
 
@@ -43624,6 +43627,13 @@ func (v *VulnerabilitiesPentera) GetCredential() *PenteraCredential {
 		return nil
 	}
 	return v.Credential
+}
+
+func (v *VulnerabilitiesPentera) GetSkipTlsVerify() *bool {
+	if v == nil {
+		return nil
+	}
+	return v.SkipTlsVerify
 }
 
 func (v *VulnerabilitiesPentera) GetUrl() string {
@@ -43652,6 +43662,13 @@ func (v *VulnerabilitiesPentera) require(field *big.Int) {
 func (v *VulnerabilitiesPentera) SetCredential(credential *PenteraCredential) {
 	v.Credential = credential
 	v.require(vulnerabilitiesPenteraFieldCredential)
+}
+
+// SetSkipTlsVerify sets the SkipTlsVerify field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (v *VulnerabilitiesPentera) SetSkipTlsVerify(skipTlsVerify *bool) {
+	v.SkipTlsVerify = skipTlsVerify
+	v.require(vulnerabilitiesPenteraFieldSkipTlsVerify)
 }
 
 // SetUrl sets the Url field and marks it as non-optional;
