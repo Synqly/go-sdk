@@ -24088,6 +24088,8 @@ type ProviderConfig struct {
 	SinkSwimlane *SinkSwimlane
 	// Configuration for Trimedx Sink.
 	SinkTrimedx *SinkTrimedx
+	// Configuration for Okta as a Shared Signals provider.
+	SsfOkta *SsfOkta
 	// Configuration for Amazon S3.
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/aws-s3-storage-setup)
@@ -25212,6 +25214,13 @@ func (p *ProviderConfig) GetSinkTrimedx() *SinkTrimedx {
 		return nil
 	}
 	return p.SinkTrimedx
+}
+
+func (p *ProviderConfig) GetSsfOkta() *SsfOkta {
+	if p == nil {
+		return nil
+	}
+	return p.SsfOkta
 }
 
 func (p *ProviderConfig) GetStorageAwsS3() *StorageAwsS3 {
@@ -26384,6 +26393,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.SinkTrimedx = value
+	case "ssf_okta":
+		value := new(SsfOkta)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.SsfOkta = value
 	case "storage_aws_s3":
 		value := new(StorageAwsS3)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -27092,6 +27107,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.SinkTrimedx != nil {
 		return internal.MarshalJSONWithExtraProperty(p.SinkTrimedx, "type", "sink_trimedx")
 	}
+	if p.SsfOkta != nil {
+		return internal.MarshalJSONWithExtraProperty(p.SsfOkta, "type", "ssf_okta")
+	}
 	if p.StorageAwsS3 != nil {
 		return internal.MarshalJSONWithExtraProperty(p.StorageAwsS3, "type", "storage_aws_s3")
 	}
@@ -27380,6 +27398,7 @@ type ProviderConfigVisitor interface {
 	VisitSinkSumoLogic(*SinkSumoLogic) error
 	VisitSinkSwimlane(*SinkSwimlane) error
 	VisitSinkTrimedx(*SinkTrimedx) error
+	VisitSsfOkta(*SsfOkta) error
 	VisitStorageAwsS3(*StorageAwsS3) error
 	VisitStorageAzureBlob(*StorageAzureBlob) error
 	VisitStorageGcs(*StorageGcs) error
@@ -27841,6 +27860,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.SinkTrimedx != nil {
 		return visitor.VisitSinkTrimedx(p.SinkTrimedx)
+	}
+	if p.SsfOkta != nil {
+		return visitor.VisitSsfOkta(p.SsfOkta)
 	}
 	if p.StorageAwsS3 != nil {
 		return visitor.VisitStorageAwsS3(p.StorageAwsS3)
@@ -28405,6 +28427,9 @@ func (p *ProviderConfig) validate() error {
 	if p.SinkTrimedx != nil {
 		fields = append(fields, "sink_trimedx")
 	}
+	if p.SsfOkta != nil {
+		fields = append(fields, "ssf_okta")
+	}
 	if p.StorageAwsS3 != nil {
 		fields = append(fields, "storage_aws_s3")
 	}
@@ -28853,6 +28878,8 @@ const (
 	ProviderConfigIdSinkSwimlane ProviderConfigId = "sink_swimlane"
 	// Trimedx Sink
 	ProviderConfigIdSinkTrimedx ProviderConfigId = "sink_trimedx"
+	// Okta Shared Signals
+	ProviderConfigIdSsfOkta ProviderConfigId = "ssf_okta"
 	// Amazon S3
 	ProviderConfigIdStorageAwsS3 ProviderConfigId = "storage_aws_s3"
 	// Microsoft Azure Blob Storage
@@ -29229,6 +29256,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdSinkSwimlane, nil
 	case "sink_trimedx":
 		return ProviderConfigIdSinkTrimedx, nil
+	case "ssf_okta":
+		return ProviderConfigIdSsfOkta, nil
 	case "storage_aws_s3":
 		return ProviderConfigIdStorageAwsS3, nil
 	case "storage_azure_blob":
@@ -31721,6 +31750,92 @@ func (s *SiemSumoLogic) MarshalJSON() ([]byte, error) {
 }
 
 func (s *SiemSumoLogic) String() string {
+	if s == nil {
+		return "<nil>"
+	}
+	if len(s.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(s.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(s); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", s)
+}
+
+// Configuration for Okta as a Shared Signals provider.
+var (
+	ssfOktaFieldUrl = big.NewInt(1 << 0)
+)
+
+type SsfOkta struct {
+	// Base URL of the Okta tenant that receives the security events.
+	Url string `json:"url" url:"url"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (s *SsfOkta) GetUrl() string {
+	if s == nil {
+		return ""
+	}
+	return s.Url
+}
+
+func (s *SsfOkta) GetExtraProperties() map[string]interface{} {
+	if s == nil {
+		return nil
+	}
+	return s.extraProperties
+}
+
+func (s *SsfOkta) require(field *big.Int) {
+	if s.explicitFields == nil {
+		s.explicitFields = big.NewInt(0)
+	}
+	s.explicitFields.Or(s.explicitFields, field)
+}
+
+// SetUrl sets the Url field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (s *SsfOkta) SetUrl(url string) {
+	s.Url = url
+	s.require(ssfOktaFieldUrl)
+}
+
+func (s *SsfOkta) UnmarshalJSON(data []byte) error {
+	type unmarshaler SsfOkta
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*s = SsfOkta(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+	s.rawJSON = nil
+	return nil
+}
+
+func (s *SsfOkta) MarshalJSON() ([]byte, error) {
+	type embed SsfOkta
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*s),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, s.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (s *SsfOkta) String() string {
 	if s == nil {
 		return "<nil>"
 	}

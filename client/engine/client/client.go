@@ -25,6 +25,7 @@ import (
     securityawareness "github.com/synqly/go-sdk/v2/client/engine/securityawareness"
     siem "github.com/synqly/go-sdk/v2/client/engine/siem"
     sink "github.com/synqly/go-sdk/v2/client/engine/sink"
+    ssf "github.com/synqly/go-sdk/v2/client/engine/ssf"
     storage "github.com/synqly/go-sdk/v2/client/engine/storage"
     threatintel "github.com/synqly/go-sdk/v2/client/engine/threatintel"
     ticketing "github.com/synqly/go-sdk/v2/client/engine/ticketing"
@@ -52,6 +53,7 @@ type Client struct {
     Securityawareness *securityawareness.Client
     Siem *siem.Client
     Sink *sink.Client
+    Ssf *ssf.Client
     Storage *storage.Client
     Threatintel *threatintel.Client
     Ticketing *ticketing.Client
@@ -84,6 +86,7 @@ func NewClient(opts ...option.RequestOption) *Client {
         Securityawareness: securityawareness.NewClient(options),
         Siem: siem.NewClient(options),
         Sink: sink.NewClient(options),
+        Ssf: ssf.NewClient(options),
         Storage: storage.NewClient(options),
         Threatintel: threatintel.NewClient(options),
         Ticketing: ticketing.NewClient(options),
