@@ -2414,11 +2414,11 @@ var (
 )
 
 type ExecuteRemoteScriptRequest struct {
-	// The script content to run on the remote endpoint. The engine runs it via the provider's script-execution facility (for example CrowdStrike RTR `runscript`) and returns the captured stdout/stderr.
+	// The script content to run on the remote endpoint.
 	Script string `json:"script" url:"script"`
-	// Optional command-line arguments passed to the script.
+	// Optional command-line arguments passed to the script. Providers may limit their length and the characters they accept.
 	Args *string `json:"args,omitempty" url:"args,omitempty"`
-	// Opaque cursor returned from a previous pending response, used to continue polling the in-flight execution.
+	// Opaque cursor returned from a previous pending response, used to continue polling the in-flight execution. A resume must resend the same script; some providers also require the original args. An execution left pending and never resumed may leave provider objects behind.
 	Cursor *string `json:"cursor,omitempty" url:"cursor,omitempty"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
@@ -2690,7 +2690,7 @@ type ExecuteRemoteScriptResult struct {
 	DeviceUid string `json:"device_uid" url:"device_uid"`
 	// The script stdout collected during the synchronous polling window.
 	Stdout *string `json:"stdout,omitempty" url:"stdout,omitempty"`
-	// The script stderr collected during the synchronous polling window.
+	// The script stderr collected during the synchronous polling window. Omitted by providers that merge stderr into stdout.
 	Stderr *string `json:"stderr,omitempty" url:"stderr,omitempty"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted

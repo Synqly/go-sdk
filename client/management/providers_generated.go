@@ -10866,7 +10866,7 @@ func (e *EdrSophos) String() string {
 	return fmt.Sprintf("%#v", e)
 }
 
-// Configuration for Tanium Cloud as a EDR Provider
+// Configuration for Tanium Cloud as a EDR Provider.
 //
 // [Configuration guide](https://docs.synqly.com/guides/provider-configuration/tanium-setup)
 var (
@@ -23813,7 +23813,7 @@ type ProviderConfig struct {
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/sophos-setup)
 	EdrSophos *EdrSophos
-	// Configuration for Tanium Cloud as a EDR Provider
+	// Configuration for Tanium Cloud as a EDR Provider.
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/tanium-setup)
 	EdrTanium *EdrTanium
