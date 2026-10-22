@@ -10772,8 +10772,8 @@ var (
 
 type EdrSophos struct {
 	Credential *SophosCredential `json:"credential" url:"credential"`
-	// Base URL for the Sophos Endpoint API.
-	Url string `json:"url" url:"url"`
+	// Base URL for the Sophos Central API. Leave blank to discover the region automatically.
+	Url *string `json:"url,omitempty" url:"url,omitempty"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -10789,9 +10789,9 @@ func (e *EdrSophos) GetCredential() *SophosCredential {
 	return e.Credential
 }
 
-func (e *EdrSophos) GetUrl() string {
+func (e *EdrSophos) GetUrl() *string {
 	if e == nil {
-		return ""
+		return nil
 	}
 	return e.Url
 }
@@ -10819,7 +10819,7 @@ func (e *EdrSophos) SetCredential(credential *SophosCredential) {
 
 // SetUrl sets the Url field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (e *EdrSophos) SetUrl(url string) {
+func (e *EdrSophos) SetUrl(url *string) {
 	e.Url = url
 	e.require(edrSophosFieldUrl)
 }
