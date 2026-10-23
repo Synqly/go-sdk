@@ -2414,11 +2414,11 @@ var (
 )
 
 type ExecuteRemoteScriptRequest struct {
-	// The script content to run on the remote endpoint.
+	// The script content to run on the remote endpoint. Required to start an execution. When resuming with a cursor it may be left empty; if sent, it must match the original.
 	Script string `json:"script" url:"script"`
 	// Optional command-line arguments passed to the script. Providers may limit their length and the characters they accept.
 	Args *string `json:"args,omitempty" url:"args,omitempty"`
-	// Opaque cursor returned from a previous pending response, used to continue polling the in-flight execution. A resume must resend the same script; some providers also require the original args. An execution left pending and never resumed may leave provider objects behind.
+	// Opaque cursor returned from a previous pending response, used to continue polling the in-flight execution. A resume needs only the cursor: the script may be left empty and args omitted. However, any that are sent on a resume  must match the original execution. An execution left pending and never  resumed may leave provider objects behind.
 	Cursor *string `json:"cursor,omitempty" url:"cursor,omitempty"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
