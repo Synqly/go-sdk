@@ -1069,13 +1069,16 @@ type Object = map[string]any
 
 // Represents a possible option from a set of choices, such as an enum value. The choices may have separate display names and IDs.
 var (
-	optionValueFieldId   = big.NewInt(1 << 0)
-	optionValueFieldName = big.NewInt(1 << 1)
+	optionValueFieldId         = big.NewInt(1 << 0)
+	optionValueFieldName       = big.NewInt(1 << 1)
+	optionValueFieldAttributes = big.NewInt(1 << 2)
 )
 
 type OptionValue struct {
 	Id   Id     `json:"id" url:"id"`
 	Name string `json:"name" url:"name"`
+	// Provider-specific details about this option, such as the workflow state type and position of a Linear status.
+	Attributes map[string]any `json:"attributes,omitempty" url:"attributes,omitempty"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -1096,6 +1099,13 @@ func (o *OptionValue) GetName() string {
 		return ""
 	}
 	return o.Name
+}
+
+func (o *OptionValue) GetAttributes() map[string]any {
+	if o == nil {
+		return nil
+	}
+	return o.Attributes
 }
 
 func (o *OptionValue) GetExtraProperties() map[string]interface{} {
@@ -1124,6 +1134,13 @@ func (o *OptionValue) SetId(id Id) {
 func (o *OptionValue) SetName(name string) {
 	o.Name = name
 	o.require(optionValueFieldName)
+}
+
+// SetAttributes sets the Attributes field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (o *OptionValue) SetAttributes(attributes map[string]any) {
+	o.Attributes = attributes
+	o.require(optionValueFieldAttributes)
 }
 
 func (o *OptionValue) UnmarshalJSON(data []byte) error {
