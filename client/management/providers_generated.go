@@ -9452,6 +9452,171 @@ func (d *DefenderEasmCredential) validate() error {
 	return nil
 }
 
+type DrataCredential struct {
+	Type string
+	// A Drata API key.
+	Token *TokenCredential
+	// Reference to existing API Key.
+	TokenId TokenCredentialId
+
+	rawJSON json.RawMessage
+}
+
+func (d *DrataCredential) GetType() string {
+	if d == nil {
+		return ""
+	}
+	return d.Type
+}
+
+func (d *DrataCredential) GetToken() *TokenCredential {
+	if d == nil {
+		return nil
+	}
+	return d.Token
+}
+
+func (d *DrataCredential) GetTokenId() TokenCredentialId {
+	if d == nil {
+		return ""
+	}
+	return d.TokenId
+}
+
+func (d *DrataCredential) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	d.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", d)
+	}
+	switch unmarshaler.Type {
+	case "token":
+		value := new(TokenCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		d.Token = value
+	case "token_id":
+		var valueUnmarshaler struct {
+			TokenId TokenCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		d.TokenId = valueUnmarshaler.TokenId
+	}
+	d.rawJSON = nil
+	return nil
+}
+
+func (d DrataCredential) MarshalJSON() ([]byte, error) {
+	if err := d.validate(); err != nil {
+		return nil, err
+	}
+	if d.Token != nil {
+		return internal.MarshalJSONWithExtraProperty(d.Token, "type", "token")
+	}
+	if d.TokenId != "" {
+		var marshaler = struct {
+			Type    string            `json:"type"`
+			TokenId TokenCredentialId `json:"value"`
+		}{
+			Type:    "token_id",
+			TokenId: d.TokenId,
+		}
+		return json.Marshal(marshaler)
+	}
+	if len(d.rawJSON) > 0 {
+		return d.rawJSON, nil
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", d)
+}
+
+type DrataCredentialVisitor interface {
+	VisitToken(*TokenCredential) error
+	VisitTokenId(TokenCredentialId) error
+}
+
+func (d *DrataCredential) Accept(visitor DrataCredentialVisitor) error {
+	if d.Token != nil {
+		return visitor.VisitToken(d.Token)
+	}
+	if d.TokenId != "" {
+		return visitor.VisitTokenId(d.TokenId)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", d)
+}
+
+func (d *DrataCredential) validate() error {
+	if d == nil {
+		return fmt.Errorf("type %T is nil", d)
+	}
+	var fields []string
+	if d.Token != nil {
+		fields = append(fields, "token")
+	}
+	if d.TokenId != "" {
+		fields = append(fields, "token_id")
+	}
+	if len(fields) == 0 {
+		if d.Type != "" {
+			if len(d.rawJSON) > 0 {
+				return nil
+			}
+			return fmt.Errorf("type %T defines a discriminant set to %q but the field is not set", d, d.Type)
+		}
+		return fmt.Errorf("type %T is empty", d)
+	}
+	if len(fields) > 1 {
+		return fmt.Errorf("type %T defines values for %s, but only one value is allowed", d, fields)
+	}
+	if d.Type != "" {
+		field := fields[0]
+		if d.Type != field {
+			return fmt.Errorf(
+				"type %T defines a discriminant set to %q, but it does not match the %T field; either remove or update the discriminant to match",
+				d,
+				d.Type,
+				d,
+			)
+		}
+	}
+	return nil
+}
+
+type DrataRegion string
+
+const (
+	// North America region.
+	DrataRegionNa DrataRegion = "NA"
+	// European Union region.
+	DrataRegionEu DrataRegion = "EU"
+	// Asia-Pacific region.
+	DrataRegionApac DrataRegion = "APAC"
+)
+
+func NewDrataRegionFromString(s string) (DrataRegion, error) {
+	switch s {
+	case "NA":
+		return DrataRegionNa, nil
+	case "EU":
+		return DrataRegionEu, nil
+	case "APAC":
+		return DrataRegionApac, nil
+	}
+	var t DrataRegion
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (d DrataRegion) Ptr() *DrataRegion {
+	return &d
+}
+
 type DuoSecurityCredential struct {
 	Type string
 	// Integration key (ikey) and secret key (skey) for a Duo Admin API application.
@@ -14457,6 +14622,109 @@ func (g *GoogleServiceAccountCredential) validate() error {
 		}
 	}
 	return nil
+}
+
+// Configuration for Drata as a GRC provider.
+var (
+	grcDrataFieldCredential = big.NewInt(1 << 0)
+	grcDrataFieldRegion     = big.NewInt(1 << 1)
+)
+
+type GrcDrata struct {
+	// Credentials used for accessing the Drata API.
+	Credential *DrataCredential `json:"credential" url:"credential"`
+	// The Drata data region that hosts this organization's tenant.
+	Region DrataRegion `json:"region" url:"region"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (g *GrcDrata) GetCredential() *DrataCredential {
+	if g == nil {
+		return nil
+	}
+	return g.Credential
+}
+
+func (g *GrcDrata) GetRegion() DrataRegion {
+	if g == nil {
+		return ""
+	}
+	return g.Region
+}
+
+func (g *GrcDrata) GetExtraProperties() map[string]interface{} {
+	if g == nil {
+		return nil
+	}
+	return g.extraProperties
+}
+
+func (g *GrcDrata) require(field *big.Int) {
+	if g.explicitFields == nil {
+		g.explicitFields = big.NewInt(0)
+	}
+	g.explicitFields.Or(g.explicitFields, field)
+}
+
+// SetCredential sets the Credential field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (g *GrcDrata) SetCredential(credential *DrataCredential) {
+	g.Credential = credential
+	g.require(grcDrataFieldCredential)
+}
+
+// SetRegion sets the Region field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (g *GrcDrata) SetRegion(region DrataRegion) {
+	g.Region = region
+	g.require(grcDrataFieldRegion)
+}
+
+func (g *GrcDrata) UnmarshalJSON(data []byte) error {
+	type unmarshaler GrcDrata
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*g = GrcDrata(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *g)
+	if err != nil {
+		return err
+	}
+	g.extraProperties = extraProperties
+	g.rawJSON = nil
+	return nil
+}
+
+func (g *GrcDrata) MarshalJSON() ([]byte, error) {
+	type embed GrcDrata
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*g),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, g.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (g *GrcDrata) String() string {
+	if g == nil {
+		return "<nil>"
+	}
+	if len(g.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(g.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(g); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", g)
 }
 
 // Configuration for Secureframe as a GRC provider.
@@ -23863,6 +24131,8 @@ type ProviderConfig struct {
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/ninjaone-endpointmanagement-setup)
 	EndpointmanagementNinjaone *EndpointmanagementNinjaone
+	// Configuration for Drata as a GRC provider.
+	GrcDrata *GrcDrata
 	// Configuration for Secureframe as a GRC provider.
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/secureframe-grc-setup)
@@ -24785,6 +25055,13 @@ func (p *ProviderConfig) GetEndpointmanagementNinjaone() *EndpointmanagementNinj
 		return nil
 	}
 	return p.EndpointmanagementNinjaone
+}
+
+func (p *ProviderConfig) GetGrcDrata() *GrcDrata {
+	if p == nil {
+		return nil
+	}
+	return p.GrcDrata
 }
 
 func (p *ProviderConfig) GetGrcSecureframe() *GrcSecureframe {
@@ -26018,6 +26295,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.EndpointmanagementNinjaone = value
+	case "grc_drata":
+		value := new(GrcDrata)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.GrcDrata = value
 	case "grc_secureframe":
 		value := new(GrcSecureframe)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -26909,6 +27192,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.EndpointmanagementNinjaone != nil {
 		return internal.MarshalJSONWithExtraProperty(p.EndpointmanagementNinjaone, "type", "endpointmanagement_ninjaone")
 	}
+	if p.GrcDrata != nil {
+		return internal.MarshalJSONWithExtraProperty(p.GrcDrata, "type", "grc_drata")
+	}
 	if p.GrcSecureframe != nil {
 		return internal.MarshalJSONWithExtraProperty(p.GrcSecureframe, "type", "grc_secureframe")
 	}
@@ -27319,6 +27605,7 @@ type ProviderConfigVisitor interface {
 	VisitEndpointmanagementIru(*EndpointmanagementIru) error
 	VisitEndpointmanagementJamf(*EndpointmanagementJamf) error
 	VisitEndpointmanagementNinjaone(*EndpointmanagementNinjaone) error
+	VisitGrcDrata(*GrcDrata) error
 	VisitGrcSecureframe(*GrcSecureframe) error
 	VisitIdentityAshby(*IdentityAshby) error
 	VisitIdentityAwsIam(*IdentityAwsIam) error
@@ -27658,6 +27945,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.EndpointmanagementNinjaone != nil {
 		return visitor.VisitEndpointmanagementNinjaone(p.EndpointmanagementNinjaone)
+	}
+	if p.GrcDrata != nil {
+		return visitor.VisitGrcDrata(p.GrcDrata)
 	}
 	if p.GrcSecureframe != nil {
 		return visitor.VisitGrcSecureframe(p.GrcSecureframe)
@@ -28222,6 +28512,9 @@ func (p *ProviderConfig) validate() error {
 	if p.EndpointmanagementNinjaone != nil {
 		fields = append(fields, "endpointmanagement_ninjaone")
 	}
+	if p.GrcDrata != nil {
+		fields = append(fields, "grc_drata")
+	}
 	if p.GrcSecureframe != nil {
 		fields = append(fields, "grc_secureframe")
 	}
@@ -28731,6 +29024,8 @@ const (
 	ProviderConfigIdEndpointmanagementJamf ProviderConfigId = "endpointmanagement_jamf"
 	// NinjaOne
 	ProviderConfigIdEndpointmanagementNinjaone ProviderConfigId = "endpointmanagement_ninjaone"
+	// Drata
+	ProviderConfigIdGrcDrata ProviderConfigId = "grc_drata"
 	// Secureframe
 	ProviderConfigIdGrcSecureframe ProviderConfigId = "grc_secureframe"
 	// Ashby Identity
@@ -29107,6 +29402,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdEndpointmanagementJamf, nil
 	case "endpointmanagement_ninjaone":
 		return ProviderConfigIdEndpointmanagementNinjaone, nil
+	case "grc_drata":
+		return ProviderConfigIdGrcDrata, nil
 	case "grc_secureframe":
 		return ProviderConfigIdGrcSecureframe, nil
 	case "identity_ashby":
