@@ -17579,6 +17579,7 @@ var (
 	identityGoogleFieldClientEmail = big.NewInt(1 << 0)
 	identityGoogleFieldCredential  = big.NewInt(1 << 1)
 	identityGoogleFieldDelegate    = big.NewInt(1 << 2)
+	identityGoogleFieldUrl         = big.NewInt(1 << 3)
 )
 
 type IdentityGoogle struct {
@@ -17587,6 +17588,8 @@ type IdentityGoogle struct {
 	Credential  *GoogleCredential `json:"credential" url:"credential"`
 	// Email address of the user that the service account is impersonating for domain-wide delegation. For more information, see [this Google support article](https://support.google.com/a/answer/162106).
 	Delegate string `json:"delegate" url:"delegate"`
+	// Optional base URL override for the Google Workspace Admin APIs. Give the root only — the Directory and Reports paths are appended for you. Leave empty to use Google's standard endpoints.
+	Url *string `json:"url,omitempty" url:"url,omitempty"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -17614,6 +17617,13 @@ func (i *IdentityGoogle) GetDelegate() string {
 		return ""
 	}
 	return i.Delegate
+}
+
+func (i *IdentityGoogle) GetUrl() *string {
+	if i == nil {
+		return nil
+	}
+	return i.Url
 }
 
 func (i *IdentityGoogle) GetExtraProperties() map[string]interface{} {
@@ -17649,6 +17659,13 @@ func (i *IdentityGoogle) SetCredential(credential *GoogleCredential) {
 func (i *IdentityGoogle) SetDelegate(delegate string) {
 	i.Delegate = delegate
 	i.require(identityGoogleFieldDelegate)
+}
+
+// SetUrl sets the Url field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (i *IdentityGoogle) SetUrl(url *string) {
+	i.Url = url
+	i.require(identityGoogleFieldUrl)
 }
 
 func (i *IdentityGoogle) UnmarshalJSON(data []byte) error {
