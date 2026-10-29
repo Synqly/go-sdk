@@ -6001,3 +6001,43 @@ func (r *RetrieveFileRequest) String() string {
 
 // Threat event information represented by OCSF Threat object. The Threat object describes characteristics of a threat event.
 type ThreatEvent = *detectionfinding.DetectionFinding
+
+var (
+	updateAlertRequestInputFieldMeta = big.NewInt(1 << 0)
+)
+
+type UpdateAlertRequestInput struct {
+	// Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
+	Meta []*string           `json:"-" url:"meta,omitempty"`
+	Body *UpdateAlertRequest `json:"-" url:"-"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+}
+
+func (u *UpdateAlertRequestInput) require(field *big.Int) {
+	if u.explicitFields == nil {
+		u.explicitFields = big.NewInt(0)
+	}
+	u.explicitFields.Or(u.explicitFields, field)
+}
+
+// SetMeta sets the Meta field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (u *UpdateAlertRequestInput) SetMeta(meta []*string) {
+	u.Meta = meta
+	u.require(updateAlertRequestInputFieldMeta)
+}
+
+func (u *UpdateAlertRequestInput) UnmarshalJSON(data []byte) error {
+	body := new(UpdateAlertRequest)
+	if err := json.Unmarshal(data, &body); err != nil {
+		return err
+	}
+	u.Body = body
+	return nil
+}
+
+func (u *UpdateAlertRequestInput) MarshalJSON() ([]byte, error) {
+	return json.Marshal(u.Body)
+}

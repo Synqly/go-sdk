@@ -197,6 +197,26 @@ func (c *Client) QueryAlerts(
     return response.Body, nil
 }
 
+// Updates the triage state of a single alert in the token-linked EDR source: its lifecycle status, the analyst verdict, a comment and who it is assigned to.
+func (c *Client) UpdateAlert(
+    ctx context.Context,
+    // UID of the Alert (URL encoded). This will be `finding_info.uid` in the OCSF model.
+    alertId string,
+    request *engine.UpdateAlertRequestInput,
+    opts ...option.RequestOption,
+) (*engine.UpdateAlertResponse, error){
+    response, err := c.WithRawResponse.UpdateAlert(
+        ctx,
+        alertId,
+        request,
+        opts...,
+    )
+    if err != nil {
+        return nil, err
+    }
+    return response.Body, nil
+}
+
 // Returns a list of iocs that match the query from the token-linked EDR source.
 func (c *Client) QueryIocs(
     ctx context.Context,

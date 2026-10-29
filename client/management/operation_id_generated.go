@@ -67,6 +67,7 @@ const (
 	OperationIdEdrQueryPostureScore                             OperationId = "edr_query_posture_score"
 	OperationIdEdrQueryThreatevents                             OperationId = "edr_query_threatevents"
 	OperationIdEdrRetrieveFile                                  OperationId = "edr_retrieve_file"
+	OperationIdEdrUpdateAlert                                   OperationId = "edr_update_alert"
 	OperationIdEmailsecurityGetThreatDetails                    OperationId = "emailsecurity_get_threat_details"
 	OperationIdEmailsecurityQueryEmailEvents                    OperationId = "emailsecurity_query_email_events"
 	OperationIdEmailsecurityQueryThreats                        OperationId = "emailsecurity_query_threats"
@@ -288,6 +289,8 @@ func NewOperationIdFromString(s string) (OperationId, error) {
 		return OperationIdEdrQueryThreatevents, nil
 	case "edr_retrieve_file":
 		return OperationIdEdrRetrieveFile, nil
+	case "edr_update_alert":
+		return OperationIdEdrUpdateAlert, nil
 	case "emailsecurity_get_threat_details":
 		return OperationIdEmailsecurityGetThreatDetails, nil
 	case "emailsecurity_query_email_events":
