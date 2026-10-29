@@ -213,6 +213,158 @@ func (g *GetUserRequest) SetMeta(meta []*string) {
 }
 
 var (
+	queryIdentityAccessGrantsRequestFieldMeta           = big.NewInt(1 << 0)
+	queryIdentityAccessGrantsRequestFieldLimit          = big.NewInt(1 << 1)
+	queryIdentityAccessGrantsRequestFieldCursor         = big.NewInt(1 << 2)
+	queryIdentityAccessGrantsRequestFieldOrder          = big.NewInt(1 << 3)
+	queryIdentityAccessGrantsRequestFieldFilter         = big.NewInt(1 << 4)
+	queryIdentityAccessGrantsRequestFieldIncludeRawData = big.NewInt(1 << 5)
+)
+
+type QueryIdentityAccessGrantsRequest struct {
+	// Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
+	Meta []*string `json:"-" url:"meta,omitempty"`
+	// Number of grants to return. Defaults to 100.
+	Limit *int `json:"-" url:"limit,omitempty"`
+	// Start search from cursor position. A page may hold fewer than `limit` grants, or none; keep paging until the response carries no cursor.
+	Cursor *string `json:"-" url:"cursor,omitempty"`
+	// Select a field to order the results by. Defaults to provider order. To control the direction of the sorting, append `[asc]` or `[desc]` to the field name. For example, `application.uid[asc]` will sort the results by `application.uid` in ascending order. The ordering defaults to `asc` if not specified.
+	Order []*string `json:"-" url:"order,omitempty"`
+	// Filter results by this query. For more information on filtering, refer to our [Filtering Guide](https://docs.synqly.com/guides/connectors/identity/query-filters). Defaults to no filter. If used more than once, the queries are ANDed together.
+	Filter []*string `json:"-" url:"filter,omitempty"`
+	// Include the raw data from the identity provider in the response. Defaults to `false`.
+	IncludeRawData *bool `json:"-" url:"include_raw_data,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+}
+
+func (q *QueryIdentityAccessGrantsRequest) require(field *big.Int) {
+	if q.explicitFields == nil {
+		q.explicitFields = big.NewInt(0)
+	}
+	q.explicitFields.Or(q.explicitFields, field)
+}
+
+// SetMeta sets the Meta field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryIdentityAccessGrantsRequest) SetMeta(meta []*string) {
+	q.Meta = meta
+	q.require(queryIdentityAccessGrantsRequestFieldMeta)
+}
+
+// SetLimit sets the Limit field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryIdentityAccessGrantsRequest) SetLimit(limit *int) {
+	q.Limit = limit
+	q.require(queryIdentityAccessGrantsRequestFieldLimit)
+}
+
+// SetCursor sets the Cursor field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryIdentityAccessGrantsRequest) SetCursor(cursor *string) {
+	q.Cursor = cursor
+	q.require(queryIdentityAccessGrantsRequestFieldCursor)
+}
+
+// SetOrder sets the Order field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryIdentityAccessGrantsRequest) SetOrder(order []*string) {
+	q.Order = order
+	q.require(queryIdentityAccessGrantsRequestFieldOrder)
+}
+
+// SetFilter sets the Filter field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryIdentityAccessGrantsRequest) SetFilter(filter []*string) {
+	q.Filter = filter
+	q.require(queryIdentityAccessGrantsRequestFieldFilter)
+}
+
+// SetIncludeRawData sets the IncludeRawData field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryIdentityAccessGrantsRequest) SetIncludeRawData(includeRawData *bool) {
+	q.IncludeRawData = includeRawData
+	q.require(queryIdentityAccessGrantsRequestFieldIncludeRawData)
+}
+
+var (
+	queryIdentityApplicationsRequestFieldMeta           = big.NewInt(1 << 0)
+	queryIdentityApplicationsRequestFieldLimit          = big.NewInt(1 << 1)
+	queryIdentityApplicationsRequestFieldCursor         = big.NewInt(1 << 2)
+	queryIdentityApplicationsRequestFieldOrder          = big.NewInt(1 << 3)
+	queryIdentityApplicationsRequestFieldFilter         = big.NewInt(1 << 4)
+	queryIdentityApplicationsRequestFieldIncludeRawData = big.NewInt(1 << 5)
+)
+
+type QueryIdentityApplicationsRequest struct {
+	// Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
+	Meta []*string `json:"-" url:"meta,omitempty"`
+	// Number of applications to return. Defaults to 100.
+	Limit *int `json:"-" url:"limit,omitempty"`
+	// Start search from cursor position.
+	Cursor *string `json:"-" url:"cursor,omitempty"`
+	// Select a field to order the results by. Defaults to provider order. To control the direction of the sorting, append `[asc]` or `[desc]` to the field name. For example, `application.name[asc]` will sort the results by `application.name` in ascending order. The ordering defaults to `asc` if not specified.
+	Order []*string `json:"-" url:"order,omitempty"`
+	// Filter results by this query. For more information on filtering, refer to our [Filtering Guide](https://docs.synqly.com/guides/connectors/identity/query-filters). Defaults to no filter. If used more than once, the queries are ANDed together.
+	Filter []*string `json:"-" url:"filter,omitempty"`
+	// Include the raw data from the identity provider in the response. Defaults to `false`.
+	IncludeRawData *bool `json:"-" url:"include_raw_data,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+}
+
+func (q *QueryIdentityApplicationsRequest) require(field *big.Int) {
+	if q.explicitFields == nil {
+		q.explicitFields = big.NewInt(0)
+	}
+	q.explicitFields.Or(q.explicitFields, field)
+}
+
+// SetMeta sets the Meta field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryIdentityApplicationsRequest) SetMeta(meta []*string) {
+	q.Meta = meta
+	q.require(queryIdentityApplicationsRequestFieldMeta)
+}
+
+// SetLimit sets the Limit field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryIdentityApplicationsRequest) SetLimit(limit *int) {
+	q.Limit = limit
+	q.require(queryIdentityApplicationsRequestFieldLimit)
+}
+
+// SetCursor sets the Cursor field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryIdentityApplicationsRequest) SetCursor(cursor *string) {
+	q.Cursor = cursor
+	q.require(queryIdentityApplicationsRequestFieldCursor)
+}
+
+// SetOrder sets the Order field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryIdentityApplicationsRequest) SetOrder(order []*string) {
+	q.Order = order
+	q.require(queryIdentityApplicationsRequestFieldOrder)
+}
+
+// SetFilter sets the Filter field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryIdentityApplicationsRequest) SetFilter(filter []*string) {
+	q.Filter = filter
+	q.require(queryIdentityApplicationsRequestFieldFilter)
+}
+
+// SetIncludeRawData sets the IncludeRawData field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryIdentityApplicationsRequest) SetIncludeRawData(includeRawData *bool) {
+	q.IncludeRawData = includeRawData
+	q.require(queryIdentityApplicationsRequestFieldIncludeRawData)
+}
+
+var (
 	queryIdentityAuditLogRequestFieldMeta           = big.NewInt(1 << 0)
 	queryIdentityAuditLogRequestFieldLimit          = big.NewInt(1 << 1)
 	queryIdentityAuditLogRequestFieldCursor         = big.NewInt(1 << 2)
@@ -1069,6 +1221,278 @@ func (q *QueryGroupsResponse) MarshalJSON() ([]byte, error) {
 }
 
 func (q *QueryGroupsResponse) String() string {
+	if q == nil {
+		return "<nil>"
+	}
+	if len(q.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(q.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(q); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", q)
+}
+
+var (
+	queryIdentityAccessGrantsResponseFieldMessages = big.NewInt(1 << 0)
+	queryIdentityAccessGrantsResponseFieldMeta     = big.NewInt(1 << 1)
+	queryIdentityAccessGrantsResponseFieldCursor   = big.NewInt(1 << 2)
+	queryIdentityAccessGrantsResponseFieldResult   = big.NewInt(1 << 3)
+)
+
+type QueryIdentityAccessGrantsResponse struct {
+	// Additional messages from the service response that may be helpful to the client.
+	Messages *MessagesResponse `json:"messages,omitempty" url:"messages,omitempty"`
+	// Various metadata about the results organized by group, then type, then field.
+	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
+	// Cursor to use to retrieve the next page of results
+	Cursor string `json:"cursor" url:"cursor"`
+	// Standing access held by principals in the identity provider, one per grant as the provider records it, each wrapped in an OCSF Access Grant Inventory Info event.
+	Result []latest.AccessGrantInventoryInfo `json:"result" url:"result"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (q *QueryIdentityAccessGrantsResponse) GetMessages() *MessagesResponse {
+	if q == nil {
+		return nil
+	}
+	return q.Messages
+}
+
+func (q *QueryIdentityAccessGrantsResponse) GetMeta() *MetaResponse {
+	if q == nil {
+		return nil
+	}
+	return q.Meta
+}
+
+func (q *QueryIdentityAccessGrantsResponse) GetCursor() string {
+	if q == nil {
+		return ""
+	}
+	return q.Cursor
+}
+
+func (q *QueryIdentityAccessGrantsResponse) GetResult() []latest.AccessGrantInventoryInfo {
+	if q == nil {
+		return nil
+	}
+	return q.Result
+}
+
+func (q *QueryIdentityAccessGrantsResponse) GetExtraProperties() map[string]interface{} {
+	if q == nil {
+		return nil
+	}
+	return q.extraProperties
+}
+
+func (q *QueryIdentityAccessGrantsResponse) require(field *big.Int) {
+	if q.explicitFields == nil {
+		q.explicitFields = big.NewInt(0)
+	}
+	q.explicitFields.Or(q.explicitFields, field)
+}
+
+// SetMessages sets the Messages field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryIdentityAccessGrantsResponse) SetMessages(messages *MessagesResponse) {
+	q.Messages = messages
+	q.require(queryIdentityAccessGrantsResponseFieldMessages)
+}
+
+// SetMeta sets the Meta field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryIdentityAccessGrantsResponse) SetMeta(meta *MetaResponse) {
+	q.Meta = meta
+	q.require(queryIdentityAccessGrantsResponseFieldMeta)
+}
+
+// SetCursor sets the Cursor field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryIdentityAccessGrantsResponse) SetCursor(cursor string) {
+	q.Cursor = cursor
+	q.require(queryIdentityAccessGrantsResponseFieldCursor)
+}
+
+// SetResult sets the Result field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryIdentityAccessGrantsResponse) SetResult(result []latest.AccessGrantInventoryInfo) {
+	q.Result = result
+	q.require(queryIdentityAccessGrantsResponseFieldResult)
+}
+
+func (q *QueryIdentityAccessGrantsResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler QueryIdentityAccessGrantsResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*q = QueryIdentityAccessGrantsResponse(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *q)
+	if err != nil {
+		return err
+	}
+	q.extraProperties = extraProperties
+	q.rawJSON = nil
+	return nil
+}
+
+func (q *QueryIdentityAccessGrantsResponse) MarshalJSON() ([]byte, error) {
+	type embed QueryIdentityAccessGrantsResponse
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*q),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, q.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (q *QueryIdentityAccessGrantsResponse) String() string {
+	if q == nil {
+		return "<nil>"
+	}
+	if len(q.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(q.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(q); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", q)
+}
+
+var (
+	queryIdentityApplicationsResponseFieldMessages = big.NewInt(1 << 0)
+	queryIdentityApplicationsResponseFieldMeta     = big.NewInt(1 << 1)
+	queryIdentityApplicationsResponseFieldCursor   = big.NewInt(1 << 2)
+	queryIdentityApplicationsResponseFieldResult   = big.NewInt(1 << 3)
+)
+
+type QueryIdentityApplicationsResponse struct {
+	// Additional messages from the service response that may be helpful to the client.
+	Messages *MessagesResponse `json:"messages,omitempty" url:"messages,omitempty"`
+	// Various metadata about the results organized by group, then type, then field.
+	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
+	// Cursor to use to retrieve the next page of results
+	Cursor string `json:"cursor" url:"cursor"`
+	// Applications registered in, or connected to, the identity provider, each wrapped in an OCSF Application Inventory Info event.
+	Result []latest.ApplicationInventoryInfo `json:"result" url:"result"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (q *QueryIdentityApplicationsResponse) GetMessages() *MessagesResponse {
+	if q == nil {
+		return nil
+	}
+	return q.Messages
+}
+
+func (q *QueryIdentityApplicationsResponse) GetMeta() *MetaResponse {
+	if q == nil {
+		return nil
+	}
+	return q.Meta
+}
+
+func (q *QueryIdentityApplicationsResponse) GetCursor() string {
+	if q == nil {
+		return ""
+	}
+	return q.Cursor
+}
+
+func (q *QueryIdentityApplicationsResponse) GetResult() []latest.ApplicationInventoryInfo {
+	if q == nil {
+		return nil
+	}
+	return q.Result
+}
+
+func (q *QueryIdentityApplicationsResponse) GetExtraProperties() map[string]interface{} {
+	if q == nil {
+		return nil
+	}
+	return q.extraProperties
+}
+
+func (q *QueryIdentityApplicationsResponse) require(field *big.Int) {
+	if q.explicitFields == nil {
+		q.explicitFields = big.NewInt(0)
+	}
+	q.explicitFields.Or(q.explicitFields, field)
+}
+
+// SetMessages sets the Messages field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryIdentityApplicationsResponse) SetMessages(messages *MessagesResponse) {
+	q.Messages = messages
+	q.require(queryIdentityApplicationsResponseFieldMessages)
+}
+
+// SetMeta sets the Meta field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryIdentityApplicationsResponse) SetMeta(meta *MetaResponse) {
+	q.Meta = meta
+	q.require(queryIdentityApplicationsResponseFieldMeta)
+}
+
+// SetCursor sets the Cursor field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryIdentityApplicationsResponse) SetCursor(cursor string) {
+	q.Cursor = cursor
+	q.require(queryIdentityApplicationsResponseFieldCursor)
+}
+
+// SetResult sets the Result field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryIdentityApplicationsResponse) SetResult(result []latest.ApplicationInventoryInfo) {
+	q.Result = result
+	q.require(queryIdentityApplicationsResponseFieldResult)
+}
+
+func (q *QueryIdentityApplicationsResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler QueryIdentityApplicationsResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*q = QueryIdentityApplicationsResponse(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *q)
+	if err != nil {
+		return err
+	}
+	q.extraProperties = extraProperties
+	q.rawJSON = nil
+	return nil
+}
+
+func (q *QueryIdentityApplicationsResponse) MarshalJSON() ([]byte, error) {
+	type embed QueryIdentityApplicationsResponse
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*q),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, q.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (q *QueryIdentityApplicationsResponse) String() string {
 	if q == nil {
 		return "<nil>"
 	}

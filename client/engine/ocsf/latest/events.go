@@ -27,6 +27,7 @@ import (
 	emailactivity "github.com/synqly/go-sdk/v2/client/engine/ocsf/v160/emailactivity"
 	filehostingactivity "github.com/synqly/go-sdk/v2/client/engine/ocsf/v160/filehostingactivity"
 	httpactivity "github.com/synqly/go-sdk/v2/client/engine/ocsf/v160/httpactivity"
+	accessgrantinventoryinfo "github.com/synqly/go-sdk/v2/client/engine/ocsf/v180/accessgrantinventoryinfo"
 	applicationinventoryinfo "github.com/synqly/go-sdk/v2/client/engine/ocsf/v180/applicationinventoryinfo"
 	applicationsecurityposturefinding "github.com/synqly/go-sdk/v2/client/engine/ocsf/v180/applicationsecurityposturefinding"
 	compliancecontrolinventoryinfo "github.com/synqly/go-sdk/v2/client/engine/ocsf/v180/compliancecontrolinventoryinfo"
@@ -35,6 +36,8 @@ import (
 	trainingcampaigninventoryinfo "github.com/synqly/go-sdk/v2/client/engine/ocsf/v180/trainingcampaigninventoryinfo"
 	userinventory "github.com/synqly/go-sdk/v2/client/engine/ocsf/v180/userinventory"
 )
+
+type AccessGrantInventoryInfo = *accessgrantinventoryinfo.AccessGrantInventoryInfo
 
 type AccountChange = *accountchange.AccountChange
 

@@ -181,6 +181,422 @@ func (a *AccessAnalysisResult) String() string {
 	return fmt.Sprintf("%#v", a)
 }
 
+// The Access Grant object describes standing access that a principal holds, or that an entity requests: permissions or scopes granted to an application, or a user, group or application assigned to an application or resource. A requested grant, such as a permission an application asks for, has no identifier or name of its own.
+var (
+	accessGrantFieldConsentType       = big.NewInt(1 << 0)
+	accessGrantFieldConsentTypeId     = big.NewInt(1 << 1)
+	accessGrantFieldCreatedTime       = big.NewInt(1 << 2)
+	accessGrantFieldCreatedTimeDt     = big.NewInt(1 << 3)
+	accessGrantFieldExpirationTime    = big.NewInt(1 << 4)
+	accessGrantFieldExpirationTimeDt  = big.NewInt(1 << 5)
+	accessGrantFieldIamRole           = big.NewInt(1 << 6)
+	accessGrantFieldModifiedTime      = big.NewInt(1 << 7)
+	accessGrantFieldModifiedTimeDt    = big.NewInt(1 << 8)
+	accessGrantFieldName              = big.NewInt(1 << 9)
+	accessGrantFieldPrivileges        = big.NewInt(1 << 10)
+	accessGrantFieldResources         = big.NewInt(1 << 11)
+	accessGrantFieldState             = big.NewInt(1 << 12)
+	accessGrantFieldStateId           = big.NewInt(1 << 13)
+	accessGrantFieldTargetApplication = big.NewInt(1 << 14)
+	accessGrantFieldType              = big.NewInt(1 << 15)
+	accessGrantFieldTypeId            = big.NewInt(1 << 16)
+	accessGrantFieldUid               = big.NewInt(1 << 17)
+)
+
+type AccessGrant struct {
+	// The consent type, normalized to the caption of the <code>consent_type_id</code> value. In the case of 'Other', it is defined by the event source.
+	ConsentType *string `json:"consent_type,omitempty" url:"consent_type,omitempty"`
+	// The normalized identifier of how the grant was consented to.
+	ConsentTypeId *AccessGrantConsentTypeId `json:"consent_type_id,omitempty" url:"consent_type_id,omitempty"`
+	// The time when the grant was made.
+	CreatedTime *Timestamp `json:"created_time,omitempty" url:"created_time,omitempty"`
+	// The time when the grant was made.
+	CreatedTimeDt *time.Time `json:"created_time_dt,omitempty" url:"created_time_dt,omitempty"`
+	// The time when the grant expires.
+	ExpirationTime *Timestamp `json:"expiration_time,omitempty" url:"expiration_time,omitempty"`
+	// The time when the grant expires.
+	ExpirationTimeDt *time.Time `json:"expiration_time_dt,omitempty" url:"expiration_time_dt,omitempty"`
+	// The role the grant gives. For example, an application role.
+	IamRole *IamRole `json:"iam_role,omitempty" url:"iam_role,omitempty"`
+	// The time when the grant was last modified.
+	ModifiedTime *Timestamp `json:"modified_time,omitempty" url:"modified_time,omitempty"`
+	// The time when the grant was last modified.
+	ModifiedTimeDt *time.Time `json:"modified_time_dt,omitempty" url:"modified_time_dt,omitempty"`
+	// The name of the grant.
+	Name *string `json:"name,omitempty" url:"name,omitempty"`
+	// The permissions or scopes the grant gives. For example, <code>User.Read.All</code> or <code>openid</code>.
+	Privileges []string `json:"privileges,omitempty" url:"privileges,omitempty"`
+	// The resources the grant gives access to. For example, a cloud subscription or storage bucket.
+	Resources []*ResourceDetails `json:"resources,omitempty" url:"resources,omitempty"`
+	// The grant state, normalized to the caption of the <code>state_id</code> value. In the case of 'Other', it is defined by the event source.
+	State *string `json:"state,omitempty" url:"state,omitempty"`
+	// The normalized identifier of the grant state.
+	StateId *AccessGrantStateId `json:"state_id,omitempty" url:"state_id,omitempty"`
+	// The application that access is granted on: the application that exposes the granted permissions or role, such as an API, or the application a principal is assigned to.
+	TargetApplication *Application `json:"target_application,omitempty" url:"target_application,omitempty"`
+	// The grant type, normalized to the caption of the <code>type_id</code> value. In the case of 'Other', it is defined by the event source.
+	Type *string `json:"type,omitempty" url:"type,omitempty"`
+	// The normalized identifier of the grant type.
+	TypeId AccessGrantTypeId `json:"type_id" url:"type_id"`
+	// The unique identifier of the grant. For example, the OAuth consent grant ID.
+	Uid *string `json:"uid,omitempty" url:"uid,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (a *AccessGrant) GetConsentType() *string {
+	if a == nil {
+		return nil
+	}
+	return a.ConsentType
+}
+
+func (a *AccessGrant) GetConsentTypeId() *AccessGrantConsentTypeId {
+	if a == nil {
+		return nil
+	}
+	return a.ConsentTypeId
+}
+
+func (a *AccessGrant) GetCreatedTime() *Timestamp {
+	if a == nil {
+		return nil
+	}
+	return a.CreatedTime
+}
+
+func (a *AccessGrant) GetCreatedTimeDt() *time.Time {
+	if a == nil {
+		return nil
+	}
+	return a.CreatedTimeDt
+}
+
+func (a *AccessGrant) GetExpirationTime() *Timestamp {
+	if a == nil {
+		return nil
+	}
+	return a.ExpirationTime
+}
+
+func (a *AccessGrant) GetExpirationTimeDt() *time.Time {
+	if a == nil {
+		return nil
+	}
+	return a.ExpirationTimeDt
+}
+
+func (a *AccessGrant) GetIamRole() *IamRole {
+	if a == nil {
+		return nil
+	}
+	return a.IamRole
+}
+
+func (a *AccessGrant) GetModifiedTime() *Timestamp {
+	if a == nil {
+		return nil
+	}
+	return a.ModifiedTime
+}
+
+func (a *AccessGrant) GetModifiedTimeDt() *time.Time {
+	if a == nil {
+		return nil
+	}
+	return a.ModifiedTimeDt
+}
+
+func (a *AccessGrant) GetName() *string {
+	if a == nil {
+		return nil
+	}
+	return a.Name
+}
+
+func (a *AccessGrant) GetPrivileges() []string {
+	if a == nil {
+		return nil
+	}
+	return a.Privileges
+}
+
+func (a *AccessGrant) GetResources() []*ResourceDetails {
+	if a == nil {
+		return nil
+	}
+	return a.Resources
+}
+
+func (a *AccessGrant) GetState() *string {
+	if a == nil {
+		return nil
+	}
+	return a.State
+}
+
+func (a *AccessGrant) GetStateId() *AccessGrantStateId {
+	if a == nil {
+		return nil
+	}
+	return a.StateId
+}
+
+func (a *AccessGrant) GetTargetApplication() *Application {
+	if a == nil {
+		return nil
+	}
+	return a.TargetApplication
+}
+
+func (a *AccessGrant) GetType() *string {
+	if a == nil {
+		return nil
+	}
+	return a.Type
+}
+
+func (a *AccessGrant) GetTypeId() AccessGrantTypeId {
+	if a == nil {
+		return 0
+	}
+	return a.TypeId
+}
+
+func (a *AccessGrant) GetUid() *string {
+	if a == nil {
+		return nil
+	}
+	return a.Uid
+}
+
+func (a *AccessGrant) GetExtraProperties() map[string]interface{} {
+	if a == nil {
+		return nil
+	}
+	return a.extraProperties
+}
+
+func (a *AccessGrant) require(field *big.Int) {
+	if a.explicitFields == nil {
+		a.explicitFields = big.NewInt(0)
+	}
+	a.explicitFields.Or(a.explicitFields, field)
+}
+
+// SetConsentType sets the ConsentType field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (a *AccessGrant) SetConsentType(consentType *string) {
+	a.ConsentType = consentType
+	a.require(accessGrantFieldConsentType)
+}
+
+// SetConsentTypeId sets the ConsentTypeId field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (a *AccessGrant) SetConsentTypeId(consentTypeId *AccessGrantConsentTypeId) {
+	a.ConsentTypeId = consentTypeId
+	a.require(accessGrantFieldConsentTypeId)
+}
+
+// SetCreatedTime sets the CreatedTime field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (a *AccessGrant) SetCreatedTime(createdTime *Timestamp) {
+	a.CreatedTime = createdTime
+	a.require(accessGrantFieldCreatedTime)
+}
+
+// SetCreatedTimeDt sets the CreatedTimeDt field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (a *AccessGrant) SetCreatedTimeDt(createdTimeDt *time.Time) {
+	a.CreatedTimeDt = createdTimeDt
+	a.require(accessGrantFieldCreatedTimeDt)
+}
+
+// SetExpirationTime sets the ExpirationTime field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (a *AccessGrant) SetExpirationTime(expirationTime *Timestamp) {
+	a.ExpirationTime = expirationTime
+	a.require(accessGrantFieldExpirationTime)
+}
+
+// SetExpirationTimeDt sets the ExpirationTimeDt field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (a *AccessGrant) SetExpirationTimeDt(expirationTimeDt *time.Time) {
+	a.ExpirationTimeDt = expirationTimeDt
+	a.require(accessGrantFieldExpirationTimeDt)
+}
+
+// SetIamRole sets the IamRole field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (a *AccessGrant) SetIamRole(iamRole *IamRole) {
+	a.IamRole = iamRole
+	a.require(accessGrantFieldIamRole)
+}
+
+// SetModifiedTime sets the ModifiedTime field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (a *AccessGrant) SetModifiedTime(modifiedTime *Timestamp) {
+	a.ModifiedTime = modifiedTime
+	a.require(accessGrantFieldModifiedTime)
+}
+
+// SetModifiedTimeDt sets the ModifiedTimeDt field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (a *AccessGrant) SetModifiedTimeDt(modifiedTimeDt *time.Time) {
+	a.ModifiedTimeDt = modifiedTimeDt
+	a.require(accessGrantFieldModifiedTimeDt)
+}
+
+// SetName sets the Name field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (a *AccessGrant) SetName(name *string) {
+	a.Name = name
+	a.require(accessGrantFieldName)
+}
+
+// SetPrivileges sets the Privileges field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (a *AccessGrant) SetPrivileges(privileges []string) {
+	a.Privileges = privileges
+	a.require(accessGrantFieldPrivileges)
+}
+
+// SetResources sets the Resources field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (a *AccessGrant) SetResources(resources []*ResourceDetails) {
+	a.Resources = resources
+	a.require(accessGrantFieldResources)
+}
+
+// SetState sets the State field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (a *AccessGrant) SetState(state *string) {
+	a.State = state
+	a.require(accessGrantFieldState)
+}
+
+// SetStateId sets the StateId field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (a *AccessGrant) SetStateId(stateId *AccessGrantStateId) {
+	a.StateId = stateId
+	a.require(accessGrantFieldStateId)
+}
+
+// SetTargetApplication sets the TargetApplication field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (a *AccessGrant) SetTargetApplication(targetApplication *Application) {
+	a.TargetApplication = targetApplication
+	a.require(accessGrantFieldTargetApplication)
+}
+
+// SetType sets the Type field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (a *AccessGrant) SetType(type_ *string) {
+	a.Type = type_
+	a.require(accessGrantFieldType)
+}
+
+// SetTypeId sets the TypeId field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (a *AccessGrant) SetTypeId(typeId AccessGrantTypeId) {
+	a.TypeId = typeId
+	a.require(accessGrantFieldTypeId)
+}
+
+// SetUid sets the Uid field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (a *AccessGrant) SetUid(uid *string) {
+	a.Uid = uid
+	a.require(accessGrantFieldUid)
+}
+
+func (a *AccessGrant) UnmarshalJSON(data []byte) error {
+	type embed AccessGrant
+	var unmarshaler = struct {
+		embed
+		CreatedTimeDt    *internal.DateTime `json:"created_time_dt,omitempty"`
+		ExpirationTimeDt *internal.DateTime `json:"expiration_time_dt,omitempty"`
+		ModifiedTimeDt   *internal.DateTime `json:"modified_time_dt,omitempty"`
+	}{
+		embed: embed(*a),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*a = AccessGrant(unmarshaler.embed)
+	a.CreatedTimeDt = unmarshaler.CreatedTimeDt.TimePtr()
+	a.ExpirationTimeDt = unmarshaler.ExpirationTimeDt.TimePtr()
+	a.ModifiedTimeDt = unmarshaler.ModifiedTimeDt.TimePtr()
+	extraProperties, err := internal.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+	a.rawJSON = nil
+	return nil
+}
+
+func (a *AccessGrant) MarshalJSON() ([]byte, error) {
+	type embed AccessGrant
+	var marshaler = struct {
+		embed
+		CreatedTimeDt    *internal.DateTime `json:"created_time_dt,omitempty"`
+		ExpirationTimeDt *internal.DateTime `json:"expiration_time_dt,omitempty"`
+		ModifiedTimeDt   *internal.DateTime `json:"modified_time_dt,omitempty"`
+	}{
+		embed:            embed(*a),
+		CreatedTimeDt:    internal.NewOptionalDateTime(a.CreatedTimeDt),
+		ExpirationTimeDt: internal.NewOptionalDateTime(a.ExpirationTimeDt),
+		ModifiedTimeDt:   internal.NewOptionalDateTime(a.ModifiedTimeDt),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, a.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (a *AccessGrant) String() string {
+	if a == nil {
+		return "<nil>"
+	}
+	if len(a.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(a.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(a); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", a)
+}
+
+// AccessGrantConsentTypeId is an enum, and the following values are allowed.
+// 0 - Unknown: The consent type is unknown.
+// 1 - Admin: An administrator consented on behalf of the organization or tenant.
+// 2 - User: A user consented for themselves.
+// 3 - System: The platform granted the access without an administrator or user consenting. For example, a pre-authorized application.
+// 99 - Other: The consent type is not mapped. See the <code>consent_type</code> attribute, which contains a data source specific value.
+type AccessGrantConsentTypeId = int
+
+// AccessGrantStateId is an enum, and the following values are allowed.
+// 0 - Unknown: The grant state is unknown.
+// 1 - Active: The grant is in effect.
+// 2 - Inactive: The grant exists but is not in effect. For example, a suspended assignment.
+// 3 - Revoked: The grant was revoked.
+// 4 - Expired: The grant reached its expiration time.
+// 99 - Other: The grant state is not mapped. See the <code>state</code> attribute, which contains a data source specific value.
+type AccessGrantStateId = int
+
+// AccessGrantTypeId is an enum, and the following values are allowed.
+// 0 - Unknown: The grant type is unknown.
+// 1 - DelegatedPermission: Permissions or scopes granted to an application to act on behalf of a signed-in user. For example, an OAuth consent grant.
+// 2 - ApplicationPermission: Permissions granted to an application to act as itself, without a signed-in user. For example, an application role on an API granted to a service principal.
+// 3 - Assignment: A principal assigned to an application or resource, optionally with a role, giving it access to that application or resource.
+// 99 - Other: The grant type is not mapped. See the <code>type</code> attribute, which contains a data source specific value.
+type AccessGrantTypeId = int
+
 // The Account object contains details about the account that initiated or performed a specific activity within a system or application. Additionally, the Account object refers to logical Cloud and Software-as-a-Service (SaaS) based containers such as AWS Accounts, Azure Subscriptions, Oracle Cloud Compartments, Google Cloud Projects, and otherwise.
 var (
 	accountFieldIsDisabled              = big.NewInt(1 << 0)
@@ -3414,35 +3830,43 @@ func (a *Api) String() string {
 
 // An Application describes the details for an inventoried application as reported by an Application Security tool or other Developer-centric tooling. Applications can be defined as Kubernetes resources, Containerized resources, or application hosting-specific cloud sources such as AWS Elastic BeanStalk, AWS Lightsail, or Azure Logic Apps.
 var (
-	applicationFieldCreatedTime          = big.NewInt(1 << 0)
-	applicationFieldCreatedTimeDt        = big.NewInt(1 << 1)
-	applicationFieldCriticality          = big.NewInt(1 << 2)
-	applicationFieldData                 = big.NewInt(1 << 3)
-	applicationFieldDesc                 = big.NewInt(1 << 4)
-	applicationFieldFirstSeenTime        = big.NewInt(1 << 5)
-	applicationFieldFirstSeenTimeDt      = big.NewInt(1 << 6)
-	applicationFieldGroup                = big.NewInt(1 << 7)
-	applicationFieldHostname             = big.NewInt(1 << 8)
-	applicationFieldLabels               = big.NewInt(1 << 9)
-	applicationFieldLastSeenTime         = big.NewInt(1 << 10)
-	applicationFieldLastSeenTimeDt       = big.NewInt(1 << 11)
-	applicationFieldModifiedTime         = big.NewInt(1 << 12)
-	applicationFieldModifiedTimeDt       = big.NewInt(1 << 13)
-	applicationFieldName                 = big.NewInt(1 << 14)
-	applicationFieldOwner                = big.NewInt(1 << 15)
-	applicationFieldRegion               = big.NewInt(1 << 16)
-	applicationFieldResourceRelationship = big.NewInt(1 << 17)
-	applicationFieldRiskLevel            = big.NewInt(1 << 18)
-	applicationFieldRiskLevelId          = big.NewInt(1 << 19)
-	applicationFieldRiskScore            = big.NewInt(1 << 20)
-	applicationFieldSbom                 = big.NewInt(1 << 21)
-	applicationFieldSrcUrl               = big.NewInt(1 << 22)
-	applicationFieldTags                 = big.NewInt(1 << 23)
-	applicationFieldType                 = big.NewInt(1 << 24)
-	applicationFieldUid                  = big.NewInt(1 << 25)
-	applicationFieldUidAlt               = big.NewInt(1 << 26)
-	applicationFieldUrl                  = big.NewInt(1 << 27)
-	applicationFieldVersion              = big.NewInt(1 << 28)
+	applicationFieldCreatedTime             = big.NewInt(1 << 0)
+	applicationFieldCreatedTimeDt           = big.NewInt(1 << 1)
+	applicationFieldCriticality             = big.NewInt(1 << 2)
+	applicationFieldData                    = big.NewInt(1 << 3)
+	applicationFieldDesc                    = big.NewInt(1 << 4)
+	applicationFieldFirstSeenTime           = big.NewInt(1 << 5)
+	applicationFieldFirstSeenTimeDt         = big.NewInt(1 << 6)
+	applicationFieldGroup                   = big.NewInt(1 << 7)
+	applicationFieldHostname                = big.NewInt(1 << 8)
+	applicationFieldIsDisabled              = big.NewInt(1 << 9)
+	applicationFieldIsPublisherVerified     = big.NewInt(1 << 10)
+	applicationFieldLabels                  = big.NewInt(1 << 11)
+	applicationFieldLastSeenTime            = big.NewInt(1 << 12)
+	applicationFieldLastSeenTimeDt          = big.NewInt(1 << 13)
+	applicationFieldModifiedTime            = big.NewInt(1 << 14)
+	applicationFieldModifiedTimeDt          = big.NewInt(1 << 15)
+	applicationFieldName                    = big.NewInt(1 << 16)
+	applicationFieldOwner                   = big.NewInt(1 << 17)
+	applicationFieldProduct                 = big.NewInt(1 << 18)
+	applicationFieldProgrammaticCredentials = big.NewInt(1 << 19)
+	applicationFieldPublisherType           = big.NewInt(1 << 20)
+	applicationFieldPublisherTypeId         = big.NewInt(1 << 21)
+	applicationFieldRegion                  = big.NewInt(1 << 22)
+	applicationFieldRequestedAccessGrants   = big.NewInt(1 << 23)
+	applicationFieldResourceRelationship    = big.NewInt(1 << 24)
+	applicationFieldRiskLevel               = big.NewInt(1 << 25)
+	applicationFieldRiskLevelId             = big.NewInt(1 << 26)
+	applicationFieldRiskScore               = big.NewInt(1 << 27)
+	applicationFieldSbom                    = big.NewInt(1 << 28)
+	applicationFieldSrcUrl                  = big.NewInt(1 << 29)
+	applicationFieldSso                     = big.NewInt(1 << 30)
+	applicationFieldTags                    = big.NewInt(1 << 31)
+	applicationFieldType                    = big.NewInt(1 << 32)
+	applicationFieldUid                     = big.NewInt(1 << 33)
+	applicationFieldUidAlt                  = big.NewInt(1 << 34)
+	applicationFieldUrl                     = big.NewInt(1 << 35)
+	applicationFieldVersion                 = big.NewInt(1 << 36)
 )
 
 type Application struct {
@@ -3464,6 +3888,10 @@ type Application struct {
 	Group *Group `json:"group,omitempty" url:"group,omitempty"`
 	// The fully qualified name of the application.
 	Hostname *Hostname `json:"hostname,omitempty" url:"hostname,omitempty"`
+	// Indicates whether the application is disabled.
+	IsDisabled *bool `json:"is_disabled,omitempty" url:"is_disabled,omitempty"`
+	// Indicates whether the platform the application is registered in has verified its publisher.
+	IsPublisherVerified *bool `json:"is_publisher_verified,omitempty" url:"is_publisher_verified,omitempty"`
 	// The list of labels associated to the application.
 	Labels []string `json:"labels,omitempty" url:"labels,omitempty"`
 	// The most recent discovery time of the application.
@@ -3478,8 +3906,18 @@ type Application struct {
 	Name *string `json:"name,omitempty" url:"name,omitempty"`
 	// The identity of the service or user account that owns the application.
 	Owner *User `json:"owner,omitempty" url:"owner,omitempty"`
+	// The software product that this application is an instance of, carrying product identity such as <code>vendor_name</code>, <code>cpe_name</code>, and canonical <code>version</code>.
+	Product *Product `json:"product,omitempty" url:"product,omitempty"`
+	// The credentials registered for the application, such as client secrets and certificates.
+	ProgrammaticCredentials []*ProgrammaticCredential `json:"programmatic_credentials,omitempty" url:"programmatic_credentials,omitempty"`
+	// The application publisher type, normalized to the caption of the <code>publisher_type_id</code> value. In the case of 'Other', it is defined by the event source.
+	PublisherType *string `json:"publisher_type,omitempty" url:"publisher_type,omitempty"`
+	// The normalized identifier of the application's publisher type, relative to the organization or tenant the application is registered in or connected to.
+	PublisherTypeId *ApplicationPublisherTypeId `json:"publisher_type_id,omitempty" url:"publisher_type_id,omitempty"`
 	// The cloud region of the resource.
 	Region *string `json:"region,omitempty" url:"region,omitempty"`
+	// The access the application requests, whether or not it has been granted.
+	RequestedAccessGrants []*AccessGrant `json:"requested_access_grants,omitempty" url:"requested_access_grants,omitempty"`
 	// A graph representation showing how this application relates to and interacts with other entities in the environment. This can include parent/child relationships, dependencies, or other connections.
 	ResourceRelationship *Graph `json:"resource_relationship,omitempty" url:"resource_relationship,omitempty"`
 	// The risk level, normalized to the caption of the risk_level_id value.
@@ -3492,6 +3930,8 @@ type Application struct {
 	Sbom *Sbom `json:"sbom,omitempty" url:"sbom,omitempty"`
 	// URL pointing to the source of the application in the event source.
 	SrcUrl *UrlString `json:"src_url,omitempty" url:"src_url,omitempty"`
+	// The single sign-on configuration of the application.
+	Sso *Sso `json:"sso,omitempty" url:"sso,omitempty"`
 	// The list of tags; <code>{key:value}</code> pairs associated to the application.
 	Tags []*KeyValueObject `json:"tags,omitempty" url:"tags,omitempty"`
 	// The type of application as defined by the event source, e.g., <code>GitHub</code>, <code>Azure Logic App</code>, or <code>Amazon Elastic BeanStalk</code>.
@@ -3575,6 +4015,20 @@ func (a *Application) GetHostname() *Hostname {
 	return a.Hostname
 }
 
+func (a *Application) GetIsDisabled() *bool {
+	if a == nil {
+		return nil
+	}
+	return a.IsDisabled
+}
+
+func (a *Application) GetIsPublisherVerified() *bool {
+	if a == nil {
+		return nil
+	}
+	return a.IsPublisherVerified
+}
+
 func (a *Application) GetLabels() []string {
 	if a == nil {
 		return nil
@@ -3624,11 +4078,46 @@ func (a *Application) GetOwner() *User {
 	return a.Owner
 }
 
+func (a *Application) GetProduct() *Product {
+	if a == nil {
+		return nil
+	}
+	return a.Product
+}
+
+func (a *Application) GetProgrammaticCredentials() []*ProgrammaticCredential {
+	if a == nil {
+		return nil
+	}
+	return a.ProgrammaticCredentials
+}
+
+func (a *Application) GetPublisherType() *string {
+	if a == nil {
+		return nil
+	}
+	return a.PublisherType
+}
+
+func (a *Application) GetPublisherTypeId() *ApplicationPublisherTypeId {
+	if a == nil {
+		return nil
+	}
+	return a.PublisherTypeId
+}
+
 func (a *Application) GetRegion() *string {
 	if a == nil {
 		return nil
 	}
 	return a.Region
+}
+
+func (a *Application) GetRequestedAccessGrants() []*AccessGrant {
+	if a == nil {
+		return nil
+	}
+	return a.RequestedAccessGrants
 }
 
 func (a *Application) GetResourceRelationship() *Graph {
@@ -3671,6 +4160,13 @@ func (a *Application) GetSrcUrl() *UrlString {
 		return nil
 	}
 	return a.SrcUrl
+}
+
+func (a *Application) GetSso() *Sso {
+	if a == nil {
+		return nil
+	}
+	return a.Sso
 }
 
 func (a *Application) GetTags() []*KeyValueObject {
@@ -3792,6 +4288,20 @@ func (a *Application) SetHostname(hostname *Hostname) {
 	a.require(applicationFieldHostname)
 }
 
+// SetIsDisabled sets the IsDisabled field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (a *Application) SetIsDisabled(isDisabled *bool) {
+	a.IsDisabled = isDisabled
+	a.require(applicationFieldIsDisabled)
+}
+
+// SetIsPublisherVerified sets the IsPublisherVerified field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (a *Application) SetIsPublisherVerified(isPublisherVerified *bool) {
+	a.IsPublisherVerified = isPublisherVerified
+	a.require(applicationFieldIsPublisherVerified)
+}
+
 // SetLabels sets the Labels field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
 func (a *Application) SetLabels(labels []string) {
@@ -3841,11 +4351,46 @@ func (a *Application) SetOwner(owner *User) {
 	a.require(applicationFieldOwner)
 }
 
+// SetProduct sets the Product field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (a *Application) SetProduct(product *Product) {
+	a.Product = product
+	a.require(applicationFieldProduct)
+}
+
+// SetProgrammaticCredentials sets the ProgrammaticCredentials field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (a *Application) SetProgrammaticCredentials(programmaticCredentials []*ProgrammaticCredential) {
+	a.ProgrammaticCredentials = programmaticCredentials
+	a.require(applicationFieldProgrammaticCredentials)
+}
+
+// SetPublisherType sets the PublisherType field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (a *Application) SetPublisherType(publisherType *string) {
+	a.PublisherType = publisherType
+	a.require(applicationFieldPublisherType)
+}
+
+// SetPublisherTypeId sets the PublisherTypeId field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (a *Application) SetPublisherTypeId(publisherTypeId *ApplicationPublisherTypeId) {
+	a.PublisherTypeId = publisherTypeId
+	a.require(applicationFieldPublisherTypeId)
+}
+
 // SetRegion sets the Region field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
 func (a *Application) SetRegion(region *string) {
 	a.Region = region
 	a.require(applicationFieldRegion)
+}
+
+// SetRequestedAccessGrants sets the RequestedAccessGrants field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (a *Application) SetRequestedAccessGrants(requestedAccessGrants []*AccessGrant) {
+	a.RequestedAccessGrants = requestedAccessGrants
+	a.require(applicationFieldRequestedAccessGrants)
 }
 
 // SetResourceRelationship sets the ResourceRelationship field and marks it as non-optional;
@@ -3888,6 +4433,13 @@ func (a *Application) SetSbom(sbom *Sbom) {
 func (a *Application) SetSrcUrl(srcUrl *UrlString) {
 	a.SrcUrl = srcUrl
 	a.require(applicationFieldSrcUrl)
+}
+
+// SetSso sets the Sso field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (a *Application) SetSso(sso *Sso) {
+	a.Sso = sso
+	a.require(applicationFieldSso)
 }
 
 // SetTags sets the Tags field and marks it as non-optional;
@@ -3993,6 +4545,14 @@ func (a *Application) String() string {
 	}
 	return fmt.Sprintf("%#v", a)
 }
+
+// ApplicationPublisherTypeId is an enum, and the following values are allowed.
+// 0 - Unknown: The publisher type is unknown.
+// 1 - PlatformVendor: Published by the vendor of the platform the entity is registered in or runs on.
+// 2 - Internal: Published by the organization or tenant itself.
+// 3 - ThirdParty: Published by another organization.
+// 99 - Other: The publisher type is not mapped. See the <code>publisher_type</code> attribute, which contains a data source specific value.
+type ApplicationPublisherTypeId = int
 
 // ApplicationRiskLevelId is an enum, and the following values are allowed.
 // 0 - Info
@@ -22810,6 +23370,228 @@ func (h *HttpResponse) String() string {
 	return fmt.Sprintf("%#v", h)
 }
 
+// The IAM Role object describes permission characteristics (or privileges) associated with a user or group of users as security principals against one or more resources. In some cases only the name or ID of the role is known hence other attributes are optional. In some systems a user or group of users can have multiple roles, imparting the union of privileges to the principal. In some systems the role can serve as a temporary security principal without its own credentials on behalf of the actual security principal.
+var (
+	iamRoleFieldAccount                 = big.NewInt(1 << 0)
+	iamRoleFieldName                    = big.NewInt(1 << 1)
+	iamRoleFieldPolicies                = big.NewInt(1 << 2)
+	iamRoleFieldPrivileges              = big.NewInt(1 << 3)
+	iamRoleFieldProgrammaticCredentials = big.NewInt(1 << 4)
+	iamRoleFieldResources               = big.NewInt(1 << 5)
+	iamRoleFieldSession                 = big.NewInt(1 << 6)
+	iamRoleFieldUid                     = big.NewInt(1 << 7)
+	iamRoleFieldUidAlt                  = big.NewInt(1 << 8)
+)
+
+type IamRole struct {
+	// The account associated with the role. For example, can be a cross-account role, different from the user or group account, granting access within this account.
+	Account *Account `json:"account,omitempty" url:"account,omitempty"`
+	// The role name. For example, <code>Power Users</code>.
+	Name *string `json:"name,omitempty" url:"name,omitempty"`
+	// IAM policies associated with the role.
+	Policies []*Policy `json:"policies,omitempty" url:"policies,omitempty"`
+	// List of privileges assigned to a role.
+	Privileges []string `json:"privileges,omitempty" url:"privileges,omitempty"`
+	// Programmatic credential (API keys, access tokens, certificates, etc) associated with the role.
+	ProgrammaticCredentials []*ProgrammaticCredential `json:"programmatic_credentials,omitempty" url:"programmatic_credentials,omitempty"`
+	// Resources that the role applies to.
+	Resources []*ResourceDetails `json:"resources,omitempty" url:"resources,omitempty"`
+	// The session where the role is active. Some roles may be temporary and expire when the session expires.
+	Session *Session `json:"session,omitempty" url:"session,omitempty"`
+	// The unique role identifier. For example, the Windows role SID, or AWS role ARN.
+	Uid *string `json:"uid,omitempty" url:"uid,omitempty"`
+	// The alternate user identifier. For example, the Active Directory role GUID or the associated LDAP group DN.
+	UidAlt *string `json:"uid_alt,omitempty" url:"uid_alt,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (i *IamRole) GetAccount() *Account {
+	if i == nil {
+		return nil
+	}
+	return i.Account
+}
+
+func (i *IamRole) GetName() *string {
+	if i == nil {
+		return nil
+	}
+	return i.Name
+}
+
+func (i *IamRole) GetPolicies() []*Policy {
+	if i == nil {
+		return nil
+	}
+	return i.Policies
+}
+
+func (i *IamRole) GetPrivileges() []string {
+	if i == nil {
+		return nil
+	}
+	return i.Privileges
+}
+
+func (i *IamRole) GetProgrammaticCredentials() []*ProgrammaticCredential {
+	if i == nil {
+		return nil
+	}
+	return i.ProgrammaticCredentials
+}
+
+func (i *IamRole) GetResources() []*ResourceDetails {
+	if i == nil {
+		return nil
+	}
+	return i.Resources
+}
+
+func (i *IamRole) GetSession() *Session {
+	if i == nil {
+		return nil
+	}
+	return i.Session
+}
+
+func (i *IamRole) GetUid() *string {
+	if i == nil {
+		return nil
+	}
+	return i.Uid
+}
+
+func (i *IamRole) GetUidAlt() *string {
+	if i == nil {
+		return nil
+	}
+	return i.UidAlt
+}
+
+func (i *IamRole) GetExtraProperties() map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	return i.extraProperties
+}
+
+func (i *IamRole) require(field *big.Int) {
+	if i.explicitFields == nil {
+		i.explicitFields = big.NewInt(0)
+	}
+	i.explicitFields.Or(i.explicitFields, field)
+}
+
+// SetAccount sets the Account field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (i *IamRole) SetAccount(account *Account) {
+	i.Account = account
+	i.require(iamRoleFieldAccount)
+}
+
+// SetName sets the Name field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (i *IamRole) SetName(name *string) {
+	i.Name = name
+	i.require(iamRoleFieldName)
+}
+
+// SetPolicies sets the Policies field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (i *IamRole) SetPolicies(policies []*Policy) {
+	i.Policies = policies
+	i.require(iamRoleFieldPolicies)
+}
+
+// SetPrivileges sets the Privileges field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (i *IamRole) SetPrivileges(privileges []string) {
+	i.Privileges = privileges
+	i.require(iamRoleFieldPrivileges)
+}
+
+// SetProgrammaticCredentials sets the ProgrammaticCredentials field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (i *IamRole) SetProgrammaticCredentials(programmaticCredentials []*ProgrammaticCredential) {
+	i.ProgrammaticCredentials = programmaticCredentials
+	i.require(iamRoleFieldProgrammaticCredentials)
+}
+
+// SetResources sets the Resources field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (i *IamRole) SetResources(resources []*ResourceDetails) {
+	i.Resources = resources
+	i.require(iamRoleFieldResources)
+}
+
+// SetSession sets the Session field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (i *IamRole) SetSession(session *Session) {
+	i.Session = session
+	i.require(iamRoleFieldSession)
+}
+
+// SetUid sets the Uid field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (i *IamRole) SetUid(uid *string) {
+	i.Uid = uid
+	i.require(iamRoleFieldUid)
+}
+
+// SetUidAlt sets the UidAlt field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (i *IamRole) SetUidAlt(uidAlt *string) {
+	i.UidAlt = uidAlt
+	i.require(iamRoleFieldUidAlt)
+}
+
+func (i *IamRole) UnmarshalJSON(data []byte) error {
+	type unmarshaler IamRole
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*i = IamRole(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *i)
+	if err != nil {
+		return err
+	}
+	i.extraProperties = extraProperties
+	i.rawJSON = nil
+	return nil
+}
+
+func (i *IamRole) MarshalJSON() ([]byte, error) {
+	type embed IamRole
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*i),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, i.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (i *IamRole) String() string {
+	if i == nil {
+		return "<nil>"
+	}
+	if len(i.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(i.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(i); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", i)
+}
+
 // The Identity Activity Metrics object captures usage patterns, authentication activity, credential usage and other metrics for identities across cloud and on-premises environments. Example identities include AWS IAM Users, Roles, Azure AD Principals, GCP Service Accounts, on-premises Active Directory accounts.
 var (
 	identityActivityMetricsFieldFirstSeenTime            = big.NewInt(1 << 0)
@@ -35651,6 +36433,203 @@ func (p *PortInfo) String() string {
 	return fmt.Sprintf("%#v", p)
 }
 
+// The Principal object describes the security principal that holds access: a user, a group, an application, or every user in an organization or tenant.
+var (
+	principalFieldApplication = big.NewInt(1 << 0)
+	principalFieldGroup       = big.NewInt(1 << 1)
+	principalFieldName        = big.NewInt(1 << 2)
+	principalFieldType        = big.NewInt(1 << 3)
+	principalFieldTypeId      = big.NewInt(1 << 4)
+	principalFieldUid         = big.NewInt(1 << 5)
+	principalFieldUser        = big.NewInt(1 << 6)
+)
+
+type Principal struct {
+	// The application that holds access.
+	Application *Application `json:"application,omitempty" url:"application,omitempty"`
+	// The group that holds access.
+	Group *Group `json:"group,omitempty" url:"group,omitempty"`
+	// The name of the principal.
+	Name *string `json:"name,omitempty" url:"name,omitempty"`
+	// The principal type, normalized to the caption of the <code>type_id</code> value. In the case of 'Other', it is defined by the event source.
+	Type *string `json:"type,omitempty" url:"type,omitempty"`
+	// The normalized identifier of the principal type.
+	TypeId PrincipalTypeId `json:"type_id" url:"type_id"`
+	// The unique identifier of the principal.
+	Uid *string `json:"uid,omitempty" url:"uid,omitempty"`
+	// The user that holds access.
+	User *User `json:"user,omitempty" url:"user,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (p *Principal) GetApplication() *Application {
+	if p == nil {
+		return nil
+	}
+	return p.Application
+}
+
+func (p *Principal) GetGroup() *Group {
+	if p == nil {
+		return nil
+	}
+	return p.Group
+}
+
+func (p *Principal) GetName() *string {
+	if p == nil {
+		return nil
+	}
+	return p.Name
+}
+
+func (p *Principal) GetType() *string {
+	if p == nil {
+		return nil
+	}
+	return p.Type
+}
+
+func (p *Principal) GetTypeId() PrincipalTypeId {
+	if p == nil {
+		return 0
+	}
+	return p.TypeId
+}
+
+func (p *Principal) GetUid() *string {
+	if p == nil {
+		return nil
+	}
+	return p.Uid
+}
+
+func (p *Principal) GetUser() *User {
+	if p == nil {
+		return nil
+	}
+	return p.User
+}
+
+func (p *Principal) GetExtraProperties() map[string]interface{} {
+	if p == nil {
+		return nil
+	}
+	return p.extraProperties
+}
+
+func (p *Principal) require(field *big.Int) {
+	if p.explicitFields == nil {
+		p.explicitFields = big.NewInt(0)
+	}
+	p.explicitFields.Or(p.explicitFields, field)
+}
+
+// SetApplication sets the Application field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (p *Principal) SetApplication(application *Application) {
+	p.Application = application
+	p.require(principalFieldApplication)
+}
+
+// SetGroup sets the Group field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (p *Principal) SetGroup(group *Group) {
+	p.Group = group
+	p.require(principalFieldGroup)
+}
+
+// SetName sets the Name field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (p *Principal) SetName(name *string) {
+	p.Name = name
+	p.require(principalFieldName)
+}
+
+// SetType sets the Type field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (p *Principal) SetType(type_ *string) {
+	p.Type = type_
+	p.require(principalFieldType)
+}
+
+// SetTypeId sets the TypeId field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (p *Principal) SetTypeId(typeId PrincipalTypeId) {
+	p.TypeId = typeId
+	p.require(principalFieldTypeId)
+}
+
+// SetUid sets the Uid field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (p *Principal) SetUid(uid *string) {
+	p.Uid = uid
+	p.require(principalFieldUid)
+}
+
+// SetUser sets the User field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (p *Principal) SetUser(user *User) {
+	p.User = user
+	p.require(principalFieldUser)
+}
+
+func (p *Principal) UnmarshalJSON(data []byte) error {
+	type unmarshaler Principal
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*p = Principal(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *p)
+	if err != nil {
+		return err
+	}
+	p.extraProperties = extraProperties
+	p.rawJSON = nil
+	return nil
+}
+
+func (p *Principal) MarshalJSON() ([]byte, error) {
+	type embed Principal
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*p),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, p.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (p *Principal) String() string {
+	if p == nil {
+		return "<nil>"
+	}
+	if len(p.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(p.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(p); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", p)
+}
+
+// PrincipalTypeId is an enum, and the following values are allowed.
+// 0 - Unknown: The principal type is unknown.
+// 1 - User: A user, including a service account the data source models as a user. See <code>user.type_id</code>.
+// 2 - Group: A group.
+// 3 - Application: An application. For example, a service principal or managed identity.
+// 4 - AllUsers: Every user in the organization or tenant. Not public or anonymous access.
+// 99 - Other: The principal type is not mapped. See the <code>type</code> attribute, which contains a data source specific value.
+type PrincipalTypeId = int
+
 // The Privilege Attack Info object groups privileges by the potential attack they could enable. It maps specific privileges to MITRE ATT&CK techniques, helping identify security risks associated with granted permissions.
 var (
 	privilegeAttackInfoFieldAttack            = big.NewInt(1 << 0)
@@ -36895,19 +37874,37 @@ func (p *Product) String() string {
 
 // The Programmatic Credential object describes service-specific credentials used for direct API access and system integration. These credentials are typically issued by individual services or platforms for accessing their APIs and resources, focusing on credential lifecycle management and usage tracking. Examples include API keys, service account keys, client certificates, and vendor-specific access tokens.
 var (
-	programmaticCredentialFieldLastUsedTime   = big.NewInt(1 << 0)
-	programmaticCredentialFieldLastUsedTimeDt = big.NewInt(1 << 1)
-	programmaticCredentialFieldType           = big.NewInt(1 << 2)
-	programmaticCredentialFieldUid            = big.NewInt(1 << 3)
+	programmaticCredentialFieldCreatedTime      = big.NewInt(1 << 0)
+	programmaticCredentialFieldCreatedTimeDt    = big.NewInt(1 << 1)
+	programmaticCredentialFieldExpirationTime   = big.NewInt(1 << 2)
+	programmaticCredentialFieldExpirationTimeDt = big.NewInt(1 << 3)
+	programmaticCredentialFieldLastUsedTime     = big.NewInt(1 << 4)
+	programmaticCredentialFieldLastUsedTimeDt   = big.NewInt(1 << 5)
+	programmaticCredentialFieldName             = big.NewInt(1 << 6)
+	programmaticCredentialFieldType             = big.NewInt(1 << 7)
+	programmaticCredentialFieldTypeId           = big.NewInt(1 << 8)
+	programmaticCredentialFieldUid              = big.NewInt(1 << 9)
 )
 
 type ProgrammaticCredential struct {
+	// The time when the credential was created or became valid.
+	CreatedTime *Timestamp `json:"created_time,omitempty" url:"created_time,omitempty"`
+	// The time when the credential was created or became valid.
+	CreatedTimeDt *time.Time `json:"created_time_dt,omitempty" url:"created_time_dt,omitempty"`
+	// The time when the credential expires.
+	ExpirationTime *Timestamp `json:"expiration_time,omitempty" url:"expiration_time,omitempty"`
+	// The time when the credential expires.
+	ExpirationTimeDt *time.Time `json:"expiration_time_dt,omitempty" url:"expiration_time_dt,omitempty"`
 	// The timestamp when this programmatic credential was last used for authentication or API access. This helps track credential usage patterns, identify dormant credentials that may pose security risks, and support credential lifecycle management. The timestamp should reflect the most recent successful authentication or API call using this credential.
 	LastUsedTime *Timestamp `json:"last_used_time,omitempty" url:"last_used_time,omitempty"`
 	// The timestamp when this programmatic credential was last used for authentication or API access. This helps track credential usage patterns, identify dormant credentials that may pose security risks, and support credential lifecycle management. The timestamp should reflect the most recent successful authentication or API call using this credential.
 	LastUsedTimeDt *time.Time `json:"last_used_time_dt,omitempty" url:"last_used_time_dt,omitempty"`
-	// The type or category of programmatic credential, normalized to the caption of the type_id value. In the case of 'Other', it is defined by the event source. Examples include 'API Key', 'Service Account Key', 'Access Token', 'Client Certificate', 'OAuth Token', 'Personal Access Token', etc.
+	// The display name of the credential.
+	Name *string `json:"name,omitempty" url:"name,omitempty"`
+	// The credential type, normalized to the caption of the <code>type_id</code> value. In the case of 'Other', it is defined by the event source.
 	Type *string `json:"type,omitempty" url:"type,omitempty"`
+	// The normalized identifier of the programmatic credential type.
+	TypeId *ProgrammaticCredentialTypeId `json:"type_id,omitempty" url:"type_id,omitempty"`
 	// The unique identifier of the programmatic credential. This could be an API key ID, service account key ID, access token identifier, certificate serial number, or other unique identifier that distinguishes this credential from others. Examples: AWS Access Key ID, GCP Service Account Key ID, Azure Application ID, or OAuth2 token identifier.
 	Uid string `json:"uid" url:"uid"`
 
@@ -36916,6 +37913,34 @@ type ProgrammaticCredential struct {
 
 	extraProperties map[string]interface{}
 	rawJSON         json.RawMessage
+}
+
+func (p *ProgrammaticCredential) GetCreatedTime() *Timestamp {
+	if p == nil {
+		return nil
+	}
+	return p.CreatedTime
+}
+
+func (p *ProgrammaticCredential) GetCreatedTimeDt() *time.Time {
+	if p == nil {
+		return nil
+	}
+	return p.CreatedTimeDt
+}
+
+func (p *ProgrammaticCredential) GetExpirationTime() *Timestamp {
+	if p == nil {
+		return nil
+	}
+	return p.ExpirationTime
+}
+
+func (p *ProgrammaticCredential) GetExpirationTimeDt() *time.Time {
+	if p == nil {
+		return nil
+	}
+	return p.ExpirationTimeDt
 }
 
 func (p *ProgrammaticCredential) GetLastUsedTime() *Timestamp {
@@ -36932,11 +37957,25 @@ func (p *ProgrammaticCredential) GetLastUsedTimeDt() *time.Time {
 	return p.LastUsedTimeDt
 }
 
+func (p *ProgrammaticCredential) GetName() *string {
+	if p == nil {
+		return nil
+	}
+	return p.Name
+}
+
 func (p *ProgrammaticCredential) GetType() *string {
 	if p == nil {
 		return nil
 	}
 	return p.Type
+}
+
+func (p *ProgrammaticCredential) GetTypeId() *ProgrammaticCredentialTypeId {
+	if p == nil {
+		return nil
+	}
+	return p.TypeId
 }
 
 func (p *ProgrammaticCredential) GetUid() string {
@@ -36960,6 +37999,34 @@ func (p *ProgrammaticCredential) require(field *big.Int) {
 	p.explicitFields.Or(p.explicitFields, field)
 }
 
+// SetCreatedTime sets the CreatedTime field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (p *ProgrammaticCredential) SetCreatedTime(createdTime *Timestamp) {
+	p.CreatedTime = createdTime
+	p.require(programmaticCredentialFieldCreatedTime)
+}
+
+// SetCreatedTimeDt sets the CreatedTimeDt field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (p *ProgrammaticCredential) SetCreatedTimeDt(createdTimeDt *time.Time) {
+	p.CreatedTimeDt = createdTimeDt
+	p.require(programmaticCredentialFieldCreatedTimeDt)
+}
+
+// SetExpirationTime sets the ExpirationTime field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (p *ProgrammaticCredential) SetExpirationTime(expirationTime *Timestamp) {
+	p.ExpirationTime = expirationTime
+	p.require(programmaticCredentialFieldExpirationTime)
+}
+
+// SetExpirationTimeDt sets the ExpirationTimeDt field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (p *ProgrammaticCredential) SetExpirationTimeDt(expirationTimeDt *time.Time) {
+	p.ExpirationTimeDt = expirationTimeDt
+	p.require(programmaticCredentialFieldExpirationTimeDt)
+}
+
 // SetLastUsedTime sets the LastUsedTime field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
 func (p *ProgrammaticCredential) SetLastUsedTime(lastUsedTime *Timestamp) {
@@ -36974,11 +38041,25 @@ func (p *ProgrammaticCredential) SetLastUsedTimeDt(lastUsedTimeDt *time.Time) {
 	p.require(programmaticCredentialFieldLastUsedTimeDt)
 }
 
+// SetName sets the Name field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (p *ProgrammaticCredential) SetName(name *string) {
+	p.Name = name
+	p.require(programmaticCredentialFieldName)
+}
+
 // SetType sets the Type field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
 func (p *ProgrammaticCredential) SetType(type_ *string) {
 	p.Type = type_
 	p.require(programmaticCredentialFieldType)
+}
+
+// SetTypeId sets the TypeId field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (p *ProgrammaticCredential) SetTypeId(typeId *ProgrammaticCredentialTypeId) {
+	p.TypeId = typeId
+	p.require(programmaticCredentialFieldTypeId)
 }
 
 // SetUid sets the Uid field and marks it as non-optional;
@@ -36992,7 +38073,9 @@ func (p *ProgrammaticCredential) UnmarshalJSON(data []byte) error {
 	type embed ProgrammaticCredential
 	var unmarshaler = struct {
 		embed
-		LastUsedTimeDt *internal.DateTime `json:"last_used_time_dt,omitempty"`
+		CreatedTimeDt    *internal.DateTime `json:"created_time_dt,omitempty"`
+		ExpirationTimeDt *internal.DateTime `json:"expiration_time_dt,omitempty"`
+		LastUsedTimeDt   *internal.DateTime `json:"last_used_time_dt,omitempty"`
 	}{
 		embed: embed(*p),
 	}
@@ -37000,6 +38083,8 @@ func (p *ProgrammaticCredential) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*p = ProgrammaticCredential(unmarshaler.embed)
+	p.CreatedTimeDt = unmarshaler.CreatedTimeDt.TimePtr()
+	p.ExpirationTimeDt = unmarshaler.ExpirationTimeDt.TimePtr()
 	p.LastUsedTimeDt = unmarshaler.LastUsedTimeDt.TimePtr()
 	extraProperties, err := internal.ExtractExtraProperties(data, *p)
 	if err != nil {
@@ -37014,10 +38099,14 @@ func (p *ProgrammaticCredential) MarshalJSON() ([]byte, error) {
 	type embed ProgrammaticCredential
 	var marshaler = struct {
 		embed
-		LastUsedTimeDt *internal.DateTime `json:"last_used_time_dt,omitempty"`
+		CreatedTimeDt    *internal.DateTime `json:"created_time_dt,omitempty"`
+		ExpirationTimeDt *internal.DateTime `json:"expiration_time_dt,omitempty"`
+		LastUsedTimeDt   *internal.DateTime `json:"last_used_time_dt,omitempty"`
 	}{
-		embed:          embed(*p),
-		LastUsedTimeDt: internal.NewOptionalDateTime(p.LastUsedTimeDt),
+		embed:            embed(*p),
+		CreatedTimeDt:    internal.NewOptionalDateTime(p.CreatedTimeDt),
+		ExpirationTimeDt: internal.NewOptionalDateTime(p.ExpirationTimeDt),
+		LastUsedTimeDt:   internal.NewOptionalDateTime(p.LastUsedTimeDt),
 	}
 	explicitMarshaler := internal.HandleExplicitFields(marshaler, p.explicitFields)
 	return json.Marshal(explicitMarshaler)
@@ -37037,6 +38126,17 @@ func (p *ProgrammaticCredential) String() string {
 	}
 	return fmt.Sprintf("%#v", p)
 }
+
+// ProgrammaticCredentialTypeId is an enum, and the following values are allowed.
+// 0 - Unknown: The credential type is unknown.
+// 1 - APIKey: An API key.
+// 2 - ClientSecret: A client secret or password registered for an application.
+// 3 - Certificate: A certificate or public key registered for the credential holder. For example, a client authentication certificate or a token-signing certificate.
+// 4 - AccessToken: An access token issued through an OAuth or similar authorization flow.
+// 5 - ServiceAccountKey: A key issued for a service account.
+// 6 - PersonalAccessToken: A token a user issues for themselves to access an API.
+// 99 - Other: The credential type is not mapped. See the <code>type</code> attribute, which contains a data source specific value.
+type ProgrammaticCredentialTypeId = int
 
 // The specific resulting evidence information that was queried or discovered. When mapping raw telemetry data users should select the appropriate child object that best matches the evidence type as defined by query_type_id.
 var (

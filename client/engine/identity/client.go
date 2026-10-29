@@ -87,6 +87,40 @@ func (c *Client) QueryRiskyUsers(
     return response.Body, nil
 }
 
+// Returns the applications registered in, or connected to, the identity provider, such as SSO applications, OAuth and OIDC clients, service principals and installed apps, each normalized to an OCSF Application Inventory Info event. A provider that keeps more than one kind of record for an application returns each as its own record, distinguished by `application.type`.
+func (c *Client) QueryApplications(
+    ctx context.Context,
+    request *engine.QueryIdentityApplicationsRequest,
+    opts ...option.RequestOption,
+) (*engine.QueryIdentityApplicationsResponse, error){
+    response, err := c.WithRawResponse.QueryApplications(
+        ctx,
+        request,
+        opts...,
+    )
+    if err != nil {
+        return nil, err
+    }
+    return response.Body, nil
+}
+
+// Returns the standing access that principals hold in the identity provider, normalized to OCSF Access Grant Inventory Info events. A grant is a delegated permission (an application acting on behalf of a signed-in user), an application permission (an application acting as itself), or an assignment (a user, group or application assigned to an application or resource).
+func (c *Client) QueryAccessGrants(
+    ctx context.Context,
+    request *engine.QueryIdentityAccessGrantsRequest,
+    opts ...option.RequestOption,
+) (*engine.QueryIdentityAccessGrantsResponse, error){
+    response, err := c.WithRawResponse.QueryAccessGrants(
+        ctx,
+        request,
+        opts...,
+    )
+    if err != nil {
+        return nil, err
+    }
+    return response.Body, nil
+}
+
 // Returns a list of `User` objects wrapped in the OCSF Entity Management event of type Read from the token-linked identity provider.
 func (c *Client) QueryUsers(
     ctx context.Context,

@@ -182,6 +182,104 @@ func (r *RawClient) QueryRiskyUsers(
     }, nil
 }
 
+func (r *RawClient) QueryApplications(
+    ctx context.Context,
+    request *engine.QueryIdentityApplicationsRequest,
+    opts ...option.RequestOption,
+) (*core.Response[*engine.QueryIdentityApplicationsResponse], error){
+    options := core.NewRequestOptions(opts...)
+    baseURL := internal.ResolveBaseURL(
+        options.BaseURL,
+        r.baseURL,
+        "https://api.synqly.com",
+    )
+    endpointURL := baseURL + "/v1/identity/applications"
+    queryParams, err := internal.QueryValues(request)
+    if err != nil {
+        return nil, err
+    }
+    if len(queryParams) > 0 {
+        endpointURL += "?" + queryParams.Encode()
+    }
+    headers := internal.MergeHeaders(
+        r.options.ToHeader(),
+        options.ToHeader(),
+    )
+    var response *engine.QueryIdentityApplicationsResponse
+    raw, err := r.caller.Call(
+        ctx,
+        &internal.CallParams{
+            URL: endpointURL,
+            Method: http.MethodGet,
+            Headers: headers,
+            MaxAttempts: options.MaxAttempts,
+            DisableRetries: options.DisableRetries,
+            BodyProperties: options.BodyProperties,
+            QueryParameters: options.QueryParameters,
+            Client: options.HTTPClient,
+            Response: &response,
+            ErrorDecoder: internal.NewErrorDecoder(engine.ErrorCodes),
+        },
+    )
+    if err != nil {
+        return nil, err
+    }
+    return &core.Response[*engine.QueryIdentityApplicationsResponse]{
+        StatusCode: raw.StatusCode,
+        Header: raw.Header,
+        Body: response,
+    }, nil
+}
+
+func (r *RawClient) QueryAccessGrants(
+    ctx context.Context,
+    request *engine.QueryIdentityAccessGrantsRequest,
+    opts ...option.RequestOption,
+) (*core.Response[*engine.QueryIdentityAccessGrantsResponse], error){
+    options := core.NewRequestOptions(opts...)
+    baseURL := internal.ResolveBaseURL(
+        options.BaseURL,
+        r.baseURL,
+        "https://api.synqly.com",
+    )
+    endpointURL := baseURL + "/v1/identity/access-grants"
+    queryParams, err := internal.QueryValues(request)
+    if err != nil {
+        return nil, err
+    }
+    if len(queryParams) > 0 {
+        endpointURL += "?" + queryParams.Encode()
+    }
+    headers := internal.MergeHeaders(
+        r.options.ToHeader(),
+        options.ToHeader(),
+    )
+    var response *engine.QueryIdentityAccessGrantsResponse
+    raw, err := r.caller.Call(
+        ctx,
+        &internal.CallParams{
+            URL: endpointURL,
+            Method: http.MethodGet,
+            Headers: headers,
+            MaxAttempts: options.MaxAttempts,
+            DisableRetries: options.DisableRetries,
+            BodyProperties: options.BodyProperties,
+            QueryParameters: options.QueryParameters,
+            Client: options.HTTPClient,
+            Response: &response,
+            ErrorDecoder: internal.NewErrorDecoder(engine.ErrorCodes),
+        },
+    )
+    if err != nil {
+        return nil, err
+    }
+    return &core.Response[*engine.QueryIdentityAccessGrantsResponse]{
+        StatusCode: raw.StatusCode,
+        Header: raw.Header,
+        Body: response,
+    }, nil
+}
+
 func (r *RawClient) QueryUsers(
     ctx context.Context,
     request *engine.QueryUserRequest,

@@ -98,6 +98,8 @@ const (
 	OperationIdIdentityGetGroupMembers                          OperationId = "identity_get_group_members"
 	OperationIdIdentityGetUser                                  OperationId = "identity_get_user"
 	OperationIdIdentityGetUserPicture                           OperationId = "identity_get_user_picture"
+	OperationIdIdentityQueryAccessGrants                        OperationId = "identity_query_access_grants"
+	OperationIdIdentityQueryApplications                        OperationId = "identity_query_applications"
 	OperationIdIdentityQueryAuditLog                            OperationId = "identity_query_audit_log"
 	OperationIdIdentityQueryGroups                              OperationId = "identity_query_groups"
 	OperationIdIdentityQueryRiskEvents                          OperationId = "identity_query_risk_events"
@@ -351,6 +353,10 @@ func NewOperationIdFromString(s string) (OperationId, error) {
 		return OperationIdIdentityGetUser, nil
 	case "identity_get_user_picture":
 		return OperationIdIdentityGetUserPicture, nil
+	case "identity_query_access_grants":
+		return OperationIdIdentityQueryAccessGrants, nil
+	case "identity_query_applications":
+		return OperationIdIdentityQueryApplications, nil
 	case "identity_query_audit_log":
 		return OperationIdIdentityQueryAuditLog, nil
 	case "identity_query_groups":

@@ -37,6 +37,7 @@ import (
 	emailactivity "github.com/synqly/go-sdk/v2/client/engine/ocsf/v160/emailactivity"
 	filehostingactivity "github.com/synqly/go-sdk/v2/client/engine/ocsf/v160/filehostingactivity"
 	httpactivity "github.com/synqly/go-sdk/v2/client/engine/ocsf/v160/httpactivity"
+	accessgrantinventoryinfo "github.com/synqly/go-sdk/v2/client/engine/ocsf/v180/accessgrantinventoryinfo"
 	applicationinventoryinfo "github.com/synqly/go-sdk/v2/client/engine/ocsf/v180/applicationinventoryinfo"
 	applicationsecurityposturefinding "github.com/synqly/go-sdk/v2/client/engine/ocsf/v180/applicationsecurityposturefinding"
 	chatmessageactivity "github.com/synqly/go-sdk/v2/client/engine/ocsf/v180/chatmessageactivity"
@@ -91,6 +92,7 @@ type Event struct {
 	ChatMessageActivity               *chatmessageactivity.ChatMessageActivity
 	ConversationActivity              *conversationactivity.ConversationActivity
 	ApplicationInventoryInfo          *applicationinventoryinfo.ApplicationInventoryInfo
+	AccessGrantInventoryInfo          *accessgrantinventoryinfo.AccessGrantInventoryInfo
 	ComplianceControlInventoryInfo    *compliancecontrolinventoryinfo.ComplianceControlInventoryInfo
 	ComplianceFrameworkInventoryInfo  *complianceframeworkinventoryinfo.ComplianceFrameworkInventoryInfo
 	ComplianceTestInventoryInfo       *compliancetestinventoryinfo.ComplianceTestInventoryInfo
@@ -361,6 +363,13 @@ func (e *Event) GetApplicationInventoryInfo() *applicationinventoryinfo.Applicat
 		return nil
 	}
 	return e.ApplicationInventoryInfo
+}
+
+func (e *Event) GetAccessGrantInventoryInfo() *accessgrantinventoryinfo.AccessGrantInventoryInfo {
+	if e == nil {
+		return nil
+	}
+	return e.AccessGrantInventoryInfo
 }
 
 func (e *Event) GetComplianceControlInventoryInfo() *compliancecontrolinventoryinfo.ComplianceControlInventoryInfo {
@@ -654,6 +663,12 @@ func (e *Event) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		e.ApplicationInventoryInfo = value
+	case "Access Grant Inventory Info":
+		value := new(accessgrantinventoryinfo.AccessGrantInventoryInfo)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.AccessGrantInventoryInfo = value
 	case "Compliance Control Inventory Info":
 		value := new(compliancecontrolinventoryinfo.ComplianceControlInventoryInfo)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -825,6 +840,9 @@ func (e Event) MarshalJSON() ([]byte, error) {
 	if e.ApplicationInventoryInfo != nil {
 		return internal.MarshalJSONWithExtraProperty(e.ApplicationInventoryInfo, "class_name", "Application Inventory Info")
 	}
+	if e.AccessGrantInventoryInfo != nil {
+		return internal.MarshalJSONWithExtraProperty(e.AccessGrantInventoryInfo, "class_name", "Access Grant Inventory Info")
+	}
 	if e.ComplianceControlInventoryInfo != nil {
 		return internal.MarshalJSONWithExtraProperty(e.ComplianceControlInventoryInfo, "class_name", "Compliance Control Inventory Info")
 	}
@@ -895,6 +913,7 @@ type EventVisitor interface {
 	VisitChatMessageActivity(*chatmessageactivity.ChatMessageActivity) error
 	VisitConversationActivity(*conversationactivity.ConversationActivity) error
 	VisitApplicationInventoryInfo(*applicationinventoryinfo.ApplicationInventoryInfo) error
+	VisitAccessGrantInventoryInfo(*accessgrantinventoryinfo.AccessGrantInventoryInfo) error
 	VisitComplianceControlInventoryInfo(*compliancecontrolinventoryinfo.ComplianceControlInventoryInfo) error
 	VisitComplianceFrameworkInventoryInfo(*complianceframeworkinventoryinfo.ComplianceFrameworkInventoryInfo) error
 	VisitComplianceTestInventoryInfo(*compliancetestinventoryinfo.ComplianceTestInventoryInfo) error
@@ -1014,6 +1033,9 @@ func (e *Event) Accept(visitor EventVisitor) error {
 	}
 	if e.ApplicationInventoryInfo != nil {
 		return visitor.VisitApplicationInventoryInfo(e.ApplicationInventoryInfo)
+	}
+	if e.AccessGrantInventoryInfo != nil {
+		return visitor.VisitAccessGrantInventoryInfo(e.AccessGrantInventoryInfo)
 	}
 	if e.ComplianceControlInventoryInfo != nil {
 		return visitor.VisitComplianceControlInventoryInfo(e.ComplianceControlInventoryInfo)
@@ -1157,6 +1179,9 @@ func (e *Event) validate() error {
 	}
 	if e.ApplicationInventoryInfo != nil {
 		fields = append(fields, "Application Inventory Info")
+	}
+	if e.AccessGrantInventoryInfo != nil {
+		fields = append(fields, "Access Grant Inventory Info")
 	}
 	if e.ComplianceControlInventoryInfo != nil {
 		fields = append(fields, "Compliance Control Inventory Info")

@@ -1,5 +1,49 @@
 package v180
 
+// AccessGrantConsentTypeId Values
+// Consent Type ID. The normalized identifier of how the grant was consented to.
+
+// Unknown. The consent type is unknown.
+const AccessGrant_ConsentType_Unknown AccessGrantConsentTypeId = 0
+// Admin. An administrator consented on behalf of the organization or tenant.
+const AccessGrant_ConsentType_Admin AccessGrantConsentTypeId = 1
+// User. A user consented for themselves.
+const AccessGrant_ConsentType_User AccessGrantConsentTypeId = 2
+// System. The platform granted the access without an administrator or user consenting. For example, a pre-authorized application.
+const AccessGrant_ConsentType_System AccessGrantConsentTypeId = 3
+// Other. The consent type is not mapped. See the <code>consent_type</code> attribute, which contains a data source specific value.
+const AccessGrant_ConsentType_Other AccessGrantConsentTypeId = 99
+
+// AccessGrantStateId Values
+// State ID. The normalized identifier of the grant state.
+
+// Unknown. The grant state is unknown.
+const AccessGrant_State_Unknown AccessGrantStateId = 0
+// Active. The grant is in effect.
+const AccessGrant_State_Active AccessGrantStateId = 1
+// Inactive. The grant exists but is not in effect. For example, a suspended assignment.
+const AccessGrant_State_Inactive AccessGrantStateId = 2
+// Revoked. The grant was revoked.
+const AccessGrant_State_Revoked AccessGrantStateId = 3
+// Expired. The grant reached its expiration time.
+const AccessGrant_State_Expired AccessGrantStateId = 4
+// Other. The grant state is not mapped. See the <code>state</code> attribute, which contains a data source specific value.
+const AccessGrant_State_Other AccessGrantStateId = 99
+
+// AccessGrantTypeId Values
+// Type ID. The normalized identifier of the grant type.
+
+// Unknown. The grant type is unknown.
+const AccessGrant_Type_Unknown AccessGrantTypeId = 0
+// DelegatedPermission. Permissions or scopes granted to an application to act on behalf of a signed-in user. For example, an OAuth consent grant.
+const AccessGrant_Type_DelegatedPermission AccessGrantTypeId = 1
+// ApplicationPermission. Permissions granted to an application to act as itself, without a signed-in user. For example, an application role on an API granted to a service principal.
+const AccessGrant_Type_ApplicationPermission AccessGrantTypeId = 2
+// Assignment. A principal assigned to an application or resource, optionally with a role, giving it access to that application or resource.
+const AccessGrant_Type_Assignment AccessGrantTypeId = 3
+// Other. The grant type is not mapped. See the <code>type</code> attribute, which contains a data source specific value.
+const AccessGrant_Type_Other AccessGrantTypeId = 99
+
 // AccountTypeId Values
 // Type ID. The normalized account type identifier.
 
@@ -155,6 +199,20 @@ const Analytic_Type_PartialDataMatch AnalyticTypeId = 10
 const Analytic_Type_IndexedDataMatch AnalyticTypeId = 11
 // Other. The type is not mapped. See the <code>type</code> attribute, which contains a data source specific value.
 const Analytic_Type_Other AnalyticTypeId = 99
+
+// ApplicationPublisherTypeId Values
+// Publisher Type ID. The normalized identifier of the application's publisher type, relative to the organization or tenant the application is registered in or connected to.
+
+// Unknown. The publisher type is unknown.
+const Application_PublisherType_Unknown ApplicationPublisherTypeId = 0
+// PlatformVendor. Published by the vendor of the platform the entity is registered in or runs on.
+const Application_PublisherType_PlatformVendor ApplicationPublisherTypeId = 1
+// Internal. Published by the organization or tenant itself.
+const Application_PublisherType_Internal ApplicationPublisherTypeId = 2
+// ThirdParty. Published by another organization.
+const Application_PublisherType_ThirdParty ApplicationPublisherTypeId = 3
+// Other. The publisher type is not mapped. See the <code>publisher_type</code> attribute, which contains a data source specific value.
+const Application_PublisherType_Other ApplicationPublisherTypeId = 99
 
 // ApplicationRiskLevelId Values
 // Risk Level ID. The normalized risk level id.
@@ -1796,6 +1854,22 @@ const PhishingSimulation_Type_Unknown PhishingSimulationTypeId = 0
 // Other. The type is not mapped. See the <code>type</code> attribute, which contains a data source specific value.
 const PhishingSimulation_Type_Other PhishingSimulationTypeId = 99
 
+// PrincipalTypeId Values
+// Type ID. The normalized identifier of the principal type.
+
+// Unknown. The principal type is unknown.
+const Principal_Type_Unknown PrincipalTypeId = 0
+// User. A user, including a service account the data source models as a user. See <code>user.type_id</code>.
+const Principal_Type_User PrincipalTypeId = 1
+// Group. A group.
+const Principal_Type_Group PrincipalTypeId = 2
+// Application. An application. For example, a service principal or managed identity.
+const Principal_Type_Application PrincipalTypeId = 3
+// AllUsers. Every user in the organization or tenant. Not public or anonymous access.
+const Principal_Type_AllUsers PrincipalTypeId = 4
+// Other. The principal type is not mapped. See the <code>type</code> attribute, which contains a data source specific value.
+const Principal_Type_Other PrincipalTypeId = 99
+
 // PrivilegeInfoTypeId Values
 // Type ID. The normalized type of the privilege.
 
@@ -1829,6 +1903,26 @@ const Process_Integrity_System ProcessIntegrityId = 5
 const Process_Integrity_Protected ProcessIntegrityId = 6
 // Other. The integrity level is not mapped. See the <code>integrity</code> attribute, which contains a data source specific value.
 const Process_Integrity_Other ProcessIntegrityId = 99
+
+// ProgrammaticCredentialTypeId Values
+// Type ID. The normalized identifier of the programmatic credential type.
+
+// Unknown. The credential type is unknown.
+const ProgrammaticCredential_Type_Unknown ProgrammaticCredentialTypeId = 0
+// APIKey. An API key.
+const ProgrammaticCredential_Type_APIKey ProgrammaticCredentialTypeId = 1
+// ClientSecret. A client secret or password registered for an application.
+const ProgrammaticCredential_Type_ClientSecret ProgrammaticCredentialTypeId = 2
+// Certificate. A certificate or public key registered for the credential holder. For example, a client authentication certificate or a token-signing certificate.
+const ProgrammaticCredential_Type_Certificate ProgrammaticCredentialTypeId = 3
+// AccessToken. An access token issued through an OAuth or similar authorization flow.
+const ProgrammaticCredential_Type_AccessToken ProgrammaticCredentialTypeId = 4
+// ServiceAccountKey. A key issued for a service account.
+const ProgrammaticCredential_Type_ServiceAccountKey ProgrammaticCredentialTypeId = 5
+// PersonalAccessToken. A token a user issues for themselves to access an API.
+const ProgrammaticCredential_Type_PersonalAccessToken ProgrammaticCredentialTypeId = 6
+// Other. The credential type is not mapped. See the <code>type</code> attribute, which contains a data source specific value.
+const ProgrammaticCredential_Type_Other ProgrammaticCredentialTypeId = 99
 
 // QueryEvidenceQueryTypeId Values
 // Query Type ID. The normalized type of system query performed against a device or system component.
