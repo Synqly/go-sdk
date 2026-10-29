@@ -121,6 +121,23 @@ func (c *Client) QueryAccessGrants(
     return response.Body, nil
 }
 
+// Returns the authentication, authorization, consent and access policies configured in the token-linked identity provider. Disabled and report-only policies are included.
+func (c *Client) QueryPolicies(
+    ctx context.Context,
+    request *engine.QueryIdentityPoliciesRequest,
+    opts ...option.RequestOption,
+) (*engine.QueryIdentityPoliciesResponse, error){
+    response, err := c.WithRawResponse.QueryPolicies(
+        ctx,
+        request,
+        opts...,
+    )
+    if err != nil {
+        return nil, err
+    }
+    return response.Body, nil
+}
+
 // Returns a list of `User` objects wrapped in the OCSF Entity Management event of type Read from the token-linked identity provider.
 func (c *Client) QueryUsers(
     ctx context.Context,

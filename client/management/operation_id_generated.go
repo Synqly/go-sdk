@@ -102,6 +102,7 @@ const (
 	OperationIdIdentityQueryApplications                        OperationId = "identity_query_applications"
 	OperationIdIdentityQueryAuditLog                            OperationId = "identity_query_audit_log"
 	OperationIdIdentityQueryGroups                              OperationId = "identity_query_groups"
+	OperationIdIdentityQueryPolicies                            OperationId = "identity_query_policies"
 	OperationIdIdentityQueryRiskEvents                          OperationId = "identity_query_risk_events"
 	OperationIdIdentityQueryRiskyUsers                          OperationId = "identity_query_risky_users"
 	OperationIdIdentityQueryUsers                               OperationId = "identity_query_users"
@@ -361,6 +362,8 @@ func NewOperationIdFromString(s string) (OperationId, error) {
 		return OperationIdIdentityQueryAuditLog, nil
 	case "identity_query_groups":
 		return OperationIdIdentityQueryGroups, nil
+	case "identity_query_policies":
+		return OperationIdIdentityQueryPolicies, nil
 	case "identity_query_risk_events":
 		return OperationIdIdentityQueryRiskEvents, nil
 	case "identity_query_risky_users":

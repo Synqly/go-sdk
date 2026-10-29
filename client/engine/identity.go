@@ -7,6 +7,7 @@ import (
 	fmt "fmt"
 	internal "github.com/synqly/go-sdk/v2/client/engine/internal"
 	latest "github.com/synqly/go-sdk/v2/client/engine/ocsf/latest"
+	compliancefinding "github.com/synqly/go-sdk/v2/client/engine/ocsf/v180/compliancefinding"
 	big "math/big"
 )
 
@@ -504,6 +505,82 @@ func (q *QueryGroupRequest) SetOrder(order []*string) {
 func (q *QueryGroupRequest) SetFilter(filter []*string) {
 	q.Filter = filter
 	q.require(queryGroupRequestFieldFilter)
+}
+
+var (
+	queryIdentityPoliciesRequestFieldMeta           = big.NewInt(1 << 0)
+	queryIdentityPoliciesRequestFieldLimit          = big.NewInt(1 << 1)
+	queryIdentityPoliciesRequestFieldCursor         = big.NewInt(1 << 2)
+	queryIdentityPoliciesRequestFieldOrder          = big.NewInt(1 << 3)
+	queryIdentityPoliciesRequestFieldFilter         = big.NewInt(1 << 4)
+	queryIdentityPoliciesRequestFieldIncludeRawData = big.NewInt(1 << 5)
+)
+
+type QueryIdentityPoliciesRequest struct {
+	// Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
+	Meta []*string `json:"-" url:"meta,omitempty"`
+	// Number of policies to return. Defaults to 100.
+	Limit *int `json:"-" url:"limit,omitempty"`
+	// Start search from cursor position.
+	Cursor *string `json:"-" url:"cursor,omitempty"`
+	// Not supported on this endpoint; any value returns 400. Policies are returned in the provider's documented kind order.
+	Order []*string `json:"-" url:"order,omitempty"`
+	// Filter results by this query. For more information on filtering, refer to our [Filtering Guide](https://docs.synqly.com/guides/connectors/identity/query-filters). Defaults to no filter. If used more than once, the queries are ANDed together.
+	Filter []*string `json:"-" url:"filter,omitempty"`
+	// Include the raw data from the identity provider in the response. Defaults to `false`.
+	IncludeRawData *bool `json:"-" url:"include_raw_data,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+}
+
+func (q *QueryIdentityPoliciesRequest) require(field *big.Int) {
+	if q.explicitFields == nil {
+		q.explicitFields = big.NewInt(0)
+	}
+	q.explicitFields.Or(q.explicitFields, field)
+}
+
+// SetMeta sets the Meta field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryIdentityPoliciesRequest) SetMeta(meta []*string) {
+	q.Meta = meta
+	q.require(queryIdentityPoliciesRequestFieldMeta)
+}
+
+// SetLimit sets the Limit field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryIdentityPoliciesRequest) SetLimit(limit *int) {
+	q.Limit = limit
+	q.require(queryIdentityPoliciesRequestFieldLimit)
+}
+
+// SetCursor sets the Cursor field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryIdentityPoliciesRequest) SetCursor(cursor *string) {
+	q.Cursor = cursor
+	q.require(queryIdentityPoliciesRequestFieldCursor)
+}
+
+// SetOrder sets the Order field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryIdentityPoliciesRequest) SetOrder(order []*string) {
+	q.Order = order
+	q.require(queryIdentityPoliciesRequestFieldOrder)
+}
+
+// SetFilter sets the Filter field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryIdentityPoliciesRequest) SetFilter(filter []*string) {
+	q.Filter = filter
+	q.require(queryIdentityPoliciesRequestFieldFilter)
+}
+
+// SetIncludeRawData sets the IncludeRawData field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryIdentityPoliciesRequest) SetIncludeRawData(includeRawData *bool) {
+	q.IncludeRawData = includeRawData
+	q.require(queryIdentityPoliciesRequestFieldIncludeRawData)
 }
 
 var (
@@ -1629,6 +1706,142 @@ func (q *QueryIdentityAuditLogResponse) MarshalJSON() ([]byte, error) {
 }
 
 func (q *QueryIdentityAuditLogResponse) String() string {
+	if q == nil {
+		return "<nil>"
+	}
+	if len(q.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(q.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(q); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", q)
+}
+
+var (
+	queryIdentityPoliciesResponseFieldMessages = big.NewInt(1 << 0)
+	queryIdentityPoliciesResponseFieldMeta     = big.NewInt(1 << 1)
+	queryIdentityPoliciesResponseFieldCursor   = big.NewInt(1 << 2)
+	queryIdentityPoliciesResponseFieldResult   = big.NewInt(1 << 3)
+)
+
+type QueryIdentityPoliciesResponse struct {
+	// Additional messages from the service response that may be helpful to the client.
+	Messages *MessagesResponse `json:"messages,omitempty" url:"messages,omitempty"`
+	// Various metadata about the results organized by group, then type, then field.
+	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
+	// Cursor to use to retrieve the next page of results
+	Cursor string `json:"cursor" url:"cursor"`
+	// Identity policies that match the query.
+	Result []*compliancefinding.ComplianceFinding `json:"result" url:"result"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (q *QueryIdentityPoliciesResponse) GetMessages() *MessagesResponse {
+	if q == nil {
+		return nil
+	}
+	return q.Messages
+}
+
+func (q *QueryIdentityPoliciesResponse) GetMeta() *MetaResponse {
+	if q == nil {
+		return nil
+	}
+	return q.Meta
+}
+
+func (q *QueryIdentityPoliciesResponse) GetCursor() string {
+	if q == nil {
+		return ""
+	}
+	return q.Cursor
+}
+
+func (q *QueryIdentityPoliciesResponse) GetResult() []*compliancefinding.ComplianceFinding {
+	if q == nil {
+		return nil
+	}
+	return q.Result
+}
+
+func (q *QueryIdentityPoliciesResponse) GetExtraProperties() map[string]interface{} {
+	if q == nil {
+		return nil
+	}
+	return q.extraProperties
+}
+
+func (q *QueryIdentityPoliciesResponse) require(field *big.Int) {
+	if q.explicitFields == nil {
+		q.explicitFields = big.NewInt(0)
+	}
+	q.explicitFields.Or(q.explicitFields, field)
+}
+
+// SetMessages sets the Messages field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryIdentityPoliciesResponse) SetMessages(messages *MessagesResponse) {
+	q.Messages = messages
+	q.require(queryIdentityPoliciesResponseFieldMessages)
+}
+
+// SetMeta sets the Meta field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryIdentityPoliciesResponse) SetMeta(meta *MetaResponse) {
+	q.Meta = meta
+	q.require(queryIdentityPoliciesResponseFieldMeta)
+}
+
+// SetCursor sets the Cursor field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryIdentityPoliciesResponse) SetCursor(cursor string) {
+	q.Cursor = cursor
+	q.require(queryIdentityPoliciesResponseFieldCursor)
+}
+
+// SetResult sets the Result field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryIdentityPoliciesResponse) SetResult(result []*compliancefinding.ComplianceFinding) {
+	q.Result = result
+	q.require(queryIdentityPoliciesResponseFieldResult)
+}
+
+func (q *QueryIdentityPoliciesResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler QueryIdentityPoliciesResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*q = QueryIdentityPoliciesResponse(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *q)
+	if err != nil {
+		return err
+	}
+	q.extraProperties = extraProperties
+	q.rawJSON = nil
+	return nil
+}
+
+func (q *QueryIdentityPoliciesResponse) MarshalJSON() ([]byte, error) {
+	type embed QueryIdentityPoliciesResponse
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*q),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, q.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (q *QueryIdentityPoliciesResponse) String() string {
 	if q == nil {
 		return "<nil>"
 	}
