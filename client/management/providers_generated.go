@@ -24540,6 +24540,8 @@ type ProviderConfig struct {
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/knowbe4-securityawareness-setup)
 	SecurityawarenessKnowbe4 *SecurityAwarenessKnowBe4
+	// Configuration for Amazon Security Lake as a SIEM provider.
+	SiemAmazonSecurityLake *SiemAmazonSecurityLake
 	// Configuration for CrowdStrike Falcon® Next-Gen SIEM.
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/crowdstrike-siem-setup)
@@ -24590,6 +24592,8 @@ type ProviderConfig struct {
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/sumo-logic-setup)
 	SiemSumoLogic *SiemSumoLogic
+	// Configuration for Amazon Security Lake as a Sink provider.
+	SinkAmazonSecurityLake *SinkAmazonSecurityLake
 	// Configuration for Amazon S3 as a Sink provider. Events are written directly to an AWS S3 bucket in compressed JSON format.
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/aws-s3-sink-setup)
@@ -25575,6 +25579,13 @@ func (p *ProviderConfig) GetSecurityawarenessKnowbe4() *SecurityAwarenessKnowBe4
 	return p.SecurityawarenessKnowbe4
 }
 
+func (p *ProviderConfig) GetSiemAmazonSecurityLake() *SiemAmazonSecurityLake {
+	if p == nil {
+		return nil
+	}
+	return p.SiemAmazonSecurityLake
+}
+
 func (p *ProviderConfig) GetSiemCrowdstrike() *SiemCrowdstrike {
 	if p == nil {
 		return nil
@@ -25664,6 +25675,13 @@ func (p *ProviderConfig) GetSiemSumoLogic() *SiemSumoLogic {
 		return nil
 	}
 	return p.SiemSumoLogic
+}
+
+func (p *ProviderConfig) GetSinkAmazonSecurityLake() *SinkAmazonSecurityLake {
+	if p == nil {
+		return nil
+	}
+	return p.SinkAmazonSecurityLake
 }
 
 func (p *ProviderConfig) GetSinkAwsS3() *SinkAwsS3 {
@@ -26790,6 +26808,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.SecurityawarenessKnowbe4 = value
+	case "siem_amazon_security_lake":
+		value := new(SiemAmazonSecurityLake)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.SiemAmazonSecurityLake = value
 	case "siem_crowdstrike":
 		value := new(SiemCrowdstrike)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -26868,6 +26892,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.SiemSumoLogic = value
+	case "sink_amazon_security_lake":
+		value := new(SinkAmazonSecurityLake)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.SinkAmazonSecurityLake = value
 	case "sink_aws_s3":
 		value := new(SinkAwsS3)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -27603,6 +27633,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.SecurityawarenessKnowbe4 != nil {
 		return internal.MarshalJSONWithExtraProperty(p.SecurityawarenessKnowbe4, "type", "securityawareness_knowbe4")
 	}
+	if p.SiemAmazonSecurityLake != nil {
+		return internal.MarshalJSONWithExtraProperty(p.SiemAmazonSecurityLake, "type", "siem_amazon_security_lake")
+	}
 	if p.SiemCrowdstrike != nil {
 		return internal.MarshalJSONWithExtraProperty(p.SiemCrowdstrike, "type", "siem_crowdstrike")
 	}
@@ -27641,6 +27674,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	}
 	if p.SiemSumoLogic != nil {
 		return internal.MarshalJSONWithExtraProperty(p.SiemSumoLogic, "type", "siem_sumo_logic")
+	}
+	if p.SinkAmazonSecurityLake != nil {
+		return internal.MarshalJSONWithExtraProperty(p.SinkAmazonSecurityLake, "type", "sink_amazon_security_lake")
 	}
 	if p.SinkAwsS3 != nil {
 		return internal.MarshalJSONWithExtraProperty(p.SinkAwsS3, "type", "sink_aws_s3")
@@ -27959,6 +27995,7 @@ type ProviderConfigVisitor interface {
 	VisitNotificationsSlackWebhook(*NotificationsSlackWebhook) error
 	VisitNotificationsTeams(*NotificationsTeams) error
 	VisitSecurityawarenessKnowbe4(*SecurityAwarenessKnowBe4) error
+	VisitSiemAmazonSecurityLake(*SiemAmazonSecurityLake) error
 	VisitSiemCrowdstrike(*SiemCrowdstrike) error
 	VisitSiemDatadog(*SiemDatadog) error
 	VisitSiemElasticsearch(*SiemElasticsearch) error
@@ -27972,6 +28009,7 @@ type ProviderConfigVisitor interface {
 	VisitSiemSentinel(*SiemSentinel) error
 	VisitSiemSplunk(*SiemSplunk) error
 	VisitSiemSumoLogic(*SiemSumoLogic) error
+	VisitSinkAmazonSecurityLake(*SinkAmazonSecurityLake) error
 	VisitSinkAwsS3(*SinkAwsS3) error
 	VisitSinkAwsSecurityLake(*SinkAwsSecurityLake) error
 	VisitSinkAwsSqs(*SinkAwsSqs) error
@@ -28361,6 +28399,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	if p.SecurityawarenessKnowbe4 != nil {
 		return visitor.VisitSecurityawarenessKnowbe4(p.SecurityawarenessKnowbe4)
 	}
+	if p.SiemAmazonSecurityLake != nil {
+		return visitor.VisitSiemAmazonSecurityLake(p.SiemAmazonSecurityLake)
+	}
 	if p.SiemCrowdstrike != nil {
 		return visitor.VisitSiemCrowdstrike(p.SiemCrowdstrike)
 	}
@@ -28399,6 +28440,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.SiemSumoLogic != nil {
 		return visitor.VisitSiemSumoLogic(p.SiemSumoLogic)
+	}
+	if p.SinkAmazonSecurityLake != nil {
+		return visitor.VisitSinkAmazonSecurityLake(p.SinkAmazonSecurityLake)
 	}
 	if p.SinkAwsS3 != nil {
 		return visitor.VisitSinkAwsS3(p.SinkAwsS3)
@@ -28930,6 +28974,9 @@ func (p *ProviderConfig) validate() error {
 	if p.SecurityawarenessKnowbe4 != nil {
 		fields = append(fields, "securityawareness_knowbe4")
 	}
+	if p.SiemAmazonSecurityLake != nil {
+		fields = append(fields, "siem_amazon_security_lake")
+	}
 	if p.SiemCrowdstrike != nil {
 		fields = append(fields, "siem_crowdstrike")
 	}
@@ -28968,6 +29015,9 @@ func (p *ProviderConfig) validate() error {
 	}
 	if p.SiemSumoLogic != nil {
 		fields = append(fields, "siem_sumo_logic")
+	}
+	if p.SinkAmazonSecurityLake != nil {
+		fields = append(fields, "sink_amazon_security_lake")
 	}
 	if p.SinkAwsS3 != nil {
 		fields = append(fields, "sink_aws_s3")
@@ -29415,6 +29465,8 @@ const (
 	ProviderConfigIdNotificationsTeams ProviderConfigId = "notifications_teams"
 	// KnowBe4 Security Awareness Training (KSAT)
 	ProviderConfigIdSecurityAwarenessKnowBe4 ProviderConfigId = "securityawareness_knowbe4"
+	// Amazon Security Lake
+	ProviderConfigIdSiemAmazonSecurityLake ProviderConfigId = "siem_amazon_security_lake"
 	// CrowdStrike Falcon® Next-Gen SIEM
 	ProviderConfigIdSiemCrowdstrike ProviderConfigId = "siem_crowdstrike"
 	// Datadog Cloud SIEM
@@ -29441,6 +29493,8 @@ const (
 	ProviderConfigIdSiemSplunk ProviderConfigId = "siem_splunk"
 	// Sumo Logic Cloud SIEM
 	ProviderConfigIdSiemSumoLogic ProviderConfigId = "siem_sumo_logic"
+	// Amazon Security Lake
+	ProviderConfigIdSinkAmazonSecurityLake ProviderConfigId = "sink_amazon_security_lake"
 	// Amazon S3
 	ProviderConfigIdSinkAwsS3 ProviderConfigId = "sink_aws_s3"
 	// Amazon Security Lake
@@ -29795,6 +29849,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdNotificationsTeams, nil
 	case "securityawareness_knowbe4":
 		return ProviderConfigIdSecurityAwarenessKnowBe4, nil
+	case "siem_amazon_security_lake":
+		return ProviderConfigIdSiemAmazonSecurityLake, nil
 	case "siem_crowdstrike":
 		return ProviderConfigIdSiemCrowdstrike, nil
 	case "siem_datadog":
@@ -29821,6 +29877,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdSiemSplunk, nil
 	case "siem_sumo_logic":
 		return ProviderConfigIdSiemSumoLogic, nil
+	case "sink_amazon_security_lake":
+		return ProviderConfigIdSinkAmazonSecurityLake, nil
 	case "sink_aws_s3":
 		return ProviderConfigIdSinkAwsS3, nil
 	case "sink_aws_security_lake":
@@ -30377,6 +30435,143 @@ func (r *Rapid7InsightCloudCredential) validate() error {
 		}
 	}
 	return nil
+}
+
+// Configuration for Amazon Security Lake as a SIEM provider.
+var (
+	siemAmazonSecurityLakeFieldCredential       = big.NewInt(1 << 0)
+	siemAmazonSecurityLakeFieldCustomLogSources = big.NewInt(1 << 1)
+	siemAmazonSecurityLakeFieldRegion           = big.NewInt(1 << 2)
+	siemAmazonSecurityLakeFieldWorkgroupName    = big.NewInt(1 << 3)
+)
+
+type SiemAmazonSecurityLake struct {
+	// AWS credentials with access to [Amazon Security Lake](https://docs.aws.amazon.com/security-lake/latest/userguide/what-is-security-lake.html).
+	Credential *AwsProviderCredential `json:"credential" url:"credential"`
+	// Amazon Security Lake custom log sources to write events to. Required to enable the Post Events operation.
+	CustomLogSources *AmazonSecurityLakeCustomLogSourcesConfig `json:"custom_log_sources,omitempty" url:"custom_log_sources,omitempty"`
+	// The [AWS region](https://docs.aws.amazon.com/global-infrastructure/latest/regions/aws-regions.html) to use for the Amazon Security Lake provider.
+	Region AwsRegion `json:"region" url:"region"`
+	// The name of the [Amazon Athena workgroup](https://docs.aws.amazon.com/athena/latest/ug/workgroups-create-manage.html) to use for querying Amazon Security Lake events. Must already be configured with an S3 query-result output location.
+	WorkgroupName string `json:"workgroup_name" url:"workgroup_name"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (s *SiemAmazonSecurityLake) GetCredential() *AwsProviderCredential {
+	if s == nil {
+		return nil
+	}
+	return s.Credential
+}
+
+func (s *SiemAmazonSecurityLake) GetCustomLogSources() *AmazonSecurityLakeCustomLogSourcesConfig {
+	if s == nil {
+		return nil
+	}
+	return s.CustomLogSources
+}
+
+func (s *SiemAmazonSecurityLake) GetRegion() AwsRegion {
+	if s == nil {
+		return ""
+	}
+	return s.Region
+}
+
+func (s *SiemAmazonSecurityLake) GetWorkgroupName() string {
+	if s == nil {
+		return ""
+	}
+	return s.WorkgroupName
+}
+
+func (s *SiemAmazonSecurityLake) GetExtraProperties() map[string]interface{} {
+	if s == nil {
+		return nil
+	}
+	return s.extraProperties
+}
+
+func (s *SiemAmazonSecurityLake) require(field *big.Int) {
+	if s.explicitFields == nil {
+		s.explicitFields = big.NewInt(0)
+	}
+	s.explicitFields.Or(s.explicitFields, field)
+}
+
+// SetCredential sets the Credential field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (s *SiemAmazonSecurityLake) SetCredential(credential *AwsProviderCredential) {
+	s.Credential = credential
+	s.require(siemAmazonSecurityLakeFieldCredential)
+}
+
+// SetCustomLogSources sets the CustomLogSources field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (s *SiemAmazonSecurityLake) SetCustomLogSources(customLogSources *AmazonSecurityLakeCustomLogSourcesConfig) {
+	s.CustomLogSources = customLogSources
+	s.require(siemAmazonSecurityLakeFieldCustomLogSources)
+}
+
+// SetRegion sets the Region field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (s *SiemAmazonSecurityLake) SetRegion(region AwsRegion) {
+	s.Region = region
+	s.require(siemAmazonSecurityLakeFieldRegion)
+}
+
+// SetWorkgroupName sets the WorkgroupName field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (s *SiemAmazonSecurityLake) SetWorkgroupName(workgroupName string) {
+	s.WorkgroupName = workgroupName
+	s.require(siemAmazonSecurityLakeFieldWorkgroupName)
+}
+
+func (s *SiemAmazonSecurityLake) UnmarshalJSON(data []byte) error {
+	type unmarshaler SiemAmazonSecurityLake
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*s = SiemAmazonSecurityLake(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+	s.rawJSON = nil
+	return nil
+}
+
+func (s *SiemAmazonSecurityLake) MarshalJSON() ([]byte, error) {
+	type embed SiemAmazonSecurityLake
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*s),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, s.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (s *SiemAmazonSecurityLake) String() string {
+	if s == nil {
+		return "<nil>"
+	}
+	if len(s.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(s.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(s); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", s)
 }
 
 // Configuration for CrowdStrike Falcon® Next-Gen SIEM.
@@ -33464,6 +33659,126 @@ func NewSinkAwsSqsEventsPerMessageFromString(s string) (SinkAwsSqsEventsPerMessa
 
 func (s SinkAwsSqsEventsPerMessage) Ptr() *SinkAwsSqsEventsPerMessage {
 	return &s
+}
+
+// Configuration for Amazon Security Lake as a Sink provider.
+var (
+	sinkAmazonSecurityLakeFieldCredential       = big.NewInt(1 << 0)
+	sinkAmazonSecurityLakeFieldCustomLogSources = big.NewInt(1 << 1)
+	sinkAmazonSecurityLakeFieldRegion           = big.NewInt(1 << 2)
+)
+
+type SinkAmazonSecurityLake struct {
+	// AWS credentials with access to [Amazon Security Lake](https://docs.aws.amazon.com/security-lake/latest/userguide/what-is-security-lake.html).
+	Credential *AwsProviderCredential `json:"credential" url:"credential"`
+	// Amazon Security Lake custom log sources to write events to.
+	CustomLogSources *AmazonSecurityLakeCustomLogSourcesConfig `json:"custom_log_sources" url:"custom_log_sources"`
+	// The [AWS region](https://docs.aws.amazon.com/global-infrastructure/latest/regions/aws-regions.html) to use for the Amazon Security Lake provider.
+	Region AwsRegion `json:"region" url:"region"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (s *SinkAmazonSecurityLake) GetCredential() *AwsProviderCredential {
+	if s == nil {
+		return nil
+	}
+	return s.Credential
+}
+
+func (s *SinkAmazonSecurityLake) GetCustomLogSources() *AmazonSecurityLakeCustomLogSourcesConfig {
+	if s == nil {
+		return nil
+	}
+	return s.CustomLogSources
+}
+
+func (s *SinkAmazonSecurityLake) GetRegion() AwsRegion {
+	if s == nil {
+		return ""
+	}
+	return s.Region
+}
+
+func (s *SinkAmazonSecurityLake) GetExtraProperties() map[string]interface{} {
+	if s == nil {
+		return nil
+	}
+	return s.extraProperties
+}
+
+func (s *SinkAmazonSecurityLake) require(field *big.Int) {
+	if s.explicitFields == nil {
+		s.explicitFields = big.NewInt(0)
+	}
+	s.explicitFields.Or(s.explicitFields, field)
+}
+
+// SetCredential sets the Credential field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (s *SinkAmazonSecurityLake) SetCredential(credential *AwsProviderCredential) {
+	s.Credential = credential
+	s.require(sinkAmazonSecurityLakeFieldCredential)
+}
+
+// SetCustomLogSources sets the CustomLogSources field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (s *SinkAmazonSecurityLake) SetCustomLogSources(customLogSources *AmazonSecurityLakeCustomLogSourcesConfig) {
+	s.CustomLogSources = customLogSources
+	s.require(sinkAmazonSecurityLakeFieldCustomLogSources)
+}
+
+// SetRegion sets the Region field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (s *SinkAmazonSecurityLake) SetRegion(region AwsRegion) {
+	s.Region = region
+	s.require(sinkAmazonSecurityLakeFieldRegion)
+}
+
+func (s *SinkAmazonSecurityLake) UnmarshalJSON(data []byte) error {
+	type unmarshaler SinkAmazonSecurityLake
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*s = SinkAmazonSecurityLake(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+	s.rawJSON = nil
+	return nil
+}
+
+func (s *SinkAmazonSecurityLake) MarshalJSON() ([]byte, error) {
+	type embed SinkAmazonSecurityLake
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*s),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, s.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (s *SinkAmazonSecurityLake) String() string {
+	if s == nil {
+		return "<nil>"
+	}
+	if len(s.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(s.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(s); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", s)
 }
 
 // Configuration for Amazon S3 as a Sink provider. Events are written directly to an AWS S3 bucket in compressed JSON format.
@@ -46144,6 +46459,338 @@ func (z *ZendeskCredential) validate() error {
 		}
 	}
 	return nil
+}
+
+// Configuration for Amazon Security Lake Custom Log Sources
+var (
+	amazonSecurityLakeCustomLogSourcesConfigFieldAccountId = big.NewInt(1 << 0)
+	amazonSecurityLakeCustomLogSourcesConfigFieldMappings  = big.NewInt(1 << 1)
+)
+
+type AmazonSecurityLakeCustomLogSourcesConfig struct {
+	// AWS account ID that the custom log sources record as the source of the events.
+	AccountId string `json:"account_id" url:"account_id"`
+	// The OCSF event class each Amazon Security Lake custom log source accepts, keyed by the custom log source name.
+	Mappings map[string]AmazonSecurityLakeOcsfEventClasses `json:"mappings" url:"mappings"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (a *AmazonSecurityLakeCustomLogSourcesConfig) GetAccountId() string {
+	if a == nil {
+		return ""
+	}
+	return a.AccountId
+}
+
+func (a *AmazonSecurityLakeCustomLogSourcesConfig) GetMappings() map[string]AmazonSecurityLakeOcsfEventClasses {
+	if a == nil {
+		return nil
+	}
+	return a.Mappings
+}
+
+func (a *AmazonSecurityLakeCustomLogSourcesConfig) GetExtraProperties() map[string]interface{} {
+	if a == nil {
+		return nil
+	}
+	return a.extraProperties
+}
+
+func (a *AmazonSecurityLakeCustomLogSourcesConfig) require(field *big.Int) {
+	if a.explicitFields == nil {
+		a.explicitFields = big.NewInt(0)
+	}
+	a.explicitFields.Or(a.explicitFields, field)
+}
+
+// SetAccountId sets the AccountId field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (a *AmazonSecurityLakeCustomLogSourcesConfig) SetAccountId(accountId string) {
+	a.AccountId = accountId
+	a.require(amazonSecurityLakeCustomLogSourcesConfigFieldAccountId)
+}
+
+// SetMappings sets the Mappings field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (a *AmazonSecurityLakeCustomLogSourcesConfig) SetMappings(mappings map[string]AmazonSecurityLakeOcsfEventClasses) {
+	a.Mappings = mappings
+	a.require(amazonSecurityLakeCustomLogSourcesConfigFieldMappings)
+}
+
+func (a *AmazonSecurityLakeCustomLogSourcesConfig) UnmarshalJSON(data []byte) error {
+	type unmarshaler AmazonSecurityLakeCustomLogSourcesConfig
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*a = AmazonSecurityLakeCustomLogSourcesConfig(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+	a.rawJSON = nil
+	return nil
+}
+
+func (a *AmazonSecurityLakeCustomLogSourcesConfig) MarshalJSON() ([]byte, error) {
+	type embed AmazonSecurityLakeCustomLogSourcesConfig
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*a),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, a.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (a *AmazonSecurityLakeCustomLogSourcesConfig) String() string {
+	if a == nil {
+		return "<nil>"
+	}
+	if len(a.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(a.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(a); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", a)
+}
+
+type AmazonSecurityLakeOcsfEventClasses string
+
+const (
+	AmazonSecurityLakeOcsfEventClassesAccountChange              AmazonSecurityLakeOcsfEventClasses = "ACCOUNT_CHANGE"
+	AmazonSecurityLakeOcsfEventClassesAdminGroupQuery            AmazonSecurityLakeOcsfEventClasses = "ADMIN_GROUP_QUERY"
+	AmazonSecurityLakeOcsfEventClassesApiActivity                AmazonSecurityLakeOcsfEventClasses = "API_ACTIVITY"
+	AmazonSecurityLakeOcsfEventClassesApplicationLifecycle       AmazonSecurityLakeOcsfEventClasses = "APPLICATION_LIFECYCLE"
+	AmazonSecurityLakeOcsfEventClassesAuthentication             AmazonSecurityLakeOcsfEventClasses = "AUTHENTICATION"
+	AmazonSecurityLakeOcsfEventClassesAuthorizeSession           AmazonSecurityLakeOcsfEventClasses = "AUTHORIZE_SESSION"
+	AmazonSecurityLakeOcsfEventClassesComplianceFinding          AmazonSecurityLakeOcsfEventClasses = "COMPLIANCE_FINDING"
+	AmazonSecurityLakeOcsfEventClassesDatastoreActivity          AmazonSecurityLakeOcsfEventClasses = "DATASTORE_ACTIVITY"
+	AmazonSecurityLakeOcsfEventClassesDataSecurityFinding        AmazonSecurityLakeOcsfEventClasses = "DATA_SECURITY_FINDING"
+	AmazonSecurityLakeOcsfEventClassesDetectionFinding           AmazonSecurityLakeOcsfEventClasses = "DETECTION_FINDING"
+	AmazonSecurityLakeOcsfEventClassesDeviceConfigState          AmazonSecurityLakeOcsfEventClasses = "DEVICE_CONFIG_STATE"
+	AmazonSecurityLakeOcsfEventClassesDeviceConfigStateChange    AmazonSecurityLakeOcsfEventClasses = "DEVICE_CONFIG_STATE_CHANGE"
+	AmazonSecurityLakeOcsfEventClassesDeviceInventoryInfo        AmazonSecurityLakeOcsfEventClasses = "DEVICE_INVENTORY_INFO"
+	AmazonSecurityLakeOcsfEventClassesDhcpActivity               AmazonSecurityLakeOcsfEventClasses = "DHCP_ACTIVITY"
+	AmazonSecurityLakeOcsfEventClassesDnsActivity                AmazonSecurityLakeOcsfEventClasses = "DNS_ACTIVITY"
+	AmazonSecurityLakeOcsfEventClassesEmailActivity              AmazonSecurityLakeOcsfEventClasses = "EMAIL_ACTIVITY"
+	AmazonSecurityLakeOcsfEventClassesEmailFileActivity          AmazonSecurityLakeOcsfEventClasses = "EMAIL_FILE_ACTIVITY"
+	AmazonSecurityLakeOcsfEventClassesEmailUrlActivity           AmazonSecurityLakeOcsfEventClasses = "EMAIL_URL_ACTIVITY"
+	AmazonSecurityLakeOcsfEventClassesEntityManagement           AmazonSecurityLakeOcsfEventClasses = "ENTITY_MANAGEMENT"
+	AmazonSecurityLakeOcsfEventClassesEventLogActivity           AmazonSecurityLakeOcsfEventClasses = "EVENT_LOG_ACTIVITY"
+	AmazonSecurityLakeOcsfEventClassesFileHostingActivity        AmazonSecurityLakeOcsfEventClasses = "FILE_HOSTING_ACTIVITY"
+	AmazonSecurityLakeOcsfEventClassesFileQuery                  AmazonSecurityLakeOcsfEventClasses = "FILE_QUERY"
+	AmazonSecurityLakeOcsfEventClassesFileRemediationActivity    AmazonSecurityLakeOcsfEventClasses = "FILE_REMEDIATION_ACTIVITY"
+	AmazonSecurityLakeOcsfEventClassesFileSystemActivity         AmazonSecurityLakeOcsfEventClasses = "FILE_SYSTEM_ACTIVITY"
+	AmazonSecurityLakeOcsfEventClassesFolderQuery                AmazonSecurityLakeOcsfEventClasses = "FOLDER_QUERY"
+	AmazonSecurityLakeOcsfEventClassesFtpActivity                AmazonSecurityLakeOcsfEventClasses = "FTP_ACTIVITY"
+	AmazonSecurityLakeOcsfEventClassesGroupManagement            AmazonSecurityLakeOcsfEventClasses = "GROUP_MANAGEMENT"
+	AmazonSecurityLakeOcsfEventClassesHttpActivity               AmazonSecurityLakeOcsfEventClasses = "HTTP_ACTIVITY"
+	AmazonSecurityLakeOcsfEventClassesIncidentFinding            AmazonSecurityLakeOcsfEventClasses = "INCIDENT_FINDING"
+	AmazonSecurityLakeOcsfEventClassesJobQuery                   AmazonSecurityLakeOcsfEventClasses = "JOB_QUERY"
+	AmazonSecurityLakeOcsfEventClassesKernelActivity             AmazonSecurityLakeOcsfEventClasses = "KERNEL_ACTIVITY"
+	AmazonSecurityLakeOcsfEventClassesKernelExtension            AmazonSecurityLakeOcsfEventClasses = "KERNEL_EXTENSION"
+	AmazonSecurityLakeOcsfEventClassesKernelObjectQuery          AmazonSecurityLakeOcsfEventClasses = "KERNEL_OBJECT_QUERY"
+	AmazonSecurityLakeOcsfEventClassesMemoryActivity             AmazonSecurityLakeOcsfEventClasses = "MEMORY_ACTIVITY"
+	AmazonSecurityLakeOcsfEventClassesModuleActivity             AmazonSecurityLakeOcsfEventClasses = "MODULE_ACTIVITY"
+	AmazonSecurityLakeOcsfEventClassesModuleQuery                AmazonSecurityLakeOcsfEventClasses = "MODULE_QUERY"
+	AmazonSecurityLakeOcsfEventClassesNetworksQuery              AmazonSecurityLakeOcsfEventClasses = "NETWORKS_QUERY"
+	AmazonSecurityLakeOcsfEventClassesNetworkActivity            AmazonSecurityLakeOcsfEventClasses = "NETWORK_ACTIVITY"
+	AmazonSecurityLakeOcsfEventClassesNetworkConnectionQuery     AmazonSecurityLakeOcsfEventClasses = "NETWORK_CONNECTION_QUERY"
+	AmazonSecurityLakeOcsfEventClassesNetworkFileActivity        AmazonSecurityLakeOcsfEventClasses = "NETWORK_FILE_ACTIVITY"
+	AmazonSecurityLakeOcsfEventClassesNetworkRemediationActivity AmazonSecurityLakeOcsfEventClasses = "NETWORK_REMEDIATION_ACTIVITY"
+	AmazonSecurityLakeOcsfEventClassesNtpActivity                AmazonSecurityLakeOcsfEventClasses = "NTP_ACTIVITY"
+	AmazonSecurityLakeOcsfEventClassesPatchState                 AmazonSecurityLakeOcsfEventClasses = "PATCH_STATE"
+	AmazonSecurityLakeOcsfEventClassesPeripheralDeviceQuery      AmazonSecurityLakeOcsfEventClasses = "PERIPHERAL_DEVICE_QUERY"
+	AmazonSecurityLakeOcsfEventClassesPrefetchQuery              AmazonSecurityLakeOcsfEventClasses = "PREFETCH_QUERY"
+	AmazonSecurityLakeOcsfEventClassesProcessActivity            AmazonSecurityLakeOcsfEventClasses = "PROCESS_ACTIVITY"
+	AmazonSecurityLakeOcsfEventClassesProcessQuery               AmazonSecurityLakeOcsfEventClasses = "PROCESS_QUERY"
+	AmazonSecurityLakeOcsfEventClassesProcessRemediationActivity AmazonSecurityLakeOcsfEventClasses = "PROCESS_REMEDIATION_ACTIVITY"
+	AmazonSecurityLakeOcsfEventClassesRdpActivity                AmazonSecurityLakeOcsfEventClasses = "RDP_ACTIVITY"
+	AmazonSecurityLakeOcsfEventClassesRegistryKeyActivity        AmazonSecurityLakeOcsfEventClasses = "REGISTRY_KEY_ACTIVITY"
+	AmazonSecurityLakeOcsfEventClassesRegistryKeyQuery           AmazonSecurityLakeOcsfEventClasses = "REGISTRY_KEY_QUERY"
+	AmazonSecurityLakeOcsfEventClassesRegistryValueActivity      AmazonSecurityLakeOcsfEventClasses = "REGISTRY_VALUE_ACTIVITY"
+	AmazonSecurityLakeOcsfEventClassesRegistryValueQuery         AmazonSecurityLakeOcsfEventClasses = "REGISTRY_VALUE_QUERY"
+	AmazonSecurityLakeOcsfEventClassesRemediationActivity        AmazonSecurityLakeOcsfEventClasses = "REMEDIATION_ACTIVITY"
+	AmazonSecurityLakeOcsfEventClassesScanActivity               AmazonSecurityLakeOcsfEventClasses = "SCAN_ACTIVITY"
+	AmazonSecurityLakeOcsfEventClassesScheduledJobActivity       AmazonSecurityLakeOcsfEventClasses = "SCHEDULED_JOB_ACTIVITY"
+	AmazonSecurityLakeOcsfEventClassesSecurityFinding            AmazonSecurityLakeOcsfEventClasses = "SECURITY_FINDING"
+	AmazonSecurityLakeOcsfEventClassesServiceQuery               AmazonSecurityLakeOcsfEventClasses = "SERVICE_QUERY"
+	AmazonSecurityLakeOcsfEventClassesSmbActivity                AmazonSecurityLakeOcsfEventClasses = "SMB_ACTIVITY"
+	AmazonSecurityLakeOcsfEventClassesSoftwareInventoryInfo      AmazonSecurityLakeOcsfEventClasses = "SOFTWARE_INVENTORY_INFO"
+	AmazonSecurityLakeOcsfEventClassesSshActivity                AmazonSecurityLakeOcsfEventClasses = "SSH_ACTIVITY"
+	AmazonSecurityLakeOcsfEventClassesTunnelActivity             AmazonSecurityLakeOcsfEventClasses = "TUNNEL_ACTIVITY"
+	AmazonSecurityLakeOcsfEventClassesUserAccess                 AmazonSecurityLakeOcsfEventClasses = "USER_ACCESS"
+	AmazonSecurityLakeOcsfEventClassesUserInventory              AmazonSecurityLakeOcsfEventClasses = "USER_INVENTORY"
+	AmazonSecurityLakeOcsfEventClassesUserQuery                  AmazonSecurityLakeOcsfEventClasses = "USER_QUERY"
+	AmazonSecurityLakeOcsfEventClassesUserSessionQuery           AmazonSecurityLakeOcsfEventClasses = "USER_SESSION_QUERY"
+	AmazonSecurityLakeOcsfEventClassesVulnerabilityFinding       AmazonSecurityLakeOcsfEventClasses = "VULNERABILITY_FINDING"
+	AmazonSecurityLakeOcsfEventClassesWebResourcesActivity       AmazonSecurityLakeOcsfEventClasses = "WEB_RESOURCES_ACTIVITY"
+	AmazonSecurityLakeOcsfEventClassesWebResourceAccessActivity  AmazonSecurityLakeOcsfEventClasses = "WEB_RESOURCE_ACCESS_ACTIVITY"
+	AmazonSecurityLakeOcsfEventClassesWindowsResourceActivity    AmazonSecurityLakeOcsfEventClasses = "WINDOWS_RESOURCE_ACTIVITY"
+	AmazonSecurityLakeOcsfEventClassesWindowsServiceActivity     AmazonSecurityLakeOcsfEventClasses = "WINDOWS_SERVICE_ACTIVITY"
+)
+
+func NewAmazonSecurityLakeOcsfEventClassesFromString(s string) (AmazonSecurityLakeOcsfEventClasses, error) {
+	switch s {
+	case "ACCOUNT_CHANGE":
+		return AmazonSecurityLakeOcsfEventClassesAccountChange, nil
+	case "ADMIN_GROUP_QUERY":
+		return AmazonSecurityLakeOcsfEventClassesAdminGroupQuery, nil
+	case "API_ACTIVITY":
+		return AmazonSecurityLakeOcsfEventClassesApiActivity, nil
+	case "APPLICATION_LIFECYCLE":
+		return AmazonSecurityLakeOcsfEventClassesApplicationLifecycle, nil
+	case "AUTHENTICATION":
+		return AmazonSecurityLakeOcsfEventClassesAuthentication, nil
+	case "AUTHORIZE_SESSION":
+		return AmazonSecurityLakeOcsfEventClassesAuthorizeSession, nil
+	case "COMPLIANCE_FINDING":
+		return AmazonSecurityLakeOcsfEventClassesComplianceFinding, nil
+	case "DATASTORE_ACTIVITY":
+		return AmazonSecurityLakeOcsfEventClassesDatastoreActivity, nil
+	case "DATA_SECURITY_FINDING":
+		return AmazonSecurityLakeOcsfEventClassesDataSecurityFinding, nil
+	case "DETECTION_FINDING":
+		return AmazonSecurityLakeOcsfEventClassesDetectionFinding, nil
+	case "DEVICE_CONFIG_STATE":
+		return AmazonSecurityLakeOcsfEventClassesDeviceConfigState, nil
+	case "DEVICE_CONFIG_STATE_CHANGE":
+		return AmazonSecurityLakeOcsfEventClassesDeviceConfigStateChange, nil
+	case "DEVICE_INVENTORY_INFO":
+		return AmazonSecurityLakeOcsfEventClassesDeviceInventoryInfo, nil
+	case "DHCP_ACTIVITY":
+		return AmazonSecurityLakeOcsfEventClassesDhcpActivity, nil
+	case "DNS_ACTIVITY":
+		return AmazonSecurityLakeOcsfEventClassesDnsActivity, nil
+	case "EMAIL_ACTIVITY":
+		return AmazonSecurityLakeOcsfEventClassesEmailActivity, nil
+	case "EMAIL_FILE_ACTIVITY":
+		return AmazonSecurityLakeOcsfEventClassesEmailFileActivity, nil
+	case "EMAIL_URL_ACTIVITY":
+		return AmazonSecurityLakeOcsfEventClassesEmailUrlActivity, nil
+	case "ENTITY_MANAGEMENT":
+		return AmazonSecurityLakeOcsfEventClassesEntityManagement, nil
+	case "EVENT_LOG_ACTIVITY":
+		return AmazonSecurityLakeOcsfEventClassesEventLogActivity, nil
+	case "FILE_HOSTING_ACTIVITY":
+		return AmazonSecurityLakeOcsfEventClassesFileHostingActivity, nil
+	case "FILE_QUERY":
+		return AmazonSecurityLakeOcsfEventClassesFileQuery, nil
+	case "FILE_REMEDIATION_ACTIVITY":
+		return AmazonSecurityLakeOcsfEventClassesFileRemediationActivity, nil
+	case "FILE_SYSTEM_ACTIVITY":
+		return AmazonSecurityLakeOcsfEventClassesFileSystemActivity, nil
+	case "FOLDER_QUERY":
+		return AmazonSecurityLakeOcsfEventClassesFolderQuery, nil
+	case "FTP_ACTIVITY":
+		return AmazonSecurityLakeOcsfEventClassesFtpActivity, nil
+	case "GROUP_MANAGEMENT":
+		return AmazonSecurityLakeOcsfEventClassesGroupManagement, nil
+	case "HTTP_ACTIVITY":
+		return AmazonSecurityLakeOcsfEventClassesHttpActivity, nil
+	case "INCIDENT_FINDING":
+		return AmazonSecurityLakeOcsfEventClassesIncidentFinding, nil
+	case "JOB_QUERY":
+		return AmazonSecurityLakeOcsfEventClassesJobQuery, nil
+	case "KERNEL_ACTIVITY":
+		return AmazonSecurityLakeOcsfEventClassesKernelActivity, nil
+	case "KERNEL_EXTENSION":
+		return AmazonSecurityLakeOcsfEventClassesKernelExtension, nil
+	case "KERNEL_OBJECT_QUERY":
+		return AmazonSecurityLakeOcsfEventClassesKernelObjectQuery, nil
+	case "MEMORY_ACTIVITY":
+		return AmazonSecurityLakeOcsfEventClassesMemoryActivity, nil
+	case "MODULE_ACTIVITY":
+		return AmazonSecurityLakeOcsfEventClassesModuleActivity, nil
+	case "MODULE_QUERY":
+		return AmazonSecurityLakeOcsfEventClassesModuleQuery, nil
+	case "NETWORKS_QUERY":
+		return AmazonSecurityLakeOcsfEventClassesNetworksQuery, nil
+	case "NETWORK_ACTIVITY":
+		return AmazonSecurityLakeOcsfEventClassesNetworkActivity, nil
+	case "NETWORK_CONNECTION_QUERY":
+		return AmazonSecurityLakeOcsfEventClassesNetworkConnectionQuery, nil
+	case "NETWORK_FILE_ACTIVITY":
+		return AmazonSecurityLakeOcsfEventClassesNetworkFileActivity, nil
+	case "NETWORK_REMEDIATION_ACTIVITY":
+		return AmazonSecurityLakeOcsfEventClassesNetworkRemediationActivity, nil
+	case "NTP_ACTIVITY":
+		return AmazonSecurityLakeOcsfEventClassesNtpActivity, nil
+	case "PATCH_STATE":
+		return AmazonSecurityLakeOcsfEventClassesPatchState, nil
+	case "PERIPHERAL_DEVICE_QUERY":
+		return AmazonSecurityLakeOcsfEventClassesPeripheralDeviceQuery, nil
+	case "PREFETCH_QUERY":
+		return AmazonSecurityLakeOcsfEventClassesPrefetchQuery, nil
+	case "PROCESS_ACTIVITY":
+		return AmazonSecurityLakeOcsfEventClassesProcessActivity, nil
+	case "PROCESS_QUERY":
+		return AmazonSecurityLakeOcsfEventClassesProcessQuery, nil
+	case "PROCESS_REMEDIATION_ACTIVITY":
+		return AmazonSecurityLakeOcsfEventClassesProcessRemediationActivity, nil
+	case "RDP_ACTIVITY":
+		return AmazonSecurityLakeOcsfEventClassesRdpActivity, nil
+	case "REGISTRY_KEY_ACTIVITY":
+		return AmazonSecurityLakeOcsfEventClassesRegistryKeyActivity, nil
+	case "REGISTRY_KEY_QUERY":
+		return AmazonSecurityLakeOcsfEventClassesRegistryKeyQuery, nil
+	case "REGISTRY_VALUE_ACTIVITY":
+		return AmazonSecurityLakeOcsfEventClassesRegistryValueActivity, nil
+	case "REGISTRY_VALUE_QUERY":
+		return AmazonSecurityLakeOcsfEventClassesRegistryValueQuery, nil
+	case "REMEDIATION_ACTIVITY":
+		return AmazonSecurityLakeOcsfEventClassesRemediationActivity, nil
+	case "SCAN_ACTIVITY":
+		return AmazonSecurityLakeOcsfEventClassesScanActivity, nil
+	case "SCHEDULED_JOB_ACTIVITY":
+		return AmazonSecurityLakeOcsfEventClassesScheduledJobActivity, nil
+	case "SECURITY_FINDING":
+		return AmazonSecurityLakeOcsfEventClassesSecurityFinding, nil
+	case "SERVICE_QUERY":
+		return AmazonSecurityLakeOcsfEventClassesServiceQuery, nil
+	case "SMB_ACTIVITY":
+		return AmazonSecurityLakeOcsfEventClassesSmbActivity, nil
+	case "SOFTWARE_INVENTORY_INFO":
+		return AmazonSecurityLakeOcsfEventClassesSoftwareInventoryInfo, nil
+	case "SSH_ACTIVITY":
+		return AmazonSecurityLakeOcsfEventClassesSshActivity, nil
+	case "TUNNEL_ACTIVITY":
+		return AmazonSecurityLakeOcsfEventClassesTunnelActivity, nil
+	case "USER_ACCESS":
+		return AmazonSecurityLakeOcsfEventClassesUserAccess, nil
+	case "USER_INVENTORY":
+		return AmazonSecurityLakeOcsfEventClassesUserInventory, nil
+	case "USER_QUERY":
+		return AmazonSecurityLakeOcsfEventClassesUserQuery, nil
+	case "USER_SESSION_QUERY":
+		return AmazonSecurityLakeOcsfEventClassesUserSessionQuery, nil
+	case "VULNERABILITY_FINDING":
+		return AmazonSecurityLakeOcsfEventClassesVulnerabilityFinding, nil
+	case "WEB_RESOURCES_ACTIVITY":
+		return AmazonSecurityLakeOcsfEventClassesWebResourcesActivity, nil
+	case "WEB_RESOURCE_ACCESS_ACTIVITY":
+		return AmazonSecurityLakeOcsfEventClassesWebResourceAccessActivity, nil
+	case "WINDOWS_RESOURCE_ACTIVITY":
+		return AmazonSecurityLakeOcsfEventClassesWindowsResourceActivity, nil
+	case "WINDOWS_SERVICE_ACTIVITY":
+		return AmazonSecurityLakeOcsfEventClassesWindowsServiceActivity, nil
+	}
+	var t AmazonSecurityLakeOcsfEventClasses
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (a AmazonSecurityLakeOcsfEventClasses) Ptr() *AmazonSecurityLakeOcsfEventClasses {
+	return &a
 }
 
 // Configuration for GitHub as an application security provider.
