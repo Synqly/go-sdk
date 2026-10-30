@@ -12236,126 +12236,6 @@ func (e *EmailSecurityExchangeOnline) String() string {
 	return fmt.Sprintf("%#v", e)
 }
 
-// Configuration for Ironscales as an email security provider.
-var (
-	emailSecurityIronscalesFieldCompanyId  = big.NewInt(1 << 0)
-	emailSecurityIronscalesFieldCredential = big.NewInt(1 << 1)
-	emailSecurityIronscalesFieldRegion     = big.NewInt(1 << 2)
-)
-
-type EmailSecurityIronscales struct {
-	// Ironscales company ID.
-	CompanyId string `json:"company_id" url:"company_id"`
-	// Credentials for the Ironscales App API.
-	Credential *IronscalesCredential `json:"credential" url:"credential"`
-	// Region of the Ironscales portal.
-	Region IronscalesRegion `json:"region" url:"region"`
-
-	// Private bitmask of fields set to an explicit value and therefore not to be omitted
-	explicitFields *big.Int `json:"-" url:"-"`
-
-	extraProperties map[string]interface{}
-	rawJSON         json.RawMessage
-}
-
-func (e *EmailSecurityIronscales) GetCompanyId() string {
-	if e == nil {
-		return ""
-	}
-	return e.CompanyId
-}
-
-func (e *EmailSecurityIronscales) GetCredential() *IronscalesCredential {
-	if e == nil {
-		return nil
-	}
-	return e.Credential
-}
-
-func (e *EmailSecurityIronscales) GetRegion() IronscalesRegion {
-	if e == nil {
-		return ""
-	}
-	return e.Region
-}
-
-func (e *EmailSecurityIronscales) GetExtraProperties() map[string]interface{} {
-	if e == nil {
-		return nil
-	}
-	return e.extraProperties
-}
-
-func (e *EmailSecurityIronscales) require(field *big.Int) {
-	if e.explicitFields == nil {
-		e.explicitFields = big.NewInt(0)
-	}
-	e.explicitFields.Or(e.explicitFields, field)
-}
-
-// SetCompanyId sets the CompanyId field and marks it as non-optional;
-// this prevents an empty or null value for this field from being omitted during serialization.
-func (e *EmailSecurityIronscales) SetCompanyId(companyId string) {
-	e.CompanyId = companyId
-	e.require(emailSecurityIronscalesFieldCompanyId)
-}
-
-// SetCredential sets the Credential field and marks it as non-optional;
-// this prevents an empty or null value for this field from being omitted during serialization.
-func (e *EmailSecurityIronscales) SetCredential(credential *IronscalesCredential) {
-	e.Credential = credential
-	e.require(emailSecurityIronscalesFieldCredential)
-}
-
-// SetRegion sets the Region field and marks it as non-optional;
-// this prevents an empty or null value for this field from being omitted during serialization.
-func (e *EmailSecurityIronscales) SetRegion(region IronscalesRegion) {
-	e.Region = region
-	e.require(emailSecurityIronscalesFieldRegion)
-}
-
-func (e *EmailSecurityIronscales) UnmarshalJSON(data []byte) error {
-	type unmarshaler EmailSecurityIronscales
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*e = EmailSecurityIronscales(value)
-	extraProperties, err := internal.ExtractExtraProperties(data, *e)
-	if err != nil {
-		return err
-	}
-	e.extraProperties = extraProperties
-	e.rawJSON = nil
-	return nil
-}
-
-func (e *EmailSecurityIronscales) MarshalJSON() ([]byte, error) {
-	type embed EmailSecurityIronscales
-	var marshaler = struct {
-		embed
-	}{
-		embed: embed(*e),
-	}
-	explicitMarshaler := internal.HandleExplicitFields(marshaler, e.explicitFields)
-	return json.Marshal(explicitMarshaler)
-}
-
-func (e *EmailSecurityIronscales) String() string {
-	if e == nil {
-		return "<nil>"
-	}
-	if len(e.rawJSON) > 0 {
-		if value, err := internal.StringifyJSON(e.rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := internal.StringifyJSON(e); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", e)
-}
-
 // Configuration for Mimecast Cloud Gateway as an email security provider.
 //
 // [Configuration guide](https://docs.synqly.com/guides/provider-configuration/mimecast-cloud-gateway-emailsecurity-setup)
@@ -18967,175 +18847,6 @@ func (i *IntuneCredential) validate() error {
 	return nil
 }
 
-type IronscalesCredential struct {
-	Type string
-	// Configuration when creating new Token.
-	Token *TokenCredential
-	// Reference to existing Token.
-	TokenId TokenCredentialId
-
-	rawJSON json.RawMessage
-}
-
-func (i *IronscalesCredential) GetType() string {
-	if i == nil {
-		return ""
-	}
-	return i.Type
-}
-
-func (i *IronscalesCredential) GetToken() *TokenCredential {
-	if i == nil {
-		return nil
-	}
-	return i.Token
-}
-
-func (i *IronscalesCredential) GetTokenId() TokenCredentialId {
-	if i == nil {
-		return ""
-	}
-	return i.TokenId
-}
-
-func (i *IronscalesCredential) UnmarshalJSON(data []byte) error {
-	var unmarshaler struct {
-		Type string `json:"type"`
-	}
-	if err := json.Unmarshal(data, &unmarshaler); err != nil {
-		return err
-	}
-	i.Type = unmarshaler.Type
-	if unmarshaler.Type == "" {
-		return fmt.Errorf("%T did not include discriminant type", i)
-	}
-	switch unmarshaler.Type {
-	case "token":
-		value := new(TokenCredential)
-		if err := json.Unmarshal(data, &value); err != nil {
-			return err
-		}
-		i.Token = value
-	case "token_id":
-		var valueUnmarshaler struct {
-			TokenId TokenCredentialId `json:"value"`
-		}
-		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
-			return err
-		}
-		i.TokenId = valueUnmarshaler.TokenId
-	}
-	i.rawJSON = nil
-	return nil
-}
-
-func (i IronscalesCredential) MarshalJSON() ([]byte, error) {
-	if err := i.validate(); err != nil {
-		return nil, err
-	}
-	if i.Token != nil {
-		return internal.MarshalJSONWithExtraProperty(i.Token, "type", "token")
-	}
-	if i.TokenId != "" {
-		var marshaler = struct {
-			Type    string            `json:"type"`
-			TokenId TokenCredentialId `json:"value"`
-		}{
-			Type:    "token_id",
-			TokenId: i.TokenId,
-		}
-		return json.Marshal(marshaler)
-	}
-	if len(i.rawJSON) > 0 {
-		return i.rawJSON, nil
-	}
-	return nil, fmt.Errorf("type %T does not define a non-empty union type", i)
-}
-
-type IronscalesCredentialVisitor interface {
-	VisitToken(*TokenCredential) error
-	VisitTokenId(TokenCredentialId) error
-}
-
-func (i *IronscalesCredential) Accept(visitor IronscalesCredentialVisitor) error {
-	if i.Token != nil {
-		return visitor.VisitToken(i.Token)
-	}
-	if i.TokenId != "" {
-		return visitor.VisitTokenId(i.TokenId)
-	}
-	return fmt.Errorf("type %T does not define a non-empty union type", i)
-}
-
-func (i *IronscalesCredential) validate() error {
-	if i == nil {
-		return fmt.Errorf("type %T is nil", i)
-	}
-	var fields []string
-	if i.Token != nil {
-		fields = append(fields, "token")
-	}
-	if i.TokenId != "" {
-		fields = append(fields, "token_id")
-	}
-	if len(fields) == 0 {
-		if i.Type != "" {
-			if len(i.rawJSON) > 0 {
-				return nil
-			}
-			return fmt.Errorf("type %T defines a discriminant set to %q but the field is not set", i, i.Type)
-		}
-		return fmt.Errorf("type %T is empty", i)
-	}
-	if len(fields) > 1 {
-		return fmt.Errorf("type %T defines values for %s, but only one value is allowed", i, fields)
-	}
-	if i.Type != "" {
-		field := fields[0]
-		if i.Type != field {
-			return fmt.Errorf(
-				"type %T defines a discriminant set to %q, but it does not match the %T field; either remove or update the discriminant to match",
-				i,
-				i.Type,
-				i,
-			)
-		}
-	}
-	return nil
-}
-
-type IronscalesRegion string
-
-const (
-	// US region.
-	IronscalesRegionUs IronscalesRegion = "US"
-	// Canada region.
-	IronscalesRegionCa IronscalesRegion = "CA"
-	// EU region.
-	IronscalesRegionEu IronscalesRegion = "EU"
-	// UAE region.
-	IronscalesRegionUae IronscalesRegion = "UAE"
-)
-
-func NewIronscalesRegionFromString(s string) (IronscalesRegion, error) {
-	switch s {
-	case "US":
-		return IronscalesRegionUs, nil
-	case "CA":
-		return IronscalesRegionCa, nil
-	case "EU":
-		return IronscalesRegionEu, nil
-	case "UAE":
-		return IronscalesRegionUae, nil
-	}
-	var t IronscalesRegion
-	return "", fmt.Errorf("%s is not a valid %T", s, t)
-}
-
-func (i IronscalesRegion) Ptr() *IronscalesRegion {
-	return &i
-}
-
 type IruCredential struct {
 	Type string
 	// Configuration when creating new Token.
@@ -24405,8 +24116,6 @@ type ProviderConfig struct {
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/exchange-online-setup)
 	EmailsecurityExchangeOnline *EmailSecurityExchangeOnline
-	// Configuration for Ironscales as an email security provider.
-	EmailsecurityIronscales *EmailSecurityIronscales
 	// Configuration for Mimecast Cloud Gateway as an email security provider.
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/mimecast-cloud-gateway-emailsecurity-setup)
@@ -25300,13 +25009,6 @@ func (p *ProviderConfig) GetEmailsecurityExchangeOnline() *EmailSecurityExchange
 		return nil
 	}
 	return p.EmailsecurityExchangeOnline
-}
-
-func (p *ProviderConfig) GetEmailsecurityIronscales() *EmailSecurityIronscales {
-	if p == nil {
-		return nil
-	}
-	return p.EmailsecurityIronscales
 }
 
 func (p *ProviderConfig) GetEmailsecurityMimecastCloudGateway() *EmailSecurityMimecastCloudGateway {
@@ -26556,12 +26258,6 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.EmailsecurityExchangeOnline = value
-	case "emailsecurity_ironscales":
-		value := new(EmailSecurityIronscales)
-		if err := json.Unmarshal(data, &value); err != nil {
-			return err
-		}
-		p.EmailsecurityIronscales = value
 	case "emailsecurity_mimecast_cloud_gateway":
 		value := new(EmailSecurityMimecastCloudGateway)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -27486,9 +27182,6 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.EmailsecurityExchangeOnline != nil {
 		return internal.MarshalJSONWithExtraProperty(p.EmailsecurityExchangeOnline, "type", "emailsecurity_exchange_online")
 	}
-	if p.EmailsecurityIronscales != nil {
-		return internal.MarshalJSONWithExtraProperty(p.EmailsecurityIronscales, "type", "emailsecurity_ironscales")
-	}
 	if p.EmailsecurityMimecastCloudGateway != nil {
 		return internal.MarshalJSONWithExtraProperty(p.EmailsecurityMimecastCloudGateway, "type", "emailsecurity_mimecast_cloud_gateway")
 	}
@@ -27920,7 +27613,6 @@ type ProviderConfigVisitor interface {
 	VisitEmailsecurityDefenderForOffice(*EmailSecurityDefenderForOffice) error
 	VisitEmailsecurityDefenderForOfficeMock(*EmailSecurityDefenderForOfficeMock) error
 	VisitEmailsecurityExchangeOnline(*EmailSecurityExchangeOnline) error
-	VisitEmailsecurityIronscales(*EmailSecurityIronscales) error
 	VisitEmailsecurityMimecastCloudGateway(*EmailSecurityMimecastCloudGateway) error
 	VisitEmailsecurityMimecastCloudGatewayMock(*EmailSecurityMimecastCloudGatewayMock) error
 	VisitEmailsecurityO365ManagementActivity(*EmailSecurityO365ManagementActivity) error
@@ -28243,9 +27935,6 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.EmailsecurityExchangeOnline != nil {
 		return visitor.VisitEmailsecurityExchangeOnline(p.EmailsecurityExchangeOnline)
-	}
-	if p.EmailsecurityIronscales != nil {
-		return visitor.VisitEmailsecurityIronscales(p.EmailsecurityIronscales)
 	}
 	if p.EmailsecurityMimecastCloudGateway != nil {
 		return visitor.VisitEmailsecurityMimecastCloudGateway(p.EmailsecurityMimecastCloudGateway)
@@ -28813,9 +28502,6 @@ func (p *ProviderConfig) validate() error {
 	if p.EmailsecurityExchangeOnline != nil {
 		fields = append(fields, "emailsecurity_exchange_online")
 	}
-	if p.EmailsecurityIronscales != nil {
-		fields = append(fields, "emailsecurity_ironscales")
-	}
 	if p.EmailsecurityMimecastCloudGateway != nil {
 		fields = append(fields, "emailsecurity_mimecast_cloud_gateway")
 	}
@@ -29337,8 +29023,6 @@ const (
 	ProviderConfigIdEmailSecurityDefenderForOfficeMock ProviderConfigId = "emailsecurity_defender_for_office_mock"
 	// Microsoft Exchange Online
 	ProviderConfigIdEmailSecurityExchangeOnline ProviderConfigId = "emailsecurity_exchange_online"
-	// Ironscales
-	ProviderConfigIdEmailSecurityIronscales ProviderConfigId = "emailsecurity_ironscales"
 	// Mimecast Cloud Gateway
 	ProviderConfigIdEmailSecurityMimecastCloudGateway ProviderConfigId = "emailsecurity_mimecast_cloud_gateway"
 	// [MOCK] Mimecast Cloud Gateway
@@ -29717,8 +29401,6 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdEmailSecurityDefenderForOfficeMock, nil
 	case "emailsecurity_exchange_online":
 		return ProviderConfigIdEmailSecurityExchangeOnline, nil
-	case "emailsecurity_ironscales":
-		return ProviderConfigIdEmailSecurityIronscales, nil
 	case "emailsecurity_mimecast_cloud_gateway":
 		return ProviderConfigIdEmailSecurityMimecastCloudGateway, nil
 	case "emailsecurity_mimecast_cloud_gateway_mock":
