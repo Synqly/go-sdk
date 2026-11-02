@@ -353,6 +353,58 @@ func (l *ListCommentsRequest) SetMeta(meta []*string) {
 }
 
 var (
+	listIssueTypeRemoteFieldsRequestFieldMeta = big.NewInt(1 << 0)
+)
+
+type ListIssueTypeRemoteFieldsRequest struct {
+	// Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
+	Meta []*string `json:"-" url:"meta,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+}
+
+func (l *ListIssueTypeRemoteFieldsRequest) require(field *big.Int) {
+	if l.explicitFields == nil {
+		l.explicitFields = big.NewInt(0)
+	}
+	l.explicitFields.Or(l.explicitFields, field)
+}
+
+// SetMeta sets the Meta field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (l *ListIssueTypeRemoteFieldsRequest) SetMeta(meta []*string) {
+	l.Meta = meta
+	l.require(listIssueTypeRemoteFieldsRequestFieldMeta)
+}
+
+var (
+	listIssueTypesRequestFieldMeta = big.NewInt(1 << 0)
+)
+
+type ListIssueTypesRequest struct {
+	// Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
+	Meta []*string `json:"-" url:"meta,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+}
+
+func (l *ListIssueTypesRequest) require(field *big.Int) {
+	if l.explicitFields == nil {
+		l.explicitFields = big.NewInt(0)
+	}
+	l.explicitFields.Or(l.explicitFields, field)
+}
+
+// SetMeta sets the Meta field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (l *ListIssueTypesRequest) SetMeta(meta []*string) {
+	l.Meta = meta
+	l.require(listIssueTypesRequestFieldMeta)
+}
+
+var (
 	listNotesRequestFieldMeta = big.NewInt(1 << 0)
 )
 
@@ -3444,6 +3496,160 @@ func (g *GroupSummary) String() string {
 	return fmt.Sprintf("%#v", g)
 }
 
+// Issue type available on a Project in a ticketing system
+var (
+	issueTypeFieldId          = big.NewInt(1 << 0)
+	issueTypeFieldName        = big.NewInt(1 << 1)
+	issueTypeFieldProjectId   = big.NewInt(1 << 2)
+	issueTypeFieldDescription = big.NewInt(1 << 3)
+	issueTypeFieldUnmapped    = big.NewInt(1 << 4)
+)
+
+type IssueType struct {
+	// Unique identifier for this issue type.
+	Id string `json:"id" url:"id"`
+	// Name of the issue type.
+	Name string `json:"name" url:"name"`
+	// The `id` of the Project this issue type belongs to.
+	ProjectId string `json:"project_id" url:"project_id"`
+	// Description of the issue type.
+	Description *string `json:"description,omitempty" url:"description,omitempty"`
+	// The attributes that are not mapped to the issue type schema. The names and values of those attributes are specific to the provider.
+	Unmapped *Object `json:"unmapped,omitempty" url:"unmapped,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (i *IssueType) GetId() string {
+	if i == nil {
+		return ""
+	}
+	return i.Id
+}
+
+func (i *IssueType) GetName() string {
+	if i == nil {
+		return ""
+	}
+	return i.Name
+}
+
+func (i *IssueType) GetProjectId() string {
+	if i == nil {
+		return ""
+	}
+	return i.ProjectId
+}
+
+func (i *IssueType) GetDescription() *string {
+	if i == nil {
+		return nil
+	}
+	return i.Description
+}
+
+func (i *IssueType) GetUnmapped() *Object {
+	if i == nil {
+		return nil
+	}
+	return i.Unmapped
+}
+
+func (i *IssueType) GetExtraProperties() map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	return i.extraProperties
+}
+
+func (i *IssueType) require(field *big.Int) {
+	if i.explicitFields == nil {
+		i.explicitFields = big.NewInt(0)
+	}
+	i.explicitFields.Or(i.explicitFields, field)
+}
+
+// SetId sets the Id field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (i *IssueType) SetId(id string) {
+	i.Id = id
+	i.require(issueTypeFieldId)
+}
+
+// SetName sets the Name field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (i *IssueType) SetName(name string) {
+	i.Name = name
+	i.require(issueTypeFieldName)
+}
+
+// SetProjectId sets the ProjectId field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (i *IssueType) SetProjectId(projectId string) {
+	i.ProjectId = projectId
+	i.require(issueTypeFieldProjectId)
+}
+
+// SetDescription sets the Description field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (i *IssueType) SetDescription(description *string) {
+	i.Description = description
+	i.require(issueTypeFieldDescription)
+}
+
+// SetUnmapped sets the Unmapped field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (i *IssueType) SetUnmapped(unmapped *Object) {
+	i.Unmapped = unmapped
+	i.require(issueTypeFieldUnmapped)
+}
+
+func (i *IssueType) UnmarshalJSON(data []byte) error {
+	type unmarshaler IssueType
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*i = IssueType(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *i)
+	if err != nil {
+		return err
+	}
+	i.extraProperties = extraProperties
+	i.rawJSON = nil
+	return nil
+}
+
+func (i *IssueType) MarshalJSON() ([]byte, error) {
+	type embed IssueType
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*i),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, i.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (i *IssueType) String() string {
+	if i == nil {
+		return "<nil>"
+	}
+	if len(i.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(i.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(i); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", i)
+}
+
 // Unique identifier for an issue type
 type IssueTypeId = string
 
@@ -3669,6 +3875,124 @@ func (l *ListCommentsResponse) MarshalJSON() ([]byte, error) {
 }
 
 func (l *ListCommentsResponse) String() string {
+	if l == nil {
+		return "<nil>"
+	}
+	if len(l.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(l.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(l); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", l)
+}
+
+var (
+	listIssueTypesResponseFieldMessages = big.NewInt(1 << 0)
+	listIssueTypesResponseFieldMeta     = big.NewInt(1 << 1)
+	listIssueTypesResponseFieldResult   = big.NewInt(1 << 2)
+)
+
+type ListIssueTypesResponse struct {
+	// Additional messages from the service response that may be helpful to the client.
+	Messages *MessagesResponse `json:"messages,omitempty" url:"messages,omitempty"`
+	// Various metadata about the results organized by group, then type, then field.
+	Meta   *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
+	Result []*IssueType  `json:"result" url:"result"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (l *ListIssueTypesResponse) GetMessages() *MessagesResponse {
+	if l == nil {
+		return nil
+	}
+	return l.Messages
+}
+
+func (l *ListIssueTypesResponse) GetMeta() *MetaResponse {
+	if l == nil {
+		return nil
+	}
+	return l.Meta
+}
+
+func (l *ListIssueTypesResponse) GetResult() []*IssueType {
+	if l == nil {
+		return nil
+	}
+	return l.Result
+}
+
+func (l *ListIssueTypesResponse) GetExtraProperties() map[string]interface{} {
+	if l == nil {
+		return nil
+	}
+	return l.extraProperties
+}
+
+func (l *ListIssueTypesResponse) require(field *big.Int) {
+	if l.explicitFields == nil {
+		l.explicitFields = big.NewInt(0)
+	}
+	l.explicitFields.Or(l.explicitFields, field)
+}
+
+// SetMessages sets the Messages field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (l *ListIssueTypesResponse) SetMessages(messages *MessagesResponse) {
+	l.Messages = messages
+	l.require(listIssueTypesResponseFieldMessages)
+}
+
+// SetMeta sets the Meta field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (l *ListIssueTypesResponse) SetMeta(meta *MetaResponse) {
+	l.Meta = meta
+	l.require(listIssueTypesResponseFieldMeta)
+}
+
+// SetResult sets the Result field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (l *ListIssueTypesResponse) SetResult(result []*IssueType) {
+	l.Result = result
+	l.require(listIssueTypesResponseFieldResult)
+}
+
+func (l *ListIssueTypesResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler ListIssueTypesResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*l = ListIssueTypesResponse(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *l)
+	if err != nil {
+		return err
+	}
+	l.extraProperties = extraProperties
+	l.rawJSON = nil
+	return nil
+}
+
+func (l *ListIssueTypesResponse) MarshalJSON() ([]byte, error) {
+	type embed ListIssueTypesResponse
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*l),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, l.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (l *ListIssueTypesResponse) String() string {
 	if l == nil {
 		return "<nil>"
 	}
@@ -5098,6 +5422,7 @@ var (
 	remoteFieldFieldProviderFieldName = big.NewInt(1 << 3)
 	remoteFieldFieldProviderFieldPath = big.NewInt(1 << 4)
 	remoteFieldFieldProjectId         = big.NewInt(1 << 5)
+	remoteFieldFieldIssueTypeId       = big.NewInt(1 << 6)
 )
 
 type RemoteField struct {
@@ -5111,8 +5436,10 @@ type RemoteField struct {
 	ProviderFieldName string `json:"provider_field_name" url:"provider_field_name"`
 	// Path to the field in the remote ticketing provider. Uses dot notation for nested fields.
 	ProviderFieldPath *string `json:"provider_field_path,omitempty" url:"provider_field_path,omitempty"`
-	// Project id to which this field is scoped to
+	// Project to which this field is scoped. On `list_remote_fields`, set only on fields specific to one project. On `list_issue_type_remote_fields`, set on every field to the `id` of the requested Project, as returned by `list_projects`.
 	ProjectId *string `json:"project_id,omitempty" url:"project_id,omitempty"`
+	// The `id` of the issue type this field was listed for.
+	IssueTypeId *string `json:"issue_type_id,omitempty" url:"issue_type_id,omitempty"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -5161,6 +5488,13 @@ func (r *RemoteField) GetProjectId() *string {
 		return nil
 	}
 	return r.ProjectId
+}
+
+func (r *RemoteField) GetIssueTypeId() *string {
+	if r == nil {
+		return nil
+	}
+	return r.IssueTypeId
 }
 
 func (r *RemoteField) GetExtraProperties() map[string]interface{} {
@@ -5219,6 +5553,13 @@ func (r *RemoteField) SetProjectId(projectId *string) {
 	r.require(remoteFieldFieldProjectId)
 }
 
+// SetIssueTypeId sets the IssueTypeId field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (r *RemoteField) SetIssueTypeId(issueTypeId *string) {
+	r.IssueTypeId = issueTypeId
+	r.require(remoteFieldFieldIssueTypeId)
+}
+
 func (r *RemoteField) UnmarshalJSON(data []byte) error {
 	type unmarshaler RemoteField
 	var value unmarshaler
@@ -5264,13 +5605,16 @@ func (r *RemoteField) String() string {
 var (
 	remoteFieldSchemaFieldFieldTypeId      = big.NewInt(1 << 0)
 	remoteFieldSchemaFieldFieldType        = big.NewInt(1 << 1)
-	remoteFieldSchemaFieldEnumValues       = big.NewInt(1 << 2)
-	remoteFieldSchemaFieldEnumOptionValues = big.NewInt(1 << 3)
+	remoteFieldSchemaFieldRequired         = big.NewInt(1 << 2)
+	remoteFieldSchemaFieldEnumValues       = big.NewInt(1 << 3)
+	remoteFieldSchemaFieldEnumOptionValues = big.NewInt(1 << 4)
 )
 
 type RemoteFieldSchema struct {
 	FieldTypeId RemoteFieldTypeId `json:"field_type_id" url:"field_type_id"`
 	FieldType   *string           `json:"field_Type,omitempty" url:"field_Type,omitempty"`
+	// Whether this field is required.
+	Required *bool `json:"required,omitempty" url:"required,omitempty"`
 	// Display names for possible values the enum can take on.
 	EnumValues []string `json:"enum_values,omitempty" url:"enum_values,omitempty"`
 	// Possible values the enum can take on. For providers which don't distinguish between ID and display name, the ID and display name should be set to the same value.
@@ -5295,6 +5639,13 @@ func (r *RemoteFieldSchema) GetFieldType() *string {
 		return nil
 	}
 	return r.FieldType
+}
+
+func (r *RemoteFieldSchema) GetRequired() *bool {
+	if r == nil {
+		return nil
+	}
+	return r.Required
 }
 
 func (r *RemoteFieldSchema) GetEnumValues() []string {
@@ -5337,6 +5688,13 @@ func (r *RemoteFieldSchema) SetFieldTypeId(fieldTypeId RemoteFieldTypeId) {
 func (r *RemoteFieldSchema) SetFieldType(fieldType *string) {
 	r.FieldType = fieldType
 	r.require(remoteFieldSchemaFieldFieldType)
+}
+
+// SetRequired sets the Required field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (r *RemoteFieldSchema) SetRequired(required *bool) {
+	r.Required = required
+	r.require(remoteFieldSchemaFieldRequired)
 }
 
 // SetEnumValues sets the EnumValues field and marks it as non-optional;

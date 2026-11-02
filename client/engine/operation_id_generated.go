@@ -151,6 +151,8 @@ const (
 	OperationIdTicketingGetTicket                               OperationId = "ticketing_get_ticket"
 	OperationIdTicketingListAttachmentsMetadata                 OperationId = "ticketing_list_attachments_metadata"
 	OperationIdTicketingListComments                            OperationId = "ticketing_list_comments"
+	OperationIdTicketingListIssueTypeRemoteFields               OperationId = "ticketing_list_issue_type_remote_fields"
+	OperationIdTicketingListIssueTypes                          OperationId = "ticketing_list_issue_types"
 	OperationIdTicketingListNotes                               OperationId = "ticketing_list_notes"
 	OperationIdTicketingListOnCall                              OperationId = "ticketing_list_on_call"
 	OperationIdTicketingListProjects                            OperationId = "ticketing_list_projects"
@@ -460,6 +462,10 @@ func NewOperationIdFromString(s string) (OperationId, error) {
 		return OperationIdTicketingListAttachmentsMetadata, nil
 	case "ticketing_list_comments":
 		return OperationIdTicketingListComments, nil
+	case "ticketing_list_issue_type_remote_fields":
+		return OperationIdTicketingListIssueTypeRemoteFields, nil
+	case "ticketing_list_issue_types":
+		return OperationIdTicketingListIssueTypes, nil
 	case "ticketing_list_notes":
 		return OperationIdTicketingListNotes, nil
 	case "ticketing_list_on_call":

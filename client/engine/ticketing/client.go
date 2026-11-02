@@ -52,6 +52,49 @@ func (c *Client) ListRemoteFields(
     return response.Body, nil
 }
 
+// List issue types for the specified project.
+func (c *Client) ListIssueTypes(
+    ctx context.Context,
+    // Project to list issue types for, as a project key or id.
+    projectId engine.ProjectId,
+    request *engine.ListIssueTypesRequest,
+    opts ...option.RequestOption,
+) (*engine.ListIssueTypesResponse, error){
+    response, err := c.WithRawResponse.ListIssueTypes(
+        ctx,
+        projectId,
+        request,
+        opts...,
+    )
+    if err != nil {
+        return nil, err
+    }
+    return response.Body, nil
+}
+
+// Lists the remote fields available when creating a ticket in the specified project, using the specified issue type.
+func (c *Client) ListIssueTypeRemoteFields(
+    ctx context.Context,
+    // Project the issue type belongs to, as a project key or id.
+    projectId engine.ProjectId,
+    // Issue type ID as returned when listing issue types.
+    issueTypeId engine.IssueTypeId,
+    request *engine.ListIssueTypeRemoteFieldsRequest,
+    opts ...option.RequestOption,
+) (*engine.ListRemoteFieldsResponse, error){
+    response, err := c.WithRawResponse.ListIssueTypeRemoteFields(
+        ctx,
+        projectId,
+        issueTypeId,
+        request,
+        opts...,
+    )
+    if err != nil {
+        return nil, err
+    }
+    return response.Body, nil
+}
+
 // Returns a list of `Projects` from the token-linked `Integration`. Tickets must be created and retrieved within the context of a specific Project.
 func (c *Client) ListProjects(
     ctx context.Context,

@@ -82,6 +82,117 @@ func (r *RawClient) ListRemoteFields(
     }, nil
 }
 
+func (r *RawClient) ListIssueTypes(
+    ctx context.Context,
+    // Project to list issue types for, as a project key or id.
+    projectId engine.ProjectId,
+    request *engine.ListIssueTypesRequest,
+    opts ...option.RequestOption,
+) (*core.Response[*engine.ListIssueTypesResponse], error){
+    options := core.NewRequestOptions(opts...)
+    baseURL := internal.ResolveBaseURL(
+        options.BaseURL,
+        r.baseURL,
+        "https://api.synqly.com",
+    )
+    endpointURL := internal.EncodeURL(
+        baseURL + "/v1/ticketing/issue-types/%v",
+        projectId,
+    )
+    queryParams, err := internal.QueryValues(request)
+    if err != nil {
+        return nil, err
+    }
+    if len(queryParams) > 0 {
+        endpointURL += "?" + queryParams.Encode()
+    }
+    headers := internal.MergeHeaders(
+        r.options.ToHeader(),
+        options.ToHeader(),
+    )
+    var response *engine.ListIssueTypesResponse
+    raw, err := r.caller.Call(
+        ctx,
+        &internal.CallParams{
+            URL: endpointURL,
+            Method: http.MethodGet,
+            Headers: headers,
+            MaxAttempts: options.MaxAttempts,
+            DisableRetries: options.DisableRetries,
+            BodyProperties: options.BodyProperties,
+            QueryParameters: options.QueryParameters,
+            Client: options.HTTPClient,
+            Response: &response,
+            ErrorDecoder: internal.NewErrorDecoder(engine.ErrorCodes),
+        },
+    )
+    if err != nil {
+        return nil, err
+    }
+    return &core.Response[*engine.ListIssueTypesResponse]{
+        StatusCode: raw.StatusCode,
+        Header: raw.Header,
+        Body: response,
+    }, nil
+}
+
+func (r *RawClient) ListIssueTypeRemoteFields(
+    ctx context.Context,
+    // Project the issue type belongs to, as a project key or id.
+    projectId engine.ProjectId,
+    // Issue type ID as returned when listing issue types.
+    issueTypeId engine.IssueTypeId,
+    request *engine.ListIssueTypeRemoteFieldsRequest,
+    opts ...option.RequestOption,
+) (*core.Response[*engine.ListRemoteFieldsResponse], error){
+    options := core.NewRequestOptions(opts...)
+    baseURL := internal.ResolveBaseURL(
+        options.BaseURL,
+        r.baseURL,
+        "https://api.synqly.com",
+    )
+    endpointURL := internal.EncodeURL(
+        baseURL + "/v1/ticketing/remote-fields/%v/%v",
+        projectId,
+        issueTypeId,
+    )
+    queryParams, err := internal.QueryValues(request)
+    if err != nil {
+        return nil, err
+    }
+    if len(queryParams) > 0 {
+        endpointURL += "?" + queryParams.Encode()
+    }
+    headers := internal.MergeHeaders(
+        r.options.ToHeader(),
+        options.ToHeader(),
+    )
+    var response *engine.ListRemoteFieldsResponse
+    raw, err := r.caller.Call(
+        ctx,
+        &internal.CallParams{
+            URL: endpointURL,
+            Method: http.MethodGet,
+            Headers: headers,
+            MaxAttempts: options.MaxAttempts,
+            DisableRetries: options.DisableRetries,
+            BodyProperties: options.BodyProperties,
+            QueryParameters: options.QueryParameters,
+            Client: options.HTTPClient,
+            Response: &response,
+            ErrorDecoder: internal.NewErrorDecoder(engine.ErrorCodes),
+        },
+    )
+    if err != nil {
+        return nil, err
+    }
+    return &core.Response[*engine.ListRemoteFieldsResponse]{
+        StatusCode: raw.StatusCode,
+        Header: raw.Header,
+        Body: response,
+    }, nil
+}
+
 func (r *RawClient) ListProjects(
     ctx context.Context,
     request *engine.ListProjectsRequest,
