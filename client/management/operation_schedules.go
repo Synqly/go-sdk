@@ -474,9 +474,12 @@ const (
 	ScheduledOperationIdEmailsecurityQueryEmailEvents             ScheduledOperationId = "emailsecurity_query_email_events"
 	ScheduledOperationIdEndpointmanagementQueryDevices            ScheduledOperationId = "endpointmanagement_query_devices"
 	ScheduledOperationIdEndpointmanagementQueryComplianceFindings ScheduledOperationId = "endpointmanagement_query_compliance_findings"
+	ScheduledOperationIdIdentityQueryAccessGrants                 ScheduledOperationId = "identity_query_access_grants"
+	ScheduledOperationIdIdentityQueryApplications                 ScheduledOperationId = "identity_query_applications"
 	ScheduledOperationIdIdentityQueryAuditLog                     ScheduledOperationId = "identity_query_audit_log"
 	ScheduledOperationIdIdentityQueryGroups                       ScheduledOperationId = "identity_query_groups"
 	ScheduledOperationIdIdentityQueryGroupsEnriched               ScheduledOperationId = "identity_query_groups_enriched"
+	ScheduledOperationIdIdentityQueryPolicies                     ScheduledOperationId = "identity_query_policies"
 	ScheduledOperationIdIdentityQueryRiskEvents                   ScheduledOperationId = "identity_query_risk_events"
 	ScheduledOperationIdIdentityQueryUsers                        ScheduledOperationId = "identity_query_users"
 	ScheduledOperationIdIdentityQueryUsersEnriched                ScheduledOperationId = "identity_query_users_enriched"
@@ -528,12 +531,18 @@ func NewScheduledOperationIdFromString(s string) (ScheduledOperationId, error) {
 		return ScheduledOperationIdEndpointmanagementQueryDevices, nil
 	case "endpointmanagement_query_compliance_findings":
 		return ScheduledOperationIdEndpointmanagementQueryComplianceFindings, nil
+	case "identity_query_access_grants":
+		return ScheduledOperationIdIdentityQueryAccessGrants, nil
+	case "identity_query_applications":
+		return ScheduledOperationIdIdentityQueryApplications, nil
 	case "identity_query_audit_log":
 		return ScheduledOperationIdIdentityQueryAuditLog, nil
 	case "identity_query_groups":
 		return ScheduledOperationIdIdentityQueryGroups, nil
 	case "identity_query_groups_enriched":
 		return ScheduledOperationIdIdentityQueryGroupsEnriched, nil
+	case "identity_query_policies":
+		return ScheduledOperationIdIdentityQueryPolicies, nil
 	case "identity_query_risk_events":
 		return ScheduledOperationIdIdentityQueryRiskEvents, nil
 	case "identity_query_users":
