@@ -35,7 +35,7 @@ func NewClient(options *core.RequestOptions) *Client {
     }
 }
 
-// Queries operation
+// Queries operation. Deprecated and will be removed in a future release.
 func (c *Client) Query(
     ctx context.Context,
     // what `operation` to query
@@ -55,7 +55,7 @@ func (c *Client) Query(
     return response.Body, nil
 }
 
-// Retrieves an Topic by ID.
+// Retrieves an `operation` by ID. Deprecated and will be removed in a future release.
 func (c *Client) Get(
     ctx context.Context,
     // what `operation` to query
@@ -78,7 +78,7 @@ func (c *Client) Get(
     return response.Body, nil
 }
 
-// Updates an `operation` by ID.
+// Updates an `operation` by ID. Deprecated and will be removed in a future release.
 func (c *Client) Patch(
     ctx context.Context,
     // what `operation` to query
@@ -102,6 +102,7 @@ func (c *Client) Patch(
 }
 
 // Deletes the object matching `id` for the operation matching `operation`.
+// Deprecated and will be removed in a future release.
 func (c *Client) Delete(
     ctx context.Context,
     // what `operation` to delete.
@@ -124,7 +125,7 @@ func (c *Client) Delete(
     return nil
 }
 
-// Writes an `operation` object to the Custom provider configured with the token used for authentication.
+// Writes an `operation` object to the Custom provider configured with the token used for authentication. Deprecated and will be removed in a future release.
 func (c *Client) Post(
     ctx context.Context,
     // what `operation` to post
@@ -144,7 +145,7 @@ func (c *Client) Post(
     return response.Body, nil
 }
 
-// Writes a batch of `operation` objects to the Custom provider configured with the token used for authentication.
+// Writes a batch of `operation` objects to the Custom provider configured with the token used for authentication. Deprecated and will be removed in a future release.
 func (c *Client) PostBatch(
     ctx context.Context,
     // what `operation` to post
