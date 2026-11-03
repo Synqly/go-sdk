@@ -131,6 +131,7 @@ const (
 	OperationIdSiemQueryEvents                                  OperationId = "siem_query_events"
 	OperationIdSiemQueryInvestigations                          OperationId = "siem_query_investigations"
 	OperationIdSiemQueryLogProviders                            OperationId = "siem_query_log_providers"
+	OperationIdSiemUpdateAlert                                  OperationId = "siem_update_alert"
 	OperationIdSinkPostEvents                                   OperationId = "sink_post_events"
 	OperationIdStorageDeleteFile                                OperationId = "storage_delete_file"
 	OperationIdStorageDownloadFile                              OperationId = "storage_download_file"
@@ -422,6 +423,8 @@ func NewOperationIdFromString(s string) (OperationId, error) {
 		return OperationIdSiemQueryInvestigations, nil
 	case "siem_query_log_providers":
 		return OperationIdSiemQueryLogProviders, nil
+	case "siem_update_alert":
+		return OperationIdSiemUpdateAlert, nil
 	case "sink_post_events":
 		return OperationIdSinkPostEvents, nil
 	case "storage_delete_file":

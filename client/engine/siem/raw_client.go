@@ -496,3 +496,58 @@ func (r *RawClient) GetAlert(
     }, nil
 }
 
+func (r *RawClient) UpdateAlert(
+    ctx context.Context,
+    // Uid of the alert (URL encoded). This will be `finding_info.uid` in the OCSF model, as Query Alerts and Get Alert return it.
+    id string,
+    request *engine.UpdateSiemAlertRequestInput,
+    opts ...option.RequestOption,
+) (*core.Response[*engine.UpdateAlertResponse], error){
+    options := core.NewRequestOptions(opts...)
+    baseURL := internal.ResolveBaseURL(
+        options.BaseURL,
+        r.baseURL,
+        "https://api.synqly.com",
+    )
+    endpointURL := internal.EncodeURL(
+        baseURL + "/v1/siem/alerts/%v",
+        id,
+    )
+    queryParams, err := internal.QueryValues(request)
+    if err != nil {
+        return nil, err
+    }
+    if len(queryParams) > 0 {
+        endpointURL += "?" + queryParams.Encode()
+    }
+    headers := internal.MergeHeaders(
+        r.options.ToHeader(),
+        options.ToHeader(),
+    )
+    var response *engine.UpdateAlertResponse
+    raw, err := r.caller.Call(
+        ctx,
+        &internal.CallParams{
+            URL: endpointURL,
+            Method: http.MethodPost,
+            Headers: headers,
+            MaxAttempts: options.MaxAttempts,
+            DisableRetries: options.DisableRetries,
+            BodyProperties: options.BodyProperties,
+            QueryParameters: options.QueryParameters,
+            Client: options.HTTPClient,
+            Request: request,
+            Response: &response,
+            ErrorDecoder: internal.NewErrorDecoder(engine.ErrorCodes),
+        },
+    )
+    if err != nil {
+        return nil, err
+    }
+    return &core.Response[*engine.UpdateAlertResponse]{
+        StatusCode: raw.StatusCode,
+        Header: raw.Header,
+        Body: response,
+    }, nil
+}
+

@@ -200,3 +200,23 @@ func (c *Client) GetAlert(
     return response.Body, nil
 }
 
+// Updates the triage state of a single alert in the token-linked SIEM: its lifecycle status, the analyst verdict, a comment and who it is assigned to.
+func (c *Client) UpdateAlert(
+    ctx context.Context,
+    // Uid of the alert (URL encoded). This will be `finding_info.uid` in the OCSF model, as Query Alerts and Get Alert return it.
+    id string,
+    request *engine.UpdateSiemAlertRequestInput,
+    opts ...option.RequestOption,
+) (*engine.UpdateAlertResponse, error){
+    response, err := c.WithRawResponse.UpdateAlert(
+        ctx,
+        id,
+        request,
+        opts...,
+    )
+    if err != nil {
+        return nil, err
+    }
+    return response.Body, nil
+}
+
