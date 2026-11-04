@@ -468,6 +468,7 @@ const (
 	ScheduledOperationIdEdrQueryApplications                      ScheduledOperationId = "edr_query_applications"
 	ScheduledOperationIdEdrQueryEndpoints                         ScheduledOperationId = "edr_query_endpoints"
 	ScheduledOperationIdEdrQueryIocs                              ScheduledOperationId = "edr_query_iocs"
+	ScheduledOperationIdEdrQueryPolicies                          ScheduledOperationId = "edr_query_policies"
 	ScheduledOperationIdEdrQueryPostureScore                      ScheduledOperationId = "edr_query_posture_score"
 	ScheduledOperationIdEdrQueryThreatevents                      ScheduledOperationId = "edr_query_threatevents"
 	ScheduledOperationIdEmailsecurityQueryThreats                 ScheduledOperationId = "emailsecurity_query_threats"
@@ -519,6 +520,8 @@ func NewScheduledOperationIdFromString(s string) (ScheduledOperationId, error) {
 		return ScheduledOperationIdEdrQueryEndpoints, nil
 	case "edr_query_iocs":
 		return ScheduledOperationIdEdrQueryIocs, nil
+	case "edr_query_policies":
+		return ScheduledOperationIdEdrQueryPolicies, nil
 	case "edr_query_posture_score":
 		return ScheduledOperationIdEdrQueryPostureScore, nil
 	case "edr_query_threatevents":
