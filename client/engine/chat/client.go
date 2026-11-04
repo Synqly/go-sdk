@@ -130,7 +130,7 @@ func (c *Client) QueryConversations(
     return response.Body, nil
 }
 
-// Returns the members of a specific conversation. Use the user-scoped variant (query_user_conversation_members) for chats that only exist in a user's mailbox (e.g. Teams 1:1 chats).
+// Returns the members of a specific conversation. Use the user-scoped variant (query_user_conversation_members) for chats that only exist in a user's mailbox (e.g. Teams 1:1 chats). Where the provider supports create_direct_message, the conversation UID it returns is accepted here.
 func (c *Client) QueryConversationMembers(
     ctx context.Context,
     conversationId string,
@@ -166,7 +166,7 @@ func (c *Client) QueryMessages(
     return response.Body, nil
 }
 
-// Returns messages from a specific conversation. The conversationId must be obtained from query_conversations or query_user_conversations. Use the user-scoped variant (query_user_conversation_messages) for chats that only exist in a user's mailbox.
+// Returns messages from a specific conversation. The conversationId must be obtained from query_conversations or query_user_conversations. Use the user-scoped variant (query_user_conversation_messages) for chats that only exist in a user's mailbox. Where the provider supports create_direct_message, the conversation UID it returns is accepted here. Where the provider declares a `chat_message.parent_uid` filter, filtering on it with the `uid` of a thread's top-level message returns that thread's replies instead.
 func (c *Client) QueryConversationMessages(
     ctx context.Context,
     conversationId string,
@@ -183,5 +183,88 @@ func (c *Client) QueryConversationMessages(
         return nil, err
     }
     return response.Body, nil
+}
+
+// Posts a message to a conversation as the integration's bot or app, either as a new top-level message or as a reply in a thread. The response carries the message's `uid`, which update_message and delete_message accept.
+func (c *Client) CreateMessage(
+    ctx context.Context,
+    // UID of the conversation (URL encoded). This is `chat_message.conversation_uid` in the OCSF model.
+    conversationId string,
+    request *engine.ChatCreateMessageRequest,
+    opts ...option.RequestOption,
+) (*engine.ChatMessageResponse, error){
+    response, err := c.WithRawResponse.CreateMessage(
+        ctx,
+        conversationId,
+        request,
+        opts...,
+    )
+    if err != nil {
+        return nil, err
+    }
+    return response.Body, nil
+}
+
+// Sends a direct message to one user, opening the direct conversation if it does not exist yet. The response's `chat_message.conversation_uid` addresses that conversation for later messages and reads.
+func (c *Client) CreateDirectMessage(
+    ctx context.Context,
+    request *engine.ChatCreateDirectMessageRequest,
+    opts ...option.RequestOption,
+) (*engine.ChatMessageResponse, error){
+    response, err := c.WithRawResponse.CreateDirectMessage(
+        ctx,
+        request,
+        opts...,
+    )
+    if err != nil {
+        return nil, err
+    }
+    return response.Body, nil
+}
+
+// Replaces the text of a message the integration sent. Messages sent by anyone else cannot be updated, and a provider's admin policy can forbid edits. The response can lack `chat_message.parent_uid`; the `create_message` response for a reply carries it.
+func (c *Client) UpdateMessage(
+    ctx context.Context,
+    // UID of the conversation (URL encoded). This is `chat_message.conversation_uid` in the OCSF model.
+    conversationId string,
+    // UID of the message (URL encoded). This is `chat_message.uid` in the OCSF model.
+    messageId string,
+    request *engine.ChatUpdateMessageRequest,
+    opts ...option.RequestOption,
+) (*engine.ChatMessageResponse, error){
+    response, err := c.WithRawResponse.UpdateMessage(
+        ctx,
+        conversationId,
+        messageId,
+        request,
+        opts...,
+    )
+    if err != nil {
+        return nil, err
+    }
+    return response.Body, nil
+}
+
+// Deletes a message the integration sent. Messages sent by anyone else cannot be deleted, and a provider's admin policy can forbid deletes.
+func (c *Client) DeleteMessage(
+    ctx context.Context,
+    // UID of the conversation (URL encoded). This is `chat_message.conversation_uid` in the OCSF model.
+    conversationId string,
+    // UID of the message (URL encoded). This is `chat_message.uid` in the OCSF model.
+    messageId string,
+    request *engine.ChatDeleteMessageRequest,
+    opts ...option.RequestOption,
+) error{
+    _, err := c.WithRawResponse.DeleteMessage(
+        ctx,
+        conversationId,
+        messageId,
+        request,
+        opts...,
+    )
+    if err != nil {
+        return err
+    }
+    return nil
 }
 

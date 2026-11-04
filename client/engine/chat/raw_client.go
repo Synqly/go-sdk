@@ -449,3 +449,221 @@ func (r *RawClient) QueryConversationMessages(
     }, nil
 }
 
+func (r *RawClient) CreateMessage(
+    ctx context.Context,
+    // UID of the conversation (URL encoded). This is `chat_message.conversation_uid` in the OCSF model.
+    conversationId string,
+    request *engine.ChatCreateMessageRequest,
+    opts ...option.RequestOption,
+) (*core.Response[*engine.ChatMessageResponse], error){
+    options := core.NewRequestOptions(opts...)
+    baseURL := internal.ResolveBaseURL(
+        options.BaseURL,
+        r.baseURL,
+        "https://api.synqly.com",
+    )
+    endpointURL := internal.EncodeURL(
+        baseURL + "/v1/chat/conversations/%v/messages",
+        conversationId,
+    )
+    queryParams, err := internal.QueryValues(request)
+    if err != nil {
+        return nil, err
+    }
+    if len(queryParams) > 0 {
+        endpointURL += "?" + queryParams.Encode()
+    }
+    headers := internal.MergeHeaders(
+        r.options.ToHeader(),
+        options.ToHeader(),
+    )
+    var response *engine.ChatMessageResponse
+    raw, err := r.caller.Call(
+        ctx,
+        &internal.CallParams{
+            URL: endpointURL,
+            Method: http.MethodPost,
+            Headers: headers,
+            MaxAttempts: options.MaxAttempts,
+            DisableRetries: options.DisableRetries,
+            BodyProperties: options.BodyProperties,
+            QueryParameters: options.QueryParameters,
+            Client: options.HTTPClient,
+            Request: request,
+            Response: &response,
+            ErrorDecoder: internal.NewErrorDecoder(engine.ErrorCodes),
+        },
+    )
+    if err != nil {
+        return nil, err
+    }
+    return &core.Response[*engine.ChatMessageResponse]{
+        StatusCode: raw.StatusCode,
+        Header: raw.Header,
+        Body: response,
+    }, nil
+}
+
+func (r *RawClient) CreateDirectMessage(
+    ctx context.Context,
+    request *engine.ChatCreateDirectMessageRequest,
+    opts ...option.RequestOption,
+) (*core.Response[*engine.ChatMessageResponse], error){
+    options := core.NewRequestOptions(opts...)
+    baseURL := internal.ResolveBaseURL(
+        options.BaseURL,
+        r.baseURL,
+        "https://api.synqly.com",
+    )
+    endpointURL := baseURL + "/v1/chat/direct-messages"
+    queryParams, err := internal.QueryValues(request)
+    if err != nil {
+        return nil, err
+    }
+    if len(queryParams) > 0 {
+        endpointURL += "?" + queryParams.Encode()
+    }
+    headers := internal.MergeHeaders(
+        r.options.ToHeader(),
+        options.ToHeader(),
+    )
+    var response *engine.ChatMessageResponse
+    raw, err := r.caller.Call(
+        ctx,
+        &internal.CallParams{
+            URL: endpointURL,
+            Method: http.MethodPost,
+            Headers: headers,
+            MaxAttempts: options.MaxAttempts,
+            DisableRetries: options.DisableRetries,
+            BodyProperties: options.BodyProperties,
+            QueryParameters: options.QueryParameters,
+            Client: options.HTTPClient,
+            Request: request,
+            Response: &response,
+            ErrorDecoder: internal.NewErrorDecoder(engine.ErrorCodes),
+        },
+    )
+    if err != nil {
+        return nil, err
+    }
+    return &core.Response[*engine.ChatMessageResponse]{
+        StatusCode: raw.StatusCode,
+        Header: raw.Header,
+        Body: response,
+    }, nil
+}
+
+func (r *RawClient) UpdateMessage(
+    ctx context.Context,
+    // UID of the conversation (URL encoded). This is `chat_message.conversation_uid` in the OCSF model.
+    conversationId string,
+    // UID of the message (URL encoded). This is `chat_message.uid` in the OCSF model.
+    messageId string,
+    request *engine.ChatUpdateMessageRequest,
+    opts ...option.RequestOption,
+) (*core.Response[*engine.ChatMessageResponse], error){
+    options := core.NewRequestOptions(opts...)
+    baseURL := internal.ResolveBaseURL(
+        options.BaseURL,
+        r.baseURL,
+        "https://api.synqly.com",
+    )
+    endpointURL := internal.EncodeURL(
+        baseURL + "/v1/chat/conversations/%v/messages/%v",
+        conversationId,
+        messageId,
+    )
+    queryParams, err := internal.QueryValues(request)
+    if err != nil {
+        return nil, err
+    }
+    if len(queryParams) > 0 {
+        endpointURL += "?" + queryParams.Encode()
+    }
+    headers := internal.MergeHeaders(
+        r.options.ToHeader(),
+        options.ToHeader(),
+    )
+    var response *engine.ChatMessageResponse
+    raw, err := r.caller.Call(
+        ctx,
+        &internal.CallParams{
+            URL: endpointURL,
+            Method: http.MethodPost,
+            Headers: headers,
+            MaxAttempts: options.MaxAttempts,
+            DisableRetries: options.DisableRetries,
+            BodyProperties: options.BodyProperties,
+            QueryParameters: options.QueryParameters,
+            Client: options.HTTPClient,
+            Request: request,
+            Response: &response,
+            ErrorDecoder: internal.NewErrorDecoder(engine.ErrorCodes),
+        },
+    )
+    if err != nil {
+        return nil, err
+    }
+    return &core.Response[*engine.ChatMessageResponse]{
+        StatusCode: raw.StatusCode,
+        Header: raw.Header,
+        Body: response,
+    }, nil
+}
+
+func (r *RawClient) DeleteMessage(
+    ctx context.Context,
+    // UID of the conversation (URL encoded). This is `chat_message.conversation_uid` in the OCSF model.
+    conversationId string,
+    // UID of the message (URL encoded). This is `chat_message.uid` in the OCSF model.
+    messageId string,
+    request *engine.ChatDeleteMessageRequest,
+    opts ...option.RequestOption,
+) (*core.Response[any], error){
+    options := core.NewRequestOptions(opts...)
+    baseURL := internal.ResolveBaseURL(
+        options.BaseURL,
+        r.baseURL,
+        "https://api.synqly.com",
+    )
+    endpointURL := internal.EncodeURL(
+        baseURL + "/v1/chat/conversations/%v/messages/%v",
+        conversationId,
+        messageId,
+    )
+    queryParams, err := internal.QueryValues(request)
+    if err != nil {
+        return nil, err
+    }
+    if len(queryParams) > 0 {
+        endpointURL += "?" + queryParams.Encode()
+    }
+    headers := internal.MergeHeaders(
+        r.options.ToHeader(),
+        options.ToHeader(),
+    )
+    raw, err := r.caller.Call(
+        ctx,
+        &internal.CallParams{
+            URL: endpointURL,
+            Method: http.MethodDelete,
+            Headers: headers,
+            MaxAttempts: options.MaxAttempts,
+            DisableRetries: options.DisableRetries,
+            BodyProperties: options.BodyProperties,
+            QueryParameters: options.QueryParameters,
+            Client: options.HTTPClient,
+            ErrorDecoder: internal.NewErrorDecoder(engine.ErrorCodes),
+        },
+    )
+    if err != nil {
+        return nil, err
+    }
+    return &core.Response[any]{
+        StatusCode: raw.StatusCode,
+        Header: raw.Header,
+        Body: nil,
+    }, nil
+}
+

@@ -27,6 +27,9 @@ const (
 	OperationIdAssetsQueryVulnerabilities                       OperationId = "assets_query_vulnerabilities"
 	OperationIdAssetsUpdateDeviceProperties                     OperationId = "assets_update_device_properties"
 	OperationIdAssetsUpdateSoftware                             OperationId = "assets_update_software"
+	OperationIdChatCreateDirectMessage                          OperationId = "chat_create_direct_message"
+	OperationIdChatCreateMessage                                OperationId = "chat_create_message"
+	OperationIdChatDeleteMessage                                OperationId = "chat_delete_message"
 	OperationIdChatQueryConversationMembers                     OperationId = "chat_query_conversation_members"
 	OperationIdChatQueryConversationMessages                    OperationId = "chat_query_conversation_messages"
 	OperationIdChatQueryConversations                           OperationId = "chat_query_conversations"
@@ -35,6 +38,7 @@ const (
 	OperationIdChatQueryUserConversationMessages                OperationId = "chat_query_user_conversation_messages"
 	OperationIdChatQueryUserConversations                       OperationId = "chat_query_user_conversations"
 	OperationIdChatQueryUsers                                   OperationId = "chat_query_users"
+	OperationIdChatUpdateMessage                                OperationId = "chat_update_message"
 	OperationIdCloudsecurityQueryCloudResourceInventory         OperationId = "cloudsecurity_query_cloud_resource_inventory"
 	OperationIdCloudsecurityQueryComplianceFindings             OperationId = "cloudsecurity_query_compliance_findings"
 	OperationIdCloudsecurityQueryEvents                         OperationId = "cloudsecurity_query_events"
@@ -215,6 +219,12 @@ func NewOperationIdFromString(s string) (OperationId, error) {
 		return OperationIdAssetsUpdateDeviceProperties, nil
 	case "assets_update_software":
 		return OperationIdAssetsUpdateSoftware, nil
+	case "chat_create_direct_message":
+		return OperationIdChatCreateDirectMessage, nil
+	case "chat_create_message":
+		return OperationIdChatCreateMessage, nil
+	case "chat_delete_message":
+		return OperationIdChatDeleteMessage, nil
 	case "chat_query_conversation_members":
 		return OperationIdChatQueryConversationMembers, nil
 	case "chat_query_conversation_messages":
@@ -231,6 +241,8 @@ func NewOperationIdFromString(s string) (OperationId, error) {
 		return OperationIdChatQueryUserConversations, nil
 	case "chat_query_users":
 		return OperationIdChatQueryUsers, nil
+	case "chat_update_message":
+		return OperationIdChatUpdateMessage, nil
 	case "cloudsecurity_query_cloud_resource_inventory":
 		return OperationIdCloudsecurityQueryCloudResourceInventory, nil
 	case "cloudsecurity_query_compliance_findings":

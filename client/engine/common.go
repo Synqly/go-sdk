@@ -1421,3 +1421,106 @@ func NewResourceTypeFromString(s string) (ResourceType, error) {
 func (r ResourceType) Ptr() *ResourceType {
 	return &r
 }
+
+// A user in the provider, identified by exactly one of `uid` or `email_addr`. Setting both or neither is rejected with a `400`.
+var (
+	userReferenceFieldUid       = big.NewInt(1 << 0)
+	userReferenceFieldEmailAddr = big.NewInt(1 << 1)
+)
+
+type UserReference struct {
+	// The user's id in the provider.
+	Uid *string `json:"uid,omitempty" url:"uid,omitempty"`
+	// The user's email address, or user principal name where the provider uses one.
+	EmailAddr *string `json:"email_addr,omitempty" url:"email_addr,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (u *UserReference) GetUid() *string {
+	if u == nil {
+		return nil
+	}
+	return u.Uid
+}
+
+func (u *UserReference) GetEmailAddr() *string {
+	if u == nil {
+		return nil
+	}
+	return u.EmailAddr
+}
+
+func (u *UserReference) GetExtraProperties() map[string]interface{} {
+	if u == nil {
+		return nil
+	}
+	return u.extraProperties
+}
+
+func (u *UserReference) require(field *big.Int) {
+	if u.explicitFields == nil {
+		u.explicitFields = big.NewInt(0)
+	}
+	u.explicitFields.Or(u.explicitFields, field)
+}
+
+// SetUid sets the Uid field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (u *UserReference) SetUid(uid *string) {
+	u.Uid = uid
+	u.require(userReferenceFieldUid)
+}
+
+// SetEmailAddr sets the EmailAddr field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (u *UserReference) SetEmailAddr(emailAddr *string) {
+	u.EmailAddr = emailAddr
+	u.require(userReferenceFieldEmailAddr)
+}
+
+func (u *UserReference) UnmarshalJSON(data []byte) error {
+	type unmarshaler UserReference
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*u = UserReference(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *u)
+	if err != nil {
+		return err
+	}
+	u.extraProperties = extraProperties
+	u.rawJSON = nil
+	return nil
+}
+
+func (u *UserReference) MarshalJSON() ([]byte, error) {
+	type embed UserReference
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*u),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, u.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (u *UserReference) String() string {
+	if u == nil {
+		return "<nil>"
+	}
+	if len(u.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(u.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(u); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", u)
+}

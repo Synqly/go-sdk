@@ -13,6 +13,176 @@ import (
 )
 
 var (
+	chatCreateDirectMessageRequestFieldMeta    = big.NewInt(1 << 0)
+	chatCreateDirectMessageRequestFieldUser    = big.NewInt(1 << 1)
+	chatCreateDirectMessageRequestFieldMessage = big.NewInt(1 << 2)
+)
+
+type ChatCreateDirectMessageRequest struct {
+	// Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
+	Meta []*string `json:"-" url:"meta,omitempty"`
+	// The user to message.
+	User *UserReference `json:"user" url:"-"`
+	// The plain-text content of the message.
+	Message string `json:"message" url:"-"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+}
+
+func (c *ChatCreateDirectMessageRequest) require(field *big.Int) {
+	if c.explicitFields == nil {
+		c.explicitFields = big.NewInt(0)
+	}
+	c.explicitFields.Or(c.explicitFields, field)
+}
+
+// SetMeta sets the Meta field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *ChatCreateDirectMessageRequest) SetMeta(meta []*string) {
+	c.Meta = meta
+	c.require(chatCreateDirectMessageRequestFieldMeta)
+}
+
+// SetUser sets the User field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *ChatCreateDirectMessageRequest) SetUser(user *UserReference) {
+	c.User = user
+	c.require(chatCreateDirectMessageRequestFieldUser)
+}
+
+// SetMessage sets the Message field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *ChatCreateDirectMessageRequest) SetMessage(message string) {
+	c.Message = message
+	c.require(chatCreateDirectMessageRequestFieldMessage)
+}
+
+func (c *ChatCreateDirectMessageRequest) UnmarshalJSON(data []byte) error {
+	type unmarshaler ChatCreateDirectMessageRequest
+	var body unmarshaler
+	if err := json.Unmarshal(data, &body); err != nil {
+		return err
+	}
+	*c = ChatCreateDirectMessageRequest(body)
+	return nil
+}
+
+func (c *ChatCreateDirectMessageRequest) MarshalJSON() ([]byte, error) {
+	type embed ChatCreateDirectMessageRequest
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*c),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, c.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+var (
+	chatCreateMessageRequestFieldMeta      = big.NewInt(1 << 0)
+	chatCreateMessageRequestFieldMessage   = big.NewInt(1 << 1)
+	chatCreateMessageRequestFieldParentUid = big.NewInt(1 << 2)
+	chatCreateMessageRequestFieldMentions  = big.NewInt(1 << 3)
+)
+
+type ChatCreateMessageRequest struct {
+	// Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
+	Meta []*string `json:"-" url:"meta,omitempty"`
+	// The plain-text content of the message.
+	Message string `json:"message" url:"-"`
+	// UID of the top-level message to reply to, which starts or continues its thread. Omit to post a new top-level message.
+	ParentUid *string `json:"parent_uid,omitempty" url:"-"`
+	// Users to mention, at most 20. Each is notified and named once at the start of the message, in the provider's own mention format, which `message` then includes in the response and in reads.
+	Mentions []*UserReference `json:"mentions,omitempty" url:"-"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+}
+
+func (c *ChatCreateMessageRequest) require(field *big.Int) {
+	if c.explicitFields == nil {
+		c.explicitFields = big.NewInt(0)
+	}
+	c.explicitFields.Or(c.explicitFields, field)
+}
+
+// SetMeta sets the Meta field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *ChatCreateMessageRequest) SetMeta(meta []*string) {
+	c.Meta = meta
+	c.require(chatCreateMessageRequestFieldMeta)
+}
+
+// SetMessage sets the Message field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *ChatCreateMessageRequest) SetMessage(message string) {
+	c.Message = message
+	c.require(chatCreateMessageRequestFieldMessage)
+}
+
+// SetParentUid sets the ParentUid field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *ChatCreateMessageRequest) SetParentUid(parentUid *string) {
+	c.ParentUid = parentUid
+	c.require(chatCreateMessageRequestFieldParentUid)
+}
+
+// SetMentions sets the Mentions field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *ChatCreateMessageRequest) SetMentions(mentions []*UserReference) {
+	c.Mentions = mentions
+	c.require(chatCreateMessageRequestFieldMentions)
+}
+
+func (c *ChatCreateMessageRequest) UnmarshalJSON(data []byte) error {
+	type unmarshaler ChatCreateMessageRequest
+	var body unmarshaler
+	if err := json.Unmarshal(data, &body); err != nil {
+		return err
+	}
+	*c = ChatCreateMessageRequest(body)
+	return nil
+}
+
+func (c *ChatCreateMessageRequest) MarshalJSON() ([]byte, error) {
+	type embed ChatCreateMessageRequest
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*c),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, c.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+var (
+	chatDeleteMessageRequestFieldMeta = big.NewInt(1 << 0)
+)
+
+type ChatDeleteMessageRequest struct {
+	// Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
+	Meta []*string `json:"-" url:"meta,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+}
+
+func (c *ChatDeleteMessageRequest) require(field *big.Int) {
+	if c.explicitFields == nil {
+		c.explicitFields = big.NewInt(0)
+	}
+	c.explicitFields.Or(c.explicitFields, field)
+}
+
+// SetMeta sets the Meta field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *ChatDeleteMessageRequest) SetMeta(meta []*string) {
+	c.Meta = meta
+	c.require(chatDeleteMessageRequestFieldMeta)
+}
+
+var (
 	queryConversationMembersFieldMeta           = big.NewInt(1 << 0)
 	queryConversationMembersFieldLimit          = big.NewInt(1 << 1)
 	queryConversationMembersFieldCursor         = big.NewInt(1 << 2)
@@ -518,6 +688,125 @@ func (q *QueryChatUsers) SetCursor(cursor *string) {
 func (q *QueryChatUsers) SetIncludeRawData(includeRawData *bool) {
 	q.IncludeRawData = includeRawData
 	q.require(queryChatUsersFieldIncludeRawData)
+}
+
+var (
+	chatMessageResponseFieldMessages = big.NewInt(1 << 0)
+	chatMessageResponseFieldMeta     = big.NewInt(1 << 1)
+	chatMessageResponseFieldResult   = big.NewInt(1 << 2)
+)
+
+type ChatMessageResponse struct {
+	// Additional messages from the service response that may be helpful to the client.
+	Messages *MessagesResponse `json:"messages,omitempty" url:"messages,omitempty"`
+	// Various metadata about the results organized by group, then type, then field.
+	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
+	// The message that was written.
+	Result *chatmessageactivity.ChatMessageActivity `json:"result" url:"result"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (c *ChatMessageResponse) GetMessages() *MessagesResponse {
+	if c == nil {
+		return nil
+	}
+	return c.Messages
+}
+
+func (c *ChatMessageResponse) GetMeta() *MetaResponse {
+	if c == nil {
+		return nil
+	}
+	return c.Meta
+}
+
+func (c *ChatMessageResponse) GetResult() *chatmessageactivity.ChatMessageActivity {
+	if c == nil {
+		return nil
+	}
+	return c.Result
+}
+
+func (c *ChatMessageResponse) GetExtraProperties() map[string]interface{} {
+	if c == nil {
+		return nil
+	}
+	return c.extraProperties
+}
+
+func (c *ChatMessageResponse) require(field *big.Int) {
+	if c.explicitFields == nil {
+		c.explicitFields = big.NewInt(0)
+	}
+	c.explicitFields.Or(c.explicitFields, field)
+}
+
+// SetMessages sets the Messages field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *ChatMessageResponse) SetMessages(messages *MessagesResponse) {
+	c.Messages = messages
+	c.require(chatMessageResponseFieldMessages)
+}
+
+// SetMeta sets the Meta field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *ChatMessageResponse) SetMeta(meta *MetaResponse) {
+	c.Meta = meta
+	c.require(chatMessageResponseFieldMeta)
+}
+
+// SetResult sets the Result field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *ChatMessageResponse) SetResult(result *chatmessageactivity.ChatMessageActivity) {
+	c.Result = result
+	c.require(chatMessageResponseFieldResult)
+}
+
+func (c *ChatMessageResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler ChatMessageResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = ChatMessageResponse(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+	c.rawJSON = nil
+	return nil
+}
+
+func (c *ChatMessageResponse) MarshalJSON() ([]byte, error) {
+	type embed ChatMessageResponse
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*c),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, c.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (c *ChatMessageResponse) String() string {
+	if c == nil {
+		return "<nil>"
+	}
+	if len(c.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(c.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
 }
 
 var (
@@ -1062,4 +1351,71 @@ func (c *ChatQueryUsersResponse) String() string {
 		return value
 	}
 	return fmt.Sprintf("%#v", c)
+}
+
+var (
+	chatUpdateMessageRequestFieldMeta     = big.NewInt(1 << 0)
+	chatUpdateMessageRequestFieldMessage  = big.NewInt(1 << 1)
+	chatUpdateMessageRequestFieldMentions = big.NewInt(1 << 2)
+)
+
+type ChatUpdateMessageRequest struct {
+	// Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
+	Meta []*string `json:"-" url:"meta,omitempty"`
+	// The new plain-text content of the message.
+	Message string `json:"message" url:"-"`
+	// Users to mention, at most 20. Each is notified and named once at the start of the message, in the provider's own mention format, which `message` then includes in the response and in reads.
+	Mentions []*UserReference `json:"mentions,omitempty" url:"-"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+}
+
+func (c *ChatUpdateMessageRequest) require(field *big.Int) {
+	if c.explicitFields == nil {
+		c.explicitFields = big.NewInt(0)
+	}
+	c.explicitFields.Or(c.explicitFields, field)
+}
+
+// SetMeta sets the Meta field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *ChatUpdateMessageRequest) SetMeta(meta []*string) {
+	c.Meta = meta
+	c.require(chatUpdateMessageRequestFieldMeta)
+}
+
+// SetMessage sets the Message field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *ChatUpdateMessageRequest) SetMessage(message string) {
+	c.Message = message
+	c.require(chatUpdateMessageRequestFieldMessage)
+}
+
+// SetMentions sets the Mentions field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *ChatUpdateMessageRequest) SetMentions(mentions []*UserReference) {
+	c.Mentions = mentions
+	c.require(chatUpdateMessageRequestFieldMentions)
+}
+
+func (c *ChatUpdateMessageRequest) UnmarshalJSON(data []byte) error {
+	type unmarshaler ChatUpdateMessageRequest
+	var body unmarshaler
+	if err := json.Unmarshal(data, &body); err != nil {
+		return err
+	}
+	*c = ChatUpdateMessageRequest(body)
+	return nil
+}
+
+func (c *ChatUpdateMessageRequest) MarshalJSON() ([]byte, error) {
+	type embed ChatUpdateMessageRequest
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*c),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, c.explicitFields)
+	return json.Marshal(explicitMarshaler)
 }

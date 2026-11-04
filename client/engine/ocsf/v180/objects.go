@@ -6214,18 +6214,24 @@ var (
 	chatMessageFieldConversationUid = big.NewInt(1 << 0)
 	chatMessageFieldFiles           = big.NewInt(1 << 1)
 	chatMessageFieldMessage         = big.NewInt(1 << 2)
-	chatMessageFieldRequestUid      = big.NewInt(1 << 3)
+	chatMessageFieldParentUid       = big.NewInt(1 << 3)
+	chatMessageFieldRequestUid      = big.NewInt(1 << 4)
+	chatMessageFieldUid             = big.NewInt(1 << 5)
 )
 
 type ChatMessage struct {
-	// The unique identifier of the conversation thread, channel, chat, or AI session.
+	// The unique identifier of the conversation: a channel, chat, or AI session.
 	ConversationUid *string `json:"conversation_uid,omitempty" url:"conversation_uid,omitempty"`
 	// Files attached to the chat message.
 	Files []*File `json:"files,omitempty" url:"files,omitempty"`
 	// The plain-text content of the message.
 	Message *string `json:"message,omitempty" url:"message,omitempty"`
+	// The uid of the top-level message this message replies to, which identifies its thread. Absent for a top-level message.
+	ParentUid *string `json:"parent_uid,omitempty" url:"parent_uid,omitempty"`
 	// For AI interactions, the unique identifier linking a user prompt to its AI response. Messages with the same request_uid form a prompt/response pair.
 	RequestUid *string `json:"request_uid,omitempty" url:"request_uid,omitempty"`
+	// The unique identifier of the message within its conversation.
+	Uid *string `json:"uid,omitempty" url:"uid,omitempty"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -6255,11 +6261,25 @@ func (c *ChatMessage) GetMessage() *string {
 	return c.Message
 }
 
+func (c *ChatMessage) GetParentUid() *string {
+	if c == nil {
+		return nil
+	}
+	return c.ParentUid
+}
+
 func (c *ChatMessage) GetRequestUid() *string {
 	if c == nil {
 		return nil
 	}
 	return c.RequestUid
+}
+
+func (c *ChatMessage) GetUid() *string {
+	if c == nil {
+		return nil
+	}
+	return c.Uid
 }
 
 func (c *ChatMessage) GetExtraProperties() map[string]interface{} {
@@ -6297,11 +6317,25 @@ func (c *ChatMessage) SetMessage(message *string) {
 	c.require(chatMessageFieldMessage)
 }
 
+// SetParentUid sets the ParentUid field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *ChatMessage) SetParentUid(parentUid *string) {
+	c.ParentUid = parentUid
+	c.require(chatMessageFieldParentUid)
+}
+
 // SetRequestUid sets the RequestUid field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
 func (c *ChatMessage) SetRequestUid(requestUid *string) {
 	c.RequestUid = requestUid
 	c.require(chatMessageFieldRequestUid)
+}
+
+// SetUid sets the Uid field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *ChatMessage) SetUid(uid *string) {
+	c.Uid = uid
+	c.require(chatMessageFieldUid)
 }
 
 func (c *ChatMessage) UnmarshalJSON(data []byte) error {
