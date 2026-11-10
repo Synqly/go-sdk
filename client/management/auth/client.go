@@ -86,14 +86,15 @@ func (c *Client) Logoff(
     return nil
 }
 
-// Configure an identity provider for Single Sign-On (SSO) with the organization.
-// Returns the created resource with its assigned SSO configuration ID.
-func (c *Client) CreateSso(
+// Configure an authentication method for the organization — an external Identity
+// Provider (OIDC or SAML) or built-in (password-based) authentication.
+// Returns the created resource with its assigned authentication configuration ID.
+func (c *Client) CreateConfiguration(
     ctx context.Context,
-    request *management.CreateSsoRequest,
+    request *management.CreateAuthConfigurationRequest,
     opts ...option.RequestOption,
-) (*management.CreateSsoResponse, error){
-    response, err := c.WithRawResponse.CreateSso(
+) (*management.CreateAuthConfigurationResponse, error){
+    response, err := c.WithRawResponse.CreateConfiguration(
         ctx,
         request,
         opts...,
@@ -104,13 +105,13 @@ func (c *Client) CreateSso(
     return response.Body, nil
 }
 
-// List all Single Sign-On (SSO) configurations for the organization.
+// List all authentication configurations for the organization.
 // Client secrets are not included.
-func (c *Client) ListSso(
+func (c *Client) ListConfigurations(
     ctx context.Context,
     opts ...option.RequestOption,
-) (*management.ListSsoResponse, error){
-    response, err := c.WithRawResponse.ListSso(
+) (*management.ListAuthConfigurationsResponse, error){
+    response, err := c.WithRawResponse.ListConfigurations(
         ctx,
         opts...,
     )
@@ -120,16 +121,15 @@ func (c *Client) ListSso(
     return response.Body, nil
 }
 
-// Retrieve a specific Single Sign-On (SSO) configuration. Client
-// secrets are not included.
-func (c *Client) GetSso(
+// Retrieve a specific authentication configuration. The client secret is not included.
+func (c *Client) GetConfiguration(
     ctx context.Context,
-    ssoId management.SsoConfigurationId,
+    configurationId management.AuthConfigurationId,
     opts ...option.RequestOption,
-) (*management.GetSsoResponse, error){
-    response, err := c.WithRawResponse.GetSso(
+) (*management.GetAuthConfigurationResponse, error){
+    response, err := c.WithRawResponse.GetConfiguration(
         ctx,
-        ssoId,
+        configurationId,
         opts...,
     )
     if err != nil {
@@ -141,11 +141,11 @@ func (c *Client) GetSso(
 // Returns configuration that must be used when configuring Identity
 // Providers, such as the OIDC redirect URI or SAML ACS URL and SP
 // entity ID.
-func (c *Client) GetSsoMetadata(
+func (c *Client) GetMetadata(
     ctx context.Context,
     opts ...option.RequestOption,
-) (*management.GetSsoMetadataResponse, error){
-    response, err := c.WithRawResponse.GetSsoMetadata(
+) (*management.GetAuthMetadataResponse, error){
+    response, err := c.WithRawResponse.GetMetadata(
         ctx,
         opts...,
     )
@@ -155,18 +155,18 @@ func (c *Client) GetSsoMetadata(
     return response.Body, nil
 }
 
-// Update the SSO configuration by ID. This is a full replacement of the
+// Update the authentication configuration by ID. This is a full replacement of the
 // configuration. The `updated_at` field is used for optimistic locking
 // to prevent concurrent updates.
-func (c *Client) UpdateSso(
+func (c *Client) UpdateConfiguration(
     ctx context.Context,
-    ssoId management.SsoConfigurationId,
-    request *management.UpdateSsoRequest,
+    configurationId management.AuthConfigurationId,
+    request *management.UpdateAuthConfigurationRequest,
     opts ...option.RequestOption,
-) (*management.UpdateSsoResponse, error){
-    response, err := c.WithRawResponse.UpdateSso(
+) (*management.UpdateAuthConfigurationResponse, error){
+    response, err := c.WithRawResponse.UpdateConfiguration(
         ctx,
-        ssoId,
+        configurationId,
         request,
         opts...,
     )
@@ -176,17 +176,17 @@ func (c *Client) UpdateSso(
     return response.Body, nil
 }
 
-// Remove a specific Single Sign-On (SSO) configuration. This may disable signing on
+// Remove a specific authentication configuration. This may disable signing on
 // with the identity provider defined in the configuration, and can result in members
 // linked to that identity provider no longer being able to access the Organization.
-func (c *Client) DeleteSso(
+func (c *Client) DeleteConfiguration(
     ctx context.Context,
-    ssoId management.SsoConfigurationId,
+    configurationId management.AuthConfigurationId,
     opts ...option.RequestOption,
 ) error{
-    _, err := c.WithRawResponse.DeleteSso(
+    _, err := c.WithRawResponse.DeleteConfiguration(
         ctx,
-        ssoId,
+        configurationId,
         opts...,
     )
     if err != nil {

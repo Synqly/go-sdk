@@ -44,6 +44,324 @@ func (a AuthCode) Ptr() *AuthCode {
 	return &a
 }
 
+// Authentication configuration for an Organization. Each configuration describes a single
+// way members can sign in: an external Identity Provider (OIDC or SAML), or the built-in
+// (password-based) authentication method. For external Identity Providers it also describes
+// how to map identities from the IdP to Member accounts of the Organization.
+var (
+	authConfigurationFieldName             = big.NewInt(1 << 0)
+	authConfigurationFieldCreatedAt        = big.NewInt(1 << 1)
+	authConfigurationFieldUpdatedAt        = big.NewInt(1 << 2)
+	authConfigurationFieldId               = big.NewInt(1 << 3)
+	authConfigurationFieldFullname         = big.NewInt(1 << 4)
+	authConfigurationFieldState            = big.NewInt(1 << 5)
+	authConfigurationFieldIdentityProvider = big.NewInt(1 << 6)
+)
+
+type AuthConfiguration struct {
+	// Human-readable name for this resource
+	Name string `json:"name" url:"name"`
+	// Time object was originally created
+	CreatedAt time.Time `json:"created_at" url:"created_at"`
+	// Last time object was updated
+	UpdatedAt time.Time           `json:"updated_at" url:"updated_at"`
+	Id        AuthConfigurationId `json:"id" url:"id"`
+	// Display name for the configuration, used on authentication screens.
+	// **Note:** To avoid confusion this name must be unique, however it cannot be used
+	// as an identifier in API calls.
+	Fullname string `json:"fullname" url:"fullname"`
+	// Whether this authentication method is enabled or disabled for the Organization.
+	State            AuthConfigurationState `json:"state" url:"state"`
+	IdentityProvider *IdPConfiguration      `json:"identity_provider" url:"identity_provider"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (a *AuthConfiguration) GetName() string {
+	if a == nil {
+		return ""
+	}
+	return a.Name
+}
+
+func (a *AuthConfiguration) GetCreatedAt() time.Time {
+	if a == nil {
+		return time.Time{}
+	}
+	return a.CreatedAt
+}
+
+func (a *AuthConfiguration) GetUpdatedAt() time.Time {
+	if a == nil {
+		return time.Time{}
+	}
+	return a.UpdatedAt
+}
+
+func (a *AuthConfiguration) GetId() AuthConfigurationId {
+	if a == nil {
+		return ""
+	}
+	return a.Id
+}
+
+func (a *AuthConfiguration) GetFullname() string {
+	if a == nil {
+		return ""
+	}
+	return a.Fullname
+}
+
+func (a *AuthConfiguration) GetState() AuthConfigurationState {
+	if a == nil {
+		return ""
+	}
+	return a.State
+}
+
+func (a *AuthConfiguration) GetIdentityProvider() *IdPConfiguration {
+	if a == nil {
+		return nil
+	}
+	return a.IdentityProvider
+}
+
+func (a *AuthConfiguration) GetExtraProperties() map[string]interface{} {
+	if a == nil {
+		return nil
+	}
+	return a.extraProperties
+}
+
+func (a *AuthConfiguration) require(field *big.Int) {
+	if a.explicitFields == nil {
+		a.explicitFields = big.NewInt(0)
+	}
+	a.explicitFields.Or(a.explicitFields, field)
+}
+
+// SetName sets the Name field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (a *AuthConfiguration) SetName(name string) {
+	a.Name = name
+	a.require(authConfigurationFieldName)
+}
+
+// SetCreatedAt sets the CreatedAt field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (a *AuthConfiguration) SetCreatedAt(createdAt time.Time) {
+	a.CreatedAt = createdAt
+	a.require(authConfigurationFieldCreatedAt)
+}
+
+// SetUpdatedAt sets the UpdatedAt field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (a *AuthConfiguration) SetUpdatedAt(updatedAt time.Time) {
+	a.UpdatedAt = updatedAt
+	a.require(authConfigurationFieldUpdatedAt)
+}
+
+// SetId sets the Id field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (a *AuthConfiguration) SetId(id AuthConfigurationId) {
+	a.Id = id
+	a.require(authConfigurationFieldId)
+}
+
+// SetFullname sets the Fullname field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (a *AuthConfiguration) SetFullname(fullname string) {
+	a.Fullname = fullname
+	a.require(authConfigurationFieldFullname)
+}
+
+// SetState sets the State field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (a *AuthConfiguration) SetState(state AuthConfigurationState) {
+	a.State = state
+	a.require(authConfigurationFieldState)
+}
+
+// SetIdentityProvider sets the IdentityProvider field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (a *AuthConfiguration) SetIdentityProvider(identityProvider *IdPConfiguration) {
+	a.IdentityProvider = identityProvider
+	a.require(authConfigurationFieldIdentityProvider)
+}
+
+func (a *AuthConfiguration) UnmarshalJSON(data []byte) error {
+	type embed AuthConfiguration
+	var unmarshaler = struct {
+		embed
+		CreatedAt *internal.DateTime `json:"created_at"`
+		UpdatedAt *internal.DateTime `json:"updated_at"`
+	}{
+		embed: embed(*a),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*a = AuthConfiguration(unmarshaler.embed)
+	a.CreatedAt = unmarshaler.CreatedAt.Time()
+	a.UpdatedAt = unmarshaler.UpdatedAt.Time()
+	extraProperties, err := internal.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+	a.rawJSON = nil
+	return nil
+}
+
+func (a *AuthConfiguration) MarshalJSON() ([]byte, error) {
+	type embed AuthConfiguration
+	var marshaler = struct {
+		embed
+		CreatedAt *internal.DateTime `json:"created_at"`
+		UpdatedAt *internal.DateTime `json:"updated_at"`
+	}{
+		embed:     embed(*a),
+		CreatedAt: internal.NewDateTime(a.CreatedAt),
+		UpdatedAt: internal.NewDateTime(a.UpdatedAt),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, a.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (a *AuthConfiguration) String() string {
+	if a == nil {
+		return "<nil>"
+	}
+	if len(a.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(a.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(a); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", a)
+}
+
+// Unique identifier for this authentication configuration
+type AuthConfigurationId = Id
+
+type AuthConfigurationState string
+
+const (
+	// This authentication method is enabled for the Organization.
+	AuthConfigurationStateEnabled AuthConfigurationState = "enabled"
+	// This authentication method is disabled for the Organization.
+	AuthConfigurationStateDisabled AuthConfigurationState = "disabled"
+)
+
+func NewAuthConfigurationStateFromString(s string) (AuthConfigurationState, error) {
+	switch s {
+	case "enabled":
+		return AuthConfigurationStateEnabled, nil
+	case "disabled":
+		return AuthConfigurationStateDisabled, nil
+	}
+	var t AuthConfigurationState
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (a AuthConfigurationState) Ptr() *AuthConfigurationState {
+	return &a
+}
+
+// Configuration for built-in (password-based) authentication. Only one built-in
+// configuration may exist per Organization.
+var (
+	builtInConfigurationFieldAllowForUsers = big.NewInt(1 << 0)
+)
+
+type BuiltInConfiguration struct {
+	// Members allowed to use built-in authentication, identified by member id or name.
+	// Use the special list ["*"] to allow all members; this is the default when omitted.
+	AllowForUsers []MemberId `json:"allow_for_users,omitempty" url:"allow_for_users,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (b *BuiltInConfiguration) GetAllowForUsers() []MemberId {
+	if b == nil {
+		return nil
+	}
+	return b.AllowForUsers
+}
+
+func (b *BuiltInConfiguration) GetExtraProperties() map[string]interface{} {
+	if b == nil {
+		return nil
+	}
+	return b.extraProperties
+}
+
+func (b *BuiltInConfiguration) require(field *big.Int) {
+	if b.explicitFields == nil {
+		b.explicitFields = big.NewInt(0)
+	}
+	b.explicitFields.Or(b.explicitFields, field)
+}
+
+// SetAllowForUsers sets the AllowForUsers field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BuiltInConfiguration) SetAllowForUsers(allowForUsers []MemberId) {
+	b.AllowForUsers = allowForUsers
+	b.require(builtInConfigurationFieldAllowForUsers)
+}
+
+func (b *BuiltInConfiguration) UnmarshalJSON(data []byte) error {
+	type unmarshaler BuiltInConfiguration
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*b = BuiltInConfiguration(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *b)
+	if err != nil {
+		return err
+	}
+	b.extraProperties = extraProperties
+	b.rawJSON = nil
+	return nil
+}
+
+func (b *BuiltInConfiguration) MarshalJSON() ([]byte, error) {
+	type embed BuiltInConfiguration
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*b),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, b.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (b *BuiltInConfiguration) String() string {
+	if b == nil {
+		return "<nil>"
+	}
+	if len(b.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(b.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(b); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", b)
+}
+
 var (
 	changePasswordResponseFieldResult = big.NewInt(1 << 0)
 )
@@ -231,9 +549,10 @@ func (c *ChangePasswordResponseResult) String() string {
 }
 
 type IdPConfiguration struct {
-	Type string
-	Oidc *OidcConfiguration
-	Saml *SamlConfiguration
+	Type    string
+	Oidc    *OidcConfiguration
+	Saml    *SamlConfiguration
+	Builtin *BuiltInConfiguration
 
 	rawJSON json.RawMessage
 }
@@ -257,6 +576,13 @@ func (i *IdPConfiguration) GetSaml() *SamlConfiguration {
 		return nil
 	}
 	return i.Saml
+}
+
+func (i *IdPConfiguration) GetBuiltin() *BuiltInConfiguration {
+	if i == nil {
+		return nil
+	}
+	return i.Builtin
 }
 
 func (i *IdPConfiguration) UnmarshalJSON(data []byte) error {
@@ -283,6 +609,12 @@ func (i *IdPConfiguration) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		i.Saml = value
+	case "builtin":
+		value := new(BuiltInConfiguration)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		i.Builtin = value
 	}
 	i.rawJSON = nil
 	return nil
@@ -298,6 +630,9 @@ func (i IdPConfiguration) MarshalJSON() ([]byte, error) {
 	if i.Saml != nil {
 		return internal.MarshalJSONWithExtraProperty(i.Saml, "type", "saml")
 	}
+	if i.Builtin != nil {
+		return internal.MarshalJSONWithExtraProperty(i.Builtin, "type", "builtin")
+	}
 	if len(i.rawJSON) > 0 {
 		return i.rawJSON, nil
 	}
@@ -307,6 +642,7 @@ func (i IdPConfiguration) MarshalJSON() ([]byte, error) {
 type IdPConfigurationVisitor interface {
 	VisitOidc(*OidcConfiguration) error
 	VisitSaml(*SamlConfiguration) error
+	VisitBuiltin(*BuiltInConfiguration) error
 }
 
 func (i *IdPConfiguration) Accept(visitor IdPConfigurationVisitor) error {
@@ -315,6 +651,9 @@ func (i *IdPConfiguration) Accept(visitor IdPConfigurationVisitor) error {
 	}
 	if i.Saml != nil {
 		return visitor.VisitSaml(i.Saml)
+	}
+	if i.Builtin != nil {
+		return visitor.VisitBuiltin(i.Builtin)
 	}
 	return fmt.Errorf("type %T does not define a non-empty union type", i)
 }
@@ -329,6 +668,9 @@ func (i *IdPConfiguration) validate() error {
 	}
 	if i.Saml != nil {
 		fields = append(fields, "saml")
+	}
+	if i.Builtin != nil {
+		fields = append(fields, "builtin")
 	}
 	if len(fields) == 0 {
 		if i.Type != "" {
@@ -947,192 +1289,3 @@ func (s *SamlConfiguration) String() string {
 	}
 	return fmt.Sprintf("%#v", s)
 }
-
-// Single Sign-On (SSO) configuration for an Organization. This describes how to connect
-// to an Identity Provider (IdP) for the purpose of signing in to the Organization.
-// Additionally this describes how to map identities from the IdP to Member accounts
-// of the Organization.
-var (
-	ssoConfigurationFieldName             = big.NewInt(1 << 0)
-	ssoConfigurationFieldCreatedAt        = big.NewInt(1 << 1)
-	ssoConfigurationFieldUpdatedAt        = big.NewInt(1 << 2)
-	ssoConfigurationFieldId               = big.NewInt(1 << 3)
-	ssoConfigurationFieldFullname         = big.NewInt(1 << 4)
-	ssoConfigurationFieldIdentityProvider = big.NewInt(1 << 5)
-)
-
-type SsoConfiguration struct {
-	// Human-readable name for this resource
-	Name string `json:"name" url:"name"`
-	// Time object was originally created
-	CreatedAt time.Time `json:"created_at" url:"created_at"`
-	// Last time object was updated
-	UpdatedAt time.Time          `json:"updated_at" url:"updated_at"`
-	Id        SsoConfigurationId `json:"id" url:"id"`
-	// Display name for the configuration, used on authentication screens.
-	// **Note:** To avoid confusion this name must be unique, however it cannot be used
-	// as an identifier in API calls.
-	Fullname         string            `json:"fullname" url:"fullname"`
-	IdentityProvider *IdPConfiguration `json:"identity_provider" url:"identity_provider"`
-
-	// Private bitmask of fields set to an explicit value and therefore not to be omitted
-	explicitFields *big.Int `json:"-" url:"-"`
-
-	extraProperties map[string]interface{}
-	rawJSON         json.RawMessage
-}
-
-func (s *SsoConfiguration) GetName() string {
-	if s == nil {
-		return ""
-	}
-	return s.Name
-}
-
-func (s *SsoConfiguration) GetCreatedAt() time.Time {
-	if s == nil {
-		return time.Time{}
-	}
-	return s.CreatedAt
-}
-
-func (s *SsoConfiguration) GetUpdatedAt() time.Time {
-	if s == nil {
-		return time.Time{}
-	}
-	return s.UpdatedAt
-}
-
-func (s *SsoConfiguration) GetId() SsoConfigurationId {
-	if s == nil {
-		return ""
-	}
-	return s.Id
-}
-
-func (s *SsoConfiguration) GetFullname() string {
-	if s == nil {
-		return ""
-	}
-	return s.Fullname
-}
-
-func (s *SsoConfiguration) GetIdentityProvider() *IdPConfiguration {
-	if s == nil {
-		return nil
-	}
-	return s.IdentityProvider
-}
-
-func (s *SsoConfiguration) GetExtraProperties() map[string]interface{} {
-	if s == nil {
-		return nil
-	}
-	return s.extraProperties
-}
-
-func (s *SsoConfiguration) require(field *big.Int) {
-	if s.explicitFields == nil {
-		s.explicitFields = big.NewInt(0)
-	}
-	s.explicitFields.Or(s.explicitFields, field)
-}
-
-// SetName sets the Name field and marks it as non-optional;
-// this prevents an empty or null value for this field from being omitted during serialization.
-func (s *SsoConfiguration) SetName(name string) {
-	s.Name = name
-	s.require(ssoConfigurationFieldName)
-}
-
-// SetCreatedAt sets the CreatedAt field and marks it as non-optional;
-// this prevents an empty or null value for this field from being omitted during serialization.
-func (s *SsoConfiguration) SetCreatedAt(createdAt time.Time) {
-	s.CreatedAt = createdAt
-	s.require(ssoConfigurationFieldCreatedAt)
-}
-
-// SetUpdatedAt sets the UpdatedAt field and marks it as non-optional;
-// this prevents an empty or null value for this field from being omitted during serialization.
-func (s *SsoConfiguration) SetUpdatedAt(updatedAt time.Time) {
-	s.UpdatedAt = updatedAt
-	s.require(ssoConfigurationFieldUpdatedAt)
-}
-
-// SetId sets the Id field and marks it as non-optional;
-// this prevents an empty or null value for this field from being omitted during serialization.
-func (s *SsoConfiguration) SetId(id SsoConfigurationId) {
-	s.Id = id
-	s.require(ssoConfigurationFieldId)
-}
-
-// SetFullname sets the Fullname field and marks it as non-optional;
-// this prevents an empty or null value for this field from being omitted during serialization.
-func (s *SsoConfiguration) SetFullname(fullname string) {
-	s.Fullname = fullname
-	s.require(ssoConfigurationFieldFullname)
-}
-
-// SetIdentityProvider sets the IdentityProvider field and marks it as non-optional;
-// this prevents an empty or null value for this field from being omitted during serialization.
-func (s *SsoConfiguration) SetIdentityProvider(identityProvider *IdPConfiguration) {
-	s.IdentityProvider = identityProvider
-	s.require(ssoConfigurationFieldIdentityProvider)
-}
-
-func (s *SsoConfiguration) UnmarshalJSON(data []byte) error {
-	type embed SsoConfiguration
-	var unmarshaler = struct {
-		embed
-		CreatedAt *internal.DateTime `json:"created_at"`
-		UpdatedAt *internal.DateTime `json:"updated_at"`
-	}{
-		embed: embed(*s),
-	}
-	if err := json.Unmarshal(data, &unmarshaler); err != nil {
-		return err
-	}
-	*s = SsoConfiguration(unmarshaler.embed)
-	s.CreatedAt = unmarshaler.CreatedAt.Time()
-	s.UpdatedAt = unmarshaler.UpdatedAt.Time()
-	extraProperties, err := internal.ExtractExtraProperties(data, *s)
-	if err != nil {
-		return err
-	}
-	s.extraProperties = extraProperties
-	s.rawJSON = nil
-	return nil
-}
-
-func (s *SsoConfiguration) MarshalJSON() ([]byte, error) {
-	type embed SsoConfiguration
-	var marshaler = struct {
-		embed
-		CreatedAt *internal.DateTime `json:"created_at"`
-		UpdatedAt *internal.DateTime `json:"updated_at"`
-	}{
-		embed:     embed(*s),
-		CreatedAt: internal.NewDateTime(s.CreatedAt),
-		UpdatedAt: internal.NewDateTime(s.UpdatedAt),
-	}
-	explicitMarshaler := internal.HandleExplicitFields(marshaler, s.explicitFields)
-	return json.Marshal(explicitMarshaler)
-}
-
-func (s *SsoConfiguration) String() string {
-	if s == nil {
-		return "<nil>"
-	}
-	if len(s.rawJSON) > 0 {
-		if value, err := internal.StringifyJSON(s.rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := internal.StringifyJSON(s); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", s)
-}
-
-// Unique identifier for this SSO configuration
-type SsoConfigurationId = Id

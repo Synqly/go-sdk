@@ -162,23 +162,23 @@ func (r *RawClient) Logoff(
     }, nil
 }
 
-func (r *RawClient) CreateSso(
+func (r *RawClient) CreateConfiguration(
     ctx context.Context,
-    request *management.CreateSsoRequest,
+    request *management.CreateAuthConfigurationRequest,
     opts ...option.RequestOption,
-) (*core.Response[*management.CreateSsoResponse], error){
+) (*core.Response[*management.CreateAuthConfigurationResponse], error){
     options := core.NewRequestOptions(opts...)
     baseURL := internal.ResolveBaseURL(
         options.BaseURL,
         r.baseURL,
         "https://api.synqly.com",
     )
-    endpointURL := baseURL + "/v1/auth/sso"
+    endpointURL := baseURL + "/v1/auth/configurations"
     headers := internal.MergeHeaders(
         r.options.ToHeader(),
         options.ToHeader(),
     )
-    var response *management.CreateSsoResponse
+    var response *management.CreateAuthConfigurationResponse
     raw, err := r.caller.Call(
         ctx,
         &internal.CallParams{
@@ -198,29 +198,29 @@ func (r *RawClient) CreateSso(
     if err != nil {
         return nil, err
     }
-    return &core.Response[*management.CreateSsoResponse]{
+    return &core.Response[*management.CreateAuthConfigurationResponse]{
         StatusCode: raw.StatusCode,
         Header: raw.Header,
         Body: response,
     }, nil
 }
 
-func (r *RawClient) ListSso(
+func (r *RawClient) ListConfigurations(
     ctx context.Context,
     opts ...option.RequestOption,
-) (*core.Response[*management.ListSsoResponse], error){
+) (*core.Response[*management.ListAuthConfigurationsResponse], error){
     options := core.NewRequestOptions(opts...)
     baseURL := internal.ResolveBaseURL(
         options.BaseURL,
         r.baseURL,
         "https://api.synqly.com",
     )
-    endpointURL := baseURL + "/v1/auth/sso"
+    endpointURL := baseURL + "/v1/auth/configurations"
     headers := internal.MergeHeaders(
         r.options.ToHeader(),
         options.ToHeader(),
     )
-    var response *management.ListSsoResponse
+    var response *management.ListAuthConfigurationsResponse
     raw, err := r.caller.Call(
         ctx,
         &internal.CallParams{
@@ -239,18 +239,18 @@ func (r *RawClient) ListSso(
     if err != nil {
         return nil, err
     }
-    return &core.Response[*management.ListSsoResponse]{
+    return &core.Response[*management.ListAuthConfigurationsResponse]{
         StatusCode: raw.StatusCode,
         Header: raw.Header,
         Body: response,
     }, nil
 }
 
-func (r *RawClient) GetSso(
+func (r *RawClient) GetConfiguration(
     ctx context.Context,
-    ssoId management.SsoConfigurationId,
+    configurationId management.AuthConfigurationId,
     opts ...option.RequestOption,
-) (*core.Response[*management.GetSsoResponse], error){
+) (*core.Response[*management.GetAuthConfigurationResponse], error){
     options := core.NewRequestOptions(opts...)
     baseURL := internal.ResolveBaseURL(
         options.BaseURL,
@@ -258,14 +258,14 @@ func (r *RawClient) GetSso(
         "https://api.synqly.com",
     )
     endpointURL := internal.EncodeURL(
-        baseURL + "/v1/auth/sso/%v",
-        ssoId,
+        baseURL + "/v1/auth/configurations/%v",
+        configurationId,
     )
     headers := internal.MergeHeaders(
         r.options.ToHeader(),
         options.ToHeader(),
     )
-    var response *management.GetSsoResponse
+    var response *management.GetAuthConfigurationResponse
     raw, err := r.caller.Call(
         ctx,
         &internal.CallParams{
@@ -284,17 +284,17 @@ func (r *RawClient) GetSso(
     if err != nil {
         return nil, err
     }
-    return &core.Response[*management.GetSsoResponse]{
+    return &core.Response[*management.GetAuthConfigurationResponse]{
         StatusCode: raw.StatusCode,
         Header: raw.Header,
         Body: response,
     }, nil
 }
 
-func (r *RawClient) GetSsoMetadata(
+func (r *RawClient) GetMetadata(
     ctx context.Context,
     opts ...option.RequestOption,
-) (*core.Response[*management.GetSsoMetadataResponse], error){
+) (*core.Response[*management.GetAuthMetadataResponse], error){
     options := core.NewRequestOptions(opts...)
     baseURL := internal.ResolveBaseURL(
         options.BaseURL,
@@ -306,7 +306,7 @@ func (r *RawClient) GetSsoMetadata(
         r.options.ToHeader(),
         options.ToHeader(),
     )
-    var response *management.GetSsoMetadataResponse
+    var response *management.GetAuthMetadataResponse
     raw, err := r.caller.Call(
         ctx,
         &internal.CallParams{
@@ -325,19 +325,19 @@ func (r *RawClient) GetSsoMetadata(
     if err != nil {
         return nil, err
     }
-    return &core.Response[*management.GetSsoMetadataResponse]{
+    return &core.Response[*management.GetAuthMetadataResponse]{
         StatusCode: raw.StatusCode,
         Header: raw.Header,
         Body: response,
     }, nil
 }
 
-func (r *RawClient) UpdateSso(
+func (r *RawClient) UpdateConfiguration(
     ctx context.Context,
-    ssoId management.SsoConfigurationId,
-    request *management.UpdateSsoRequest,
+    configurationId management.AuthConfigurationId,
+    request *management.UpdateAuthConfigurationRequest,
     opts ...option.RequestOption,
-) (*core.Response[*management.UpdateSsoResponse], error){
+) (*core.Response[*management.UpdateAuthConfigurationResponse], error){
     options := core.NewRequestOptions(opts...)
     baseURL := internal.ResolveBaseURL(
         options.BaseURL,
@@ -345,14 +345,14 @@ func (r *RawClient) UpdateSso(
         "https://api.synqly.com",
     )
     endpointURL := internal.EncodeURL(
-        baseURL + "/v1/auth/sso/%v",
-        ssoId,
+        baseURL + "/v1/auth/configurations/%v",
+        configurationId,
     )
     headers := internal.MergeHeaders(
         r.options.ToHeader(),
         options.ToHeader(),
     )
-    var response *management.UpdateSsoResponse
+    var response *management.UpdateAuthConfigurationResponse
     raw, err := r.caller.Call(
         ctx,
         &internal.CallParams{
@@ -372,16 +372,16 @@ func (r *RawClient) UpdateSso(
     if err != nil {
         return nil, err
     }
-    return &core.Response[*management.UpdateSsoResponse]{
+    return &core.Response[*management.UpdateAuthConfigurationResponse]{
         StatusCode: raw.StatusCode,
         Header: raw.Header,
         Body: response,
     }, nil
 }
 
-func (r *RawClient) DeleteSso(
+func (r *RawClient) DeleteConfiguration(
     ctx context.Context,
-    ssoId management.SsoConfigurationId,
+    configurationId management.AuthConfigurationId,
     opts ...option.RequestOption,
 ) (*core.Response[any], error){
     options := core.NewRequestOptions(opts...)
@@ -391,8 +391,8 @@ func (r *RawClient) DeleteSso(
         "https://api.synqly.com",
     )
     endpointURL := internal.EncodeURL(
-        baseURL + "/v1/auth/sso/%v",
-        ssoId,
+        baseURL + "/v1/auth/configurations/%v",
+        configurationId,
     )
     headers := internal.MergeHeaders(
         r.options.ToHeader(),

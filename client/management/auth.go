@@ -10,6 +10,110 @@ import (
 	time "time"
 )
 
+// SP-side configuration values the user needs to enter into their Identity Provider.
+// Only the fields relevant to the configured protocol are populated.
+var (
+	authConfigurationMetadataFieldOidc = big.NewInt(1 << 0)
+	authConfigurationMetadataFieldSaml = big.NewInt(1 << 1)
+)
+
+type AuthConfigurationMetadata struct {
+	// OIDC configuration values. Present when the configuration uses OIDC.
+	Oidc *OidcUserConfiguration `json:"oidc,omitempty" url:"oidc,omitempty"`
+	// SAML configuration values. Present when the configuration uses SAML.
+	Saml *SamlUserConfiguration `json:"saml,omitempty" url:"saml,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (a *AuthConfigurationMetadata) GetOidc() *OidcUserConfiguration {
+	if a == nil {
+		return nil
+	}
+	return a.Oidc
+}
+
+func (a *AuthConfigurationMetadata) GetSaml() *SamlUserConfiguration {
+	if a == nil {
+		return nil
+	}
+	return a.Saml
+}
+
+func (a *AuthConfigurationMetadata) GetExtraProperties() map[string]interface{} {
+	if a == nil {
+		return nil
+	}
+	return a.extraProperties
+}
+
+func (a *AuthConfigurationMetadata) require(field *big.Int) {
+	if a.explicitFields == nil {
+		a.explicitFields = big.NewInt(0)
+	}
+	a.explicitFields.Or(a.explicitFields, field)
+}
+
+// SetOidc sets the Oidc field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (a *AuthConfigurationMetadata) SetOidc(oidc *OidcUserConfiguration) {
+	a.Oidc = oidc
+	a.require(authConfigurationMetadataFieldOidc)
+}
+
+// SetSaml sets the Saml field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (a *AuthConfigurationMetadata) SetSaml(saml *SamlUserConfiguration) {
+	a.Saml = saml
+	a.require(authConfigurationMetadataFieldSaml)
+}
+
+func (a *AuthConfigurationMetadata) UnmarshalJSON(data []byte) error {
+	type unmarshaler AuthConfigurationMetadata
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*a = AuthConfigurationMetadata(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+	a.rawJSON = nil
+	return nil
+}
+
+func (a *AuthConfigurationMetadata) MarshalJSON() ([]byte, error) {
+	type embed AuthConfigurationMetadata
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*a),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, a.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (a *AuthConfigurationMetadata) String() string {
+	if a == nil {
+		return "<nil>"
+	}
+	if len(a.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(a.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(a); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", a)
+}
+
 var (
 	changePasswordRequestFieldOldSecret = big.NewInt(1 << 0)
 	changePasswordRequestFieldNewSecret = big.NewInt(1 << 1)
@@ -112,20 +216,22 @@ func (c *ChangePasswordRequest) String() string {
 	return fmt.Sprintf("%#v", c)
 }
 
-// Configuration for an OpenID Connect (OIDC) compliant Identity Provider.
+// Request to create an authentication configuration
 var (
-	createOidcSsoConfigurationFieldIssuerUrl    = big.NewInt(1 << 0)
-	createOidcSsoConfigurationFieldClientId     = big.NewInt(1 << 1)
-	createOidcSsoConfigurationFieldClientSecret = big.NewInt(1 << 2)
+	createAuthConfigurationRequestFieldFullname = big.NewInt(1 << 0)
+	createAuthConfigurationRequestFieldState    = big.NewInt(1 << 1)
+	createAuthConfigurationRequestFieldConfig   = big.NewInt(1 << 2)
 )
 
-type CreateOidcSsoConfiguration struct {
-	// Issuer URL used to automatically obtain the OpenID Connect discovery document.
-	IssuerUrl string `json:"issuer_url" url:"issuer_url"`
-	// Client ID registered with the identity provider.
-	ClientId string `json:"client_id" url:"client_id"`
-	// Client secret registered with the identity provider.
-	ClientSecret string `json:"client_secret" url:"client_secret"`
+type CreateAuthConfigurationRequest struct {
+	// Display name for the configuration, used on authentication screens.
+	// **Note:** To avoid confusion this name must be unique, however it cannot be used
+	// as an identifier in API calls.
+	Fullname string `json:"fullname" url:"fullname"`
+	// Whether the configuration is enabled or disabled. Defaults to enabled when omitted.
+	State *AuthConfigurationState `json:"state,omitempty" url:"state,omitempty"`
+	// Identity provider configuration. The type discriminator determines the authentication method.
+	Config *CreateIdPConfiguration `json:"config" url:"config"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -134,69 +240,69 @@ type CreateOidcSsoConfiguration struct {
 	rawJSON         json.RawMessage
 }
 
-func (c *CreateOidcSsoConfiguration) GetIssuerUrl() string {
+func (c *CreateAuthConfigurationRequest) GetFullname() string {
 	if c == nil {
 		return ""
 	}
-	return c.IssuerUrl
+	return c.Fullname
 }
 
-func (c *CreateOidcSsoConfiguration) GetClientId() string {
+func (c *CreateAuthConfigurationRequest) GetState() *AuthConfigurationState {
 	if c == nil {
-		return ""
+		return nil
 	}
-	return c.ClientId
+	return c.State
 }
 
-func (c *CreateOidcSsoConfiguration) GetClientSecret() string {
+func (c *CreateAuthConfigurationRequest) GetConfig() *CreateIdPConfiguration {
 	if c == nil {
-		return ""
+		return nil
 	}
-	return c.ClientSecret
+	return c.Config
 }
 
-func (c *CreateOidcSsoConfiguration) GetExtraProperties() map[string]interface{} {
+func (c *CreateAuthConfigurationRequest) GetExtraProperties() map[string]interface{} {
 	if c == nil {
 		return nil
 	}
 	return c.extraProperties
 }
 
-func (c *CreateOidcSsoConfiguration) require(field *big.Int) {
+func (c *CreateAuthConfigurationRequest) require(field *big.Int) {
 	if c.explicitFields == nil {
 		c.explicitFields = big.NewInt(0)
 	}
 	c.explicitFields.Or(c.explicitFields, field)
 }
 
-// SetIssuerUrl sets the IssuerUrl field and marks it as non-optional;
+// SetFullname sets the Fullname field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (c *CreateOidcSsoConfiguration) SetIssuerUrl(issuerUrl string) {
-	c.IssuerUrl = issuerUrl
-	c.require(createOidcSsoConfigurationFieldIssuerUrl)
+func (c *CreateAuthConfigurationRequest) SetFullname(fullname string) {
+	c.Fullname = fullname
+	c.require(createAuthConfigurationRequestFieldFullname)
 }
 
-// SetClientId sets the ClientId field and marks it as non-optional;
+// SetState sets the State field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (c *CreateOidcSsoConfiguration) SetClientId(clientId string) {
-	c.ClientId = clientId
-	c.require(createOidcSsoConfigurationFieldClientId)
+func (c *CreateAuthConfigurationRequest) SetState(state *AuthConfigurationState) {
+	c.State = state
+	c.require(createAuthConfigurationRequestFieldState)
 }
 
-// SetClientSecret sets the ClientSecret field and marks it as non-optional;
+// SetConfig sets the Config field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (c *CreateOidcSsoConfiguration) SetClientSecret(clientSecret string) {
-	c.ClientSecret = clientSecret
-	c.require(createOidcSsoConfigurationFieldClientSecret)
+func (c *CreateAuthConfigurationRequest) SetConfig(config *CreateIdPConfiguration) {
+	c.Config = config
+	c.require(createAuthConfigurationRequestFieldConfig)
 }
 
-func (c *CreateOidcSsoConfiguration) UnmarshalJSON(data []byte) error {
-	type unmarshaler CreateOidcSsoConfiguration
+func (c *CreateAuthConfigurationRequest) UnmarshalJSON(data []byte) error {
+	type unmarshaler CreateAuthConfigurationRequest
 	var value unmarshaler
 	if err := json.Unmarshal(data, &value); err != nil {
 		return err
 	}
-	*c = CreateOidcSsoConfiguration(value)
+	*c = CreateAuthConfigurationRequest(value)
 	extraProperties, err := internal.ExtractExtraProperties(data, *c)
 	if err != nil {
 		return err
@@ -206,8 +312,8 @@ func (c *CreateOidcSsoConfiguration) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (c *CreateOidcSsoConfiguration) MarshalJSON() ([]byte, error) {
-	type embed CreateOidcSsoConfiguration
+func (c *CreateAuthConfigurationRequest) MarshalJSON() ([]byte, error) {
+	type embed CreateAuthConfigurationRequest
 	var marshaler = struct {
 		embed
 	}{
@@ -217,7 +323,7 @@ func (c *CreateOidcSsoConfiguration) MarshalJSON() ([]byte, error) {
 	return json.Marshal(explicitMarshaler)
 }
 
-func (c *CreateOidcSsoConfiguration) String() string {
+func (c *CreateAuthConfigurationRequest) String() string {
 	if c == nil {
 		return "<nil>"
 	}
@@ -232,29 +338,12 @@ func (c *CreateOidcSsoConfiguration) String() string {
 	return fmt.Sprintf("%#v", c)
 }
 
-// Configuration for creating a SAML 2.0 Identity Provider.
 var (
-	createSamlssoConfigurationFieldIdpEntityId    = big.NewInt(1 << 0)
-	createSamlssoConfigurationFieldIdpSsoUrl      = big.NewInt(1 << 1)
-	createSamlssoConfigurationFieldIdpCertificate = big.NewInt(1 << 2)
-	createSamlssoConfigurationFieldSpEntityId     = big.NewInt(1 << 3)
-	createSamlssoConfigurationFieldIdpMetadataUrl = big.NewInt(1 << 4)
-	createSamlssoConfigurationFieldNameIdFormat   = big.NewInt(1 << 5)
+	createAuthConfigurationResponseFieldResult = big.NewInt(1 << 0)
 )
 
-type CreateSamlssoConfiguration struct {
-	// Entity ID of the SAML Identity Provider.
-	IdpEntityId string `json:"idp_entity_id" url:"idp_entity_id"`
-	// Single Sign-On URL of the SAML Identity Provider (HTTPS required).
-	IdpSsoUrl string `json:"idp_sso_url" url:"idp_sso_url"`
-	// PEM-encoded X.509 certificate for verifying SAML assertion signatures.
-	IdpCertificate string `json:"idp_certificate" url:"idp_certificate"`
-	// Entity ID of the Service Provider.
-	SpEntityId string `json:"sp_entity_id" url:"sp_entity_id"`
-	// URL to the IdP's SAML metadata document (informational).
-	IdpMetadataUrl *string `json:"idp_metadata_url,omitempty" url:"idp_metadata_url,omitempty"`
-	// NameID format. Defaults to urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress.
-	NameIdFormat *string `json:"name_id_format,omitempty" url:"name_id_format,omitempty"`
+type CreateAuthConfigurationResponse struct {
+	Result *AuthConfiguration `json:"result" url:"result"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -263,111 +352,41 @@ type CreateSamlssoConfiguration struct {
 	rawJSON         json.RawMessage
 }
 
-func (c *CreateSamlssoConfiguration) GetIdpEntityId() string {
-	if c == nil {
-		return ""
-	}
-	return c.IdpEntityId
-}
-
-func (c *CreateSamlssoConfiguration) GetIdpSsoUrl() string {
-	if c == nil {
-		return ""
-	}
-	return c.IdpSsoUrl
-}
-
-func (c *CreateSamlssoConfiguration) GetIdpCertificate() string {
-	if c == nil {
-		return ""
-	}
-	return c.IdpCertificate
-}
-
-func (c *CreateSamlssoConfiguration) GetSpEntityId() string {
-	if c == nil {
-		return ""
-	}
-	return c.SpEntityId
-}
-
-func (c *CreateSamlssoConfiguration) GetIdpMetadataUrl() *string {
+func (c *CreateAuthConfigurationResponse) GetResult() *AuthConfiguration {
 	if c == nil {
 		return nil
 	}
-	return c.IdpMetadataUrl
+	return c.Result
 }
 
-func (c *CreateSamlssoConfiguration) GetNameIdFormat() *string {
-	if c == nil {
-		return nil
-	}
-	return c.NameIdFormat
-}
-
-func (c *CreateSamlssoConfiguration) GetExtraProperties() map[string]interface{} {
+func (c *CreateAuthConfigurationResponse) GetExtraProperties() map[string]interface{} {
 	if c == nil {
 		return nil
 	}
 	return c.extraProperties
 }
 
-func (c *CreateSamlssoConfiguration) require(field *big.Int) {
+func (c *CreateAuthConfigurationResponse) require(field *big.Int) {
 	if c.explicitFields == nil {
 		c.explicitFields = big.NewInt(0)
 	}
 	c.explicitFields.Or(c.explicitFields, field)
 }
 
-// SetIdpEntityId sets the IdpEntityId field and marks it as non-optional;
+// SetResult sets the Result field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (c *CreateSamlssoConfiguration) SetIdpEntityId(idpEntityId string) {
-	c.IdpEntityId = idpEntityId
-	c.require(createSamlssoConfigurationFieldIdpEntityId)
+func (c *CreateAuthConfigurationResponse) SetResult(result *AuthConfiguration) {
+	c.Result = result
+	c.require(createAuthConfigurationResponseFieldResult)
 }
 
-// SetIdpSsoUrl sets the IdpSsoUrl field and marks it as non-optional;
-// this prevents an empty or null value for this field from being omitted during serialization.
-func (c *CreateSamlssoConfiguration) SetIdpSsoUrl(idpSsoUrl string) {
-	c.IdpSsoUrl = idpSsoUrl
-	c.require(createSamlssoConfigurationFieldIdpSsoUrl)
-}
-
-// SetIdpCertificate sets the IdpCertificate field and marks it as non-optional;
-// this prevents an empty or null value for this field from being omitted during serialization.
-func (c *CreateSamlssoConfiguration) SetIdpCertificate(idpCertificate string) {
-	c.IdpCertificate = idpCertificate
-	c.require(createSamlssoConfigurationFieldIdpCertificate)
-}
-
-// SetSpEntityId sets the SpEntityId field and marks it as non-optional;
-// this prevents an empty or null value for this field from being omitted during serialization.
-func (c *CreateSamlssoConfiguration) SetSpEntityId(spEntityId string) {
-	c.SpEntityId = spEntityId
-	c.require(createSamlssoConfigurationFieldSpEntityId)
-}
-
-// SetIdpMetadataUrl sets the IdpMetadataUrl field and marks it as non-optional;
-// this prevents an empty or null value for this field from being omitted during serialization.
-func (c *CreateSamlssoConfiguration) SetIdpMetadataUrl(idpMetadataUrl *string) {
-	c.IdpMetadataUrl = idpMetadataUrl
-	c.require(createSamlssoConfigurationFieldIdpMetadataUrl)
-}
-
-// SetNameIdFormat sets the NameIdFormat field and marks it as non-optional;
-// this prevents an empty or null value for this field from being omitted during serialization.
-func (c *CreateSamlssoConfiguration) SetNameIdFormat(nameIdFormat *string) {
-	c.NameIdFormat = nameIdFormat
-	c.require(createSamlssoConfigurationFieldNameIdFormat)
-}
-
-func (c *CreateSamlssoConfiguration) UnmarshalJSON(data []byte) error {
-	type unmarshaler CreateSamlssoConfiguration
+func (c *CreateAuthConfigurationResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler CreateAuthConfigurationResponse
 	var value unmarshaler
 	if err := json.Unmarshal(data, &value); err != nil {
 		return err
 	}
-	*c = CreateSamlssoConfiguration(value)
+	*c = CreateAuthConfigurationResponse(value)
 	extraProperties, err := internal.ExtractExtraProperties(data, *c)
 	if err != nil {
 		return err
@@ -377,8 +396,8 @@ func (c *CreateSamlssoConfiguration) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (c *CreateSamlssoConfiguration) MarshalJSON() ([]byte, error) {
-	type embed CreateSamlssoConfiguration
+func (c *CreateAuthConfigurationResponse) MarshalJSON() ([]byte, error) {
+	type embed CreateAuthConfigurationResponse
 	var marshaler = struct {
 		embed
 	}{
@@ -388,7 +407,7 @@ func (c *CreateSamlssoConfiguration) MarshalJSON() ([]byte, error) {
 	return json.Marshal(explicitMarshaler)
 }
 
-func (c *CreateSamlssoConfiguration) String() string {
+func (c *CreateAuthConfigurationResponse) String() string {
 	if c == nil {
 		return "<nil>"
 	}
@@ -403,36 +422,131 @@ func (c *CreateSamlssoConfiguration) String() string {
 	return fmt.Sprintf("%#v", c)
 }
 
-type CreateSsoConfiguration struct {
-	Type string
-	Oidc *CreateOidcSsoConfiguration
-	Saml *CreateSamlssoConfiguration
+// Configuration for creating built-in (password-based) authentication.
+var (
+	createBuiltInConfigurationFieldAllowForUsers = big.NewInt(1 << 0)
+)
+
+type CreateBuiltInConfiguration struct {
+	// Members allowed to use built-in authentication, identified by member id or name.
+	// Use the special list ["*"] to allow all members; this is the default when omitted.
+	AllowForUsers []MemberId `json:"allow_for_users,omitempty" url:"allow_for_users,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (c *CreateBuiltInConfiguration) GetAllowForUsers() []MemberId {
+	if c == nil {
+		return nil
+	}
+	return c.AllowForUsers
+}
+
+func (c *CreateBuiltInConfiguration) GetExtraProperties() map[string]interface{} {
+	if c == nil {
+		return nil
+	}
+	return c.extraProperties
+}
+
+func (c *CreateBuiltInConfiguration) require(field *big.Int) {
+	if c.explicitFields == nil {
+		c.explicitFields = big.NewInt(0)
+	}
+	c.explicitFields.Or(c.explicitFields, field)
+}
+
+// SetAllowForUsers sets the AllowForUsers field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CreateBuiltInConfiguration) SetAllowForUsers(allowForUsers []MemberId) {
+	c.AllowForUsers = allowForUsers
+	c.require(createBuiltInConfigurationFieldAllowForUsers)
+}
+
+func (c *CreateBuiltInConfiguration) UnmarshalJSON(data []byte) error {
+	type unmarshaler CreateBuiltInConfiguration
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = CreateBuiltInConfiguration(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+	c.rawJSON = nil
+	return nil
+}
+
+func (c *CreateBuiltInConfiguration) MarshalJSON() ([]byte, error) {
+	type embed CreateBuiltInConfiguration
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*c),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, c.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (c *CreateBuiltInConfiguration) String() string {
+	if c == nil {
+		return "<nil>"
+	}
+	if len(c.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(c.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
+type CreateIdPConfiguration struct {
+	Type    string
+	Oidc    *CreateOidcConfiguration
+	Saml    *CreateSamlConfiguration
+	Builtin *CreateBuiltInConfiguration
 
 	rawJSON json.RawMessage
 }
 
-func (c *CreateSsoConfiguration) GetType() string {
+func (c *CreateIdPConfiguration) GetType() string {
 	if c == nil {
 		return ""
 	}
 	return c.Type
 }
 
-func (c *CreateSsoConfiguration) GetOidc() *CreateOidcSsoConfiguration {
+func (c *CreateIdPConfiguration) GetOidc() *CreateOidcConfiguration {
 	if c == nil {
 		return nil
 	}
 	return c.Oidc
 }
 
-func (c *CreateSsoConfiguration) GetSaml() *CreateSamlssoConfiguration {
+func (c *CreateIdPConfiguration) GetSaml() *CreateSamlConfiguration {
 	if c == nil {
 		return nil
 	}
 	return c.Saml
 }
 
-func (c *CreateSsoConfiguration) UnmarshalJSON(data []byte) error {
+func (c *CreateIdPConfiguration) GetBuiltin() *CreateBuiltInConfiguration {
+	if c == nil {
+		return nil
+	}
+	return c.Builtin
+}
+
+func (c *CreateIdPConfiguration) UnmarshalJSON(data []byte) error {
 	var unmarshaler struct {
 		Type string `json:"type"`
 	}
@@ -445,23 +559,29 @@ func (c *CreateSsoConfiguration) UnmarshalJSON(data []byte) error {
 	}
 	switch unmarshaler.Type {
 	case "oidc":
-		value := new(CreateOidcSsoConfiguration)
+		value := new(CreateOidcConfiguration)
 		if err := json.Unmarshal(data, &value); err != nil {
 			return err
 		}
 		c.Oidc = value
 	case "saml":
-		value := new(CreateSamlssoConfiguration)
+		value := new(CreateSamlConfiguration)
 		if err := json.Unmarshal(data, &value); err != nil {
 			return err
 		}
 		c.Saml = value
+	case "builtin":
+		value := new(CreateBuiltInConfiguration)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		c.Builtin = value
 	}
 	c.rawJSON = nil
 	return nil
 }
 
-func (c CreateSsoConfiguration) MarshalJSON() ([]byte, error) {
+func (c CreateIdPConfiguration) MarshalJSON() ([]byte, error) {
 	if err := c.validate(); err != nil {
 		return nil, err
 	}
@@ -471,28 +591,35 @@ func (c CreateSsoConfiguration) MarshalJSON() ([]byte, error) {
 	if c.Saml != nil {
 		return internal.MarshalJSONWithExtraProperty(c.Saml, "type", "saml")
 	}
+	if c.Builtin != nil {
+		return internal.MarshalJSONWithExtraProperty(c.Builtin, "type", "builtin")
+	}
 	if len(c.rawJSON) > 0 {
 		return c.rawJSON, nil
 	}
 	return nil, fmt.Errorf("type %T does not define a non-empty union type", c)
 }
 
-type CreateSsoConfigurationVisitor interface {
-	VisitOidc(*CreateOidcSsoConfiguration) error
-	VisitSaml(*CreateSamlssoConfiguration) error
+type CreateIdPConfigurationVisitor interface {
+	VisitOidc(*CreateOidcConfiguration) error
+	VisitSaml(*CreateSamlConfiguration) error
+	VisitBuiltin(*CreateBuiltInConfiguration) error
 }
 
-func (c *CreateSsoConfiguration) Accept(visitor CreateSsoConfigurationVisitor) error {
+func (c *CreateIdPConfiguration) Accept(visitor CreateIdPConfigurationVisitor) error {
 	if c.Oidc != nil {
 		return visitor.VisitOidc(c.Oidc)
 	}
 	if c.Saml != nil {
 		return visitor.VisitSaml(c.Saml)
 	}
+	if c.Builtin != nil {
+		return visitor.VisitBuiltin(c.Builtin)
+	}
 	return fmt.Errorf("type %T does not define a non-empty union type", c)
 }
 
-func (c *CreateSsoConfiguration) validate() error {
+func (c *CreateIdPConfiguration) validate() error {
 	if c == nil {
 		return fmt.Errorf("type %T is nil", c)
 	}
@@ -502,6 +629,9 @@ func (c *CreateSsoConfiguration) validate() error {
 	}
 	if c.Saml != nil {
 		fields = append(fields, "saml")
+	}
+	if c.Builtin != nil {
+		fields = append(fields, "builtin")
 	}
 	if len(fields) == 0 {
 		if c.Type != "" {
@@ -529,19 +659,20 @@ func (c *CreateSsoConfiguration) validate() error {
 	return nil
 }
 
-// Request to create an SSO configuration
+// Configuration for an OpenID Connect (OIDC) compliant Identity Provider.
 var (
-	createSsoRequestFieldFullname = big.NewInt(1 << 0)
-	createSsoRequestFieldConfig   = big.NewInt(1 << 1)
+	createOidcConfigurationFieldIssuerUrl    = big.NewInt(1 << 0)
+	createOidcConfigurationFieldClientId     = big.NewInt(1 << 1)
+	createOidcConfigurationFieldClientSecret = big.NewInt(1 << 2)
 )
 
-type CreateSsoRequest struct {
-	// Display name for the configuration, used on authentication screens.
-	// **Note:** To avoid confusion this name must be unique, however it cannot be used
-	// as an identifier in API calls.
-	Fullname string `json:"fullname" url:"fullname"`
-	// Identity provider configuration. The type discriminator determines the SSO provider type.
-	Config *CreateSsoConfiguration `json:"config" url:"config"`
+type CreateOidcConfiguration struct {
+	// Issuer URL used to automatically obtain the OpenID Connect discovery document.
+	IssuerUrl string `json:"issuer_url" url:"issuer_url"`
+	// Client ID registered with the identity provider.
+	ClientId string `json:"client_id" url:"client_id"`
+	// Client secret registered with the identity provider.
+	ClientSecret string `json:"client_secret" url:"client_secret"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -550,55 +681,69 @@ type CreateSsoRequest struct {
 	rawJSON         json.RawMessage
 }
 
-func (c *CreateSsoRequest) GetFullname() string {
+func (c *CreateOidcConfiguration) GetIssuerUrl() string {
 	if c == nil {
 		return ""
 	}
-	return c.Fullname
+	return c.IssuerUrl
 }
 
-func (c *CreateSsoRequest) GetConfig() *CreateSsoConfiguration {
+func (c *CreateOidcConfiguration) GetClientId() string {
 	if c == nil {
-		return nil
+		return ""
 	}
-	return c.Config
+	return c.ClientId
 }
 
-func (c *CreateSsoRequest) GetExtraProperties() map[string]interface{} {
+func (c *CreateOidcConfiguration) GetClientSecret() string {
+	if c == nil {
+		return ""
+	}
+	return c.ClientSecret
+}
+
+func (c *CreateOidcConfiguration) GetExtraProperties() map[string]interface{} {
 	if c == nil {
 		return nil
 	}
 	return c.extraProperties
 }
 
-func (c *CreateSsoRequest) require(field *big.Int) {
+func (c *CreateOidcConfiguration) require(field *big.Int) {
 	if c.explicitFields == nil {
 		c.explicitFields = big.NewInt(0)
 	}
 	c.explicitFields.Or(c.explicitFields, field)
 }
 
-// SetFullname sets the Fullname field and marks it as non-optional;
+// SetIssuerUrl sets the IssuerUrl field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (c *CreateSsoRequest) SetFullname(fullname string) {
-	c.Fullname = fullname
-	c.require(createSsoRequestFieldFullname)
+func (c *CreateOidcConfiguration) SetIssuerUrl(issuerUrl string) {
+	c.IssuerUrl = issuerUrl
+	c.require(createOidcConfigurationFieldIssuerUrl)
 }
 
-// SetConfig sets the Config field and marks it as non-optional;
+// SetClientId sets the ClientId field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (c *CreateSsoRequest) SetConfig(config *CreateSsoConfiguration) {
-	c.Config = config
-	c.require(createSsoRequestFieldConfig)
+func (c *CreateOidcConfiguration) SetClientId(clientId string) {
+	c.ClientId = clientId
+	c.require(createOidcConfigurationFieldClientId)
 }
 
-func (c *CreateSsoRequest) UnmarshalJSON(data []byte) error {
-	type unmarshaler CreateSsoRequest
+// SetClientSecret sets the ClientSecret field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CreateOidcConfiguration) SetClientSecret(clientSecret string) {
+	c.ClientSecret = clientSecret
+	c.require(createOidcConfigurationFieldClientSecret)
+}
+
+func (c *CreateOidcConfiguration) UnmarshalJSON(data []byte) error {
+	type unmarshaler CreateOidcConfiguration
 	var value unmarshaler
 	if err := json.Unmarshal(data, &value); err != nil {
 		return err
 	}
-	*c = CreateSsoRequest(value)
+	*c = CreateOidcConfiguration(value)
 	extraProperties, err := internal.ExtractExtraProperties(data, *c)
 	if err != nil {
 		return err
@@ -608,8 +753,8 @@ func (c *CreateSsoRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (c *CreateSsoRequest) MarshalJSON() ([]byte, error) {
-	type embed CreateSsoRequest
+func (c *CreateOidcConfiguration) MarshalJSON() ([]byte, error) {
+	type embed CreateOidcConfiguration
 	var marshaler = struct {
 		embed
 	}{
@@ -619,7 +764,7 @@ func (c *CreateSsoRequest) MarshalJSON() ([]byte, error) {
 	return json.Marshal(explicitMarshaler)
 }
 
-func (c *CreateSsoRequest) String() string {
+func (c *CreateOidcConfiguration) String() string {
 	if c == nil {
 		return "<nil>"
 	}
@@ -634,12 +779,29 @@ func (c *CreateSsoRequest) String() string {
 	return fmt.Sprintf("%#v", c)
 }
 
+// Configuration for creating a SAML 2.0 Identity Provider.
 var (
-	createSsoResponseFieldResult = big.NewInt(1 << 0)
+	createSamlConfigurationFieldIdpEntityId    = big.NewInt(1 << 0)
+	createSamlConfigurationFieldIdpSsoUrl      = big.NewInt(1 << 1)
+	createSamlConfigurationFieldIdpCertificate = big.NewInt(1 << 2)
+	createSamlConfigurationFieldSpEntityId     = big.NewInt(1 << 3)
+	createSamlConfigurationFieldIdpMetadataUrl = big.NewInt(1 << 4)
+	createSamlConfigurationFieldNameIdFormat   = big.NewInt(1 << 5)
 )
 
-type CreateSsoResponse struct {
-	Result *SsoConfiguration `json:"result" url:"result"`
+type CreateSamlConfiguration struct {
+	// Entity ID of the SAML Identity Provider.
+	IdpEntityId string `json:"idp_entity_id" url:"idp_entity_id"`
+	// Single Sign-On URL of the SAML Identity Provider (HTTPS required).
+	IdpSsoUrl string `json:"idp_sso_url" url:"idp_sso_url"`
+	// PEM-encoded X.509 certificate for verifying SAML assertion signatures.
+	IdpCertificate string `json:"idp_certificate" url:"idp_certificate"`
+	// Entity ID of the Service Provider.
+	SpEntityId string `json:"sp_entity_id" url:"sp_entity_id"`
+	// URL to the IdP's SAML metadata document (informational).
+	IdpMetadataUrl *string `json:"idp_metadata_url,omitempty" url:"idp_metadata_url,omitempty"`
+	// NameID format. Defaults to urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress.
+	NameIdFormat *string `json:"name_id_format,omitempty" url:"name_id_format,omitempty"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -648,41 +810,111 @@ type CreateSsoResponse struct {
 	rawJSON         json.RawMessage
 }
 
-func (c *CreateSsoResponse) GetResult() *SsoConfiguration {
+func (c *CreateSamlConfiguration) GetIdpEntityId() string {
+	if c == nil {
+		return ""
+	}
+	return c.IdpEntityId
+}
+
+func (c *CreateSamlConfiguration) GetIdpSsoUrl() string {
+	if c == nil {
+		return ""
+	}
+	return c.IdpSsoUrl
+}
+
+func (c *CreateSamlConfiguration) GetIdpCertificate() string {
+	if c == nil {
+		return ""
+	}
+	return c.IdpCertificate
+}
+
+func (c *CreateSamlConfiguration) GetSpEntityId() string {
+	if c == nil {
+		return ""
+	}
+	return c.SpEntityId
+}
+
+func (c *CreateSamlConfiguration) GetIdpMetadataUrl() *string {
 	if c == nil {
 		return nil
 	}
-	return c.Result
+	return c.IdpMetadataUrl
 }
 
-func (c *CreateSsoResponse) GetExtraProperties() map[string]interface{} {
+func (c *CreateSamlConfiguration) GetNameIdFormat() *string {
+	if c == nil {
+		return nil
+	}
+	return c.NameIdFormat
+}
+
+func (c *CreateSamlConfiguration) GetExtraProperties() map[string]interface{} {
 	if c == nil {
 		return nil
 	}
 	return c.extraProperties
 }
 
-func (c *CreateSsoResponse) require(field *big.Int) {
+func (c *CreateSamlConfiguration) require(field *big.Int) {
 	if c.explicitFields == nil {
 		c.explicitFields = big.NewInt(0)
 	}
 	c.explicitFields.Or(c.explicitFields, field)
 }
 
-// SetResult sets the Result field and marks it as non-optional;
+// SetIdpEntityId sets the IdpEntityId field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (c *CreateSsoResponse) SetResult(result *SsoConfiguration) {
-	c.Result = result
-	c.require(createSsoResponseFieldResult)
+func (c *CreateSamlConfiguration) SetIdpEntityId(idpEntityId string) {
+	c.IdpEntityId = idpEntityId
+	c.require(createSamlConfigurationFieldIdpEntityId)
 }
 
-func (c *CreateSsoResponse) UnmarshalJSON(data []byte) error {
-	type unmarshaler CreateSsoResponse
+// SetIdpSsoUrl sets the IdpSsoUrl field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CreateSamlConfiguration) SetIdpSsoUrl(idpSsoUrl string) {
+	c.IdpSsoUrl = idpSsoUrl
+	c.require(createSamlConfigurationFieldIdpSsoUrl)
+}
+
+// SetIdpCertificate sets the IdpCertificate field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CreateSamlConfiguration) SetIdpCertificate(idpCertificate string) {
+	c.IdpCertificate = idpCertificate
+	c.require(createSamlConfigurationFieldIdpCertificate)
+}
+
+// SetSpEntityId sets the SpEntityId field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CreateSamlConfiguration) SetSpEntityId(spEntityId string) {
+	c.SpEntityId = spEntityId
+	c.require(createSamlConfigurationFieldSpEntityId)
+}
+
+// SetIdpMetadataUrl sets the IdpMetadataUrl field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CreateSamlConfiguration) SetIdpMetadataUrl(idpMetadataUrl *string) {
+	c.IdpMetadataUrl = idpMetadataUrl
+	c.require(createSamlConfigurationFieldIdpMetadataUrl)
+}
+
+// SetNameIdFormat sets the NameIdFormat field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CreateSamlConfiguration) SetNameIdFormat(nameIdFormat *string) {
+	c.NameIdFormat = nameIdFormat
+	c.require(createSamlConfigurationFieldNameIdFormat)
+}
+
+func (c *CreateSamlConfiguration) UnmarshalJSON(data []byte) error {
+	type unmarshaler CreateSamlConfiguration
 	var value unmarshaler
 	if err := json.Unmarshal(data, &value); err != nil {
 		return err
 	}
-	*c = CreateSsoResponse(value)
+	*c = CreateSamlConfiguration(value)
 	extraProperties, err := internal.ExtractExtraProperties(data, *c)
 	if err != nil {
 		return err
@@ -692,8 +924,8 @@ func (c *CreateSsoResponse) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (c *CreateSsoResponse) MarshalJSON() ([]byte, error) {
-	type embed CreateSsoResponse
+func (c *CreateSamlConfiguration) MarshalJSON() ([]byte, error) {
+	type embed CreateSamlConfiguration
 	var marshaler = struct {
 		embed
 	}{
@@ -703,7 +935,7 @@ func (c *CreateSsoResponse) MarshalJSON() ([]byte, error) {
 	return json.Marshal(explicitMarshaler)
 }
 
-func (c *CreateSsoResponse) String() string {
+func (c *CreateSamlConfiguration) String() string {
 	if c == nil {
 		return "<nil>"
 	}
@@ -719,12 +951,96 @@ func (c *CreateSsoResponse) String() string {
 }
 
 var (
-	getSsoMetadataResponseFieldResult = big.NewInt(1 << 0)
+	getAuthConfigurationResponseFieldResult = big.NewInt(1 << 0)
 )
 
-type GetSsoMetadataResponse struct {
+type GetAuthConfigurationResponse struct {
+	Result *AuthConfiguration `json:"result" url:"result"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (g *GetAuthConfigurationResponse) GetResult() *AuthConfiguration {
+	if g == nil {
+		return nil
+	}
+	return g.Result
+}
+
+func (g *GetAuthConfigurationResponse) GetExtraProperties() map[string]interface{} {
+	if g == nil {
+		return nil
+	}
+	return g.extraProperties
+}
+
+func (g *GetAuthConfigurationResponse) require(field *big.Int) {
+	if g.explicitFields == nil {
+		g.explicitFields = big.NewInt(0)
+	}
+	g.explicitFields.Or(g.explicitFields, field)
+}
+
+// SetResult sets the Result field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (g *GetAuthConfigurationResponse) SetResult(result *AuthConfiguration) {
+	g.Result = result
+	g.require(getAuthConfigurationResponseFieldResult)
+}
+
+func (g *GetAuthConfigurationResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler GetAuthConfigurationResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*g = GetAuthConfigurationResponse(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *g)
+	if err != nil {
+		return err
+	}
+	g.extraProperties = extraProperties
+	g.rawJSON = nil
+	return nil
+}
+
+func (g *GetAuthConfigurationResponse) MarshalJSON() ([]byte, error) {
+	type embed GetAuthConfigurationResponse
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*g),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, g.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (g *GetAuthConfigurationResponse) String() string {
+	if g == nil {
+		return "<nil>"
+	}
+	if len(g.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(g.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(g); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", g)
+}
+
+var (
+	getAuthMetadataResponseFieldResult = big.NewInt(1 << 0)
+)
+
+type GetAuthMetadataResponse struct {
 	// Information the user needs to configure their Identity Provider.
-	Result *SsoUserConfiguration `json:"result" url:"result"`
+	Result *AuthConfigurationMetadata `json:"result" url:"result"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -733,21 +1049,21 @@ type GetSsoMetadataResponse struct {
 	rawJSON         json.RawMessage
 }
 
-func (g *GetSsoMetadataResponse) GetResult() *SsoUserConfiguration {
+func (g *GetAuthMetadataResponse) GetResult() *AuthConfigurationMetadata {
 	if g == nil {
 		return nil
 	}
 	return g.Result
 }
 
-func (g *GetSsoMetadataResponse) GetExtraProperties() map[string]interface{} {
+func (g *GetAuthMetadataResponse) GetExtraProperties() map[string]interface{} {
 	if g == nil {
 		return nil
 	}
 	return g.extraProperties
 }
 
-func (g *GetSsoMetadataResponse) require(field *big.Int) {
+func (g *GetAuthMetadataResponse) require(field *big.Int) {
 	if g.explicitFields == nil {
 		g.explicitFields = big.NewInt(0)
 	}
@@ -756,18 +1072,18 @@ func (g *GetSsoMetadataResponse) require(field *big.Int) {
 
 // SetResult sets the Result field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (g *GetSsoMetadataResponse) SetResult(result *SsoUserConfiguration) {
+func (g *GetAuthMetadataResponse) SetResult(result *AuthConfigurationMetadata) {
 	g.Result = result
-	g.require(getSsoMetadataResponseFieldResult)
+	g.require(getAuthMetadataResponseFieldResult)
 }
 
-func (g *GetSsoMetadataResponse) UnmarshalJSON(data []byte) error {
-	type unmarshaler GetSsoMetadataResponse
+func (g *GetAuthMetadataResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler GetAuthMetadataResponse
 	var value unmarshaler
 	if err := json.Unmarshal(data, &value); err != nil {
 		return err
 	}
-	*g = GetSsoMetadataResponse(value)
+	*g = GetAuthMetadataResponse(value)
 	extraProperties, err := internal.ExtractExtraProperties(data, *g)
 	if err != nil {
 		return err
@@ -777,8 +1093,8 @@ func (g *GetSsoMetadataResponse) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (g *GetSsoMetadataResponse) MarshalJSON() ([]byte, error) {
-	type embed GetSsoMetadataResponse
+func (g *GetAuthMetadataResponse) MarshalJSON() ([]byte, error) {
+	type embed GetAuthMetadataResponse
 	var marshaler = struct {
 		embed
 	}{
@@ -788,7 +1104,7 @@ func (g *GetSsoMetadataResponse) MarshalJSON() ([]byte, error) {
 	return json.Marshal(explicitMarshaler)
 }
 
-func (g *GetSsoMetadataResponse) String() string {
+func (g *GetAuthMetadataResponse) String() string {
 	if g == nil {
 		return "<nil>"
 	}
@@ -804,11 +1120,11 @@ func (g *GetSsoMetadataResponse) String() string {
 }
 
 var (
-	getSsoResponseFieldResult = big.NewInt(1 << 0)
+	listAuthConfigurationsResponseFieldResult = big.NewInt(1 << 0)
 )
 
-type GetSsoResponse struct {
-	Result *SsoConfiguration `json:"result" url:"result"`
+type ListAuthConfigurationsResponse struct {
+	Result []*AuthConfiguration `json:"result" url:"result"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -817,105 +1133,21 @@ type GetSsoResponse struct {
 	rawJSON         json.RawMessage
 }
 
-func (g *GetSsoResponse) GetResult() *SsoConfiguration {
-	if g == nil {
-		return nil
-	}
-	return g.Result
-}
-
-func (g *GetSsoResponse) GetExtraProperties() map[string]interface{} {
-	if g == nil {
-		return nil
-	}
-	return g.extraProperties
-}
-
-func (g *GetSsoResponse) require(field *big.Int) {
-	if g.explicitFields == nil {
-		g.explicitFields = big.NewInt(0)
-	}
-	g.explicitFields.Or(g.explicitFields, field)
-}
-
-// SetResult sets the Result field and marks it as non-optional;
-// this prevents an empty or null value for this field from being omitted during serialization.
-func (g *GetSsoResponse) SetResult(result *SsoConfiguration) {
-	g.Result = result
-	g.require(getSsoResponseFieldResult)
-}
-
-func (g *GetSsoResponse) UnmarshalJSON(data []byte) error {
-	type unmarshaler GetSsoResponse
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*g = GetSsoResponse(value)
-	extraProperties, err := internal.ExtractExtraProperties(data, *g)
-	if err != nil {
-		return err
-	}
-	g.extraProperties = extraProperties
-	g.rawJSON = nil
-	return nil
-}
-
-func (g *GetSsoResponse) MarshalJSON() ([]byte, error) {
-	type embed GetSsoResponse
-	var marshaler = struct {
-		embed
-	}{
-		embed: embed(*g),
-	}
-	explicitMarshaler := internal.HandleExplicitFields(marshaler, g.explicitFields)
-	return json.Marshal(explicitMarshaler)
-}
-
-func (g *GetSsoResponse) String() string {
-	if g == nil {
-		return "<nil>"
-	}
-	if len(g.rawJSON) > 0 {
-		if value, err := internal.StringifyJSON(g.rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := internal.StringifyJSON(g); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", g)
-}
-
-var (
-	listSsoResponseFieldResult = big.NewInt(1 << 0)
-)
-
-type ListSsoResponse struct {
-	Result []*SsoConfiguration `json:"result" url:"result"`
-
-	// Private bitmask of fields set to an explicit value and therefore not to be omitted
-	explicitFields *big.Int `json:"-" url:"-"`
-
-	extraProperties map[string]interface{}
-	rawJSON         json.RawMessage
-}
-
-func (l *ListSsoResponse) GetResult() []*SsoConfiguration {
+func (l *ListAuthConfigurationsResponse) GetResult() []*AuthConfiguration {
 	if l == nil {
 		return nil
 	}
 	return l.Result
 }
 
-func (l *ListSsoResponse) GetExtraProperties() map[string]interface{} {
+func (l *ListAuthConfigurationsResponse) GetExtraProperties() map[string]interface{} {
 	if l == nil {
 		return nil
 	}
 	return l.extraProperties
 }
 
-func (l *ListSsoResponse) require(field *big.Int) {
+func (l *ListAuthConfigurationsResponse) require(field *big.Int) {
 	if l.explicitFields == nil {
 		l.explicitFields = big.NewInt(0)
 	}
@@ -924,18 +1156,18 @@ func (l *ListSsoResponse) require(field *big.Int) {
 
 // SetResult sets the Result field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (l *ListSsoResponse) SetResult(result []*SsoConfiguration) {
+func (l *ListAuthConfigurationsResponse) SetResult(result []*AuthConfiguration) {
 	l.Result = result
-	l.require(listSsoResponseFieldResult)
+	l.require(listAuthConfigurationsResponseFieldResult)
 }
 
-func (l *ListSsoResponse) UnmarshalJSON(data []byte) error {
-	type unmarshaler ListSsoResponse
+func (l *ListAuthConfigurationsResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler ListAuthConfigurationsResponse
 	var value unmarshaler
 	if err := json.Unmarshal(data, &value); err != nil {
 		return err
 	}
-	*l = ListSsoResponse(value)
+	*l = ListAuthConfigurationsResponse(value)
 	extraProperties, err := internal.ExtractExtraProperties(data, *l)
 	if err != nil {
 		return err
@@ -945,8 +1177,8 @@ func (l *ListSsoResponse) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (l *ListSsoResponse) MarshalJSON() ([]byte, error) {
-	type embed ListSsoResponse
+func (l *ListAuthConfigurationsResponse) MarshalJSON() ([]byte, error) {
+	type embed ListAuthConfigurationsResponse
 	var marshaler = struct {
 		embed
 	}{
@@ -956,7 +1188,7 @@ func (l *ListSsoResponse) MarshalJSON() ([]byte, error) {
 	return json.Marshal(explicitMarshaler)
 }
 
-func (l *ListSsoResponse) String() string {
+func (l *ListAuthConfigurationsResponse) String() string {
 	if l == nil {
 		return "<nil>"
 	}
@@ -1177,18 +1409,25 @@ func (s *SamlUserConfiguration) String() string {
 	return fmt.Sprintf("%#v", s)
 }
 
-// SP-side configuration values the user needs to enter into their Identity Provider.
-// Only the fields relevant to the configured protocol are populated.
+// Request to update an authentication configuration
 var (
-	ssoUserConfigurationFieldOidc = big.NewInt(1 << 0)
-	ssoUserConfigurationFieldSaml = big.NewInt(1 << 1)
+	updateAuthConfigurationRequestFieldFullname  = big.NewInt(1 << 0)
+	updateAuthConfigurationRequestFieldState     = big.NewInt(1 << 1)
+	updateAuthConfigurationRequestFieldConfig    = big.NewInt(1 << 2)
+	updateAuthConfigurationRequestFieldUpdatedAt = big.NewInt(1 << 3)
 )
 
-type SsoUserConfiguration struct {
-	// OIDC configuration values. Present when the SSO configuration uses OIDC.
-	Oidc *OidcUserConfiguration `json:"oidc,omitempty" url:"oidc,omitempty"`
-	// SAML configuration values. Present when the SSO configuration uses SAML.
-	Saml *SamlUserConfiguration `json:"saml,omitempty" url:"saml,omitempty"`
+type UpdateAuthConfigurationRequest struct {
+	// Display name for the configuration, used on authentication screens.
+	// **Note:** To avoid confusion this name must be unique, however it cannot be used
+	// as an identifier in API calls.
+	Fullname string `json:"fullname" url:"fullname"`
+	// Whether the configuration is enabled or disabled. Defaults to enabled when omitted.
+	State *AuthConfigurationState `json:"state,omitempty" url:"state,omitempty"`
+	// Identity provider configuration. The type discriminator determines the authentication method.
+	Config *UpdateIdPConfiguration `json:"config" url:"config"`
+	// Used for optimistic locking to prevent concurrent updates.
+	UpdatedAt *time.Time `json:"updated_at,omitempty" url:"updated_at,omitempty"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -1197,175 +1436,89 @@ type SsoUserConfiguration struct {
 	rawJSON         json.RawMessage
 }
 
-func (s *SsoUserConfiguration) GetOidc() *OidcUserConfiguration {
-	if s == nil {
-		return nil
-	}
-	return s.Oidc
-}
-
-func (s *SsoUserConfiguration) GetSaml() *SamlUserConfiguration {
-	if s == nil {
-		return nil
-	}
-	return s.Saml
-}
-
-func (s *SsoUserConfiguration) GetExtraProperties() map[string]interface{} {
-	if s == nil {
-		return nil
-	}
-	return s.extraProperties
-}
-
-func (s *SsoUserConfiguration) require(field *big.Int) {
-	if s.explicitFields == nil {
-		s.explicitFields = big.NewInt(0)
-	}
-	s.explicitFields.Or(s.explicitFields, field)
-}
-
-// SetOidc sets the Oidc field and marks it as non-optional;
-// this prevents an empty or null value for this field from being omitted during serialization.
-func (s *SsoUserConfiguration) SetOidc(oidc *OidcUserConfiguration) {
-	s.Oidc = oidc
-	s.require(ssoUserConfigurationFieldOidc)
-}
-
-// SetSaml sets the Saml field and marks it as non-optional;
-// this prevents an empty or null value for this field from being omitted during serialization.
-func (s *SsoUserConfiguration) SetSaml(saml *SamlUserConfiguration) {
-	s.Saml = saml
-	s.require(ssoUserConfigurationFieldSaml)
-}
-
-func (s *SsoUserConfiguration) UnmarshalJSON(data []byte) error {
-	type unmarshaler SsoUserConfiguration
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*s = SsoUserConfiguration(value)
-	extraProperties, err := internal.ExtractExtraProperties(data, *s)
-	if err != nil {
-		return err
-	}
-	s.extraProperties = extraProperties
-	s.rawJSON = nil
-	return nil
-}
-
-func (s *SsoUserConfiguration) MarshalJSON() ([]byte, error) {
-	type embed SsoUserConfiguration
-	var marshaler = struct {
-		embed
-	}{
-		embed: embed(*s),
-	}
-	explicitMarshaler := internal.HandleExplicitFields(marshaler, s.explicitFields)
-	return json.Marshal(explicitMarshaler)
-}
-
-func (s *SsoUserConfiguration) String() string {
-	if s == nil {
-		return "<nil>"
-	}
-	if len(s.rawJSON) > 0 {
-		if value, err := internal.StringifyJSON(s.rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := internal.StringifyJSON(s); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", s)
-}
-
-// Configuration for an OpenID Connect (OIDC) compliant Identity Provider.
-var (
-	updateOidcSsoConfigurationFieldIssuerUrl    = big.NewInt(1 << 0)
-	updateOidcSsoConfigurationFieldClientId     = big.NewInt(1 << 1)
-	updateOidcSsoConfigurationFieldClientSecret = big.NewInt(1 << 2)
-)
-
-type UpdateOidcSsoConfiguration struct {
-	// Issuer URL used to automatically obtain the OpenID Connect discovery document.
-	IssuerUrl string `json:"issuer_url" url:"issuer_url"`
-	// Client ID registered with the identity provider.
-	ClientId string `json:"client_id" url:"client_id"`
-	// Client secret. Include only when rotating the secret.
-	ClientSecret *string `json:"client_secret,omitempty" url:"client_secret,omitempty"`
-
-	// Private bitmask of fields set to an explicit value and therefore not to be omitted
-	explicitFields *big.Int `json:"-" url:"-"`
-
-	extraProperties map[string]interface{}
-	rawJSON         json.RawMessage
-}
-
-func (u *UpdateOidcSsoConfiguration) GetIssuerUrl() string {
+func (u *UpdateAuthConfigurationRequest) GetFullname() string {
 	if u == nil {
 		return ""
 	}
-	return u.IssuerUrl
+	return u.Fullname
 }
 
-func (u *UpdateOidcSsoConfiguration) GetClientId() string {
-	if u == nil {
-		return ""
-	}
-	return u.ClientId
-}
-
-func (u *UpdateOidcSsoConfiguration) GetClientSecret() *string {
+func (u *UpdateAuthConfigurationRequest) GetState() *AuthConfigurationState {
 	if u == nil {
 		return nil
 	}
-	return u.ClientSecret
+	return u.State
 }
 
-func (u *UpdateOidcSsoConfiguration) GetExtraProperties() map[string]interface{} {
+func (u *UpdateAuthConfigurationRequest) GetConfig() *UpdateIdPConfiguration {
+	if u == nil {
+		return nil
+	}
+	return u.Config
+}
+
+func (u *UpdateAuthConfigurationRequest) GetUpdatedAt() *time.Time {
+	if u == nil {
+		return nil
+	}
+	return u.UpdatedAt
+}
+
+func (u *UpdateAuthConfigurationRequest) GetExtraProperties() map[string]interface{} {
 	if u == nil {
 		return nil
 	}
 	return u.extraProperties
 }
 
-func (u *UpdateOidcSsoConfiguration) require(field *big.Int) {
+func (u *UpdateAuthConfigurationRequest) require(field *big.Int) {
 	if u.explicitFields == nil {
 		u.explicitFields = big.NewInt(0)
 	}
 	u.explicitFields.Or(u.explicitFields, field)
 }
 
-// SetIssuerUrl sets the IssuerUrl field and marks it as non-optional;
+// SetFullname sets the Fullname field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (u *UpdateOidcSsoConfiguration) SetIssuerUrl(issuerUrl string) {
-	u.IssuerUrl = issuerUrl
-	u.require(updateOidcSsoConfigurationFieldIssuerUrl)
+func (u *UpdateAuthConfigurationRequest) SetFullname(fullname string) {
+	u.Fullname = fullname
+	u.require(updateAuthConfigurationRequestFieldFullname)
 }
 
-// SetClientId sets the ClientId field and marks it as non-optional;
+// SetState sets the State field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (u *UpdateOidcSsoConfiguration) SetClientId(clientId string) {
-	u.ClientId = clientId
-	u.require(updateOidcSsoConfigurationFieldClientId)
+func (u *UpdateAuthConfigurationRequest) SetState(state *AuthConfigurationState) {
+	u.State = state
+	u.require(updateAuthConfigurationRequestFieldState)
 }
 
-// SetClientSecret sets the ClientSecret field and marks it as non-optional;
+// SetConfig sets the Config field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (u *UpdateOidcSsoConfiguration) SetClientSecret(clientSecret *string) {
-	u.ClientSecret = clientSecret
-	u.require(updateOidcSsoConfigurationFieldClientSecret)
+func (u *UpdateAuthConfigurationRequest) SetConfig(config *UpdateIdPConfiguration) {
+	u.Config = config
+	u.require(updateAuthConfigurationRequestFieldConfig)
 }
 
-func (u *UpdateOidcSsoConfiguration) UnmarshalJSON(data []byte) error {
-	type unmarshaler UpdateOidcSsoConfiguration
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
+// SetUpdatedAt sets the UpdatedAt field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (u *UpdateAuthConfigurationRequest) SetUpdatedAt(updatedAt *time.Time) {
+	u.UpdatedAt = updatedAt
+	u.require(updateAuthConfigurationRequestFieldUpdatedAt)
+}
+
+func (u *UpdateAuthConfigurationRequest) UnmarshalJSON(data []byte) error {
+	type embed UpdateAuthConfigurationRequest
+	var unmarshaler = struct {
+		embed
+		UpdatedAt *internal.DateTime `json:"updated_at,omitempty"`
+	}{
+		embed: embed(*u),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
 		return err
 	}
-	*u = UpdateOidcSsoConfiguration(value)
+	*u = UpdateAuthConfigurationRequest(unmarshaler.embed)
+	u.UpdatedAt = unmarshaler.UpdatedAt.TimePtr()
 	extraProperties, err := internal.ExtractExtraProperties(data, *u)
 	if err != nil {
 		return err
@@ -1375,18 +1528,20 @@ func (u *UpdateOidcSsoConfiguration) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (u *UpdateOidcSsoConfiguration) MarshalJSON() ([]byte, error) {
-	type embed UpdateOidcSsoConfiguration
+func (u *UpdateAuthConfigurationRequest) MarshalJSON() ([]byte, error) {
+	type embed UpdateAuthConfigurationRequest
 	var marshaler = struct {
 		embed
+		UpdatedAt *internal.DateTime `json:"updated_at,omitempty"`
 	}{
-		embed: embed(*u),
+		embed:     embed(*u),
+		UpdatedAt: internal.NewOptionalDateTime(u.UpdatedAt),
 	}
 	explicitMarshaler := internal.HandleExplicitFields(marshaler, u.explicitFields)
 	return json.Marshal(explicitMarshaler)
 }
 
-func (u *UpdateOidcSsoConfiguration) String() string {
+func (u *UpdateAuthConfigurationRequest) String() string {
 	if u == nil {
 		return "<nil>"
 	}
@@ -1401,29 +1556,12 @@ func (u *UpdateOidcSsoConfiguration) String() string {
 	return fmt.Sprintf("%#v", u)
 }
 
-// Configuration for updating a SAML 2.0 Identity Provider.
 var (
-	updateSamlssoConfigurationFieldIdpEntityId    = big.NewInt(1 << 0)
-	updateSamlssoConfigurationFieldIdpSsoUrl      = big.NewInt(1 << 1)
-	updateSamlssoConfigurationFieldIdpCertificate = big.NewInt(1 << 2)
-	updateSamlssoConfigurationFieldSpEntityId     = big.NewInt(1 << 3)
-	updateSamlssoConfigurationFieldIdpMetadataUrl = big.NewInt(1 << 4)
-	updateSamlssoConfigurationFieldNameIdFormat   = big.NewInt(1 << 5)
+	updateAuthConfigurationResponseFieldResult = big.NewInt(1 << 0)
 )
 
-type UpdateSamlssoConfiguration struct {
-	// Entity ID of the SAML Identity Provider.
-	IdpEntityId string `json:"idp_entity_id" url:"idp_entity_id"`
-	// Single Sign-On URL of the SAML Identity Provider (HTTPS required).
-	IdpSsoUrl string `json:"idp_sso_url" url:"idp_sso_url"`
-	// PEM-encoded X.509 certificate. Omit to keep existing certificate.
-	IdpCertificate *string `json:"idp_certificate,omitempty" url:"idp_certificate,omitempty"`
-	// Entity ID of the Service Provider.
-	SpEntityId string `json:"sp_entity_id" url:"sp_entity_id"`
-	// URL to the IdP's SAML metadata document (informational).
-	IdpMetadataUrl *string `json:"idp_metadata_url,omitempty" url:"idp_metadata_url,omitempty"`
-	// NameID format. Defaults to urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress.
-	NameIdFormat *string `json:"name_id_format,omitempty" url:"name_id_format,omitempty"`
+type UpdateAuthConfigurationResponse struct {
+	Result *AuthConfiguration `json:"result" url:"result"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -1432,111 +1570,41 @@ type UpdateSamlssoConfiguration struct {
 	rawJSON         json.RawMessage
 }
 
-func (u *UpdateSamlssoConfiguration) GetIdpEntityId() string {
-	if u == nil {
-		return ""
-	}
-	return u.IdpEntityId
-}
-
-func (u *UpdateSamlssoConfiguration) GetIdpSsoUrl() string {
-	if u == nil {
-		return ""
-	}
-	return u.IdpSsoUrl
-}
-
-func (u *UpdateSamlssoConfiguration) GetIdpCertificate() *string {
+func (u *UpdateAuthConfigurationResponse) GetResult() *AuthConfiguration {
 	if u == nil {
 		return nil
 	}
-	return u.IdpCertificate
+	return u.Result
 }
 
-func (u *UpdateSamlssoConfiguration) GetSpEntityId() string {
-	if u == nil {
-		return ""
-	}
-	return u.SpEntityId
-}
-
-func (u *UpdateSamlssoConfiguration) GetIdpMetadataUrl() *string {
-	if u == nil {
-		return nil
-	}
-	return u.IdpMetadataUrl
-}
-
-func (u *UpdateSamlssoConfiguration) GetNameIdFormat() *string {
-	if u == nil {
-		return nil
-	}
-	return u.NameIdFormat
-}
-
-func (u *UpdateSamlssoConfiguration) GetExtraProperties() map[string]interface{} {
+func (u *UpdateAuthConfigurationResponse) GetExtraProperties() map[string]interface{} {
 	if u == nil {
 		return nil
 	}
 	return u.extraProperties
 }
 
-func (u *UpdateSamlssoConfiguration) require(field *big.Int) {
+func (u *UpdateAuthConfigurationResponse) require(field *big.Int) {
 	if u.explicitFields == nil {
 		u.explicitFields = big.NewInt(0)
 	}
 	u.explicitFields.Or(u.explicitFields, field)
 }
 
-// SetIdpEntityId sets the IdpEntityId field and marks it as non-optional;
+// SetResult sets the Result field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (u *UpdateSamlssoConfiguration) SetIdpEntityId(idpEntityId string) {
-	u.IdpEntityId = idpEntityId
-	u.require(updateSamlssoConfigurationFieldIdpEntityId)
+func (u *UpdateAuthConfigurationResponse) SetResult(result *AuthConfiguration) {
+	u.Result = result
+	u.require(updateAuthConfigurationResponseFieldResult)
 }
 
-// SetIdpSsoUrl sets the IdpSsoUrl field and marks it as non-optional;
-// this prevents an empty or null value for this field from being omitted during serialization.
-func (u *UpdateSamlssoConfiguration) SetIdpSsoUrl(idpSsoUrl string) {
-	u.IdpSsoUrl = idpSsoUrl
-	u.require(updateSamlssoConfigurationFieldIdpSsoUrl)
-}
-
-// SetIdpCertificate sets the IdpCertificate field and marks it as non-optional;
-// this prevents an empty or null value for this field from being omitted during serialization.
-func (u *UpdateSamlssoConfiguration) SetIdpCertificate(idpCertificate *string) {
-	u.IdpCertificate = idpCertificate
-	u.require(updateSamlssoConfigurationFieldIdpCertificate)
-}
-
-// SetSpEntityId sets the SpEntityId field and marks it as non-optional;
-// this prevents an empty or null value for this field from being omitted during serialization.
-func (u *UpdateSamlssoConfiguration) SetSpEntityId(spEntityId string) {
-	u.SpEntityId = spEntityId
-	u.require(updateSamlssoConfigurationFieldSpEntityId)
-}
-
-// SetIdpMetadataUrl sets the IdpMetadataUrl field and marks it as non-optional;
-// this prevents an empty or null value for this field from being omitted during serialization.
-func (u *UpdateSamlssoConfiguration) SetIdpMetadataUrl(idpMetadataUrl *string) {
-	u.IdpMetadataUrl = idpMetadataUrl
-	u.require(updateSamlssoConfigurationFieldIdpMetadataUrl)
-}
-
-// SetNameIdFormat sets the NameIdFormat field and marks it as non-optional;
-// this prevents an empty or null value for this field from being omitted during serialization.
-func (u *UpdateSamlssoConfiguration) SetNameIdFormat(nameIdFormat *string) {
-	u.NameIdFormat = nameIdFormat
-	u.require(updateSamlssoConfigurationFieldNameIdFormat)
-}
-
-func (u *UpdateSamlssoConfiguration) UnmarshalJSON(data []byte) error {
-	type unmarshaler UpdateSamlssoConfiguration
+func (u *UpdateAuthConfigurationResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler UpdateAuthConfigurationResponse
 	var value unmarshaler
 	if err := json.Unmarshal(data, &value); err != nil {
 		return err
 	}
-	*u = UpdateSamlssoConfiguration(value)
+	*u = UpdateAuthConfigurationResponse(value)
 	extraProperties, err := internal.ExtractExtraProperties(data, *u)
 	if err != nil {
 		return err
@@ -1546,8 +1614,8 @@ func (u *UpdateSamlssoConfiguration) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (u *UpdateSamlssoConfiguration) MarshalJSON() ([]byte, error) {
-	type embed UpdateSamlssoConfiguration
+func (u *UpdateAuthConfigurationResponse) MarshalJSON() ([]byte, error) {
+	type embed UpdateAuthConfigurationResponse
 	var marshaler = struct {
 		embed
 	}{
@@ -1557,7 +1625,7 @@ func (u *UpdateSamlssoConfiguration) MarshalJSON() ([]byte, error) {
 	return json.Marshal(explicitMarshaler)
 }
 
-func (u *UpdateSamlssoConfiguration) String() string {
+func (u *UpdateAuthConfigurationResponse) String() string {
 	if u == nil {
 		return "<nil>"
 	}
@@ -1572,36 +1640,131 @@ func (u *UpdateSamlssoConfiguration) String() string {
 	return fmt.Sprintf("%#v", u)
 }
 
-type UpdateSsoConfiguration struct {
-	Type string
-	Oidc *UpdateOidcSsoConfiguration
-	Saml *UpdateSamlssoConfiguration
+// Configuration for updating built-in (password-based) authentication.
+var (
+	updateBuiltInConfigurationFieldAllowForUsers = big.NewInt(1 << 0)
+)
+
+type UpdateBuiltInConfiguration struct {
+	// Members allowed to use built-in authentication, identified by member id or name.
+	// Use the special list ["*"] to allow all members; this is the default when omitted.
+	AllowForUsers []MemberId `json:"allow_for_users,omitempty" url:"allow_for_users,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (u *UpdateBuiltInConfiguration) GetAllowForUsers() []MemberId {
+	if u == nil {
+		return nil
+	}
+	return u.AllowForUsers
+}
+
+func (u *UpdateBuiltInConfiguration) GetExtraProperties() map[string]interface{} {
+	if u == nil {
+		return nil
+	}
+	return u.extraProperties
+}
+
+func (u *UpdateBuiltInConfiguration) require(field *big.Int) {
+	if u.explicitFields == nil {
+		u.explicitFields = big.NewInt(0)
+	}
+	u.explicitFields.Or(u.explicitFields, field)
+}
+
+// SetAllowForUsers sets the AllowForUsers field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (u *UpdateBuiltInConfiguration) SetAllowForUsers(allowForUsers []MemberId) {
+	u.AllowForUsers = allowForUsers
+	u.require(updateBuiltInConfigurationFieldAllowForUsers)
+}
+
+func (u *UpdateBuiltInConfiguration) UnmarshalJSON(data []byte) error {
+	type unmarshaler UpdateBuiltInConfiguration
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*u = UpdateBuiltInConfiguration(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *u)
+	if err != nil {
+		return err
+	}
+	u.extraProperties = extraProperties
+	u.rawJSON = nil
+	return nil
+}
+
+func (u *UpdateBuiltInConfiguration) MarshalJSON() ([]byte, error) {
+	type embed UpdateBuiltInConfiguration
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*u),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, u.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (u *UpdateBuiltInConfiguration) String() string {
+	if u == nil {
+		return "<nil>"
+	}
+	if len(u.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(u.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(u); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", u)
+}
+
+type UpdateIdPConfiguration struct {
+	Type    string
+	Oidc    *UpdateOidcConfiguration
+	Saml    *UpdateSamlConfiguration
+	Builtin *UpdateBuiltInConfiguration
 
 	rawJSON json.RawMessage
 }
 
-func (u *UpdateSsoConfiguration) GetType() string {
+func (u *UpdateIdPConfiguration) GetType() string {
 	if u == nil {
 		return ""
 	}
 	return u.Type
 }
 
-func (u *UpdateSsoConfiguration) GetOidc() *UpdateOidcSsoConfiguration {
+func (u *UpdateIdPConfiguration) GetOidc() *UpdateOidcConfiguration {
 	if u == nil {
 		return nil
 	}
 	return u.Oidc
 }
 
-func (u *UpdateSsoConfiguration) GetSaml() *UpdateSamlssoConfiguration {
+func (u *UpdateIdPConfiguration) GetSaml() *UpdateSamlConfiguration {
 	if u == nil {
 		return nil
 	}
 	return u.Saml
 }
 
-func (u *UpdateSsoConfiguration) UnmarshalJSON(data []byte) error {
+func (u *UpdateIdPConfiguration) GetBuiltin() *UpdateBuiltInConfiguration {
+	if u == nil {
+		return nil
+	}
+	return u.Builtin
+}
+
+func (u *UpdateIdPConfiguration) UnmarshalJSON(data []byte) error {
 	var unmarshaler struct {
 		Type string `json:"type"`
 	}
@@ -1614,23 +1777,29 @@ func (u *UpdateSsoConfiguration) UnmarshalJSON(data []byte) error {
 	}
 	switch unmarshaler.Type {
 	case "oidc":
-		value := new(UpdateOidcSsoConfiguration)
+		value := new(UpdateOidcConfiguration)
 		if err := json.Unmarshal(data, &value); err != nil {
 			return err
 		}
 		u.Oidc = value
 	case "saml":
-		value := new(UpdateSamlssoConfiguration)
+		value := new(UpdateSamlConfiguration)
 		if err := json.Unmarshal(data, &value); err != nil {
 			return err
 		}
 		u.Saml = value
+	case "builtin":
+		value := new(UpdateBuiltInConfiguration)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		u.Builtin = value
 	}
 	u.rawJSON = nil
 	return nil
 }
 
-func (u UpdateSsoConfiguration) MarshalJSON() ([]byte, error) {
+func (u UpdateIdPConfiguration) MarshalJSON() ([]byte, error) {
 	if err := u.validate(); err != nil {
 		return nil, err
 	}
@@ -1640,28 +1809,35 @@ func (u UpdateSsoConfiguration) MarshalJSON() ([]byte, error) {
 	if u.Saml != nil {
 		return internal.MarshalJSONWithExtraProperty(u.Saml, "type", "saml")
 	}
+	if u.Builtin != nil {
+		return internal.MarshalJSONWithExtraProperty(u.Builtin, "type", "builtin")
+	}
 	if len(u.rawJSON) > 0 {
 		return u.rawJSON, nil
 	}
 	return nil, fmt.Errorf("type %T does not define a non-empty union type", u)
 }
 
-type UpdateSsoConfigurationVisitor interface {
-	VisitOidc(*UpdateOidcSsoConfiguration) error
-	VisitSaml(*UpdateSamlssoConfiguration) error
+type UpdateIdPConfigurationVisitor interface {
+	VisitOidc(*UpdateOidcConfiguration) error
+	VisitSaml(*UpdateSamlConfiguration) error
+	VisitBuiltin(*UpdateBuiltInConfiguration) error
 }
 
-func (u *UpdateSsoConfiguration) Accept(visitor UpdateSsoConfigurationVisitor) error {
+func (u *UpdateIdPConfiguration) Accept(visitor UpdateIdPConfigurationVisitor) error {
 	if u.Oidc != nil {
 		return visitor.VisitOidc(u.Oidc)
 	}
 	if u.Saml != nil {
 		return visitor.VisitSaml(u.Saml)
 	}
+	if u.Builtin != nil {
+		return visitor.VisitBuiltin(u.Builtin)
+	}
 	return fmt.Errorf("type %T does not define a non-empty union type", u)
 }
 
-func (u *UpdateSsoConfiguration) validate() error {
+func (u *UpdateIdPConfiguration) validate() error {
 	if u == nil {
 		return fmt.Errorf("type %T is nil", u)
 	}
@@ -1671,6 +1847,9 @@ func (u *UpdateSsoConfiguration) validate() error {
 	}
 	if u.Saml != nil {
 		fields = append(fields, "saml")
+	}
+	if u.Builtin != nil {
+		fields = append(fields, "builtin")
 	}
 	if len(fields) == 0 {
 		if u.Type != "" {
@@ -1698,22 +1877,20 @@ func (u *UpdateSsoConfiguration) validate() error {
 	return nil
 }
 
-// Request to update an SSO configuration
+// Configuration for an OpenID Connect (OIDC) compliant Identity Provider.
 var (
-	updateSsoRequestFieldFullname  = big.NewInt(1 << 0)
-	updateSsoRequestFieldConfig    = big.NewInt(1 << 1)
-	updateSsoRequestFieldUpdatedAt = big.NewInt(1 << 2)
+	updateOidcConfigurationFieldIssuerUrl    = big.NewInt(1 << 0)
+	updateOidcConfigurationFieldClientId     = big.NewInt(1 << 1)
+	updateOidcConfigurationFieldClientSecret = big.NewInt(1 << 2)
 )
 
-type UpdateSsoRequest struct {
-	// Display name for the configuration, used on authentication screens.
-	// **Note:** To avoid confusion this name must be unique, however it cannot be used
-	// as an identifier in API calls.
-	Fullname string `json:"fullname" url:"fullname"`
-	// Identity provider configuration. The type discriminator determines the SSO provider type.
-	Config *UpdateSsoConfiguration `json:"config" url:"config"`
-	// Used for optimistic locking to prevent concurrent updates.
-	UpdatedAt *time.Time `json:"updated_at,omitempty" url:"updated_at,omitempty"`
+type UpdateOidcConfiguration struct {
+	// Issuer URL used to automatically obtain the OpenID Connect discovery document.
+	IssuerUrl string `json:"issuer_url" url:"issuer_url"`
+	// Client ID registered with the identity provider.
+	ClientId string `json:"client_id" url:"client_id"`
+	// Client secret. Include only when rotating the secret.
+	ClientSecret *string `json:"client_secret,omitempty" url:"client_secret,omitempty"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -1722,75 +1899,69 @@ type UpdateSsoRequest struct {
 	rawJSON         json.RawMessage
 }
 
-func (u *UpdateSsoRequest) GetFullname() string {
+func (u *UpdateOidcConfiguration) GetIssuerUrl() string {
 	if u == nil {
 		return ""
 	}
-	return u.Fullname
+	return u.IssuerUrl
 }
 
-func (u *UpdateSsoRequest) GetConfig() *UpdateSsoConfiguration {
+func (u *UpdateOidcConfiguration) GetClientId() string {
+	if u == nil {
+		return ""
+	}
+	return u.ClientId
+}
+
+func (u *UpdateOidcConfiguration) GetClientSecret() *string {
 	if u == nil {
 		return nil
 	}
-	return u.Config
+	return u.ClientSecret
 }
 
-func (u *UpdateSsoRequest) GetUpdatedAt() *time.Time {
-	if u == nil {
-		return nil
-	}
-	return u.UpdatedAt
-}
-
-func (u *UpdateSsoRequest) GetExtraProperties() map[string]interface{} {
+func (u *UpdateOidcConfiguration) GetExtraProperties() map[string]interface{} {
 	if u == nil {
 		return nil
 	}
 	return u.extraProperties
 }
 
-func (u *UpdateSsoRequest) require(field *big.Int) {
+func (u *UpdateOidcConfiguration) require(field *big.Int) {
 	if u.explicitFields == nil {
 		u.explicitFields = big.NewInt(0)
 	}
 	u.explicitFields.Or(u.explicitFields, field)
 }
 
-// SetFullname sets the Fullname field and marks it as non-optional;
+// SetIssuerUrl sets the IssuerUrl field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (u *UpdateSsoRequest) SetFullname(fullname string) {
-	u.Fullname = fullname
-	u.require(updateSsoRequestFieldFullname)
+func (u *UpdateOidcConfiguration) SetIssuerUrl(issuerUrl string) {
+	u.IssuerUrl = issuerUrl
+	u.require(updateOidcConfigurationFieldIssuerUrl)
 }
 
-// SetConfig sets the Config field and marks it as non-optional;
+// SetClientId sets the ClientId field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (u *UpdateSsoRequest) SetConfig(config *UpdateSsoConfiguration) {
-	u.Config = config
-	u.require(updateSsoRequestFieldConfig)
+func (u *UpdateOidcConfiguration) SetClientId(clientId string) {
+	u.ClientId = clientId
+	u.require(updateOidcConfigurationFieldClientId)
 }
 
-// SetUpdatedAt sets the UpdatedAt field and marks it as non-optional;
+// SetClientSecret sets the ClientSecret field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (u *UpdateSsoRequest) SetUpdatedAt(updatedAt *time.Time) {
-	u.UpdatedAt = updatedAt
-	u.require(updateSsoRequestFieldUpdatedAt)
+func (u *UpdateOidcConfiguration) SetClientSecret(clientSecret *string) {
+	u.ClientSecret = clientSecret
+	u.require(updateOidcConfigurationFieldClientSecret)
 }
 
-func (u *UpdateSsoRequest) UnmarshalJSON(data []byte) error {
-	type embed UpdateSsoRequest
-	var unmarshaler = struct {
-		embed
-		UpdatedAt *internal.DateTime `json:"updated_at,omitempty"`
-	}{
-		embed: embed(*u),
-	}
-	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+func (u *UpdateOidcConfiguration) UnmarshalJSON(data []byte) error {
+	type unmarshaler UpdateOidcConfiguration
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
 		return err
 	}
-	*u = UpdateSsoRequest(unmarshaler.embed)
-	u.UpdatedAt = unmarshaler.UpdatedAt.TimePtr()
+	*u = UpdateOidcConfiguration(value)
 	extraProperties, err := internal.ExtractExtraProperties(data, *u)
 	if err != nil {
 		return err
@@ -1800,20 +1971,18 @@ func (u *UpdateSsoRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (u *UpdateSsoRequest) MarshalJSON() ([]byte, error) {
-	type embed UpdateSsoRequest
+func (u *UpdateOidcConfiguration) MarshalJSON() ([]byte, error) {
+	type embed UpdateOidcConfiguration
 	var marshaler = struct {
 		embed
-		UpdatedAt *internal.DateTime `json:"updated_at,omitempty"`
 	}{
-		embed:     embed(*u),
-		UpdatedAt: internal.NewOptionalDateTime(u.UpdatedAt),
+		embed: embed(*u),
 	}
 	explicitMarshaler := internal.HandleExplicitFields(marshaler, u.explicitFields)
 	return json.Marshal(explicitMarshaler)
 }
 
-func (u *UpdateSsoRequest) String() string {
+func (u *UpdateOidcConfiguration) String() string {
 	if u == nil {
 		return "<nil>"
 	}
@@ -1828,12 +1997,29 @@ func (u *UpdateSsoRequest) String() string {
 	return fmt.Sprintf("%#v", u)
 }
 
+// Configuration for updating a SAML 2.0 Identity Provider.
 var (
-	updateSsoResponseFieldResult = big.NewInt(1 << 0)
+	updateSamlConfigurationFieldIdpEntityId    = big.NewInt(1 << 0)
+	updateSamlConfigurationFieldIdpSsoUrl      = big.NewInt(1 << 1)
+	updateSamlConfigurationFieldIdpCertificate = big.NewInt(1 << 2)
+	updateSamlConfigurationFieldSpEntityId     = big.NewInt(1 << 3)
+	updateSamlConfigurationFieldIdpMetadataUrl = big.NewInt(1 << 4)
+	updateSamlConfigurationFieldNameIdFormat   = big.NewInt(1 << 5)
 )
 
-type UpdateSsoResponse struct {
-	Result *SsoConfiguration `json:"result" url:"result"`
+type UpdateSamlConfiguration struct {
+	// Entity ID of the SAML Identity Provider.
+	IdpEntityId string `json:"idp_entity_id" url:"idp_entity_id"`
+	// Single Sign-On URL of the SAML Identity Provider (HTTPS required).
+	IdpSsoUrl string `json:"idp_sso_url" url:"idp_sso_url"`
+	// PEM-encoded X.509 certificate. Omit to keep existing certificate.
+	IdpCertificate *string `json:"idp_certificate,omitempty" url:"idp_certificate,omitempty"`
+	// Entity ID of the Service Provider.
+	SpEntityId string `json:"sp_entity_id" url:"sp_entity_id"`
+	// URL to the IdP's SAML metadata document (informational).
+	IdpMetadataUrl *string `json:"idp_metadata_url,omitempty" url:"idp_metadata_url,omitempty"`
+	// NameID format. Defaults to urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress.
+	NameIdFormat *string `json:"name_id_format,omitempty" url:"name_id_format,omitempty"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -1842,41 +2028,111 @@ type UpdateSsoResponse struct {
 	rawJSON         json.RawMessage
 }
 
-func (u *UpdateSsoResponse) GetResult() *SsoConfiguration {
+func (u *UpdateSamlConfiguration) GetIdpEntityId() string {
+	if u == nil {
+		return ""
+	}
+	return u.IdpEntityId
+}
+
+func (u *UpdateSamlConfiguration) GetIdpSsoUrl() string {
+	if u == nil {
+		return ""
+	}
+	return u.IdpSsoUrl
+}
+
+func (u *UpdateSamlConfiguration) GetIdpCertificate() *string {
 	if u == nil {
 		return nil
 	}
-	return u.Result
+	return u.IdpCertificate
 }
 
-func (u *UpdateSsoResponse) GetExtraProperties() map[string]interface{} {
+func (u *UpdateSamlConfiguration) GetSpEntityId() string {
+	if u == nil {
+		return ""
+	}
+	return u.SpEntityId
+}
+
+func (u *UpdateSamlConfiguration) GetIdpMetadataUrl() *string {
+	if u == nil {
+		return nil
+	}
+	return u.IdpMetadataUrl
+}
+
+func (u *UpdateSamlConfiguration) GetNameIdFormat() *string {
+	if u == nil {
+		return nil
+	}
+	return u.NameIdFormat
+}
+
+func (u *UpdateSamlConfiguration) GetExtraProperties() map[string]interface{} {
 	if u == nil {
 		return nil
 	}
 	return u.extraProperties
 }
 
-func (u *UpdateSsoResponse) require(field *big.Int) {
+func (u *UpdateSamlConfiguration) require(field *big.Int) {
 	if u.explicitFields == nil {
 		u.explicitFields = big.NewInt(0)
 	}
 	u.explicitFields.Or(u.explicitFields, field)
 }
 
-// SetResult sets the Result field and marks it as non-optional;
+// SetIdpEntityId sets the IdpEntityId field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (u *UpdateSsoResponse) SetResult(result *SsoConfiguration) {
-	u.Result = result
-	u.require(updateSsoResponseFieldResult)
+func (u *UpdateSamlConfiguration) SetIdpEntityId(idpEntityId string) {
+	u.IdpEntityId = idpEntityId
+	u.require(updateSamlConfigurationFieldIdpEntityId)
 }
 
-func (u *UpdateSsoResponse) UnmarshalJSON(data []byte) error {
-	type unmarshaler UpdateSsoResponse
+// SetIdpSsoUrl sets the IdpSsoUrl field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (u *UpdateSamlConfiguration) SetIdpSsoUrl(idpSsoUrl string) {
+	u.IdpSsoUrl = idpSsoUrl
+	u.require(updateSamlConfigurationFieldIdpSsoUrl)
+}
+
+// SetIdpCertificate sets the IdpCertificate field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (u *UpdateSamlConfiguration) SetIdpCertificate(idpCertificate *string) {
+	u.IdpCertificate = idpCertificate
+	u.require(updateSamlConfigurationFieldIdpCertificate)
+}
+
+// SetSpEntityId sets the SpEntityId field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (u *UpdateSamlConfiguration) SetSpEntityId(spEntityId string) {
+	u.SpEntityId = spEntityId
+	u.require(updateSamlConfigurationFieldSpEntityId)
+}
+
+// SetIdpMetadataUrl sets the IdpMetadataUrl field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (u *UpdateSamlConfiguration) SetIdpMetadataUrl(idpMetadataUrl *string) {
+	u.IdpMetadataUrl = idpMetadataUrl
+	u.require(updateSamlConfigurationFieldIdpMetadataUrl)
+}
+
+// SetNameIdFormat sets the NameIdFormat field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (u *UpdateSamlConfiguration) SetNameIdFormat(nameIdFormat *string) {
+	u.NameIdFormat = nameIdFormat
+	u.require(updateSamlConfigurationFieldNameIdFormat)
+}
+
+func (u *UpdateSamlConfiguration) UnmarshalJSON(data []byte) error {
+	type unmarshaler UpdateSamlConfiguration
 	var value unmarshaler
 	if err := json.Unmarshal(data, &value); err != nil {
 		return err
 	}
-	*u = UpdateSsoResponse(value)
+	*u = UpdateSamlConfiguration(value)
 	extraProperties, err := internal.ExtractExtraProperties(data, *u)
 	if err != nil {
 		return err
@@ -1886,8 +2142,8 @@ func (u *UpdateSsoResponse) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (u *UpdateSsoResponse) MarshalJSON() ([]byte, error) {
-	type embed UpdateSsoResponse
+func (u *UpdateSamlConfiguration) MarshalJSON() ([]byte, error) {
+	type embed UpdateSamlConfiguration
 	var marshaler = struct {
 		embed
 	}{
@@ -1897,7 +2153,7 @@ func (u *UpdateSsoResponse) MarshalJSON() ([]byte, error) {
 	return json.Marshal(explicitMarshaler)
 }
 
-func (u *UpdateSsoResponse) String() string {
+func (u *UpdateSamlConfiguration) String() string {
 	if u == nil {
 		return "<nil>"
 	}
