@@ -21124,16 +21124,22 @@ func (n *NetworkSecurityAzure) String() string {
 // [Configuration guide](https://docs.synqly.com/guides/provider-configuration/google-networksecurity-setup)
 var (
 	networkSecurityGoogleFieldCredential                 = big.NewInt(1 << 0)
-	networkSecurityGoogleFieldProjectId                  = big.NewInt(1 << 1)
-	networkSecurityGoogleFieldTrafficLogConfigurationIds = big.NewInt(1 << 2)
+	networkSecurityGoogleFieldDnsLogConfigurationIds     = big.NewInt(1 << 1)
+	networkSecurityGoogleFieldLogResourceNames           = big.NewInt(1 << 2)
+	networkSecurityGoogleFieldProjectId                  = big.NewInt(1 << 3)
+	networkSecurityGoogleFieldTrafficLogConfigurationIds = big.NewInt(1 << 4)
 )
 
 type NetworkSecurityGoogle struct {
 	// Service account credentials with sufficient access.
 	Credential *GoogleServiceAccountCredential `json:"credential" url:"credential"`
-	// Google Cloud project that contains your VPC flow logs.
+	// Optional list of DNS logging to read. Leave empty to include all DNS logging in the project.
+	DnsLogConfigurationIds []string `json:"dns_log_configuration_ids,omitempty" url:"dns_log_configuration_ids,omitempty"`
+	// Projects or log buckets to read VPC flow and DNS logs from. Each entry is a Log Router sink destination, a project, or a log bucket view.
+	LogResourceNames []string `json:"log_resource_names,omitempty" url:"log_resource_names,omitempty"`
+	// The ID of the Google Cloud project to read from.
 	ProjectId string `json:"project_id" url:"project_id"`
-	// Optional list of VPC flow log configuration IDs. Leave empty to include all configurations in the project.
+	// Optional list of VPC flow logs to read from. Leave empty to include all flow log configurations in the project.
 	TrafficLogConfigurationIds []string `json:"traffic_log_configuration_ids,omitempty" url:"traffic_log_configuration_ids,omitempty"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
@@ -21148,6 +21154,20 @@ func (n *NetworkSecurityGoogle) GetCredential() *GoogleServiceAccountCredential 
 		return nil
 	}
 	return n.Credential
+}
+
+func (n *NetworkSecurityGoogle) GetDnsLogConfigurationIds() []string {
+	if n == nil {
+		return nil
+	}
+	return n.DnsLogConfigurationIds
+}
+
+func (n *NetworkSecurityGoogle) GetLogResourceNames() []string {
+	if n == nil {
+		return nil
+	}
+	return n.LogResourceNames
 }
 
 func (n *NetworkSecurityGoogle) GetProjectId() string {
@@ -21183,6 +21203,20 @@ func (n *NetworkSecurityGoogle) require(field *big.Int) {
 func (n *NetworkSecurityGoogle) SetCredential(credential *GoogleServiceAccountCredential) {
 	n.Credential = credential
 	n.require(networkSecurityGoogleFieldCredential)
+}
+
+// SetDnsLogConfigurationIds sets the DnsLogConfigurationIds field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (n *NetworkSecurityGoogle) SetDnsLogConfigurationIds(dnsLogConfigurationIds []string) {
+	n.DnsLogConfigurationIds = dnsLogConfigurationIds
+	n.require(networkSecurityGoogleFieldDnsLogConfigurationIds)
+}
+
+// SetLogResourceNames sets the LogResourceNames field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (n *NetworkSecurityGoogle) SetLogResourceNames(logResourceNames []string) {
+	n.LogResourceNames = logResourceNames
+	n.require(networkSecurityGoogleFieldLogResourceNames)
 }
 
 // SetProjectId sets the ProjectId field and marks it as non-optional;
