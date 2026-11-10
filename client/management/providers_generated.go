@@ -4777,10 +4777,12 @@ func (a *AzureBlobCredential) validate() error {
 type AzureCloud string
 
 const (
-	// Azure public cloud (ARM https://management.azure.com).
+	// Azure public cloud.
 	AzureCloudPublic AzureCloud = "public"
-	// Azure Government (ARM https://management.usgovcloudapi.net).
+	// Azure Government, with a GCC High Microsoft 365 tenant.
 	AzureCloudGovernment AzureCloud = "government"
+	// Azure Government, with a DoD Microsoft 365 tenant.
+	AzureCloudDod AzureCloud = "dod"
 )
 
 func NewAzureCloudFromString(s string) (AzureCloud, error) {
@@ -4789,6 +4791,8 @@ func NewAzureCloudFromString(s string) (AzureCloud, error) {
 		return AzureCloudPublic, nil
 	case "government":
 		return AzureCloudGovernment, nil
+	case "dod":
+		return AzureCloudDod, nil
 	}
 	var t AzureCloud
 	return "", fmt.Errorf("%s is not a valid %T", s, t)
@@ -20959,7 +20963,7 @@ var (
 )
 
 type NetworkSecurityAzure struct {
-	// Which Microsoft cloud to use: `public` (default) or `government`.
+	// Which Microsoft cloud to use: `public` (default), `government` or `dod`. `government` and `dod` both use Azure Government.
 	AzureCloud *AzureCloud `json:"azure_cloud,omitempty" url:"azure_cloud,omitempty"`
 	// Client ID and secret for the Entra app.
 	Credential *AzureNetworkSecurityCredential `json:"credential" url:"credential"`
@@ -31990,21 +31994,24 @@ func (s *SiemRapid7InsightIdr) String() string {
 //
 // [Configuration guide](https://docs.synqly.com/guides/provider-configuration/microsoft-sentinel-siem-setup)
 var (
-	siemSentinelFieldCredential     = big.NewInt(1 << 0)
-	siemSentinelFieldDefaultTables  = big.NewInt(1 << 1)
-	siemSentinelFieldIngestUrl      = big.NewInt(1 << 2)
-	siemSentinelFieldLogsUrl        = big.NewInt(1 << 3)
-	siemSentinelFieldManagementUrl  = big.NewInt(1 << 4)
-	siemSentinelFieldResourceGroup  = big.NewInt(1 << 5)
-	siemSentinelFieldRuleId         = big.NewInt(1 << 6)
-	siemSentinelFieldStreamName     = big.NewInt(1 << 7)
-	siemSentinelFieldSubscriptionId = big.NewInt(1 << 8)
-	siemSentinelFieldTenantId       = big.NewInt(1 << 9)
-	siemSentinelFieldWorkspaceId    = big.NewInt(1 << 10)
-	siemSentinelFieldWorkspaceName  = big.NewInt(1 << 11)
+	siemSentinelFieldAzureCloud     = big.NewInt(1 << 0)
+	siemSentinelFieldCredential     = big.NewInt(1 << 1)
+	siemSentinelFieldDefaultTables  = big.NewInt(1 << 2)
+	siemSentinelFieldIngestUrl      = big.NewInt(1 << 3)
+	siemSentinelFieldLogsUrl        = big.NewInt(1 << 4)
+	siemSentinelFieldManagementUrl  = big.NewInt(1 << 5)
+	siemSentinelFieldResourceGroup  = big.NewInt(1 << 6)
+	siemSentinelFieldRuleId         = big.NewInt(1 << 7)
+	siemSentinelFieldStreamName     = big.NewInt(1 << 8)
+	siemSentinelFieldSubscriptionId = big.NewInt(1 << 9)
+	siemSentinelFieldTenantId       = big.NewInt(1 << 10)
+	siemSentinelFieldWorkspaceId    = big.NewInt(1 << 11)
+	siemSentinelFieldWorkspaceName  = big.NewInt(1 << 12)
 )
 
 type SiemSentinel struct {
+	// Which Microsoft cloud the workspace is in: `public` (default), `government` for Azure Government with a GCC High tenant, or `dod` for Azure Government with a DoD tenant.
+	AzureCloud *AzureCloud         `json:"azure_cloud,omitempty" url:"azure_cloud,omitempty"`
 	Credential *SentinelCredential `json:"credential" url:"credential"`
 	// The default tables to use for queries. Supply this value if you would like to a subset of the default tables or non-ASIM data tables with Sentinel/Log Analytics queries.
 	// If more than one table is specified, a union operator will join them to query all of the tables at once. Supply a single value with `*` if you would like to query all tables without the normalizing ASIM transformations.
@@ -32012,9 +32019,9 @@ type SiemSentinel struct {
 	DefaultTables []string `json:"default_tables,omitempty" url:"default_tables,omitempty"`
 	// Either the logs ingestion API url for you Data Collection Rule or your Data Collection Endpoint URL. This value must be supplied to ingest data into Microsoft Sentinel. This should look something like https://mydcr-xxx-westus2.logs.z1.ingest.monitor.azure.com
 	IngestUrl *string `json:"ingest_url,omitempty" url:"ingest_url,omitempty"`
-	// Base URL for the Microsoft Azure Monitor Logs API. Should only be supplied if using an alternate Microsoft cloud, such as GovCloud.
+	// Base URL override for the Microsoft Azure Monitor Logs API, for custom or proxied environments. Must be in the same Microsoft cloud as Azure Cloud.
 	LogsUrl *string `json:"logs_url,omitempty" url:"logs_url,omitempty"`
-	// Base URL for the Microsoft Azure Management API. Should only be supplied if using an alternate Microsoft cloud, such as GovCloud.
+	// Base URL override for the Microsoft Azure Management API, for custom or proxied environments. Must be in the same Microsoft cloud as Azure Cloud.
 	ManagementUrl *string `json:"management_url,omitempty" url:"management_url,omitempty"`
 	// Azure resource group name that contains the Microsoft Sentinel workspace.
 	ResourceGroup string `json:"resource_group" url:"resource_group"`
@@ -32036,6 +32043,13 @@ type SiemSentinel struct {
 
 	extraProperties map[string]interface{}
 	rawJSON         json.RawMessage
+}
+
+func (s *SiemSentinel) GetAzureCloud() *AzureCloud {
+	if s == nil {
+		return nil
+	}
+	return s.AzureCloud
 }
 
 func (s *SiemSentinel) GetCredential() *SentinelCredential {
@@ -32134,6 +32148,13 @@ func (s *SiemSentinel) require(field *big.Int) {
 		s.explicitFields = big.NewInt(0)
 	}
 	s.explicitFields.Or(s.explicitFields, field)
+}
+
+// SetAzureCloud sets the AzureCloud field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (s *SiemSentinel) SetAzureCloud(azureCloud *AzureCloud) {
+	s.AzureCloud = azureCloud
+	s.require(siemSentinelFieldAzureCloud)
 }
 
 // SetCredential sets the Credential field and marks it as non-optional;
@@ -34476,15 +34497,18 @@ func (s *SinkAzureBlob) String() string {
 //
 // [Configuration guide](https://docs.synqly.com/guides/provider-configuration/azure-monitor-logs)
 var (
-	sinkAzureMonitorLogsFieldClientId   = big.NewInt(1 << 0)
-	sinkAzureMonitorLogsFieldCredential = big.NewInt(1 << 1)
-	sinkAzureMonitorLogsFieldRuleId     = big.NewInt(1 << 2)
-	sinkAzureMonitorLogsFieldStreamName = big.NewInt(1 << 3)
-	sinkAzureMonitorLogsFieldTenantId   = big.NewInt(1 << 4)
-	sinkAzureMonitorLogsFieldUrl        = big.NewInt(1 << 5)
+	sinkAzureMonitorLogsFieldAzureCloud = big.NewInt(1 << 0)
+	sinkAzureMonitorLogsFieldClientId   = big.NewInt(1 << 1)
+	sinkAzureMonitorLogsFieldCredential = big.NewInt(1 << 2)
+	sinkAzureMonitorLogsFieldRuleId     = big.NewInt(1 << 3)
+	sinkAzureMonitorLogsFieldStreamName = big.NewInt(1 << 4)
+	sinkAzureMonitorLogsFieldTenantId   = big.NewInt(1 << 5)
+	sinkAzureMonitorLogsFieldUrl        = big.NewInt(1 << 6)
 )
 
 type SinkAzureMonitorLogs struct {
+	// Which Microsoft cloud the data collection endpoint is in: `public` (default), or `government` for Azure Government. `dod` behaves the same as `government`.
+	AzureCloud *AzureCloud `json:"azure_cloud,omitempty" url:"azure_cloud,omitempty"`
 	// Azure Client (Application) ID.
 	ClientId string `json:"client_id" url:"client_id"`
 	// Credential with access to the configured data collection endpoint.
@@ -34503,6 +34527,13 @@ type SinkAzureMonitorLogs struct {
 
 	extraProperties map[string]interface{}
 	rawJSON         json.RawMessage
+}
+
+func (s *SinkAzureMonitorLogs) GetAzureCloud() *AzureCloud {
+	if s == nil {
+		return nil
+	}
+	return s.AzureCloud
 }
 
 func (s *SinkAzureMonitorLogs) GetClientId() string {
@@ -34559,6 +34590,13 @@ func (s *SinkAzureMonitorLogs) require(field *big.Int) {
 		s.explicitFields = big.NewInt(0)
 	}
 	s.explicitFields.Or(s.explicitFields, field)
+}
+
+// SetAzureCloud sets the AzureCloud field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (s *SinkAzureMonitorLogs) SetAzureCloud(azureCloud *AzureCloud) {
+	s.AzureCloud = azureCloud
+	s.require(sinkAzureMonitorLogsFieldAzureCloud)
 }
 
 // SetClientId sets the ClientId field and marks it as non-optional;
