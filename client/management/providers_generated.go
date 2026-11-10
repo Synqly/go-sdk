@@ -7541,6 +7541,125 @@ func (c *CloudSecuritySentinelOne) String() string {
 	return fmt.Sprintf("%#v", c)
 }
 
+// Configuration for the Tenable Cloud Security provider.
+var (
+	cloudSecurityTenableFieldCredential = big.NewInt(1 << 0)
+	cloudSecurityTenableFieldRegion     = big.NewInt(1 << 1)
+	cloudSecurityTenableFieldUrl        = big.NewInt(1 << 2)
+)
+
+type CloudSecurityTenable struct {
+	Credential *TenableCloudSecurityCredential `json:"credential" url:"credential"`
+	// Region of the Tenable Cloud Security tenant.
+	Region *TenableCloudSecurityRegion `json:"region,omitempty" url:"region,omitempty"`
+	// Base URL override for custom or proxied environments. When set, the region field is ignored.
+	Url *string `json:"url,omitempty" url:"url,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (c *CloudSecurityTenable) GetCredential() *TenableCloudSecurityCredential {
+	if c == nil {
+		return nil
+	}
+	return c.Credential
+}
+
+func (c *CloudSecurityTenable) GetRegion() *TenableCloudSecurityRegion {
+	if c == nil {
+		return nil
+	}
+	return c.Region
+}
+
+func (c *CloudSecurityTenable) GetUrl() *string {
+	if c == nil {
+		return nil
+	}
+	return c.Url
+}
+
+func (c *CloudSecurityTenable) GetExtraProperties() map[string]interface{} {
+	if c == nil {
+		return nil
+	}
+	return c.extraProperties
+}
+
+func (c *CloudSecurityTenable) require(field *big.Int) {
+	if c.explicitFields == nil {
+		c.explicitFields = big.NewInt(0)
+	}
+	c.explicitFields.Or(c.explicitFields, field)
+}
+
+// SetCredential sets the Credential field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CloudSecurityTenable) SetCredential(credential *TenableCloudSecurityCredential) {
+	c.Credential = credential
+	c.require(cloudSecurityTenableFieldCredential)
+}
+
+// SetRegion sets the Region field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CloudSecurityTenable) SetRegion(region *TenableCloudSecurityRegion) {
+	c.Region = region
+	c.require(cloudSecurityTenableFieldRegion)
+}
+
+// SetUrl sets the Url field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CloudSecurityTenable) SetUrl(url *string) {
+	c.Url = url
+	c.require(cloudSecurityTenableFieldUrl)
+}
+
+func (c *CloudSecurityTenable) UnmarshalJSON(data []byte) error {
+	type unmarshaler CloudSecurityTenable
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = CloudSecurityTenable(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+	c.rawJSON = nil
+	return nil
+}
+
+func (c *CloudSecurityTenable) MarshalJSON() ([]byte, error) {
+	type embed CloudSecurityTenable
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*c),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, c.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (c *CloudSecurityTenable) String() string {
+	if c == nil {
+		return "<nil>"
+	}
+	if len(c.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(c.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
 // Configuration for the Upwind Cloud Security provider.
 //
 // [Configuration guide](https://docs.synqly.com/guides/provider-configuration/upwind-setup)
@@ -24381,6 +24500,8 @@ type ProviderConfig struct {
 	CloudsecurityPaloalto *CloudSecurityPaloAlto
 	// Configuration for the SentinelOne Singularity Cloud Native Security Provider
 	CloudsecuritySentinelone *CloudSecuritySentinelOne
+	// Configuration for the Tenable Cloud Security provider.
+	CloudsecurityTenable *CloudSecurityTenable
 	// Configuration for the Upwind Cloud Security provider.
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/upwind-setup)
@@ -25211,6 +25332,13 @@ func (p *ProviderConfig) GetCloudsecuritySentinelone() *CloudSecuritySentinelOne
 		return nil
 	}
 	return p.CloudsecuritySentinelone
+}
+
+func (p *ProviderConfig) GetCloudsecurityTenable() *CloudSecurityTenable {
+	if p == nil {
+		return nil
+	}
+	return p.CloudsecurityTenable
 }
 
 func (p *ProviderConfig) GetCloudsecurityUpwind() *CloudSecurityUpwind {
@@ -26507,6 +26635,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.CloudsecuritySentinelone = value
+	case "cloudsecurity_tenable":
+		value := new(CloudSecurityTenable)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.CloudsecurityTenable = value
 	case "cloudsecurity_upwind":
 		value := new(CloudSecurityUpwind)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -27512,6 +27646,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.CloudsecuritySentinelone != nil {
 		return internal.MarshalJSONWithExtraProperty(p.CloudsecuritySentinelone, "type", "cloudsecurity_sentinelone")
 	}
+	if p.CloudsecurityTenable != nil {
+		return internal.MarshalJSONWithExtraProperty(p.CloudsecurityTenable, "type", "cloudsecurity_tenable")
+	}
 	if p.CloudsecurityUpwind != nil {
 		return internal.MarshalJSONWithExtraProperty(p.CloudsecurityUpwind, "type", "cloudsecurity_upwind")
 	}
@@ -27993,6 +28130,7 @@ type ProviderConfigVisitor interface {
 	VisitCloudsecurityOrca(*CloudSecurityOrca) error
 	VisitCloudsecurityPaloalto(*CloudSecurityPaloAlto) error
 	VisitCloudsecuritySentinelone(*CloudSecuritySentinelOne) error
+	VisitCloudsecurityTenable(*CloudSecurityTenable) error
 	VisitCloudsecurityUpwind(*CloudSecurityUpwind) error
 	VisitCloudsecurityWiz(*CloudSecurityWiz) error
 	VisitCustomSynqly(*CustomSynqly) error
@@ -28281,6 +28419,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.CloudsecuritySentinelone != nil {
 		return visitor.VisitCloudsecuritySentinelone(p.CloudsecuritySentinelone)
+	}
+	if p.CloudsecurityTenable != nil {
+		return visitor.VisitCloudsecurityTenable(p.CloudsecurityTenable)
 	}
 	if p.CloudsecurityUpwind != nil {
 		return visitor.VisitCloudsecurityUpwind(p.CloudsecurityUpwind)
@@ -28860,6 +29001,9 @@ func (p *ProviderConfig) validate() error {
 	if p.CloudsecuritySentinelone != nil {
 		fields = append(fields, "cloudsecurity_sentinelone")
 	}
+	if p.CloudsecurityTenable != nil {
+		fields = append(fields, "cloudsecurity_tenable")
+	}
 	if p.CloudsecurityUpwind != nil {
 		fields = append(fields, "cloudsecurity_upwind")
 	}
@@ -29412,6 +29556,8 @@ const (
 	ProviderConfigIdCloudSecurityPaloAlto ProviderConfigId = "cloudsecurity_paloalto"
 	// SentinelOne Singularity™ Cloud Native Security
 	ProviderConfigIdCloudSecuritySentinelOne ProviderConfigId = "cloudsecurity_sentinelone"
+	// Tenable Cloud Security
+	ProviderConfigIdCloudSecurityTenable ProviderConfigId = "cloudsecurity_tenable"
 	// Upwind Cloud Security
 	ProviderConfigIdCloudSecurityUpwind ProviderConfigId = "cloudsecurity_upwind"
 	// Wiz
@@ -29798,6 +29944,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdCloudSecurityPaloAlto, nil
 	case "cloudsecurity_sentinelone":
 		return ProviderConfigIdCloudSecuritySentinelOne, nil
+	case "cloudsecurity_tenable":
+		return ProviderConfigIdCloudSecurityTenable, nil
 	case "cloudsecurity_upwind":
 		return ProviderConfigIdCloudSecurityUpwind, nil
 	case "cloudsecurity_wiz":
@@ -39282,6 +39430,167 @@ func (t *TenableCloudCredential) validate() error {
 		}
 	}
 	return nil
+}
+
+type TenableCloudSecurityCredential struct {
+	Type string
+	// Configuration when creating new Service Account Secret.
+	Token *TokenCredential
+	// Reference to existing Service Account Secret.
+	TokenId TokenCredentialId
+
+	rawJSON json.RawMessage
+}
+
+func (t *TenableCloudSecurityCredential) GetType() string {
+	if t == nil {
+		return ""
+	}
+	return t.Type
+}
+
+func (t *TenableCloudSecurityCredential) GetToken() *TokenCredential {
+	if t == nil {
+		return nil
+	}
+	return t.Token
+}
+
+func (t *TenableCloudSecurityCredential) GetTokenId() TokenCredentialId {
+	if t == nil {
+		return ""
+	}
+	return t.TokenId
+}
+
+func (t *TenableCloudSecurityCredential) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	t.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", t)
+	}
+	switch unmarshaler.Type {
+	case "token":
+		value := new(TokenCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		t.Token = value
+	case "token_id":
+		var valueUnmarshaler struct {
+			TokenId TokenCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		t.TokenId = valueUnmarshaler.TokenId
+	}
+	t.rawJSON = nil
+	return nil
+}
+
+func (t TenableCloudSecurityCredential) MarshalJSON() ([]byte, error) {
+	if err := t.validate(); err != nil {
+		return nil, err
+	}
+	if t.Token != nil {
+		return internal.MarshalJSONWithExtraProperty(t.Token, "type", "token")
+	}
+	if t.TokenId != "" {
+		var marshaler = struct {
+			Type    string            `json:"type"`
+			TokenId TokenCredentialId `json:"value"`
+		}{
+			Type:    "token_id",
+			TokenId: t.TokenId,
+		}
+		return json.Marshal(marshaler)
+	}
+	if len(t.rawJSON) > 0 {
+		return t.rawJSON, nil
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", t)
+}
+
+type TenableCloudSecurityCredentialVisitor interface {
+	VisitToken(*TokenCredential) error
+	VisitTokenId(TokenCredentialId) error
+}
+
+func (t *TenableCloudSecurityCredential) Accept(visitor TenableCloudSecurityCredentialVisitor) error {
+	if t.Token != nil {
+		return visitor.VisitToken(t.Token)
+	}
+	if t.TokenId != "" {
+		return visitor.VisitTokenId(t.TokenId)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", t)
+}
+
+func (t *TenableCloudSecurityCredential) validate() error {
+	if t == nil {
+		return fmt.Errorf("type %T is nil", t)
+	}
+	var fields []string
+	if t.Token != nil {
+		fields = append(fields, "token")
+	}
+	if t.TokenId != "" {
+		fields = append(fields, "token_id")
+	}
+	if len(fields) == 0 {
+		if t.Type != "" {
+			if len(t.rawJSON) > 0 {
+				return nil
+			}
+			return fmt.Errorf("type %T defines a discriminant set to %q but the field is not set", t, t.Type)
+		}
+		return fmt.Errorf("type %T is empty", t)
+	}
+	if len(fields) > 1 {
+		return fmt.Errorf("type %T defines values for %s, but only one value is allowed", t, fields)
+	}
+	if t.Type != "" {
+		field := fields[0]
+		if t.Type != field {
+			return fmt.Errorf(
+				"type %T defines a discriminant set to %q, but it does not match the %T field; either remove or update the discriminant to match",
+				t,
+				t.Type,
+				t,
+			)
+		}
+	}
+	return nil
+}
+
+type TenableCloudSecurityRegion string
+
+const (
+	// Global region.
+	TenableCloudSecurityRegionGlobal TenableCloudSecurityRegion = "global"
+	// United States Government region.
+	TenableCloudSecurityRegionUsGov TenableCloudSecurityRegion = "us_gov"
+)
+
+func NewTenableCloudSecurityRegionFromString(s string) (TenableCloudSecurityRegion, error) {
+	switch s {
+	case "global":
+		return TenableCloudSecurityRegionGlobal, nil
+	case "us_gov":
+		return TenableCloudSecurityRegionUsGov, nil
+	}
+	var t TenableCloudSecurityRegion
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (t TenableCloudSecurityRegion) Ptr() *TenableCloudSecurityRegion {
+	return &t
 }
 
 type TenableScCredential struct {
