@@ -1389,6 +1389,31 @@ func (c *CredentialConfigNoSecret) String() string {
 // Unique identifier for this Credential
 type CredentialId = Id
 
+// What a credential is for. Set by Synqly when the credential is created and never changed afterwards.
+type CredentialKind string
+
+const (
+	// An ordinary credential, holding a secret used to reach a provider.
+	CredentialKindDefault CredentialKind = "default"
+	// An SSF signing key. Synqly generates the key, publishes its public half in the integration's key set, and signs Security Event Tokens with it. It is not a provider credential and is not named by any provider configuration.
+	CredentialKindSsf CredentialKind = "ssf"
+)
+
+func NewCredentialKindFromString(s string) (CredentialKind, error) {
+	switch s {
+	case "default":
+		return CredentialKindDefault, nil
+	case "ssf":
+		return CredentialKindSsf, nil
+	}
+	var t CredentialKind
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (c CredentialKind) Ptr() *CredentialKind {
+	return &c
+}
+
 // Response object for a Credential
 var (
 	credentialResponseFieldName                  = big.NewInt(1 << 0)
@@ -1404,6 +1429,7 @@ var (
 	credentialResponseFieldConfig                = big.NewInt(1 << 10)
 	credentialResponseFieldExpires               = big.NewInt(1 << 11)
 	credentialResponseFieldManaged               = big.NewInt(1 << 12)
+	credentialResponseFieldKind                  = big.NewInt(1 << 13)
 )
 
 type CredentialResponse struct {
@@ -1431,6 +1457,8 @@ type CredentialResponse struct {
 	Expires *time.Time `json:"expires,omitempty" url:"expires,omitempty"`
 	// Field is set by the management process. Determines lifecycle and ownership of the credential.
 	Managed ManagedType `json:"managed" url:"managed"`
+	// What the credential is for. Read only - it is set when the credential is created and cannot be changed.
+	Kind CredentialKind `json:"kind" url:"kind"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -1528,6 +1556,13 @@ func (c *CredentialResponse) GetManaged() ManagedType {
 		return ""
 	}
 	return c.Managed
+}
+
+func (c *CredentialResponse) GetKind() CredentialKind {
+	if c == nil {
+		return ""
+	}
+	return c.Kind
 }
 
 func (c *CredentialResponse) GetExtraProperties() map[string]interface{} {
@@ -1633,6 +1668,13 @@ func (c *CredentialResponse) SetExpires(expires *time.Time) {
 func (c *CredentialResponse) SetManaged(managed ManagedType) {
 	c.Managed = managed
 	c.require(credentialResponseFieldManaged)
+}
+
+// SetKind sets the Kind field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CredentialResponse) SetKind(kind CredentialKind) {
+	c.Kind = kind
+	c.require(credentialResponseFieldKind)
 }
 
 func (c *CredentialResponse) UnmarshalJSON(data []byte) error {

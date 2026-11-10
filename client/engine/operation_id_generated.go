@@ -137,6 +137,9 @@ const (
 	OperationIdSiemQueryLogProviders                            OperationId = "siem_query_log_providers"
 	OperationIdSiemUpdateAlert                                  OperationId = "siem_update_alert"
 	OperationIdSinkPostEvents                                   OperationId = "sink_post_events"
+	OperationIdSsfGetTransmitterUrls                            OperationId = "ssf_get_transmitter_urls"
+	OperationIdSsfJwks                                          OperationId = "ssf_jwks"
+	OperationIdSsfPostEvent                                     OperationId = "ssf_post_event"
 	OperationIdStorageDeleteFile                                OperationId = "storage_delete_file"
 	OperationIdStorageDownloadFile                              OperationId = "storage_download_file"
 	OperationIdStorageListFiles                                 OperationId = "storage_list_files"
@@ -439,6 +442,12 @@ func NewOperationIdFromString(s string) (OperationId, error) {
 		return OperationIdSiemUpdateAlert, nil
 	case "sink_post_events":
 		return OperationIdSinkPostEvents, nil
+	case "ssf_get_transmitter_urls":
+		return OperationIdSsfGetTransmitterUrls, nil
+	case "ssf_jwks":
+		return OperationIdSsfJwks, nil
+	case "ssf_post_event":
+		return OperationIdSsfPostEvent, nil
 	case "storage_delete_file":
 		return OperationIdStorageDeleteFile, nil
 	case "storage_download_file":
