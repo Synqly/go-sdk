@@ -11263,6 +11263,7 @@ var (
 	edrTrellixFieldApiKey     = big.NewInt(1 << 0)
 	edrTrellixFieldCredential = big.NewInt(1 << 1)
 	edrTrellixFieldTenantId   = big.NewInt(1 << 2)
+	edrTrellixFieldUrl        = big.NewInt(1 << 3)
 )
 
 type EdrTrellix struct {
@@ -11272,6 +11273,8 @@ type EdrTrellix struct {
 	Credential *TrellixCredential `json:"credential" url:"credential"`
 	// Trellix tenant GUID for the customer tenancy you want to query.
 	TenantId string `json:"tenant_id" url:"tenant_id"`
+	// Base URL override for the Trellix ePO API. Only required for custom or proxied environments.
+	Url *string `json:"url,omitempty" url:"url,omitempty"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -11299,6 +11302,13 @@ func (e *EdrTrellix) GetTenantId() string {
 		return ""
 	}
 	return e.TenantId
+}
+
+func (e *EdrTrellix) GetUrl() *string {
+	if e == nil {
+		return nil
+	}
+	return e.Url
 }
 
 func (e *EdrTrellix) GetExtraProperties() map[string]interface{} {
@@ -11334,6 +11344,13 @@ func (e *EdrTrellix) SetCredential(credential *TrellixCredential) {
 func (e *EdrTrellix) SetTenantId(tenantId string) {
 	e.TenantId = tenantId
 	e.require(edrTrellixFieldTenantId)
+}
+
+// SetUrl sets the Url field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (e *EdrTrellix) SetUrl(url *string) {
+	e.Url = url
+	e.require(edrTrellixFieldUrl)
 }
 
 func (e *EdrTrellix) UnmarshalJSON(data []byte) error {
