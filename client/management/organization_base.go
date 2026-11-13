@@ -870,14 +870,123 @@ func (o *Organization) String() string {
 	return fmt.Sprintf("%#v", o)
 }
 
+var (
+	organizationCredentialOptionsFieldOAuthCode = big.NewInt(1 << 0)
+)
+
+type OrganizationCredentialOptions struct {
+	// When `enabled`, the Capabilities API includes the `o_auth_code` credential type in the provider configs that support it, for requests authenticated as this organization. When unset or `disabled` it is left out, so configuration forms built from the capabilities schema never see it. Only the Capabilities API reads this option.
+	OAuthCode *OrganizationOptionState `json:"o_auth_code,omitempty" url:"o_auth_code,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (o *OrganizationCredentialOptions) GetOAuthCode() *OrganizationOptionState {
+	if o == nil {
+		return nil
+	}
+	return o.OAuthCode
+}
+
+func (o *OrganizationCredentialOptions) GetExtraProperties() map[string]interface{} {
+	if o == nil {
+		return nil
+	}
+	return o.extraProperties
+}
+
+func (o *OrganizationCredentialOptions) require(field *big.Int) {
+	if o.explicitFields == nil {
+		o.explicitFields = big.NewInt(0)
+	}
+	o.explicitFields.Or(o.explicitFields, field)
+}
+
+// SetOAuthCode sets the OAuthCode field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (o *OrganizationCredentialOptions) SetOAuthCode(oAuthCode *OrganizationOptionState) {
+	o.OAuthCode = oAuthCode
+	o.require(organizationCredentialOptionsFieldOAuthCode)
+}
+
+func (o *OrganizationCredentialOptions) UnmarshalJSON(data []byte) error {
+	type unmarshaler OrganizationCredentialOptions
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*o = OrganizationCredentialOptions(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *o)
+	if err != nil {
+		return err
+	}
+	o.extraProperties = extraProperties
+	o.rawJSON = nil
+	return nil
+}
+
+func (o *OrganizationCredentialOptions) MarshalJSON() ([]byte, error) {
+	type embed OrganizationCredentialOptions
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*o),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, o.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (o *OrganizationCredentialOptions) String() string {
+	if o == nil {
+		return "<nil>"
+	}
+	if len(o.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(o.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(o); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", o)
+}
+
 // Unique identifier for this Organization
 type OrganizationId = Id
+
+type OrganizationOptionState string
+
+const (
+	OrganizationOptionStateEnabled  OrganizationOptionState = "enabled"
+	OrganizationOptionStateDisabled OrganizationOptionState = "disabled"
+)
+
+func NewOrganizationOptionStateFromString(s string) (OrganizationOptionState, error) {
+	switch s {
+	case "enabled":
+		return OrganizationOptionStateEnabled, nil
+	case "disabled":
+		return OrganizationOptionStateDisabled, nil
+	}
+	var t OrganizationOptionState
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (o OrganizationOptionState) Ptr() *OrganizationOptionState {
+	return &o
+}
 
 var (
 	organizationOptionsFieldInviteDuration        = big.NewInt(1 << 0)
 	organizationOptionsFieldForgotDuration        = big.NewInt(1 << 1)
 	organizationOptionsFieldPasswordDuration      = big.NewInt(1 << 2)
 	organizationOptionsFieldMinimumPasswordLength = big.NewInt(1 << 3)
+	organizationOptionsFieldOauthAppReturnOrigins = big.NewInt(1 << 4)
+	organizationOptionsFieldCredentials           = big.NewInt(1 << 5)
 )
 
 type OrganizationOptions struct {
@@ -889,6 +998,10 @@ type OrganizationOptions struct {
 	PasswordDuration *string `json:"password_duration,omitempty" url:"password_duration,omitempty"`
 	// Minimum password length. Default: 8, minimum 8, maximum 72.
 	MinimumPasswordLength *int `json:"minimum_password_length,omitempty" url:"minimum_password_length,omitempty"`
+	// Origins a caller may name in the `return_url` of an OAuth app authorization link (`return_url` on Authorize Integration, `oauth_app_return_url` on Create Integration). Each is a scheme, host and optional port, such as `https://app.example.com`, with no path, query or fragment: `https`, or `http` only for localhost. A `return_url` must match one exactly; the deployment's result page is always allowed.
+	OauthAppReturnOrigins []string `json:"oauth_app_return_origins,omitempty" url:"oauth_app_return_origins,omitempty"`
+	// Credential types this organization opts into.
+	Credentials *OrganizationCredentialOptions `json:"credentials,omitempty" url:"credentials,omitempty"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -923,6 +1036,20 @@ func (o *OrganizationOptions) GetMinimumPasswordLength() *int {
 		return nil
 	}
 	return o.MinimumPasswordLength
+}
+
+func (o *OrganizationOptions) GetOauthAppReturnOrigins() []string {
+	if o == nil {
+		return nil
+	}
+	return o.OauthAppReturnOrigins
+}
+
+func (o *OrganizationOptions) GetCredentials() *OrganizationCredentialOptions {
+	if o == nil {
+		return nil
+	}
+	return o.Credentials
 }
 
 func (o *OrganizationOptions) GetExtraProperties() map[string]interface{} {
@@ -965,6 +1092,20 @@ func (o *OrganizationOptions) SetPasswordDuration(passwordDuration *string) {
 func (o *OrganizationOptions) SetMinimumPasswordLength(minimumPasswordLength *int) {
 	o.MinimumPasswordLength = minimumPasswordLength
 	o.require(organizationOptionsFieldMinimumPasswordLength)
+}
+
+// SetOauthAppReturnOrigins sets the OauthAppReturnOrigins field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (o *OrganizationOptions) SetOauthAppReturnOrigins(oauthAppReturnOrigins []string) {
+	o.OauthAppReturnOrigins = oauthAppReturnOrigins
+	o.require(organizationOptionsFieldOauthAppReturnOrigins)
+}
+
+// SetCredentials sets the Credentials field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (o *OrganizationOptions) SetCredentials(credentials *OrganizationCredentialOptions) {
+	o.Credentials = credentials
+	o.require(organizationOptionsFieldCredentials)
 }
 
 func (o *OrganizationOptions) UnmarshalJSON(data []byte) error {

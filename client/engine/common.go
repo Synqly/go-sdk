@@ -44,6 +44,31 @@ func (a ActionId) Ptr() *ActionId {
 	return &a
 }
 
+// Why an integration refused a request because it is not authorized to act. Sent as `context.provider_details.reason` on a 403 problem of type `authorization-required`, alongside `provider`.
+type AuthorizationRequiredReason string
+
+const (
+	// The integration uses an OAuth app that has not been installed yet. Use the Authorize Integration API to get a link and complete the install.
+	AuthorizationRequiredReasonPendingAuthorization AuthorizationRequiredReason = "pending_authorization"
+	// The OAuth app install was removed or disabled in the vendor. Use the Authorize Integration API to get a link and install it again.
+	AuthorizationRequiredReasonRevoked AuthorizationRequiredReason = "revoked"
+)
+
+func NewAuthorizationRequiredReasonFromString(s string) (AuthorizationRequiredReason, error) {
+	switch s {
+	case "pending_authorization":
+		return AuthorizationRequiredReasonPendingAuthorization, nil
+	case "revoked":
+		return AuthorizationRequiredReasonRevoked, nil
+	}
+	var t AuthorizationRequiredReason
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (a AuthorizationRequiredReason) Ptr() *AuthorizationRequiredReason {
+	return &a
+}
+
 var (
 	baseFieldName      = big.NewInt(1 << 0)
 	baseFieldCreatedAt = big.NewInt(1 << 1)

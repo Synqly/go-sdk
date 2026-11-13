@@ -13520,6 +13520,10 @@ type EntraIdCredential struct {
 	OAuthClient *OAuthClientCredential
 	// Reference to existing Client Credentials.
 	OAuthClientId OAuthClientCredentialId
+	// Install a pre-registered Entra ID app in your tenant through an administrator's consent, instead of supplying a client ID and secret. Not available with a bridge, a custom Base URL, or the GCC High and DoD clouds.
+	OAuthCode *OAuthCodeCredential
+	// Reference to existing Entra ID App.
+	OAuthCodeId OAuthCodeCredentialId
 
 	rawJSON json.RawMessage
 }
@@ -13543,6 +13547,20 @@ func (e *EntraIdCredential) GetOAuthClientId() OAuthClientCredentialId {
 		return ""
 	}
 	return e.OAuthClientId
+}
+
+func (e *EntraIdCredential) GetOAuthCode() *OAuthCodeCredential {
+	if e == nil {
+		return nil
+	}
+	return e.OAuthCode
+}
+
+func (e *EntraIdCredential) GetOAuthCodeId() OAuthCodeCredentialId {
+	if e == nil {
+		return ""
+	}
+	return e.OAuthCodeId
 }
 
 func (e *EntraIdCredential) UnmarshalJSON(data []byte) error {
@@ -13571,6 +13589,20 @@ func (e *EntraIdCredential) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		e.OAuthClientId = valueUnmarshaler.OAuthClientId
+	case "o_auth_code":
+		value := new(OAuthCodeCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.OAuthCode = value
+	case "o_auth_code_id":
+		var valueUnmarshaler struct {
+			OAuthCodeId OAuthCodeCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		e.OAuthCodeId = valueUnmarshaler.OAuthCodeId
 	}
 	e.rawJSON = nil
 	return nil
@@ -13593,6 +13625,19 @@ func (e EntraIdCredential) MarshalJSON() ([]byte, error) {
 		}
 		return json.Marshal(marshaler)
 	}
+	if e.OAuthCode != nil {
+		return internal.MarshalJSONWithExtraProperty(e.OAuthCode, "type", "o_auth_code")
+	}
+	if e.OAuthCodeId != "" {
+		var marshaler = struct {
+			Type        string                `json:"type"`
+			OAuthCodeId OAuthCodeCredentialId `json:"value"`
+		}{
+			Type:        "o_auth_code_id",
+			OAuthCodeId: e.OAuthCodeId,
+		}
+		return json.Marshal(marshaler)
+	}
 	if len(e.rawJSON) > 0 {
 		return e.rawJSON, nil
 	}
@@ -13602,6 +13647,8 @@ func (e EntraIdCredential) MarshalJSON() ([]byte, error) {
 type EntraIdCredentialVisitor interface {
 	VisitOAuthClient(*OAuthClientCredential) error
 	VisitOAuthClientId(OAuthClientCredentialId) error
+	VisitOAuthCode(*OAuthCodeCredential) error
+	VisitOAuthCodeId(OAuthCodeCredentialId) error
 }
 
 func (e *EntraIdCredential) Accept(visitor EntraIdCredentialVisitor) error {
@@ -13610,6 +13657,12 @@ func (e *EntraIdCredential) Accept(visitor EntraIdCredentialVisitor) error {
 	}
 	if e.OAuthClientId != "" {
 		return visitor.VisitOAuthClientId(e.OAuthClientId)
+	}
+	if e.OAuthCode != nil {
+		return visitor.VisitOAuthCode(e.OAuthCode)
+	}
+	if e.OAuthCodeId != "" {
+		return visitor.VisitOAuthCodeId(e.OAuthCodeId)
 	}
 	return fmt.Errorf("type %T does not define a non-empty union type", e)
 }
@@ -13624,6 +13677,12 @@ func (e *EntraIdCredential) validate() error {
 	}
 	if e.OAuthClientId != "" {
 		fields = append(fields, "o_auth_client_id")
+	}
+	if e.OAuthCode != nil {
+		fields = append(fields, "o_auth_code")
+	}
+	if e.OAuthCodeId != "" {
+		fields = append(fields, "o_auth_code_id")
 	}
 	if len(fields) == 0 {
 		if e.Type != "" {
@@ -17501,8 +17560,8 @@ type IdentityEntraId struct {
 	Credential *EntraIdCredential `json:"credential" url:"credential"`
 	// Government cloud selector.
 	Region *MicrosoftDefenderRegion `json:"region,omitempty" url:"region,omitempty"`
-	// Azure Directory (tenant) identifier.
-	TenantId string `json:"tenant_id" url:"tenant_id"`
+	// The Directory (tenant) ID of your Microsoft Entra tenant, shown on the Overview page of Microsoft Entra ID in the Azure portal. With a client ID and secret, a verified domain of the tenant also works. When you install the Entra ID App, the tenant ID is optional. If the app is already installed in that tenant, the integration uses it without asking an administrator to consent again. Otherwise, the administrator must consent in that tenant. After the app is installed, the tenant cannot be changed.
+	TenantId *string `json:"tenant_id,omitempty" url:"tenant_id,omitempty"`
 	// Base URL for the the Microsoft Graph API.
 	Url *string `json:"url,omitempty" url:"url,omitempty"`
 
@@ -17527,9 +17586,9 @@ func (i *IdentityEntraId) GetRegion() *MicrosoftDefenderRegion {
 	return i.Region
 }
 
-func (i *IdentityEntraId) GetTenantId() string {
+func (i *IdentityEntraId) GetTenantId() *string {
 	if i == nil {
-		return ""
+		return nil
 	}
 	return i.TenantId
 }
@@ -17571,7 +17630,7 @@ func (i *IdentityEntraId) SetRegion(region *MicrosoftDefenderRegion) {
 
 // SetTenantId sets the TenantId field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (i *IdentityEntraId) SetTenantId(tenantId string) {
+func (i *IdentityEntraId) SetTenantId(tenantId *string) {
 	i.TenantId = tenantId
 	i.require(identityEntraIdFieldTenantId)
 }

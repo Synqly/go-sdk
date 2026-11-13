@@ -18,6 +18,7 @@ import (
     mappings "github.com/synqly/go-sdk/v2/client/management/mappings"
     members "github.com/synqly/go-sdk/v2/client/management/members"
     meta "github.com/synqly/go-sdk/v2/client/management/meta"
+    oauthapps "github.com/synqly/go-sdk/v2/client/management/oauthapps"
     operations "github.com/synqly/go-sdk/v2/client/management/operations"
     option "github.com/synqly/go-sdk/v2/client/management/option"
     organization "github.com/synqly/go-sdk/v2/client/management/organization"
@@ -44,6 +45,7 @@ type Client struct {
     Mappings *mappings.Client
     Members *members.Client
     Meta *meta.Client
+    OauthApps *oauthapps.Client
     Operations *operations.Client
     OrganizationWebhooks *organizationwebhooks.Client
     Organization *organization.Client
@@ -74,6 +76,7 @@ func NewClient(opts ...option.RequestOption) *Client {
         Mappings: mappings.NewClient(options),
         Members: members.NewClient(options),
         Meta: meta.NewClient(options),
+        OauthApps: oauthapps.NewClient(options),
         Operations: operations.NewClient(options),
         OrganizationWebhooks: organizationwebhooks.NewClient(options),
         Organization: organization.NewClient(options),

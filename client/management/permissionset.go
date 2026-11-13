@@ -1850,6 +1850,7 @@ const (
 	IntegrationsActionsDelete      IntegrationsActions = "delete"
 	IntegrationsActionsListAccount IntegrationsActions = "list_account"
 	IntegrationsActionsVerify      IntegrationsActions = "verify"
+	IntegrationsActionsAuthorize   IntegrationsActions = "authorize"
 	IntegrationsActionsAll         IntegrationsActions = "*"
 )
 
@@ -1871,6 +1872,8 @@ func NewIntegrationsActionsFromString(s string) (IntegrationsActions, error) {
 		return IntegrationsActionsListAccount, nil
 	case "verify":
 		return IntegrationsActionsVerify, nil
+	case "authorize":
+		return IntegrationsActionsAuthorize, nil
 	case "*":
 		return IntegrationsActionsAll, nil
 	}

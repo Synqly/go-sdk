@@ -423,6 +423,55 @@ func (r *RawClient) Patch(
     }, nil
 }
 
+func (r *RawClient) Authorize(
+    ctx context.Context,
+    accountId management.AccountId,
+    integrationId management.IntegrationId,
+    request *management.AuthorizeIntegrationRequest,
+    opts ...option.RequestOption,
+) (*core.Response[*management.AuthorizeIntegrationResponse], error){
+    options := core.NewRequestOptions(opts...)
+    baseURL := internal.ResolveBaseURL(
+        options.BaseURL,
+        r.baseURL,
+        "https://api.synqly.com",
+    )
+    endpointURL := internal.EncodeURL(
+        baseURL + "/v1/integrations/%v/%v/authorize",
+        accountId,
+        integrationId,
+    )
+    headers := internal.MergeHeaders(
+        r.options.ToHeader(),
+        options.ToHeader(),
+    )
+    var response *management.AuthorizeIntegrationResponse
+    raw, err := r.caller.Call(
+        ctx,
+        &internal.CallParams{
+            URL: endpointURL,
+            Method: http.MethodPost,
+            Headers: headers,
+            MaxAttempts: options.MaxAttempts,
+            DisableRetries: options.DisableRetries,
+            BodyProperties: options.BodyProperties,
+            QueryParameters: options.QueryParameters,
+            Client: options.HTTPClient,
+            Request: request,
+            Response: &response,
+            ErrorDecoder: internal.NewErrorDecoder(management.ErrorCodes),
+        },
+    )
+    if err != nil {
+        return nil, err
+    }
+    return &core.Response[*management.AuthorizeIntegrationResponse]{
+        StatusCode: raw.StatusCode,
+        Header: raw.Header,
+        Body: response,
+    }, nil
+}
+
 func (r *RawClient) Delete(
     ctx context.Context,
     accountId management.AccountId,

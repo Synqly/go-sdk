@@ -170,6 +170,287 @@ func (l *ListAccountIntegrationsRequest) SetTotal(total *bool) {
 	l.require(listAccountIntegrationsRequestFieldTotal)
 }
 
+var (
+	authorizeIntegrationRequestFieldReturnUrl = big.NewInt(1 << 0)
+)
+
+type AuthorizeIntegrationRequest struct {
+	// Where the administrator's browser goes when the install finishes. An
+	// absolute `https` URL without a fragment, on an origin listed in the
+	// organization's `options.oauth_app_return_origins`, or the
+	// deployment's result page. Defaults to the deployment's result page.
+	//
+	// The browser arrives with the query parameters `status` (`authorized`,
+	// `canceled` or `error`) and `integration_id`. On `error` it also gets
+	// a `reason`:
+	//
+	//   - `vendor_instance_mismatch`: the administrator consented or signed in
+	//     to a different vendor instance, such as another tenant, than the
+	//     one the integration names or is installed in.
+	//   - `role_missing`: the account the administrator signed in with does
+	//     not hold a role that can install the app.
+	//   - `verification_failed`: the vendor accepted the consent, but the app
+	//     could not yet be confirmed to work in the vendor instance. Vendors
+	//     can take a few minutes to apply a consent; try again later with a
+	//     new link.
+	//   - `vendor_error`: the vendor reported an error or an unexpected
+	//     response. Try again with a new link.
+	//   - `not_configured`: the OAuth app is not available on this
+	//     deployment.
+	//   - `integration_unavailable`: the integration was deleted, or its
+	//     credential changed, while the install was in progress.
+	//
+	// New reasons may be added, so treat an unknown reason as a generic
+	// failure. The outcome is also on the integration's
+	// `oauth_app_install.state` and in the integration update webhook.
+	ReturnUrl *string `json:"return_url,omitempty" url:"return_url,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (a *AuthorizeIntegrationRequest) GetReturnUrl() *string {
+	if a == nil {
+		return nil
+	}
+	return a.ReturnUrl
+}
+
+func (a *AuthorizeIntegrationRequest) GetExtraProperties() map[string]interface{} {
+	if a == nil {
+		return nil
+	}
+	return a.extraProperties
+}
+
+func (a *AuthorizeIntegrationRequest) require(field *big.Int) {
+	if a.explicitFields == nil {
+		a.explicitFields = big.NewInt(0)
+	}
+	a.explicitFields.Or(a.explicitFields, field)
+}
+
+// SetReturnUrl sets the ReturnUrl field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (a *AuthorizeIntegrationRequest) SetReturnUrl(returnUrl *string) {
+	a.ReturnUrl = returnUrl
+	a.require(authorizeIntegrationRequestFieldReturnUrl)
+}
+
+func (a *AuthorizeIntegrationRequest) UnmarshalJSON(data []byte) error {
+	type unmarshaler AuthorizeIntegrationRequest
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*a = AuthorizeIntegrationRequest(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+	a.rawJSON = nil
+	return nil
+}
+
+func (a *AuthorizeIntegrationRequest) MarshalJSON() ([]byte, error) {
+	type embed AuthorizeIntegrationRequest
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*a),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, a.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (a *AuthorizeIntegrationRequest) String() string {
+	if a == nil {
+		return "<nil>"
+	}
+	if len(a.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(a.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(a); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", a)
+}
+
+var (
+	authorizeIntegrationResponseFieldResult = big.NewInt(1 << 0)
+)
+
+type AuthorizeIntegrationResponse struct {
+	Result *AuthorizeIntegrationResult `json:"result" url:"result"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (a *AuthorizeIntegrationResponse) GetResult() *AuthorizeIntegrationResult {
+	if a == nil {
+		return nil
+	}
+	return a.Result
+}
+
+func (a *AuthorizeIntegrationResponse) GetExtraProperties() map[string]interface{} {
+	if a == nil {
+		return nil
+	}
+	return a.extraProperties
+}
+
+func (a *AuthorizeIntegrationResponse) require(field *big.Int) {
+	if a.explicitFields == nil {
+		a.explicitFields = big.NewInt(0)
+	}
+	a.explicitFields.Or(a.explicitFields, field)
+}
+
+// SetResult sets the Result field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (a *AuthorizeIntegrationResponse) SetResult(result *AuthorizeIntegrationResult) {
+	a.Result = result
+	a.require(authorizeIntegrationResponseFieldResult)
+}
+
+func (a *AuthorizeIntegrationResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler AuthorizeIntegrationResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*a = AuthorizeIntegrationResponse(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+	a.rawJSON = nil
+	return nil
+}
+
+func (a *AuthorizeIntegrationResponse) MarshalJSON() ([]byte, error) {
+	type embed AuthorizeIntegrationResponse
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*a),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, a.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (a *AuthorizeIntegrationResponse) String() string {
+	if a == nil {
+		return "<nil>"
+	}
+	if len(a.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(a.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(a); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", a)
+}
+
+var (
+	authorizeIntegrationResultFieldAuthorizationLink = big.NewInt(1 << 0)
+)
+
+type AuthorizeIntegrationResult struct {
+	// Link to install the OAuth app. It can be opened once, within 10 minutes.
+	AuthorizationLink *OAuthAppAuthorizationLink `json:"authorization_link" url:"authorization_link"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (a *AuthorizeIntegrationResult) GetAuthorizationLink() *OAuthAppAuthorizationLink {
+	if a == nil {
+		return nil
+	}
+	return a.AuthorizationLink
+}
+
+func (a *AuthorizeIntegrationResult) GetExtraProperties() map[string]interface{} {
+	if a == nil {
+		return nil
+	}
+	return a.extraProperties
+}
+
+func (a *AuthorizeIntegrationResult) require(field *big.Int) {
+	if a.explicitFields == nil {
+		a.explicitFields = big.NewInt(0)
+	}
+	a.explicitFields.Or(a.explicitFields, field)
+}
+
+// SetAuthorizationLink sets the AuthorizationLink field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (a *AuthorizeIntegrationResult) SetAuthorizationLink(authorizationLink *OAuthAppAuthorizationLink) {
+	a.AuthorizationLink = authorizationLink
+	a.require(authorizeIntegrationResultFieldAuthorizationLink)
+}
+
+func (a *AuthorizeIntegrationResult) UnmarshalJSON(data []byte) error {
+	type unmarshaler AuthorizeIntegrationResult
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*a = AuthorizeIntegrationResult(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+	a.rawJSON = nil
+	return nil
+}
+
+func (a *AuthorizeIntegrationResult) MarshalJSON() ([]byte, error) {
+	type embed AuthorizeIntegrationResult
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*a),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, a.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (a *AuthorizeIntegrationResult) String() string {
+	if a == nil {
+		return "<nil>"
+	}
+	if len(a.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(a.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(a); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", a)
+}
+
 type BridgeSelector struct {
 	Type string
 	// ID of a specific bridge group to use
@@ -326,6 +607,7 @@ var (
 	createIntegrationRequestFieldMappings            = big.NewInt(1 << 6)
 	createIntegrationRequestFieldAdditionalMappings  = big.NewInt(1 << 7)
 	createIntegrationRequestFieldScheduledOperations = big.NewInt(1 << 8)
+	createIntegrationRequestFieldOauthAppReturnUrl   = big.NewInt(1 << 9)
 )
 
 type CreateIntegrationRequest struct {
@@ -347,6 +629,8 @@ type CreateIntegrationRequest struct {
 	AdditionalMappings []*AdditionalMapping `json:"additional_mappings,omitempty" url:"additional_mappings,omitempty"`
 	// Scheduled operations owned by this integration. During creation, a non-empty list is used as supplied; otherwise, the integration point's current scheduled_operations template is copied onto the integration, if present. The stored list is an independent snapshot: later changes to the integration point never affect it. Clearing this field from an existing integration removes its schedules and does not restore the integration point template. The integration does not require an integration point for these schedules to run.
 	ScheduledOperations []*OperationSchedule `json:"scheduled_operations,omitempty" url:"scheduled_operations,omitempty"`
+	// Where the administrator's browser goes when the install that `oauth_app_authorization_link` starts finishes. See `return_url` on Authorize Integration. Only for a provider config that uses an `o_auth_code` credential.
+	OauthAppReturnUrl *string `json:"oauth_app_return_url,omitempty" url:"oauth_app_return_url,omitempty"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -416,6 +700,13 @@ func (c *CreateIntegrationRequest) GetScheduledOperations() []*OperationSchedule
 		return nil
 	}
 	return c.ScheduledOperations
+}
+
+func (c *CreateIntegrationRequest) GetOauthAppReturnUrl() *string {
+	if c == nil {
+		return nil
+	}
+	return c.OauthAppReturnUrl
 }
 
 func (c *CreateIntegrationRequest) GetExtraProperties() map[string]interface{} {
@@ -493,6 +784,13 @@ func (c *CreateIntegrationRequest) SetAdditionalMappings(additionalMappings []*A
 func (c *CreateIntegrationRequest) SetScheduledOperations(scheduledOperations []*OperationSchedule) {
 	c.ScheduledOperations = scheduledOperations
 	c.require(createIntegrationRequestFieldScheduledOperations)
+}
+
+// SetOauthAppReturnUrl sets the OauthAppReturnUrl field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CreateIntegrationRequest) SetOauthAppReturnUrl(oauthAppReturnUrl *string) {
+	c.OauthAppReturnUrl = oauthAppReturnUrl
+	c.require(createIntegrationRequestFieldOauthAppReturnUrl)
 }
 
 func (c *CreateIntegrationRequest) UnmarshalJSON(data []byte) error {
@@ -639,15 +937,18 @@ func (c *CreateIntegrationResponse) String() string {
 }
 
 var (
-	createIntegrationResponseResultFieldCredentialsCreated = big.NewInt(1 << 0)
-	createIntegrationResponseResultFieldIntegration        = big.NewInt(1 << 1)
-	createIntegrationResponseResultFieldToken              = big.NewInt(1 << 2)
+	createIntegrationResponseResultFieldCredentialsCreated        = big.NewInt(1 << 0)
+	createIntegrationResponseResultFieldIntegration               = big.NewInt(1 << 1)
+	createIntegrationResponseResultFieldToken                     = big.NewInt(1 << 2)
+	createIntegrationResponseResultFieldOauthAppAuthorizationLink = big.NewInt(1 << 3)
 )
 
 type CreateIntegrationResponseResult struct {
 	CredentialsCreated []*CredentialResponse `json:"credentials_created,omitempty" url:"credentials_created,omitempty"`
 	Integration        *Integration          `json:"integration" url:"integration"`
 	Token              *TokenPair            `json:"token" url:"token"`
+	// Link to install the OAuth app. It can be opened once, within 10 minutes. Present only when the provider config uses an `o_auth_code` credential.
+	OauthAppAuthorizationLink *OAuthAppAuthorizationLink `json:"oauth_app_authorization_link,omitempty" url:"oauth_app_authorization_link,omitempty"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -675,6 +976,13 @@ func (c *CreateIntegrationResponseResult) GetToken() *TokenPair {
 		return nil
 	}
 	return c.Token
+}
+
+func (c *CreateIntegrationResponseResult) GetOauthAppAuthorizationLink() *OAuthAppAuthorizationLink {
+	if c == nil {
+		return nil
+	}
+	return c.OauthAppAuthorizationLink
 }
 
 func (c *CreateIntegrationResponseResult) GetExtraProperties() map[string]interface{} {
@@ -710,6 +1018,13 @@ func (c *CreateIntegrationResponseResult) SetIntegration(integration *Integratio
 func (c *CreateIntegrationResponseResult) SetToken(token *TokenPair) {
 	c.Token = token
 	c.require(createIntegrationResponseResultFieldToken)
+}
+
+// SetOauthAppAuthorizationLink sets the OauthAppAuthorizationLink field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CreateIntegrationResponseResult) SetOauthAppAuthorizationLink(oauthAppAuthorizationLink *OAuthAppAuthorizationLink) {
+	c.OauthAppAuthorizationLink = oauthAppAuthorizationLink
+	c.require(createIntegrationResponseResultFieldOauthAppAuthorizationLink)
 }
 
 func (c *CreateIntegrationResponseResult) UnmarshalJSON(data []byte) error {
@@ -859,6 +1174,7 @@ var (
 	integrationFieldMappings            = big.NewInt(1 << 16)
 	integrationFieldAdditionalMappings  = big.NewInt(1 << 17)
 	integrationFieldScheduledOperations = big.NewInt(1 << 18)
+	integrationFieldOauthAppInstall     = big.NewInt(1 << 19)
 )
 
 type Integration struct {
@@ -899,6 +1215,8 @@ type Integration struct {
 	AdditionalMappings []*AdditionalMapping `json:"additional_mappings,omitempty" url:"additional_mappings,omitempty"`
 	// Scheduled operations owned by this integration. During creation, a non-empty list is used as supplied; otherwise, the integration point's current scheduled_operations template is copied onto the integration, if present. The stored list is an independent snapshot: later changes to the integration point never affect it. Clearing this field from an existing integration removes its schedules and does not restore the integration point template. The integration does not require an integration point for these schedules to run.
 	ScheduledOperations []*OperationSchedule `json:"scheduled_operations,omitempty" url:"scheduled_operations,omitempty"`
+	// The OAuth app install this integration runs with. Present only when the provider config uses an `o_auth_code` credential.
+	OauthAppInstall *IntegrationOAuthAppInstall `json:"oauth_app_install,omitempty" url:"oauth_app_install,omitempty"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -1038,6 +1356,13 @@ func (i *Integration) GetScheduledOperations() []*OperationSchedule {
 		return nil
 	}
 	return i.ScheduledOperations
+}
+
+func (i *Integration) GetOauthAppInstall() *IntegrationOAuthAppInstall {
+	if i == nil {
+		return nil
+	}
+	return i.OauthAppInstall
 }
 
 func (i *Integration) GetExtraProperties() map[string]interface{} {
@@ -1185,6 +1510,13 @@ func (i *Integration) SetAdditionalMappings(additionalMappings []*AdditionalMapp
 func (i *Integration) SetScheduledOperations(scheduledOperations []*OperationSchedule) {
 	i.ScheduledOperations = scheduledOperations
 	i.require(integrationFieldScheduledOperations)
+}
+
+// SetOauthAppInstall sets the OauthAppInstall field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (i *Integration) SetOauthAppInstall(oauthAppInstall *IntegrationOAuthAppInstall) {
+	i.OauthAppInstall = oauthAppInstall
+	i.require(integrationFieldOauthAppInstall)
 }
 
 func (i *Integration) UnmarshalJSON(data []byte) error {

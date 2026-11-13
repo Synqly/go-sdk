@@ -1065,6 +1065,7 @@ type CredentialConfig struct {
 	Secret         *SecretCredential
 	OAuthClient    *OAuthClientCredential
 	TlsCertificate *TlsCertificateCredential
+	OAuthCode      *OAuthCodeCredential
 
 	rawJSON json.RawMessage
 }
@@ -1125,6 +1126,13 @@ func (c *CredentialConfig) GetTlsCertificate() *TlsCertificateCredential {
 	return c.TlsCertificate
 }
 
+func (c *CredentialConfig) GetOAuthCode() *OAuthCodeCredential {
+	if c == nil {
+		return nil
+	}
+	return c.OAuthCode
+}
+
 func (c *CredentialConfig) UnmarshalJSON(data []byte) error {
 	var unmarshaler struct {
 		Type string `json:"type"`
@@ -1179,6 +1187,12 @@ func (c *CredentialConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		c.TlsCertificate = value
+	case "o_auth_code":
+		value := new(OAuthCodeCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		c.OAuthCode = value
 	}
 	c.rawJSON = nil
 	return nil
@@ -1209,6 +1223,9 @@ func (c CredentialConfig) MarshalJSON() ([]byte, error) {
 	if c.TlsCertificate != nil {
 		return internal.MarshalJSONWithExtraProperty(c.TlsCertificate, "type", "tls_certificate")
 	}
+	if c.OAuthCode != nil {
+		return internal.MarshalJSONWithExtraProperty(c.OAuthCode, "type", "o_auth_code")
+	}
 	if len(c.rawJSON) > 0 {
 		return c.rawJSON, nil
 	}
@@ -1223,6 +1240,7 @@ type CredentialConfigVisitor interface {
 	VisitSecret(*SecretCredential) error
 	VisitOAuthClient(*OAuthClientCredential) error
 	VisitTlsCertificate(*TlsCertificateCredential) error
+	VisitOAuthCode(*OAuthCodeCredential) error
 }
 
 func (c *CredentialConfig) Accept(visitor CredentialConfigVisitor) error {
@@ -1246,6 +1264,9 @@ func (c *CredentialConfig) Accept(visitor CredentialConfigVisitor) error {
 	}
 	if c.TlsCertificate != nil {
 		return visitor.VisitTlsCertificate(c.TlsCertificate)
+	}
+	if c.OAuthCode != nil {
+		return visitor.VisitOAuthCode(c.OAuthCode)
 	}
 	return fmt.Errorf("type %T does not define a non-empty union type", c)
 }
@@ -1275,6 +1296,9 @@ func (c *CredentialConfig) validate() error {
 	}
 	if c.TlsCertificate != nil {
 		fields = append(fields, "tls_certificate")
+	}
+	if c.OAuthCode != nil {
+		fields = append(fields, "o_auth_code")
 	}
 	if len(fields) == 0 {
 		if c.Type != "" {
@@ -1745,6 +1769,7 @@ const (
 	CredentialTypeSecret         CredentialType = "secret"
 	CredentialTypeOAuthClient    CredentialType = "o_auth_client"
 	CredentialTypeTlsCertificate CredentialType = "tls_certificate"
+	CredentialTypeOAuthCode      CredentialType = "o_auth_code"
 )
 
 func NewCredentialTypeFromString(s string) (CredentialType, error) {
@@ -1763,6 +1788,8 @@ func NewCredentialTypeFromString(s string) (CredentialType, error) {
 		return CredentialTypeOAuthClient, nil
 	case "tls_certificate":
 		return CredentialTypeTlsCertificate, nil
+	case "o_auth_code":
+		return CredentialTypeOAuthCode, nil
 	}
 	var t CredentialType
 	return "", fmt.Errorf("%s is not a valid %T", s, t)
@@ -2185,6 +2212,75 @@ func (o *OAuthClientCredential) String() string {
 
 // Unique identifier for an OAuth Client Credential
 type OAuthClientCredentialId = CredentialId
+
+// Authenticates with an installed OAuth app instead of a client id and secret. The integration's `oauth_app_install` reports the install's state.
+type OAuthCodeCredential struct {
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (o *OAuthCodeCredential) GetExtraProperties() map[string]interface{} {
+	if o == nil {
+		return nil
+	}
+	return o.extraProperties
+}
+
+func (o *OAuthCodeCredential) require(field *big.Int) {
+	if o.explicitFields == nil {
+		o.explicitFields = big.NewInt(0)
+	}
+	o.explicitFields.Or(o.explicitFields, field)
+}
+
+func (o *OAuthCodeCredential) UnmarshalJSON(data []byte) error {
+	type unmarshaler OAuthCodeCredential
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*o = OAuthCodeCredential(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *o)
+	if err != nil {
+		return err
+	}
+	o.extraProperties = extraProperties
+	o.rawJSON = nil
+	return nil
+}
+
+func (o *OAuthCodeCredential) MarshalJSON() ([]byte, error) {
+	type embed OAuthCodeCredential
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*o),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, o.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (o *OAuthCodeCredential) String() string {
+	if o == nil {
+		return "<nil>"
+	}
+	if len(o.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(o.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(o); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", o)
+}
+
+// Unique identifier for an OAuth Code Credential
+type OAuthCodeCredentialId = CredentialId
 
 type OwnerType string
 

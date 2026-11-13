@@ -205,6 +205,40 @@ func (c *Client) Patch(
     return response.Body, nil
 }
 
+// Returns a new single-use link to install
+// the OAuth app of the `Integration` matching `{integrationId}`. Only
+// integrations whose provider config uses an `o_auth_code` credential can be
+// authorized.
+// 
+// Issuing a link replaces any earlier link for the integration. It does not
+// change an installed integration: the integration keeps running until the
+// new consent completes, and then runs with the install that consent
+// completed.
+// Use it to finish a pending install, to re-consent after the app's
+// permissions changed, or to reinstall after the app was removed.
+// 
+// The link is short-lived: issue it when the administrator asks to install,
+// and send their browser to it straight away.
+func (c *Client) Authorize(
+    ctx context.Context,
+    accountId management.AccountId,
+    integrationId management.IntegrationId,
+    request *management.AuthorizeIntegrationRequest,
+    opts ...option.RequestOption,
+) (*management.AuthorizeIntegrationResponse, error){
+    response, err := c.WithRawResponse.Authorize(
+        ctx,
+        accountId,
+        integrationId,
+        request,
+        opts...,
+    )
+    if err != nil {
+        return nil, err
+    }
+    return response.Body, nil
+}
+
 // Deletes the `Integration` object matching `{integrationId}, where the
 // `Integration` belongs to the `Account` matching `{accountId}`. Deleting
 // an `Integration` also deletes any tokens that belong to it.
