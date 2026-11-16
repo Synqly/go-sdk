@@ -1672,15 +1672,16 @@ var (
 	providerOperationsFieldName                    = big.NewInt(1 << 1)
 	providerOperationsFieldFullname                = big.NewInt(1 << 2)
 	providerOperationsFieldDescription             = big.NewInt(1 << 3)
-	providerOperationsFieldRequestMethod           = big.NewInt(1 << 4)
-	providerOperationsFieldRequestPath             = big.NewInt(1 << 5)
-	providerOperationsFieldSupported               = big.NewInt(1 << 6)
-	providerOperationsFieldRequiredFields          = big.NewInt(1 << 7)
-	providerOperationsFieldSupportedResponseFields = big.NewInt(1 << 8)
-	providerOperationsFieldFilters                 = big.NewInt(1 << 9)
-	providerOperationsFieldOrders                  = big.NewInt(1 << 10)
-	providerOperationsFieldRequestBody             = big.NewInt(1 << 11)
-	providerOperationsFieldActions                 = big.NewInt(1 << 12)
+	providerOperationsFieldDocs                    = big.NewInt(1 << 4)
+	providerOperationsFieldRequestMethod           = big.NewInt(1 << 5)
+	providerOperationsFieldRequestPath             = big.NewInt(1 << 6)
+	providerOperationsFieldSupported               = big.NewInt(1 << 7)
+	providerOperationsFieldRequiredFields          = big.NewInt(1 << 8)
+	providerOperationsFieldSupportedResponseFields = big.NewInt(1 << 9)
+	providerOperationsFieldFilters                 = big.NewInt(1 << 10)
+	providerOperationsFieldOrders                  = big.NewInt(1 << 11)
+	providerOperationsFieldRequestBody             = big.NewInt(1 << 12)
+	providerOperationsFieldActions                 = big.NewInt(1 << 13)
 )
 
 type ProviderOperations struct {
@@ -1692,6 +1693,8 @@ type ProviderOperations struct {
 	Fullname *string `json:"fullname,omitempty" url:"fullname,omitempty"`
 	// Description of the operation.
 	Description *string `json:"description,omitempty" url:"description,omitempty"`
+	// Provider-specific notes on this operation, in addition to its description, such as what a field holds or whether an action can be reversed.
+	Docs *string `json:"docs,omitempty" url:"docs,omitempty"`
 	// HTTP method used for the operation.
 	RequestMethod *string `json:"request_method,omitempty" url:"request_method,omitempty"`
 	// URI template path for the operation, including path parameters.
@@ -1752,6 +1755,13 @@ func (p *ProviderOperations) GetDescription() *string {
 		return nil
 	}
 	return p.Description
+}
+
+func (p *ProviderOperations) GetDocs() *string {
+	if p == nil {
+		return nil
+	}
+	return p.Docs
 }
 
 func (p *ProviderOperations) GetRequestMethod() *string {
@@ -1857,6 +1867,13 @@ func (p *ProviderOperations) SetFullname(fullname *string) {
 func (p *ProviderOperations) SetDescription(description *string) {
 	p.Description = description
 	p.require(providerOperationsFieldDescription)
+}
+
+// SetDocs sets the Docs field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (p *ProviderOperations) SetDocs(docs *string) {
+	p.Docs = docs
+	p.require(providerOperationsFieldDocs)
 }
 
 // SetRequestMethod sets the RequestMethod field and marks it as non-optional;
