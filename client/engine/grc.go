@@ -170,7 +170,7 @@ var (
 type GrcQueryControlsRequest struct {
 	// Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
 	Meta []*string `json:"-" url:"meta,omitempty"`
-	// Number of controls to return. Defaults to 100.
+	// Number of controls to return. Defaults to 100. A page may hold fewer results than `limit`, or none, even when more remain; keep paging until the returned cursor is empty.
 	Limit *int `json:"-" url:"limit,omitempty"`
 	// Order results by a supported field. Ascending by default; append `[desc]` for descending (or `[asc]`). Supported fields vary by provider; consult the [capabilities API](https://docs.synqly.com/api-reference/management/capabilities) for a given provider's coverage.
 	Order []*string `json:"-" url:"order,omitempty"`
@@ -246,7 +246,7 @@ var (
 type GrcQueryDevicesRequest struct {
 	// Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
 	Meta []*string `json:"-" url:"meta,omitempty"`
-	// Number of devices to return. Defaults to 100.
+	// Number of devices to return. Defaults to 100. A page may hold fewer results than `limit`, or none, even when more remain; keep paging until the returned cursor is empty.
 	Limit *int `json:"-" url:"limit,omitempty"`
 	// Order results by a supported field. Ascending by default; append `[desc]` for descending (or `[asc]`). Supported fields vary by provider; consult the [capabilities API](https://docs.synqly.com/api-reference/management/capabilities) for a given provider's coverage.
 	Order []*string `json:"-" url:"order,omitempty"`
@@ -322,7 +322,7 @@ var (
 type GrcQueryEvidenceRequest struct {
 	// Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
 	Meta []*string `json:"-" url:"meta,omitempty"`
-	// Number of evidence artifacts to return. Defaults to 100.
+	// Number of evidence artifacts to return. Defaults to 100. A page may hold fewer results than `limit`, or none, even when more remain; keep paging until the returned cursor is empty.
 	Limit *int `json:"-" url:"limit,omitempty"`
 	// Order results by a supported field. Ascending by default; append `[desc]` for descending (or `[asc]`). Supported fields vary by provider; consult the [capabilities API](https://docs.synqly.com/api-reference/management/capabilities) for a given provider's coverage.
 	Order []*string `json:"-" url:"order,omitempty"`
@@ -398,7 +398,7 @@ var (
 type GrcQueryFrameworksRequest struct {
 	// Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
 	Meta []*string `json:"-" url:"meta,omitempty"`
-	// Number of frameworks to return. Defaults to 100.
+	// Number of frameworks to return. Defaults to 100. A page may hold fewer results than `limit`, or none, even when more remain; keep paging until the returned cursor is empty.
 	Limit *int `json:"-" url:"limit,omitempty"`
 	// Ordering is not supported for frameworks in v1.
 	Order []*string `json:"-" url:"order,omitempty"`
@@ -474,7 +474,7 @@ var (
 type GrcQueryPersonnelRequest struct {
 	// Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
 	Meta []*string `json:"-" url:"meta,omitempty"`
-	// Number of people to return. Defaults to 100.
+	// Number of people to return. Defaults to 100. A page may hold fewer results than `limit`, or none, even when more remain; keep paging until the returned cursor is empty.
 	Limit *int `json:"-" url:"limit,omitempty"`
 	// Order results by a supported field. Ascending by default; append `[desc]` for descending (or `[asc]`). Supported fields vary by provider; consult the [capabilities API](https://docs.synqly.com/api-reference/management/capabilities) for a given provider's coverage.
 	Order []*string `json:"-" url:"order,omitempty"`
@@ -550,7 +550,7 @@ var (
 type GrcQueryTestsRequest struct {
 	// Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
 	Meta []*string `json:"-" url:"meta,omitempty"`
-	// Number of tests to return. Defaults to 100.
+	// Number of tests to return. Defaults to 100. A page may hold fewer results than `limit`, or none, even when more remain; keep paging until the returned cursor is empty.
 	Limit *int `json:"-" url:"limit,omitempty"`
 	// Order results by a supported field. Ascending by default; append `[desc]` for descending (or `[asc]`). Supported fields vary by provider; consult the [capabilities API](https://docs.synqly.com/api-reference/management/capabilities) for a given provider's coverage.
 	Order []*string `json:"-" url:"order,omitempty"`

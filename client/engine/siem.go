@@ -210,7 +210,7 @@ var (
 type QuerySiemAlertsRequest struct {
 	// Cursor to use to retrieve the next page of results.
 	Cursor *string `json:"-" url:"cursor,omitempty"`
-	// Number of `Account` objects to return in this page. Defaults to 100.
+	// Number of `Account` objects to return in this page. Defaults to 100. A page may hold fewer results than `limit`, or none, even when more remain; keep paging until the returned cursor is empty.
 	Limit *int `json:"-" url:"limit,omitempty"`
 	// Select a field to order the results by. Defaults to `time`. To control the direction of the sorting, append `[asc]` or `[desc]` to the field name. For example, `name[desc]` will sort the results by `name` in descending order. The ordering defaults to `asc` if not specified. May be used multiple times to order by multiple fields, and the ordering is applied in the order the fields are specified.
 	Order []*string `json:"-" url:"order,omitempty"`
@@ -287,7 +287,7 @@ var (
 type QuerySiemEventsRequest struct {
 	// Cursor to use to retrieve the next page of results.
 	Cursor *string `json:"-" url:"cursor,omitempty"`
-	// Number of events to return per page. Defaults to 100 with a maximum of 5000. If a provider has a maximum limit lower than 5000, the provider's maximum limit will be used instead.
+	// Number of events to return per page. Defaults to 100 with a maximum of 5000. If a provider has a maximum limit lower than 5000, the provider's maximum limit will be used instead. A page may hold fewer results than `limit`, or none, even when more remain; keep paging until the returned cursor is empty.
 	Limit *int `json:"-" url:"limit,omitempty"`
 	// Select a field to order the results by. Defaults to `time` descending (newest first). To control the direction of the sorting, append `[asc]` or `[desc]` to the field name. For example, `name[desc]` will sort the results by `name` in descending order. Bare `order=time` is descending. May be used multiple times to order by multiple fields, and the ordering is applied in the order the fields are specified.
 	Order []*string `json:"-" url:"order,omitempty"`
@@ -376,7 +376,7 @@ type QueryInvestigationsRequest struct {
 	Meta []*string `json:"-" url:"meta,omitempty"`
 	// Cursor to use to retrieve the next page of results.
 	Cursor *string `json:"-" url:"cursor,omitempty"`
-	// Number of `Investigation` objects to return in this page. Defaults to 100.
+	// Number of `Investigation` objects to return in this page. Defaults to 100. A page may hold fewer results than `limit`, or none, even when more remain; keep paging until the returned cursor is empty.
 	Limit *int `json:"-" url:"limit,omitempty"`
 	// Select a field to order the results by.
 	Order []*string `json:"-" url:"order,omitempty"`
@@ -449,7 +449,7 @@ type QueryLogProvidersRequest struct {
 	Meta []*string `json:"-" url:"meta,omitempty"`
 	// Cursor to use to retrieve the next page of results.
 	Cursor *string `json:"-" url:"cursor,omitempty"`
-	// Number of log provider objects to return in this page. Defaults to 100.
+	// Number of log provider objects to return in this page. Defaults to 100. A page may hold fewer results than `limit`, or none, even when more remain; keep paging until the returned cursor is empty.
 	Limit *int `json:"-" url:"limit,omitempty"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted

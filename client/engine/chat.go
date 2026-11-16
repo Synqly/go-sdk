@@ -192,7 +192,7 @@ var (
 type QueryConversationMembers struct {
 	// Add metadata to the response by invoking meta functions.
 	Meta []*string `json:"-" url:"meta,omitempty"`
-	// Number of members to return. Defaults to 100 with a maximum of 1000. If a provider has a maximum limit lower than 1000, the provider's maximum limit will be used instead.
+	// Number of members to return. Defaults to 100 with a maximum of 1000. If a provider has a maximum limit lower than 1000, the provider's maximum limit will be used instead. A page may hold fewer results than `limit`, or none, even when more remain; keep paging until the returned cursor is empty.
 	Limit *int `json:"-" url:"limit,omitempty"`
 	// Start search from cursor position.
 	Cursor *string `json:"-" url:"cursor,omitempty"`
@@ -249,7 +249,7 @@ var (
 type QueryConversationMessages struct {
 	// Add metadata to the response by invoking meta functions.
 	Meta []*string `json:"-" url:"meta,omitempty"`
-	// Number of messages to return. Defaults to 100 with a maximum of 1000. If a provider has a maximum limit lower than 1000, the provider's maximum limit will be used instead.
+	// Number of messages to return. Defaults to 100 with a maximum of 1000. If a provider has a maximum limit lower than 1000, the provider's maximum limit will be used instead. A page may hold fewer results than `limit`, or none, even when more remain; keep paging until the returned cursor is empty.
 	Limit *int `json:"-" url:"limit,omitempty"`
 	// Filter results by this query. Supported filter fields vary by provider. Defaults to no filter. If used more than once, the queries are ANDed together.
 	Filter []*string `json:"-" url:"filter,omitempty"`
@@ -315,7 +315,7 @@ var (
 type QueryConversations struct {
 	// Add metadata to the response by invoking meta functions.
 	Meta []*string `json:"-" url:"meta,omitempty"`
-	// Number of conversations to return. Defaults to 100 with a maximum of 1000. If a provider has a maximum limit lower than 1000, the provider's maximum limit will be used instead.
+	// Number of conversations to return. Defaults to 100 with a maximum of 1000. If a provider has a maximum limit lower than 1000, the provider's maximum limit will be used instead. A page may hold fewer results than `limit`, or none, even when more remain; keep paging until the returned cursor is empty.
 	Limit *int `json:"-" url:"limit,omitempty"`
 	// Filter results by this query. Defaults to no filter. If used more than once, the queries are ANDed together.
 	Filter []*string `json:"-" url:"filter,omitempty"`
@@ -381,7 +381,7 @@ var (
 type ChatQueryMessages struct {
 	// Add metadata to the response by invoking meta functions.
 	Meta []*string `json:"-" url:"meta,omitempty"`
-	// Number of messages to return per page. Defaults to 100 with a maximum of 1000. If a provider has a maximum limit lower than 1000, the provider's maximum limit will be used instead.
+	// Number of messages to return per page. Defaults to 100 with a maximum of 1000. If a provider has a maximum limit lower than 1000, the provider's maximum limit will be used instead. A page may hold fewer results than `limit`, or none, even when more remain; keep paging until the returned cursor is empty.
 	Limit *int `json:"-" url:"limit,omitempty"`
 	// Filter results by this query. Only an optional time window (`time[gte]`/`time[lte]`) is supported, and only for providers whose message APIs support time filtering. Defaults to no filter. If used more than once, the queries are ANDed together.
 	Filter []*string `json:"-" url:"filter,omitempty"`
@@ -446,7 +446,7 @@ var (
 type QueryUserConversationMembers struct {
 	// Add metadata to the response by invoking meta functions.
 	Meta []*string `json:"-" url:"meta,omitempty"`
-	// Number of members to return. Defaults to 100 with a maximum of 1000. If a provider has a maximum limit lower than 1000, the provider's maximum limit will be used instead.
+	// Number of members to return. Defaults to 100 with a maximum of 1000. If a provider has a maximum limit lower than 1000, the provider's maximum limit will be used instead. A page may hold fewer results than `limit`, or none, even when more remain; keep paging until the returned cursor is empty.
 	Limit *int `json:"-" url:"limit,omitempty"`
 	// Start search from cursor position.
 	Cursor *string `json:"-" url:"cursor,omitempty"`
@@ -503,7 +503,7 @@ var (
 type QueryUserConversationMessages struct {
 	// Add metadata to the response by invoking meta functions.
 	Meta []*string `json:"-" url:"meta,omitempty"`
-	// Number of messages to return. Defaults to 100 with a maximum of 1000. If a provider has a maximum limit lower than 1000, the provider's maximum limit will be used instead.
+	// Number of messages to return. Defaults to 100 with a maximum of 1000. If a provider has a maximum limit lower than 1000, the provider's maximum limit will be used instead. A page may hold fewer results than `limit`, or none, even when more remain; keep paging until the returned cursor is empty.
 	Limit *int `json:"-" url:"limit,omitempty"`
 	// Filter results by this query. Supported filter fields vary by provider. Defaults to no filter. If used more than once, the queries are ANDed together.
 	Filter []*string `json:"-" url:"filter,omitempty"`
@@ -569,7 +569,7 @@ var (
 type QueryUserConversations struct {
 	// Add metadata to the response by invoking meta functions.
 	Meta []*string `json:"-" url:"meta,omitempty"`
-	// Number of conversations to return. Defaults to 100 with a maximum of 1000. If a provider has a maximum limit lower than 1000, the provider's maximum limit will be used instead.
+	// Number of conversations to return. Defaults to 100 with a maximum of 1000. If a provider has a maximum limit lower than 1000, the provider's maximum limit will be used instead. A page may hold fewer results than `limit`, or none, even when more remain; keep paging until the returned cursor is empty.
 	Limit *int `json:"-" url:"limit,omitempty"`
 	// Filter results by this query. Defaults to no filter. If used more than once, the queries are ANDed together.
 	Filter []*string `json:"-" url:"filter,omitempty"`
@@ -635,7 +635,7 @@ var (
 type QueryChatUsers struct {
 	// Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
 	Meta []*string `json:"-" url:"meta,omitempty"`
-	// Number of users to return. Defaults to 100 with a maximum of 1000. If a provider has a maximum limit lower than 1000, the provider's maximum limit will be used instead.
+	// Number of users to return. Defaults to 100 with a maximum of 1000. If a provider has a maximum limit lower than 1000, the provider's maximum limit will be used instead. A page may hold fewer results than `limit`, or none, even when more remain; keep paging until the returned cursor is empty.
 	Limit *int `json:"-" url:"limit,omitempty"`
 	// Filter results by this query. For more information on filtering, refer to our [Filtering Guide](https://docs.synqly.com/guides/connectors/chat/query-filters). Defaults to no filter. If used more than once, the queries are ANDed together.
 	Filter []*string `json:"-" url:"filter,omitempty"`

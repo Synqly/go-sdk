@@ -205,7 +205,7 @@ type QueryCustomRequest struct {
 	Meta []*string `json:"-" url:"meta,omitempty"`
 	// Cursor to use to retrieve the next page of results.
 	Cursor *string `json:"-" url:"cursor,omitempty"`
-	// Number of `operation` objects to return in this page. Defaults to 100.
+	// Number of `operation` objects to return in this page. Defaults to 100. A page may hold fewer results than `limit`, or none, even when more remain; keep paging until the returned cursor is empty.
 	Limit *int `json:"-" url:"limit,omitempty"`
 	// Select a field to order the results by.
 	Order []*string `json:"-" url:"order,omitempty"`

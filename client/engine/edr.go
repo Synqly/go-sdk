@@ -293,7 +293,7 @@ var (
 type GetThreatNotesRequest struct {
 	// Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
 	Meta []*string `json:"-" url:"meta,omitempty"`
-	// Maximum number of notes to return. Defaults to 100.
+	// Maximum number of notes to return. Defaults to 100. A page may hold fewer results than `limit`, or none, even when more remain; keep paging until the returned cursor is empty.
 	Limit *int `json:"-" url:"limit,omitempty"`
 	// Cursor from a previous response to retrieve the next page of notes.
 	Cursor *string `json:"-" url:"cursor,omitempty"`
@@ -382,7 +382,7 @@ var (
 type QueryAlertsRequest struct {
 	// Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
 	Meta []*string `json:"-" url:"meta,omitempty"`
-	// Number of threats to return. Defaults to 50.
+	// Number of threats to return. Defaults to 50. A page may hold fewer results than `limit`, or none, even when more remain; keep paging until the returned cursor is empty.
 	Limit *int `json:"-" url:"limit,omitempty"`
 	// Start search from cursor position.
 	Cursor *string `json:"-" url:"cursor,omitempty"`
@@ -458,7 +458,7 @@ var (
 type QueryApplicationsRequest struct {
 	// Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
 	Meta []*string `json:"-" url:"meta,omitempty"`
-	// Number of applications to return. Defaults to 50.
+	// Number of applications to return. Defaults to 50. A page may hold fewer results than `limit`, or none, even when more remain; keep paging until the returned cursor is empty.
 	Limit *int `json:"-" url:"limit,omitempty"`
 	// Start search from cursor position.
 	Cursor *string `json:"-" url:"cursor,omitempty"`
@@ -541,7 +541,7 @@ type QueryEdrEventsRequest struct {
 	Filter []*string `json:"-" url:"filter,omitempty"`
 	// Include the raw data from the EDR in the response. Defaults to `false`.
 	IncludeRawData *bool `json:"-" url:"include_raw_data,omitempty"`
-	// Number of events to return. Defaults to 50.
+	// Number of events to return. Defaults to 50. A page may hold fewer results than `limit`, or none, even when more remain; keep paging until the returned cursor is empty.
 	Limit *int `json:"-" url:"limit,omitempty"`
 	// Select a field to order the results by. To control the direction of the sorting, append
 	// `[asc]` or `[desc]` to the field name. For example, `timestamp[asc]` will sort the results by `timestamp` in ascending order.
@@ -622,7 +622,7 @@ var (
 type QueryEndpointsRequest struct {
 	// Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
 	Meta []*string `json:"-" url:"meta,omitempty"`
-	// Number of endpoint assets to return. Defaults to 50.
+	// Number of endpoint assets to return. Defaults to 50. A page may hold fewer results than `limit`, or none, even when more remain; keep paging until the returned cursor is empty.
 	Limit *int `json:"-" url:"limit,omitempty"`
 	// Start search from cursor position.
 	Cursor *string `json:"-" url:"cursor,omitempty"`
@@ -698,7 +698,7 @@ var (
 type QueryExclusionsRequest struct {
 	// Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
 	Meta []*string `json:"-" url:"meta,omitempty"`
-	// Number of exclusions to return. Defaults to 50.
+	// Number of exclusions to return. Defaults to 50. A page may hold fewer results than `limit`, or none, even when more remain; keep paging until the returned cursor is empty.
 	Limit *int `json:"-" url:"limit,omitempty"`
 	// Start search from cursor position.
 	Cursor *string `json:"-" url:"cursor,omitempty"`
@@ -774,7 +774,7 @@ var (
 type QueryIoaRequest struct {
 	// Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
 	Meta []*string `json:"-" url:"meta,omitempty"`
-	// Number of IOA rules to return. Defaults to 50.
+	// Number of IOA rules to return. Defaults to 50. A page may hold fewer results than `limit`, or none, even when more remain; keep paging until the returned cursor is empty.
 	Limit *int `json:"-" url:"limit,omitempty"`
 	// Start search from cursor position.
 	Cursor *string `json:"-" url:"cursor,omitempty"`
@@ -850,7 +850,7 @@ var (
 type QueryIocsRequest struct {
 	// Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
 	Meta []*string `json:"-" url:"meta,omitempty"`
-	// Number of threats to return. Defaults to 50.
+	// Number of threats to return. Defaults to 50. A page may hold fewer results than `limit`, or none, even when more remain; keep paging until the returned cursor is empty.
 	Limit *int `json:"-" url:"limit,omitempty"`
 	// Start search from cursor position.
 	Cursor *string `json:"-" url:"cursor,omitempty"`
@@ -926,7 +926,7 @@ var (
 type QueryPoliciesRequest struct {
 	// Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
 	Meta []*string `json:"-" url:"meta,omitempty"`
-	// Number of findings to return. Defaults to 50.
+	// Number of findings to return. Defaults to 50. A page may hold fewer results than `limit`, or none, even when more remain; keep paging until the returned cursor is empty.
 	Limit *int `json:"-" url:"limit,omitempty"`
 	// Start search from cursor position.
 	Cursor *string `json:"-" url:"cursor,omitempty"`
@@ -1002,7 +1002,7 @@ var (
 type QueryPostureScoreRequest struct {
 	// Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
 	Meta []*string `json:"-" url:"meta,omitempty"`
-	// Number of scores for endpoints to return. Defaults to 50.
+	// Number of scores for endpoints to return. Defaults to 50. A page may hold fewer results than `limit`, or none, even when more remain; keep paging until the returned cursor is empty.
 	Limit *int `json:"-" url:"limit,omitempty"`
 	// Start search from cursor position.
 	Cursor *string `json:"-" url:"cursor,omitempty"`
@@ -1078,7 +1078,7 @@ var (
 type QueryThreatsRequest struct {
 	// Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
 	Meta []*string `json:"-" url:"meta,omitempty"`
-	// Number of threats to return. Defaults to 50.
+	// Number of threats to return. Defaults to 50. A page may hold fewer results than `limit`, or none, even when more remain; keep paging until the returned cursor is empty.
 	Limit *int `json:"-" url:"limit,omitempty"`
 	// Start search from cursor position.
 	Cursor *string `json:"-" url:"cursor,omitempty"`

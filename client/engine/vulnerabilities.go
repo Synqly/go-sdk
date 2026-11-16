@@ -103,7 +103,7 @@ var (
 type VulnerabilitiesGetLabelsRequest struct {
 	// Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
 	Meta []*string `json:"-" url:"meta,omitempty"`
-	// Number of labels to return. Defaults to 50.
+	// Number of labels to return. Defaults to 50. A page may hold fewer results than `limit`, or none, even when more remain; keep paging until the returned cursor is empty.
 	Limit *int `json:"-" url:"limit,omitempty"`
 	// Start search from cursor position.
 	Cursor *string `json:"-" url:"cursor,omitempty"`
@@ -249,7 +249,7 @@ var (
 type QueryAssetsRequest struct {
 	// Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
 	Meta []*string `json:"-" url:"meta,omitempty"`
-	// Number of assets to return. Defaults to 50.
+	// Number of assets to return. Defaults to 50. A page may hold fewer results than `limit`, or none, even when more remain; keep paging until the returned cursor is empty.
 	Limit *int `json:"-" url:"limit,omitempty"`
 	// Start search from cursor position.
 	Cursor *string `json:"-" url:"cursor,omitempty"`
@@ -315,7 +315,7 @@ var (
 type QueryFindingsRequest struct {
 	// Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
 	Meta []*string `json:"-" url:"meta,omitempty"`
-	// Number of finding reports to return. Defaults to 50.
+	// Number of finding reports to return. Defaults to 50. A page may hold fewer results than `limit`, or none, even when more remain; keep paging until the returned cursor is empty.
 	Limit *int `json:"-" url:"limit,omitempty"`
 	// Start search from cursor position.
 	Cursor *string `json:"-" url:"cursor,omitempty"`
@@ -381,7 +381,7 @@ var (
 type VulnerabilitiesQueryScanFindingsRequest struct {
 	// Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
 	Meta []*string `json:"-" url:"meta,omitempty"`
-	// Number of findings to return. Defaults to 50 with a maximum of 5000. If a provider has a maximum limit lower than 5000, the provider's maximum limit will be used instead.
+	// Number of findings to return. Defaults to 50 with a maximum of 5000. If a provider has a maximum limit lower than 5000, the provider's maximum limit will be used instead. A page may hold fewer results than `limit`, or none, even when more remain; keep paging until the returned cursor is empty.
 	Limit *int `json:"-" url:"limit,omitempty"`
 	// Filter results by this query. For more information on filtering, refer to our [Filtering Guide](https://docs.synqly.com/guides/connectors/vulnerabilities/query-filters). Defaults to no filter. If used more than once, the queries are ANDed together.
 	Filter []*string `json:"-" url:"filter,omitempty"`
@@ -446,7 +446,7 @@ var (
 type QueryScansRequest struct {
 	// Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
 	Meta []*string `json:"-" url:"meta,omitempty"`
-	// Number of scans to return. Defaults to 50.
+	// Number of scans to return. Defaults to 50. A page may hold fewer results than `limit`, or none, even when more remain; keep paging until the returned cursor is empty.
 	Limit *int `json:"-" url:"limit,omitempty"`
 	// Start search from cursor position.
 	Cursor *string `json:"-" url:"cursor,omitempty"`

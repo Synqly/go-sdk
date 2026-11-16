@@ -22,7 +22,7 @@ var (
 type QueryCloudResourceInventory struct {
 	// Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
 	Meta []*string `json:"-" url:"meta,omitempty"`
-	// Number of cloud resources to return. Defaults to 500.
+	// Number of cloud resources to return. Defaults to 500. A page may hold fewer results than `limit`, or none, even when more remain; keep paging until the returned cursor is empty.
 	Limit *int `json:"-" url:"limit,omitempty"`
 	// Select a field to order the results by. Defaults to `name`. To control the direction of the sorting, append `[asc]` or `[desc]` to the field name. For example, `name[asc]` will sort the results by `name` in ascending order. The ordering defaults to `asc` if not specified.
 	Order []*string `json:"-" url:"order,omitempty"`
@@ -98,7 +98,7 @@ var (
 type QueryComplianceFindings struct {
 	// Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
 	Meta []*string `json:"-" url:"meta,omitempty"`
-	// Number of compliance findings to return. Defaults to 50.
+	// Number of compliance findings to return. Defaults to 50. A page may hold fewer results than `limit`, or none, even when more remain; keep paging until the returned cursor is empty.
 	Limit *int `json:"-" url:"limit,omitempty"`
 	// Start search from cursor position.
 	Cursor *string `json:"-" url:"cursor,omitempty"`
@@ -173,7 +173,7 @@ var (
 type QueryEvents struct {
 	// Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
 	Meta []*string `json:"-" url:"meta,omitempty"`
-	// Number of events to return. Defaults to 100.
+	// Number of events to return. Defaults to 100. A page may hold fewer results than `limit`, or none, even when more remain; keep paging until the returned cursor is empty.
 	Limit *int `json:"-" url:"limit,omitempty"`
 	// Select a field to order the results by. Defaults to `name`. To control the direction of the sorting, append `[asc]` or `[desc]` to the field name. For example, `name[asc]` will sort the results by `name` in ascending order. The ordering defaults to `asc` if not specified.
 	Order []*string `json:"-" url:"order,omitempty"`
@@ -240,7 +240,7 @@ var (
 type QueryIoms struct {
 	// Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
 	Meta []*string `json:"-" url:"meta,omitempty"`
-	// Number of cloud resources to return. Defaults to 500.
+	// Number of cloud resources to return. Defaults to 500. A page may hold fewer results than `limit`, or none, even when more remain; keep paging until the returned cursor is empty.
 	Limit *int `json:"-" url:"limit,omitempty"`
 	// Select a field to order the results by. Defaults to `name`. To control the direction of the sorting, append `[asc]` or `[desc]` to the field name. For example, `name[asc]` will sort the results by `name` in ascending order. The ordering defaults to `asc` if not specified.
 	Order []*string `json:"-" url:"order,omitempty"`
@@ -316,7 +316,7 @@ var (
 type QueryCloudSecurityThreats struct {
 	// Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
 	Meta []*string `json:"-" url:"meta,omitempty"`
-	// Number of threats to return. Defaults to 100.
+	// Number of threats to return. Defaults to 100. A page may hold fewer results than `limit`, or none, even when more remain; keep paging until the returned cursor is empty.
 	Limit *int `json:"-" url:"limit,omitempty"`
 	// Select a field to order the results by. Defaults to `name`. To control the direction of the sorting, append `[asc]` or `[desc]` to the field name. For example, `name[asc]` will sort the results by `name` in ascending order. The ordering defaults to `asc` if not specified.
 	Order []*string `json:"-" url:"order,omitempty"`
