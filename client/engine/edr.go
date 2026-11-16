@@ -150,8 +150,8 @@ var (
 type DeleteIocsRequest struct {
 	// Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
 	Meta []*string `json:"-" url:"meta,omitempty"`
-	// list of ids to delete
-	Ids *string `json:"-" url:"ids,omitempty"`
+	// IDs of the indicators to delete, each the `id` returned by Create IOCs or Query IOCs. Repeat the parameter for several IDs; a single value may also hold a comma-separated list.
+	Ids []string `json:"-" url:"ids"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -173,7 +173,7 @@ func (d *DeleteIocsRequest) SetMeta(meta []*string) {
 
 // SetIds sets the Ids field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (d *DeleteIocsRequest) SetIds(ids *string) {
+func (d *DeleteIocsRequest) SetIds(ids []string) {
 	d.Ids = ids
 	d.require(deleteIocsRequestFieldIds)
 }

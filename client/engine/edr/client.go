@@ -251,7 +251,7 @@ func (c *Client) CreateIocs(
     return response.Body, nil
 }
 
-// Deletes a list of iocs that match the input of ids in the query param
+// Deletes the indicators of compromise identified by `ids`.
 func (c *Client) DeleteIocs(
     ctx context.Context,
     request *engine.DeleteIocsRequest,
