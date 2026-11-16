@@ -39,40 +39,41 @@ type SeverityId = int
 
 // Device Software Info events report device software data that is either logged or proactively collected.
 var (
-	softwareInfoFieldActivityId     = big.NewInt(1 << 0)
-	softwareInfoFieldActivityName   = big.NewInt(1 << 1)
-	softwareInfoFieldApi            = big.NewInt(1 << 2)
-	softwareInfoFieldCategoryName   = big.NewInt(1 << 3)
-	softwareInfoFieldCategoryUid    = big.NewInt(1 << 4)
-	softwareInfoFieldClassUid       = big.NewInt(1 << 5)
-	softwareInfoFieldCloud          = big.NewInt(1 << 6)
-	softwareInfoFieldCount          = big.NewInt(1 << 7)
-	softwareInfoFieldCustomFields   = big.NewInt(1 << 8)
-	softwareInfoFieldDevice         = big.NewInt(1 << 9)
-	softwareInfoFieldDuration       = big.NewInt(1 << 10)
-	softwareInfoFieldEndTime        = big.NewInt(1 << 11)
-	softwareInfoFieldEndTimeDt      = big.NewInt(1 << 12)
-	softwareInfoFieldEnrichments    = big.NewInt(1 << 13)
-	softwareInfoFieldMessage        = big.NewInt(1 << 14)
-	softwareInfoFieldMetadata       = big.NewInt(1 << 15)
-	softwareInfoFieldObservables    = big.NewInt(1 << 16)
-	softwareInfoFieldOsint          = big.NewInt(1 << 17)
-	softwareInfoFieldProduct        = big.NewInt(1 << 18)
-	softwareInfoFieldRawData        = big.NewInt(1 << 19)
-	softwareInfoFieldSeverity       = big.NewInt(1 << 20)
-	softwareInfoFieldSeverityId     = big.NewInt(1 << 21)
-	softwareInfoFieldStartTime      = big.NewInt(1 << 22)
-	softwareInfoFieldStartTimeDt    = big.NewInt(1 << 23)
-	softwareInfoFieldStatus         = big.NewInt(1 << 24)
-	softwareInfoFieldStatusCode     = big.NewInt(1 << 25)
-	softwareInfoFieldStatusDetail   = big.NewInt(1 << 26)
-	softwareInfoFieldStatusId       = big.NewInt(1 << 27)
-	softwareInfoFieldTime           = big.NewInt(1 << 28)
-	softwareInfoFieldTimeDt         = big.NewInt(1 << 29)
-	softwareInfoFieldTimezoneOffset = big.NewInt(1 << 30)
-	softwareInfoFieldTypeName       = big.NewInt(1 << 31)
-	softwareInfoFieldTypeUid        = big.NewInt(1 << 32)
-	softwareInfoFieldUnmapped       = big.NewInt(1 << 33)
+	softwareInfoFieldActivityId         = big.NewInt(1 << 0)
+	softwareInfoFieldActivityName       = big.NewInt(1 << 1)
+	softwareInfoFieldApi                = big.NewInt(1 << 2)
+	softwareInfoFieldCategoryName       = big.NewInt(1 << 3)
+	softwareInfoFieldCategoryUid        = big.NewInt(1 << 4)
+	softwareInfoFieldClassUid           = big.NewInt(1 << 5)
+	softwareInfoFieldCloud              = big.NewInt(1 << 6)
+	softwareInfoFieldCount              = big.NewInt(1 << 7)
+	softwareInfoFieldCustomFields       = big.NewInt(1 << 8)
+	softwareInfoFieldDevice             = big.NewInt(1 << 9)
+	softwareInfoFieldDuration           = big.NewInt(1 << 10)
+	softwareInfoFieldEndTime            = big.NewInt(1 << 11)
+	softwareInfoFieldEndTimeDt          = big.NewInt(1 << 12)
+	softwareInfoFieldEnrichments        = big.NewInt(1 << 13)
+	softwareInfoFieldMessage            = big.NewInt(1 << 14)
+	softwareInfoFieldMetadata           = big.NewInt(1 << 15)
+	softwareInfoFieldObservables        = big.NewInt(1 << 16)
+	softwareInfoFieldOsint              = big.NewInt(1 << 17)
+	softwareInfoFieldProduct            = big.NewInt(1 << 18)
+	softwareInfoFieldRawData            = big.NewInt(1 << 19)
+	softwareInfoFieldSeverity           = big.NewInt(1 << 20)
+	softwareInfoFieldSeverityId         = big.NewInt(1 << 21)
+	softwareInfoFieldStartTime          = big.NewInt(1 << 22)
+	softwareInfoFieldStartTimeDt        = big.NewInt(1 << 23)
+	softwareInfoFieldStatus             = big.NewInt(1 << 24)
+	softwareInfoFieldStatusCode         = big.NewInt(1 << 25)
+	softwareInfoFieldStatusDetail       = big.NewInt(1 << 26)
+	softwareInfoFieldStatusId           = big.NewInt(1 << 27)
+	softwareInfoFieldTime               = big.NewInt(1 << 28)
+	softwareInfoFieldTimeDt             = big.NewInt(1 << 29)
+	softwareInfoFieldTimezoneOffset     = big.NewInt(1 << 30)
+	softwareInfoFieldTypeName           = big.NewInt(1 << 31)
+	softwareInfoFieldTypeUid            = big.NewInt(1 << 32)
+	softwareInfoFieldUnmapped           = big.NewInt(1 << 33)
+	softwareInfoFieldVulnerabilityCount = big.NewInt(1 << 34)
 )
 
 type SoftwareInfo struct {
@@ -144,6 +145,8 @@ type SoftwareInfo struct {
 	TypeUid TypeUid `json:"type_uid" url:"type_uid"`
 	// The attributes that are not mapped to the event schema. The names and values of those attributes are specific to the event source.
 	Unmapped *v130.Object `json:"unmapped,omitempty" url:"unmapped,omitempty"`
+	// The number of known vulnerabilities that affect the software, as reported by the event source.
+	VulnerabilityCount *int `json:"vulnerability_count,omitempty" url:"vulnerability_count,omitempty"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -388,6 +391,13 @@ func (s *SoftwareInfo) GetUnmapped() *v130.Object {
 		return nil
 	}
 	return s.Unmapped
+}
+
+func (s *SoftwareInfo) GetVulnerabilityCount() *int {
+	if s == nil {
+		return nil
+	}
+	return s.VulnerabilityCount
 }
 
 func (s *SoftwareInfo) GetExtraProperties() map[string]interface{} {
@@ -640,6 +650,13 @@ func (s *SoftwareInfo) SetTypeUid(typeUid TypeUid) {
 func (s *SoftwareInfo) SetUnmapped(unmapped *v130.Object) {
 	s.Unmapped = unmapped
 	s.require(softwareInfoFieldUnmapped)
+}
+
+// SetVulnerabilityCount sets the VulnerabilityCount field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (s *SoftwareInfo) SetVulnerabilityCount(vulnerabilityCount *int) {
+	s.VulnerabilityCount = vulnerabilityCount
+	s.require(softwareInfoFieldVulnerabilityCount)
 }
 
 func (s *SoftwareInfo) UnmarshalJSON(data []byte) error {
