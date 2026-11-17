@@ -33231,7 +33231,7 @@ type SiemSplunk struct {
 	Index *string `json:"index,omitempty" url:"index,omitempty"`
 	// Credential used when authenticating with the Splunk Search Service.
 	SearchServiceCredential *SplunkSearchCredential `json:"search_service_credential" url:"search_service_credential"`
-	// URL used when connecting to the Splunk Search Service.
+	// URL of the REST API on the splunkd management port.
 	SearchServiceUrl string `json:"search_service_url" url:"search_service_url"`
 	// When true, skips verification of the Splunk TLS certificate.
 	SkipTlsVerify *bool `json:"skip_tls_verify,omitempty" url:"skip_tls_verify,omitempty"`
