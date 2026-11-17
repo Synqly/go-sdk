@@ -5763,7 +5763,7 @@ var (
 
 type ChatMicrosoftTeams struct {
 	Credential *TeamsGraphChatCredential `json:"credential" url:"credential"`
-	// Team identifier, required for querying team channels. If omitted, only user-scoped chats (DMs and group chats) can be queried.
+	// Team identifier, required for reading and sending team channel messages. If omitted, only user-scoped chats (DMs and group chats) can be used.
 	TeamId *string `json:"team_id,omitempty" url:"team_id,omitempty"`
 	// Azure Directory (tenant) identifier.
 	TenantId string `json:"tenant_id" url:"tenant_id"`
