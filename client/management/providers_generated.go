@@ -21502,13 +21502,13 @@ type NetworkSecurityAzure struct {
 	AzureCloud *AzureCloud `json:"azure_cloud,omitempty" url:"azure_cloud,omitempty"`
 	// Client ID and secret for the Entra app.
 	Credential *AzureNetworkSecurityCredential `json:"credential" url:"credential"`
-	// Optional list of DNS log configuration IDs, in the form `{resourceId}|{category}`. Leave empty to include all DNS logging in the subscription.
+	// Optional list of DNS log configuration IDs, each a DNS resolver policy or Azure Firewall resource ID and its DNS log category, in the form `{resourceId}|{category}`. Leave empty to include all DNS logging in the subscription.
 	DnsLogConfigurationIds []string `json:"dns_log_configuration_ids,omitempty" url:"dns_log_configuration_ids,omitempty"`
 	// Azure subscription that owns the network security resources.
 	SubscriptionId string `json:"subscription_id" url:"subscription_id"`
 	// Directory (tenant) ID of your Microsoft Entra tenant.
 	TenantId string `json:"tenant_id" url:"tenant_id"`
-	// Optional list of flow log resource IDs. Leave empty to include all flow logs in the subscription.
+	// Optional list of Network Watcher flow log resource IDs. Leave empty to include all flow logs in the subscription.
 	TrafficLogConfigurationIds []string `json:"traffic_log_configuration_ids,omitempty" url:"traffic_log_configuration_ids,omitempty"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
