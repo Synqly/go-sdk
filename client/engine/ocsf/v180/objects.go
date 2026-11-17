@@ -37915,9 +37915,10 @@ var (
 	programmaticCredentialFieldLastUsedTime     = big.NewInt(1 << 4)
 	programmaticCredentialFieldLastUsedTimeDt   = big.NewInt(1 << 5)
 	programmaticCredentialFieldName             = big.NewInt(1 << 6)
-	programmaticCredentialFieldType             = big.NewInt(1 << 7)
-	programmaticCredentialFieldTypeId           = big.NewInt(1 << 8)
-	programmaticCredentialFieldUid              = big.NewInt(1 << 9)
+	programmaticCredentialFieldResource         = big.NewInt(1 << 7)
+	programmaticCredentialFieldType             = big.NewInt(1 << 8)
+	programmaticCredentialFieldTypeId           = big.NewInt(1 << 9)
+	programmaticCredentialFieldUid              = big.NewInt(1 << 10)
 )
 
 type ProgrammaticCredential struct {
@@ -37935,6 +37936,8 @@ type ProgrammaticCredential struct {
 	LastUsedTimeDt *time.Time `json:"last_used_time_dt,omitempty" url:"last_used_time_dt,omitempty"`
 	// The display name of the credential.
 	Name *string `json:"name,omitempty" url:"name,omitempty"`
+	// The resource the credential belongs to, such as a project or workspace.
+	Resource *ResourceDetails `json:"resource,omitempty" url:"resource,omitempty"`
 	// The credential type, normalized to the caption of the <code>type_id</code> value. In the case of 'Other', it is defined by the event source.
 	Type *string `json:"type,omitempty" url:"type,omitempty"`
 	// The normalized identifier of the programmatic credential type.
@@ -37996,6 +37999,13 @@ func (p *ProgrammaticCredential) GetName() *string {
 		return nil
 	}
 	return p.Name
+}
+
+func (p *ProgrammaticCredential) GetResource() *ResourceDetails {
+	if p == nil {
+		return nil
+	}
+	return p.Resource
 }
 
 func (p *ProgrammaticCredential) GetType() *string {
@@ -38080,6 +38090,13 @@ func (p *ProgrammaticCredential) SetLastUsedTimeDt(lastUsedTimeDt *time.Time) {
 func (p *ProgrammaticCredential) SetName(name *string) {
 	p.Name = name
 	p.require(programmaticCredentialFieldName)
+}
+
+// SetResource sets the Resource field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (p *ProgrammaticCredential) SetResource(resource *ResourceDetails) {
+	p.Resource = resource
+	p.require(programmaticCredentialFieldResource)
 }
 
 // SetType sets the Type field and marks it as non-optional;

@@ -307,6 +307,28 @@ func (c *Client) ExpireAllUserSessions(
     return nil
 }
 
+// Revokes one of a user's programmatic credentials. A programmatic credential is a secret software uses to act as a user or service account, such as an API key or access token; OCSF names them so. A user's credentials are listed in the `programmatic_credentials` field of the user that `get_user` returns. The user stays enabled.
+func (c *Client) RevokeProgrammaticCredential(
+    ctx context.Context,
+    userId engine.UserId,
+    // The `uid` of the programmatic credential, such as an API key ID, from the user's `programmatic_credentials` field.
+    credentialUid string,
+    request *engine.RevokeProgrammaticCredentialRequest,
+    opts ...option.RequestOption,
+) error{
+    _, err := c.WithRawResponse.RevokeProgrammaticCredential(
+        ctx,
+        userId,
+        credentialUid,
+        request,
+        opts...,
+    )
+    if err != nil {
+        return err
+    }
+    return nil
+}
+
 // Returns the profile picture for a user as binary image data. The Content-Type header indicates the image format (e.g., image/jpeg, image/png).
 func (c *Client) GetUserPicture(
     ctx context.Context,

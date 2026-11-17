@@ -109,6 +109,7 @@ const (
 	OperationIdIdentityQueryRiskEvents                          OperationId = "identity_query_risk_events"
 	OperationIdIdentityQueryRiskyUsers                          OperationId = "identity_query_risky_users"
 	OperationIdIdentityQueryUsers                               OperationId = "identity_query_users"
+	OperationIdIdentityRevokeProgrammaticCredential             OperationId = "identity_revoke_programmatic_credential"
 	OperationIdIncidentresponseQueryEscalationPolicies          OperationId = "incidentresponse_query_escalation_policies"
 	OperationIdIncidentresponseQueryEscalationPolicyUsersOnCall OperationId = "incidentresponse_query_escalation_policy_users_on_call"
 	OperationIdNetworksecurityQueryDnsEvents                    OperationId = "networksecurity_query_dns_events"
@@ -385,6 +386,8 @@ func NewOperationIdFromString(s string) (OperationId, error) {
 		return OperationIdIdentityQueryRiskyUsers, nil
 	case "identity_query_users":
 		return OperationIdIdentityQueryUsers, nil
+	case "identity_revoke_programmatic_credential":
+		return OperationIdIdentityRevokeProgrammaticCredential, nil
 	case "incidentresponse_query_escalation_policies":
 		return OperationIdIncidentresponseQueryEscalationPolicies, nil
 	case "incidentresponse_query_escalation_policy_users_on_call":

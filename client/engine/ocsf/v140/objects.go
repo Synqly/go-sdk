@@ -27315,6 +27315,289 @@ func (p *Product) String() string {
 	return fmt.Sprintf("%#v", p)
 }
 
+// The Programmatic Credential object describes service-specific credentials used for direct API access and system integration, such as API keys, service account keys, client certificates and access tokens.
+var (
+	programmaticCredentialFieldCreatedTime      = big.NewInt(1 << 0)
+	programmaticCredentialFieldCreatedTimeDt    = big.NewInt(1 << 1)
+	programmaticCredentialFieldExpirationTime   = big.NewInt(1 << 2)
+	programmaticCredentialFieldExpirationTimeDt = big.NewInt(1 << 3)
+	programmaticCredentialFieldLastUsedTime     = big.NewInt(1 << 4)
+	programmaticCredentialFieldLastUsedTimeDt   = big.NewInt(1 << 5)
+	programmaticCredentialFieldName             = big.NewInt(1 << 6)
+	programmaticCredentialFieldResource         = big.NewInt(1 << 7)
+	programmaticCredentialFieldType             = big.NewInt(1 << 8)
+	programmaticCredentialFieldTypeId           = big.NewInt(1 << 9)
+	programmaticCredentialFieldUid              = big.NewInt(1 << 10)
+)
+
+type ProgrammaticCredential struct {
+	// The time when the credential was created or became valid.
+	CreatedTime *Timestamp `json:"created_time,omitempty" url:"created_time,omitempty"`
+	// The time when the credential was created or became valid.
+	CreatedTimeDt *time.Time `json:"created_time_dt,omitempty" url:"created_time_dt,omitempty"`
+	// The time when the credential expires.
+	ExpirationTime *Timestamp `json:"expiration_time,omitempty" url:"expiration_time,omitempty"`
+	// The time when the credential expires.
+	ExpirationTimeDt *time.Time `json:"expiration_time_dt,omitempty" url:"expiration_time_dt,omitempty"`
+	// The timestamp when this programmatic credential was last used for authentication or API access.
+	LastUsedTime *Timestamp `json:"last_used_time,omitempty" url:"last_used_time,omitempty"`
+	// The timestamp when this programmatic credential was last used for authentication or API access.
+	LastUsedTimeDt *time.Time `json:"last_used_time_dt,omitempty" url:"last_used_time_dt,omitempty"`
+	// The display name of the credential.
+	Name *string `json:"name,omitempty" url:"name,omitempty"`
+	// The resource the credential belongs to, such as a project or workspace.
+	Resource *ResourceDetails `json:"resource,omitempty" url:"resource,omitempty"`
+	// The credential type, normalized to the caption of the <code>type_id</code> value. In the case of 'Other', it is defined by the event source.
+	Type *string `json:"type,omitempty" url:"type,omitempty"`
+	// The normalized identifier of the programmatic credential type.
+	TypeId *ProgrammaticCredentialTypeId `json:"type_id,omitempty" url:"type_id,omitempty"`
+	// The unique identifier of the programmatic credential, such as an API key ID.
+	Uid string `json:"uid" url:"uid"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (p *ProgrammaticCredential) GetCreatedTime() *Timestamp {
+	if p == nil {
+		return nil
+	}
+	return p.CreatedTime
+}
+
+func (p *ProgrammaticCredential) GetCreatedTimeDt() *time.Time {
+	if p == nil {
+		return nil
+	}
+	return p.CreatedTimeDt
+}
+
+func (p *ProgrammaticCredential) GetExpirationTime() *Timestamp {
+	if p == nil {
+		return nil
+	}
+	return p.ExpirationTime
+}
+
+func (p *ProgrammaticCredential) GetExpirationTimeDt() *time.Time {
+	if p == nil {
+		return nil
+	}
+	return p.ExpirationTimeDt
+}
+
+func (p *ProgrammaticCredential) GetLastUsedTime() *Timestamp {
+	if p == nil {
+		return nil
+	}
+	return p.LastUsedTime
+}
+
+func (p *ProgrammaticCredential) GetLastUsedTimeDt() *time.Time {
+	if p == nil {
+		return nil
+	}
+	return p.LastUsedTimeDt
+}
+
+func (p *ProgrammaticCredential) GetName() *string {
+	if p == nil {
+		return nil
+	}
+	return p.Name
+}
+
+func (p *ProgrammaticCredential) GetResource() *ResourceDetails {
+	if p == nil {
+		return nil
+	}
+	return p.Resource
+}
+
+func (p *ProgrammaticCredential) GetType() *string {
+	if p == nil {
+		return nil
+	}
+	return p.Type
+}
+
+func (p *ProgrammaticCredential) GetTypeId() *ProgrammaticCredentialTypeId {
+	if p == nil {
+		return nil
+	}
+	return p.TypeId
+}
+
+func (p *ProgrammaticCredential) GetUid() string {
+	if p == nil {
+		return ""
+	}
+	return p.Uid
+}
+
+func (p *ProgrammaticCredential) GetExtraProperties() map[string]interface{} {
+	if p == nil {
+		return nil
+	}
+	return p.extraProperties
+}
+
+func (p *ProgrammaticCredential) require(field *big.Int) {
+	if p.explicitFields == nil {
+		p.explicitFields = big.NewInt(0)
+	}
+	p.explicitFields.Or(p.explicitFields, field)
+}
+
+// SetCreatedTime sets the CreatedTime field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (p *ProgrammaticCredential) SetCreatedTime(createdTime *Timestamp) {
+	p.CreatedTime = createdTime
+	p.require(programmaticCredentialFieldCreatedTime)
+}
+
+// SetCreatedTimeDt sets the CreatedTimeDt field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (p *ProgrammaticCredential) SetCreatedTimeDt(createdTimeDt *time.Time) {
+	p.CreatedTimeDt = createdTimeDt
+	p.require(programmaticCredentialFieldCreatedTimeDt)
+}
+
+// SetExpirationTime sets the ExpirationTime field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (p *ProgrammaticCredential) SetExpirationTime(expirationTime *Timestamp) {
+	p.ExpirationTime = expirationTime
+	p.require(programmaticCredentialFieldExpirationTime)
+}
+
+// SetExpirationTimeDt sets the ExpirationTimeDt field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (p *ProgrammaticCredential) SetExpirationTimeDt(expirationTimeDt *time.Time) {
+	p.ExpirationTimeDt = expirationTimeDt
+	p.require(programmaticCredentialFieldExpirationTimeDt)
+}
+
+// SetLastUsedTime sets the LastUsedTime field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (p *ProgrammaticCredential) SetLastUsedTime(lastUsedTime *Timestamp) {
+	p.LastUsedTime = lastUsedTime
+	p.require(programmaticCredentialFieldLastUsedTime)
+}
+
+// SetLastUsedTimeDt sets the LastUsedTimeDt field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (p *ProgrammaticCredential) SetLastUsedTimeDt(lastUsedTimeDt *time.Time) {
+	p.LastUsedTimeDt = lastUsedTimeDt
+	p.require(programmaticCredentialFieldLastUsedTimeDt)
+}
+
+// SetName sets the Name field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (p *ProgrammaticCredential) SetName(name *string) {
+	p.Name = name
+	p.require(programmaticCredentialFieldName)
+}
+
+// SetResource sets the Resource field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (p *ProgrammaticCredential) SetResource(resource *ResourceDetails) {
+	p.Resource = resource
+	p.require(programmaticCredentialFieldResource)
+}
+
+// SetType sets the Type field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (p *ProgrammaticCredential) SetType(type_ *string) {
+	p.Type = type_
+	p.require(programmaticCredentialFieldType)
+}
+
+// SetTypeId sets the TypeId field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (p *ProgrammaticCredential) SetTypeId(typeId *ProgrammaticCredentialTypeId) {
+	p.TypeId = typeId
+	p.require(programmaticCredentialFieldTypeId)
+}
+
+// SetUid sets the Uid field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (p *ProgrammaticCredential) SetUid(uid string) {
+	p.Uid = uid
+	p.require(programmaticCredentialFieldUid)
+}
+
+func (p *ProgrammaticCredential) UnmarshalJSON(data []byte) error {
+	type embed ProgrammaticCredential
+	var unmarshaler = struct {
+		embed
+		CreatedTimeDt    *internal.DateTime `json:"created_time_dt,omitempty"`
+		ExpirationTimeDt *internal.DateTime `json:"expiration_time_dt,omitempty"`
+		LastUsedTimeDt   *internal.DateTime `json:"last_used_time_dt,omitempty"`
+	}{
+		embed: embed(*p),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*p = ProgrammaticCredential(unmarshaler.embed)
+	p.CreatedTimeDt = unmarshaler.CreatedTimeDt.TimePtr()
+	p.ExpirationTimeDt = unmarshaler.ExpirationTimeDt.TimePtr()
+	p.LastUsedTimeDt = unmarshaler.LastUsedTimeDt.TimePtr()
+	extraProperties, err := internal.ExtractExtraProperties(data, *p)
+	if err != nil {
+		return err
+	}
+	p.extraProperties = extraProperties
+	p.rawJSON = nil
+	return nil
+}
+
+func (p *ProgrammaticCredential) MarshalJSON() ([]byte, error) {
+	type embed ProgrammaticCredential
+	var marshaler = struct {
+		embed
+		CreatedTimeDt    *internal.DateTime `json:"created_time_dt,omitempty"`
+		ExpirationTimeDt *internal.DateTime `json:"expiration_time_dt,omitempty"`
+		LastUsedTimeDt   *internal.DateTime `json:"last_used_time_dt,omitempty"`
+	}{
+		embed:            embed(*p),
+		CreatedTimeDt:    internal.NewOptionalDateTime(p.CreatedTimeDt),
+		ExpirationTimeDt: internal.NewOptionalDateTime(p.ExpirationTimeDt),
+		LastUsedTimeDt:   internal.NewOptionalDateTime(p.LastUsedTimeDt),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, p.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (p *ProgrammaticCredential) String() string {
+	if p == nil {
+		return "<nil>"
+	}
+	if len(p.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(p.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(p); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", p)
+}
+
+// ProgrammaticCredentialTypeId is an enum, and the following values are allowed.
+// 0 - Unknown: The credential type is unknown.
+// 1 - APIKey: An API key.
+// 2 - ClientSecret: A client secret or password registered for an application.
+// 3 - Certificate: A certificate or public key registered for the credential holder. For example, a client authentication certificate or a token-signing certificate.
+// 4 - AccessToken: An access token issued through an OAuth or similar authorization flow.
+// 5 - ServiceAccountKey: A key issued for a service account.
+// 6 - PersonalAccessToken: A token a user issues for themselves to access an API.
+// 99 - Other: The credential type is not mapped. See the <code>type</code> attribute, which contains a data source specific value.
+type ProgrammaticCredentialTypeId = int
+
 // The query info object holds information related to data access within a datastore. To access, manipulate, delete, or retrieve data from a datastore, a query must be written using a specific syntax.
 var (
 	queryInfoFieldBytes       = big.NewInt(1 << 0)
@@ -35886,32 +36169,33 @@ type UrlCategoryIds = int
 
 // The User object describes the characteristics of a user/person or a security principal.
 var (
-	userFieldAccount       = big.NewInt(1 << 0)
-	userFieldCredentialUid = big.NewInt(1 << 1)
-	userFieldDomain        = big.NewInt(1 << 2)
-	userFieldEmailAddr     = big.NewInt(1 << 3)
-	userFieldForwardAddr   = big.NewInt(1 << 4)
-	userFieldFullName      = big.NewInt(1 << 5)
-	userFieldGroups        = big.NewInt(1 << 6)
-	userFieldHasMfa        = big.NewInt(1 << 7)
-	userFieldLdapPerson    = big.NewInt(1 << 8)
-	userFieldLeaveEvents   = big.NewInt(1 << 9)
-	userFieldMfaStatus     = big.NewInt(1 << 10)
-	userFieldMfaStatusId   = big.NewInt(1 << 11)
-	userFieldName          = big.NewInt(1 << 12)
-	userFieldOnLeave       = big.NewInt(1 << 13)
-	userFieldOrg           = big.NewInt(1 << 14)
-	userFieldPhoneNumber   = big.NewInt(1 << 15)
-	userFieldPrivileges    = big.NewInt(1 << 16)
-	userFieldRiskLevel     = big.NewInt(1 << 17)
-	userFieldRiskLevelId   = big.NewInt(1 << 18)
-	userFieldRiskScore     = big.NewInt(1 << 19)
-	userFieldType          = big.NewInt(1 << 20)
-	userFieldTypeId        = big.NewInt(1 << 21)
-	userFieldUid           = big.NewInt(1 << 22)
-	userFieldUidAlt        = big.NewInt(1 << 23)
-	userFieldUserStatus    = big.NewInt(1 << 24)
-	userFieldUserStatusId  = big.NewInt(1 << 25)
+	userFieldAccount                 = big.NewInt(1 << 0)
+	userFieldCredentialUid           = big.NewInt(1 << 1)
+	userFieldDomain                  = big.NewInt(1 << 2)
+	userFieldEmailAddr               = big.NewInt(1 << 3)
+	userFieldForwardAddr             = big.NewInt(1 << 4)
+	userFieldFullName                = big.NewInt(1 << 5)
+	userFieldGroups                  = big.NewInt(1 << 6)
+	userFieldHasMfa                  = big.NewInt(1 << 7)
+	userFieldLdapPerson              = big.NewInt(1 << 8)
+	userFieldLeaveEvents             = big.NewInt(1 << 9)
+	userFieldMfaStatus               = big.NewInt(1 << 10)
+	userFieldMfaStatusId             = big.NewInt(1 << 11)
+	userFieldName                    = big.NewInt(1 << 12)
+	userFieldOnLeave                 = big.NewInt(1 << 13)
+	userFieldOrg                     = big.NewInt(1 << 14)
+	userFieldPhoneNumber             = big.NewInt(1 << 15)
+	userFieldPrivileges              = big.NewInt(1 << 16)
+	userFieldProgrammaticCredentials = big.NewInt(1 << 17)
+	userFieldRiskLevel               = big.NewInt(1 << 18)
+	userFieldRiskLevelId             = big.NewInt(1 << 19)
+	userFieldRiskScore               = big.NewInt(1 << 20)
+	userFieldType                    = big.NewInt(1 << 21)
+	userFieldTypeId                  = big.NewInt(1 << 22)
+	userFieldUid                     = big.NewInt(1 << 23)
+	userFieldUidAlt                  = big.NewInt(1 << 24)
+	userFieldUserStatus              = big.NewInt(1 << 25)
+	userFieldUserStatusId            = big.NewInt(1 << 26)
 )
 
 type User struct {
@@ -35949,6 +36233,8 @@ type User struct {
 	PhoneNumber *string `json:"phone_number,omitempty" url:"phone_number,omitempty"`
 	// The user's privileges.
 	Privileges []string `json:"privileges,omitempty" url:"privileges,omitempty"`
+	// Details about the programmatic credential (API keys, access tokens, certificates, etc) associated to the user.
+	ProgrammaticCredentials []*ProgrammaticCredential `json:"programmatic_credentials,omitempty" url:"programmatic_credentials,omitempty"`
 	// The risk level, normalized to the caption of the risk_level_id value.
 	RiskLevel *string `json:"risk_level,omitempty" url:"risk_level,omitempty"`
 	// The normalized risk level id.
@@ -36092,6 +36378,13 @@ func (u *User) GetPrivileges() []string {
 		return nil
 	}
 	return u.Privileges
+}
+
+func (u *User) GetProgrammaticCredentials() []*ProgrammaticCredential {
+	if u == nil {
+		return nil
+	}
+	return u.ProgrammaticCredentials
 }
 
 func (u *User) GetRiskLevel() *string {
@@ -36290,6 +36583,13 @@ func (u *User) SetPrivileges(privileges []string) {
 	u.require(userFieldPrivileges)
 }
 
+// SetProgrammaticCredentials sets the ProgrammaticCredentials field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (u *User) SetProgrammaticCredentials(programmaticCredentials []*ProgrammaticCredential) {
+	u.ProgrammaticCredentials = programmaticCredentials
+	u.require(userFieldProgrammaticCredentials)
+}
+
 // SetRiskLevel sets the RiskLevel field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
 func (u *User) SetRiskLevel(riskLevel *string) {
@@ -36417,6 +36717,7 @@ type UserRiskLevelId = int
 // 1 - User: Regular user account.
 // 2 - Admin: Admin/root user account.
 // 3 - System: System account. For example, Windows computer accounts with a trailing dollar sign ($).
+// 4 - Service: Service account. For example, Windows service account.
 // 99 - Other: The type is not mapped. See the <code>type</code> attribute, which contains a data source specific value.
 type UserTypeId = int
 

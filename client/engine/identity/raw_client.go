@@ -790,6 +790,61 @@ func (r *RawClient) ExpireAllUserSessions(
     }, nil
 }
 
+func (r *RawClient) RevokeProgrammaticCredential(
+    ctx context.Context,
+    userId engine.UserId,
+    // The `uid` of the programmatic credential, such as an API key ID, from the user's `programmatic_credentials` field.
+    credentialUid string,
+    request *engine.RevokeProgrammaticCredentialRequest,
+    opts ...option.RequestOption,
+) (*core.Response[any], error){
+    options := core.NewRequestOptions(opts...)
+    baseURL := internal.ResolveBaseURL(
+        options.BaseURL,
+        r.baseURL,
+        "https://api.synqly.com",
+    )
+    endpointURL := internal.EncodeURL(
+        baseURL + "/v1/identity/users/%v/programmatic-credentials/%v/actions/revoke",
+        userId,
+        credentialUid,
+    )
+    queryParams, err := internal.QueryValues(request)
+    if err != nil {
+        return nil, err
+    }
+    if len(queryParams) > 0 {
+        endpointURL += "?" + queryParams.Encode()
+    }
+    headers := internal.MergeHeaders(
+        r.options.ToHeader(),
+        options.ToHeader(),
+    )
+    raw, err := r.caller.Call(
+        ctx,
+        &internal.CallParams{
+            URL: endpointURL,
+            Method: http.MethodPost,
+            Headers: headers,
+            MaxAttempts: options.MaxAttempts,
+            DisableRetries: options.DisableRetries,
+            BodyProperties: options.BodyProperties,
+            QueryParameters: options.QueryParameters,
+            Client: options.HTTPClient,
+            Request: request,
+            ErrorDecoder: internal.NewErrorDecoder(engine.ErrorCodes),
+        },
+    )
+    if err != nil {
+        return nil, err
+    }
+    return &core.Response[any]{
+        StatusCode: raw.StatusCode,
+        Header: raw.Header,
+        Body: nil,
+    }, nil
+}
+
 func (r *RawClient) GetUserPicture(
     ctx context.Context,
     userId engine.UserId,

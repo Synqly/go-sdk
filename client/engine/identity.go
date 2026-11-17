@@ -802,6 +802,63 @@ func (q *QueryUserRequest) SetFilter(filter []*string) {
 }
 
 var (
+	revokeProgrammaticCredentialRequestFieldMeta        = big.NewInt(1 << 0)
+	revokeProgrammaticCredentialRequestFieldResourceUid = big.NewInt(1 << 1)
+)
+
+type RevokeProgrammaticCredentialRequest struct {
+	// Add metadata to the response by invoking meta functions. Documentation for [meta functions](https://docs.synqly.com/api-reference/meta-functions) is available. Not all meta functions are available at every endpoint.
+	Meta []*string `json:"-" url:"meta,omitempty"`
+	// The `uid` of the credential's `resource`, from the user's `programmatic_credentials` field. Give it whenever the credential lists a `resource`; a credential that lists one cannot be revoked without it.
+	ResourceUid *string `json:"resource_uid,omitempty" url:"-"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+}
+
+func (r *RevokeProgrammaticCredentialRequest) require(field *big.Int) {
+	if r.explicitFields == nil {
+		r.explicitFields = big.NewInt(0)
+	}
+	r.explicitFields.Or(r.explicitFields, field)
+}
+
+// SetMeta sets the Meta field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (r *RevokeProgrammaticCredentialRequest) SetMeta(meta []*string) {
+	r.Meta = meta
+	r.require(revokeProgrammaticCredentialRequestFieldMeta)
+}
+
+// SetResourceUid sets the ResourceUid field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (r *RevokeProgrammaticCredentialRequest) SetResourceUid(resourceUid *string) {
+	r.ResourceUid = resourceUid
+	r.require(revokeProgrammaticCredentialRequestFieldResourceUid)
+}
+
+func (r *RevokeProgrammaticCredentialRequest) UnmarshalJSON(data []byte) error {
+	type unmarshaler RevokeProgrammaticCredentialRequest
+	var body unmarshaler
+	if err := json.Unmarshal(data, &body); err != nil {
+		return err
+	}
+	*r = RevokeProgrammaticCredentialRequest(body)
+	return nil
+}
+
+func (r *RevokeProgrammaticCredentialRequest) MarshalJSON() ([]byte, error) {
+	type embed RevokeProgrammaticCredentialRequest
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*r),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, r.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+var (
 	getGroupMembersResponseFieldMessages = big.NewInt(1 << 0)
 	getGroupMembersResponseFieldMeta     = big.NewInt(1 << 1)
 	getGroupMembersResponseFieldCursor   = big.NewInt(1 << 2)

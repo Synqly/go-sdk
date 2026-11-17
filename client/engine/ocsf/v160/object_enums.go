@@ -1526,6 +1526,26 @@ const Process_Integrity_Protected ProcessIntegrityId = 6
 // Other. The integrity level is not mapped. See the <code>integrity</code> attribute, which contains a data source specific value.
 const Process_Integrity_Other ProcessIntegrityId = 99
 
+// ProgrammaticCredentialTypeId Values
+// Type ID. The normalized identifier of the programmatic credential type.
+
+// Unknown. The credential type is unknown.
+const ProgrammaticCredential_Type_Unknown ProgrammaticCredentialTypeId = 0
+// APIKey. An API key.
+const ProgrammaticCredential_Type_APIKey ProgrammaticCredentialTypeId = 1
+// ClientSecret. A client secret or password registered for an application.
+const ProgrammaticCredential_Type_ClientSecret ProgrammaticCredentialTypeId = 2
+// Certificate. A certificate or public key registered for the credential holder. For example, a client authentication certificate or a token-signing certificate.
+const ProgrammaticCredential_Type_Certificate ProgrammaticCredentialTypeId = 3
+// AccessToken. An access token issued through an OAuth or similar authorization flow.
+const ProgrammaticCredential_Type_AccessToken ProgrammaticCredentialTypeId = 4
+// ServiceAccountKey. A key issued for a service account.
+const ProgrammaticCredential_Type_ServiceAccountKey ProgrammaticCredentialTypeId = 5
+// PersonalAccessToken. A token a user issues for themselves to access an API.
+const ProgrammaticCredential_Type_PersonalAccessToken ProgrammaticCredentialTypeId = 6
+// Other. The credential type is not mapped. See the <code>type</code> attribute, which contains a data source specific value.
+const ProgrammaticCredential_Type_Other ProgrammaticCredentialTypeId = 99
+
 // QueryEvidenceQueryTypeId Values
 // Query Type ID. The normalized type of system query performed against a device or system component.
 

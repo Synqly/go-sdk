@@ -1270,6 +1270,26 @@ const Process_Integrity_Protected ProcessIntegrityId = 6
 // Other. The integrity level is not mapped. See the <code>integrity</code> attribute, which contains a data source specific value.
 const Process_Integrity_Other ProcessIntegrityId = 99
 
+// ProgrammaticCredentialTypeId Values
+// Type ID. The normalized identifier of the programmatic credential type.
+
+// Unknown. The credential type is unknown.
+const ProgrammaticCredential_Type_Unknown ProgrammaticCredentialTypeId = 0
+// APIKey. An API key.
+const ProgrammaticCredential_Type_APIKey ProgrammaticCredentialTypeId = 1
+// ClientSecret. A client secret or password registered for an application.
+const ProgrammaticCredential_Type_ClientSecret ProgrammaticCredentialTypeId = 2
+// Certificate. A certificate or public key registered for the credential holder. For example, a client authentication certificate or a token-signing certificate.
+const ProgrammaticCredential_Type_Certificate ProgrammaticCredentialTypeId = 3
+// AccessToken. An access token issued through an OAuth or similar authorization flow.
+const ProgrammaticCredential_Type_AccessToken ProgrammaticCredentialTypeId = 4
+// ServiceAccountKey. A key issued for a service account.
+const ProgrammaticCredential_Type_ServiceAccountKey ProgrammaticCredentialTypeId = 5
+// PersonalAccessToken. A token a user issues for themselves to access an API.
+const ProgrammaticCredential_Type_PersonalAccessToken ProgrammaticCredentialTypeId = 6
+// Other. The credential type is not mapped. See the <code>type</code> attribute, which contains a data source specific value.
+const ProgrammaticCredential_Type_Other ProgrammaticCredentialTypeId = 99
+
 // RelatedEventSeverityId Values
 // Severity ID. <p>The normalized identifier of the event/finding severity.</p>The normalized severity is a measurement the effort and expense required to manage and resolve an event or incident. Smaller numerical values represent lower impact events, and larger numerical values represent higher impact events.
 
@@ -1987,6 +2007,8 @@ const User_Type_User UserTypeId = 1
 const User_Type_Admin UserTypeId = 2
 // System. System account. For example, Windows computer accounts with a trailing dollar sign ($).
 const User_Type_System UserTypeId = 3
+// Service. Service account. For example, Windows service account.
+const User_Type_Service UserTypeId = 4
 // Other. The type is not mapped. See the <code>type</code> attribute, which contains a data source specific value.
 const User_Type_Other UserTypeId = 99
 

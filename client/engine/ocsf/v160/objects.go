@@ -32533,22 +32533,43 @@ func (p *Product) String() string {
 	return fmt.Sprintf("%#v", p)
 }
 
-// The Programmatic Credential object describes service-specific credentials used for direct API access and system integration. These credentials are typically issued by individual services or platforms for accessing their APIs and resources, focusing on credential lifecycle management and usage tracking. Examples include API keys, service account keys, client certificates, and vendor-specific access tokens.
+// The Programmatic Credential object describes service-specific credentials used for direct API access and system integration, such as API keys, service account keys, client certificates and access tokens.
 var (
-	programmaticCredentialFieldLastUsedTime   = big.NewInt(1 << 0)
-	programmaticCredentialFieldLastUsedTimeDt = big.NewInt(1 << 1)
-	programmaticCredentialFieldType           = big.NewInt(1 << 2)
-	programmaticCredentialFieldUid            = big.NewInt(1 << 3)
+	programmaticCredentialFieldCreatedTime      = big.NewInt(1 << 0)
+	programmaticCredentialFieldCreatedTimeDt    = big.NewInt(1 << 1)
+	programmaticCredentialFieldExpirationTime   = big.NewInt(1 << 2)
+	programmaticCredentialFieldExpirationTimeDt = big.NewInt(1 << 3)
+	programmaticCredentialFieldLastUsedTime     = big.NewInt(1 << 4)
+	programmaticCredentialFieldLastUsedTimeDt   = big.NewInt(1 << 5)
+	programmaticCredentialFieldName             = big.NewInt(1 << 6)
+	programmaticCredentialFieldResource         = big.NewInt(1 << 7)
+	programmaticCredentialFieldType             = big.NewInt(1 << 8)
+	programmaticCredentialFieldTypeId           = big.NewInt(1 << 9)
+	programmaticCredentialFieldUid              = big.NewInt(1 << 10)
 )
 
 type ProgrammaticCredential struct {
-	// The timestamp when this programmatic credential was last used for authentication or API access. This helps track credential usage patterns, identify dormant credentials that may pose security risks, and support credential lifecycle management. The timestamp should reflect the most recent successful authentication or API call using this credential.
+	// The time when the credential was created or became valid.
+	CreatedTime *Timestamp `json:"created_time,omitempty" url:"created_time,omitempty"`
+	// The time when the credential was created or became valid.
+	CreatedTimeDt *time.Time `json:"created_time_dt,omitempty" url:"created_time_dt,omitempty"`
+	// The time when the credential expires.
+	ExpirationTime *Timestamp `json:"expiration_time,omitempty" url:"expiration_time,omitempty"`
+	// The time when the credential expires.
+	ExpirationTimeDt *time.Time `json:"expiration_time_dt,omitempty" url:"expiration_time_dt,omitempty"`
+	// The timestamp when this programmatic credential was last used for authentication or API access.
 	LastUsedTime *Timestamp `json:"last_used_time,omitempty" url:"last_used_time,omitempty"`
-	// The timestamp when this programmatic credential was last used for authentication or API access. This helps track credential usage patterns, identify dormant credentials that may pose security risks, and support credential lifecycle management. The timestamp should reflect the most recent successful authentication or API call using this credential.
+	// The timestamp when this programmatic credential was last used for authentication or API access.
 	LastUsedTimeDt *time.Time `json:"last_used_time_dt,omitempty" url:"last_used_time_dt,omitempty"`
-	// The type or category of programmatic credential, normalized to the caption of the type_id value. In the case of 'Other', it is defined by the event source. Examples include 'API Key', 'Service Account Key', 'Access Token', 'Client Certificate', 'OAuth Token', 'Personal Access Token', etc.
+	// The display name of the credential.
+	Name *string `json:"name,omitempty" url:"name,omitempty"`
+	// The resource the credential belongs to, such as a project or workspace.
+	Resource *ResourceDetails `json:"resource,omitempty" url:"resource,omitempty"`
+	// The credential type, normalized to the caption of the <code>type_id</code> value. In the case of 'Other', it is defined by the event source.
 	Type *string `json:"type,omitempty" url:"type,omitempty"`
-	// The unique identifier of the programmatic credential. This could be an API key ID, service account key ID, access token identifier, certificate serial number, or other unique identifier that distinguishes this credential from others. Examples: AWS Access Key ID, GCP Service Account Key ID, Azure Application ID, or OAuth2 token identifier.
+	// The normalized identifier of the programmatic credential type.
+	TypeId *ProgrammaticCredentialTypeId `json:"type_id,omitempty" url:"type_id,omitempty"`
+	// The unique identifier of the programmatic credential, such as an API key ID.
 	Uid string `json:"uid" url:"uid"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
@@ -32556,6 +32577,34 @@ type ProgrammaticCredential struct {
 
 	extraProperties map[string]interface{}
 	rawJSON         json.RawMessage
+}
+
+func (p *ProgrammaticCredential) GetCreatedTime() *Timestamp {
+	if p == nil {
+		return nil
+	}
+	return p.CreatedTime
+}
+
+func (p *ProgrammaticCredential) GetCreatedTimeDt() *time.Time {
+	if p == nil {
+		return nil
+	}
+	return p.CreatedTimeDt
+}
+
+func (p *ProgrammaticCredential) GetExpirationTime() *Timestamp {
+	if p == nil {
+		return nil
+	}
+	return p.ExpirationTime
+}
+
+func (p *ProgrammaticCredential) GetExpirationTimeDt() *time.Time {
+	if p == nil {
+		return nil
+	}
+	return p.ExpirationTimeDt
 }
 
 func (p *ProgrammaticCredential) GetLastUsedTime() *Timestamp {
@@ -32572,11 +32621,32 @@ func (p *ProgrammaticCredential) GetLastUsedTimeDt() *time.Time {
 	return p.LastUsedTimeDt
 }
 
+func (p *ProgrammaticCredential) GetName() *string {
+	if p == nil {
+		return nil
+	}
+	return p.Name
+}
+
+func (p *ProgrammaticCredential) GetResource() *ResourceDetails {
+	if p == nil {
+		return nil
+	}
+	return p.Resource
+}
+
 func (p *ProgrammaticCredential) GetType() *string {
 	if p == nil {
 		return nil
 	}
 	return p.Type
+}
+
+func (p *ProgrammaticCredential) GetTypeId() *ProgrammaticCredentialTypeId {
+	if p == nil {
+		return nil
+	}
+	return p.TypeId
 }
 
 func (p *ProgrammaticCredential) GetUid() string {
@@ -32600,6 +32670,34 @@ func (p *ProgrammaticCredential) require(field *big.Int) {
 	p.explicitFields.Or(p.explicitFields, field)
 }
 
+// SetCreatedTime sets the CreatedTime field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (p *ProgrammaticCredential) SetCreatedTime(createdTime *Timestamp) {
+	p.CreatedTime = createdTime
+	p.require(programmaticCredentialFieldCreatedTime)
+}
+
+// SetCreatedTimeDt sets the CreatedTimeDt field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (p *ProgrammaticCredential) SetCreatedTimeDt(createdTimeDt *time.Time) {
+	p.CreatedTimeDt = createdTimeDt
+	p.require(programmaticCredentialFieldCreatedTimeDt)
+}
+
+// SetExpirationTime sets the ExpirationTime field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (p *ProgrammaticCredential) SetExpirationTime(expirationTime *Timestamp) {
+	p.ExpirationTime = expirationTime
+	p.require(programmaticCredentialFieldExpirationTime)
+}
+
+// SetExpirationTimeDt sets the ExpirationTimeDt field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (p *ProgrammaticCredential) SetExpirationTimeDt(expirationTimeDt *time.Time) {
+	p.ExpirationTimeDt = expirationTimeDt
+	p.require(programmaticCredentialFieldExpirationTimeDt)
+}
+
 // SetLastUsedTime sets the LastUsedTime field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
 func (p *ProgrammaticCredential) SetLastUsedTime(lastUsedTime *Timestamp) {
@@ -32614,11 +32712,32 @@ func (p *ProgrammaticCredential) SetLastUsedTimeDt(lastUsedTimeDt *time.Time) {
 	p.require(programmaticCredentialFieldLastUsedTimeDt)
 }
 
+// SetName sets the Name field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (p *ProgrammaticCredential) SetName(name *string) {
+	p.Name = name
+	p.require(programmaticCredentialFieldName)
+}
+
+// SetResource sets the Resource field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (p *ProgrammaticCredential) SetResource(resource *ResourceDetails) {
+	p.Resource = resource
+	p.require(programmaticCredentialFieldResource)
+}
+
 // SetType sets the Type field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
 func (p *ProgrammaticCredential) SetType(type_ *string) {
 	p.Type = type_
 	p.require(programmaticCredentialFieldType)
+}
+
+// SetTypeId sets the TypeId field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (p *ProgrammaticCredential) SetTypeId(typeId *ProgrammaticCredentialTypeId) {
+	p.TypeId = typeId
+	p.require(programmaticCredentialFieldTypeId)
 }
 
 // SetUid sets the Uid field and marks it as non-optional;
@@ -32632,7 +32751,9 @@ func (p *ProgrammaticCredential) UnmarshalJSON(data []byte) error {
 	type embed ProgrammaticCredential
 	var unmarshaler = struct {
 		embed
-		LastUsedTimeDt *internal.DateTime `json:"last_used_time_dt,omitempty"`
+		CreatedTimeDt    *internal.DateTime `json:"created_time_dt,omitempty"`
+		ExpirationTimeDt *internal.DateTime `json:"expiration_time_dt,omitempty"`
+		LastUsedTimeDt   *internal.DateTime `json:"last_used_time_dt,omitempty"`
 	}{
 		embed: embed(*p),
 	}
@@ -32640,6 +32761,8 @@ func (p *ProgrammaticCredential) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*p = ProgrammaticCredential(unmarshaler.embed)
+	p.CreatedTimeDt = unmarshaler.CreatedTimeDt.TimePtr()
+	p.ExpirationTimeDt = unmarshaler.ExpirationTimeDt.TimePtr()
 	p.LastUsedTimeDt = unmarshaler.LastUsedTimeDt.TimePtr()
 	extraProperties, err := internal.ExtractExtraProperties(data, *p)
 	if err != nil {
@@ -32654,10 +32777,14 @@ func (p *ProgrammaticCredential) MarshalJSON() ([]byte, error) {
 	type embed ProgrammaticCredential
 	var marshaler = struct {
 		embed
-		LastUsedTimeDt *internal.DateTime `json:"last_used_time_dt,omitempty"`
+		CreatedTimeDt    *internal.DateTime `json:"created_time_dt,omitempty"`
+		ExpirationTimeDt *internal.DateTime `json:"expiration_time_dt,omitempty"`
+		LastUsedTimeDt   *internal.DateTime `json:"last_used_time_dt,omitempty"`
 	}{
-		embed:          embed(*p),
-		LastUsedTimeDt: internal.NewOptionalDateTime(p.LastUsedTimeDt),
+		embed:            embed(*p),
+		CreatedTimeDt:    internal.NewOptionalDateTime(p.CreatedTimeDt),
+		ExpirationTimeDt: internal.NewOptionalDateTime(p.ExpirationTimeDt),
+		LastUsedTimeDt:   internal.NewOptionalDateTime(p.LastUsedTimeDt),
 	}
 	explicitMarshaler := internal.HandleExplicitFields(marshaler, p.explicitFields)
 	return json.Marshal(explicitMarshaler)
@@ -32677,6 +32804,17 @@ func (p *ProgrammaticCredential) String() string {
 	}
 	return fmt.Sprintf("%#v", p)
 }
+
+// ProgrammaticCredentialTypeId is an enum, and the following values are allowed.
+// 0 - Unknown: The credential type is unknown.
+// 1 - APIKey: An API key.
+// 2 - ClientSecret: A client secret or password registered for an application.
+// 3 - Certificate: A certificate or public key registered for the credential holder. For example, a client authentication certificate or a token-signing certificate.
+// 4 - AccessToken: An access token issued through an OAuth or similar authorization flow.
+// 5 - ServiceAccountKey: A key issued for a service account.
+// 6 - PersonalAccessToken: A token a user issues for themselves to access an API.
+// 99 - Other: The credential type is not mapped. See the <code>type</code> attribute, which contains a data source specific value.
+type ProgrammaticCredentialTypeId = int
 
 // The specific resulting evidence information that was queried or discovered. When mapping raw telemetry data users should select the appropriate child object that best matches the evidence type as defined by query_type_id.
 var (

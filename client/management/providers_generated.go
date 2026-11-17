@@ -5873,6 +5873,125 @@ func (c *ChatMicrosoftTeams) String() string {
 	return fmt.Sprintf("%#v", c)
 }
 
+// Configuration for a ChatGPT Enterprise or Edu workspace as a chat provider.
+var (
+	chatOpenAiChatGptFieldCredential  = big.NewInt(1 << 0)
+	chatOpenAiChatGptFieldUrl         = big.NewInt(1 << 1)
+	chatOpenAiChatGptFieldWorkspaceId = big.NewInt(1 << 2)
+)
+
+type ChatOpenAiChatGpt struct {
+	Credential *OpenAiChatGptAdminCredential `json:"credential" url:"credential"`
+	// Base URL for the ChatGPT API. Only required for custom or proxied environments.
+	Url *string `json:"url,omitempty" url:"url,omitempty"`
+	// ID of the ChatGPT Enterprise or Edu workspace.
+	WorkspaceId string `json:"workspace_id" url:"workspace_id"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (c *ChatOpenAiChatGpt) GetCredential() *OpenAiChatGptAdminCredential {
+	if c == nil {
+		return nil
+	}
+	return c.Credential
+}
+
+func (c *ChatOpenAiChatGpt) GetUrl() *string {
+	if c == nil {
+		return nil
+	}
+	return c.Url
+}
+
+func (c *ChatOpenAiChatGpt) GetWorkspaceId() string {
+	if c == nil {
+		return ""
+	}
+	return c.WorkspaceId
+}
+
+func (c *ChatOpenAiChatGpt) GetExtraProperties() map[string]interface{} {
+	if c == nil {
+		return nil
+	}
+	return c.extraProperties
+}
+
+func (c *ChatOpenAiChatGpt) require(field *big.Int) {
+	if c.explicitFields == nil {
+		c.explicitFields = big.NewInt(0)
+	}
+	c.explicitFields.Or(c.explicitFields, field)
+}
+
+// SetCredential sets the Credential field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *ChatOpenAiChatGpt) SetCredential(credential *OpenAiChatGptAdminCredential) {
+	c.Credential = credential
+	c.require(chatOpenAiChatGptFieldCredential)
+}
+
+// SetUrl sets the Url field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *ChatOpenAiChatGpt) SetUrl(url *string) {
+	c.Url = url
+	c.require(chatOpenAiChatGptFieldUrl)
+}
+
+// SetWorkspaceId sets the WorkspaceId field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *ChatOpenAiChatGpt) SetWorkspaceId(workspaceId string) {
+	c.WorkspaceId = workspaceId
+	c.require(chatOpenAiChatGptFieldWorkspaceId)
+}
+
+func (c *ChatOpenAiChatGpt) UnmarshalJSON(data []byte) error {
+	type unmarshaler ChatOpenAiChatGpt
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = ChatOpenAiChatGpt(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+	c.rawJSON = nil
+	return nil
+}
+
+func (c *ChatOpenAiChatGpt) MarshalJSON() ([]byte, error) {
+	type embed ChatOpenAiChatGpt
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*c),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, c.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (c *ChatOpenAiChatGpt) String() string {
+	if c == nil {
+		return "<nil>"
+	}
+	if len(c.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(c.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
 // Configuration for Slack.
 //
 // [Configuration guide](https://docs.synqly.com/guides/provider-configuration/slack-chat-setup)
@@ -18390,6 +18509,227 @@ func (i *IdentityOktaMock) String() string {
 	return fmt.Sprintf("%#v", i)
 }
 
+// Configuration for a ChatGPT Enterprise or Edu workspace as an identity provider.
+var (
+	identityOpenAiChatGptFieldCredential  = big.NewInt(1 << 0)
+	identityOpenAiChatGptFieldUrl         = big.NewInt(1 << 1)
+	identityOpenAiChatGptFieldWorkspaceId = big.NewInt(1 << 2)
+)
+
+type IdentityOpenAiChatGpt struct {
+	Credential *OpenAiChatGptAdminCredential `json:"credential" url:"credential"`
+	// Base URL for the ChatGPT API. Only required for custom or proxied environments.
+	Url *string `json:"url,omitempty" url:"url,omitempty"`
+	// ID of the ChatGPT Enterprise or Edu workspace.
+	WorkspaceId string `json:"workspace_id" url:"workspace_id"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (i *IdentityOpenAiChatGpt) GetCredential() *OpenAiChatGptAdminCredential {
+	if i == nil {
+		return nil
+	}
+	return i.Credential
+}
+
+func (i *IdentityOpenAiChatGpt) GetUrl() *string {
+	if i == nil {
+		return nil
+	}
+	return i.Url
+}
+
+func (i *IdentityOpenAiChatGpt) GetWorkspaceId() string {
+	if i == nil {
+		return ""
+	}
+	return i.WorkspaceId
+}
+
+func (i *IdentityOpenAiChatGpt) GetExtraProperties() map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	return i.extraProperties
+}
+
+func (i *IdentityOpenAiChatGpt) require(field *big.Int) {
+	if i.explicitFields == nil {
+		i.explicitFields = big.NewInt(0)
+	}
+	i.explicitFields.Or(i.explicitFields, field)
+}
+
+// SetCredential sets the Credential field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (i *IdentityOpenAiChatGpt) SetCredential(credential *OpenAiChatGptAdminCredential) {
+	i.Credential = credential
+	i.require(identityOpenAiChatGptFieldCredential)
+}
+
+// SetUrl sets the Url field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (i *IdentityOpenAiChatGpt) SetUrl(url *string) {
+	i.Url = url
+	i.require(identityOpenAiChatGptFieldUrl)
+}
+
+// SetWorkspaceId sets the WorkspaceId field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (i *IdentityOpenAiChatGpt) SetWorkspaceId(workspaceId string) {
+	i.WorkspaceId = workspaceId
+	i.require(identityOpenAiChatGptFieldWorkspaceId)
+}
+
+func (i *IdentityOpenAiChatGpt) UnmarshalJSON(data []byte) error {
+	type unmarshaler IdentityOpenAiChatGpt
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*i = IdentityOpenAiChatGpt(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *i)
+	if err != nil {
+		return err
+	}
+	i.extraProperties = extraProperties
+	i.rawJSON = nil
+	return nil
+}
+
+func (i *IdentityOpenAiChatGpt) MarshalJSON() ([]byte, error) {
+	type embed IdentityOpenAiChatGpt
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*i),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, i.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (i *IdentityOpenAiChatGpt) String() string {
+	if i == nil {
+		return "<nil>"
+	}
+	if len(i.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(i.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(i); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", i)
+}
+
+// Configuration for an OpenAI API platform organization as an identity provider.
+var (
+	identityOpenAiPlatformFieldCredential = big.NewInt(1 << 0)
+	identityOpenAiPlatformFieldUrl        = big.NewInt(1 << 1)
+)
+
+type IdentityOpenAiPlatform struct {
+	Credential *OpenAiAdminCredential `json:"credential" url:"credential"`
+	// Base URL for the OpenAI API. Only required for custom or proxied environments.
+	Url *string `json:"url,omitempty" url:"url,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (i *IdentityOpenAiPlatform) GetCredential() *OpenAiAdminCredential {
+	if i == nil {
+		return nil
+	}
+	return i.Credential
+}
+
+func (i *IdentityOpenAiPlatform) GetUrl() *string {
+	if i == nil {
+		return nil
+	}
+	return i.Url
+}
+
+func (i *IdentityOpenAiPlatform) GetExtraProperties() map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	return i.extraProperties
+}
+
+func (i *IdentityOpenAiPlatform) require(field *big.Int) {
+	if i.explicitFields == nil {
+		i.explicitFields = big.NewInt(0)
+	}
+	i.explicitFields.Or(i.explicitFields, field)
+}
+
+// SetCredential sets the Credential field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (i *IdentityOpenAiPlatform) SetCredential(credential *OpenAiAdminCredential) {
+	i.Credential = credential
+	i.require(identityOpenAiPlatformFieldCredential)
+}
+
+// SetUrl sets the Url field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (i *IdentityOpenAiPlatform) SetUrl(url *string) {
+	i.Url = url
+	i.require(identityOpenAiPlatformFieldUrl)
+}
+
+func (i *IdentityOpenAiPlatform) UnmarshalJSON(data []byte) error {
+	type unmarshaler IdentityOpenAiPlatform
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*i = IdentityOpenAiPlatform(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *i)
+	if err != nil {
+		return err
+	}
+	i.extraProperties = extraProperties
+	i.rawJSON = nil
+	return nil
+}
+
+func (i *IdentityOpenAiPlatform) MarshalJSON() ([]byte, error) {
+	type embed IdentityOpenAiPlatform
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*i),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, i.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (i *IdentityOpenAiPlatform) String() string {
+	if i == nil {
+		return "<nil>"
+	}
+	if len(i.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(i.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(i); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", i)
+}
+
 // Configuration for PingOne Cloud Platform.
 //
 // [Configuration guide](https://docs.synqly.com/guides/provider-configuration/ping-identity-setup)
@@ -22908,6 +23248,280 @@ func (o *OktaCredential) validate() error {
 	return nil
 }
 
+type OpenAiAdminCredential struct {
+	Type string
+	// An Admin API key for the OpenAI API platform organization.
+	Token *TokenCredential
+	// Reference to existing Admin API Key.
+	TokenId TokenCredentialId
+
+	rawJSON json.RawMessage
+}
+
+func (o *OpenAiAdminCredential) GetType() string {
+	if o == nil {
+		return ""
+	}
+	return o.Type
+}
+
+func (o *OpenAiAdminCredential) GetToken() *TokenCredential {
+	if o == nil {
+		return nil
+	}
+	return o.Token
+}
+
+func (o *OpenAiAdminCredential) GetTokenId() TokenCredentialId {
+	if o == nil {
+		return ""
+	}
+	return o.TokenId
+}
+
+func (o *OpenAiAdminCredential) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	o.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", o)
+	}
+	switch unmarshaler.Type {
+	case "token":
+		value := new(TokenCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		o.Token = value
+	case "token_id":
+		var valueUnmarshaler struct {
+			TokenId TokenCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		o.TokenId = valueUnmarshaler.TokenId
+	}
+	o.rawJSON = nil
+	return nil
+}
+
+func (o OpenAiAdminCredential) MarshalJSON() ([]byte, error) {
+	if err := o.validate(); err != nil {
+		return nil, err
+	}
+	if o.Token != nil {
+		return internal.MarshalJSONWithExtraProperty(o.Token, "type", "token")
+	}
+	if o.TokenId != "" {
+		var marshaler = struct {
+			Type    string            `json:"type"`
+			TokenId TokenCredentialId `json:"value"`
+		}{
+			Type:    "token_id",
+			TokenId: o.TokenId,
+		}
+		return json.Marshal(marshaler)
+	}
+	if len(o.rawJSON) > 0 {
+		return o.rawJSON, nil
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", o)
+}
+
+type OpenAiAdminCredentialVisitor interface {
+	VisitToken(*TokenCredential) error
+	VisitTokenId(TokenCredentialId) error
+}
+
+func (o *OpenAiAdminCredential) Accept(visitor OpenAiAdminCredentialVisitor) error {
+	if o.Token != nil {
+		return visitor.VisitToken(o.Token)
+	}
+	if o.TokenId != "" {
+		return visitor.VisitTokenId(o.TokenId)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", o)
+}
+
+func (o *OpenAiAdminCredential) validate() error {
+	if o == nil {
+		return fmt.Errorf("type %T is nil", o)
+	}
+	var fields []string
+	if o.Token != nil {
+		fields = append(fields, "token")
+	}
+	if o.TokenId != "" {
+		fields = append(fields, "token_id")
+	}
+	if len(fields) == 0 {
+		if o.Type != "" {
+			if len(o.rawJSON) > 0 {
+				return nil
+			}
+			return fmt.Errorf("type %T defines a discriminant set to %q but the field is not set", o, o.Type)
+		}
+		return fmt.Errorf("type %T is empty", o)
+	}
+	if len(fields) > 1 {
+		return fmt.Errorf("type %T defines values for %s, but only one value is allowed", o, fields)
+	}
+	if o.Type != "" {
+		field := fields[0]
+		if o.Type != field {
+			return fmt.Errorf(
+				"type %T defines a discriminant set to %q, but it does not match the %T field; either remove or update the discriminant to match",
+				o,
+				o.Type,
+				o,
+			)
+		}
+	}
+	return nil
+}
+
+type OpenAiChatGptAdminCredential struct {
+	Type string
+	// A workspace-scoped Admin key for the ChatGPT Enterprise or Edu workspace.
+	Token *TokenCredential
+	// Reference to existing ChatGPT Admin Key.
+	TokenId TokenCredentialId
+
+	rawJSON json.RawMessage
+}
+
+func (o *OpenAiChatGptAdminCredential) GetType() string {
+	if o == nil {
+		return ""
+	}
+	return o.Type
+}
+
+func (o *OpenAiChatGptAdminCredential) GetToken() *TokenCredential {
+	if o == nil {
+		return nil
+	}
+	return o.Token
+}
+
+func (o *OpenAiChatGptAdminCredential) GetTokenId() TokenCredentialId {
+	if o == nil {
+		return ""
+	}
+	return o.TokenId
+}
+
+func (o *OpenAiChatGptAdminCredential) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	o.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", o)
+	}
+	switch unmarshaler.Type {
+	case "token":
+		value := new(TokenCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		o.Token = value
+	case "token_id":
+		var valueUnmarshaler struct {
+			TokenId TokenCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		o.TokenId = valueUnmarshaler.TokenId
+	}
+	o.rawJSON = nil
+	return nil
+}
+
+func (o OpenAiChatGptAdminCredential) MarshalJSON() ([]byte, error) {
+	if err := o.validate(); err != nil {
+		return nil, err
+	}
+	if o.Token != nil {
+		return internal.MarshalJSONWithExtraProperty(o.Token, "type", "token")
+	}
+	if o.TokenId != "" {
+		var marshaler = struct {
+			Type    string            `json:"type"`
+			TokenId TokenCredentialId `json:"value"`
+		}{
+			Type:    "token_id",
+			TokenId: o.TokenId,
+		}
+		return json.Marshal(marshaler)
+	}
+	if len(o.rawJSON) > 0 {
+		return o.rawJSON, nil
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", o)
+}
+
+type OpenAiChatGptAdminCredentialVisitor interface {
+	VisitToken(*TokenCredential) error
+	VisitTokenId(TokenCredentialId) error
+}
+
+func (o *OpenAiChatGptAdminCredential) Accept(visitor OpenAiChatGptAdminCredentialVisitor) error {
+	if o.Token != nil {
+		return visitor.VisitToken(o.Token)
+	}
+	if o.TokenId != "" {
+		return visitor.VisitTokenId(o.TokenId)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", o)
+}
+
+func (o *OpenAiChatGptAdminCredential) validate() error {
+	if o == nil {
+		return fmt.Errorf("type %T is nil", o)
+	}
+	var fields []string
+	if o.Token != nil {
+		fields = append(fields, "token")
+	}
+	if o.TokenId != "" {
+		fields = append(fields, "token_id")
+	}
+	if len(fields) == 0 {
+		if o.Type != "" {
+			if len(o.rawJSON) > 0 {
+				return nil
+			}
+			return fmt.Errorf("type %T defines a discriminant set to %q but the field is not set", o, o.Type)
+		}
+		return fmt.Errorf("type %T is empty", o)
+	}
+	if len(fields) > 1 {
+		return fmt.Errorf("type %T defines values for %s, but only one value is allowed", o, fields)
+	}
+	if o.Type != "" {
+		field := fields[0]
+		if o.Type != field {
+			return fmt.Errorf(
+				"type %T defines a discriminant set to %q, but it does not match the %T field; either remove or update the discriminant to match",
+				o,
+				o.Type,
+				o,
+			)
+		}
+	}
+	return nil
+}
+
 type OpenSearchCredential struct {
 	Type string
 	// Basic authentication credentials for OpenSearch.
@@ -24544,6 +25158,8 @@ type ProviderConfig struct {
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/teams-chat-setup)
 	ChatMicrosoftTeams *ChatMicrosoftTeams
+	// Configuration for a ChatGPT Enterprise or Edu workspace as a chat provider.
+	ChatOpenaiChatgpt *ChatOpenAiChatGpt
 	// Configuration for Slack.
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/slack-chat-setup)
@@ -24722,6 +25338,10 @@ type ProviderConfig struct {
 	IdentityOkta *IdentityOkta
 	// Configuration for [MOCK] Okta Identity.
 	IdentityOktaMock *IdentityOktaMock
+	// Configuration for a ChatGPT Enterprise or Edu workspace as an identity provider.
+	IdentityOpenaiChatgpt *IdentityOpenAiChatGpt
+	// Configuration for an OpenAI API platform organization as an identity provider.
+	IdentityOpenaiPlatform *IdentityOpenAiPlatform
 	// Configuration for PingOne Cloud Platform.
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/ping-identity-setup)
@@ -25340,6 +25960,13 @@ func (p *ProviderConfig) GetChatMicrosoftTeams() *ChatMicrosoftTeams {
 	return p.ChatMicrosoftTeams
 }
 
+func (p *ProviderConfig) GetChatOpenaiChatgpt() *ChatOpenAiChatGpt {
+	if p == nil {
+		return nil
+	}
+	return p.ChatOpenaiChatgpt
+}
+
 func (p *ProviderConfig) GetChatSlack() *ChatSlack {
 	if p == nil {
 		return nil
@@ -25723,6 +26350,20 @@ func (p *ProviderConfig) GetIdentityOktaMock() *IdentityOktaMock {
 		return nil
 	}
 	return p.IdentityOktaMock
+}
+
+func (p *ProviderConfig) GetIdentityOpenaiChatgpt() *IdentityOpenAiChatGpt {
+	if p == nil {
+		return nil
+	}
+	return p.IdentityOpenaiChatgpt
+}
+
+func (p *ProviderConfig) GetIdentityOpenaiPlatform() *IdentityOpenAiPlatform {
+	if p == nil {
+		return nil
+	}
+	return p.IdentityOpenaiPlatform
 }
 
 func (p *ProviderConfig) GetIdentityPingone() *IdentityPingOne {
@@ -26651,6 +27292,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.ChatMicrosoftTeams = value
+	case "chat_openai_chatgpt":
+		value := new(ChatOpenAiChatGpt)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.ChatOpenaiChatgpt = value
 	case "chat_slack":
 		value := new(ChatSlack)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -26981,6 +27628,18 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.IdentityOktaMock = value
+	case "identity_openai_chatgpt":
+		value := new(IdentityOpenAiChatGpt)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.IdentityOpenaiChatgpt = value
+	case "identity_openai_platform":
+		value := new(IdentityOpenAiPlatform)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.IdentityOpenaiPlatform = value
 	case "identity_pingone":
 		value := new(IdentityPingOne)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -27692,6 +28351,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.ChatMicrosoftTeams != nil {
 		return internal.MarshalJSONWithExtraProperty(p.ChatMicrosoftTeams, "type", "chat_microsoft_teams")
 	}
+	if p.ChatOpenaiChatgpt != nil {
+		return internal.MarshalJSONWithExtraProperty(p.ChatOpenaiChatgpt, "type", "chat_openai_chatgpt")
+	}
 	if p.ChatSlack != nil {
 		return internal.MarshalJSONWithExtraProperty(p.ChatSlack, "type", "chat_slack")
 	}
@@ -27856,6 +28518,12 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	}
 	if p.IdentityOktaMock != nil {
 		return internal.MarshalJSONWithExtraProperty(p.IdentityOktaMock, "type", "identity_okta_mock")
+	}
+	if p.IdentityOpenaiChatgpt != nil {
+		return internal.MarshalJSONWithExtraProperty(p.IdentityOpenaiChatgpt, "type", "identity_openai_chatgpt")
+	}
+	if p.IdentityOpenaiPlatform != nil {
+		return internal.MarshalJSONWithExtraProperty(p.IdentityOpenaiPlatform, "type", "identity_openai_platform")
 	}
 	if p.IdentityPingone != nil {
 		return internal.MarshalJSONWithExtraProperty(p.IdentityPingone, "type", "identity_pingone")
@@ -28196,6 +28864,7 @@ type ProviderConfigVisitor interface {
 	VisitAssetsTenableCloudMock(*AssetsTenableCloudMock) error
 	VisitChatMicrosoftCopilot(*ChatMicrosoftCopilot) error
 	VisitChatMicrosoftTeams(*ChatMicrosoftTeams) error
+	VisitChatOpenaiChatgpt(*ChatOpenAiChatGpt) error
 	VisitChatSlack(*ChatSlack) error
 	VisitCloudsecurityAws(*CloudSecurityAws) error
 	VisitCloudsecurityAwseventbridgesqs(*CloudSecurityAwsEventBridgeSqs) error
@@ -28251,6 +28920,8 @@ type ProviderConfigVisitor interface {
 	VisitIdentityGreenhouse(*IdentityGreenhouse) error
 	VisitIdentityOkta(*IdentityOkta) error
 	VisitIdentityOktaMock(*IdentityOktaMock) error
+	VisitIdentityOpenaiChatgpt(*IdentityOpenAiChatGpt) error
+	VisitIdentityOpenaiPlatform(*IdentityOpenAiPlatform) error
 	VisitIdentityPingone(*IdentityPingOne) error
 	VisitIdentityPingoneMock(*IdentityPingOneMock) error
 	VisitIdentityWorkday(*IdentityWorkday) error
@@ -28466,6 +29137,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	if p.ChatMicrosoftTeams != nil {
 		return visitor.VisitChatMicrosoftTeams(p.ChatMicrosoftTeams)
 	}
+	if p.ChatOpenaiChatgpt != nil {
+		return visitor.VisitChatOpenaiChatgpt(p.ChatOpenaiChatgpt)
+	}
 	if p.ChatSlack != nil {
 		return visitor.VisitChatSlack(p.ChatSlack)
 	}
@@ -28630,6 +29304,12 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.IdentityOktaMock != nil {
 		return visitor.VisitIdentityOktaMock(p.IdentityOktaMock)
+	}
+	if p.IdentityOpenaiChatgpt != nil {
+		return visitor.VisitIdentityOpenaiChatgpt(p.IdentityOpenaiChatgpt)
+	}
+	if p.IdentityOpenaiPlatform != nil {
+		return visitor.VisitIdentityOpenaiPlatform(p.IdentityOpenaiPlatform)
 	}
 	if p.IdentityPingone != nil {
 		return visitor.VisitIdentityPingone(p.IdentityPingone)
@@ -29047,6 +29727,9 @@ func (p *ProviderConfig) validate() error {
 	if p.ChatMicrosoftTeams != nil {
 		fields = append(fields, "chat_microsoft_teams")
 	}
+	if p.ChatOpenaiChatgpt != nil {
+		fields = append(fields, "chat_openai_chatgpt")
+	}
 	if p.ChatSlack != nil {
 		fields = append(fields, "chat_slack")
 	}
@@ -29211,6 +29894,12 @@ func (p *ProviderConfig) validate() error {
 	}
 	if p.IdentityOktaMock != nil {
 		fields = append(fields, "identity_okta_mock")
+	}
+	if p.IdentityOpenaiChatgpt != nil {
+		fields = append(fields, "identity_openai_chatgpt")
+	}
+	if p.IdentityOpenaiPlatform != nil {
+		fields = append(fields, "identity_openai_platform")
 	}
 	if p.IdentityPingone != nil {
 		fields = append(fields, "identity_pingone")
@@ -29612,6 +30301,8 @@ const (
 	ProviderConfigIdChatMicrosoftCopilot ProviderConfigId = "chat_microsoft_copilot"
 	// Microsoft Teams
 	ProviderConfigIdChatMicrosoftTeams ProviderConfigId = "chat_microsoft_teams"
+	// OpenAI ChatGPT Enterprise
+	ProviderConfigIdChatOpenAiChatGpt ProviderConfigId = "chat_openai_chatgpt"
 	// Slack
 	ProviderConfigIdChatSlack ProviderConfigId = "chat_slack"
 	// AWS Cloud Security
@@ -29722,6 +30413,10 @@ const (
 	ProviderConfigIdIdentityOkta ProviderConfigId = "identity_okta"
 	// [MOCK] Okta Identity
 	ProviderConfigIdIdentityOktaMock ProviderConfigId = "identity_okta_mock"
+	// OpenAI ChatGPT Enterprise
+	ProviderConfigIdIdentityOpenAiChatGpt ProviderConfigId = "identity_openai_chatgpt"
+	// OpenAI API Platform
+	ProviderConfigIdIdentityOpenAiPlatform ProviderConfigId = "identity_openai_platform"
 	// PingOne Cloud Platform
 	ProviderConfigIdIdentityPingOne ProviderConfigId = "identity_pingone"
 	// [MOCK] PingOne Cloud Platform
@@ -30000,6 +30695,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdChatMicrosoftCopilot, nil
 	case "chat_microsoft_teams":
 		return ProviderConfigIdChatMicrosoftTeams, nil
+	case "chat_openai_chatgpt":
+		return ProviderConfigIdChatOpenAiChatGpt, nil
 	case "chat_slack":
 		return ProviderConfigIdChatSlack, nil
 	case "cloudsecurity_aws":
@@ -30110,6 +30807,10 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdIdentityOkta, nil
 	case "identity_okta_mock":
 		return ProviderConfigIdIdentityOktaMock, nil
+	case "identity_openai_chatgpt":
+		return ProviderConfigIdIdentityOpenAiChatGpt, nil
+	case "identity_openai_platform":
+		return ProviderConfigIdIdentityOpenAiPlatform, nil
 	case "identity_pingone":
 		return ProviderConfigIdIdentityPingOne, nil
 	case "identity_pingone_mock":
