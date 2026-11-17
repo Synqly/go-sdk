@@ -25396,6 +25396,8 @@ type ProviderConfig struct {
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/knowbe4-securityawareness-setup)
 	SecurityawarenessKnowbe4 *SecurityAwarenessKnowBe4
 	// Configuration for Amazon Security Lake as a SIEM provider.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/amazonsecuritylake-siem-setup)
 	SiemAmazonSecurityLake *SiemAmazonSecurityLake
 	// Configuration for CrowdStrike Falcon® Next-Gen SIEM.
 	//
@@ -25448,6 +25450,8 @@ type ProviderConfig struct {
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/sumo-logic-setup)
 	SiemSumoLogic *SiemSumoLogic
 	// Configuration for Amazon Security Lake as a Sink provider.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/amazonsecuritylake-sink-setup)
 	SinkAmazonSecurityLake *SinkAmazonSecurityLake
 	// Configuration for Amazon S3 as a Sink provider. Events are written directly to an AWS S3 bucket in compressed JSON format.
 	//
@@ -31430,6 +31434,8 @@ func (r *Rapid7InsightCloudCredential) validate() error {
 }
 
 // Configuration for Amazon Security Lake as a SIEM provider.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/amazonsecuritylake-siem-setup)
 var (
 	siemAmazonSecurityLakeFieldCredential       = big.NewInt(1 << 0)
 	siemAmazonSecurityLakeFieldCustomLogSources = big.NewInt(1 << 1)
@@ -34757,6 +34763,8 @@ func (s SinkAwsSqsEventsPerMessage) Ptr() *SinkAwsSqsEventsPerMessage {
 }
 
 // Configuration for Amazon Security Lake as a Sink provider.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/amazonsecuritylake-sink-setup)
 var (
 	sinkAmazonSecurityLakeFieldCredential       = big.NewInt(1 << 0)
 	sinkAmazonSecurityLakeFieldCustomLogSources = big.NewInt(1 << 1)
