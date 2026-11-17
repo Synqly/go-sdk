@@ -288,7 +288,7 @@ func (c *Client) ForceUserPasswordReset(
     return nil
 }
 
-// Logs a user out of all current sessions so they must log in again.
+// Signs a user out of all current sessions so they must sign in again.
 func (c *Client) ExpireAllUserSessions(
     ctx context.Context,
     userId engine.UserId,
