@@ -2444,7 +2444,7 @@ type CreateTicketRequest struct {
 	Status *Status `json:"status,omitempty" url:"status,omitempty"`
 	// The ticket project.
 	Project *string `json:"project,omitempty" url:"project,omitempty"`
-	// The ticket's type.
+	// The ticket's type. Some providers require it; the provider's capabilities say when. Accepted values are provider-specific; List Issue Types returns them where the provider supports it.
 	IssueType *string `json:"issue_type,omitempty" url:"issue_type,omitempty"`
 	// Provider specific ID of the parent ticket.
 	Parent *string `json:"parent,omitempty" url:"parent,omitempty"`
