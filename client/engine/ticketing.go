@@ -5934,7 +5934,7 @@ func (s *ScheduleSummary) String() string {
 
 type Status = string
 
-// Ticketing ticket
+// A ticket. `name` holds the ticket title, key or record number. The value of `name` is provider dependent. For more detail, see provider specific documentation in the [capabilities API](https://docs.synqly.com/api-reference/management/capabilities).
 var (
 	ticketFieldName           = big.NewInt(1 << 0)
 	ticketFieldCreatedAt      = big.NewInt(1 << 1)
@@ -5966,7 +5966,7 @@ type Ticket struct {
 	// Last time object was updated
 	UpdatedAt time.Time `json:"updated_at" url:"updated_at"`
 	Id        TicketId  `json:"id" url:"id"`
-	// Ticket summary.
+	// The ticket title or short summary of the ticket. The value of this field is provider dependent. For more detail, see provider specific documentation in the [capabilities API](https://docs.synqly.com/api-reference/management/capabilities).
 	Summary string `json:"summary" url:"summary"`
 	// User who created this ticket.
 	Creator *string `json:"creator,omitempty" url:"creator,omitempty"`
