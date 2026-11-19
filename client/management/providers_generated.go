@@ -12941,6 +12941,110 @@ func (e *EmailSecurityO365ManagementActivity) String() string {
 	return fmt.Sprintf("%#v", e)
 }
 
+// Configuration for Sublime Security as an email security provider.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/sublime-emailsecurity-setup)
+var (
+	emailSecuritySublimeFieldCredential = big.NewInt(1 << 0)
+	emailSecuritySublimeFieldUrl        = big.NewInt(1 << 1)
+)
+
+type EmailSecuritySublime struct {
+	Credential *SublimeCredential `json:"credential" url:"credential"`
+	// Base URL for the Sublime Platform API.
+	Url string `json:"url" url:"url"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (e *EmailSecuritySublime) GetCredential() *SublimeCredential {
+	if e == nil {
+		return nil
+	}
+	return e.Credential
+}
+
+func (e *EmailSecuritySublime) GetUrl() string {
+	if e == nil {
+		return ""
+	}
+	return e.Url
+}
+
+func (e *EmailSecuritySublime) GetExtraProperties() map[string]interface{} {
+	if e == nil {
+		return nil
+	}
+	return e.extraProperties
+}
+
+func (e *EmailSecuritySublime) require(field *big.Int) {
+	if e.explicitFields == nil {
+		e.explicitFields = big.NewInt(0)
+	}
+	e.explicitFields.Or(e.explicitFields, field)
+}
+
+// SetCredential sets the Credential field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (e *EmailSecuritySublime) SetCredential(credential *SublimeCredential) {
+	e.Credential = credential
+	e.require(emailSecuritySublimeFieldCredential)
+}
+
+// SetUrl sets the Url field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (e *EmailSecuritySublime) SetUrl(url string) {
+	e.Url = url
+	e.require(emailSecuritySublimeFieldUrl)
+}
+
+func (e *EmailSecuritySublime) UnmarshalJSON(data []byte) error {
+	type unmarshaler EmailSecuritySublime
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*e = EmailSecuritySublime(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *e)
+	if err != nil {
+		return err
+	}
+	e.extraProperties = extraProperties
+	e.rawJSON = nil
+	return nil
+}
+
+func (e *EmailSecuritySublime) MarshalJSON() ([]byte, error) {
+	type embed EmailSecuritySublime
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*e),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, e.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (e *EmailSecuritySublime) String() string {
+	if e == nil {
+		return "<nil>"
+	}
+	if len(e.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(e.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(e); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", e)
+}
+
 // Configuration for Automox.
 //
 // [Configuration guide](https://docs.synqly.com/guides/provider-configuration/automox-endpointmgmt-setup)
@@ -25266,6 +25370,10 @@ type ProviderConfig struct {
 	EmailsecurityMimecastCloudGatewayMock *EmailSecurityMimecastCloudGatewayMock
 	// Configuration for Microsoft 365 Management Activity as an Email Security provider.
 	EmailsecurityO365ManagementActivity *EmailSecurityO365ManagementActivity
+	// Configuration for Sublime Security as an email security provider.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/sublime-emailsecurity-setup)
+	EmailsecuritySublime *EmailSecuritySublime
 	// Configuration for Automox.
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/automox-endpointmgmt-setup)
@@ -26207,6 +26315,13 @@ func (p *ProviderConfig) GetEmailsecurityO365ManagementActivity() *EmailSecurity
 		return nil
 	}
 	return p.EmailsecurityO365ManagementActivity
+}
+
+func (p *ProviderConfig) GetEmailsecuritySublime() *EmailSecuritySublime {
+	if p == nil {
+		return nil
+	}
+	return p.EmailsecuritySublime
 }
 
 func (p *ProviderConfig) GetEndpointmanagementAutomox() *EndpointmanagementAutomox {
@@ -27506,6 +27621,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.EmailsecurityO365ManagementActivity = value
+	case "emailsecurity_sublime":
+		value := new(EmailSecuritySublime)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.EmailsecuritySublime = value
 	case "endpointmanagement_automox":
 		value := new(EndpointmanagementAutomox)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -28460,6 +28581,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.EmailsecurityO365ManagementActivity != nil {
 		return internal.MarshalJSONWithExtraProperty(p.EmailsecurityO365ManagementActivity, "type", "emailsecurity_o365_management_activity")
 	}
+	if p.EmailsecuritySublime != nil {
+		return internal.MarshalJSONWithExtraProperty(p.EmailsecuritySublime, "type", "emailsecurity_sublime")
+	}
 	if p.EndpointmanagementAutomox != nil {
 		return internal.MarshalJSONWithExtraProperty(p.EndpointmanagementAutomox, "type", "endpointmanagement_automox")
 	}
@@ -28903,6 +29027,7 @@ type ProviderConfigVisitor interface {
 	VisitEmailsecurityMimecastCloudGateway(*EmailSecurityMimecastCloudGateway) error
 	VisitEmailsecurityMimecastCloudGatewayMock(*EmailSecurityMimecastCloudGatewayMock) error
 	VisitEmailsecurityO365ManagementActivity(*EmailSecurityO365ManagementActivity) error
+	VisitEmailsecuritySublime(*EmailSecuritySublime) error
 	VisitEndpointmanagementAutomox(*EndpointmanagementAutomox) error
 	VisitEndpointmanagementBigfix(*EndpointmanagementBigfix) error
 	VisitEndpointmanagementIntune(*EndpointmanagementIntune) error
@@ -29245,6 +29370,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.EmailsecurityO365ManagementActivity != nil {
 		return visitor.VisitEmailsecurityO365ManagementActivity(p.EmailsecurityO365ManagementActivity)
+	}
+	if p.EmailsecuritySublime != nil {
+		return visitor.VisitEmailsecuritySublime(p.EmailsecuritySublime)
 	}
 	if p.EndpointmanagementAutomox != nil {
 		return visitor.VisitEndpointmanagementAutomox(p.EndpointmanagementAutomox)
@@ -29836,6 +29964,9 @@ func (p *ProviderConfig) validate() error {
 	if p.EmailsecurityO365ManagementActivity != nil {
 		fields = append(fields, "emailsecurity_o365_management_activity")
 	}
+	if p.EmailsecuritySublime != nil {
+		fields = append(fields, "emailsecurity_sublime")
+	}
 	if p.EndpointmanagementAutomox != nil {
 		fields = append(fields, "endpointmanagement_automox")
 	}
@@ -30375,6 +30506,8 @@ const (
 	ProviderConfigIdEmailSecurityMimecastCloudGatewayMock ProviderConfigId = "emailsecurity_mimecast_cloud_gateway_mock"
 	// Microsoft 365 Management Activity
 	ProviderConfigIdEmailSecurityO365ManagementActivity ProviderConfigId = "emailsecurity_o365_management_activity"
+	// Sublime Security
+	ProviderConfigIdEmailSecuritySublime ProviderConfigId = "emailsecurity_sublime"
 	// Automox
 	ProviderConfigIdEndpointmanagementAutomox ProviderConfigId = "endpointmanagement_automox"
 	// HCL BigFix
@@ -30769,6 +30902,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdEmailSecurityMimecastCloudGatewayMock, nil
 	case "emailsecurity_o365_management_activity":
 		return ProviderConfigIdEmailSecurityO365ManagementActivity, nil
+	case "emailsecurity_sublime":
+		return ProviderConfigIdEmailSecuritySublime, nil
 	case "endpointmanagement_automox":
 		return ProviderConfigIdEndpointmanagementAutomox, nil
 	case "endpointmanagement_bigfix":
@@ -39060,6 +39195,143 @@ func (s *StorageMock) String() string {
 		return value
 	}
 	return fmt.Sprintf("%#v", s)
+}
+
+type SublimeCredential struct {
+	Type string
+	// API key for the Sublime Platform API.
+	Token *TokenCredential
+	// Reference to existing Token.
+	TokenId TokenCredentialId
+
+	rawJSON json.RawMessage
+}
+
+func (s *SublimeCredential) GetType() string {
+	if s == nil {
+		return ""
+	}
+	return s.Type
+}
+
+func (s *SublimeCredential) GetToken() *TokenCredential {
+	if s == nil {
+		return nil
+	}
+	return s.Token
+}
+
+func (s *SublimeCredential) GetTokenId() TokenCredentialId {
+	if s == nil {
+		return ""
+	}
+	return s.TokenId
+}
+
+func (s *SublimeCredential) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	s.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", s)
+	}
+	switch unmarshaler.Type {
+	case "token":
+		value := new(TokenCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		s.Token = value
+	case "token_id":
+		var valueUnmarshaler struct {
+			TokenId TokenCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		s.TokenId = valueUnmarshaler.TokenId
+	}
+	s.rawJSON = nil
+	return nil
+}
+
+func (s SublimeCredential) MarshalJSON() ([]byte, error) {
+	if err := s.validate(); err != nil {
+		return nil, err
+	}
+	if s.Token != nil {
+		return internal.MarshalJSONWithExtraProperty(s.Token, "type", "token")
+	}
+	if s.TokenId != "" {
+		var marshaler = struct {
+			Type    string            `json:"type"`
+			TokenId TokenCredentialId `json:"value"`
+		}{
+			Type:    "token_id",
+			TokenId: s.TokenId,
+		}
+		return json.Marshal(marshaler)
+	}
+	if len(s.rawJSON) > 0 {
+		return s.rawJSON, nil
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", s)
+}
+
+type SublimeCredentialVisitor interface {
+	VisitToken(*TokenCredential) error
+	VisitTokenId(TokenCredentialId) error
+}
+
+func (s *SublimeCredential) Accept(visitor SublimeCredentialVisitor) error {
+	if s.Token != nil {
+		return visitor.VisitToken(s.Token)
+	}
+	if s.TokenId != "" {
+		return visitor.VisitTokenId(s.TokenId)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", s)
+}
+
+func (s *SublimeCredential) validate() error {
+	if s == nil {
+		return fmt.Errorf("type %T is nil", s)
+	}
+	var fields []string
+	if s.Token != nil {
+		fields = append(fields, "token")
+	}
+	if s.TokenId != "" {
+		fields = append(fields, "token_id")
+	}
+	if len(fields) == 0 {
+		if s.Type != "" {
+			if len(s.rawJSON) > 0 {
+				return nil
+			}
+			return fmt.Errorf("type %T defines a discriminant set to %q but the field is not set", s, s.Type)
+		}
+		return fmt.Errorf("type %T is empty", s)
+	}
+	if len(fields) > 1 {
+		return fmt.Errorf("type %T defines values for %s, but only one value is allowed", s, fields)
+	}
+	if s.Type != "" {
+		field := fields[0]
+		if s.Type != field {
+			return fmt.Errorf(
+				"type %T defines a discriminant set to %q, but it does not match the %T field; either remove or update the discriminant to match",
+				s,
+				s.Type,
+				s,
+			)
+		}
+	}
+	return nil
 }
 
 type SumoLogicCollectionUrl struct {
