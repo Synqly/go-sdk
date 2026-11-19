@@ -570,15 +570,140 @@ func (m *MetaApi) String() string {
 }
 
 var (
-	metaApiPrimaryResponseFieldEndpoint = big.NewInt(1 << 0)
-	metaApiPrimaryResponseFieldResponse = big.NewInt(1 << 1)
+	metaApiCallResponseFieldResponse   = big.NewInt(1 << 0)
+	metaApiCallResponseFieldTruncated  = big.NewInt(1 << 1)
+	metaApiCallResponseFieldTotalBytes = big.NewInt(1 << 2)
+)
+
+type MetaApiCallResponse struct {
+	// The response from one backing API call. It may be cut short; see `truncated`. Each response keeps at most its first 256 KiB, and one request keeps at most 16 MiB of responses in total.
+	Response string `json:"response" url:"response"`
+	// True when `response` holds only the start of the response body. Absent otherwise.
+	Truncated *bool `json:"truncated,omitempty" url:"truncated,omitempty"`
+	// The size in bytes of the response body as received. Present when `truncated` is true.
+	TotalBytes *int64 `json:"total_bytes,omitempty" url:"total_bytes,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (m *MetaApiCallResponse) GetResponse() string {
+	if m == nil {
+		return ""
+	}
+	return m.Response
+}
+
+func (m *MetaApiCallResponse) GetTruncated() *bool {
+	if m == nil {
+		return nil
+	}
+	return m.Truncated
+}
+
+func (m *MetaApiCallResponse) GetTotalBytes() *int64 {
+	if m == nil {
+		return nil
+	}
+	return m.TotalBytes
+}
+
+func (m *MetaApiCallResponse) GetExtraProperties() map[string]interface{} {
+	if m == nil {
+		return nil
+	}
+	return m.extraProperties
+}
+
+func (m *MetaApiCallResponse) require(field *big.Int) {
+	if m.explicitFields == nil {
+		m.explicitFields = big.NewInt(0)
+	}
+	m.explicitFields.Or(m.explicitFields, field)
+}
+
+// SetResponse sets the Response field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (m *MetaApiCallResponse) SetResponse(response string) {
+	m.Response = response
+	m.require(metaApiCallResponseFieldResponse)
+}
+
+// SetTruncated sets the Truncated field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (m *MetaApiCallResponse) SetTruncated(truncated *bool) {
+	m.Truncated = truncated
+	m.require(metaApiCallResponseFieldTruncated)
+}
+
+// SetTotalBytes sets the TotalBytes field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (m *MetaApiCallResponse) SetTotalBytes(totalBytes *int64) {
+	m.TotalBytes = totalBytes
+	m.require(metaApiCallResponseFieldTotalBytes)
+}
+
+func (m *MetaApiCallResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler MetaApiCallResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*m = MetaApiCallResponse(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *m)
+	if err != nil {
+		return err
+	}
+	m.extraProperties = extraProperties
+	m.rawJSON = nil
+	return nil
+}
+
+func (m *MetaApiCallResponse) MarshalJSON() ([]byte, error) {
+	type embed MetaApiCallResponse
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*m),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, m.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (m *MetaApiCallResponse) String() string {
+	if m == nil {
+		return "<nil>"
+	}
+	if len(m.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(m.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(m); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", m)
+}
+
+var (
+	metaApiPrimaryResponseFieldEndpoint   = big.NewInt(1 << 0)
+	metaApiPrimaryResponseFieldResponse   = big.NewInt(1 << 1)
+	metaApiPrimaryResponseFieldTruncated  = big.NewInt(1 << 2)
+	metaApiPrimaryResponseFieldTotalBytes = big.NewInt(1 << 3)
 )
 
 type MetaApiPrimaryResponse struct {
 	// The endpoint URL of the primary API request made to fulfill the response.
 	Endpoint string `json:"endpoint" url:"endpoint"`
-	// The response from the primary API request.
+	// The response from the primary API request. It may be cut short; see `truncated`. Each response keeps at most its first 256 KiB, and one request keeps at most 16 MiB of responses in total.
 	Response string `json:"response" url:"response"`
+	// True when `response` holds only the start of the response body. Absent otherwise.
+	Truncated *bool `json:"truncated,omitempty" url:"truncated,omitempty"`
+	// The size in bytes of the response body as received. Present when `truncated` is true.
+	TotalBytes *int64 `json:"total_bytes,omitempty" url:"total_bytes,omitempty"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -599,6 +724,20 @@ func (m *MetaApiPrimaryResponse) GetResponse() string {
 		return ""
 	}
 	return m.Response
+}
+
+func (m *MetaApiPrimaryResponse) GetTruncated() *bool {
+	if m == nil {
+		return nil
+	}
+	return m.Truncated
+}
+
+func (m *MetaApiPrimaryResponse) GetTotalBytes() *int64 {
+	if m == nil {
+		return nil
+	}
+	return m.TotalBytes
 }
 
 func (m *MetaApiPrimaryResponse) GetExtraProperties() map[string]interface{} {
@@ -627,6 +766,20 @@ func (m *MetaApiPrimaryResponse) SetEndpoint(endpoint string) {
 func (m *MetaApiPrimaryResponse) SetResponse(response string) {
 	m.Response = response
 	m.require(metaApiPrimaryResponseFieldResponse)
+}
+
+// SetTruncated sets the Truncated field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (m *MetaApiPrimaryResponse) SetTruncated(truncated *bool) {
+	m.Truncated = truncated
+	m.require(metaApiPrimaryResponseFieldTruncated)
+}
+
+// SetTotalBytes sets the TotalBytes field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (m *MetaApiPrimaryResponse) SetTotalBytes(totalBytes *int64) {
+	m.TotalBytes = totalBytes
+	m.require(metaApiPrimaryResponseFieldTotalBytes)
 }
 
 func (m *MetaApiPrimaryResponse) UnmarshalJSON(data []byte) error {
@@ -679,7 +832,7 @@ var (
 type MetaApiResponse struct {
 	Primary *MetaApiPrimaryResponse `json:"primary,omitempty" url:"primary,omitempty"`
 	// All responses from backing API calls, indexed by endpoint URL.
-	List map[string][]string `json:"list,omitempty" url:"list,omitempty"`
+	List map[string][]*MetaApiCallResponse `json:"list,omitempty" url:"list,omitempty"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -695,7 +848,7 @@ func (m *MetaApiResponse) GetPrimary() *MetaApiPrimaryResponse {
 	return m.Primary
 }
 
-func (m *MetaApiResponse) GetList() map[string][]string {
+func (m *MetaApiResponse) GetList() map[string][]*MetaApiCallResponse {
 	if m == nil {
 		return nil
 	}
@@ -725,7 +878,7 @@ func (m *MetaApiResponse) SetPrimary(primary *MetaApiPrimaryResponse) {
 
 // SetList sets the List field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (m *MetaApiResponse) SetList(list map[string][]string) {
+func (m *MetaApiResponse) SetList(list map[string][]*MetaApiCallResponse) {
 	m.List = list
 	m.require(metaApiResponseFieldList)
 }
