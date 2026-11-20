@@ -6113,6 +6113,143 @@ func (c *ChatSlack) String() string {
 	return fmt.Sprintf("%#v", c)
 }
 
+type CiscoFmcCredential struct {
+	Type string
+	// Username and password of an FMC user with REST API access.
+	Basic *BasicCredential
+	// Reference to existing Username & Password.
+	BasicId BasicCredentialId
+
+	rawJSON json.RawMessage
+}
+
+func (c *CiscoFmcCredential) GetType() string {
+	if c == nil {
+		return ""
+	}
+	return c.Type
+}
+
+func (c *CiscoFmcCredential) GetBasic() *BasicCredential {
+	if c == nil {
+		return nil
+	}
+	return c.Basic
+}
+
+func (c *CiscoFmcCredential) GetBasicId() BasicCredentialId {
+	if c == nil {
+		return ""
+	}
+	return c.BasicId
+}
+
+func (c *CiscoFmcCredential) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	c.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", c)
+	}
+	switch unmarshaler.Type {
+	case "basic":
+		value := new(BasicCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		c.Basic = value
+	case "basic_id":
+		var valueUnmarshaler struct {
+			BasicId BasicCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		c.BasicId = valueUnmarshaler.BasicId
+	}
+	c.rawJSON = nil
+	return nil
+}
+
+func (c CiscoFmcCredential) MarshalJSON() ([]byte, error) {
+	if err := c.validate(); err != nil {
+		return nil, err
+	}
+	if c.Basic != nil {
+		return internal.MarshalJSONWithExtraProperty(c.Basic, "type", "basic")
+	}
+	if c.BasicId != "" {
+		var marshaler = struct {
+			Type    string            `json:"type"`
+			BasicId BasicCredentialId `json:"value"`
+		}{
+			Type:    "basic_id",
+			BasicId: c.BasicId,
+		}
+		return json.Marshal(marshaler)
+	}
+	if len(c.rawJSON) > 0 {
+		return c.rawJSON, nil
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", c)
+}
+
+type CiscoFmcCredentialVisitor interface {
+	VisitBasic(*BasicCredential) error
+	VisitBasicId(BasicCredentialId) error
+}
+
+func (c *CiscoFmcCredential) Accept(visitor CiscoFmcCredentialVisitor) error {
+	if c.Basic != nil {
+		return visitor.VisitBasic(c.Basic)
+	}
+	if c.BasicId != "" {
+		return visitor.VisitBasicId(c.BasicId)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", c)
+}
+
+func (c *CiscoFmcCredential) validate() error {
+	if c == nil {
+		return fmt.Errorf("type %T is nil", c)
+	}
+	var fields []string
+	if c.Basic != nil {
+		fields = append(fields, "basic")
+	}
+	if c.BasicId != "" {
+		fields = append(fields, "basic_id")
+	}
+	if len(fields) == 0 {
+		if c.Type != "" {
+			if len(c.rawJSON) > 0 {
+				return nil
+			}
+			return fmt.Errorf("type %T defines a discriminant set to %q but the field is not set", c, c.Type)
+		}
+		return fmt.Errorf("type %T is empty", c)
+	}
+	if len(fields) > 1 {
+		return fmt.Errorf("type %T defines values for %s, but only one value is allowed", c, fields)
+	}
+	if c.Type != "" {
+		field := fields[0]
+		if c.Type != field {
+			return fmt.Errorf(
+				"type %T defines a discriminant set to %q, but it does not match the %T field; either remove or update the discriminant to match",
+				c,
+				c.Type,
+				c,
+			)
+		}
+	}
+	return nil
+}
+
 type ClarotyApiurl string
 
 const (
@@ -21762,6 +21899,145 @@ func (n *NetworkSecurityAzure) String() string {
 	return fmt.Sprintf("%#v", n)
 }
 
+// Configuration for Cisco Secure Firewall.
+//
+// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/cisco-fmc-networksecurity-setup)
+var (
+	networkSecurityCiscoFmcFieldCredential      = big.NewInt(1 << 0)
+	networkSecurityCiscoFmcFieldDomain          = big.NewInt(1 << 1)
+	networkSecurityCiscoFmcFieldTlsVerification = big.NewInt(1 << 2)
+	networkSecurityCiscoFmcFieldUrl             = big.NewInt(1 << 3)
+)
+
+type NetworkSecurityCiscoFmc struct {
+	// FMC API credentials with sufficient permissions to read the required resources.
+	Credential *CiscoFmcCredential `json:"credential" url:"credential"`
+	// The FMC domain to read from. For a subdomain, enter its full path.
+	Domain *string `json:"domain,omitempty" url:"domain,omitempty"`
+	// Use `custom_ca` when the FMC's certificate comes from a private CA, or `skip` when the FMC still uses its default self-signed certificate.
+	TlsVerification *TlsVerification `json:"tls_verification,omitempty" url:"tls_verification,omitempty"`
+	// Base URL of your Firewall Management Center.
+	Url string `json:"url" url:"url"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (n *NetworkSecurityCiscoFmc) GetCredential() *CiscoFmcCredential {
+	if n == nil {
+		return nil
+	}
+	return n.Credential
+}
+
+func (n *NetworkSecurityCiscoFmc) GetDomain() *string {
+	if n == nil {
+		return nil
+	}
+	return n.Domain
+}
+
+func (n *NetworkSecurityCiscoFmc) GetTlsVerification() *TlsVerification {
+	if n == nil {
+		return nil
+	}
+	return n.TlsVerification
+}
+
+func (n *NetworkSecurityCiscoFmc) GetUrl() string {
+	if n == nil {
+		return ""
+	}
+	return n.Url
+}
+
+func (n *NetworkSecurityCiscoFmc) GetExtraProperties() map[string]interface{} {
+	if n == nil {
+		return nil
+	}
+	return n.extraProperties
+}
+
+func (n *NetworkSecurityCiscoFmc) require(field *big.Int) {
+	if n.explicitFields == nil {
+		n.explicitFields = big.NewInt(0)
+	}
+	n.explicitFields.Or(n.explicitFields, field)
+}
+
+// SetCredential sets the Credential field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (n *NetworkSecurityCiscoFmc) SetCredential(credential *CiscoFmcCredential) {
+	n.Credential = credential
+	n.require(networkSecurityCiscoFmcFieldCredential)
+}
+
+// SetDomain sets the Domain field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (n *NetworkSecurityCiscoFmc) SetDomain(domain *string) {
+	n.Domain = domain
+	n.require(networkSecurityCiscoFmcFieldDomain)
+}
+
+// SetTlsVerification sets the TlsVerification field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (n *NetworkSecurityCiscoFmc) SetTlsVerification(tlsVerification *TlsVerification) {
+	n.TlsVerification = tlsVerification
+	n.require(networkSecurityCiscoFmcFieldTlsVerification)
+}
+
+// SetUrl sets the Url field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (n *NetworkSecurityCiscoFmc) SetUrl(url string) {
+	n.Url = url
+	n.require(networkSecurityCiscoFmcFieldUrl)
+}
+
+func (n *NetworkSecurityCiscoFmc) UnmarshalJSON(data []byte) error {
+	type unmarshaler NetworkSecurityCiscoFmc
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*n = NetworkSecurityCiscoFmc(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *n)
+	if err != nil {
+		return err
+	}
+	n.extraProperties = extraProperties
+	n.rawJSON = nil
+	return nil
+}
+
+func (n *NetworkSecurityCiscoFmc) MarshalJSON() ([]byte, error) {
+	type embed NetworkSecurityCiscoFmc
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*n),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, n.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (n *NetworkSecurityCiscoFmc) String() string {
+	if n == nil {
+		return "<nil>"
+	}
+	if len(n.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(n.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(n); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", n)
+}
+
 // Configuration for the Google Cloud Platform Network Security Provider.
 //
 // [Configuration guide](https://docs.synqly.com/guides/provider-configuration/google-networksecurity-setup)
@@ -25476,6 +25752,10 @@ type ProviderConfig struct {
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/azure-networksecurity-setup)
 	NetworksecurityAzure *NetworkSecurityAzure
+	// Configuration for Cisco Secure Firewall.
+	//
+	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/cisco-fmc-networksecurity-setup)
+	NetworksecurityCiscoFmc *NetworkSecurityCiscoFmc
 	// Configuration for the Google Cloud Platform Network Security Provider.
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/google-networksecurity-setup)
@@ -26532,6 +26812,13 @@ func (p *ProviderConfig) GetNetworksecurityAzure() *NetworkSecurityAzure {
 		return nil
 	}
 	return p.NetworksecurityAzure
+}
+
+func (p *ProviderConfig) GetNetworksecurityCiscoFmc() *NetworkSecurityCiscoFmc {
+	if p == nil {
+		return nil
+	}
+	return p.NetworksecurityCiscoFmc
 }
 
 func (p *ProviderConfig) GetNetworksecurityGoogle() *NetworkSecurityGoogle {
@@ -27807,6 +28094,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.NetworksecurityAzure = value
+	case "networksecurity_cisco_fmc":
+		value := new(NetworkSecurityCiscoFmc)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.NetworksecurityCiscoFmc = value
 	case "networksecurity_google":
 		value := new(NetworkSecurityGoogle)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -28674,6 +28967,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.NetworksecurityAzure != nil {
 		return internal.MarshalJSONWithExtraProperty(p.NetworksecurityAzure, "type", "networksecurity_azure")
 	}
+	if p.NetworksecurityCiscoFmc != nil {
+		return internal.MarshalJSONWithExtraProperty(p.NetworksecurityCiscoFmc, "type", "networksecurity_cisco_fmc")
+	}
 	if p.NetworksecurityGoogle != nil {
 		return internal.MarshalJSONWithExtraProperty(p.NetworksecurityGoogle, "type", "networksecurity_google")
 	}
@@ -29058,6 +29354,7 @@ type ProviderConfigVisitor interface {
 	VisitIncidentresponsePagerduty(*IncidentResponsePagerDuty) error
 	VisitNetworksecurityAws(*NetworkSecurityAws) error
 	VisitNetworksecurityAzure(*NetworkSecurityAzure) error
+	VisitNetworksecurityCiscoFmc(*NetworkSecurityCiscoFmc) error
 	VisitNetworksecurityGoogle(*NetworkSecurityGoogle) error
 	VisitNotificationsJira(*NotificationsJira) error
 	VisitNotificationsMockNotifications(*NotificationsMock) error
@@ -29463,6 +29760,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.NetworksecurityAzure != nil {
 		return visitor.VisitNetworksecurityAzure(p.NetworksecurityAzure)
+	}
+	if p.NetworksecurityCiscoFmc != nil {
+		return visitor.VisitNetworksecurityCiscoFmc(p.NetworksecurityCiscoFmc)
 	}
 	if p.NetworksecurityGoogle != nil {
 		return visitor.VisitNetworksecurityGoogle(p.NetworksecurityGoogle)
@@ -30057,6 +30357,9 @@ func (p *ProviderConfig) validate() error {
 	if p.NetworksecurityAzure != nil {
 		fields = append(fields, "networksecurity_azure")
 	}
+	if p.NetworksecurityCiscoFmc != nil {
+		fields = append(fields, "networksecurity_cisco_fmc")
+	}
 	if p.NetworksecurityGoogle != nil {
 		fields = append(fields, "networksecurity_google")
 	}
@@ -30568,6 +30871,8 @@ const (
 	ProviderConfigIdNetworkSecurityAws ProviderConfigId = "networksecurity_aws"
 	// Microsoft Azure Network Security
 	ProviderConfigIdNetworkSecurityAzure ProviderConfigId = "networksecurity_azure"
+	// Cisco Secure Firewall (FMC)
+	ProviderConfigIdNetworkSecurityCiscoFmc ProviderConfigId = "networksecurity_cisco_fmc"
 	// Google Network Security
 	ProviderConfigIdNetworkSecurityGoogle ProviderConfigId = "networksecurity_google"
 	// Atlassian Jira
@@ -30964,6 +31269,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdNetworkSecurityAws, nil
 	case "networksecurity_azure":
 		return ProviderConfigIdNetworkSecurityAzure, nil
+	case "networksecurity_cisco_fmc":
+		return ProviderConfigIdNetworkSecurityCiscoFmc, nil
 	case "networksecurity_google":
 		return ProviderConfigIdNetworkSecurityGoogle, nil
 	case "notifications_jira":
@@ -43600,6 +43907,375 @@ func (t *TicketingZendesk) MarshalJSON() ([]byte, error) {
 }
 
 func (t *TicketingZendesk) String() string {
+	if t == nil {
+		return "<nil>"
+	}
+	if len(t.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(t.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(t); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", t)
+}
+
+// How the server's TLS certificate is verified. Over a Bridge, this setting is not used: set trust in the Bridge's configuration instead.
+type TlsVerification struct {
+	Type     string
+	CustomCa *TlsVerificationCustomCa
+	Skip     *TlsVerificationSkip
+	Verify   *TlsVerificationVerify
+
+	rawJSON json.RawMessage
+}
+
+func (t *TlsVerification) GetType() string {
+	if t == nil {
+		return ""
+	}
+	return t.Type
+}
+
+func (t *TlsVerification) GetCustomCa() *TlsVerificationCustomCa {
+	if t == nil {
+		return nil
+	}
+	return t.CustomCa
+}
+
+func (t *TlsVerification) GetSkip() *TlsVerificationSkip {
+	if t == nil {
+		return nil
+	}
+	return t.Skip
+}
+
+func (t *TlsVerification) GetVerify() *TlsVerificationVerify {
+	if t == nil {
+		return nil
+	}
+	return t.Verify
+}
+
+func (t *TlsVerification) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	t.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", t)
+	}
+	switch unmarshaler.Type {
+	case "custom_ca":
+		value := new(TlsVerificationCustomCa)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		t.CustomCa = value
+	case "skip":
+		value := new(TlsVerificationSkip)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		t.Skip = value
+	case "verify":
+		value := new(TlsVerificationVerify)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		t.Verify = value
+	}
+	t.rawJSON = nil
+	return nil
+}
+
+func (t TlsVerification) MarshalJSON() ([]byte, error) {
+	if err := t.validate(); err != nil {
+		return nil, err
+	}
+	if t.CustomCa != nil {
+		return internal.MarshalJSONWithExtraProperty(t.CustomCa, "type", "custom_ca")
+	}
+	if t.Skip != nil {
+		return internal.MarshalJSONWithExtraProperty(t.Skip, "type", "skip")
+	}
+	if t.Verify != nil {
+		return internal.MarshalJSONWithExtraProperty(t.Verify, "type", "verify")
+	}
+	if len(t.rawJSON) > 0 {
+		return t.rawJSON, nil
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", t)
+}
+
+type TlsVerificationVisitor interface {
+	VisitCustomCa(*TlsVerificationCustomCa) error
+	VisitSkip(*TlsVerificationSkip) error
+	VisitVerify(*TlsVerificationVerify) error
+}
+
+func (t *TlsVerification) Accept(visitor TlsVerificationVisitor) error {
+	if t.CustomCa != nil {
+		return visitor.VisitCustomCa(t.CustomCa)
+	}
+	if t.Skip != nil {
+		return visitor.VisitSkip(t.Skip)
+	}
+	if t.Verify != nil {
+		return visitor.VisitVerify(t.Verify)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", t)
+}
+
+func (t *TlsVerification) validate() error {
+	if t == nil {
+		return fmt.Errorf("type %T is nil", t)
+	}
+	var fields []string
+	if t.CustomCa != nil {
+		fields = append(fields, "custom_ca")
+	}
+	if t.Skip != nil {
+		fields = append(fields, "skip")
+	}
+	if t.Verify != nil {
+		fields = append(fields, "verify")
+	}
+	if len(fields) == 0 {
+		if t.Type != "" {
+			if len(t.rawJSON) > 0 {
+				return nil
+			}
+			return fmt.Errorf("type %T defines a discriminant set to %q but the field is not set", t, t.Type)
+		}
+		return fmt.Errorf("type %T is empty", t)
+	}
+	if len(fields) > 1 {
+		return fmt.Errorf("type %T defines values for %s, but only one value is allowed", t, fields)
+	}
+	if t.Type != "" {
+		field := fields[0]
+		if t.Type != field {
+			return fmt.Errorf(
+				"type %T defines a discriminant set to %q, but it does not match the %T field; either remove or update the discriminant to match",
+				t,
+				t.Type,
+				t,
+			)
+		}
+	}
+	return nil
+}
+
+// Verify the certificate against the certificate authority given in **CA Certificate**, such as an internal company CA.
+var (
+	tlsVerificationCustomCaFieldCaCertificate = big.NewInt(1 << 0)
+)
+
+type TlsVerificationCustomCa struct {
+	// PEM certificate of the CA that issued the server's certificate.
+	CaCertificate string `json:"ca_certificate" url:"ca_certificate"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (t *TlsVerificationCustomCa) GetCaCertificate() string {
+	if t == nil {
+		return ""
+	}
+	return t.CaCertificate
+}
+
+func (t *TlsVerificationCustomCa) GetExtraProperties() map[string]interface{} {
+	if t == nil {
+		return nil
+	}
+	return t.extraProperties
+}
+
+func (t *TlsVerificationCustomCa) require(field *big.Int) {
+	if t.explicitFields == nil {
+		t.explicitFields = big.NewInt(0)
+	}
+	t.explicitFields.Or(t.explicitFields, field)
+}
+
+// SetCaCertificate sets the CaCertificate field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (t *TlsVerificationCustomCa) SetCaCertificate(caCertificate string) {
+	t.CaCertificate = caCertificate
+	t.require(tlsVerificationCustomCaFieldCaCertificate)
+}
+
+func (t *TlsVerificationCustomCa) UnmarshalJSON(data []byte) error {
+	type unmarshaler TlsVerificationCustomCa
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*t = TlsVerificationCustomCa(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *t)
+	if err != nil {
+		return err
+	}
+	t.extraProperties = extraProperties
+	t.rawJSON = nil
+	return nil
+}
+
+func (t *TlsVerificationCustomCa) MarshalJSON() ([]byte, error) {
+	type embed TlsVerificationCustomCa
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*t),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, t.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (t *TlsVerificationCustomCa) String() string {
+	if t == nil {
+		return "<nil>"
+	}
+	if len(t.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(t.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(t); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", t)
+}
+
+// Do not verify the certificate. The connection is still encrypted, but the server's identity is not confirmed.
+type TlsVerificationSkip struct {
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (t *TlsVerificationSkip) GetExtraProperties() map[string]interface{} {
+	if t == nil {
+		return nil
+	}
+	return t.extraProperties
+}
+
+func (t *TlsVerificationSkip) require(field *big.Int) {
+	if t.explicitFields == nil {
+		t.explicitFields = big.NewInt(0)
+	}
+	t.explicitFields.Or(t.explicitFields, field)
+}
+
+func (t *TlsVerificationSkip) UnmarshalJSON(data []byte) error {
+	type unmarshaler TlsVerificationSkip
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*t = TlsVerificationSkip(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *t)
+	if err != nil {
+		return err
+	}
+	t.extraProperties = extraProperties
+	t.rawJSON = nil
+	return nil
+}
+
+func (t *TlsVerificationSkip) MarshalJSON() ([]byte, error) {
+	type embed TlsVerificationSkip
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*t),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, t.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (t *TlsVerificationSkip) String() string {
+	if t == nil {
+		return "<nil>"
+	}
+	if len(t.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(t.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(t); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", t)
+}
+
+// Verify the certificate against publicly trusted certificate authorities.
+type TlsVerificationVerify struct {
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (t *TlsVerificationVerify) GetExtraProperties() map[string]interface{} {
+	if t == nil {
+		return nil
+	}
+	return t.extraProperties
+}
+
+func (t *TlsVerificationVerify) require(field *big.Int) {
+	if t.explicitFields == nil {
+		t.explicitFields = big.NewInt(0)
+	}
+	t.explicitFields.Or(t.explicitFields, field)
+}
+
+func (t *TlsVerificationVerify) UnmarshalJSON(data []byte) error {
+	type unmarshaler TlsVerificationVerify
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*t = TlsVerificationVerify(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *t)
+	if err != nil {
+		return err
+	}
+	t.extraProperties = extraProperties
+	t.rawJSON = nil
+	return nil
+}
+
+func (t *TlsVerificationVerify) MarshalJSON() ([]byte, error) {
+	type embed TlsVerificationVerify
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*t),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, t.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (t *TlsVerificationVerify) String() string {
 	if t == nil {
 		return "<nil>"
 	}
