@@ -17,6 +17,7 @@ var (
 	queryCloudResourceInventoryFieldFilter         = big.NewInt(1 << 3)
 	queryCloudResourceInventoryFieldCursor         = big.NewInt(1 << 4)
 	queryCloudResourceInventoryFieldIncludeRawData = big.NewInt(1 << 5)
+	queryCloudResourceInventoryFieldBulk           = big.NewInt(1 << 6)
 )
 
 type QueryCloudResourceInventory struct {
@@ -32,6 +33,8 @@ type QueryCloudResourceInventory struct {
 	Cursor *string `json:"-" url:"cursor,omitempty"`
 	// Include the raw data from the CloudSecurity in the response. Defaults to `false`.
 	IncludeRawData *bool `json:"-" url:"include_raw_data,omitempty"`
+	// Retrieve the full result set through the provider's bulk export, when it has one. Results are unordered, and the first responses may be empty with `status` set to `PENDING` while the export is prepared; repeat the request with the returned `cursor`. Providers without a bulk export ignore this parameter. Defaults to `false`.
+	Bulk *bool `json:"-" url:"bulk,omitempty"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -84,6 +87,13 @@ func (q *QueryCloudResourceInventory) SetCursor(cursor *string) {
 func (q *QueryCloudResourceInventory) SetIncludeRawData(includeRawData *bool) {
 	q.IncludeRawData = includeRawData
 	q.require(queryCloudResourceInventoryFieldIncludeRawData)
+}
+
+// SetBulk sets the Bulk field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryCloudResourceInventory) SetBulk(bulk *bool) {
+	q.Bulk = bulk
+	q.require(queryCloudResourceInventoryFieldBulk)
 }
 
 var (
@@ -235,6 +245,7 @@ var (
 	queryIomsFieldFilter         = big.NewInt(1 << 3)
 	queryIomsFieldCursor         = big.NewInt(1 << 4)
 	queryIomsFieldIncludeRawData = big.NewInt(1 << 5)
+	queryIomsFieldBulk           = big.NewInt(1 << 6)
 )
 
 type QueryIoms struct {
@@ -250,6 +261,8 @@ type QueryIoms struct {
 	Cursor *string `json:"-" url:"cursor,omitempty"`
 	// Include the raw data from the CloudSecurity in the response. Defaults to `false`.
 	IncludeRawData *bool `json:"-" url:"include_raw_data,omitempty"`
+	// Retrieve the full result set through the provider's bulk export, when it has one. Results are unordered, and the first responses may be empty with `status` set to `PENDING` while the export is prepared; repeat the request with the returned `cursor`. Providers without a bulk export ignore this parameter. Defaults to `false`.
+	Bulk *bool `json:"-" url:"bulk,omitempty"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -304,6 +317,13 @@ func (q *QueryIoms) SetIncludeRawData(includeRawData *bool) {
 	q.require(queryIomsFieldIncludeRawData)
 }
 
+// SetBulk sets the Bulk field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryIoms) SetBulk(bulk *bool) {
+	q.Bulk = bulk
+	q.require(queryIomsFieldBulk)
+}
+
 var (
 	queryCloudSecurityThreatsFieldMeta           = big.NewInt(1 << 0)
 	queryCloudSecurityThreatsFieldLimit          = big.NewInt(1 << 1)
@@ -311,6 +331,7 @@ var (
 	queryCloudSecurityThreatsFieldFilter         = big.NewInt(1 << 3)
 	queryCloudSecurityThreatsFieldCursor         = big.NewInt(1 << 4)
 	queryCloudSecurityThreatsFieldIncludeRawData = big.NewInt(1 << 5)
+	queryCloudSecurityThreatsFieldBulk           = big.NewInt(1 << 6)
 )
 
 type QueryCloudSecurityThreats struct {
@@ -326,6 +347,8 @@ type QueryCloudSecurityThreats struct {
 	Cursor *string `json:"-" url:"cursor,omitempty"`
 	// Include the raw data from the CloudSecurity in the response. Defaults to `false`.
 	IncludeRawData *bool `json:"-" url:"include_raw_data,omitempty"`
+	// Retrieve the full result set through the provider's bulk export, when it has one. Results are unordered, and the first responses may be empty with `status` set to `PENDING` while the export is prepared; repeat the request with the returned `cursor`. Providers without a bulk export ignore this parameter. Defaults to `false`.
+	Bulk *bool `json:"-" url:"bulk,omitempty"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -380,11 +403,19 @@ func (q *QueryCloudSecurityThreats) SetIncludeRawData(includeRawData *bool) {
 	q.require(queryCloudSecurityThreatsFieldIncludeRawData)
 }
 
+// SetBulk sets the Bulk field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryCloudSecurityThreats) SetBulk(bulk *bool) {
+	q.Bulk = bulk
+	q.require(queryCloudSecurityThreatsFieldBulk)
+}
+
 var (
 	queryCloudResourceInventoryResponseFieldMessages = big.NewInt(1 << 0)
 	queryCloudResourceInventoryResponseFieldMeta     = big.NewInt(1 << 1)
 	queryCloudResourceInventoryResponseFieldCursor   = big.NewInt(1 << 2)
-	queryCloudResourceInventoryResponseFieldResult   = big.NewInt(1 << 3)
+	queryCloudResourceInventoryResponseFieldStatus   = big.NewInt(1 << 3)
+	queryCloudResourceInventoryResponseFieldResult   = big.NewInt(1 << 4)
 )
 
 type QueryCloudResourceInventoryResponse struct {
@@ -394,6 +425,8 @@ type QueryCloudResourceInventoryResponse struct {
 	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
 	// Cursor to use to retrieve the next page of results
 	Cursor string `json:"cursor" url:"cursor"`
+	// `PENDING` while the provider is still preparing results; repeat the request with the returned `cursor`. `COMPLETE` otherwise.
+	Status QueryStatus `json:"status" url:"status"`
 	// List of cloud resources that match the query.
 	Result []latest.CloudResourcesInventoryInfo `json:"result" url:"result"`
 
@@ -423,6 +456,13 @@ func (q *QueryCloudResourceInventoryResponse) GetCursor() string {
 		return ""
 	}
 	return q.Cursor
+}
+
+func (q *QueryCloudResourceInventoryResponse) GetStatus() QueryStatus {
+	if q == nil {
+		return ""
+	}
+	return q.Status
 }
 
 func (q *QueryCloudResourceInventoryResponse) GetResult() []latest.CloudResourcesInventoryInfo {
@@ -465,6 +505,13 @@ func (q *QueryCloudResourceInventoryResponse) SetMeta(meta *MetaResponse) {
 func (q *QueryCloudResourceInventoryResponse) SetCursor(cursor string) {
 	q.Cursor = cursor
 	q.require(queryCloudResourceInventoryResponseFieldCursor)
+}
+
+// SetStatus sets the Status field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryCloudResourceInventoryResponse) SetStatus(status QueryStatus) {
+	q.Status = status
+	q.require(queryCloudResourceInventoryResponseFieldStatus)
 }
 
 // SetResult sets the Result field and marks it as non-optional;
@@ -520,7 +567,8 @@ var (
 	queryCloudSecurityThreatsResponseFieldMessages = big.NewInt(1 << 0)
 	queryCloudSecurityThreatsResponseFieldMeta     = big.NewInt(1 << 1)
 	queryCloudSecurityThreatsResponseFieldCursor   = big.NewInt(1 << 2)
-	queryCloudSecurityThreatsResponseFieldResult   = big.NewInt(1 << 3)
+	queryCloudSecurityThreatsResponseFieldStatus   = big.NewInt(1 << 3)
+	queryCloudSecurityThreatsResponseFieldResult   = big.NewInt(1 << 4)
 )
 
 type QueryCloudSecurityThreatsResponse struct {
@@ -530,6 +578,8 @@ type QueryCloudSecurityThreatsResponse struct {
 	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
 	// Cursor to use to retrieve the next page of results
 	Cursor string `json:"cursor" url:"cursor"`
+	// `PENDING` while the provider is still preparing results; repeat the request with the returned `cursor`. `COMPLETE` otherwise.
+	Status QueryStatus `json:"status" url:"status"`
 	// List of cloud security threats that match the query.
 	Result []latest.DetectionFinding `json:"result" url:"result"`
 
@@ -559,6 +609,13 @@ func (q *QueryCloudSecurityThreatsResponse) GetCursor() string {
 		return ""
 	}
 	return q.Cursor
+}
+
+func (q *QueryCloudSecurityThreatsResponse) GetStatus() QueryStatus {
+	if q == nil {
+		return ""
+	}
+	return q.Status
 }
 
 func (q *QueryCloudSecurityThreatsResponse) GetResult() []latest.DetectionFinding {
@@ -601,6 +658,13 @@ func (q *QueryCloudSecurityThreatsResponse) SetMeta(meta *MetaResponse) {
 func (q *QueryCloudSecurityThreatsResponse) SetCursor(cursor string) {
 	q.Cursor = cursor
 	q.require(queryCloudSecurityThreatsResponseFieldCursor)
+}
+
+// SetStatus sets the Status field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryCloudSecurityThreatsResponse) SetStatus(status QueryStatus) {
+	q.Status = status
+	q.require(queryCloudSecurityThreatsResponseFieldStatus)
 }
 
 // SetResult sets the Result field and marks it as non-optional;
@@ -928,7 +992,8 @@ var (
 	queryIomsResponseFieldMessages = big.NewInt(1 << 0)
 	queryIomsResponseFieldMeta     = big.NewInt(1 << 1)
 	queryIomsResponseFieldCursor   = big.NewInt(1 << 2)
-	queryIomsResponseFieldResult   = big.NewInt(1 << 3)
+	queryIomsResponseFieldStatus   = big.NewInt(1 << 3)
+	queryIomsResponseFieldResult   = big.NewInt(1 << 4)
 )
 
 type QueryIomsResponse struct {
@@ -938,6 +1003,8 @@ type QueryIomsResponse struct {
 	Meta *MetaResponse `json:"meta,omitempty" url:"meta,omitempty"`
 	// Cursor to use to retrieve the next page of results
 	Cursor string `json:"cursor" url:"cursor"`
+	// `PENDING` while the provider is still preparing results; repeat the request with the returned `cursor`. `COMPLETE` otherwise.
+	Status QueryStatus `json:"status" url:"status"`
 	// List of IOM findings that match the query.
 	Result []latest.ComplianceFinding `json:"result" url:"result"`
 
@@ -967,6 +1034,13 @@ func (q *QueryIomsResponse) GetCursor() string {
 		return ""
 	}
 	return q.Cursor
+}
+
+func (q *QueryIomsResponse) GetStatus() QueryStatus {
+	if q == nil {
+		return ""
+	}
+	return q.Status
 }
 
 func (q *QueryIomsResponse) GetResult() []latest.ComplianceFinding {
@@ -1009,6 +1083,13 @@ func (q *QueryIomsResponse) SetMeta(meta *MetaResponse) {
 func (q *QueryIomsResponse) SetCursor(cursor string) {
 	q.Cursor = cursor
 	q.require(queryIomsResponseFieldCursor)
+}
+
+// SetStatus sets the Status field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryIomsResponse) SetStatus(status QueryStatus) {
+	q.Status = status
+	q.require(queryIomsResponseFieldStatus)
 }
 
 // SetResult sets the Result field and marks it as non-optional;
