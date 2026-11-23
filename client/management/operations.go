@@ -79,15 +79,17 @@ var (
 type ListExecutionHistoryRequestParams struct {
 	// Filter operation execution history by this query.
 	// Available filters:
-	// - `id[eq]` - Filter by specific operation ID
-	// - `integration_id[eq]` - Filter by specific integration ID
-	// - `account_id[eq]` - Filter by specific account ID
-	// - `execution_id[eq]` - Filter by specific execution ID
-	// - `started_at[gte]` - Filter executions started at or after a specific datetime (RFC3339 format)
-	// - `started_at[lte]` - Filter executions started at or before a specific datetime (RFC3339 format)
-	// - `started_at[gt]` - Filter executions started after a specific datetime
-	// - `started_at[lt]` - Filter executions started before a specific datetime
-	// - `operation_id[eq]` - Filter by operation name (e.g., "assets_query_devices")
+	//   - `id[eq]` - Filter by the operation an execution event belongs to: the event's `operation_id`.
+	//     Use this to tell apart the executions of one operation scheduled more than once with different filters.
+	//   - `integration_id[eq]` - Filter by specific integration ID
+	//   - `account_id[eq]` - Filter by specific account ID
+	//   - `execution_id[eq]` - Filter by specific execution ID
+	//   - `started_at[gte]` - Filter executions started at or after a specific datetime (RFC3339 format)
+	//   - `started_at[lte]` - Filter executions started at or before a specific datetime (RFC3339 format)
+	//   - `started_at[gt]` - Filter executions started after a specific datetime
+	//   - `started_at[lt]` - Filter executions started before a specific datetime
+	//   - `operation_id[eq]` - Filter by operation name: the event's `operation` (e.g., "assets_query_devices"), not its `operation_id`
+	//
 	// If used more than once, the queries are ANDed together.
 	Filter []*string `json:"-" url:"filter,omitempty"`
 	// Select a field to order the results by. Defaults to `started_at[desc]`. To control the direction of the sorting, append
