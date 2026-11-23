@@ -7,6 +7,7 @@ import (
 	fmt "fmt"
 	internal "github.com/synqly/go-sdk/v2/client/engine/internal"
 	big "math/big"
+	time "time"
 )
 
 var (
@@ -1012,6 +1013,906 @@ func (m *MetaMapping) String() string {
 
 // The list of mapping chains applied, indexed by operation ID. Each entry contains an array of mapping IDs.
 type MetaMappingChains = map[string][]string
+
+var (
+	metaMappingsAppliedFieldOutcome = big.NewInt(1 << 0)
+	metaMappingsAppliedFieldChains  = big.NewInt(1 << 1)
+)
+
+type MetaMappingsApplied struct {
+	Outcome MetaParamOutcome `json:"outcome" url:"outcome"`
+	// The mapping chains that ran, by operation ID, filtered by `operations`. Present when `outcome` is `applied`; empty when no chain ran.
+	Chains *MetaMappingChains `json:"chains,omitempty" url:"chains,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (m *MetaMappingsApplied) GetOutcome() MetaParamOutcome {
+	if m == nil {
+		return ""
+	}
+	return m.Outcome
+}
+
+func (m *MetaMappingsApplied) GetChains() *MetaMappingChains {
+	if m == nil {
+		return nil
+	}
+	return m.Chains
+}
+
+func (m *MetaMappingsApplied) GetExtraProperties() map[string]interface{} {
+	if m == nil {
+		return nil
+	}
+	return m.extraProperties
+}
+
+func (m *MetaMappingsApplied) require(field *big.Int) {
+	if m.explicitFields == nil {
+		m.explicitFields = big.NewInt(0)
+	}
+	m.explicitFields.Or(m.explicitFields, field)
+}
+
+// SetOutcome sets the Outcome field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (m *MetaMappingsApplied) SetOutcome(outcome MetaParamOutcome) {
+	m.Outcome = outcome
+	m.require(metaMappingsAppliedFieldOutcome)
+}
+
+// SetChains sets the Chains field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (m *MetaMappingsApplied) SetChains(chains *MetaMappingChains) {
+	m.Chains = chains
+	m.require(metaMappingsAppliedFieldChains)
+}
+
+func (m *MetaMappingsApplied) UnmarshalJSON(data []byte) error {
+	type unmarshaler MetaMappingsApplied
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*m = MetaMappingsApplied(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *m)
+	if err != nil {
+		return err
+	}
+	m.extraProperties = extraProperties
+	m.rawJSON = nil
+	return nil
+}
+
+func (m *MetaMappingsApplied) MarshalJSON() ([]byte, error) {
+	type embed MetaMappingsApplied
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*m),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, m.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (m *MetaMappingsApplied) String() string {
+	if m == nil {
+		return "<nil>"
+	}
+	if len(m.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(m.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(m); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", m)
+}
+
+// How the call served a param.
+type MetaParamOutcome string
+
+const (
+	// The param was served as set.
+	MetaParamOutcomeApplied MetaParamOutcome = "applied"
+	// The param could not be served for this call; the call ran without it.
+	MetaParamOutcomeNotSupported MetaParamOutcome = "not_supported"
+	// The param was served with a different value, which the report gives.
+	MetaParamOutcomeAdjusted MetaParamOutcome = "adjusted"
+)
+
+func NewMetaParamOutcomeFromString(s string) (MetaParamOutcome, error) {
+	switch s {
+	case "applied":
+		return MetaParamOutcomeApplied, nil
+	case "not_supported":
+		return MetaParamOutcomeNotSupported, nil
+	case "adjusted":
+		return MetaParamOutcomeAdjusted, nil
+	}
+	var t MetaParamOutcome
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (m MetaParamOutcome) Ptr() *MetaParamOutcome {
+	return &m
+}
+
+var (
+	metaPollTimeoutFieldOutcome   = big.NewInt(1 << 0)
+	metaPollTimeoutFieldRequested = big.NewInt(1 << 1)
+	metaPollTimeoutFieldApplied   = big.NewInt(1 << 2)
+)
+
+type MetaPollTimeout struct {
+	Outcome MetaParamOutcome `json:"outcome" url:"outcome"`
+	// The poll timeout the call asked for, in seconds.
+	Requested int64 `json:"requested" url:"requested"`
+	// The poll timeout the call ran with, in seconds, when `outcome` is `adjusted`.
+	Applied *int64 `json:"applied,omitempty" url:"applied,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (m *MetaPollTimeout) GetOutcome() MetaParamOutcome {
+	if m == nil {
+		return ""
+	}
+	return m.Outcome
+}
+
+func (m *MetaPollTimeout) GetRequested() int64 {
+	if m == nil {
+		return 0
+	}
+	return m.Requested
+}
+
+func (m *MetaPollTimeout) GetApplied() *int64 {
+	if m == nil {
+		return nil
+	}
+	return m.Applied
+}
+
+func (m *MetaPollTimeout) GetExtraProperties() map[string]interface{} {
+	if m == nil {
+		return nil
+	}
+	return m.extraProperties
+}
+
+func (m *MetaPollTimeout) require(field *big.Int) {
+	if m.explicitFields == nil {
+		m.explicitFields = big.NewInt(0)
+	}
+	m.explicitFields.Or(m.explicitFields, field)
+}
+
+// SetOutcome sets the Outcome field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (m *MetaPollTimeout) SetOutcome(outcome MetaParamOutcome) {
+	m.Outcome = outcome
+	m.require(metaPollTimeoutFieldOutcome)
+}
+
+// SetRequested sets the Requested field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (m *MetaPollTimeout) SetRequested(requested int64) {
+	m.Requested = requested
+	m.require(metaPollTimeoutFieldRequested)
+}
+
+// SetApplied sets the Applied field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (m *MetaPollTimeout) SetApplied(applied *int64) {
+	m.Applied = applied
+	m.require(metaPollTimeoutFieldApplied)
+}
+
+func (m *MetaPollTimeout) UnmarshalJSON(data []byte) error {
+	type unmarshaler MetaPollTimeout
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*m = MetaPollTimeout(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *m)
+	if err != nil {
+		return err
+	}
+	m.extraProperties = extraProperties
+	m.rawJSON = nil
+	return nil
+}
+
+func (m *MetaPollTimeout) MarshalJSON() ([]byte, error) {
+	type embed MetaPollTimeout
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*m),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, m.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (m *MetaPollTimeout) String() string {
+	if m == nil {
+		return "<nil>"
+	}
+	if len(m.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(m.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(m); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", m)
+}
+
+var (
+	metaProviderCallFieldUrl        = big.NewInt(1 << 0)
+	metaProviderCallFieldPrimary    = big.NewInt(1 << 1)
+	metaProviderCallFieldStatus     = big.NewInt(1 << 2)
+	metaProviderCallFieldStartedAt  = big.NewInt(1 << 3)
+	metaProviderCallFieldDurationMs = big.NewInt(1 << 4)
+	metaProviderCallFieldResponse   = big.NewInt(1 << 5)
+	metaProviderCallFieldTruncated  = big.NewInt(1 << 6)
+	metaProviderCallFieldTotalBytes = big.NewInt(1 << 7)
+)
+
+type MetaProviderCall struct {
+	// The URL called. With `detail` `summary`, only its scheme, host and path.
+	Url string `json:"url" url:"url"`
+	// True on the call that fetched the result. Absent otherwise.
+	Primary *bool `json:"primary,omitempty" url:"primary,omitempty"`
+	// The HTTP status the vendor answered with. Absent when the call got no response.
+	Status *int `json:"status,omitempty" url:"status,omitempty"`
+	// When the call started.
+	StartedAt time.Time `json:"started_at" url:"started_at"`
+	// How long the call took, in milliseconds.
+	DurationMs int64 `json:"duration_ms" url:"duration_ms"`
+	// The response body, with `detail` `bodies`. Each response keeps at most its first 256 KiB, and one request keeps at most 16 MiB of responses in total.
+	Response *string `json:"response,omitempty" url:"response,omitempty"`
+	// True when `response` holds only the start of the response body. Absent otherwise.
+	Truncated *bool `json:"truncated,omitempty" url:"truncated,omitempty"`
+	// The size in bytes of the response body as received.
+	TotalBytes *int64 `json:"total_bytes,omitempty" url:"total_bytes,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (m *MetaProviderCall) GetUrl() string {
+	if m == nil {
+		return ""
+	}
+	return m.Url
+}
+
+func (m *MetaProviderCall) GetPrimary() *bool {
+	if m == nil {
+		return nil
+	}
+	return m.Primary
+}
+
+func (m *MetaProviderCall) GetStatus() *int {
+	if m == nil {
+		return nil
+	}
+	return m.Status
+}
+
+func (m *MetaProviderCall) GetStartedAt() time.Time {
+	if m == nil {
+		return time.Time{}
+	}
+	return m.StartedAt
+}
+
+func (m *MetaProviderCall) GetDurationMs() int64 {
+	if m == nil {
+		return 0
+	}
+	return m.DurationMs
+}
+
+func (m *MetaProviderCall) GetResponse() *string {
+	if m == nil {
+		return nil
+	}
+	return m.Response
+}
+
+func (m *MetaProviderCall) GetTruncated() *bool {
+	if m == nil {
+		return nil
+	}
+	return m.Truncated
+}
+
+func (m *MetaProviderCall) GetTotalBytes() *int64 {
+	if m == nil {
+		return nil
+	}
+	return m.TotalBytes
+}
+
+func (m *MetaProviderCall) GetExtraProperties() map[string]interface{} {
+	if m == nil {
+		return nil
+	}
+	return m.extraProperties
+}
+
+func (m *MetaProviderCall) require(field *big.Int) {
+	if m.explicitFields == nil {
+		m.explicitFields = big.NewInt(0)
+	}
+	m.explicitFields.Or(m.explicitFields, field)
+}
+
+// SetUrl sets the Url field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (m *MetaProviderCall) SetUrl(url string) {
+	m.Url = url
+	m.require(metaProviderCallFieldUrl)
+}
+
+// SetPrimary sets the Primary field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (m *MetaProviderCall) SetPrimary(primary *bool) {
+	m.Primary = primary
+	m.require(metaProviderCallFieldPrimary)
+}
+
+// SetStatus sets the Status field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (m *MetaProviderCall) SetStatus(status *int) {
+	m.Status = status
+	m.require(metaProviderCallFieldStatus)
+}
+
+// SetStartedAt sets the StartedAt field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (m *MetaProviderCall) SetStartedAt(startedAt time.Time) {
+	m.StartedAt = startedAt
+	m.require(metaProviderCallFieldStartedAt)
+}
+
+// SetDurationMs sets the DurationMs field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (m *MetaProviderCall) SetDurationMs(durationMs int64) {
+	m.DurationMs = durationMs
+	m.require(metaProviderCallFieldDurationMs)
+}
+
+// SetResponse sets the Response field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (m *MetaProviderCall) SetResponse(response *string) {
+	m.Response = response
+	m.require(metaProviderCallFieldResponse)
+}
+
+// SetTruncated sets the Truncated field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (m *MetaProviderCall) SetTruncated(truncated *bool) {
+	m.Truncated = truncated
+	m.require(metaProviderCallFieldTruncated)
+}
+
+// SetTotalBytes sets the TotalBytes field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (m *MetaProviderCall) SetTotalBytes(totalBytes *int64) {
+	m.TotalBytes = totalBytes
+	m.require(metaProviderCallFieldTotalBytes)
+}
+
+func (m *MetaProviderCall) UnmarshalJSON(data []byte) error {
+	type embed MetaProviderCall
+	var unmarshaler = struct {
+		embed
+		StartedAt *internal.DateTime `json:"started_at"`
+	}{
+		embed: embed(*m),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*m = MetaProviderCall(unmarshaler.embed)
+	m.StartedAt = unmarshaler.StartedAt.Time()
+	extraProperties, err := internal.ExtractExtraProperties(data, *m)
+	if err != nil {
+		return err
+	}
+	m.extraProperties = extraProperties
+	m.rawJSON = nil
+	return nil
+}
+
+func (m *MetaProviderCall) MarshalJSON() ([]byte, error) {
+	type embed MetaProviderCall
+	var marshaler = struct {
+		embed
+		StartedAt *internal.DateTime `json:"started_at"`
+	}{
+		embed:     embed(*m),
+		StartedAt: internal.NewDateTime(m.StartedAt),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, m.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (m *MetaProviderCall) String() string {
+	if m == nil {
+		return "<nil>"
+	}
+	if len(m.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(m.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(m); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", m)
+}
+
+var (
+	metaProviderCallsFieldOutcome = big.NewInt(1 << 0)
+	metaProviderCallsFieldCalls   = big.NewInt(1 << 1)
+)
+
+type MetaProviderCalls struct {
+	Outcome MetaParamOutcome `json:"outcome" url:"outcome"`
+	// The calls `provider_calls` selects, ordered by when each started; empty when none matched or `outcome` is not `applied`. Authentication calls are never included.
+	Calls []*MetaProviderCall `json:"calls" url:"calls"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (m *MetaProviderCalls) GetOutcome() MetaParamOutcome {
+	if m == nil {
+		return ""
+	}
+	return m.Outcome
+}
+
+func (m *MetaProviderCalls) GetCalls() []*MetaProviderCall {
+	if m == nil {
+		return nil
+	}
+	return m.Calls
+}
+
+func (m *MetaProviderCalls) GetExtraProperties() map[string]interface{} {
+	if m == nil {
+		return nil
+	}
+	return m.extraProperties
+}
+
+func (m *MetaProviderCalls) require(field *big.Int) {
+	if m.explicitFields == nil {
+		m.explicitFields = big.NewInt(0)
+	}
+	m.explicitFields.Or(m.explicitFields, field)
+}
+
+// SetOutcome sets the Outcome field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (m *MetaProviderCalls) SetOutcome(outcome MetaParamOutcome) {
+	m.Outcome = outcome
+	m.require(metaProviderCallsFieldOutcome)
+}
+
+// SetCalls sets the Calls field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (m *MetaProviderCalls) SetCalls(calls []*MetaProviderCall) {
+	m.Calls = calls
+	m.require(metaProviderCallsFieldCalls)
+}
+
+func (m *MetaProviderCalls) UnmarshalJSON(data []byte) error {
+	type unmarshaler MetaProviderCalls
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*m = MetaProviderCalls(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *m)
+	if err != nil {
+		return err
+	}
+	m.extraProperties = extraProperties
+	m.rawJSON = nil
+	return nil
+}
+
+func (m *MetaProviderCalls) MarshalJSON() ([]byte, error) {
+	type embed MetaProviderCalls
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*m),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, m.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (m *MetaProviderCalls) String() string {
+	if m == nil {
+		return "<nil>"
+	}
+	if len(m.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(m.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(m); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", m)
+}
+
+var (
+	metaProviderQueryFieldOutcome  = big.NewInt(1 << 0)
+	metaProviderQueryFieldProvider = big.NewInt(1 << 1)
+)
+
+type MetaProviderQuery struct {
+	Outcome MetaParamOutcome `json:"outcome" url:"outcome"`
+	// The native query, when `outcome` is `applied`.
+	Provider *string `json:"provider,omitempty" url:"provider,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (m *MetaProviderQuery) GetOutcome() MetaParamOutcome {
+	if m == nil {
+		return ""
+	}
+	return m.Outcome
+}
+
+func (m *MetaProviderQuery) GetProvider() *string {
+	if m == nil {
+		return nil
+	}
+	return m.Provider
+}
+
+func (m *MetaProviderQuery) GetExtraProperties() map[string]interface{} {
+	if m == nil {
+		return nil
+	}
+	return m.extraProperties
+}
+
+func (m *MetaProviderQuery) require(field *big.Int) {
+	if m.explicitFields == nil {
+		m.explicitFields = big.NewInt(0)
+	}
+	m.explicitFields.Or(m.explicitFields, field)
+}
+
+// SetOutcome sets the Outcome field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (m *MetaProviderQuery) SetOutcome(outcome MetaParamOutcome) {
+	m.Outcome = outcome
+	m.require(metaProviderQueryFieldOutcome)
+}
+
+// SetProvider sets the Provider field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (m *MetaProviderQuery) SetProvider(provider *string) {
+	m.Provider = provider
+	m.require(metaProviderQueryFieldProvider)
+}
+
+func (m *MetaProviderQuery) UnmarshalJSON(data []byte) error {
+	type unmarshaler MetaProviderQuery
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*m = MetaProviderQuery(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *m)
+	if err != nil {
+		return err
+	}
+	m.extraProperties = extraProperties
+	m.rawJSON = nil
+	return nil
+}
+
+func (m *MetaProviderQuery) MarshalJSON() ([]byte, error) {
+	type embed MetaProviderQuery
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*m),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, m.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (m *MetaProviderQuery) String() string {
+	if m == nil {
+		return "<nil>"
+	}
+	if len(m.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(m.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(m); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", m)
+}
+
+var (
+	metaResolvedParamFieldName      = big.NewInt(1 << 0)
+	metaResolvedParamFieldValue     = big.NewInt(1 << 1)
+	metaResolvedParamFieldEffective = big.NewInt(1 << 2)
+	metaResolvedParamFieldLayer     = big.NewInt(1 << 3)
+	metaResolvedParamFieldLockedBy  = big.NewInt(1 << 4)
+)
+
+type MetaResolvedParam struct {
+	// The param's name, as a key of the call's `params`. A provider param is named as its binding declares it.
+	Name string `json:"name" url:"name"`
+	// The value as the winning layer wrote it.
+	Value any `json:"value" url:"value"`
+	// The value the call ran with, which differs from `value` when a relative or missing time bound was filled in.
+	Effective any `json:"effective" url:"effective"`
+	// The layer the value came from: `platform`, `provider`, `operation`, `profile`, `integration_point`, `integration` or `call`.
+	Layer string `json:"layer" url:"layer"`
+	// The layer whose lock is in force on this param, if any.
+	LockedBy *string `json:"locked_by,omitempty" url:"locked_by,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (m *MetaResolvedParam) GetName() string {
+	if m == nil {
+		return ""
+	}
+	return m.Name
+}
+
+func (m *MetaResolvedParam) GetValue() any {
+	if m == nil {
+		return nil
+	}
+	return m.Value
+}
+
+func (m *MetaResolvedParam) GetEffective() any {
+	if m == nil {
+		return nil
+	}
+	return m.Effective
+}
+
+func (m *MetaResolvedParam) GetLayer() string {
+	if m == nil {
+		return ""
+	}
+	return m.Layer
+}
+
+func (m *MetaResolvedParam) GetLockedBy() *string {
+	if m == nil {
+		return nil
+	}
+	return m.LockedBy
+}
+
+func (m *MetaResolvedParam) GetExtraProperties() map[string]interface{} {
+	if m == nil {
+		return nil
+	}
+	return m.extraProperties
+}
+
+func (m *MetaResolvedParam) require(field *big.Int) {
+	if m.explicitFields == nil {
+		m.explicitFields = big.NewInt(0)
+	}
+	m.explicitFields.Or(m.explicitFields, field)
+}
+
+// SetName sets the Name field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (m *MetaResolvedParam) SetName(name string) {
+	m.Name = name
+	m.require(metaResolvedParamFieldName)
+}
+
+// SetValue sets the Value field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (m *MetaResolvedParam) SetValue(value any) {
+	m.Value = value
+	m.require(metaResolvedParamFieldValue)
+}
+
+// SetEffective sets the Effective field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (m *MetaResolvedParam) SetEffective(effective any) {
+	m.Effective = effective
+	m.require(metaResolvedParamFieldEffective)
+}
+
+// SetLayer sets the Layer field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (m *MetaResolvedParam) SetLayer(layer string) {
+	m.Layer = layer
+	m.require(metaResolvedParamFieldLayer)
+}
+
+// SetLockedBy sets the LockedBy field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (m *MetaResolvedParam) SetLockedBy(lockedBy *string) {
+	m.LockedBy = lockedBy
+	m.require(metaResolvedParamFieldLockedBy)
+}
+
+func (m *MetaResolvedParam) UnmarshalJSON(data []byte) error {
+	type unmarshaler MetaResolvedParam
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*m = MetaResolvedParam(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *m)
+	if err != nil {
+		return err
+	}
+	m.extraProperties = extraProperties
+	m.rawJSON = nil
+	return nil
+}
+
+func (m *MetaResolvedParam) MarshalJSON() ([]byte, error) {
+	type embed MetaResolvedParam
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*m),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, m.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (m *MetaResolvedParam) String() string {
+	if m == nil {
+		return "<nil>"
+	}
+	if len(m.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(m.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(m); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", m)
+}
+
+var (
+	metaResolvedParamsFieldParams = big.NewInt(1 << 0)
+)
+
+type MetaResolvedParams struct {
+	// One entry per param that has a value at some layer.
+	Params []*MetaResolvedParam `json:"params" url:"params"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (m *MetaResolvedParams) GetParams() []*MetaResolvedParam {
+	if m == nil {
+		return nil
+	}
+	return m.Params
+}
+
+func (m *MetaResolvedParams) GetExtraProperties() map[string]interface{} {
+	if m == nil {
+		return nil
+	}
+	return m.extraProperties
+}
+
+func (m *MetaResolvedParams) require(field *big.Int) {
+	if m.explicitFields == nil {
+		m.explicitFields = big.NewInt(0)
+	}
+	m.explicitFields.Or(m.explicitFields, field)
+}
+
+// SetParams sets the Params field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (m *MetaResolvedParams) SetParams(params []*MetaResolvedParam) {
+	m.Params = params
+	m.require(metaResolvedParamsFieldParams)
+}
+
+func (m *MetaResolvedParams) UnmarshalJSON(data []byte) error {
+	type unmarshaler MetaResolvedParams
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*m = MetaResolvedParams(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *m)
+	if err != nil {
+		return err
+	}
+	m.extraProperties = extraProperties
+	m.rawJSON = nil
+	return nil
+}
+
+func (m *MetaResolvedParams) MarshalJSON() ([]byte, error) {
+	type embed MetaResolvedParams
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*m),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, m.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (m *MetaResolvedParams) String() string {
+	if m == nil {
+		return "<nil>"
+	}
+	if len(m.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(m.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(m); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", m)
+}
 
 var (
 	metaResponseFieldStats   = big.NewInt(1 << 0)
