@@ -8277,6 +8277,143 @@ func (c *CopilotChatCredential) validate() error {
 	return nil
 }
 
+type CriblCredential struct {
+	Type string
+	// An auth token configured on the Cribl HTTP Source. Required when the Source has auth tokens configured.
+	Token *TokenCredential
+	// Reference to existing Auth Token.
+	TokenId TokenCredentialId
+
+	rawJSON json.RawMessage
+}
+
+func (c *CriblCredential) GetType() string {
+	if c == nil {
+		return ""
+	}
+	return c.Type
+}
+
+func (c *CriblCredential) GetToken() *TokenCredential {
+	if c == nil {
+		return nil
+	}
+	return c.Token
+}
+
+func (c *CriblCredential) GetTokenId() TokenCredentialId {
+	if c == nil {
+		return ""
+	}
+	return c.TokenId
+}
+
+func (c *CriblCredential) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	c.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", c)
+	}
+	switch unmarshaler.Type {
+	case "token":
+		value := new(TokenCredential)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		c.Token = value
+	case "token_id":
+		var valueUnmarshaler struct {
+			TokenId TokenCredentialId `json:"value"`
+		}
+		if err := json.Unmarshal(data, &valueUnmarshaler); err != nil {
+			return err
+		}
+		c.TokenId = valueUnmarshaler.TokenId
+	}
+	c.rawJSON = nil
+	return nil
+}
+
+func (c CriblCredential) MarshalJSON() ([]byte, error) {
+	if err := c.validate(); err != nil {
+		return nil, err
+	}
+	if c.Token != nil {
+		return internal.MarshalJSONWithExtraProperty(c.Token, "type", "token")
+	}
+	if c.TokenId != "" {
+		var marshaler = struct {
+			Type    string            `json:"type"`
+			TokenId TokenCredentialId `json:"value"`
+		}{
+			Type:    "token_id",
+			TokenId: c.TokenId,
+		}
+		return json.Marshal(marshaler)
+	}
+	if len(c.rawJSON) > 0 {
+		return c.rawJSON, nil
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", c)
+}
+
+type CriblCredentialVisitor interface {
+	VisitToken(*TokenCredential) error
+	VisitTokenId(TokenCredentialId) error
+}
+
+func (c *CriblCredential) Accept(visitor CriblCredentialVisitor) error {
+	if c.Token != nil {
+		return visitor.VisitToken(c.Token)
+	}
+	if c.TokenId != "" {
+		return visitor.VisitTokenId(c.TokenId)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", c)
+}
+
+func (c *CriblCredential) validate() error {
+	if c == nil {
+		return fmt.Errorf("type %T is nil", c)
+	}
+	var fields []string
+	if c.Token != nil {
+		fields = append(fields, "token")
+	}
+	if c.TokenId != "" {
+		fields = append(fields, "token_id")
+	}
+	if len(fields) == 0 {
+		if c.Type != "" {
+			if len(c.rawJSON) > 0 {
+				return nil
+			}
+			return fmt.Errorf("type %T defines a discriminant set to %q but the field is not set", c, c.Type)
+		}
+		return fmt.Errorf("type %T is empty", c)
+	}
+	if len(fields) > 1 {
+		return fmt.Errorf("type %T defines values for %s, but only one value is allowed", c, fields)
+	}
+	if c.Type != "" {
+		field := fields[0]
+		if c.Type != field {
+			return fmt.Errorf(
+				"type %T defines a discriminant set to %q, but it does not match the %T field; either remove or update the discriminant to match",
+				c,
+				c.Type,
+				c,
+			)
+		}
+	}
+	return nil
+}
+
 type CrowdStrikeCredential struct {
 	Type string
 	// Configuration when creating new Client Credentials.
@@ -25861,6 +25998,8 @@ type ProviderConfig struct {
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/azure-monitor-logs)
 	SinkAzureMonitorLogs *SinkAzureMonitorLogs
+	// Configuration for Cribl Stream as a Sink provider.
+	SinkCribl *SinkCribl
 	// Configuration for CrowdStrike Falcon® Next-Gen SIEM (HEC).
 	//
 	// [Configuration guide](https://docs.synqly.com/guides/provider-configuration/crowdstrike-sink-setup)
@@ -27008,6 +27147,13 @@ func (p *ProviderConfig) GetSinkAzureMonitorLogs() *SinkAzureMonitorLogs {
 		return nil
 	}
 	return p.SinkAzureMonitorLogs
+}
+
+func (p *ProviderConfig) GetSinkCribl() *SinkCribl {
+	if p == nil {
+		return nil
+	}
+	return p.SinkCribl
 }
 
 func (p *ProviderConfig) GetSinkCrowdstrikeHec() *SinkCrowdstrikeHec {
@@ -28262,6 +28408,12 @@ func (p *ProviderConfig) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.SinkAzureMonitorLogs = value
+	case "sink_cribl":
+		value := new(SinkCribl)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.SinkCribl = value
 	case "sink_crowdstrike_hec":
 		value := new(SinkCrowdstrikeHec)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -29051,6 +29203,9 @@ func (p ProviderConfig) MarshalJSON() ([]byte, error) {
 	if p.SinkAzureMonitorLogs != nil {
 		return internal.MarshalJSONWithExtraProperty(p.SinkAzureMonitorLogs, "type", "sink_azure_monitor_logs")
 	}
+	if p.SinkCribl != nil {
+		return internal.MarshalJSONWithExtraProperty(p.SinkCribl, "type", "sink_cribl")
+	}
 	if p.SinkCrowdstrikeHec != nil {
 		return internal.MarshalJSONWithExtraProperty(p.SinkCrowdstrikeHec, "type", "sink_crowdstrike_hec")
 	}
@@ -29382,6 +29537,7 @@ type ProviderConfigVisitor interface {
 	VisitSinkAwsSqs(*SinkAwsSqs) error
 	VisitSinkAzureBlob(*SinkAzureBlob) error
 	VisitSinkAzureMonitorLogs(*SinkAzureMonitorLogs) error
+	VisitSinkCribl(*SinkCribl) error
 	VisitSinkCrowdstrikeHec(*SinkCrowdstrikeHec) error
 	VisitSinkDatadog(*SinkDatadog) error
 	VisitSinkElasticsearch(*SinkElasticsearch) error
@@ -29844,6 +30000,9 @@ func (p *ProviderConfig) Accept(visitor ProviderConfigVisitor) error {
 	}
 	if p.SinkAzureMonitorLogs != nil {
 		return visitor.VisitSinkAzureMonitorLogs(p.SinkAzureMonitorLogs)
+	}
+	if p.SinkCribl != nil {
+		return visitor.VisitSinkCribl(p.SinkCribl)
 	}
 	if p.SinkCrowdstrikeHec != nil {
 		return visitor.VisitSinkCrowdstrikeHec(p.SinkCrowdstrikeHec)
@@ -30441,6 +30600,9 @@ func (p *ProviderConfig) validate() error {
 	if p.SinkAzureMonitorLogs != nil {
 		fields = append(fields, "sink_azure_monitor_logs")
 	}
+	if p.SinkCribl != nil {
+		fields = append(fields, "sink_cribl")
+	}
 	if p.SinkCrowdstrikeHec != nil {
 		fields = append(fields, "sink_crowdstrike_hec")
 	}
@@ -30927,6 +31089,8 @@ const (
 	ProviderConfigIdSinkAzureBlob ProviderConfigId = "sink_azure_blob"
 	// Microsoft Azure Monitor Logs
 	ProviderConfigIdSinkAzureMonitorLogs ProviderConfigId = "sink_azure_monitor_logs"
+	// Cribl Stream
+	ProviderConfigIdSinkCribl ProviderConfigId = "sink_cribl"
 	// CrowdStrike Falcon® Next-Gen SIEM (HEC)
 	ProviderConfigIdSinkCrowdstrikeHec ProviderConfigId = "sink_crowdstrike_hec"
 	// Datadog Logs
@@ -31325,6 +31489,8 @@ func NewProviderConfigIdFromString(s string) (ProviderConfigId, error) {
 		return ProviderConfigIdSinkAzureBlob, nil
 	case "sink_azure_monitor_logs":
 		return ProviderConfigIdSinkAzureMonitorLogs, nil
+	case "sink_cribl":
+		return ProviderConfigIdSinkCribl, nil
 	case "sink_crowdstrike_hec":
 		return ProviderConfigIdSinkCrowdstrikeHec, nil
 	case "sink_datadog":
@@ -36044,6 +36210,125 @@ func (s *SinkAzureMonitorLogs) MarshalJSON() ([]byte, error) {
 }
 
 func (s *SinkAzureMonitorLogs) String() string {
+	if s == nil {
+		return "<nil>"
+	}
+	if len(s.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(s.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(s); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", s)
+}
+
+// Configuration for Cribl Stream as a Sink provider.
+var (
+	sinkCriblFieldCredential      = big.NewInt(1 << 0)
+	sinkCriblFieldTlsVerification = big.NewInt(1 << 1)
+	sinkCriblFieldUrl             = big.NewInt(1 << 2)
+)
+
+type SinkCribl struct {
+	Credential *CriblCredential `json:"credential,omitempty" url:"credential,omitempty"`
+	// Defaults to `verify`. Use `custom_ca` when the Source's certificate comes from a private CA or is self-signed (paste the certificate itself), and `skip` only when neither is possible. Under `verify` and `custom_ca`, the certificate must name the host in the URL.
+	TlsVerification *TlsVerification `json:"tls_verification,omitempty" url:"tls_verification,omitempty"`
+	// URL of the Cribl HTTP Source, including its port. If the Source's Cribl HTTP event API path has been changed from the default, add that path to the URL.
+	Url string `json:"url" url:"url"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (s *SinkCribl) GetCredential() *CriblCredential {
+	if s == nil {
+		return nil
+	}
+	return s.Credential
+}
+
+func (s *SinkCribl) GetTlsVerification() *TlsVerification {
+	if s == nil {
+		return nil
+	}
+	return s.TlsVerification
+}
+
+func (s *SinkCribl) GetUrl() string {
+	if s == nil {
+		return ""
+	}
+	return s.Url
+}
+
+func (s *SinkCribl) GetExtraProperties() map[string]interface{} {
+	if s == nil {
+		return nil
+	}
+	return s.extraProperties
+}
+
+func (s *SinkCribl) require(field *big.Int) {
+	if s.explicitFields == nil {
+		s.explicitFields = big.NewInt(0)
+	}
+	s.explicitFields.Or(s.explicitFields, field)
+}
+
+// SetCredential sets the Credential field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (s *SinkCribl) SetCredential(credential *CriblCredential) {
+	s.Credential = credential
+	s.require(sinkCriblFieldCredential)
+}
+
+// SetTlsVerification sets the TlsVerification field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (s *SinkCribl) SetTlsVerification(tlsVerification *TlsVerification) {
+	s.TlsVerification = tlsVerification
+	s.require(sinkCriblFieldTlsVerification)
+}
+
+// SetUrl sets the Url field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (s *SinkCribl) SetUrl(url string) {
+	s.Url = url
+	s.require(sinkCriblFieldUrl)
+}
+
+func (s *SinkCribl) UnmarshalJSON(data []byte) error {
+	type unmarshaler SinkCribl
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*s = SinkCribl(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+	s.rawJSON = nil
+	return nil
+}
+
+func (s *SinkCribl) MarshalJSON() ([]byte, error) {
+	type embed SinkCribl
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*s),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, s.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (s *SinkCribl) String() string {
 	if s == nil {
 		return "<nil>"
 	}
