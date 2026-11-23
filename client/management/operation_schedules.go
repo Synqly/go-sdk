@@ -473,6 +473,7 @@ const (
 	ScheduledOperationIdEdrQueryAlerts                            ScheduledOperationId = "edr_query_alerts"
 	ScheduledOperationIdEdrQueryApplications                      ScheduledOperationId = "edr_query_applications"
 	ScheduledOperationIdEdrQueryEndpoints                         ScheduledOperationId = "edr_query_endpoints"
+	ScheduledOperationIdEdrQueryExclusions                        ScheduledOperationId = "edr_query_exclusions"
 	ScheduledOperationIdEdrQueryIocs                              ScheduledOperationId = "edr_query_iocs"
 	ScheduledOperationIdEdrQueryPolicies                          ScheduledOperationId = "edr_query_policies"
 	ScheduledOperationIdEdrQueryPostureScore                      ScheduledOperationId = "edr_query_posture_score"
@@ -524,6 +525,8 @@ func NewScheduledOperationIdFromString(s string) (ScheduledOperationId, error) {
 		return ScheduledOperationIdEdrQueryApplications, nil
 	case "edr_query_endpoints":
 		return ScheduledOperationIdEdrQueryEndpoints, nil
+	case "edr_query_exclusions":
+		return ScheduledOperationIdEdrQueryExclusions, nil
 	case "edr_query_iocs":
 		return ScheduledOperationIdEdrQueryIocs, nil
 	case "edr_query_policies":
