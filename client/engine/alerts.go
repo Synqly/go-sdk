@@ -11,7 +11,7 @@ import (
 	big "math/big"
 )
 
-// The user an `update_alert` request assigns an alert to. Set exactly one of `email_addr` or `uid`, or neither to unassign. A display name is not accepted: providers store one as a label without resolving it to a user, which would leave the alert unassigned while reporting success.
+// The user an update request assigns an alert or case to. Set exactly one of `email_addr` or `uid`, or neither to unassign. A display name is not accepted: providers store one as a label without resolving it to a user, which would leave the record unassigned while reporting success.
 var (
 	alertAssigneeFieldUid       = big.NewInt(1 << 0)
 	alertAssigneeFieldEmailAddr = big.NewInt(1 << 1)

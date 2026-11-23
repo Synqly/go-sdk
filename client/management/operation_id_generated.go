@@ -127,15 +127,18 @@ const (
 	OperationIdSecurityawarenessQueryTrainingCampaigns          OperationId = "securityawareness_query_training_campaigns"
 	OperationIdSecurityawarenessQueryUsers                      OperationId = "securityawareness_query_users"
 	OperationIdSiemGetAlert                                     OperationId = "siem_get_alert"
+	OperationIdSiemGetCase                                      OperationId = "siem_get_case"
 	OperationIdSiemGetEvidence                                  OperationId = "siem_get_evidence"
 	OperationIdSiemGetInvestigation                             OperationId = "siem_get_investigation"
 	OperationIdSiemPatchInvestigation                           OperationId = "siem_patch_investigation"
 	OperationIdSiemPostEvents                                   OperationId = "siem_post_events"
 	OperationIdSiemQueryAlerts                                  OperationId = "siem_query_alerts"
+	OperationIdSiemQueryCases                                   OperationId = "siem_query_cases"
 	OperationIdSiemQueryEvents                                  OperationId = "siem_query_events"
 	OperationIdSiemQueryInvestigations                          OperationId = "siem_query_investigations"
 	OperationIdSiemQueryLogProviders                            OperationId = "siem_query_log_providers"
 	OperationIdSiemUpdateAlert                                  OperationId = "siem_update_alert"
+	OperationIdSiemUpdateCase                                   OperationId = "siem_update_case"
 	OperationIdSinkPostEvents                                   OperationId = "sink_post_events"
 	OperationIdSsfGetTransmitterUrls                            OperationId = "ssf_get_transmitter_urls"
 	OperationIdSsfJwks                                          OperationId = "ssf_jwks"
@@ -422,6 +425,8 @@ func NewOperationIdFromString(s string) (OperationId, error) {
 		return OperationIdSecurityawarenessQueryUsers, nil
 	case "siem_get_alert":
 		return OperationIdSiemGetAlert, nil
+	case "siem_get_case":
+		return OperationIdSiemGetCase, nil
 	case "siem_get_evidence":
 		return OperationIdSiemGetEvidence, nil
 	case "siem_get_investigation":
@@ -432,6 +437,8 @@ func NewOperationIdFromString(s string) (OperationId, error) {
 		return OperationIdSiemPostEvents, nil
 	case "siem_query_alerts":
 		return OperationIdSiemQueryAlerts, nil
+	case "siem_query_cases":
+		return OperationIdSiemQueryCases, nil
 	case "siem_query_events":
 		return OperationIdSiemQueryEvents, nil
 	case "siem_query_investigations":
@@ -440,6 +447,8 @@ func NewOperationIdFromString(s string) (OperationId, error) {
 		return OperationIdSiemQueryLogProviders, nil
 	case "siem_update_alert":
 		return OperationIdSiemUpdateAlert, nil
+	case "siem_update_case":
+		return OperationIdSiemUpdateCase, nil
 	case "sink_post_events":
 		return OperationIdSinkPostEvents, nil
 	case "ssf_get_transmitter_urls":
