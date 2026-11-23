@@ -13,10 +13,11 @@ import (
 )
 
 var (
-	queryDnsEventsRequestFieldMeta   = big.NewInt(1 << 0)
-	queryDnsEventsRequestFieldLimit  = big.NewInt(1 << 1)
-	queryDnsEventsRequestFieldFilter = big.NewInt(1 << 2)
-	queryDnsEventsRequestFieldCursor = big.NewInt(1 << 3)
+	queryDnsEventsRequestFieldMeta           = big.NewInt(1 << 0)
+	queryDnsEventsRequestFieldLimit          = big.NewInt(1 << 1)
+	queryDnsEventsRequestFieldFilter         = big.NewInt(1 << 2)
+	queryDnsEventsRequestFieldCursor         = big.NewInt(1 << 3)
+	queryDnsEventsRequestFieldIncludeRawData = big.NewInt(1 << 4)
 )
 
 type QueryDnsEventsRequest struct {
@@ -28,6 +29,8 @@ type QueryDnsEventsRequest struct {
 	Filter []*string `json:"-" url:"filter,omitempty"`
 	// Start search from cursor position.
 	Cursor *string `json:"-" url:"cursor,omitempty"`
+	// Include the raw data from the provider in the response. Defaults to `false`.
+	IncludeRawData *bool `json:"-" url:"include_raw_data,omitempty"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -68,11 +71,19 @@ func (q *QueryDnsEventsRequest) SetCursor(cursor *string) {
 	q.require(queryDnsEventsRequestFieldCursor)
 }
 
+// SetIncludeRawData sets the IncludeRawData field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryDnsEventsRequest) SetIncludeRawData(includeRawData *bool) {
+	q.IncludeRawData = includeRawData
+	q.require(queryDnsEventsRequestFieldIncludeRawData)
+}
+
 var (
-	queryDnsLogConfigurationsRequestFieldMeta   = big.NewInt(1 << 0)
-	queryDnsLogConfigurationsRequestFieldLimit  = big.NewInt(1 << 1)
-	queryDnsLogConfigurationsRequestFieldFilter = big.NewInt(1 << 2)
-	queryDnsLogConfigurationsRequestFieldCursor = big.NewInt(1 << 3)
+	queryDnsLogConfigurationsRequestFieldMeta           = big.NewInt(1 << 0)
+	queryDnsLogConfigurationsRequestFieldLimit          = big.NewInt(1 << 1)
+	queryDnsLogConfigurationsRequestFieldFilter         = big.NewInt(1 << 2)
+	queryDnsLogConfigurationsRequestFieldCursor         = big.NewInt(1 << 3)
+	queryDnsLogConfigurationsRequestFieldIncludeRawData = big.NewInt(1 << 4)
 )
 
 type QueryDnsLogConfigurationsRequest struct {
@@ -84,6 +95,8 @@ type QueryDnsLogConfigurationsRequest struct {
 	Filter []*string `json:"-" url:"filter,omitempty"`
 	// Start search from cursor position.
 	Cursor *string `json:"-" url:"cursor,omitempty"`
+	// Include the raw data from the provider in the response. Defaults to `false`.
+	IncludeRawData *bool `json:"-" url:"include_raw_data,omitempty"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -124,11 +137,19 @@ func (q *QueryDnsLogConfigurationsRequest) SetCursor(cursor *string) {
 	q.require(queryDnsLogConfigurationsRequestFieldCursor)
 }
 
+// SetIncludeRawData sets the IncludeRawData field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryDnsLogConfigurationsRequest) SetIncludeRawData(includeRawData *bool) {
+	q.IncludeRawData = includeRawData
+	q.require(queryDnsLogConfigurationsRequestFieldIncludeRawData)
+}
+
 var (
-	queryFirewallRulesRequestFieldMeta   = big.NewInt(1 << 0)
-	queryFirewallRulesRequestFieldLimit  = big.NewInt(1 << 1)
-	queryFirewallRulesRequestFieldFilter = big.NewInt(1 << 2)
-	queryFirewallRulesRequestFieldCursor = big.NewInt(1 << 3)
+	queryFirewallRulesRequestFieldMeta           = big.NewInt(1 << 0)
+	queryFirewallRulesRequestFieldLimit          = big.NewInt(1 << 1)
+	queryFirewallRulesRequestFieldFilter         = big.NewInt(1 << 2)
+	queryFirewallRulesRequestFieldCursor         = big.NewInt(1 << 3)
+	queryFirewallRulesRequestFieldIncludeRawData = big.NewInt(1 << 4)
 )
 
 type QueryFirewallRulesRequest struct {
@@ -140,6 +161,8 @@ type QueryFirewallRulesRequest struct {
 	Filter []*string `json:"-" url:"filter,omitempty"`
 	// Start search from cursor position.
 	Cursor *string `json:"-" url:"cursor,omitempty"`
+	// Include the raw data from the provider in the response. Defaults to `false`.
+	IncludeRawData *bool `json:"-" url:"include_raw_data,omitempty"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -180,11 +203,19 @@ func (q *QueryFirewallRulesRequest) SetCursor(cursor *string) {
 	q.require(queryFirewallRulesRequestFieldCursor)
 }
 
+// SetIncludeRawData sets the IncludeRawData field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryFirewallRulesRequest) SetIncludeRawData(includeRawData *bool) {
+	q.IncludeRawData = includeRawData
+	q.require(queryFirewallRulesRequestFieldIncludeRawData)
+}
+
 var (
-	queryTrafficEventsRequestFieldMeta   = big.NewInt(1 << 0)
-	queryTrafficEventsRequestFieldLimit  = big.NewInt(1 << 1)
-	queryTrafficEventsRequestFieldFilter = big.NewInt(1 << 2)
-	queryTrafficEventsRequestFieldCursor = big.NewInt(1 << 3)
+	queryTrafficEventsRequestFieldMeta           = big.NewInt(1 << 0)
+	queryTrafficEventsRequestFieldLimit          = big.NewInt(1 << 1)
+	queryTrafficEventsRequestFieldFilter         = big.NewInt(1 << 2)
+	queryTrafficEventsRequestFieldCursor         = big.NewInt(1 << 3)
+	queryTrafficEventsRequestFieldIncludeRawData = big.NewInt(1 << 4)
 )
 
 type QueryTrafficEventsRequest struct {
@@ -196,6 +227,8 @@ type QueryTrafficEventsRequest struct {
 	Filter []*string `json:"-" url:"filter,omitempty"`
 	// Start search from cursor position.
 	Cursor *string `json:"-" url:"cursor,omitempty"`
+	// Include the raw data from the provider in the response. Defaults to `false`.
+	IncludeRawData *bool `json:"-" url:"include_raw_data,omitempty"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -236,11 +269,19 @@ func (q *QueryTrafficEventsRequest) SetCursor(cursor *string) {
 	q.require(queryTrafficEventsRequestFieldCursor)
 }
 
+// SetIncludeRawData sets the IncludeRawData field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryTrafficEventsRequest) SetIncludeRawData(includeRawData *bool) {
+	q.IncludeRawData = includeRawData
+	q.require(queryTrafficEventsRequestFieldIncludeRawData)
+}
+
 var (
-	queryTrafficLogConfigurationsRequestFieldMeta   = big.NewInt(1 << 0)
-	queryTrafficLogConfigurationsRequestFieldLimit  = big.NewInt(1 << 1)
-	queryTrafficLogConfigurationsRequestFieldFilter = big.NewInt(1 << 2)
-	queryTrafficLogConfigurationsRequestFieldCursor = big.NewInt(1 << 3)
+	queryTrafficLogConfigurationsRequestFieldMeta           = big.NewInt(1 << 0)
+	queryTrafficLogConfigurationsRequestFieldLimit          = big.NewInt(1 << 1)
+	queryTrafficLogConfigurationsRequestFieldFilter         = big.NewInt(1 << 2)
+	queryTrafficLogConfigurationsRequestFieldCursor         = big.NewInt(1 << 3)
+	queryTrafficLogConfigurationsRequestFieldIncludeRawData = big.NewInt(1 << 4)
 )
 
 type QueryTrafficLogConfigurationsRequest struct {
@@ -252,6 +293,8 @@ type QueryTrafficLogConfigurationsRequest struct {
 	Filter []*string `json:"-" url:"filter,omitempty"`
 	// Start search from cursor position.
 	Cursor *string `json:"-" url:"cursor,omitempty"`
+	// Include the raw data from the provider in the response. Defaults to `false`.
+	IncludeRawData *bool `json:"-" url:"include_raw_data,omitempty"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -290,6 +333,13 @@ func (q *QueryTrafficLogConfigurationsRequest) SetFilter(filter []*string) {
 func (q *QueryTrafficLogConfigurationsRequest) SetCursor(cursor *string) {
 	q.Cursor = cursor
 	q.require(queryTrafficLogConfigurationsRequestFieldCursor)
+}
+
+// SetIncludeRawData sets the IncludeRawData field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (q *QueryTrafficLogConfigurationsRequest) SetIncludeRawData(includeRawData *bool) {
+	q.IncludeRawData = includeRawData
+	q.require(queryTrafficLogConfigurationsRequestFieldIncludeRawData)
 }
 
 // Normalized DNS event.
