@@ -47,7 +47,7 @@ type ListStorageRequest struct {
 	Meta []*string `json:"-" url:"meta,omitempty"`
 	// Cursor to fetch the next set of results.
 	Cursor *string `json:"-" url:"cursor,omitempty"`
-	// Number of results to return. Default is 50. A page may hold fewer results than `limit`, or none, even when more remain; keep paging until the returned cursor is empty.
+	// Number of results to return. Defaults to 100. A page may hold fewer results than `limit`, or none, even when more remain; keep paging until the returned cursor is empty.
 	Limit *int `json:"-" url:"limit,omitempty"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
